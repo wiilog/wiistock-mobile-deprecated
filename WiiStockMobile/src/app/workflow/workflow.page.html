@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      Workflow
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content padding>
+	<ion-grid>
+		<ion-row>
+			<ion-col>
+				<h2>Ordres</h2>
+				<ion-select multiple placeholder="Type d'ordre">
+					<ion-select-option>Type 1</ion-select-option>
+					<ion-select-option>Type 2</ion-select-option>
+				</ion-select>
+			</ion-col>
+		</ion-row>
+
+		<ion-row>
+			<ion-card *ngFor="let ordre of ordres">
+				<ion-card-content text-center class="ordre-card">
+					<h1>{{ ordre.type }}</h1>
+					<h2>{{ ordre.date | date }}</h2>
+					<ion-fab horizontal="end" vertical="center">
+						<ion-fab-button color="light">
+							<ion-icon name="arrow-forward"></ion-icon>	
+						</ion-fab-button>
+					</ion-fab>
+					<div text-left>{{ ordre.auteur }}</div>
+				</ion-card-content>
+			</ion-card>
+		</ion-row>
+	</ion-grid>	
+</ion-content>
