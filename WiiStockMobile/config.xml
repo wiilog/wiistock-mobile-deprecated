@@ -81,6 +81,6 @@
     <plugin name="cordova-plugin-splashscreen" spec="5.0.2" />
     <plugin name="cordova-plugin-ionic-webview" spec="^2.0.0" />
     <plugin name="cordova-plugin-ionic-keyboard" spec="^2.0.5" />
-    <allow-navigation href="http://10.1.0.122:8100" sessionid="a7c3d44c" />
+    <allow-navigation href="http://10.1.0.122:8100" sessionid="a3dcd09a" />
     <engine name="android" spec="7.0.0" />
 </widget>
