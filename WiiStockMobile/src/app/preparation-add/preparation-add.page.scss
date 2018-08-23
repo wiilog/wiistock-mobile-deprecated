@@ -1,16 +1,4 @@
 
-$header-color:#ffbc02;
-$button-default-color: #CC0000;
-$button-default-active-color: #b80303;
-
-.pull-right {
-    float: right !important;
-}
-
-.text-center {
-    text-align: center;
-}
-
 form {
     margin: 20px 20%;
 }
@@ -78,42 +66,10 @@ label {
     font-weight: 700;
 }
 
-.btn {
-    text-align: center;
-    text-decoration: none;
-    cursor: pointer;
-    display: inline-block;
-    -webkit-transition-duration: 0.4s;
-    transition-duration: 0.4s;
-    border-radius: 50px;
-    padding: 10px 20px 10px 20px;
-    margin: 5px;
-    font-size: 20px;
-    border: black 1.5px solid;
-}
-
-.btn-default {
-    color: #fcfcfc;
-    background-color: $button-default-color;
-    border-color: $button-default-color;
-}
-
-.btn-default:active {
-    background-color: $button-default-active-color;
-}
-
-.btn-col {
-    display: flex;
-    flex-direction: column;
-    margin: 0 3%;
-}
-
 .title-header {
-    margin-bottom: 25px;
-    padding: 20px 35px;
-    background-color: $header-color;
-    color: #fcfcfc;
-    text-align: center;
-    font-size: 32px;
-    font-weight: bold;
+    background-color: var(--header-color-preparation, #ffbc02);
 }
+
+h1 {
+    margin-bottom: 20px; 
+  }

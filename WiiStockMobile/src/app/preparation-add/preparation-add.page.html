@@ -1,6 +1,11 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>preparation_add</ion-title>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      Préparation add
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
@@ -14,7 +19,22 @@
     Quantité article n° 1337
   </h1>
 
-  <form>
+  <ion-list>
+    <ion-item>
+      <ion-label>Quantité</ion-label>
+      <ion-input type="number" value="0" slot="end"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label>Statut</ion-label>
+      <ion-select placeholder="Filtre" okText="Valider" cancelText="Annuler">
+        <ion-select-option value="statut1">Statut 1</ion-select-option>
+        <ion-select-option value="statut2">Statut 2</ion-select-option>
+        <ion-select-option value="statut3">Statut 3</ion-select-option>
+      </ion-select>
+    </ion-item>
+  </ion-list>
+
+  <!-- <form>
     <div class="form-group input-group">
       <label class="input-group-addon">
         Quantité
@@ -31,11 +51,15 @@
         <option>Statut 3</option>
       </select>
     </div>
-  </form>
+  </form> -->
 
-  <div class="pull-right btn-col">
-    <a class="btn btn-default">+ Ajouter un article</a>
-    <a class="btn btn-default">Terminer</a>
+  <div class="btn-col">
+    <ion-button color="danger" tappable fill="solid" shape="round">
+      Ajouter un article
+    </ion-button>
+    <ion-button color="danger" tappable fill="solid" shape="round">
+      Terminer
+    </ion-button>
   </div>
 
 </ion-content>

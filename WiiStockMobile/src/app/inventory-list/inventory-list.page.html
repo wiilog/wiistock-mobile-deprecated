@@ -1,0 +1,49 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      Inventory list
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <div class="title-header">
+    Préparation
+  </div>
+
+  <h1 class="text-center">
+    Liste des inventaires (en cours)
+  </h1>
+
+  <!-- <app-progress-bar [progress]="50"></app-progress-bar> -->
+  <ion-list>
+      <ion-list-header class="list-header">
+        <ion-label>Nom</ion-label>
+        <ion-label>Type</ion-label>
+        <ion-label>Date</ion-label>
+        <ion-label>% Vérifié</ion-label>
+        <ion-label>Action</ion-label>
+      </ion-list-header>
+      <ion-item-divider *ngFor="let inventaire of inventaires">
+        <ion-label><p>{{inventaire.nom}}</p></ion-label>
+        <ion-label>{{inventaire.type}}</ion-label>
+        <ion-label>{{inventaire.date | date}}</ion-label>
+        <ion-label>{{inventaire.percent}}%</ion-label>
+
+        <ion-button color="danger" tappable fill="solid" shape="round" round fill="outline">
+          Voir
+        </ion-button>
+      </ion-item-divider>
+    </ion-list>
+  
+    <div class="btn-col">
+      <ion-button color="danger" tappable fill="solid" shape="round">
+        Retour
+      </ion-button>
+    </div>
+
+</ion-content>

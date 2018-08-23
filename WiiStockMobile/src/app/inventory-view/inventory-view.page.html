@@ -1,0 +1,55 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      Inventory View
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+
+  <div class="title-header">
+    Inventaire
+  </div>
+
+  <h1 class="text-center">
+    Inventaire n°
+  </h1>
+
+  <ion-item>
+      <ion-label>Liste des articles</ion-label>
+      <ion-select placeholder="Filtre" okText="Valider" cancelText="Annuler">
+        <ion-select-option value="filtre1">Filtre 1</ion-select-option>
+        <ion-select-option value="filtre2">Filtre 2</ion-select-option>
+      </ion-select>
+    </ion-item>
+
+  <ion-list>
+    <ion-list-header class="list-header">
+      <ion-label>Nom</ion-label>
+      <ion-label>Référence</ion-label>
+      <ion-label>Emplacement</ion-label>
+      <ion-label>Quantité</ion-label>
+    </ion-list-header>
+    <ion-item-divider *ngFor="let item of inventaire">
+      <ion-label>{{item.nom}}</ion-label>
+      <ion-label>{{item.ref}}</ion-label>
+      <ion-label>
+        <p>{{item.allee}}</p>
+        <p>{{item.travee}}</p>
+        <p>{{item.rack}}</p>
+      </ion-label>
+      <ion-input type="number" value="{{item.quantite}}"></ion-input>
+    </ion-item-divider>
+  </ion-list>
+
+  <div class="btn-col">
+    <ion-button color="danger" tappable fill="solid" shape="round">
+      Sauvegarder
+    </ion-button>
+  </div>
+
+</ion-content>

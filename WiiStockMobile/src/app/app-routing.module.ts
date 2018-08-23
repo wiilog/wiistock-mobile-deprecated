@@ -17,7 +17,9 @@ const routes: Routes = [
   },
   { path: 'preparation_add', loadChildren: './preparation-add/preparation-add.module#PreparationAddPageModule' },
   { path: 'preparation_recapitulatif', loadChildren: './preparation-recapitulatif/preparation-recapitulatif.module#PreparationRecapitulatifPageModule' },
-  { path: 'workflow', loadChildren: './workflow/workflow.module#WorkflowPageModule' }
+  { path: 'workflow', loadChildren: './workflow/workflow.module#WorkflowPageModule' },  { path: 'inventory_list', loadChildren: './inventory-list/inventory-list.module#InventoryListPageModule' },
+  { path: 'inventory_view', loadChildren: './inventory-view/inventory-view.module#InventoryViewPageModule' }
+
 
 ];
 
