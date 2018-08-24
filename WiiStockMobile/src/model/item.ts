@@ -9,3 +9,15 @@ export class ItemModel {
 		this.date = date;
 	}
 }
+
+export class ArticleModel {
+	private nom : string;
+	private localisation : string;
+	private quantite : number;
+
+	constructor(nom: string, localisation: string, quantite: number) {
+		this.nom  = nom;
+		this.localisation = localisation;
+		this.quantite = quantite;		
+	}
+}

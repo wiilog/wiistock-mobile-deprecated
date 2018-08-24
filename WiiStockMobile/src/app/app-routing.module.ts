@@ -15,9 +15,11 @@ const routes: Routes = [
     path: 'list',
     loadChildren: './list/list.module#ListPageModule'
   },
+  { path: 'ordre_detail', loadChildren: './ordre-detail/ordre-detail.module#OrdreDetailPageModule' },
   { path: 'preparation_add', loadChildren: './preparation-add/preparation-add.module#PreparationAddPageModule' },
   { path: 'preparation_recapitulatif', loadChildren: './preparation-recapitulatif/preparation-recapitulatif.module#PreparationRecapitulatifPageModule' },
-  { path: 'workflow', loadChildren: './workflow/workflow.module#WorkflowPageModule' },  { path: 'inventory_list', loadChildren: './inventory-list/inventory-list.module#InventoryListPageModule' },
+  { path: 'workflow', loadChildren: './workflow/workflow.module#WorkflowPageModule' },
+  { path: 'inventory_list', loadChildren: './inventory-list/inventory-list.module#InventoryListPageModule' },
   { path: 'inventory_view', loadChildren: './inventory-view/inventory-view.module#InventoryViewPageModule' }
 
 

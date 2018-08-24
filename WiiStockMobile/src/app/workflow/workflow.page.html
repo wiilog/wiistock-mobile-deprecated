@@ -8,7 +8,11 @@
     </ion-title>
   </ion-toolbar>
 </ion-header>
-<ion-content padding>
+<ion-content>
+  <div class="title-header">
+    Workflow
+  </div>
+
 	<ion-grid>
 		<ion-row>
 			<ion-col>
@@ -26,7 +30,7 @@
 					<h1>{{ ordre.type }}</h1>
 					<h2>{{ ordre.date | date }}</h2>
 					<ion-fab horizontal="end" vertical="center">
-						<ion-fab-button color="light">
+						<ion-fab-button color="light" (click)="openPage()">
 							<ion-icon name="arrow-forward"></ion-icon>	
 						</ion-fab-button>
 					</ion-fab>
