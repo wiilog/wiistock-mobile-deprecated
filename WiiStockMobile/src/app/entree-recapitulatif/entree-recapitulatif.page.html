@@ -1,9 +1,37 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>entree_recapitulatif</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      Entrée récapitulatif
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content>
+
+  <div class="title-header">
+    Entrée
+  </div>
+
+  <h1 class="text-center">
+    Récapitulatif entrée
+  </h1>
+
+  <ion-list>
+    <ion-item-divider *ngFor="let item of items">
+      <ion-label>{{item.title}}</ion-label>
+      <ion-button [disabled]="item.button_state" color="danger" tappable fill="solid" shape="round" round fill="outline" slot="end">
+        {{item.button_state === true ? 'Emplacement défini' : 'Emplacement en attente'}}
+      </ion-button>
+    </ion-item-divider>
+  </ion-list>
+
+  <div class="btn-col">
+    <ion-button color="danger" tappable fill="solid" shape="round">
+      Terminer
+    </ion-button>
+  </div>
 
 </ion-content>

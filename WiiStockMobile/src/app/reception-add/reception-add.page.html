@@ -1,9 +1,62 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>reception_add</ion-title>
+    <ion-buttons slot="start">
+      <ion-back-button></ion-back-button>
+    </ion-buttons>
+    <ion-title>
+      Réception add
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content>
+
+  <div class="title-header">
+    Réception
+  </div>
+
+  <h1 class="text-center">
+    Quantité article n° 1337
+  </h1>
+
+  <ion-list>
+    <ion-item>
+      <ion-label>Quantité</ion-label>
+      <ion-input type="number" value="0" slot="end"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label>Quai d'arrivée</ion-label>
+      <ion-select placeholder="Filtre" okText="Valider" cancelText="Annuler">
+        <ion-select-option value="statut1">Quai 1</ion-select-option>
+        <ion-select-option value="statut2">Quai 2</ion-select-option>
+        <ion-select-option value="statut3">Quai 3</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item>
+      <ion-label>Zone de stockage</ion-label>
+      <ion-select placeholder="Filtre" okText="Valider" cancelText="Annuler">
+        <ion-select-option value="statut1">Zone 1</ion-select-option>
+        <ion-select-option value="statut2">Zone 2</ion-select-option>
+        <ion-select-option value="statut3">Zone 3</ion-select-option>
+      </ion-select>
+    </ion-item>
+    <ion-item>
+      <ion-label>Statut</ion-label>
+      <ion-select placeholder="Filtre" okText="Valider" cancelText="Annuler">
+        <ion-select-option value="statut1">Statut 1</ion-select-option>
+        <ion-select-option value="statut2">Statut 2</ion-select-option>
+        <ion-select-option value="statut3">Statut 3</ion-select-option>
+      </ion-select>
+    </ion-item>
+  </ion-list>
+
+  <div class="btn-col">
+    <ion-button color="danger" tappable fill="solid" shape="round">
+      Ajouter un article
+    </ion-button>
+    <ion-button color="danger" tappable fill="solid" shape="round">
+      Terminer
+    </ion-button>
+  </div>
 
 </ion-content>

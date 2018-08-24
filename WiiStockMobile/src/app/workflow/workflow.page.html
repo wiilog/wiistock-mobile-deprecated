@@ -31,7 +31,7 @@
 				<h1>{{ ordre.type }}</h1>
 				<h2>{{ ordre.date | date : 'dd MMM y' : '+0' }}</h2>
 				<ion-fab horizontal="end" vertical="center">
-					<ion-fab-button color="light" (click)="openPage()">
+					<ion-fab-button color="light" (click)="openPage(ordre)">
 						<ion-icon name="arrow-forward"></ion-icon>
 					</ion-fab-button>
 				</ion-fab>
