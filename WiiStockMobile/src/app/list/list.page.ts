@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
+import { Camera, CameraOptions } from '@ionic-native/camera/ngx';
 
 @Component({
   selector: 'app-list',
   templateUrl: 'list.page.html',
-  styleUrls: ['list.page.scss']
+  styleUrls: ['list.page.scss'],
+  providers: [[ Camera ]]
 })
 export class ListPage implements OnInit {
   private selectedItem: any;
@@ -19,8 +21,9 @@ export class ListPage implements OnInit {
     'bluetooth',
     'build'
   ];
+  private options: CameraOptions;
   public items: Array<{ title: string; note: string; icon: string }> = [];
-  constructor() {
+  constructor(private camera: Camera) {
     for (let i = 1; i < 11; i++) {
       this.items.push({
         title: 'Item ' + i,
@@ -36,4 +39,22 @@ export class ListPage implements OnInit {
   // navigate(item) {
   //   this.router.navigate(['/list', JSON.stringify(item)]);
   // }
+  
+
+  takePicture() {
+    this.options = {
+      quality: 100,
+      destinationType: this.camera.DestinationType.FILE_URI,
+      sourceType: this.camera.PictureSourceType.CAMERA,
+      encodingType: this.camera.EncodingType.JPEG,
+      mediaType: this.camera.MediaType.PICTURE,
+      correctOrientation: true,
+    }
+
+    this.camera.getPicture(this.options).then((imageUri) => {
+      console.log(imageUri);
+    });
+
+  }
+
 }
