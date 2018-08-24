@@ -124,7 +124,7 @@ $grey: #E6E8E6;
 .camera,
 .band,
 .lens,
-.button, .flash {
+.camera-container .button, .flash {
   position: absolute;
 }
 
@@ -172,7 +172,7 @@ $grey: #E6E8E6;
   }
 }
 
-.button {
+.camera-container .button {
   @include size(5vmin, 3vmin);
   border-radius: 100%;
   top: -16vmin;
