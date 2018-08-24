@@ -1,36 +1,48 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-menu-button></ion-menu-button>
-    </ion-buttons>
-    <ion-title>
-      Préparation add
-    </ion-title>
-  </ion-toolbar>
+	<ion-toolbar>
+		<ion-buttons slot="start">
+			<ion-menu-button></ion-menu-button>
+		</ion-buttons>
+		<ion-title>
+			Préparation flash
+		</ion-title>
+	</ion-toolbar>
 </ion-header>
 
 
 
 <ion-content>
 
-  <div class="title-header">
-    Préparation
-  </div>
+	<div class="title-header">
+		Préparation
+	</div>
 
-  <h1 text-center>
-    Flash articles
-  </h1>
+	<h1 text-center>
+		Flash articles
+	</h1>
 
-  <ion-fab horizontal="center" vertical="center">
-    <ion-fab-button color="light">
-      <ion-icon size="large" name="camera"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
+	<a class="camera-container" (click)="takePicture()">
+		<div class="button"></div>
+		<div class="camera">
+			<div class="band"></div>
+			<div class="lens">
+				<div class="sonar-wave"></div>
+			</div>
+			<div class="flash"></div>
+		</div>
+	</a>
+	<div text-center class="legend">Prendre une photo</div>
 
-  <ion-fab horizontal="end" vertical="bottom">
-    <ion-fab-button color="light" (click)="openPage()">
-      <ion-icon name="arrow-forward"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
+	<!-- <ion-fab horizontal="center" vertical="center">
+		<ion-fab-button class="btn-circle btn-xl" color="light" (click)="takePicture()">
+			<ion-icon size="large" name="camera"></ion-icon>
+		</ion-fab-button>
+	</ion-fab> -->
+
+	<ion-fab text-center horizontal="end" vertical="bottom">
+		<ion-fab-button color="light" (click)="openPage()">
+			<ion-icon name="arrow-forward"></ion-icon>
+		</ion-fab-button>
+	</ion-fab>
 
 </ion-content>

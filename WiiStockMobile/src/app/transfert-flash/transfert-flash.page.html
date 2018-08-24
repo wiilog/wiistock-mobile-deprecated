@@ -1,9 +1,40 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>transfert_flash</ion-title>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>
+      Transfert flash
+    </ion-title>
   </ion-toolbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content>
+
+  <div class="title-header">
+    Transfert
+  </div>
+
+  <h1 text-center>
+    Flash articles
+  </h1>
+
+  <a class="camera-container" (click)="takePicture()">
+    <div class="button"></div>
+    <div class="camera">
+      <div class="band"></div>
+      <div class="lens">
+        <div class="sonar-wave"></div>
+      </div>
+      <div class="flash"></div>
+    </div>
+  </a>
+  <div text-center class="legend">Prendre une photo</div>
+
+  <ion-fab text-center horizontal="end" vertical="bottom">
+    <ion-fab-button color="light" (click)="openPage()">
+      <ion-icon name="arrow-forward"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 
 </ion-content>
