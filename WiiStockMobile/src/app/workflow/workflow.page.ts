@@ -14,7 +14,7 @@ export class WorkflowPage implements OnInit {
 
   constructor(public navCtrl: NavController) { 
   	for (let i = 1; i < 10; i++) {
-  		let ordre = new ItemModel("Type "+ i, "Auteur "+ i, "01/0"+i+"/2018");
+  		let ordre = new ItemModel("Type "+ i, "Auteur "+ i, "05/0"+i+"/2018");
   		this.ordres.push(ordre);
   	}
   }

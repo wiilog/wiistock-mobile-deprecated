@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { NavController } from '@ionic/angular';
 
 @Component({
   selector: 'app-inventory-list',
@@ -8,7 +9,7 @@ import { Component, OnInit } from '@angular/core';
 export class InventoryListPage implements OnInit {
   private selectedItem: any;
   public inventaires: Array<{ nom: string; type: string; date: string; percent: number }> = [];
-  constructor() {
+  constructor(public navCtrl: NavController) {
     for (let i = 1; i < 11; i++) {
       this.inventaires.push({
         nom: 'Inventaire ' + i,
@@ -19,6 +20,10 @@ export class InventoryListPage implements OnInit {
     }
   }
   ngOnInit() {
+  }
+
+  openPage() {
+    this.navCtrl.goForward('/inventory_view');
   }
 
 }

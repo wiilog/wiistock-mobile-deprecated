@@ -34,7 +34,7 @@
         <ion-label>{{inventaire.date | date}}</ion-label>
         <ion-label>{{inventaire.percent}}%</ion-label>
 
-        <ion-button color="danger" tappable fill="solid" shape="round" round fill="outline">
+        <ion-button (click)="openPage()" color="danger" tappable fill="solid" shape="round" round fill="outline">
           Voir
         </ion-button>
       </ion-item-divider>

@@ -1,14 +1,8 @@
 .ordre-card {
-	background: #cc0000;
+    background: var(--header-color-transfert, #cc0000);
+    color: #fcfcfc;
 }
 
-$header-color:#130078;
-
 .title-header {
-    padding: 20px 35px;
-    background-color: $header-color;
-    color: #fcfcfc;
-    text-align: center;
-    font-size: 32px;
-    font-weight: bold;
+    background-color: var(--header-color-workflow, #130078);
 }

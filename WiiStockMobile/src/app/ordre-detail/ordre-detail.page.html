@@ -1,36 +1,54 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-    	<ion-back-button></ion-back-button>
-    </ion-buttons>
-    <ion-title>
-    	Ordre détail
-    </ion-title>
-  </ion-toolbar>
+	<ion-toolbar>
+		<ion-buttons slot="start">
+			<ion-back-button></ion-back-button>
+		</ion-buttons>
+		<ion-title>
+			Ordre détail
+		</ion-title>
+	</ion-toolbar>
 </ion-header>
 
 <ion-content>
-  <div class="title-header">
-    Workflow
-  </div>
+	<div class="title-header">
+		Workflow
+	</div>
 
-  <ion-card class="prepa">
-  	<h3>Préparation</h3>
-  	<ion-list>
-  		<ion-item *ngFor="let article of articles">
-  			<ion-label>
-  				<h2>{{ article.nom }}</h2>
-  				<p>Localisation : {{ article.localisation }}</p>
-  				<p>Quantité : {{ article.quantite }} </p>
-  			</ion-label>
-  		</ion-item>
-  	</ion-list>
-  	<h2>Réaliser la préparation ?</h2>
-  	<ion-button color="danger" (click)="closePage()">
-  		<ion-icon name="close-circle" size="large" color="light"></ion-icon>
-  	</ion-button>
-  	<ion-button color="success" (click)="openPage()">
-  		<ion-icon name="checkmark" size="large" color="light"></ion-icon>
-  	</ion-button>
-  </ion-card>
+	<div class="preparation">
+
+		<div class="header">
+			<h1>
+				Préparation
+				<ion-fab horizontal="end">
+					<ion-fab-button color="light" (click)="closePage()">
+						<ion-icon name="arrow-up"></ion-icon>
+					</ion-fab-button>
+				</ion-fab>
+			</h1>
+
+			<ion-list>
+				<ion-card *ngFor="let article of articles">
+					<ion-label>
+						<h2>{{ article.nom }}</h2>
+						<p>Localisation : {{ article.localisation }}</p>
+						<p>Quantité : {{ article.quantite }} </p>
+					</ion-label>
+				</ion-card>
+			</ion-list>
+		</div>
+
+		<div class="footer">
+			<h2 text-center>Réaliser la préparation ?</h2>
+			<div class="btn-center">
+				<ion-fab-button color="danger" (click)="closePage()">
+					<ion-icon name="close-circle" size="large" color="light"></ion-icon>
+				</ion-fab-button>
+				<ion-fab-button color="success" (click)="openPage()">
+					<ion-icon name="checkmark" size="large" color="light"></ion-icon>
+				</ion-fab-button>
+			</div>
+		</div>
+
+	</div>
+
 </ion-content>
