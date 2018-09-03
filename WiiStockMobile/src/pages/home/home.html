@@ -1,18 +1,40 @@
 <ion-header>
+
   <ion-navbar>
     <button ion-button menuToggle>
-      <ion-icon name="menu"></ion-icon>
+    	<ion-icon name="menu"></ion-icon>
     </button>
     <ion-title>Home</ion-title>
   </ion-navbar>
+
 </ion-header>
 
-<ion-content padding>
-  <h3>Ionic Menu Starter</h3>
 
-  <p>
-    If you get lost, the <a href="http://ionicframework.com/docs/v2">docs</a> will show you the way.
-  </p>
-
-  <button ion-button secondary menuToggle>Toggle Menu</button>
+<ion-content>
+	<ion-row>
+    <ion-col>
+      <button ion-button full large text-wrap color="default">Ordre en cours
+      </button>
+    </ion-col>
+  </ion-row>
+  <ion-row>
+    <ion-col>
+      <button ion-button full large color="danger" (click)="openPage(pages.workflow)">Workflow</button>
+    </ion-col>
+  </ion-row>
+  <ion-row>
+    <ion-col>
+      <button ion-button full large color="danger" (click)="openPage(pages.entree)">Entrées</button>
+    </ion-col>
+  </ion-row>
+  <ion-row>
+    <ion-col>
+      <button ion-button full large color="default" (click)="openPage(pages.sortie)">Sorties</button>
+    </ion-col>
+  </ion-row>
+  <ion-row>
+    <ion-col>
+      <button ion-button full large color="danger" (click)="openPage(pages.inventaire)">Inventaire</button>
+    </ion-col>
+  </ion-row>
 </ion-content>

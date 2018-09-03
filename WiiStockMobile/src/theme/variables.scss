@@ -38,7 +38,15 @@ $colors: (
   secondary:  #32db64,
   danger:     #f53d3d,
   light:      #f4f4f4,
-  dark:       #222
+  dark:       #222,
+  yellow:     #ffbc02,
+  blue:       #130078,
+  orange:     #f08800,
+  red:        #cc0000,
+  rose:       #f699cd,
+  violet:     #7000f0,
+  light-blue: #00b0ef,
+
 );
 
 
@@ -86,3 +94,162 @@ $colors: (
 
 @import "roboto";
 @import "noto-sans";
+
+:root {
+  --header-color-inventory:#00b0ef;
+  --header-color-preparation:#ffbc02;
+  --header-color-workflow: #130078;
+  --header-color-transfert: #cc0000;
+  --header-color-entree: #32db64;
+  --header-color-expedition: #f699cd;
+  --header-color-reception: #7000f0;
+  --header-color-sortie: #f08800;
+  --header-color-grey: #cccccc;
+}
+
+.title-header {
+  margin-bottom: 25px;
+  padding: 20px 35px;
+  color: #fcfcfc;
+  text-align: center;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.btn-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin: 0 3%;
+}
+
+/* Flash
+================= */
+
+$grey: #E6E8E6;
+@mixin size($w: 100%, $h: 100%) {
+  width: $w;
+  height: $h;
+}
+
+.camera-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.camera,
+.band,
+.lens,
+.camera-container .button, .flash {
+  position: absolute;
+}
+
+.camera {
+  @include size(50vmin, 30vmin);
+  background: $grey;
+  border-radius: 2vmin;
+  box-shadow: 1vmin 1vmin 0 0 rgba(#000,0.2);
+}
+
+.band {
+  top: 50%;
+  margin-top: -8vmin;
+  @include size(50vmin, 15vmin);
+}
+
+.lens {
+  @include size(20vmin, 20vmin);
+  border-radius: 100%;
+  background: radial-gradient(#000 0%, #000 20%, #383838 0%, #383838 40%, #4B4B4B 0%, #4B4B4B 50%, #3A3A3A 0%, #3A3A3A 60%, $grey 0%, $grey 100%);
+  left: 50%;
+  margin-left: -10vmin;
+  top: 50%;
+  margin-top: -10vmin;
+  &:before,
+  &:after {
+    position: absolute;
+    content: '';
+  }
+  &:before {
+    @include size(14vmin, 7vmin);
+    border-radius: 100%;
+    border-bottom: 7vmin solid rgba(#FFF, 0.2);
+    left: 3vmin;
+    top: 3vmin;
+    transform: rotate(-50deg);
+  }
+  &:after {
+    @include size(1.5vmin, 1.5vmin);
+    border-radius: 100%;
+    background: #FFF;
+    top: 8vmin;
+    left: 10vmin;
+    opacity: 0.8;
+  }
+}
+
+.camera-container .button {
+  @include size(5vmin, 3vmin);
+  border-radius: 100%;
+  top: -16vmin;
+  left: 28vmin;
+  border-radius: 0.5vmin;
+}
+
+.flash {
+  top: 2vmin;
+  &:before,
+  &:after {
+    position: absolute;
+    content: '';
+  }
+  &:before {
+    @include size(3vmin, 3vmin);
+    background: #ADE1E5;
+    left: 44vmin;
+    border-radius: 100%;
+  }
+  
+  &:after{
+    @include size(1vmin, 1vmin);
+    background: #FFF;
+    top: 13vmin;
+    border-radius: 100%;
+    left: 23vmin;
+    opacity: 0.6;
+  }
+}
+
+.legend {
+  margin-top: 80px;
+  font-size: 24px;
+}
+
+.sonar-wave {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background-color: #fcfcfc;
+  opacity: 0;
+  z-index: -1;
+  pointer-events: none;
+  animation: sonarWave 1s linear infinite;
+}
+
+@keyframes sonarWave {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    transform: scale(6);
+    opacity: 0;
+  }
+}

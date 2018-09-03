@@ -1,0 +1,47 @@
+page-workflow {
+	.ordre-card {
+		padding: 0px 0px;
+		position: relative;
+		color: #fcfcfc;
+		
+		h1, h2 {
+			color: #fcfcfc;
+		}
+
+	    .ordre-card-transfert {
+	    	padding: 13px 16px;
+	    	background: var(--header-color-transfert, #cc0000);
+	    }
+
+	    .ordre-card-entree {
+	    	padding: 13px 16px;
+	    	background: var(--header-color-entree, #32db64);
+	    }
+
+	    .ordre-card-sortie {
+	    	padding: 13px 16px;
+	    	background: var(--header-color-sortie, #f08800);
+	    }
+
+	    .ordre-card-reception {
+	    	padding: 13px 16px;
+	    	background: var(--header-color-reception, #7000f0);
+	    }
+
+	    .ordre-card-preparation {
+	    	padding: 13px 16px;
+	    	background: var(--header-color-preparation, #ffbc02);
+	    }
+	}
+
+	.title-header {
+	    background-color: var(--header-color-workflow, #130078);
+	}
+
+
+	.ion-fab-workflow {
+		position: absolute;
+		left: 80%;
+		top: 22%;
+	}
+}
