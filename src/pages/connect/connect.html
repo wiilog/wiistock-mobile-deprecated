@@ -1,0 +1,25 @@
+<ion-header>
+  <ion-navbar>
+    <button ion-button menuToggle>
+      <ion-icon name="menu"></ion-icon>
+    </button>
+    <ion-title>Connexion</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+
+  <form (ngSubmit)="logForm()">
+    <ion-item>
+      <ion-label>Login</ion-label>
+      <ion-input type="text" [(ngModel)]="form.login" name="login"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-label>Mot de passe</ion-label>
+      <ion-input type="password" [(ngModel)]="form.password" name="passsword" (keyup)="checkPassword()"></ion-input>
+    </ion-item>
+    <button ion-button type="submit" block>Connexion</button>
+  </form>
+
+  <p>{{ errorMsg }}</p>
+</ion-content>
