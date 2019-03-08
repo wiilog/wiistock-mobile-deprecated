@@ -14,3 +14,41 @@
 // To declare rules for a specific mode, create a child rule
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
+
+// surcharges classes ionic
+ion-title {
+  text-align: center;
+}
+ion-icon {
+  font-size: 2em;
+}
+
+ion-grid {
+  ion-col {
+    padding: 5px !important;
+  }
+}
+
+// éléments génériques
+.d-flex {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+.small-icon {
+  font-size: 1.4em;
+}
+.big-icon {
+  font-size: 4em;
+}
+.big-button {
+  height: 12em;
+  width: 90%;
+  //background-color: $lightGrey;
+}
+.m-6 {
+  margin: 6px;
+}
+.list {
+  color: $grey;
+}

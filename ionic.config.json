@@ -1,0 +1,7 @@
+{
+  "name": "Wiistock-Nomade",
+  "integrations": {
+    "cordova": {}
+  },
+  "type": "ionic-angular"
+}

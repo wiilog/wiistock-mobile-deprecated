@@ -1,16 +1,18 @@
-import { Component, ViewChild } from '@angular/core';
-
+import { Component, ViewChild, Injectable } from '@angular/core';
+import { SQLite } from "@ionic-native/sqlite";
+import { Storage } from '@ionic/storage';
 import { Platform, MenuController, Nav } from 'ionic-angular';
 
-import { ListPage } from '../pages/list/list';
+import { MenuPage } from '../pages/menu/menu';
 import { ConnectPage } from "../pages/connect/connect";
 
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
-import {PrisePage} from "../pages/prise/prise";
-import {DeposePage} from "../pages/depose/depose";
+import {DeposePage} from "../pages/stockage/depose/depose";
+import {PriseEmplacementPage} from "../pages/stockage/prise-emplacement/prise-emplacement";
 
 
+@Injectable()
 @Component({
   templateUrl: 'app.html'
 })
@@ -20,20 +22,23 @@ export class MyApp {
   // make ConnectPage the root (or first) page
   rootPage = ConnectPage;
   pages: Array<{title: string, component: any}>;
+  homePage = MenuPage;
 
   constructor(
     public platform: Platform,
     public menu: MenuController,
     public statusBar: StatusBar,
-    public splashScreen: SplashScreen
+    public splashScreen: SplashScreen,
+    private sqlite: SQLite,
+    private storage: Storage
   ) {
     this.initializeApp();
 
     // set our app's pages
     this.pages = [
-      { title: 'Accueil', component: ListPage },
+      { title: 'Accueil', component: MenuPage },
       { title: 'Connexion', component: ConnectPage },
-      { title: 'Prise', component: PrisePage },
+      { title: 'Prise', component: PriseEmplacementPage },
       { title: 'Depose', component: DeposePage}
     ];
   }
@@ -44,6 +49,24 @@ export class MyApp {
       // Here you can do any higher level native things you might need.
       this.statusBar.styleDefault();
       this.splashScreen.hide();
+
+      // this.storage.set('name', 'Cegaz');
+      // this.storage.get('name').then((val) => {
+      //   console.log('your name is', val);
+      // })
+
+      // this.sqlite.create({
+      //   name: 'gt_follow_stock.db',
+      //   location: 'default'
+      // })
+      //     .then((db: SQLiteObject) => {
+      //       console.log('créa table');
+      //       db.executeSql('CREATE TABLE mouvements(label VARCHAR(16))', [])
+      //           .then(() => console.log('Executed SQL'))
+      //           .catch(e => console.log(e));
+      //
+      //     })
+      //     .catch(e => console.log(e));
     });
   }
 
@@ -53,4 +76,12 @@ export class MyApp {
     // navigate to the new page if it is not the current page
     this.nav.setRoot(page.component);
   }
+
+  //TODO CG comment utiliser ds ttes pages ?
+  goHome() {
+    this.nav.setRoot(this.homePage);
+  }
+
+
+
 }

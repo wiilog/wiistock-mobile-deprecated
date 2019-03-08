@@ -1,0 +1,25 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Confirmation prise</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+
+  <ion-list inset>
+
+    <ion-item>
+      <ion-label>Article</ion-label>
+      <ion-input type="text" [(ngModel)]="ref"></ion-input>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Quantité</ion-label>
+      <ion-input type="number" [(ngModel)]="quantity"></ion-input>
+    </ion-item>
+
+  </ion-list>
+
+  <ion-icon class="big-icon" name="checkmark-circle" (click)="addArticle()"></ion-icon>
+
+</ion-content>

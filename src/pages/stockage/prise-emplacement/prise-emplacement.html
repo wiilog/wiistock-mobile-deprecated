@@ -1,0 +1,40 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons start>
+      <button ion-button icon-only (click)="goHome()">
+        <ion-icon name="home"></ion-icon>
+      </button>
+    </ion-buttons>
+
+    <ion-title>Prise</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+  <div>
+    <div>
+      <ion-title>Confirmation emplacement</ion-title>
+
+      <ion-item>
+        <ion-label>Emplacement</ion-label>
+        <ion-input type="text" [(ngModel)]="location"></ion-input>
+      </ion-item>
+    </div>
+
+    <!--<button (click)="vibrate()">-->
+    <!--vibration-->
+    <!--</button>-->
+    <!--<ion-content text-center>-->
+      <!--<ion-icon name="barcode" color="danger"></ion-icon>-->
+    <!--</ion-content>-->
+
+  </div>
+
+</ion-content>
+
+<ion-footer padding>
+  <div class="d-flex">
+    <ion-icon class="big-icon" name="arrow-dropleft-circle" navPop></ion-icon>
+    <ion-icon class="big-icon" name="checkmark-circle" (click)="goToArticles()"></ion-icon>
+  </div>
+</ion-footer>
