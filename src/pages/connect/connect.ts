@@ -31,12 +31,12 @@ export class ConnectPage {
   logForm() {
     this.navCtrl.push(MenuPage);
 
-    // this.usersApiProvider.setProvider(this.form).subscribe(data => {
-    //   console.log(data);
-    //   this.currentUser = data;
-    //
-    //   this.navCtrl.push(MenuPage);
-    // });
+    this.usersApiProvider.setProvider(this.form).subscribe(data => {
+      console.log(data);
+      this.currentUser = data;
+
+      this.navCtrl.push(MenuPage);
+    });
   }
 
   checkPassword() {
