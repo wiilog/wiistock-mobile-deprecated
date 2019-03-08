@@ -1,7 +1,0 @@
-{
-  "name": "WiiStockMobile",
-  "integrations": {
-    "cordova": {}
-  },
-  "type": "ionic-angular"
-}
