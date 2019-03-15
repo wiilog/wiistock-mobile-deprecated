@@ -1,18 +1,14 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams, ToastController } from 'ionic-angular';
-import {PriseConfirmPage} from "../prise-confirm/prise-confirm";
-import {SousMenuPage} from "../../sous-menu/sous-menu";
-import {DeposePage} from "../depose/depose";
-import {PriseEmplacementPage} from "../prise-emplacement/prise-emplacement";
-import {MenuPage} from "../../menu/menu";
-import { StorageService, Mouvement } from "../../../app/services/storage.service";
+import { PriseConfirmPage } from "../prise-confirm/prise-confirm";
+import { MenuPage } from "../../menu/menu";
+import { Mouvement} from "../../../app/entities/mouvement";
+import { Article } from "../../../app/entities/article";
+import { ArticleMouvement } from "../../../app/entities/article_mouvement";
+import { Emplacement } from "../../../app/entities/emplacement";
+import { SqliteProvider } from "../../../providers/sqlite/sqlite";
+import {StockageMenuPage} from "../stockage-menu/stockage-menu";
 
-/**
- * Generated class for the PriseArticlesPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
 
 @IonicPage()
 @Component({
@@ -21,13 +17,13 @@ import { StorageService, Mouvement } from "../../../app/services/storage.service
 })
 export class PriseArticlesPage {
 
-  location: string;
-  articles: Array<{ref: string, quantity: number}>;
-  mouvement: Mouvement = <Mouvement>{};
+  emplacement: Emplacement;
+  articles: Array<Article>;
+  mouvement: Mouvement;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private toastController: ToastController, private storageService: StorageService) {
-    if (typeof(navParams.get('location')) !== undefined) {
-      this.location = navParams.get('location');
+  constructor(public navCtrl: NavController, public navParams: NavParams, private toastController: ToastController, private sqliteProvider: SqliteProvider) {
+    if (typeof(navParams.get('emplacement')) !== undefined) {
+      this.emplacement = navParams.get('emplacement');
     }
 
     if (typeof(navParams.get('articles')) !== undefined) {
@@ -35,31 +31,38 @@ export class PriseArticlesPage {
     }
   }
 
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad PriseArticlesPage');
-  }
-
   addArticleManually() {
     this.navCtrl.push(PriseConfirmPage, {
-      articles: this.articles
+      articles: this.articles, emplacement: this.emplacement
     });
   }
 
   finishTaking() {
-    this.mouvement.id = Date.now();
-    this.mouvement.type = 'prise';
-    this.mouvement.emplacement = this.location;
+    this.mouvement = {
+      id: null,
+      type: 'prise',
+      id_emplacement: this.emplacement.id,
+      date: Date(),
+      username: 'cegaz'
+    }; //TODO
 
-    this.storageService.addMouvement(this.mouvement).then(mouvement => {
-      this.mouvement = <Mouvement>{};
-      // this.showToast('Mouvement ajouté !');
-    })
+    this.sqliteProvider.insert('mouvement', this.mouvement)
+        .then((data) => {
+          this.mouvement.id = data.insertId;
 
-    let item = {title: 'Stockage', icon: 'flask', funcs: [
-      {label: 'prise', page: PriseEmplacementPage, icon: 'cloud-download'},
-      {label: 'dépose', page: DeposePage, icon: 'cloud-upload'}
-    ]}; // TODO CG trouver autre système
-    this.navCtrl.push(SousMenuPage, {item : item});
+          for (let article of this.articles) {
+            let article_mouvement = new ArticleMouvement();
+            article_mouvement.id_article = article.id;
+            article_mouvement.id_mouvement = this.mouvement.id;
+
+            this.sqliteProvider.insert('article_mouvement', article_mouvement)
+                .then((data) => {
+                  console.log(data);
+                });
+          }
+
+          this.navCtrl.push(StockageMenuPage);
+        });
   }
 
   // Helper

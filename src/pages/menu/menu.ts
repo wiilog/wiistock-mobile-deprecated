@@ -1,34 +1,28 @@
 import { Component } from '@angular/core';
 import { App, NavController, NavParams } from 'ionic-angular';
-import { SousMenuPage } from '../sous-menu/sous-menu';
-import { PriseEmplacementPage } from "../stockage/prise-emplacement/prise-emplacement";
-import { DeposePage } from "../stockage/depose/depose";
+import {StockageMenuPage} from "../stockage/stockage-menu/stockage-menu";
+import {Page} from "ionic-angular/navigation/nav-util";
 
 @Component({
   selector: 'page-menu',
   templateUrl: 'menu.html'
 })
 export class MenuPage {
-  items: Array<{title: string, icon: string, funcs: {}[]}>;
+  items: Array<{title: string, icon: string, page: Page}>;
 
   constructor(public app: App, public navCtrl: NavController, public navParams: NavParams) {
 
     this.items = [
-      {title: 'Stockage', icon: 'flask', funcs: [
-          {label: 'prise', page: PriseEmplacementPage, icon: 'cloud-download'},
-          {label: 'dépose', page: DeposePage, icon: 'cloud-upload'}
-          ]},
-      {title: 'Préparations', icon: 'wifi', funcs: []},
-      {title: 'Collectes', icon: 'beer', funcs: []},
-      {title: 'Livraisons', icon: 'paper-plane', funcs: []},
-      {title: 'Inventaire', icon: 'boat', funcs: []}
+      {title: 'Stockage', icon: 'flask', page: StockageMenuPage},
+      {title: 'Préparations', icon: 'wifi', page: StockageMenuPage},
+      {title: 'Collectes', icon: 'beer', page: StockageMenuPage},
+      {title: 'Livraisons', icon: 'paper-plane', page: StockageMenuPage},
+      {title: 'Inventaire', icon: 'boat', page: StockageMenuPage}
       ];
   }
 
   itemTapped(event, item) {
-    this.navCtrl.push(SousMenuPage, {
-      item: item
-    });
+    this.navCtrl.push(item.page);
   }
 
 }

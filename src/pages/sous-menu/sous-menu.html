@@ -1,41 +1,44 @@
-<ion-header>
-  <!--<ion-navbar hideBackButton="true">-->
-    <!--<ion-toolbar>-->
-      <!--<div class="d-flex">-->
-  <ion-toolbar>
-    <ion-buttons start>
-      <button ion-button icon-only (click)="goHome()">
-        <ion-icon name="home"></ion-icon>
-      </button>
-    </ion-buttons>
+<!--<ion-header>-->
+  <!--&lt;!&ndash;<ion-navbar hideBackButton="true">&ndash;&gt;-->
+    <!--&lt;!&ndash;<ion-toolbar>&ndash;&gt;-->
+      <!--&lt;!&ndash;<div class="d-flex">&ndash;&gt;-->
+  <!--<ion-toolbar>-->
+    <!--<ion-buttons start>-->
+      <!--<button ion-button icon-only (click)="goHome()">-->
+        <!--<ion-icon name="home"></ion-icon>-->
+      <!--</button>-->
+    <!--</ion-buttons>-->
 
-    <ion-title>Follow GT Stock</ion-title>
+    <!--<ion-title>Follow GT Stock</ion-title>-->
 
-  </ion-toolbar>
-        <!--<a routerLink="/home" routerLinkActive="active"><ion-icon name="home"></ion-icon></a>-->
-</ion-header>
+  <!--</ion-toolbar>-->
+        <!--&lt;!&ndash;<a routerLink="/home" routerLinkActive="active"><ion-icon name="home"></ion-icon></a>&ndash;&gt;-->
+<!--</ion-header>-->
 
-<ion-content>
-  <h3 text-center *ngIf="selectedItem">
-    {{selectedItem.title}}
-  </h3>
+<!--<ion-content>-->
+  <!--<h3 text-center *ngIf="selectedItem">-->
+    <!--{{selectedItem.title}}-->
+  <!--</h3>-->
 
-  <ion-grid>
-    <ion-row>
-      <ion-col col-6 *ngFor="let func of selectedItem.funcs" (click)="funcTapped($event, func)">
-        <button ion-button outline class="big-button" color="dark">
-          <ion-card-content>
-            <ion-icon class="big-icon" name="{{ func.icon }}"></ion-icon>
-            <p text-center>{{ func.label }}</p>
-          </ion-card-content>
-        </button>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+  <!--<ion-grid>-->
+    <!--<ion-row>-->
+      <!--<ion-col col-6 *ngFor="let func of selectedItem.funcs" (click)="funcTapped($event, func)">-->
+        <!--<button ion-button outline class="big-button" color="dark">-->
+          <!--<ion-card-content>-->
+            <!--<ion-icon class="big-icon" name="{{ func.icon }}"></ion-icon>-->
+            <!--<p text-center>{{ func.label }}</p>-->
+          <!--</ion-card-content>-->
+        <!--</button>-->
+      <!--</ion-col>-->
+    <!--</ion-row>-->
+  <!--</ion-grid>-->
 
-  <div *ngFor="let mouvement of mouvements">
-    empl : {{ mouvement.type }}
-  </div>
+  <!--<div *ngFor="let mouvement of mouvements">-->
+    <!--{{ mouvement.type }} / {{ mouvement.emplacement }}-->
+    <!--<ul *ngFor="let article of mouvement.articles">-->
+      <!--<li>{{ article }}</li>-->
+    <!--</ul>-->
+  <!--</div>-->
 
 
-</ion-content>
+<!--</ion-content>-->

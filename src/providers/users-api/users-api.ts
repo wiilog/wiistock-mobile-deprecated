@@ -14,19 +14,13 @@ import { Storage } from '@ionic/storage';
 @Injectable()
 export class UsersApiProvider {
 
-  private baseUrl: string = 'http://localhost:8000/api/test';
-  // private baseUrl: string = 'http://localhost/users';
+  private baseUrl: string = 'http://51.77.202.108/api/test'; //TODO
 
   constructor(public http: HttpClient, public storage: Storage) {
-    console.log('API Users');
   }
 
   setProvider(options):Observable<any> {
-    return this.http.post(this.baseUrl, JSON.stringify(options));
-  }
-
-  getAllUsers() {
-    return this.storage.get('users');
+    return this.http.post(this.baseUrl, options);
   }
 
 }

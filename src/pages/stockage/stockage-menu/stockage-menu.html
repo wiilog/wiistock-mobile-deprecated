@@ -1,0 +1,42 @@
+<ion-header>
+  <!--<ion-navbar hideBackButton="true">-->
+  <!--<ion-toolbar>-->
+  <!--<div class="d-flex">-->
+  <ion-toolbar>
+    <ion-buttons start>
+      <button ion-button icon-only (click)="goHome()">
+        <ion-icon name="home"></ion-icon>
+      </button>
+    </ion-buttons>
+
+    <ion-title>Follow GT Stock</ion-title>
+
+  </ion-toolbar>
+  <!--<a routerLink="/home" routerLinkActive="active"><ion-icon name="home"></ion-icon></a>-->
+</ion-header>
+
+<ion-content>
+  <h3 text-center>Stockage</h3>
+
+  <ion-grid>
+    <ion-row>
+      <ion-col col-6 (click)="goToPrise()">
+        <button ion-button outline class="big-button" color="dark" [class.alert]="openedMouvements>0">
+          <ion-card-content>
+            <ion-icon class="big-icon" name="cloud-download"></ion-icon>
+            <p text-center>PRISE</p>
+          </ion-card-content>
+        </button>
+      </ion-col>
+      <ion-col col-6 (click)="goToDepose()">
+        <button ion-button outline class="big-button" color="dark">
+          <ion-card-content>
+            <ion-icon class="big-icon" name="cloud-upload"></ion-icon>
+            <p text-center>DÉPOSE</p>
+          </ion-card-content>
+        </button>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+
+</ion-content>

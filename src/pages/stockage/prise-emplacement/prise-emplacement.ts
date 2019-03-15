@@ -2,14 +2,10 @@ import { Component } from '@angular/core';
 import { App, IonicPage, NavController, NavParams } from 'ionic-angular';
 import {PriseArticlesPage} from "../prise-articles/prise-articles";
 import {MenuPage} from "../../menu/menu";
-// import { BarcodeScanner } from '@ionic-native/barcode-scanner/ngx';
+import {Emplacement} from "../../../app/entities/emplacement";
+import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 
-/**
- * Generated class for the PriseEmplacementPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
+// import { BarcodeScanner } from '@ionic-native/barcode-scanner/ngx';
 
 @IonicPage()
 @Component({
@@ -18,24 +14,34 @@ import {MenuPage} from "../../menu/menu";
 })
 export class PriseEmplacementPage {
 
-  location = '';
+  emplacement: Emplacement;
+  id: number;
+  // location = '';
+  db_locations: Array<Emplacement>;
+  choucroute;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public app: App) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public app: App, public sqliteProvider: SqliteProvider) {
   // constructor(public navCtrl: NavController, public navParams: NavParams, private barcodeScanner: BarcodeScanner) {
   //   this.scan();
+
+    // $storageService.getEmplacements().then(mouvements => {
+    //   console.log(mouvements);
+    //   this.locations = mouvements;
+    // });
+
+    this.db_locations = this.sqliteProvider.findAll('emplacement');
   }
 
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad PriseEmplacementPage');
-  }
-
-  vibrate() {
-      navigator.vibrate(3000);
-  }
+  // vibrate() {
+  //     navigator.vibrate(3000);
+  // }
 
   goToArticles() {
-    // verif emplacement existe
-    this.navCtrl.push(PriseArticlesPage, {location: this.location});
+    this.sqliteProvider.findOne('emplacement', this.id).then((emplacement) => {
+      this.emplacement = emplacement;
+      this.navCtrl.push(PriseArticlesPage, {emplacement: this.emplacement});
+    })
+
   }
 
   goHome() {

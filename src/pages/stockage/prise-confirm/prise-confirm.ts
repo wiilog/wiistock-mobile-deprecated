@@ -1,14 +1,9 @@
 import { Component } from '@angular/core';
 import { IonicPage, NavController, NavParams } from 'ionic-angular';
 import {PriseArticlesPage} from "../prise-articles/prise-articles";
-
-
-/**
- * Generated class for the PriseConfirmPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
+import {Article} from "../../../app/entities/article";
+import {SqliteProvider} from "../../../providers/sqlite/sqlite";
+import {Emplacement} from "../../../app/entities/emplacement";
 
 @IonicPage()
 @Component({
@@ -17,32 +12,29 @@ import {PriseArticlesPage} from "../prise-articles/prise-articles";
 })
 export class PriseConfirmPage {
 
-  ref: string;
-  quantity: number;
-  articles: Array<{ref: string, quantity: number}>;
+  quantite: number;
+  id: number;
+  articles: Array<Article>;
+  db_articles: Array<Article>;
+  emplacement: Emplacement;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams) {
-    this.ref = '';
-    this.quantity = 1;
-
+  constructor(public navCtrl: NavController, public navParams: NavParams, public sqliteProvider: SqliteProvider) {
     this.articles = navParams.get('articles');
-  }
-
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad PriseConfirmPage');
+    this.emplacement = navParams.get('emplacement');
+    this.db_articles = this.sqliteProvider.findAll('article');
   }
 
   addArticle() {
-      let article = {ref: this.ref, quantity: this.quantity};
+      this.sqliteProvider.findOne('article', this.id).then((article) => {
+          article.quantite = this.quantite;
 
-      if (typeof(this.articles) !== 'undefined') {
-          this.articles.push(article);
-      } else {
-          this.articles = [article];
-      }
+          if (typeof(this.articles) !== 'undefined') {
+              this.articles.push(article);
+          } else {
+              this.articles = [article];
+          }
 
-      this.navCtrl.push(PriseArticlesPage, {
-          articles: this.articles
+          this.navCtrl.push(PriseArticlesPage, {articles: this.articles, emplacement: this.emplacement});
       });
   }
 

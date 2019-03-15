@@ -16,8 +16,10 @@
       <ion-title>Confirmation emplacement</ion-title>
 
       <ion-item>
-        <ion-label>Emplacement</ion-label>
-        <ion-input type="text" [(ngModel)]="location"></ion-input>
+        <ion-label>Emplacement</ion-label>{{ choucroute }}
+        <ion-select [(ngModel)]="id">
+          <ion-option *ngFor="let db_location of db_locations" value="{{ db_location.id }}">{{ db_location.nom }}</ion-option>
+        </ion-select>
       </ion-item>
     </div>
 
