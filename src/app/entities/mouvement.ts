@@ -1,8 +1,8 @@
 export class Mouvement {
     id: number;
-    type: string;
-    date: string;
-    username: string;
-    id_emplacement: number;
-    //id_preparation: number
+    id_article: number;
+    date_prise: string;
+    id_emplacement_prise: number;
+    date_depose: string;
+    id_emplacement_depose: number;
 }

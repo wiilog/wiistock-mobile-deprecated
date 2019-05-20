@@ -16,18 +16,12 @@ export class PriseEmplacementPage {
 
   emplacement: Emplacement;
   id: number;
-  // location = '';
+  // locationLabel = '';
   db_locations: Array<Emplacement>;
-  choucroute;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, public app: App, public sqliteProvider: SqliteProvider) {
   // constructor(public navCtrl: NavController, public navParams: NavParams, private barcodeScanner: BarcodeScanner) {
   //   this.scan();
-
-    // $storageService.getEmplacements().then(mouvements => {
-    //   console.log(mouvements);
-    //   this.locations = mouvements;
-    // });
 
     this.db_locations = this.sqliteProvider.findAll('emplacement');
   }

@@ -52,3 +52,8 @@ ion-grid {
 .list {
   color: $grey;
 }
+.toast-error {
+  > div {
+    background-color: $danger;
+  }
+}

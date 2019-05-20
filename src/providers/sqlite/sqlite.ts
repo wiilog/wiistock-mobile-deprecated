@@ -1,6 +1,7 @@
 // import { NavController, NavParams } from 'ionic-angular';
 import { SQLite, SQLiteObject } from "@ionic-native/sqlite";
 import { Injectable } from '@angular/core';
+import {StorageService} from "../../app/services/storage.service";
 
 const DB_NAME: string = 'follow_gt.db';
 
@@ -10,7 +11,7 @@ export class SqliteProvider {
     private db: SQLiteObject = null;
 
 
-    constructor(private sqlite: SQLite) {
+    constructor(private sqlite: SQLite, private storageService: StorageService) {
         this.createDbFile();
     }
 
@@ -22,25 +23,28 @@ export class SqliteProvider {
             .then((db: SQLiteObject) => {
                 console.log('bdd créée');
                 this.db = db;
-                this.createTables();
+                this.db.executeSql('DROP TABLE `article`', []).then(() => {
+                    console.log('drop table article'); //TODO CG
+                    this.createTables();
+                })
             })
             .catch(e => console.log(e));
     }
-
+ 
     private createTables(): void {
-        this.db.executeSql('CREATE TABLE IF NOT EXISTS `article` (`id` INTEGER PRIMARY KEY AUTOINCREMENT , `reference` VARCHAR(255), `quantite` INTEGER)', [])
+        this.db.executeSql('CREATE TABLE IF NOT EXISTS `article` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255), `reference` VARCHAR(255), `quantite` INTEGER)', [])
             .then(() => {
                 console.log('table article créée');
 
-                this.db.executeSql('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT , `nom` VARCHAR(255))', [])
+                this.db.executeSql('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))', [])
                     .then(() => {
                         console.log('table emplacement créée !')
 
-                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT , `type` VARCHAR(16), `date` VARCHAR(255), `username` VARCHAR(255), `id_emplacement` INTEGER)', [])
-                            .then(() => console.log('table mouvement créée'))
+                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `prise` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_article` INTEGER, `quantite` INTEGER, `date_prise` VARCHAR(255), `id_emplacement_prise` INTEGER)', [])
+                            .then(() => console.log('table prise créée'))
 
-                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_mouvement` (`id_article` INTEGER, `id_mouvement` INTEGER, PRIMARY KEY (`id_article`, `id_mouvement`))', [])
-                                .then(() => console.log('table article_mouvement créée !'))
+                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT , `id_article` INTEGER, `quantite` INTEGER, `date_prise` VARCHAR(255), `username_prise` VARCHAR(255), `id_emplacement_prise` INTEGER, `date_depose` VARCHAR(255), `username_depose` VARCHAR(255), `id_emplacement_depose` INTEGER)', [])
+                                .then(() => console.log('table mouvement créée !'))
                                 .catch(e => console.log(e));
                     });
             });
@@ -49,7 +53,7 @@ export class SqliteProvider {
     public cleanDataBase(): Promise<any> {
         return this.db.executeSql('DELETE FROM `article`', [])
             .then(() => {
-                console.log('table article deleted !');
+                console.log('table article cleaned !');
                 this.db.executeSql('DELETE FROM `emplacement`', [])
                     .then(() => {
                         console.log('table emplacement cleaned !');
@@ -58,11 +62,31 @@ export class SqliteProvider {
     }
 
     public importData(data): Promise<any> {
-        return this.db.executeSql('INSERT INTO `emplacement` VALUES (2, \'bat1\'); INSERT INTO `emplacement` VALUES (3, \'bat2\');', [])
+        this.storageService.setApiKey(data['apiKey']);
+
+        //TODO CG ajouter article.label une fois que sera ajouté côté api
+        let articles = data['articles'];
+        //TODO CG mettre quantités à zéro à l'import
+        let articleValues = [];
+        for (let article of articles) {
+            articleValues.push("(" + article.id + ", '" + article.reference + "', " + article.quantite + ")");
+        }
+        let articleValuesStr = articleValues.join(', ');
+        let sqlArticles = 'INSERT INTO `article` (`id`, `reference`, `quantite`) VALUES ' + articleValuesStr + ';';
+
+        let emplacements = data['emplacements'];
+        let emplacementValues = [];
+        for (let emplacement of emplacements) {
+            emplacementValues.push("(" + emplacement.id + ", '" + emplacement.label + "')");
+        }
+        let emplacementValuesStr = emplacementValues.join(', ');
+        let sqlEmplacements = 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';';
+
+        return this.db.executeSql(sqlArticles, [])
             .then(() => {
-                this.db.executeSql('INSERT INTO `article` VALUES (2, \'iphoneY\', 3)', []);
-                this.db.executeSql('INSERT INTO `article` VALUES (3, \'iphoneZ\', 5)', []);
-                    }).catch(e => console.log(e));
+                return this.db.executeSql(sqlEmplacements, [])
+                    .catch(e => console.log(e));
+            });
     }
 
     static openDatabase() {
@@ -91,12 +115,15 @@ export class SqliteProvider {
         return resp;
     }
 
-    public count(table:string, where: any[]): Promise<any> {
+    public count(table:string, where?: any[]): Promise<any> {
         let query = "SELECT COUNT(*) AS nb FROM " + table;
 
-        let res = this.buildQueryWhereClause(where);
-        query += res.query;
-        let values = res.values;
+        let values = [];
+        if (where) {
+            let res = this.buildQueryWhereClause(where);
+            query += res.query;
+            values = res.values;
+        }
 
         let resp = new Promise<any>((resolve) => {
             this.db.executeSql(query, values).then((data) => {

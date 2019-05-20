@@ -21,7 +21,7 @@
   <ion-grid>
     <ion-row>
       <ion-col col-6 (click)="goToPrise()">
-        <button ion-button outline class="big-button" color="dark" [class.alert]="openedMouvements>0">
+        <button ion-button outline class="big-button" color="dark">
           <ion-card-content>
             <ion-icon class="big-icon" name="cloud-download"></ion-icon>
             <p text-center>PRISE</p>
@@ -29,7 +29,7 @@
         </button>
       </ion-col>
       <ion-col col-6 (click)="goToDepose()">
-        <button ion-button outline class="big-button" color="dark">
+        <button ion-button outline class="big-button" color="dark" [class.alert]="openedMouvements>0">
           <ion-card-content>
             <ion-icon class="big-icon" name="cloud-upload"></ion-icon>
             <p text-center>DÉPOSE</p>

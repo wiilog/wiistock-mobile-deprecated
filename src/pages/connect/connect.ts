@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import {NavController, NavParams, ToastController} from 'ionic-angular';
 import { UsersApiProvider } from "../../providers/users-api/users-api";
 import { MenuPage } from "../menu/menu";
-import { StorageService } from "../../app/services/storage.service";
 import {SqliteProvider} from "../../providers/sqlite/sqlite";
 
 @Component({
@@ -15,39 +14,34 @@ export class ConnectPage {
     login: '',
     password: ''
   };
-  errorMsg: string = '';
-  currentUser = {
-    'login': '',
-    'role': ''
-  };
 
-  // constructor(public navCtrl: NavController, public navParams: NavParams, public usersApiProvider: UsersApiProvider, private sqlite: SQLite) {
-  constructor(public navCtrl: NavController, public navParams: NavParams, public usersApiProvider: UsersApiProvider, public storageService: StorageService, public sqliteProvider: SqliteProvider) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public usersApiProvider: UsersApiProvider, private toastController: ToastController, public sqliteProvider: SqliteProvider) {
   }
 
   logForm() {
-      //TODO à remettre quand API branchée
-    // this.usersApiProvider.setProvider(this.form).subscribe(resp => {
-    //     console.log(resp);
-    //   if (resp.success) {
-        // this.sqliteProvider.importData(resp.data);
-
+    this.usersApiProvider.setProvider(this.form).subscribe(resp => {
+      if (resp.success) {
         this.sqliteProvider.cleanDataBase()
             .then(() => {
-              this.sqliteProvider.importData(null)
+              this.sqliteProvider.importData(resp.data.data)
                   .then(() => {
                     this.navCtrl.push(MenuPage);
                   });
             });
-    //   } else {
-    //     this.errorMsg = 'Identifiants incorrects.'
-    //   }
-    // });
+      } else {
+        this.showToast('Identifiants incorrects...');
+      }
+    });
   }
 
-  // checkPassword() {
-  //   let nbChar = this.form.password.length;
-  //   this.errorMsg = nbChar < 8 ? 'Le mot de passe doit faire au moins 8 caractères.' : '';
-  // }
+  async showToast(msg) {
+    const toast = await this.toastController.create({
+      message: msg,
+      duration: 2000,
+      position: 'center',
+      cssClass: 'toast-error'
+    });
+    toast.present();
+  }
 
 }

@@ -16,11 +16,24 @@
       <ion-title>Confirmation emplacement</ion-title>
 
       <ion-item>
-        <ion-label>Emplacement</ion-label>{{ choucroute }}
+        <ion-label>Emplacement</ion-label>
         <ion-select [(ngModel)]="id">
-          <ion-option *ngFor="let db_location of db_locations" value="{{ db_location.id }}">{{ db_location.nom }}</ion-option>
+          <ion-option *ngFor="let db_location of db_locations" value="{{ db_location.id }}">{{ db_location.label }}</ion-option>
         </ion-select>
       </ion-item>
+
+      <!--<div class="autocomplete">-->
+        <!--<ion-searchbar-->
+          <!--[(ngModel)]="locationLabel">-->
+          <!--&lt;!&ndash;(ionFocus)="addFocus()"&ndash;&gt;-->
+          <!--&lt;!&ndash;(ionInput)="search()"&ndash;&gt;-->
+          <!--&lt;!&ndash;(ionBlur)="removeFocus()"&ndash;&gt;-->
+          <!--&lt;!&ndash;debounce=500&ndash;&gt;-->
+        <!--</ion-searchbar>-->
+        <!--<ion-list>-->
+          <!--<ion-item *ngFor="let db_location of db_locations">{{ db_location.label }}</ion-item>-->
+        <!--</ion-list>-->
+      <!--</div>-->
     </div>
 
     <!--<button (click)="vibrate()">-->

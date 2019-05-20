@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams } from 'ionic-angular';
+import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
 import {PriseArticlesPage} from "../prise-articles/prise-articles";
 import {Article} from "../../../app/entities/article";
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
@@ -18,7 +18,7 @@ export class PriseConfirmPage {
   db_articles: Array<Article>;
   emplacement: Emplacement;
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public sqliteProvider: SqliteProvider) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public sqliteProvider: SqliteProvider, private toastController: ToastController) {
     this.articles = navParams.get('articles');
     this.emplacement = navParams.get('emplacement');
     this.db_articles = this.sqliteProvider.findAll('article');
@@ -26,16 +26,31 @@ export class PriseConfirmPage {
 
   addArticle() {
       this.sqliteProvider.findOne('article', this.id).then((article) => {
-          article.quantite = this.quantite;
+          if (article) {
+              article.quantite = this.quantite;
 
-          if (typeof(this.articles) !== 'undefined') {
-              this.articles.push(article);
+              if (typeof(this.articles) !== 'undefined') {
+                  this.articles.push(article);
+              } else {
+                  this.articles = [article];
+              }
+
+              this.navCtrl.push(PriseArticlesPage, {articles: this.articles, emplacement: this.emplacement});
           } else {
-              this.articles = [article];
+              this.showToast("Cet article n'existe pas en stock.");
           }
 
-          this.navCtrl.push(PriseArticlesPage, {articles: this.articles, emplacement: this.emplacement});
       });
   }
+
+    async showToast(msg) {
+        const toast = await this.toastController.create({
+            message: msg,
+            duration: 2000,
+            position: 'center',
+            cssClass: 'toast-error'
+        });
+        toast.present();
+    }
 
 }

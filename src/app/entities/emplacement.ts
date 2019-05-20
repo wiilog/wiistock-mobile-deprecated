@@ -1,4 +1,4 @@
 export class Emplacement {
     id: number;
-    nom: string;
+    label: string;
 }
