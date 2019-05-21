@@ -23,7 +23,7 @@ export class ConnectPage {
       if (resp.success) {
         this.sqliteProvider.cleanDataBase()
             .then(() => {
-              this.sqliteProvider.importData(resp.data.data)
+              this.sqliteProvider.importData(resp.data)
                   .then(() => {
                     this.navCtrl.push(MenuPage);
                   });

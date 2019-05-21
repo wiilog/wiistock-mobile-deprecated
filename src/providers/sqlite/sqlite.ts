@@ -23,10 +23,7 @@ export class SqliteProvider {
             .then((db: SQLiteObject) => {
                 console.log('bdd créée');
                 this.db = db;
-                this.db.executeSql('DROP TABLE `article`', []).then(() => {
-                    console.log('drop table article'); //TODO CG
-                    this.createTables();
-                })
+                this.createTables();
             })
             .catch(e => console.log(e));
     }
@@ -39,42 +36,33 @@ export class SqliteProvider {
                 this.db.executeSql('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))', [])
                     .then(() => {
                         console.log('table emplacement créée !')
-
-                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `prise` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_article` INTEGER, `quantite` INTEGER, `date_prise` VARCHAR(255), `id_emplacement_prise` INTEGER)', [])
-                            .then(() => console.log('table prise créée'))
-
-                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT , `id_article` INTEGER, `quantite` INTEGER, `date_prise` VARCHAR(255), `username_prise` VARCHAR(255), `id_emplacement_prise` INTEGER, `date_depose` VARCHAR(255), `username_depose` VARCHAR(255), `id_emplacement_depose` INTEGER)', [])
-                                .then(() => console.log('table mouvement créée !'))
-                                .catch(e => console.log(e));
+                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT , `id_article` INTEGER, `quantite` INTEGER, `date_prise` VARCHAR(255), `id_emplacement_prise` INTEGER, `date_depose` VARCHAR(255), `id_emplacement_depose` INTEGER)', [])
+                            .then(() => console.log('table mouvement créée !'))
+                            .catch(e => console.log(e));
                     });
             });
     }
 
     public cleanDataBase(): Promise<any> {
-        return this.db.executeSql('DELETE FROM `article`', [])
+        return this.db.executeSql('DELETE FROM `article`; DELETE FROM `emplacement`', [])
             .then(() => {
-                console.log('table article cleaned !');
-                this.db.executeSql('DELETE FROM `emplacement`', [])
-                    .then(() => {
-                        console.log('table emplacement cleaned !');
-                    });
+                console.log('tables article and emplacement cleaned !');
             });
     }
 
-    public importData(data): Promise<any> {
+    public importData(data) {
         this.storageService.setApiKey(data['apiKey']);
 
-        //TODO CG ajouter article.label une fois que sera ajouté côté api
         let articles = data['articles'];
-        //TODO CG mettre quantités à zéro à l'import
         let articleValues = [];
         for (let article of articles) {
-            articleValues.push("(" + article.id + ", '" + article.reference + "', " + article.quantite + ")");
+            articleValues.push("(" + article.id + ", '" + article.reference + "', " + article.quantiteStock + ")");
         }
         let articleValuesStr = articleValues.join(', ');
         let sqlArticles = 'INSERT INTO `article` (`id`, `reference`, `quantite`) VALUES ' + articleValuesStr + ';';
 
         let emplacements = data['emplacements'];
+
         let emplacementValues = [];
         for (let emplacement of emplacements) {
             emplacementValues.push("(" + emplacement.id + ", '" + emplacement.label + "')");
