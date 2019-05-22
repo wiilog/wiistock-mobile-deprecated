@@ -21,7 +21,6 @@ export class PriseEmplacementPage {
   // locationLabel = '';
   db_locations: Array<Emplacement>;
   db_articles: Array<Article>;
-  result: Article;
 
   constructor(public navCtrl: NavController,
     public navParams: NavParams,
@@ -32,7 +31,9 @@ export class PriseEmplacementPage {
     private changeDetectorRef: ChangeDetectorRef) {
     // constructor(public navCtrl: NavController, public navParams: NavParams, private barcodeScanner: BarcodeScanner) {
     //   this.scan();
-
+    if (navParams.get('selectedEmplacement') !== undefined) {
+      this.id = navParams.get('selectedEmplacement');
+    }
     this.db_locations = this.sqliteProvider.findAll('emplacement');
     this.db_articles = this.sqliteProvider.findAll('article');
     let instance = this;
@@ -46,24 +47,22 @@ export class PriseEmplacementPage {
     },
       function (intent) {
         let found = false;
-        instance.db_articles.forEach(article => {
-          if (article['reference'] === intent.extras['com.symbol.datawedge.data_string'] && !found) {
-            instance.result = article;
+        instance.db_locations.forEach(emplacement => {
+          if (emplacement['label'] === intent.extras['com.symbol.datawedge.data_string'] && !found) {
+            instance.navCtrl.push(PriseEmplacementPage, { selectedEmplacement: emplacement.id });
             found = true;
           }
         });
         if (!found) {
           instance.toast.create({
-            message: 'Aucun article ne correspond à l\'article scanné',
+            message: 'Aucun emplacement ne correspond à l\'emplacement scanné',
             duration: 3000,
             position: 'center',
             cssClass: 'toast-error'
           }).present();
         }
-        changeDetectorRef.detectChanges();
+        instance.changeDetectorRef.detectChanges();
       });
-
-
   }
 
   // vibrate() {
@@ -74,8 +73,7 @@ export class PriseEmplacementPage {
     this.sqliteProvider.findOne('emplacement', this.id).then((emplacement) => {
       this.emplacement = emplacement;
       this.navCtrl.push(PriseArticlesPage, { emplacement: this.emplacement });
-    })
-
+    });
   }
 
   goHome() {
@@ -84,27 +82,29 @@ export class PriseEmplacementPage {
 
   scan() {
     this.barcodeScanner.scan().then(res => {
-      let found = false;
-      this.db_articles.forEach(article => {
-        if (article['reference'] === res.text && !found) {
-          this.result = article;
-          found = false;
-        }
-      });
-      if (!found) {
-        this.toast.create({
-          message: 'Aucun article ne correspond à l\'article scanné',
-          duration: 3000,
-          position: 'center',
-          cssClass: 'toast-error'
-        }).present();
+      this.testIfBarcodeEquals(res.text);
+    });
+  }
+
+  testIfBarcodeEquals(text) {
+    let found = false;
+    console.log(text);
+    this.db_locations.forEach(emplacement => {
+      console.log(emplacement['label']);
+      if (emplacement['label'] === text && !found) {
+        this.navCtrl.push(PriseEmplacementPage, { selectedEmplacement: emplacement.id });
+        found = true;
       }
-      this.changeDetectorRef.detectChanges();
-    }).catch(err => {
+    });
+    if (!found) {
       this.toast.create({
-        message: err.message
+        message: 'Aucun emplacement ne correspond à l\'emplacement scanné',
+        duration: 3000,
+        position: 'center',
+        cssClass: 'toast-error'
       }).present();
-    })
+    }
+    this.changeDetectorRef.detectChanges();
   }
 
 }

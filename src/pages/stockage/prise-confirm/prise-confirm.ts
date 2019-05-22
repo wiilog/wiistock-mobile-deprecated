@@ -22,6 +22,9 @@ export class PriseConfirmPage {
     this.articles = navParams.get('articles');
     this.emplacement = navParams.get('emplacement');
     this.db_articles = this.sqliteProvider.findAll('article');
+    if (navParams.get('selectedArticle') !== undefined) {
+        this.id = navParams.get('selectedArticle')['id'];
+    }
   }
 
   addArticle() {

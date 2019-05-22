@@ -13,32 +13,33 @@
 <ion-content padding>
   <div>
     <div>
-      <ion-title>Confirmation emplacement</ion-title>
-
-      <ion-item>
-        <ion-label>Emplacement</ion-label>
-        <ion-select [(ngModel)]="id">
-          <ion-option *ngFor="let db_location of db_locations" value="{{ db_location.id }}">{{ db_location.label }}</ion-option>
-        </ion-select>
-      </ion-item>
+      <ion-title *ngIf="!id">Veuillez flasher ou sélectionner<br>un emplacement</ion-title>
       <ion-card>
-        <ion-card-content *ngIf="result">
-          <p>Reference : {{result.reference}}</p>
-          <p>Quantite : {{result.quantite}}</p>
+        <ion-card-header>
+          <ion-card-title>Emplacement : </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <ion-item>
+            <ion-label>Emplacement</ion-label>
+            <ion-select [(ngModel)]="id">
+              <ion-option *ngFor="let db_location of db_locations" value="{{ db_location.id }}">{{ db_location.label }}
+              </ion-option>
+            </ion-select>
+          </ion-item>
         </ion-card-content>
       </ion-card>
 
       <!--<div class="autocomplete">-->
-        <!--<ion-searchbar-->
-          <!--[(ngModel)]="locationLabel">-->
-          <!--&lt;!&ndash;(ionFocus)="addFocus()"&ndash;&gt;-->
-          <!--&lt;!&ndash;(ionInput)="search()"&ndash;&gt;-->
-          <!--&lt;!&ndash;(ionBlur)="removeFocus()"&ndash;&gt;-->
-          <!--&lt;!&ndash;debounce=500&ndash;&gt;-->
-        <!--</ion-searchbar>-->
-        <!--<ion-list>-->
-          <!--<ion-item *ngFor="let db_location of db_locations">{{ db_location.label }}</ion-item>-->
-        <!--</ion-list>-->
+      <!--<ion-searchbar-->
+      <!--[(ngModel)]="locationLabel">-->
+      <!--&lt;!&ndash;(ionFocus)="addFocus()"&ndash;&gt;-->
+      <!--&lt;!&ndash;(ionInput)="search()"&ndash;&gt;-->
+      <!--&lt;!&ndash;(ionBlur)="removeFocus()"&ndash;&gt;-->
+      <!--&lt;!&ndash;debounce=500&ndash;&gt;-->
+      <!--</ion-searchbar>-->
+      <!--<ion-list>-->
+      <!--<ion-item *ngFor="let db_location of db_locations">{{ db_location.label }}</ion-item>-->
+      <!--</ion-list>-->
       <!--</div>-->
     </div>
 
@@ -46,7 +47,7 @@
     <!--vibration-->
     <!--</button>-->
     <!--<ion-content text-center>-->
-      <!--<ion-icon name="barcode" color="danger"></ion-icon>-->
+    <!--<ion-icon name="barcode" color="danger"></ion-icon>-->
     <!--</ion-content>-->
 
   </div>
@@ -56,6 +57,7 @@
 <ion-footer padding>
   <div class="d-flex">
     <ion-icon class="big-icon" name="arrow-dropleft-circle" navPop></ion-icon>
+    <ion-icon class="big-icon" name="qr-scanner" (click)="scan()"></ion-icon>
     <ion-icon class="big-icon" name="checkmark-circle" (click)="goToArticles()"></ion-icon>
   </div>
 </ion-footer>

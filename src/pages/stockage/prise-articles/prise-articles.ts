@@ -5,8 +5,10 @@ import { MenuPage } from "../../menu/menu";
 import { Article } from "../../../app/entities/article";
 import { Emplacement } from "../../../app/entities/emplacement";
 import { SqliteProvider } from "../../../providers/sqlite/sqlite";
-import {StockageMenuPage} from "../stockage-menu/stockage-menu";
+import { StockageMenuPage } from "../stockage-menu/stockage-menu";
 import { Mouvement } from '../../../app/entities/mouvement';
+import { BarcodeScanner } from '@ionic-native/barcode-scanner';
+import { ChangeDetectorRef } from '@angular/core';
 
 
 @IonicPage()
@@ -18,16 +20,34 @@ export class PriseArticlesPage {
 
   emplacement: Emplacement;
   articles: Array<Article>;
-
-  constructor(public navCtrl: NavController, public navParams: NavParams, private toastController: ToastController, private sqliteProvider: SqliteProvider) {
-
-    if (typeof(navParams.get('emplacement')) !== undefined) {
+  db_articles: Array<Article>;
+  constructor(
+    public navCtrl: NavController,
+    public navParams: NavParams,
+    private toastController: ToastController,
+    private sqliteProvider: SqliteProvider,
+    private barcodeScanner: BarcodeScanner,
+    private changeDetectorRef: ChangeDetectorRef) {
+    this.db_articles = this.sqliteProvider.findAll('article');
+    if (typeof (navParams.get('emplacement')) !== undefined) {
       this.emplacement = navParams.get('emplacement');
     }
 
-    if (typeof(navParams.get('articles')) !== undefined) {
+    if (typeof (navParams.get('articles')) !== undefined) {
       this.articles = navParams.get('articles');
     }
+    let instance = this;
+    (<any>window).plugins.intentShim.registerBroadcastReceiver({
+      filterActions: [
+        'io.ionic.starter.ACTION'
+      ],
+      filterCategories: [
+        'android.intent.category.DEFAULT'
+      ]
+    },
+      function (intent) {
+        instance.testIfBarcodeEquals(intent.extras['com.symbol.datawedge.data_string']);
+      });
   }
 
   addArticleManually() {
@@ -55,16 +75,16 @@ export class PriseArticlesPage {
 
       this.sqliteProvider.executeQuery(
         'INSERT INTO mouvement (id_article, quantite, date_prise, id_emplacement_prise, date_depose, id_emplacement_depose, type) VALUES (66, 2, "2019-05-21T15:54:03.021Z", 54, null, null, "prise-depose")')
-          .then(() => {
-              console.log('prise enregistrée !');
-          })
+        .then(() => {
+          console.log('prise enregistrée !');
+        })
       // this.sqliteProvider.insert('mouvement', mouvement)
       //     .then(() => {
       //       console.log('prise enregistrée');
       //     })
     } //TODO CG prévoir insert many
     this.navCtrl.push(StockageMenuPage)
-        .then(() => this.showToast('Prise enregistrée.'));
+      .then(() => this.showToast('Prise enregistrée.'));
   }
 
   // Helper
@@ -79,6 +99,35 @@ export class PriseArticlesPage {
 
   goHome() {
     this.navCtrl.push(MenuPage);
+  }
+
+  scan() {
+    this.barcodeScanner.scan().then(res => {
+      this.testIfBarcodeEquals(res.text);
+    });
+  }
+
+  testIfBarcodeEquals(text) {
+    let found = false;
+    console.log(text);
+    this.db_articles.forEach(article => {
+      console.log(article['reference']);
+      if (article['reference'] === text && !found) {
+        found = true;
+        this.navCtrl.push(PriseConfirmPage, {
+          articles: this.articles, emplacement: this.emplacement, selectedArticle: article
+        });
+      }
+    });
+    if (!found) {
+      this.toastController.create({
+        message: 'Aucun article ne correspond à l\'article scanné',
+        duration: 3000,
+        position: 'center',
+        cssClass: 'toast-error'
+      }).present();
+    }
+    this.changeDetectorRef.detectChanges();
   }
 
 }

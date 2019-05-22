@@ -44,13 +44,20 @@ export class SqliteProvider {
     }
 
     public cleanDataBase(): Promise<any> {
-        return this.db.executeSql('DELETE FROM `article`; DELETE FROM `emplacement`', [])
+        return this.db.executeSql('DELETE FROM `article`;', [])
             .then(() => {
-                console.log('tables article and emplacement cleaned !');
+                this.db.executeSql('DELETE FROM `emplacement`;', [])
+                    .then(() => {
+                        console.log('Tables cleansed');
+                    }).catch(err => {
+                        console.log(err);
+                    })
+            }).catch(err => {
+                console.log(err);
             });
     }
 
-    public importData(data) {
+    public async importData(data) {
         this.storageService.setApiKey(data['apiKey']);
 
         let articles = data['articles'];
@@ -74,6 +81,7 @@ export class SqliteProvider {
                 return this.db.executeSql(sqlEmplacements, [])
                     .catch(e => console.log(e));
             }).catch(e => console.log(e));
+
     }
 
     static openDatabase() {
@@ -181,7 +189,7 @@ export class SqliteProvider {
 
         query += " );";
         console.log(query);
-        
+
         return this.db.executeSql(query);
         // return this.db.executeSql(query, values);
     }
