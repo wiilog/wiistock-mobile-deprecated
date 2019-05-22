@@ -46,22 +46,7 @@ export class PriseEmplacementPage {
       ]
     },
       function (intent) {
-        let found = false;
-        instance.db_locations.forEach(emplacement => {
-          if (emplacement['label'] === intent.extras['com.symbol.datawedge.data_string'] && !found) {
-            instance.navCtrl.push(PriseEmplacementPage, { selectedEmplacement: emplacement.id });
-            found = true;
-          }
-        });
-        if (!found) {
-          instance.toast.create({
-            message: 'Aucun emplacement ne correspond à l\'emplacement scanné',
-            duration: 3000,
-            position: 'center',
-            cssClass: 'toast-error'
-          }).present();
-        }
-        instance.changeDetectorRef.detectChanges();
+        instance.testIfBarcodeEquals(intent.extras['com.symbol.datawedge.data_string'])
       });
   }
 
@@ -88,9 +73,7 @@ export class PriseEmplacementPage {
 
   testIfBarcodeEquals(text) {
     let found = false;
-    console.log(text);
     this.db_locations.forEach(emplacement => {
-      console.log(emplacement['label']);
       if (emplacement['label'] === text && !found) {
         this.navCtrl.push(PriseEmplacementPage, { selectedEmplacement: emplacement.id });
         found = true;
