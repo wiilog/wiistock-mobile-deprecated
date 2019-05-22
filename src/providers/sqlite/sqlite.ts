@@ -3,7 +3,7 @@ import { SQLite, SQLiteObject } from "@ionic-native/sqlite";
 import { Injectable } from '@angular/core';
 import {StorageService} from "../../app/services/storage.service";
 
-const DB_NAME: string = 'follow_gt.db';
+const DB_NAME: string = 'follow_gt';
 
 @Injectable()
 export class SqliteProvider {
@@ -36,7 +36,7 @@ export class SqliteProvider {
                 this.db.executeSql('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))', [])
                     .then(() => {
                         console.log('table emplacement créée !')
-                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT , `id_article` INTEGER, `quantite` INTEGER, `date_prise` VARCHAR(255), `id_emplacement_prise` INTEGER, `date_depose` VARCHAR(255), `id_emplacement_depose` INTEGER)', [])
+                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_article` INTEGER, `quantite` INTEGER, `date_prise` VARCHAR(255), `id_emplacement_prise` INTEGER, `date_depose` VARCHAR(255), `id_emplacement_depose` INTEGER)', [])
                             .then(() => console.log('table mouvement créée !'))
                             .catch(e => console.log(e));
                     });
@@ -148,7 +148,7 @@ export class SqliteProvider {
     }
 
     public insert(name: string, object: any) {
-
+        console.log(object);
         let fields = Object.keys(object);
         let values = Object.keys(object).map((key) => {
             return object[key];
@@ -158,24 +158,37 @@ export class SqliteProvider {
 
         let i = 0;
         for (let field of fields) {
-            query += " " + field + " ";
+            query += field;
             if (i < fields.length - 1) {
                 query += ", ";
             }
             i++;
         }
-        query += " ) VALUES( ";
+        query += " ) VALUES ( ";
 
         let nbValues = values.length;
+        // for (i = 0; i < nbValues; i++) {
+        //     query += " ? ";
+        //     if (i < nbValues - 1) {
+        //         query += ", ";
+        //     }
+        // }
         for (i = 0; i < nbValues; i++) {
-            query += " ? ";
+            query += "'" + values[i] + "'";
             if (i < nbValues - 1) {
                 query += ", ";
             }
         }
 
         query += " );";
-        return this.db.executeSql(query, values);
+        console.log(query);
+        
+        return this.db.executeSql(query);
+        // return this.db.executeSql(query, values);
+    }
+
+    public executeQuery(query: string) {
+        return this.db.executeSql(query);
     }
 
     private buildQueryWhereClause(selections: any[]) {

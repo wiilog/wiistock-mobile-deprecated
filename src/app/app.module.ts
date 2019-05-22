@@ -38,7 +38,7 @@ import { SqliteProvider } from "../providers/sqlite/sqlite";
       backButtonIcon: 'ios-arrow-dropleft'
     }),
     HttpClientModule,
-    IonicStorageModule.forRoot({ name: '_gtfollowdb', driverOrder: ['sqlite', 'websql', 'indexeddb']})
+    IonicStorageModule.forRoot({ name: 'follow_gt', driverOrder: ['sqlite', 'websql', 'indexeddb']})
   ],
   bootstrap: [IonicApp],
   entryComponents: [

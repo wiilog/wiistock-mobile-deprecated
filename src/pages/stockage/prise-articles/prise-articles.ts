@@ -6,7 +6,7 @@ import { Article } from "../../../app/entities/article";
 import { Emplacement } from "../../../app/entities/emplacement";
 import { SqliteProvider } from "../../../providers/sqlite/sqlite";
 import {StockageMenuPage} from "../stockage-menu/stockage-menu";
-import {Prise} from "../../../app/entities/prise";
+import { Mouvement } from '../../../app/entities/mouvement';
 
 
 @IonicPage()
@@ -20,6 +20,7 @@ export class PriseArticlesPage {
   articles: Array<Article>;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private toastController: ToastController, private sqliteProvider: SqliteProvider) {
+
     if (typeof(navParams.get('emplacement')) !== undefined) {
       this.emplacement = navParams.get('emplacement');
     }
@@ -37,23 +38,33 @@ export class PriseArticlesPage {
 
   finishTaking() {
     for (let article of this.articles) {
-      let prise = new Prise();
-      prise = {
+      console.log(this.sqliteProvider.findAll('article'));
+      let mouvement = new Mouvement();
+      let date = new Date().toISOString();
+      mouvement = {
         id: null,
         id_article: article.id,
         quantite: article.quantite,
-        date_prise: new Date(),
-        id_emplacement_prise: this.emplacement.id
-      }
+        date_prise: date,
+        id_emplacement_prise: this.emplacement.id,
+        date_depose: null,
+        id_emplacement_depose: null,
+        type: 'prise-depose'
+      };
+      console.log(mouvement);
 
-      this.sqliteProvider.insert('prise', prise)
+      this.sqliteProvider.executeQuery(
+        'INSERT INTO mouvement (id_article, quantite, date_prise, id_emplacement_prise, date_depose, id_emplacement_depose, type) VALUES (66, 2, "2019-05-21T15:54:03.021Z", 54, null, null, "prise-depose")')
           .then(() => {
-            console.log('prise enregistrée');
+              console.log('prise enregistrée !');
           })
+      // this.sqliteProvider.insert('mouvement', mouvement)
+      //     .then(() => {
+      //       console.log('prise enregistrée');
+      //     })
     } //TODO CG prévoir insert many
     this.navCtrl.push(StockageMenuPage)
         .then(() => this.showToast('Prise enregistrée.'));
-
   }
 
   // Helper

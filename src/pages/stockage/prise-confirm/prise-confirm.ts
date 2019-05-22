@@ -34,7 +34,6 @@ export class PriseConfirmPage {
               } else {
                   this.articles = [article];
               }
-
               this.navCtrl.push(PriseArticlesPage, {articles: this.articles, emplacement: this.emplacement});
           } else {
               this.showToast("Cet article n'existe pas en stock.");

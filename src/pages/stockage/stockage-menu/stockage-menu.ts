@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import { Mouvement } from "../../../app/entities/mouvement";
-import {MenuPage} from "../../menu/menu";
-import {PriseEmplacementPage} from "../prise-emplacement/prise-emplacement";
-import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import {Prise} from "../../../app/entities/prise";
+import { MenuPage } from "../../menu/menu";
+import { PriseEmplacementPage } from "../prise-emplacement/prise-emplacement";
+import { SqliteProvider } from "../../../providers/sqlite/sqlite";
 
 
 @Component({
@@ -13,15 +12,16 @@ import {Prise} from "../../../app/entities/prise";
 })
 export class StockageMenuPage {
   mouvements: Mouvement[];
-  prises: Prise[];
   openedMouvements: boolean;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private sqliteProvider: SqliteProvider) {
     this.displayMouvements();
+    console.log(this.mouvements);
+    console.log(this.sqliteProvider.findAll('mouvement'));
   }
 
   displayMouvements() {
-    this.sqliteProvider.count('prise')
+    this.sqliteProvider.count('mouvement', [{column: 'date_depose', operator: 'is', value: 'null'}])
         .then((count) => {
           this.openedMouvements = count > 0;
         });
