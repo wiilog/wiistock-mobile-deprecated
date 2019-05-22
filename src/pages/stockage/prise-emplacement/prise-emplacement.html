@@ -21,6 +21,12 @@
           <ion-option *ngFor="let db_location of db_locations" value="{{ db_location.id }}">{{ db_location.label }}</ion-option>
         </ion-select>
       </ion-item>
+      <ion-card>
+        <ion-card-content *ngIf="result">
+          <p>Reference : {{result.reference}}</p>
+          <p>Quantite : {{result.quantite}}</p>
+        </ion-card-content>
+      </ion-card>
 
       <!--<div class="autocomplete">-->
         <!--<ion-searchbar-->
@@ -50,6 +56,6 @@
 <ion-footer padding>
   <div class="d-flex">
     <ion-icon class="big-icon" name="arrow-dropleft-circle" navPop></ion-icon>
-    <ion-icon class="big-icon" name="checkmark-circle" (click)="goToArticles()"></ion-icon>
+    <ion-icon class="big-icon" name="checkmark-circle" (click)="scan()"></ion-icon>
   </div>
 </ion-footer>

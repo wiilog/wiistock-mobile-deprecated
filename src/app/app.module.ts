@@ -19,6 +19,7 @@ import { PriseEmplacementPage } from "../pages/stockage/prise-emplacement/prise-
 import { StorageService } from "./services/storage.service";
 import { StockageMenuPage } from "../pages/stockage/stockage-menu/stockage-menu";
 import { SqliteProvider } from "../providers/sqlite/sqlite";
+import { BarcodeScanner } from '@ionic-native/barcode-scanner';
 
 @NgModule({
   declarations: [
@@ -59,7 +60,8 @@ import { SqliteProvider } from "../providers/sqlite/sqlite";
     MyApp,
     SQLite,
     SqliteProvider,
-    StorageService
+    StorageService,
+    BarcodeScanner
   ]
 })
 export class AppModule {}

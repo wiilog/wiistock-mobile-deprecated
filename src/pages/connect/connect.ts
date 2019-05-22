@@ -25,6 +25,7 @@ export class ConnectPage {
             .then(() => {
               this.sqliteProvider.importData(resp.data)
                   .then(() => {
+                    console.log('connect');
                     this.navCtrl.push(MenuPage);
                   });
             });
