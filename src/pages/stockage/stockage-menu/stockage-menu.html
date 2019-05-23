@@ -38,5 +38,8 @@
       </ion-col>
     </ion-row>
   </ion-grid>
+  <ion-list inset *ngFor="let mvt of mouvements">
+    <p>{{mvt.id}} - {{mvt.id_article}} - {{mvt.quantite}} - {{mvt.date_prise}} - {{mvt.type}}</p>
+  </ion-list>
 
 </ion-content>

@@ -36,7 +36,7 @@ export class SqliteProvider {
                 this.db.executeSql('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))', [])
                     .then(() => {
                         console.log('table emplacement créée !')
-                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_article` INTEGER, `quantite` INTEGER, `date_prise` VARCHAR(255), `id_emplacement_prise` INTEGER, `date_depose` VARCHAR(255), `id_emplacement_depose` INTEGER)', [])
+                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_article` INTEGER, `quantite` INTEGER, `date_prise` VARCHAR(255), `id_emplacement_prise` INTEGER, `date_depose` VARCHAR(255), `id_emplacement_depose` INTEGER, `type` VARCHAR(255))', [])
                             .then(() => console.log('table mouvement créée !'))
                             .catch(e => console.log(e));
                     });
@@ -155,48 +155,21 @@ export class SqliteProvider {
     }
 
     public insert(name: string, object: any) {
-        console.log(object);
-        let fields = Object.keys(object);
-        let values = Object.keys(object).map((key) => {
-            return object[key];
+        let values = [];
+        let query = "INSERT INTO " + name + " VALUES (";
+        Object.keys(object).forEach((key) => {
+            values.push(object[key]);
+            query += '?, '
         });
-
-        let query = "INSERT INTO " + name + " (";
-
-        let i = 0;
-        for (let field of fields) {
-            query += field;
-            if (i < fields.length - 1) {
-                query += ", ";
-            }
-            i++;
-        }
-        query += " ) VALUES ( ";
-
-        let nbValues = values.length;
-        // for (i = 0; i < nbValues; i++) {
-        //     query += " ? ";
-        //     if (i < nbValues - 1) {
-        //         query += ", ";
-        //     }
-        // }
-        for (i = 0; i < nbValues; i++) {
-            query += "'" + values[i] + "'";
-            if (i < nbValues - 1) {
-                query += ", ";
-            }
-        }
-
-        query += " );";
-        console.log(query);
-
-        return this.db.executeSql(query);
-        // return this.db.executeSql(query, values);
+        query = query.slice(0, -2) + ");";
+        return this.db.executeSql(query, values).then((data) => console.log('row inserted' + data));
     }
 
     public executeQuery(query: string) {
-        return this.db.executeSql(query);
+        console.log(query);
+        return this.db.executeSql(query).then(() => console.log("fsd")).catch(err => console.log(err));
     }
+
 
     private buildQueryWhereClause(selections: any[]) {
         let query = "";

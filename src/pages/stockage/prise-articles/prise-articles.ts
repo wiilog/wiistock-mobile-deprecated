@@ -57,8 +57,8 @@ export class PriseArticlesPage {
   }
 
   finishTaking() {
+
     for (let article of this.articles) {
-      console.log(this.sqliteProvider.findAll('article'));
       let mouvement = new Mouvement();
       let date = new Date().toISOString();
       mouvement = {
@@ -71,20 +71,23 @@ export class PriseArticlesPage {
         id_emplacement_depose: null,
         type: 'prise-depose'
       };
-      console.log(mouvement);
+      if (this.articles.indexOf(article) === this.articles.length - 1) {
+        this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
+          this.redirectAfterTake();
+        });
+      } else {
+        this.sqliteProvider.insert('`mouvement`', mouvement);
+      }
+    }
 
-      this.sqliteProvider.executeQuery(
-        'INSERT INTO mouvement (id_article, quantite, date_prise, id_emplacement_prise, date_depose, id_emplacement_depose, type) VALUES (66, 2, "2019-05-21T15:54:03.021Z", 54, null, null, "prise-depose")')
-        .then(() => {
-          console.log('prise enregistrée !');
-        })
-      // this.sqliteProvider.insert('mouvement', mouvement)
-      //     .then(() => {
-      //       console.log('prise enregistrée');
-      //     })
-    } //TODO CG prévoir insert many
+    //   });
+  }
+
+  redirectAfterTake() {
     this.navCtrl.push(StockageMenuPage)
-      .then(() => this.showToast('Prise enregistrée.'));
+      .then(() => {
+        this.showToast('Prise enregistrée.')
+      });
   }
 
   // Helper

@@ -16,8 +16,7 @@ export class StockageMenuPage {
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private sqliteProvider: SqliteProvider) {
     this.displayMouvements();
-    console.log(this.mouvements);
-    console.log(this.sqliteProvider.findAll('mouvement'));
+    this.mouvements = this.sqliteProvider.findAll('`mouvement`');
   }
 
   displayMouvements() {
