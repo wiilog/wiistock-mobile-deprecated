@@ -42,6 +42,8 @@
     "cordova-plugin-whitelist": "^1.3.3",
     "cordova-sqlite-storage": "^3.1.0",
     "ionic-angular": "3.9.3",
+    "ionic-select-searchable": "^2.10.0",
+    "ionic-selectable": "^3.4.0",
     "ionicons": "3.0.0",
     "node": "^8.16.0",
     "phone-vibrate": "^2.0.0",

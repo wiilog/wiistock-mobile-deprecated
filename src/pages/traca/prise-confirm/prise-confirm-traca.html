@@ -1,0 +1,27 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>Confirmation prise</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+
+  <ion-list inset>
+
+    <ion-item>
+      <ion-label>Article</ion-label>
+      <ion-select [(ngModel)]="id">
+        <ion-option *ngFor="let db_article of db_articles" value="{{ db_article.id }}">{{ db_article.reference }}</ion-option>
+      </ion-select>
+    </ion-item>
+
+    <ion-item>
+      <ion-label>Quantité</ion-label>
+      <ion-input type="number" [(ngModel)]="quantite">{{ quantite }}</ion-input>
+    </ion-item>
+
+  </ion-list>
+
+  <ion-icon class="big-icon" name="checkmark-circle" (click)="addArticle()"></ion-icon>
+
+</ion-content>

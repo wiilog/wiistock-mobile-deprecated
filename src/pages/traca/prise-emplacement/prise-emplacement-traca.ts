@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {App, IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
-import {PriseArticlesPage} from "../prise-articles/prise-articles";
+import {PriseArticlesPageTraca} from "../prise-articles/prise-articles-traca";
 import {MenuPage} from "../../menu/menu";
 import {Emplacement} from "../../../app/entities/emplacement";
 import {Article} from "../../../app/entities/article";
@@ -12,9 +12,9 @@ import {IonicSelectableComponent} from 'ionic-selectable';
 @IonicPage()
 @Component({
     selector: 'page-prise',
-    templateUrl: 'prise-emplacement.html',
+    templateUrl: 'prise-emplacement-traca.html',
 })
-export class PriseEmplacementPage {
+export class PriseEmplacementPageTraca {
 
     emplacement: Emplacement;
     // locationLabel = '';
@@ -55,7 +55,7 @@ export class PriseEmplacementPage {
 
     goToArticles() {
         console.log(this.emplacement);
-        this.navCtrl.push(PriseArticlesPage, {emplacement: this.emplacement});
+        this.navCtrl.push(PriseArticlesPageTraca, {emplacement: this.emplacement});
     }
 
     emplacementChange(event: { component: IonicSelectableComponent, value: any }) {
@@ -84,7 +84,7 @@ export class PriseEmplacementPage {
         let found = false;
         this.db_locations.forEach(emplacement => {
             if (emplacement['label'] === text && !found) {
-                this.navCtrl.push(PriseEmplacementPage, {selectedEmplacement: emplacement});
+                this.navCtrl.push(PriseEmplacementPageTraca, {selectedEmplacement: emplacement});
                 found = true;
             }
         });

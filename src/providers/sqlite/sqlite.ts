@@ -2,6 +2,7 @@
 import { SQLite, SQLiteObject } from "@ionic-native/sqlite";
 import { Injectable } from '@angular/core';
 import { StorageService } from "../../app/services/storage.service";
+import {escapeHtml} from "@ionic/app-scripts";
 
 const DB_NAME: string = 'follow_gt';
 
@@ -37,7 +38,15 @@ export class SqliteProvider {
                     .then(() => {
                         console.log('table emplacement créée !')
                         this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_article` INTEGER, `quantite` INTEGER, `date_prise` VARCHAR(255), `id_emplacement_prise` INTEGER, `date_depose` VARCHAR(255), `id_emplacement_depose` INTEGER, `type` VARCHAR(255))', [])
-                            .then(() => console.log('table mouvement créée !'))
+                            .then(() => {
+                                console.log('table mouvement créée !')
+                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `quantite` INTEGER, `date_prise` VARCHAR(255), `ref_emplacement_prise` INTEGER, `date_depose` VARCHAR(255), `ref_emplacement_depose` INTEGER, `type` VARCHAR(255))', [])
+                                    .then(() => {
+                                        console.log('table mouvement traca créée !')
+
+                                    })
+                                    .catch(e => console.log(e));
+                            })
                             .catch(e => console.log(e));
                     });
             });
@@ -63,7 +72,7 @@ export class SqliteProvider {
         let articles = data['articles'];
         let articleValues = [];
         for (let article of articles) {
-            articleValues.push("(" + article.id + ", '" + article.reference + "', " + (article.quantiteStock ? article.quantiteStock : article.quantite) + ")");
+            articleValues.push("(" + article.id + ", '" + article.reference + "', " + (article.quantiteStock  || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ")");
         }
         let articleValuesStr = articleValues.join(', ');
         let sqlArticles = 'INSERT INTO `article` (`id`, `reference`, `quantite`) VALUES ' + articleValuesStr + ';';
@@ -71,7 +80,7 @@ export class SqliteProvider {
         let emplacements = data['emplacements'];
         let emplacementValues = [];
         for (let emplacement of emplacements) {
-            emplacementValues.push("(" + emplacement.id + ", '" + emplacement.label + "')");
+            emplacementValues.push("(" + emplacement.id + ", '" + emplacement.label.replace(/(\"|\')/g, "\'$1") + "')");
         }
         let emplacementValuesStr = emplacementValues.join(', ');
         let sqlEmplacements = 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';';
@@ -154,6 +163,50 @@ export class SqliteProvider {
         return list;
     }
 
+    public findByElementNull(table: string, element: string) {
+        let list = [];
+        this.db.executeSql('SELECT * FROM ' + table + 'WHERE ' + element + ' IS NULL', [])
+            .then((data) => {
+
+                if (data == null) {
+                    return;
+                }
+
+                if (data.rows) {
+                    if (data.rows.length > 0) {
+                        for (let i = 0; i < data.rows.length; i++) {
+                            list.push(data.rows.item(i));
+                        }
+                    }
+                }
+            });
+        return list;
+    }
+
+    public findByElement(table: string, element: string, value: string) {
+        if (value !== '') {
+            let list = [];
+            let query = 'SELECT * FROM ' + table + ' WHERE ' + element + ' LIKE \'%' + value + '%\'';
+            console.log(query);
+            this.db.executeSql(query, [])
+                .then((data) => {
+
+                    if (data == null) {
+                        return;
+                    }
+
+                    if (data.rows) {
+                        if (data.rows.length > 0) {
+                            for (let i = 0; i < data.rows.length; i++) {
+                                list.push(data.rows.item(i));
+                            }
+                        }
+                    }
+                }).catch(err => console.log(err));
+            return list;
+        }
+    }
+
     public insert(name: string, object: any) {
         let values = [];
         let query = "INSERT INTO " + name + " VALUES (";
@@ -193,4 +246,5 @@ export class SqliteProvider {
 
         return { query: query, values: values };
     }
+
 }

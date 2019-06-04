@@ -28,7 +28,7 @@ export class ConnectPage {
                     console.log('connect');
                     this.navCtrl.push(MenuPage);
                   });
-            });
+            }).catch(err => console.log(err));
       } else {
         this.showToast('Identifiants incorrects...');
       }

@@ -7,6 +7,7 @@ import { ConnectPage } from "../pages/connect/connect";
 import { StatusBar } from '@ionic-native/status-bar';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import {DeposePage} from "../pages/stockage/depose/depose";
+import { DeposePageTraca } from "../pages/traca/depose/depose-traca";
 import {PriseEmplacementPage} from "../pages/stockage/prise-emplacement/prise-emplacement";
 import {StockageMenuPage} from "../pages/stockage/stockage-menu/stockage-menu";
 
@@ -37,7 +38,8 @@ export class MyApp {
       { title: 'Connexion', component: ConnectPage },
       { title: 'Stockage', component: StockageMenuPage },
       { title: 'Prise', component: PriseEmplacementPage },
-      { title: 'Depose', component: DeposePage}
+      { title: 'Depose', component: DeposePage},
+      { title: 'Traça', component: DeposePageTraca}
     ];
   }
 

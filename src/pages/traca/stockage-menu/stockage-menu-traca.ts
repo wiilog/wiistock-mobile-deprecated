@@ -2,28 +2,27 @@ import { Component } from '@angular/core';
 import { NavController, NavParams } from 'ionic-angular';
 import { Mouvement } from "../../../app/entities/mouvement";
 import { MenuPage } from "../../menu/menu";
-import { PriseEmplacementPage } from "../prise-emplacement/prise-emplacement";
+import { PriseEmplacementPageTraca } from "../prise-emplacement/prise-emplacement-traca";
 import { SqliteProvider } from "../../../providers/sqlite/sqlite";
 
 
 @Component({
   selector: 'page-stockage-menu',
-  templateUrl: 'stockage-menu.html',
+  templateUrl: 'stockage-menu-traca.html',
 })
-export class StockageMenuPage {
+export class StockageMenuPageTraca {
   unfinishedMouvements: Mouvement[];
-  toFinish: Boolean;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private sqliteProvider: SqliteProvider) {
-    this.unfinishedMouvements = this.sqliteProvider.findByElementNull('`mouvement`', 'date_depose');
+    this.unfinishedMouvements = this.sqliteProvider.findByElementNull('`mouvement_traca`', 'date_depose');
   }
 
   goToPrise() {
-    this.navCtrl.push(PriseEmplacementPage);
+    this.navCtrl.push(PriseEmplacementPageTraca);
   }
 
   goToDepose() {
-    this.navCtrl.push(PriseEmplacementPage); //TODO CG
+    this.navCtrl.push(PriseEmplacementPageTraca); //TODO CG
   }
 
   goHome() {

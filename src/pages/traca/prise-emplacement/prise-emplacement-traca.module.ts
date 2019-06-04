@@ -1,16 +1,16 @@
 import {NgModule} from '@angular/core';
 import {IonicPageModule} from 'ionic-angular';
-import {PriseEmplacementPage} from './prise-emplacement';
+import {PriseEmplacementPageTraca} from './prise-emplacement-traca';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import { IonicSelectableModule } from 'ionic-selectable'
 
 @NgModule({
     declarations: [
-        PriseEmplacementPage,
+        PriseEmplacementPageTraca,
     ],
     imports: [
         IonicSelectableModule,
-        IonicPageModule.forChild(PriseEmplacementPage),
+        IonicPageModule.forChild(PriseEmplacementPageTraca),
     ],
     providers: [
         BarcodeScanner
