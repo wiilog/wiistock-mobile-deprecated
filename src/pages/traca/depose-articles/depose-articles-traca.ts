@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
-import {PriseConfirmPageTraca} from "../prise-confirm/prise-confirm-traca";
+import {DeposeConfirmPageTraca} from "../depose-confirm/depose-confirm-traca";
 import {MenuPage} from "../../menu/menu";
 import {Article} from "../../../app/entities/article";
 import {Emplacement} from "../../../app/entities/emplacement";
@@ -9,14 +9,15 @@ import {StockageMenuPageTraca} from "../stockage-menu/stockage-menu-traca";
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {ChangeDetectorRef} from '@angular/core';
 import {MouvementTraca} from "../../../app/entities/mouvementTraca";
+import {PriseConfirmPageTraca} from "../prise-confirm/prise-confirm-traca";
 
 
 @IonicPage()
 @Component({
-    selector: 'page-prise-articles',
-    templateUrl: 'prise-articles-traca.html',
+    selector: 'page-depose-articles',
+    templateUrl: 'depose-articles-traca.html',
 })
-export class PriseArticlesPageTraca {
+export class DeposeArticlesPageTraca {
 
     emplacement: Emplacement;
     articles: Array<Article>;
@@ -52,7 +53,7 @@ export class PriseArticlesPageTraca {
     }
 
     addArticleManually() {
-        this.navCtrl.push(PriseConfirmPageTraca, {
+        this.navCtrl.push(DeposeConfirmPageTraca, {
             articles: this.articles, emplacement: this.emplacement
         });
     }
@@ -68,14 +69,14 @@ export class PriseArticlesPageTraca {
                 quantite: article.quantite,
                 date: date,
                 ref_emplacement: this.emplacement.label,
-                type: 'prise'
+                type: 'depose'
             };
             if (this.articles.indexOf(article) === this.articles.length - 1) {
                 this.sqliteProvider.insert('`mouvement_traca`', mouvement).then(() => {
                     this.redirectAfterTake();
-                }).catch(err => console.log(err));
+                });
             } else {
-                this.sqliteProvider.insert('`mouvement_traca`', mouvement).catch(err => console.log(err));
+                this.sqliteProvider.insert('`mouvement_traca`', mouvement);
             }
         }
 
@@ -85,7 +86,7 @@ export class PriseArticlesPageTraca {
     redirectAfterTake() {
         this.navCtrl.push(StockageMenuPageTraca)
             .then(() => {
-                this.showToast('Prise enregistrée.')
+                this.showToast('Dépose enregistrée.')
             });
     }
 
@@ -117,7 +118,7 @@ export class PriseArticlesPageTraca {
             reference: text,
             quantite: null
         };
-        this.navCtrl.push(PriseConfirmPageTraca, {
+        this.navCtrl.push(DeposeConfirmPageTraca, {
             articles: this.articles, emplacement: this.emplacement, selectedArticle: a
         });
         this.changeDetectorRef.detectChanges();

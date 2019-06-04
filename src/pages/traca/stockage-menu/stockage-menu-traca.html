@@ -29,7 +29,7 @@
         </button>
       </ion-col>
       <ion-col col-6 (click)="goToDepose()">
-        <button ion-button outline class="big-button" color="dark" [class.alert]="unfinishedMouvements.length > 0">
+        <button ion-button outline class="big-button" color="dark">
           <ion-card-content>
             <ion-icon class="big-icon" name="cloud-upload"></ion-icon>
             <p text-center>DÉPOSE</p>
@@ -38,5 +38,11 @@
       </ion-col>
     </ion-row>
   </ion-grid>
+  <ion-item>
+    <ion-list inset *ngFor="let mvt of mvts">
+      <p>{{mvt.id}} - {{mvt.ref_article}} - {{mvt.quantite}} </p>
+      <p>{{mvt.date}} - {{mvt.ref_emplacement}} - {{mvt.type}}</p>
+    </ion-list>
+  </ion-item>
 
 </ion-content>

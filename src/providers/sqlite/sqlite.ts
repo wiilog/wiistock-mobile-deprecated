@@ -1,8 +1,7 @@
 // import { NavController, NavParams } from 'ionic-angular';
-import { SQLite, SQLiteObject } from "@ionic-native/sqlite";
-import { Injectable } from '@angular/core';
-import { StorageService } from "../../app/services/storage.service";
-import {escapeHtml} from "@ionic/app-scripts";
+import {SQLite, SQLiteObject} from "@ionic-native/sqlite";
+import {Injectable} from '@angular/core';
+import {StorageService} from "../../app/services/storage.service";
 
 const DB_NAME: string = 'follow_gt';
 
@@ -40,9 +39,15 @@ export class SqliteProvider {
                         this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_article` INTEGER, `quantite` INTEGER, `date_prise` VARCHAR(255), `id_emplacement_prise` INTEGER, `date_depose` VARCHAR(255), `id_emplacement_depose` INTEGER, `type` VARCHAR(255))', [])
                             .then(() => {
                                 console.log('table mouvement créée !')
-                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `quantite` INTEGER, `date_prise` VARCHAR(255), `ref_emplacement_prise` INTEGER, `date_depose` VARCHAR(255), `ref_emplacement_depose` INTEGER, `type` VARCHAR(255))', [])
+                                this.db.executeSql('DROP TABLE IF EXISTS `mouvement_traca`', [])
                                     .then(() => {
-                                        console.log('table mouvement traca créée !')
+                                        console.log('table mouvement traca deleted !');
+                                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `quantite` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255))', [])
+                                            .then(() => {
+                                                console.log('table mouvement traca créée !')
+
+                                            })
+                                            .catch(e => console.log(e));
 
                                     })
                                     .catch(e => console.log(e));
@@ -57,10 +62,15 @@ export class SqliteProvider {
             .then(() => {
                 this.db.executeSql('DELETE FROM `emplacement`;', [])
                     .then(() => {
-                        console.log('Tables cleansed');
+                        this.db.executeSql('DELETE FROM `mouvement_traca`;', [])
+                            .then(() => {
+                                console.log('Tables cleansed');
+                            }).catch(err => {
+                            console.log(err);
+                        })
                     }).catch(err => {
-                        console.log(err);
-                    })
+                    console.log(err);
+                })
             }).catch(err => {
                 console.log(err);
             });
@@ -72,7 +82,7 @@ export class SqliteProvider {
         let articles = data['articles'];
         let articleValues = [];
         for (let article of articles) {
-            articleValues.push("(" + article.id + ", '" + article.reference + "', " + (article.quantiteStock  || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ")");
+            articleValues.push("(" + article.id + ", '" + article.reference + "', " + (article.quantiteStock || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ")");
         }
         let articleValuesStr = articleValues.join(', ');
         let sqlArticles = 'INSERT INTO `article` (`id`, `reference`, `quantite`) VALUES ' + articleValuesStr + ';';
@@ -244,7 +254,7 @@ export class SqliteProvider {
             i++;
         }
 
-        return { query: query, values: values };
+        return {query: query, values: values};
     }
 
 }

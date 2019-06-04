@@ -1,6 +1,5 @@
 import {Component} from '@angular/core';
 import {App, IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
-import {PriseArticlesPageTraca} from "../prise-articles/prise-articles-traca";
 import {MenuPage} from "../../menu/menu";
 import {Emplacement} from "../../../app/entities/emplacement";
 import {Article} from "../../../app/entities/article";
@@ -8,13 +7,14 @@ import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {ChangeDetectorRef} from '@angular/core';
 import {IonicSelectableComponent} from 'ionic-selectable';
+import {DeposeArticlesPageTraca} from "../depose-articles/depose-articles-traca";
 
 @IonicPage()
 @Component({
-    selector: 'page-prise',
-    templateUrl: 'prise-emplacement-traca.html',
+    selector: 'depose-prise',
+    templateUrl: 'depose-emplacement-traca.html',
 })
-export class PriseEmplacementPageTraca {
+export class DeposeEmplacementPageTraca {
 
     emplacement: Emplacement;
     // locationLabel = '';
@@ -55,7 +55,7 @@ export class PriseEmplacementPageTraca {
 
     goToArticles() {
         console.log(this.emplacement);
-        this.navCtrl.push(PriseArticlesPageTraca, {emplacement: this.emplacement});
+        this.navCtrl.push(DeposeArticlesPageTraca, {emplacement: this.emplacement});
     }
 
     emplacementChange(event: { component: IonicSelectableComponent, value: any }) {
@@ -86,7 +86,7 @@ export class PriseEmplacementPageTraca {
             id: new Date().getUTCMilliseconds(),
             label: text
         };
-        this.navCtrl.push(PriseEmplacementPageTraca, {selectedEmplacement: emplacement});
+        this.navCtrl.push(DeposeEmplacementPageTraca, {selectedEmplacement: emplacement});
         this.changeDetectorRef.detectChanges();
     }
 

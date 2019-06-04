@@ -1,17 +1,17 @@
 import {Component} from '@angular/core';
 import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
-import {PriseArticlesPageTraca} from "../prise-articles/prise-articles-traca";
 import {Article} from "../../../app/entities/article";
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 import {Emplacement} from "../../../app/entities/emplacement";
 import {IonicSelectableComponent} from "ionic-selectable";
+import {DeposeArticlesPageTraca} from "../depose-articles/depose-articles-traca";
 
 @IonicPage()
 @Component({
-    selector: 'page-prise-confirm',
-    templateUrl: 'prise-confirm-traca.html',
+    selector: 'page-depose-confirm',
+    templateUrl: 'depose-confirm-traca.html',
 })
-export class PriseConfirmPageTraca {
+export class DeposeConfirmPageTraca {
 
     article: Article;
     quantite: number;
@@ -50,7 +50,7 @@ export class PriseConfirmPageTraca {
             } else {
                 this.articles = [this.article];
             }
-            this.navCtrl.push(PriseArticlesPageTraca, {articles: this.articles, emplacement: this.emplacement});
+            this.navCtrl.push(DeposeArticlesPageTraca, {articles: this.articles, emplacement: this.emplacement});
         } else {
             this.showToast("Cet article n'existe pas en stock.");
         }

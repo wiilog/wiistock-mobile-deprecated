@@ -24,6 +24,10 @@ import {PriseArticlesPageTraca} from "../pages/traca/prise-articles/prise-articl
 import {PriseConfirmPageTraca} from "../pages/traca/prise-confirm/prise-confirm-traca";
 import {PriseEmplacementPageTraca} from "../pages/traca/prise-emplacement/prise-emplacement-traca";
 
+import {DeposeArticlesPageTraca} from "../pages/traca/depose-articles/depose-articles-traca";
+import {DeposeConfirmPageTraca} from "../pages/traca/depose-confirm/depose-confirm-traca";
+import {DeposeEmplacementPageTraca} from "../pages/traca/depose-emplacement/depose-emplacement-traca";
+
 import {StorageService} from "./services/storage.service";
 import {StockageMenuPage} from "../pages/stockage/stockage-menu/stockage-menu";
 import {StockageMenuPageTraca} from "../pages/traca/stockage-menu/stockage-menu-traca";
@@ -44,6 +48,9 @@ import {IonicSelectableModule} from 'ionic-selectable'
         PriseEmplacementPageTraca,
         PriseArticlesPageTraca,
         PriseConfirmPageTraca,
+        DeposeEmplacementPageTraca,
+        DeposeArticlesPageTraca,
+        DeposeConfirmPageTraca,
         DeposePage,
         DeposePageTraca,
     ],
@@ -70,6 +77,9 @@ import {IonicSelectableModule} from 'ionic-selectable'
         PriseEmplacementPageTraca,
         PriseArticlesPageTraca,
         PriseConfirmPageTraca,
+        DeposeEmplacementPageTraca,
+        DeposeArticlesPageTraca,
+        DeposeConfirmPageTraca,
         DeposePage,
         DeposePageTraca,
     ],

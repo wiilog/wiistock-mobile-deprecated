@@ -3,7 +3,9 @@ import { NavController, NavParams } from 'ionic-angular';
 import { Mouvement } from "../../../app/entities/mouvement";
 import { MenuPage } from "../../menu/menu";
 import { PriseEmplacementPageTraca } from "../prise-emplacement/prise-emplacement-traca";
-import { SqliteProvider } from "../../../providers/sqlite/sqlite";
+import {DeposeEmplacementPageTraca} from "../depose-emplacement/depose-emplacement-traca";
+import {} from ''
+import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 
 
 @Component({
@@ -11,10 +13,10 @@ import { SqliteProvider } from "../../../providers/sqlite/sqlite";
   templateUrl: 'stockage-menu-traca.html',
 })
 export class StockageMenuPageTraca {
-  unfinishedMouvements: Mouvement[];
+  mvts: Mouvement[];
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, private sqliteProvider: SqliteProvider) {
-    this.unfinishedMouvements = this.sqliteProvider.findByElementNull('`mouvement_traca`', 'date_depose');
+  constructor(public navCtrl: NavController, public navParams: NavParams, sqlProvider : SqliteProvider ) {
+    this.mvts = sqlProvider.findAll('`mouvement_traca`');
   }
 
   goToPrise() {
@@ -22,7 +24,7 @@ export class StockageMenuPageTraca {
   }
 
   goToDepose() {
-    this.navCtrl.push(PriseEmplacementPageTraca); //TODO CG
+    this.navCtrl.push(DeposeEmplacementPageTraca); //TODO CG
   }
 
   goHome() {
