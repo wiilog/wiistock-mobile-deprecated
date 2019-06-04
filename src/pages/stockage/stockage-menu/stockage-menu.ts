@@ -4,6 +4,8 @@ import { Mouvement } from "../../../app/entities/mouvement";
 import { MenuPage } from "../../menu/menu";
 import { PriseEmplacementPage } from "../prise-emplacement/prise-emplacement";
 import { SqliteProvider } from "../../../providers/sqlite/sqlite";
+import { Observable } from 'rxjs/Observable'
+import 'rxjs/add/observable/of';
 
 
 @Component({
@@ -12,18 +14,20 @@ import { SqliteProvider } from "../../../providers/sqlite/sqlite";
 })
 export class StockageMenuPage {
   mouvements: Mouvement[];
-  openedMouvements: boolean;
+  mouvementsObs: Observable<Mouvement[]>;
+  toFinish: Boolean;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private sqliteProvider: SqliteProvider) {
-    this.displayMouvements();
     this.mouvements = this.sqliteProvider.findAll('`mouvement`');
-  }
-
-  displayMouvements() {
-    this.sqliteProvider.count('mouvement', [{column: 'date_depose', operator: 'is', value: 'null'}])
-        .then((count) => {
-          this.openedMouvements = count > 0;
-        });
+    this.mouvementsObs = Observable.of(this.mouvements);
+    this.mouvementsObs.subscribe((value) => {
+      this.toFinish = false;
+      value.forEach((mvt) => {
+        if (mvt.date_depose === null) {
+          this.toFinish = true;
+        }
+      })
+    })
   }
 
   goToPrise() {
