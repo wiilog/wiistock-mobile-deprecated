@@ -42,13 +42,30 @@ export class DeposeConfirmPageTraca {
 
     addArticle() {
         if (this.article) {
-
-            if (typeof (this.articles) !== 'undefined') {
-                this.articles.push(this.article);
-            } else {
-                this.articles = [this.article];
+            let numberOfArticles = 0;
+            if (this.articles) {
+                this.articles.forEach((articleToCmp) => {
+                    if (articleToCmp.reference === this.article.reference) {
+                        numberOfArticles++;
+                    }
+                });
             }
-            this.navCtrl.push(DeposeArticlesPageTraca, {articles: this.articles, emplacement: this.emplacement});
+            this.sqliteProvider.keyExists(this.article.reference).then((value) => {
+                if (value !== false) {
+                    if (value > numberOfArticles) {
+                        if (typeof (this.articles) !== 'undefined') {
+                            this.articles.push(this.article);
+                        } else {
+                            this.articles = [this.article];
+                        }
+                        this.navCtrl.push(DeposeArticlesPageTraca, {articles: this.articles, emplacement: this.emplacement});
+                    } else {
+                        this.showToast('Cet article est déjà enregistré assez de fois dans le panier.');
+                    }
+                } else {
+                    this.showToast('Cet article ne correspond à aucune prise.');
+                }
+            });
         } else {
             this.showToast("Cet article n'existe pas en stock.");
         }
