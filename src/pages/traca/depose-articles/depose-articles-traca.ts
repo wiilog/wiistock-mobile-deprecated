@@ -61,6 +61,12 @@ export class DeposeArticlesPageTraca {
     finishTaking() {
 
         for (let article of this.articles) {
+            let numberOfArticles = 0;
+            this.articles.forEach((articleToCmp) => {
+                if (articleToCmp.reference === article.reference) {
+                    numberOfArticles++;
+                }
+            });
             let mouvement = new MouvementTraca();
             let date = new Date().toISOString();
             mouvement = {
@@ -70,7 +76,7 @@ export class DeposeArticlesPageTraca {
                 ref_emplacement: this.emplacement.label,
                 type: 'depose'
             };
-            this.sqliteProvider.setDeposeValue(mouvement.ref_article).then(() => {
+            this.sqliteProvider.setDeposeValue(mouvement.ref_article, numberOfArticles).then(() => {
                 if (this.articles.indexOf(article) === this.articles.length - 1) {
                     this.sqliteProvider.insert('`mouvement_traca`', mouvement).then(() => {
                         this.redirectAfterTake();
@@ -112,6 +118,14 @@ export class DeposeArticlesPageTraca {
     }
 
     testIfBarcodeEquals(text) {
+        let numberOfArticles = 0;
+        if (this.articles) {
+            this.articles.forEach((article) => {
+                if (article.reference === text) {
+                    numberOfArticles++;
+                }
+            });
+        }
         let a: Article;
         a = {
             id: new Date().getUTCMilliseconds(),
@@ -120,12 +134,14 @@ export class DeposeArticlesPageTraca {
             quantite: null
         };
         this.sqliteProvider.keyExists(text).then((value) => {
-            let result: boolean;
-            result = value;
-            if (result) {
-                this.navCtrl.push(DeposeConfirmPageTraca, {
-                    articles: this.articles, emplacement: this.emplacement, selectedArticle: a
-                });
+            if (value !== false) {
+                if (value > numberOfArticles) {
+                    this.navCtrl.push(DeposeConfirmPageTraca, {
+                        articles: this.articles, emplacement: this.emplacement, selectedArticle: a
+                    });
+                } else {
+                    this.showToast('Cet article est déjà enregistré assez de fois dans le panier.');
+                }
             } else {
                 this.showToast('Cet article ne correspond à aucune prise.');
             }

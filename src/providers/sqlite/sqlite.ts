@@ -189,9 +189,9 @@ export class SqliteProvider {
         });
     }
 
-    public async setPriseValue(value) {
+    public async setPriseValue(value, number) {
         return new Promise((resolve, reject) => {
-            resolve(this.storageService.setPriseValue(value));
+            resolve(this.storageService.setPriseValue(value, number));
         });
     }
 
@@ -203,9 +203,9 @@ export class SqliteProvider {
         });
     }
 
-    public async setDeposeValue(value) {
+    public async setDeposeValue(value, number) {
         return new Promise((resolve, reject) => {
-            resolve(this.storageService.setDeposeValue(value));
+            resolve(this.storageService.setDeposeValue(value, number));
         });
     };
 

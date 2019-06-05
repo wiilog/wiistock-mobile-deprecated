@@ -59,6 +59,12 @@ export class PriseArticlesPageTraca {
 
     finishTaking() {
         for (let article of this.articles) {
+            let numberOfArticles = 0;
+            this.articles.forEach((articleToCmp) => {
+                if (articleToCmp.reference === article.reference) {
+                    numberOfArticles++;
+                }
+            });
             let mouvement = new MouvementTraca();
             let date = new Date().toISOString();
             mouvement = {
@@ -68,7 +74,7 @@ export class PriseArticlesPageTraca {
                 ref_emplacement: this.emplacement.label,
                 type: 'prise'
             };
-            this.sqliteProvider.setPriseValue(mouvement.ref_article).then(() => {
+            this.sqliteProvider.setPriseValue(mouvement.ref_article, numberOfArticles).then(() => {
                 if (this.articles.indexOf(article) === this.articles.length - 1) {
                     this.sqliteProvider.insert('`mouvement_traca`', mouvement).then(() => {
                         this.redirectAfterTake();

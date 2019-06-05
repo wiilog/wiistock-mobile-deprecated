@@ -15,15 +15,15 @@ export class StorageService {
         this.storage.set(API_KEY, apiKey);
     }
 
-    public setPriseValue(value: string) {
+    public setPriseValue(value: string, number: number) {
         return this.storage.get(value).then(data => {
             if (!data) {
-                console.log('set prise value ' + value + ' 1');
-                this.storage.set(value, 1);
+                console.log('set prise value ' + value + ' ' + number);
+                this.storage.set(value, number);
             }
             if (data) {
-                console.log('set prise value ' + value + ' ' + (data + 1));
-                this.storage.set(value, data + 1);
+                console.log('set prise value ' + value + ' ' + (data + number));
+                this.storage.set(value, data + number);
             }
         });
     }
@@ -32,20 +32,20 @@ export class StorageService {
         return new Promise<boolean>((resolve, reject) => {
             this.storage.get(key).then(data => {
                 console.log('data ' + data + ' for key ' + key);
-                if (data && data > 0) resolve(true);
+                if (data && data > 0) resolve(data);
                 if (!data || data === 0) resolve(false);
             });
         });
     }
 
-    public setDeposeValue(value: string) {
+    public setDeposeValue(value: string, number: number) {
         return this.storage.get(value).then(data => {
             console.log(data);
             if (data) {
-                if (data - 1 >= 0) {
-                    console.log('set depose value ' + value + ' ' + (data-1));
-                    this.storage.set(value, data - 1);
-                } else if (data - 1 < 0) {
+                if (data - number >= 0) {
+                    console.log('set depose value ' + value + ' ' + (data-number));
+                    this.storage.set(value, data - number);
+                } else if (data - number < 0) {
                     console.log('set depose value ' + value + ' 0');
                     this.storage.set(value, 0);
                 }
