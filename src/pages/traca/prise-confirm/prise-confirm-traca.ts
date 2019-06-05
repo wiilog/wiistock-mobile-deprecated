@@ -14,7 +14,6 @@ import {IonicSelectableComponent} from "ionic-selectable";
 export class PriseConfirmPageTraca {
 
     article: Article;
-    quantite: number;
     articles: Array<Article>;
     db_articles: Array<Article>;
     emplacement: Emplacement;
@@ -43,7 +42,6 @@ export class PriseConfirmPageTraca {
 
     addArticle() {
         if (this.article) {
-            this.article.quantite = this.quantite;
 
             if (typeof (this.articles) !== 'undefined') {
                 this.articles.push(this.article);

@@ -66,18 +66,19 @@ export class DeposeArticlesPageTraca {
             mouvement = {
                 id: null,
                 ref_article: article.reference,
-                quantite: article.quantite,
                 date: date,
                 ref_emplacement: this.emplacement.label,
                 type: 'depose'
             };
-            if (this.articles.indexOf(article) === this.articles.length - 1) {
-                this.sqliteProvider.insert('`mouvement_traca`', mouvement).then(() => {
-                    this.redirectAfterTake();
-                });
-            } else {
-                this.sqliteProvider.insert('`mouvement_traca`', mouvement);
-            }
+            this.sqliteProvider.setDeposeValue(mouvement.ref_article).then(() => {
+                if (this.articles.indexOf(article) === this.articles.length - 1) {
+                    this.sqliteProvider.insert('`mouvement_traca`', mouvement).then(() => {
+                        this.redirectAfterTake();
+                    });
+                } else {
+                    this.sqliteProvider.insert('`mouvement_traca`', mouvement);
+                }
+            });
         }
 
         //   });
@@ -118,8 +119,16 @@ export class DeposeArticlesPageTraca {
             reference: text,
             quantite: null
         };
-        this.navCtrl.push(DeposeConfirmPageTraca, {
-            articles: this.articles, emplacement: this.emplacement, selectedArticle: a
+        this.sqliteProvider.keyExists(text).then((value) => {
+            let result: boolean;
+            result = value;
+            if (result) {
+                this.navCtrl.push(DeposeConfirmPageTraca, {
+                    articles: this.articles, emplacement: this.emplacement, selectedArticle: a
+                });
+            } else {
+                this.showToast('Cet article ne correspond à aucune prise.');
+            }
         });
         this.changeDetectorRef.detectChanges();
     }

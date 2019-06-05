@@ -2,6 +2,7 @@
 import {SQLite, SQLiteObject} from "@ionic-native/sqlite";
 import {Injectable} from '@angular/core';
 import {StorageService} from "../../app/services/storage.service";
+import {Storage} from "@ionic/storage";
 
 const DB_NAME: string = 'follow_gt';
 
@@ -11,7 +12,7 @@ export class SqliteProvider {
     private db: SQLiteObject = null;
 
 
-    constructor(private sqlite: SQLite, private storageService: StorageService) {
+    constructor(private sqlite: SQLite, private storageService: StorageService, private storage: Storage) {
         this.createDbFile();
     }
 
@@ -42,7 +43,7 @@ export class SqliteProvider {
                                 this.db.executeSql('DROP TABLE IF EXISTS `mouvement_traca`', [])
                                     .then(() => {
                                         console.log('table mouvement traca deleted !');
-                                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `quantite` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255))', [])
+                                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255))', [])
                                             .then(() => {
                                                 console.log('table mouvement traca créée !')
 
@@ -172,6 +173,41 @@ export class SqliteProvider {
             });
         return list;
     }
+
+    public async priseAreUnfinished() {
+        return new Promise<any>((resolve, reject) => {
+            this.storageService.prisesAreUnfinished().then((value) => {
+                console.log(value);
+                resolve(value);
+            });
+        });
+    }
+
+    public async clearStorage() {
+        return new Promise((resolve, reject) => {
+            resolve(this.storageService.clear());
+        });
+    }
+
+    public async setPriseValue(value) {
+        return new Promise((resolve, reject) => {
+            resolve(this.storageService.setPriseValue(value));
+        });
+    }
+
+    public async keyExists(key) {
+        return new Promise<any>((resolve, reject) => {
+            this.storageService.keyExists(key).then((value) => {
+                resolve(value);
+            });
+        });
+    }
+
+    public async setDeposeValue(value) {
+        return new Promise((resolve, reject) => {
+            resolve(this.storageService.setDeposeValue(value));
+        });
+    };
 
     public findByElementNull(table: string, element: string) {
         let list = [];
