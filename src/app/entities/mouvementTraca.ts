@@ -3,5 +3,6 @@ export class MouvementTraca {
     ref_article: string;
     date: string;
     ref_emplacement: string;
-    type: string
+    type: string;
+    operateur: string;
 }

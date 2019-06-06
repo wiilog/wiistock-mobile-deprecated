@@ -2,7 +2,6 @@
 import {SQLite, SQLiteObject} from "@ionic-native/sqlite";
 import {Injectable} from '@angular/core';
 import {StorageService} from "../../app/services/storage.service";
-import {Storage} from "@ionic/storage";
 
 const DB_NAME: string = 'follow_gt';
 
@@ -12,7 +11,7 @@ export class SqliteProvider {
     private db: SQLiteObject = null;
 
 
-    constructor(private sqlite: SQLite, private storageService: StorageService, private storage: Storage) {
+    constructor(private sqlite: SQLite, private storageService: StorageService) {
         this.createDbFile();
     }
 
@@ -43,7 +42,7 @@ export class SqliteProvider {
                                 this.db.executeSql('DROP TABLE IF EXISTS `mouvement_traca`', [])
                                     .then(() => {
                                         console.log('table mouvement traca deleted !');
-                                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255))', [])
+                                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255))', [])
                                             .then(() => {
                                                 console.log('table mouvement traca créée !')
 
@@ -75,6 +74,18 @@ export class SqliteProvider {
             }).catch(err => {
                 console.log(err);
             });
+    }
+
+    public setOperateur(operateur) {
+        this.storageService.setOperateur(operateur);
+    }
+
+    public getOperateur() {
+        return new Promise<any>((resolve, reject) => {
+            this.storageService.getOperateur().then((value) => {
+                resolve(value);
+            });
+        });
     }
 
     public async importData(data) {

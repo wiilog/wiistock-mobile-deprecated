@@ -9,7 +9,6 @@ import {StockageMenuPageTraca} from "../stockage-menu/stockage-menu-traca";
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {ChangeDetectorRef} from '@angular/core';
 import {MouvementTraca} from "../../../app/entities/mouvementTraca";
-import {PriseConfirmPageTraca} from "../prise-confirm/prise-confirm-traca";
 
 
 @IonicPage()
@@ -69,21 +68,24 @@ export class DeposeArticlesPageTraca {
             });
             let mouvement = new MouvementTraca();
             let date = new Date().toISOString();
-            mouvement = {
-                id: null,
-                ref_article: article.reference,
-                date: date,
-                ref_emplacement: this.emplacement.label,
-                type: 'depose'
-            };
-            this.sqliteProvider.setDeposeValue(mouvement.ref_article, numberOfArticles).then(() => {
-                if (this.articles.indexOf(article) === this.articles.length - 1) {
-                    this.sqliteProvider.insert('`mouvement_traca`', mouvement).then(() => {
-                        this.redirectAfterTake();
-                    });
-                } else {
-                    this.sqliteProvider.insert('`mouvement_traca`', mouvement);
-                }
+            this.sqliteProvider.getOperateur().then((value) => {
+                mouvement = {
+                    id: null,
+                    ref_article: article.reference,
+                    date: date,
+                    ref_emplacement: this.emplacement.label,
+                    type: 'depose',
+                    operateur: value
+                };
+                this.sqliteProvider.setDeposeValue(mouvement.ref_article, numberOfArticles).then(() => {
+                    if (this.articles.indexOf(article) === this.articles.length - 1) {
+                        this.sqliteProvider.insert('`mouvement_traca`', mouvement).then(() => {
+                            this.redirectAfterTake();
+                        });
+                    } else {
+                        this.sqliteProvider.insert('`mouvement_traca`', mouvement);
+                    }
+                });
             });
         }
 

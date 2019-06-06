@@ -21,6 +21,7 @@ export class ConnectPage {
     logForm() {
         this.usersApiProvider.setProvider(this.form).subscribe(resp => {
             if (resp.success) {
+                this.sqliteProvider.setOperateur(this.form.login);
                 this.sqliteProvider.cleanDataBase()
                     .then(() => {
                         this.sqliteProvider.clearStorage().then(() => {

@@ -1,12 +1,13 @@
 import {Component} from '@angular/core';
-import {NavController, NavParams, ToastController} from 'ionic-angular';
+import {Events, NavController, NavParams, ToastController} from 'ionic-angular';
 import {MenuPage} from "../../menu/menu";
 import {PriseEmplacementPageTraca} from "../prise-emplacement/prise-emplacement-traca";
 import {DeposeEmplacementPageTraca} from "../depose-emplacement/depose-emplacement-traca";
-import {} from ''
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 import {MouvementTraca} from "../../../app/entities/mouvementTraca";
 import {HttpClient} from "@angular/common/http";
+import {NetworkProvider} from "../../../providers/network/network";
+import {Network} from "@ionic-native/network";
 
 
 @Component({
@@ -16,11 +17,23 @@ import {HttpClient} from "@angular/common/http";
 export class StockageMenuPageTraca {
     mvts: MouvementTraca[];
     unfinishedMvts: boolean;
+    type: string;
 
-    constructor(public navCtrl: NavController, public navParams: NavParams, sqlProvider: SqliteProvider, public http: HttpClient, public toastController: ToastController) {
+    constructor(public navCtrl: NavController,
+                public navParams: NavParams,
+                sqlProvider: SqliteProvider,
+                public http: HttpClient,
+                public toastController: ToastController,
+                public networkProvider: NetworkProvider,
+                public events: Events,
+                public network: Network,) {
         this.mvts = sqlProvider.findAll('`mouvement_traca`');
         sqlProvider.priseAreUnfinished().then((value) => {
             this.unfinishedMvts = value;
+            this.type = this.network.type;
+            if(this.type !== "unknown" && this.type !== "none" && this.type !== undefined){
+                this.synchronise();
+            }
         });
     }
 
@@ -37,20 +50,17 @@ export class StockageMenuPageTraca {
     }
 
     synchronise() {
-        if (!this.unfinishedMvts) {
-            let baseUrl: string = 'http://51.77.202.108/WiiStock-dev/public/index.php/api/addMouvementTraca';
-            let toInsert = {
-                mouvements : this.mvts,
-            };
-            this.http.post<any>(baseUrl, toInsert).subscribe((resp) => {
-                if (resp.success) {
-                    this.showToast('Export des mouvements effectué.')
-                }
-            });
-        } else {
-            this.showToast('Finissez vos mouvements en cours.')
-        }
+        let baseUrl: string = 'http://51.77.202.108/WiiStock-dev/public/index.php/api/addMouvementTraca';
+        let toInsert = {
+            mouvements: this.mvts,
+        };
+        this.http.post<any>(baseUrl, toInsert).subscribe((resp) => {
+            if (resp.success) {
+                this.showToast(resp.data.status);
+            }
+        });
     }
+
     async showToast(msg) {
         const toast = await this.toastController.create({
             message: msg,

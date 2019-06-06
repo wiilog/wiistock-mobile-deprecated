@@ -67,21 +67,24 @@ export class PriseArticlesPageTraca {
             });
             let mouvement = new MouvementTraca();
             let date = new Date().toISOString();
-            mouvement = {
-                id: null,
-                ref_article: article.reference,
-                date: date,
-                ref_emplacement: this.emplacement.label,
-                type: 'prise'
-            };
-            this.sqliteProvider.setPriseValue(mouvement.ref_article, numberOfArticles).then(() => {
-                if (this.articles.indexOf(article) === this.articles.length - 1) {
-                    this.sqliteProvider.insert('`mouvement_traca`', mouvement).then(() => {
-                        this.redirectAfterTake();
-                    }).catch(err => console.log(err));
-                } else {
-                    this.sqliteProvider.insert('`mouvement_traca`', mouvement).catch(err => console.log(err));
-                }
+            this.sqliteProvider.getOperateur().then((value) => {
+                mouvement = {
+                    id: null,
+                    ref_article: article.reference,
+                    date: date,
+                    ref_emplacement: this.emplacement.label,
+                    type: 'prise',
+                    operateur: value
+                };
+                this.sqliteProvider.setPriseValue(mouvement.ref_article, numberOfArticles).then(() => {
+                    if (this.articles.indexOf(article) === this.articles.length - 1) {
+                        this.sqliteProvider.insert('`mouvement_traca`', mouvement).then(() => {
+                            this.redirectAfterTake();
+                        }).catch(err => console.log(err));
+                    } else {
+                        this.sqliteProvider.insert('`mouvement_traca`', mouvement).catch(err => console.log(err));
+                    }
+                });
             });
         }
 

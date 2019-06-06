@@ -1,9 +1,9 @@
 import {Injectable} from '@angular/core';
 import {Storage} from '@ionic/storage';
-import {bootstrapCDN} from "@ionic/pro/dist/src/cdn";
 
 
 const API_KEY = 'api-key';
+const OPERATEUR = 'operateur';
 
 @Injectable()
 export class StorageService {
@@ -13,6 +13,14 @@ export class StorageService {
 
     setApiKey(apiKey: string) {
         this.storage.set(API_KEY, apiKey);
+    }
+
+    setOperateur(operateur) {
+        this.storage.set(OPERATEUR, operateur);
+    }
+
+    getOperateur() {
+        return this.storage.get(OPERATEUR);
     }
 
     public setPriseValue(value: string, number: number) {

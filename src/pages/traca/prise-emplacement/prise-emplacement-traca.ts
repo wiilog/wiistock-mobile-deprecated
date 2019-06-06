@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {App, IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
+import {App, IonicPage, NavController, NavParams} from 'ionic-angular';
 import {PriseArticlesPageTraca} from "../prise-articles/prise-articles-traca";
 import {MenuPage} from "../../menu/menu";
 import {Emplacement} from "../../../app/entities/emplacement";
@@ -26,7 +26,6 @@ export class PriseEmplacementPageTraca {
                 public app: App,
                 public sqliteProvider: SqliteProvider,
                 private barcodeScanner: BarcodeScanner,
-                private toast: ToastController,
                 private changeDetectorRef: ChangeDetectorRef) {
         // constructor(public navCtrl: NavController, public navParams: NavParams, private barcodeScanner: BarcodeScanner) {
         //   this.scan();

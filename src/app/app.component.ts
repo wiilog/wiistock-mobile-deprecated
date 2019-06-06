@@ -1,5 +1,5 @@
 import { Component, ViewChild, Injectable } from '@angular/core';
-import { Platform, MenuController, Nav } from 'ionic-angular';
+import {Platform, MenuController, Nav, Events, ToastController} from 'ionic-angular';
 
 import { MenuPage } from '../pages/menu/menu';
 import { ConnectPage } from "../pages/connect/connect";
@@ -10,6 +10,10 @@ import {DeposePage} from "../pages/stockage/depose/depose";
 import { DeposePageTraca } from "../pages/traca/depose/depose-traca";
 import {PriseEmplacementPage} from "../pages/stockage/prise-emplacement/prise-emplacement";
 import {StockageMenuPage} from "../pages/stockage/stockage-menu/stockage-menu";
+import { NetworkProvider } from '../providers/network/network'
+import {Network} from "@ionic-native/network";
+import {SqliteProvider} from "../providers/sqlite/sqlite";
+import {HttpClient} from "@angular/common/http";
 
 
 @Injectable()
@@ -29,6 +33,12 @@ export class MyApp {
     public menu: MenuController,
     public statusBar: StatusBar,
     public splashScreen: SplashScreen,
+    public networkProvider : NetworkProvider,
+    public events: Events,
+    public http: HttpClient,
+    public network: Network,
+    public sqlProvider: SqliteProvider,
+    public toastController: ToastController,
   ) {
     this.initializeApp();
 
@@ -41,6 +51,7 @@ export class MyApp {
       { title: 'Depose', component: DeposePage},
       { title: 'Traça', component: DeposePageTraca}
     ];
+
   }
 
   initializeApp() {
@@ -49,6 +60,26 @@ export class MyApp {
       // Here you can do any higher level native things you might need.
       this.statusBar.styleDefault();
       this.splashScreen.hide();
+      this.networkProvider.initializeNetworkEvents();
+
+      // Offline event
+      this.events.subscribe('network:offline', () => {
+        console.log('network:offline ==> '+this.network.type);
+      });
+
+      // Online event
+      this.events.subscribe('network:online', () => {
+        let baseUrl: string = 'http://51.77.202.108/WiiStock-dev/public/index.php/api/addMouvementTraca';
+        let toInsert = {
+          mouvements: this.sqlProvider.findAll('`mouvement_traca`'),
+        };
+        this.http.post<any>(baseUrl, toInsert).subscribe((resp) => {
+          if (resp.success) {
+            this.showToast(resp.data.status);
+          }
+        });
+        console.log('network:online ==> '+this.network.type);
+      });
     });
   }
 
@@ -61,6 +92,16 @@ export class MyApp {
 
   goHome() {
     this.nav.setRoot(this.homePage);
+  }
+
+  async showToast(msg) {
+    const toast = await this.toastController.create({
+      message: msg,
+      duration: 2000,
+      position: 'center',
+      cssClass: 'toast-error'
+    });
+    toast.present();
   }
 
 

@@ -34,6 +34,8 @@ import {StockageMenuPageTraca} from "../pages/traca/stockage-menu/stockage-menu-
 import {SqliteProvider} from "../providers/sqlite/sqlite";
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {IonicSelectableModule} from 'ionic-selectable'
+import {NetworkProvider} from "../providers/network/network";
+import {Network} from "@ionic-native/network";
 
 @NgModule({
     declarations: [
@@ -92,7 +94,9 @@ import {IonicSelectableModule} from 'ionic-selectable'
         SQLite,
         SqliteProvider,
         StorageService,
-        BarcodeScanner
+        BarcodeScanner,
+        NetworkProvider,
+        Network,
     ]
 })
 export class AppModule {
