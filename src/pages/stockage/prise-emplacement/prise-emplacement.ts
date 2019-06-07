@@ -33,8 +33,12 @@ export class PriseEmplacementPage {
         if (navParams.get('selectedEmplacement') !== undefined) {
             this.emplacement = navParams.get('selectedEmplacement');
         }
-        this.db_locations = this.sqliteProvider.findAll('emplacement');
-        this.db_articles = this.sqliteProvider.findAll('article');
+        this.sqliteProvider.findAll('emplacement').then((value) => {
+            this.db_locations = value;
+            this.sqliteProvider.findAll('article').then((value) => {
+                this.db_articles = value;
+            })
+        });
         let instance = this;
         (<any>window).plugins.intentShim.registerBroadcastReceiver({
                 filterActions: [

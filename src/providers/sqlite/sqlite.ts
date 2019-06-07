@@ -166,23 +166,25 @@ export class SqliteProvider {
 
     public findAll(table: string) {
         let list = [];
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('SELECT * FROM ' + table, [])
+                .then((data) => {
 
-        this.db.executeSql('SELECT * FROM ' + table, [])
-            .then((data) => {
+                    if (data == null) {
+                        return;
+                    }
 
-                if (data == null) {
-                    return;
-                }
-
-                if (data.rows) {
-                    if (data.rows.length > 0) {
-                        for (let i = 0; i < data.rows.length; i++) {
-                            list.push(data.rows.item(i));
+                    if (data.rows) {
+                        if (data.rows.length > 0) {
+                            for (let i = 0; i < data.rows.length; i++) {
+                                list.push(data.rows.item(i));
+                            }
                         }
                     }
-                }
-            });
-        return list;
+                    resolve(list);
+                });
+        });
+        return resp;
     }
 
     public async priseAreUnfinished() {

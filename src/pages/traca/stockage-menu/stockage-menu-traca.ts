@@ -18,6 +18,7 @@ export class StockageMenuPageTraca {
     mvts: MouvementTraca[];
     unfinishedMvts: boolean;
     type: string;
+    sqlProvider : SqliteProvider;
 
     constructor(public navCtrl: NavController,
                 public navParams: NavParams,
@@ -27,8 +28,11 @@ export class StockageMenuPageTraca {
                 public networkProvider: NetworkProvider,
                 public events: Events,
                 public network: Network,) {
-        this.mvts = sqlProvider.findAll('`mouvement_traca`');
-        sqlProvider.priseAreUnfinished().then((value) => {
+        this.sqlProvider = sqlProvider;
+        this.sqlProvider.findAll('`mouvement_traca`').then((value) => {
+            this.mvts = value;
+        });
+        this.sqlProvider.priseAreUnfinished().then((value) => {
             this.unfinishedMvts = value;
             this.type = this.network.type;
             if(this.type !== "unknown" && this.type !== "none" && this.type !== undefined){
@@ -51,14 +55,17 @@ export class StockageMenuPageTraca {
 
     synchronise() {
         let baseUrl: string = 'http://51.77.202.108/WiiStock-dev/public/index.php/api/addMouvementTraca';
-        let toInsert = {
-            mouvements: this.mvts,
-        };
-        this.http.post<any>(baseUrl, toInsert).subscribe((resp) => {
-            if (resp.success) {
-                this.showToast(resp.data.status);
-            }
+        this.sqlProvider.findAll('`mouvement_traca`').then((result) => {
+            let toInsert = {
+                mouvements: result,
+            };
+            this.http.post<any>(baseUrl, toInsert).subscribe((resp) => {
+                if (resp.success) {
+                    this.showToast(resp.data.status);
+                }
+            });
         });
+
     }
 
     async showToast(msg) {

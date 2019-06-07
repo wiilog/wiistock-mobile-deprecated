@@ -28,7 +28,9 @@ export class PriseArticlesPage {
     private sqliteProvider: SqliteProvider,
     private barcodeScanner: BarcodeScanner,
     private changeDetectorRef: ChangeDetectorRef) {
-    this.db_articles = this.sqliteProvider.findAll('article');
+    this.sqliteProvider.findAll('article').then((value) => {
+      this.db_articles = value;
+    });
     if (typeof (navParams.get('emplacement')) !== undefined) {
       this.emplacement = navParams.get('emplacement');
     }

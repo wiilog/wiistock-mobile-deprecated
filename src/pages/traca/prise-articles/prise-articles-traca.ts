@@ -29,7 +29,9 @@ export class PriseArticlesPageTraca {
         private sqliteProvider: SqliteProvider,
         private barcodeScanner: BarcodeScanner,
         private changeDetectorRef: ChangeDetectorRef) {
-        this.db_articles = this.sqliteProvider.findAll('article');
+        this.sqliteProvider.findAll('article').then((value) => {
+            this.db_articles = value;
+        });
         if (typeof (navParams.get('emplacement')) !== undefined) {
             this.emplacement = navParams.get('emplacement');
         }
@@ -71,7 +73,7 @@ export class PriseArticlesPageTraca {
                 mouvement = {
                     id: null,
                     ref_article: article.reference,
-                    date: date,
+                    date: date + '_' + Math.random().toString(36).substr(2, 9),
                     ref_emplacement: this.emplacement.label,
                     type: 'prise',
                     operateur: value

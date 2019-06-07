@@ -25,7 +25,9 @@ export class PriseConfirmPageTraca {
             this.article = navParams.get('selectedArticle');
             this.db_articles = [navParams.get('selectedArticle')];
         } else {
-            this.db_articles = this.sqliteProvider.findAll('article');
+            this.sqliteProvider.findAll('article').then((value) => {
+                this.db_articles = value;
+            });
         }
     }
 
