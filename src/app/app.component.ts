@@ -14,6 +14,7 @@ import {NetworkProvider} from '../providers/network/network'
 import {Network} from "@ionic-native/network";
 import {SqliteProvider} from "../providers/sqlite/sqlite";
 import {HttpClient} from "@angular/common/http";
+import { StockageMenuPageTraca } from "../pages/traca/stockage-menu/stockage-menu-traca"
 
 
 @Injectable()
@@ -45,11 +46,7 @@ export class MyApp {
         // set our app's pages
         this.pages = [
             {title: 'Accueil', component: MenuPage},
-            {title: 'Connexion', component: ConnectPage},
-            {title: 'Stockage', component: StockageMenuPage},
-            {title: 'Prise', component: PriseEmplacementPage},
-            {title: 'Depose', component: DeposePage},
-            {title: 'Traça', component: DeposePageTraca}
+            {title: 'Traça', component: StockageMenuPageTraca}
         ];
 
     }

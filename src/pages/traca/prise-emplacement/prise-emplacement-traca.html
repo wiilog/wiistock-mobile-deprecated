@@ -13,14 +13,14 @@
 <ion-content padding>
     <div>
         <div>
-            <ion-title *ngIf="!id">Veuillez flasher ou sélectionner<br>un emplacement</ion-title>
+            <ion-title *ngIf="!emplacement">Veuillez flasher ou sélectionner<br>un emplacement</ion-title>
             <ion-card>
                 <ion-card-header>
                     <ion-card-title>Emplacement :</ion-card-title>
                 </ion-card-header>
                 <ion-card-content>
                     <ion-item>
-                        <ion-label>Emplacement</ion-label>
+                        <ion-label *ngIf="!emplacement">Emplacement</ion-label>
                         <ionic-selectable
                                 item-content
                                 [(ngModel)]="emplacement"

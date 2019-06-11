@@ -9,18 +9,16 @@
 <!-- TODO pas possible mutualiser header ?? -->
 
 <ion-content>
-
-  <ion-grid>
+  <ion-grid [class]="gridMenu">
     <ion-row>
-      <ion-col col-6 *ngFor="let item of items" (click)="itemTapped($event, item)">
+      <ion-col col-6 *ngFor="let item of items" >
         <button ion-button outline class="big-button" color="dark">
           <ion-card-content>
-            <ion-icon class="big-icon" name="{{ item.icon }}"></ion-icon>
+            <ion-icon class="big-icon" name="{{ item.icon }}" (click)="itemTapped($event, item)"></ion-icon>
             <p text-center>{{ item.title }}</p>
           </ion-card-content>
         </button>
       </ion-col>
     </ion-row>
   </ion-grid>
-
 </ion-content>

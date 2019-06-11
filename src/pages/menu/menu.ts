@@ -14,12 +14,7 @@ export class MenuPage {
   constructor(public app: App, public navCtrl: NavController, public navParams: NavParams) {
 
     this.items = [
-      {title: 'Stockage', icon: 'flask', page: StockageMenuPage},
-      {title: 'Préparations', icon: 'wifi', page: StockageMenuPage},
-      {title: 'Collectes', icon: 'beer', page: StockageMenuPage},
-      {title: 'Livraisons', icon: 'paper-plane', page: StockageMenuPage},
-      {title: 'Inventaire', icon: 'boat', page: StockageMenuPage},
-      {title: 'Traça', icon: 'boat', page: StockageMenuPageTraca}
+      {title: 'Traça', icon: 'cube', page: StockageMenuPageTraca}
       ];
   }
 
