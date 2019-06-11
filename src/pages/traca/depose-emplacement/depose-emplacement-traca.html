@@ -20,7 +20,7 @@
                 </ion-card-header>
                 <ion-card-content>
                     <ion-item>
-                        <ion-label>Emplacement</ion-label>
+                        <ion-label *ngIf="!emplacement">Emplacement</ion-label>
                         <ionic-selectable
                                 item-content
                                 [(ngModel)]="emplacement"
