@@ -9,6 +9,7 @@ import {StockageMenuPageTraca} from "../stockage-menu/stockage-menu-traca";
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {ChangeDetectorRef} from '@angular/core';
 import {MouvementTraca} from "../../../app/entities/mouvementTraca";
+import moment from "moment";
 
 
 @IonicPage()
@@ -69,7 +70,7 @@ export class DeposeArticlesPageTraca {
                 }
             });
             let mouvement = new MouvementTraca();
-            let date = new Date().toUTCString();
+            let date = moment().format();
             this.sqliteProvider.getOperateur().then((value) => {
                 mouvement = {
                     id: null,
