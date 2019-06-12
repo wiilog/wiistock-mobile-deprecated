@@ -68,7 +68,7 @@ export class PriseArticlesPageTraca {
                 }
             });
             let mouvement = new MouvementTraca();
-            let date = new Date().toISOString();
+            let date = new Date().toUTCString();
             this.sqliteProvider.getOperateur().then((value) => {
                 mouvement = {
                     id: null,
