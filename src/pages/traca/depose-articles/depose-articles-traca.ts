@@ -145,10 +145,10 @@ export class DeposeArticlesPageTraca {
                         articles: this.articles, emplacement: this.emplacement, selectedArticle: a
                     });
                 } else {
-                    this.showToast('Cet article est déjà enregistré assez de fois dans le panier.');
+                    this.showToast('Ce colis est déjà enregistré assez de fois dans le panier.');
                 }
             } else {
-                this.showToast('Cet article ne correspond à aucune prise.');
+                this.showToast('Ce colis ne correspond à aucune prise.');
             }
         });
         this.changeDetectorRef.detectChanges();

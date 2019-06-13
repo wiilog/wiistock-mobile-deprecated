@@ -9,7 +9,7 @@
       </button>
     </ion-buttons>
 
-    <ion-title>Follow GT Stock</ion-title>
+    <ion-title>Follow GT</ion-title>
 
   </ion-toolbar>
   <!--<a routerLink="/home" routerLinkActive="active"><ion-icon name="home"></ion-icon></a>-->
@@ -38,12 +38,6 @@
       </ion-col>
     </ion-row>
   </ion-grid>
-  <ion-item>
-    <ion-list inset *ngFor="let mvt of mvts">
-      <p>{{mvt.id}} - {{mvt.ref_article}}</p>
-      <p>{{mvt.date}} - {{mvt.ref_emplacement}} - {{mvt.type}}</p>
-    </ion-list>
-  </ion-item>
 
 </ion-content>
 <ion-footer padding>
