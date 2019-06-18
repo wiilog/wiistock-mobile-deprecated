@@ -6,10 +6,6 @@ import {ConnectPage} from "../pages/connect/connect";
 
 import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
-import {DeposePage} from "../pages/stockage/depose/depose";
-import {DeposePageTraca} from "../pages/traca/depose/depose-traca";
-import {PriseEmplacementPage} from "../pages/stockage/prise-emplacement/prise-emplacement";
-import {StockageMenuPage} from "../pages/stockage/stockage-menu/stockage-menu";
 import {NetworkProvider} from '../providers/network/network'
 import {Network} from "@ionic-native/network";
 import {SqliteProvider} from "../providers/sqlite/sqlite";
