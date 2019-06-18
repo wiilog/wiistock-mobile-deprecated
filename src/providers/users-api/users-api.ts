@@ -6,7 +6,7 @@ import { Observable } from "rxjs";
 @Injectable()
 export class UsersApiProvider {
 
-  private baseUrl: string = 'http://scs1-rec.follow-gt.fr/api/connect'; //TODO
+  private baseUrl: string = 'https://scs1-rec.follow-gt.fr/api/connect';
 
   constructor(public http: HttpClient) {
   }

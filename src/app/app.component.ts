@@ -62,7 +62,7 @@ export class MyApp {
 
             // Online event
             this.events.subscribe('network:online', () => {
-                let baseUrl: string = 'http://scs1-rec.follow-gt.fr/api/addMouvementTraca';
+                let baseUrl: string = 'https://scs1-rec.follow-gt.fr/api/addMouvementTraca';
                 this.sqlProvider.findAll('`mouvement_traca`').then((value) => {
                     let toInsert = {};
                     toInsert = {

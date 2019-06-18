@@ -54,7 +54,7 @@ export class StockageMenuPageTraca {
     }
 
     synchronise() {
-        let baseUrl: string = 'http://scs1-rec.follow-gt.fr/api/addMouvementTraca';
+        let baseUrl: string = 'https://scs1-rec.follow-gt.fr/api/addMouvementTraca';
         this.sqlProvider.findAll('`mouvement_traca`').then((result) => {
             let toInsert = {
                 mouvements: result,

@@ -3,9 +3,9 @@ import { IonicPageModule } from 'ionic-angular';
 import { SqliteProvider } from './sqlite';
 
 @NgModule({
-  declarations: [
-    SqliteProvider,
-  ],
+  // declarations: [
+  //   SqliteProvider,
+  // ],
   imports: [
     IonicPageModule.forChild(SqliteProvider),
   ],
