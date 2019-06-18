@@ -54,7 +54,7 @@ export class StockageMenuPageTraca {
     }
 
     synchronise() {
-        let baseUrl: string = 'http://51.77.202.108/WiiStock-dev/public/index.php/api/addMouvementTraca';
+        let baseUrl: string = 'http://scs1-rec.follow-gt.fr/api/addMouvementTraca';
         this.sqlProvider.findAll('`mouvement_traca`').then((result) => {
             let toInsert = {
                 mouvements: result,

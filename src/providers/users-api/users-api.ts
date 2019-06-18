@@ -6,7 +6,7 @@ import { Observable } from "rxjs";
 @Injectable()
 export class UsersApiProvider {
 
-  private baseUrl: string = 'http://51.77.202.108/WiiStock-dev/public/index.php/api/connect'; //TODO
+  private baseUrl: string = 'http://scs1-rec.follow-gt.fr/api/connect'; //TODO
 
   constructor(public http: HttpClient) {
   }
