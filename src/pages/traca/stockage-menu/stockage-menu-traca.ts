@@ -19,6 +19,7 @@ export class StockageMenuPageTraca {
     unfinishedMvts: boolean;
     type: string;
     sqlProvider : SqliteProvider;
+    addMvtURL : string = 'addMouvementTraca';
 
     constructor(public navCtrl: NavController,
                 public navParams: NavParams,
@@ -54,18 +55,23 @@ export class StockageMenuPageTraca {
     }
 
     synchronise() {
-        let baseUrl: string = 'https://scs1-rec.follow-gt.fr/api/addMouvementTraca';
-        this.sqlProvider.findAll('`mouvement_traca`').then((result) => {
-            let toInsert = {
-                mouvements: result,
-            };
-            this.http.post<any>(baseUrl, toInsert).subscribe((resp) => {
-                if (resp.success) {
-                    this.showToast(resp.data.status);
-                }
-            });
+        this.sqlProvider.getAPI_URL().then((result) => {
+            if (result !== null) {
+                let url: string = result + this.addMvtURL;
+                this.sqlProvider.findAll('`mouvement_traca`').then((result) => {
+                    let toInsert = {
+                        mouvements: result,
+                    };
+                    this.http.post<any>(url, toInsert).subscribe((resp) => {
+                        if (resp.success) {
+                            this.showToast(resp.data.status);
+                        }
+                    });
+                });
+            } else {
+                this.showToast('Aucune configuration URL...')
+            }
         });
-
     }
 
     async showToast(msg) {

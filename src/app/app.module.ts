@@ -6,6 +6,7 @@ import {SQLite} from "@ionic-native/sqlite";
 
 import {ConnectPage} from '../pages/connect/connect';
 import {MenuPage} from '../pages/menu/menu';
+import {ParamsPage} from '../pages/params/params'
 import {DeposePage} from "../pages/stockage/depose/depose";
 import {DeposePageTraca} from '../pages/traca/depose/depose-traca'
 import {IonicStorageModule} from "@ionic/storage";
@@ -42,6 +43,7 @@ import {Network} from "@ionic-native/network";
         MyApp,
         ConnectPage,
         MenuPage,
+        ParamsPage,
         StockageMenuPage,
         StockageMenuPageTraca,
         PriseEmplacementPage,
@@ -71,6 +73,7 @@ import {Network} from "@ionic-native/network";
         MyApp,
         ConnectPage,
         MenuPage,
+        ParamsPage,
         StockageMenuPage,
         StockageMenuPageTraca,
         PriseEmplacementPage,

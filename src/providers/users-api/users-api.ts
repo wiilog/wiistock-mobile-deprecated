@@ -1,18 +1,17 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from "rxjs";
+import {SqliteProvider} from "../../providers/sqlite/sqlite";
 
 
 @Injectable()
 export class UsersApiProvider {
 
-  private baseUrl: string = 'https://scs1-rec.follow-gt.fr/api/connect';
-
-  constructor(public http: HttpClient) {
+  constructor(public http: HttpClient, public sqlProvider : SqliteProvider) {
   }
 
-  setProvider(options):Observable<any> {
-    return this.http.post(this.baseUrl, options);
-  }
+  setProvider(options, url):Observable<any> {
+        return this.http.post(url, options);
+  };
 
 }

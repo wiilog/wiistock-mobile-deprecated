@@ -24,6 +24,7 @@ export class MyApp {
     rootPage = ConnectPage;
     pages: Array<{ title: string, component: any }>;
     homePage = MenuPage;
+    addMvtURL : string = 'addMouvementTraca';
 
     constructor(
         public platform: Platform,
@@ -62,19 +63,23 @@ export class MyApp {
 
             // Online event
             this.events.subscribe('network:online', () => {
-                let baseUrl: string = 'https://scs1-rec.follow-gt.fr/api/addMouvementTraca';
-                this.sqlProvider.findAll('`mouvement_traca`').then((value) => {
-                    let toInsert = {};
-                    toInsert = {
-                        mouvements: value
-                    };
-                    this.http.post<any>(baseUrl, toInsert).subscribe((resp) => {
-                        if (resp.success) {
-                            this.showToast(resp.data.status);
-                        }
-                    });
+                this.sqlProvider.getAPI_URL().then((result) => {
+                    if (result !== null) {
+                        let url: string = result + this.addMvtURL;
+                        this.sqlProvider.findAll('`mouvement_traca`').then((value) => {
+                            let toInsert = {};
+                            toInsert = {
+                                mouvements: value
+                            };
+                            this.http.post<any>(url, toInsert).subscribe((resp) => {
+                                if (resp.success) {
+                                    this.showToast(resp.data.status);
+                                }
+                            });
+                        });
+                        console.log('network:online ==> ' + this.network.type);
+                    }
                 });
-                console.log('network:online ==> ' + this.network.type);
             });
         });
     }

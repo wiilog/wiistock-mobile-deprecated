@@ -1,0 +1,24 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Follow GT</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content padding>
+
+  <form (ngSubmit)="registerURL()">
+    <ion-item>
+      <ion-label>URL</ion-label>
+      <ion-input type="text" [(ngModel)]="URL" name="login"></ion-input>
+    </ion-item>
+    <button ion-button type="submit" block>Enregistrer</button>
+  </form>
+  <img src="assets/icon/iconGT.png">
+
+</ion-content>
+<ion-footer padding>
+  <div class="d-flex">
+    <ion-icon class="big-icon" name="return-left" (click)="goToConnect()"></ion-icon>
+    <ion-icon class="big-icon" name="checkmark" (click)="testURL()"></ion-icon>
+  </div>
+</ion-footer>

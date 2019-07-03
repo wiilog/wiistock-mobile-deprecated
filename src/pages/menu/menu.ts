@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
 import { App, NavController, NavParams } from 'ionic-angular';
-import {StockageMenuPage} from "../stockage/stockage-menu/stockage-menu";
 import { StockageMenuPageTraca } from "../traca/stockage-menu/stockage-menu-traca"
 import {Page} from "ionic-angular/navigation/nav-util";
 

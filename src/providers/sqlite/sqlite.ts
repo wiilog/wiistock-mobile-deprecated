@@ -45,7 +45,12 @@ export class SqliteProvider {
                                         this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255))', [])
                                             .then(() => {
                                                 console.log('table mouvement traca créée !')
-
+                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []).then(() => {
+                                                    console.log('table api_params créée!');
+                                                    this.db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []).then(() => {
+                                                        console.log('inserted single api param');
+                                                    }).catch(err => console.log(err));
+                                                })
                                             })
                                             .catch(e => console.log(e));
 
@@ -304,6 +309,32 @@ export class SqliteProvider {
         }
 
         return {query: query, values: values};
+    }
+
+    public async setAPI_URL(url) {
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('UPDATE `API_PARAMS` SET url = \'' + url + '\'', []).then(() => {
+                resolve(true);
+            }).catch((err) => {
+                resolve(err);
+            })
+        });
+        return resp;
+    }
+
+    public getAPI_URL() {
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('SELECT * FROM `API_PARAMS` LIMIT 1', []).then((data) => {
+                if (data && data.rows && data.rows.length > 0 && data.rows.item(0).url !== '') {
+                    resolve(data.rows.item(0).url);
+                } else {
+                    resolve(null);
+                }
+            }).catch((err) => {
+                resolve(false);
+            })
+        });
+        return resp;
     }
 
 }
