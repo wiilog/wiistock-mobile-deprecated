@@ -99,7 +99,7 @@ export class SqliteProvider {
         let articles = data['articles'];
         let articleValues = [];
         for (let article of articles) {
-            articleValues.push("(" + article.id + ", '" + article.reference + "', " + (article.quantiteStock || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ")");
+            articleValues.push("(" + null + ", '" + article.reference + "', " + (article.quantiteStock || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ")");
         }
         let articleValuesStr = articleValues.join(', ');
         let sqlArticles = 'INSERT INTO `article` (`id`, `reference`, `quantite`) VALUES ' + articleValuesStr + ';';
