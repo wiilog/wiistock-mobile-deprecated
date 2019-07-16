@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {App, IonicPage, NavController, NavParams} from 'ionic-angular';
+import {App, IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
 import {MenuPage} from "../../menu/menu";
 import {Emplacement} from "../../../app/entities/emplacement";
 import {Article} from "../../../app/entities/article";
@@ -26,7 +26,8 @@ export class DeposeEmplacementPageTraca {
                 public app: App,
                 public sqliteProvider: SqliteProvider,
                 private barcodeScanner: BarcodeScanner,
-                private changeDetectorRef: ChangeDetectorRef) {
+                private changeDetectorRef: ChangeDetectorRef,
+                public toastController: ToastController) {
         // constructor(public navCtrl: NavController, public navParams: NavParams, private barcodeScanner: BarcodeScanner) {
         //   this.scan();
         if (navParams.get('selectedEmplacement') !== undefined) {
@@ -84,13 +85,30 @@ export class DeposeEmplacementPageTraca {
     }
 
     testIfBarcodeEquals(text) {
-        let emplacement: Emplacement;
-        emplacement = {
-            id: new Date().getUTCMilliseconds(),
-            label: text
-        };
-        this.navCtrl.push(DeposeEmplacementPageTraca, {selectedEmplacement: emplacement});
-        this.changeDetectorRef.detectChanges();
+        let instance = this;
+        this.sqliteProvider.findAll('`emplacement`').then(resp => {
+            let found = false;
+            resp.forEach(function(element) {
+                if (element.label === text) {
+                    found = true;
+                    instance.navCtrl.push(DeposeEmplacementPageTraca, {selectedEmplacement: element});
+                    instance.changeDetectorRef.detectChanges();
+                }
+            });
+            if (!found) {
+                this.showToast('Veuillez flasher ou séléctionner un emplacement connu.');
+            }
+        });
+    }
+
+    async showToast(msg) {
+        const toast = await this.toastController.create({
+            message: msg,
+            duration: 2000,
+            position: 'center',
+            cssClass: 'toast-error'
+        });
+        toast.present();
     }
 
 }
