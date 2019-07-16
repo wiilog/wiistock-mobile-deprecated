@@ -112,11 +112,16 @@ export class SqliteProvider {
         let emplacementValuesStr = emplacementValues.join(', ');
         let sqlEmplacements = 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';';
         console.log(sqlEmplacements);
-        return this.db.executeSql(sqlArticles, [])
-            .then(() => {
-                return this.db.executeSql(sqlEmplacements, [])
-                    .catch(e => console.log(e));
-            }).catch(e => console.log(e));
+        if (articleValuesStr !== '') {
+            return this.db.executeSql(sqlArticles, [])
+                .then(() => {
+                    return this.db.executeSql(sqlEmplacements, [])
+                        .catch(e => console.log(e));
+                }).catch(e => console.log(e));
+        } else {
+            return this.db.executeSql(sqlEmplacements, [])
+                .catch(e => console.log(e));
+        }
 
     }
 

@@ -43,7 +43,8 @@ export class MyApp {
         // set our app's pages
         this.pages = [
             {title: 'Accueil', component: MenuPage},
-            {title: 'Traça', component: StockageMenuPageTraca}
+            {title: 'Traça', component: StockageMenuPageTraca},
+            {title: 'Préparation', component: StockageMenuPageTraca}
         ];
 
     }
