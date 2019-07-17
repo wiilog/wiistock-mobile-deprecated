@@ -55,17 +55,20 @@ export class StockageMenuPageTraca {
     }
 
     synchronise() {
-        this.sqlProvider.getAPI_URL().then((result) => {
-            if (result !== null) {
-                let url: string = result + this.addMvtURL;
-                this.sqlProvider.findAll('`mouvement_traca`').then((result) => {
-                    let toInsert = {
-                        mouvements: result,
+        this.sqlProvider.getAPI_URL().then((resultUrl) => {
+            if (resultUrl !== null) {
+                let url: string = resultUrl + this.addMvtURL;
+                this.sqlProvider.findAll('`mouvement_traca`').then((data) => {
+                    this.sqlProvider.getApiKey().then(result => {
+                        let toInsert = {
+                            mouvements: data,
+                            apikey: result
                     };
-                    this.http.post<any>(url, toInsert).subscribe((resp) => {
-                        if (resp.success) {
-                            this.showToast(resp.data.status);
-                        }
+                        this.http.post<any>(url, toInsert).subscribe((resp) => {
+                            if (resp.success) {
+                                this.showToast(resp.data.status);
+                            }
+                        });
                     });
                 });
             } else {

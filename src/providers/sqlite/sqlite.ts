@@ -342,4 +342,12 @@ export class SqliteProvider {
         return resp;
     }
 
+    public getApiKey() {
+        return new Promise<any>((resolve, reject) => {
+            this.storageService.getApiKey().then((value) => {
+                resolve(value);
+            });
+        });
+    }
+
 }

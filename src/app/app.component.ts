@@ -44,7 +44,7 @@ export class MyApp {
         this.pages = [
             {title: 'Accueil', component: MenuPage},
             {title: 'Traça', component: StockageMenuPageTraca},
-            {title: 'Préparation', component: StockageMenuPageTraca}
+            //{title: 'Préparation', component: StockageMenuPageTraca}
         ];
 
     }
@@ -64,21 +64,22 @@ export class MyApp {
 
             // Online event
             this.events.subscribe('network:online', () => {
-                this.sqlProvider.getAPI_URL().then((result) => {
-                    if (result !== null) {
-                        let url: string = result + this.addMvtURL;
-                        this.sqlProvider.findAll('`mouvement_traca`').then((value) => {
-                            let toInsert = {};
-                            toInsert = {
-                                mouvements: value
-                            };
-                            this.http.post<any>(url, toInsert).subscribe((resp) => {
-                                if (resp.success) {
-                                    this.showToast(resp.data.status);
-                                }
+                this.sqlProvider.getAPI_URL().then((resultUrl) => {
+                    if (resultUrl !== null) {
+                        let url: string = resultUrl + this.addMvtURL;
+                        this.sqlProvider.findAll('`mouvement_traca`').then((data) => {
+                            this.sqlProvider.getApiKey().then(result => {
+                                let toInsert = {
+                                    mouvements: data,
+                                    apikey: result
+                                };
+                                this.http.post<any>(url, toInsert).subscribe((resp) => {
+                                    if (resp.success) {
+                                        this.showToast(resp.data.status);
+                                    }
+                                });
                             });
                         });
-                        console.log('network:online ==> ' + this.network.type);
                     }
                 });
             });

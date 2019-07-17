@@ -14,7 +14,7 @@ export class MenuPage {
 
     this.items = [
       {title: 'Traça', icon: 'cube', page: StockageMenuPageTraca},
-      {title: 'Préparation', icon: 'cube', page: StockageMenuPageTraca}
+      //{title: 'Préparation', icon: 'cube', page: StockageMenuPageTraca}
       ];
   }
 
