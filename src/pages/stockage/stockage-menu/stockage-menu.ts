@@ -15,7 +15,7 @@ export class StockageMenuPage {
   toFinish: Boolean;
 
   constructor(public navCtrl: NavController, public navParams: NavParams, private sqliteProvider: SqliteProvider) {
-    this.unfinishedMouvements = this.sqliteProvider.findByElementNull('`mouvement`', 'date_depose');
+    this.unfinishedMouvements = this.sqliteProvider.findByElementNull('`mouvement`', 'date_drop');
   }
 
   goToPrise() {

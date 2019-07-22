@@ -1,10 +1,12 @@
 export class Mouvement {
     id: number;
-    id_article: number;
-    quantite: number;
-    date_prise: string;
-    id_emplacement_prise: number;
-    date_depose: string;
-    id_emplacement_depose: number;
-    type: string
+    reference: string;
+    quantity: number;
+    date_pickup: string;
+    location_from: string;
+    date_drop: string;
+    location_to: string;
+    type: string;
+    is_ref : string;
+    id_article_prepa: number;
 }

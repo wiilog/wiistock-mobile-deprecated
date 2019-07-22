@@ -38,7 +38,7 @@ export class DeposeConfirmPageTraca {
     searchArticle(event: { component: IonicSelectableComponent, text: string }) {
         let text = event.text.trim();
         event.component.startSearch();
-        event.component.items = this.sqliteProvider.findByElement('article', 'reference', text);
+        event.component.items = this.sqliteProvider.findByElement('article', 'id_article', text);
         event.component.endSearch();
     }
 

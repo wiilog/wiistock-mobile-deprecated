@@ -1,6 +1,6 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule, ErrorHandler} from '@angular/core';
-import {IonicApp, IonicModule, IonicErrorHandler} from 'ionic-angular';
+import {IonicApp, IonicModule, IonicErrorHandler, Navbar} from 'ionic-angular';
 import {MyApp} from './app.component';
 import {SQLite} from "@ionic-native/sqlite";
 
@@ -37,6 +37,10 @@ import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {IonicSelectableModule} from 'ionic-selectable'
 import {NetworkProvider} from "../providers/network/network";
 import {Network} from "@ionic-native/network";
+import {PreparationMenuPage} from "../pages/preparation/preparation-menu/preparation-menu";
+import {PreparationArticlesPage} from "../pages/preparation/preparation-articles/preparation-articles";
+import {PreparationArticleTakePage} from "../pages/preparation/preparation-article-take/preparation-article-take";
+import {PreparationEmplacementPage} from "../pages/preparation/preparation-emplacement/preparation-emplacement";
 
 @NgModule({
     declarations: [
@@ -45,12 +49,16 @@ import {Network} from "@ionic-native/network";
         MenuPage,
         ParamsPage,
         StockageMenuPage,
+        PreparationMenuPage,
+        PreparationArticlesPage,
         StockageMenuPageTraca,
         PriseEmplacementPage,
         PriseArticlesPage,
         PriseConfirmPage,
         PriseEmplacementPageTraca,
         PriseArticlesPageTraca,
+        PreparationArticleTakePage,
+        PreparationEmplacementPage,
         PriseConfirmPageTraca,
         DeposeEmplacementPageTraca,
         DeposeArticlesPageTraca,
@@ -80,6 +88,10 @@ import {Network} from "@ionic-native/network";
         PriseArticlesPage,
         PriseConfirmPage,
         PriseEmplacementPageTraca,
+        PreparationMenuPage,
+        PreparationArticleTakePage,
+        PreparationEmplacementPage,
+        PreparationArticlesPage,
         PriseArticlesPageTraca,
         PriseConfirmPageTraca,
         DeposeEmplacementPageTraca,

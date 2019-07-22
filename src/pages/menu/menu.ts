@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { App, NavController, NavParams } from 'ionic-angular';
 import { StockageMenuPageTraca } from "../traca/stockage-menu/stockage-menu-traca"
 import {Page} from "ionic-angular/navigation/nav-util";
+import {PreparationMenuPage} from "../preparation/preparation-menu/preparation-menu";
 
 @Component({
   selector: 'page-menu',
@@ -14,7 +15,7 @@ export class MenuPage {
 
     this.items = [
       {title: 'Traça', icon: 'cube', page: StockageMenuPageTraca},
-      //{title: 'Préparation', icon: 'cube', page: StockageMenuPageTraca}
+      {title: 'Préparation', icon: 'cube', page: PreparationMenuPage}
       ];
   }
 

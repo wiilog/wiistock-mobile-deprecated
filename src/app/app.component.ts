@@ -6,12 +6,12 @@ import {ConnectPage} from "../pages/connect/connect";
 
 import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
-import {NetworkProvider} from '../providers/network/network'
+import {NetworkProvider} from '../providers/network/network';
 import {Network} from "@ionic-native/network";
 import {SqliteProvider} from "../providers/sqlite/sqlite";
 import {HttpClient} from "@angular/common/http";
-import { StockageMenuPageTraca } from "../pages/traca/stockage-menu/stockage-menu-traca"
-
+import {StockageMenuPageTraca} from "../pages/traca/stockage-menu/stockage-menu-traca";
+import {PreparationMenuPage} from "../pages/preparation/preparation-menu/preparation-menu";
 
 @Injectable()
 @Component({
@@ -24,7 +24,7 @@ export class MyApp {
     rootPage = ConnectPage;
     pages: Array<{ title: string, component: any }>;
     homePage = MenuPage;
-    addMvtURL : string = 'addMouvementTraca';
+    addMvtURL: string = 'addMouvementTraca';
 
     constructor(
         public platform: Platform,
@@ -44,7 +44,7 @@ export class MyApp {
         this.pages = [
             {title: 'Accueil', component: MenuPage},
             {title: 'Traça', component: StockageMenuPageTraca},
-            //{title: 'Préparation', component: StockageMenuPageTraca}
+            {title: 'Préparation', component: PreparationMenuPage}
         ];
 
     }

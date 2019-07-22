@@ -1,0 +1,19 @@
+<ion-header>
+    <ion-navbar>
+        <ion-title>Confirmation prise article</ion-title>
+    </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+
+    <div class="d-flex">
+        <ion-label>Article : {{article.reference}}. Quantité : {{ article.quantite }}</ion-label>
+    </div>
+    <div class="d-flex">
+        <ion-label>Quantité de prélèvement</ion-label>
+        <ion-input clearInput type="number" value="{{quantite}}" [(ngModel)]="quantite"></ion-input>
+    </div>
+
+    <ion-icon class="big-icon" name="checkmark-circle" (click)="addArticle()"></ion-icon>
+
+</ion-content>

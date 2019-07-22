@@ -16,12 +16,15 @@ export class ConnectPage {
         password: ''
     };
     connectURL : string = 'connect';
+    hasLoaded : boolean;
 
     constructor(public navCtrl: NavController, public navParams: NavParams, public usersApiProvider: UsersApiProvider, private toastController: ToastController, public sqliteProvider: SqliteProvider) {
+        this.hasLoaded = false;
     }
 
     logForm() {
         this.sqliteProvider.getAPI_URL().then((result) => {
+            this.hasLoaded = true;
             if (result !== null) {
                 let url : string = result + this.connectURL;
                 this.usersApiProvider.setProvider(this.form, url).subscribe(resp => {
@@ -39,10 +42,12 @@ export class ConnectPage {
                             });
                     } else {
                         this.showToast('Identifiants incorrects...');
+                        this.hasLoaded = false;
                     }
                 });
             } else {
-                this.showToast('Aucune configuration URL...')
+                this.showToast('Aucune configuration URL...');
+                this.hasLoaded = false;
             }
         });
     }

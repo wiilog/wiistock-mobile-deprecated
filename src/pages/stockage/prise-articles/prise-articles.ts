@@ -65,13 +65,15 @@ export class PriseArticlesPage {
       let date = new Date().toISOString();
       mouvement = {
         id: null,
-        id_article: article.id,
-        quantite: article.quantite,
-        date_prise: date,
-        id_emplacement_prise: this.emplacement.id,
-        date_depose: null,
-        id_emplacement_depose: null,
-        type: 'prise-depose'
+        reference: article.reference,
+        quantity: article.quantite,
+        date_pickup: date,
+        location_from: this.emplacement.label,
+        date_drop: null,
+        location_to: null,
+        type: 'prise-depose',
+        is_ref : null,
+        id_article_prepa : article.id
       };
       if (this.articles.indexOf(article) === this.articles.length - 1) {
         this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {

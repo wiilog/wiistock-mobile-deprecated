@@ -2,14 +2,18 @@
 import {SQLite, SQLiteObject} from "@ionic-native/sqlite";
 import {Injectable} from '@angular/core';
 import {StorageService} from "../../app/services/storage.service";
+import {Pro} from "@ionic/pro";
+import moment from "moment";
+import {Preparation} from "../../app/entities/preparation";
+import {Mouvement} from "../../app/entities/mouvement";
 
 const DB_NAME: string = 'follow_gt';
+
 
 @Injectable()
 export class SqliteProvider {
 
     private db: SQLiteObject = null;
-
 
     constructor(private sqlite: SQLite, private storageService: StorageService) {
         this.createDbFile();
@@ -29,56 +33,82 @@ export class SqliteProvider {
     }
 
     private createTables(): void {
-        this.db.executeSql('CREATE TABLE IF NOT EXISTS `article` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255), `reference` VARCHAR(255), `quantite` INTEGER)', [])
+        this.db.executeSql('CREATE TABLE IF NOT EXISTS `article` (`id` INTEGER PRIMARY KEY, `reference` VARCHAR(255), `quantite` INTEGER)', [])
             .then(() => {
                 console.log('table article créée');
-
                 this.db.executeSql('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))', [])
                     .then(() => {
                         console.log('table emplacement créée !')
-                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_article` INTEGER, `quantite` INTEGER, `date_prise` VARCHAR(255), `id_emplacement_prise` INTEGER, `date_depose` VARCHAR(255), `id_emplacement_depose` INTEGER, `type` VARCHAR(255))', [])
-                            .then(() => {
-                                console.log('table mouvement créée !')
-                                this.db.executeSql('DROP TABLE IF EXISTS `mouvement_traca`', [])
-                                    .then(() => {
-                                        console.log('table mouvement traca deleted !');
-                                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255))', [])
-                                            .then(() => {
-                                                console.log('table mouvement traca créée !')
-                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []).then(() => {
-                                                    console.log('table api_params créée!');
-                                                    this.db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []).then(() => {
-                                                        console.log('inserted single api param');
-                                                    }).catch(err => console.log(err));
+                        this.db.executeSql('DROP TABLE IF EXISTS `mouvement`', []).then(() => {
+                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location_to` TEXT, `type` VARCHAR(255), `is_ref` TEXT, `id_article_prepa` INTEGER)', [])
+                                .then(() => {
+                                    console.log('table mouvement créée !')
+                                    this.db.executeSql('DROP TABLE IF EXISTS `mouvement_traca`', [])
+                                        .then(() => {
+                                            console.log('table mouvement traca deleted !');
+                                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255))', [])
+                                                .then(() => {
+                                                    console.log('table mouvement traca créée !')
+                                                    this.db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []).then(() => {
+                                                        console.log('table api_params créée!');
+                                                        this.db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []).then(() => {
+                                                            console.log('inserted single api param');
+                                                            this.db.executeSql('DROP TABLE IF EXISTS `preparation`', []).then(() => {
+                                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []).then(() => {
+                                                                    console.log('table prepa créee');
+                                                                    this.db.executeSql('DROP TABLE IF EXISTS `article_prepa`', []).then(() => {
+                                                                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []).then(() => {
+                                                                            console.log('table article prepa crée');
+                                                                        }).catch(err => console.log(err));
+                                                                    });
+                                                                }).catch(err => console.log(err));
+                                                            });
+                                                        }).catch(err => console.log(err));
+                                                    })
                                                 })
-                                            })
-                                            .catch(e => console.log(e));
+                                                .catch(e => console.log(e));
 
-                                    })
-                                    .catch(e => console.log(e));
-                            })
-                            .catch(e => console.log(e));
+                                        })
+                                        .catch(e => console.log(e));
+                                })
+                                .catch(e => console.log(e));
+                        });
                     });
             });
     }
 
-    public cleanDataBase(): Promise<any> {
-        return this.db.executeSql('DELETE FROM `article`;', [])
-            .then(() => {
-                this.db.executeSql('DELETE FROM `emplacement`;', [])
-                    .then(() => {
-                        this.db.executeSql('DELETE FROM `mouvement_traca`;', [])
-                            .then(() => {
-                                console.log('Tables cleansed');
-                            }).catch(err => {
-                            console.log(err);
-                        })
+    public cleanDataBase(fromAfter = false): Promise<any> {
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('DELETE FROM `article`;', [])
+                .then(() => {
+                    this.db.executeSql('DELETE FROM `emplacement`;', [])
+                        .then(() => {
+                            this.db.executeSql('DELETE FROM `mouvement_traca`;', [])
+                                .then(() => {
+                                    if (!fromAfter) {
+                                        this.db.executeSql('DELETE FROM `preparation`;', [])
+                                            .then(() => {
+                                                resolve(this.db.executeSql('DELETE FROM `article_prepa`;', [])
+                                                    .then(() => {
+                                                        console.log('Tables cleansed');
+                                                    }).catch(err => {
+                                                    console.log(err);
+                                                }));
+                                            }).catch(err => {
+                                            console.log(err);
+                                        });
+                                    }
+                                }).catch(err => {
+                                console.log(err);
+                            })
+                        }).catch(err => {
+                        console.log(err);
                     }).catch(err => {
-                    console.log(err);
-                })
-            }).catch(err => {
-                console.log(err);
-            });
+                        console.log(err);
+                    });
+                });
+        });
+        return resp;
     }
 
     public setOperateur(operateur) {
@@ -93,8 +123,8 @@ export class SqliteProvider {
         });
     }
 
-    public async importData(data) {
-        this.storageService.setApiKey(data['apiKey']);
+    public async importData(data, refresh = false) {
+        if (!refresh) this.storageService.setApiKey(data['apiKey']);
 
         let articles = data['articles'];
         let articleValues = [];
@@ -104,6 +134,8 @@ export class SqliteProvider {
         let articleValuesStr = articleValues.join(', ');
         let sqlArticles = 'INSERT INTO `article` (`id`, `reference`, `quantite`) VALUES ' + articleValuesStr + ';';
         console.log(sqlArticles);
+
+
         let emplacements = data['emplacements'];
         let emplacementValues = [];
         for (let emplacement of emplacements) {
@@ -112,15 +144,55 @@ export class SqliteProvider {
         let emplacementValuesStr = emplacementValues.join(', ');
         let sqlEmplacements = 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';';
         console.log(sqlEmplacements);
-        if (articleValuesStr !== '') {
-            return this.db.executeSql(sqlArticles, [])
-                .then(() => {
-                    return this.db.executeSql(sqlEmplacements, [])
-                        .catch(e => console.log(e));
-                }).catch(e => console.log(e));
-        } else {
-            return this.db.executeSql(sqlEmplacements, [])
-                .catch(e => console.log(e));
+
+
+        let prepas = data['preparations'];
+        let prepasValues = [];
+        for (let prepa of prepas) {
+            this.findOne('preparation', prepa.id).then((prepaInserted) => {
+                console.log(prepaInserted);
+                if (prepaInserted === null) {
+                    prepasValues.push("(" + prepa.id + ", '" + prepa.number + "', " + null + ", " + null + ")");
+                }
+                if (prepas.indexOf(prepa) === prepas.length - 1) {
+                    let prepasValuesStr = prepasValues.join(', ');
+                    let sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`) VALUES ' + prepasValuesStr + ';';
+                    console.log(sqlPrepas);
+                    let articlesPrepa = data['articlesPrepa'];
+                    let articlesPrepaValues = [];
+                    for (let article of articlesPrepa) {
+                        this.findArticlesByPrepa(article.id_prepa).then((articles) => {
+                            console.log(article);
+                            console.log(articles);
+                            if (articles.find(articlePrepa => articlePrepa.reference === article.reference && articlePrepa.is_ref === article.is_ref) === undefined) {
+                                articlesPrepaValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_prepa + ", " + 0 + ", '" + article.location + "')");
+                            }
+                            if (articlesPrepa.indexOf(article) === articlesPrepa.length - 1) {
+                                let articlesPrepaValuesStr = articlesPrepaValues.join(', ');
+                                let sqlArticlesPrepa = 'INSERT INTO `article_prepa` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_prepa`, `has_moved`, `emplacement`) VALUES ' + articlesPrepaValuesStr + ';';
+                                console.log(sqlArticlesPrepa);
+                                let resp;
+                                resp = new Promise<any>((resolve) => {
+                                    this.db.executeSql(sqlArticles, [])
+                                        .then(val => val).catch((err) => console.log(err)).then(() => {
+                                        this.db.executeSql(sqlEmplacements, [])
+                                            .then(val => val).catch((err) => console.log(err)).then(() => {
+                                            this.db.executeSql(sqlPrepas, [])
+                                                .then(val => val).catch((err) => console.log(err)).then(() => {
+                                                resolve(this.db.executeSql(sqlArticlesPrepa, [])
+                                                    .then(val => val).catch((err) => console.log(err)).then(() => {
+                                                        console.log("fdf");
+                                                    }));
+                                            });
+                                        });
+                                    });
+                                });
+                                return resp;
+                            }
+                        });
+                    }
+                }
+            });
         }
 
     }
@@ -284,7 +356,12 @@ export class SqliteProvider {
             query += '?, '
         });
         query = query.slice(0, -2) + ");";
-        return this.db.executeSql(query, values).then((data) => console.log('row inserted' + data));
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql(query, values).then((id) => {
+                resolve(id);
+            }).catch(err => console.log(err));
+        });
+        return resp;
     }
 
     public executeQuery(query: string) {
@@ -336,6 +413,7 @@ export class SqliteProvider {
                     resolve(null);
                 }
             }).catch((err) => {
+                console.log(err);
                 resolve(false);
             })
         });
@@ -348,6 +426,98 @@ export class SqliteProvider {
                 resolve(value);
             });
         });
+    }
+
+    public findArticlesByPrepa(id_prepa: number) {
+        let list = [];
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('SELECT * FROM `article_prepa` WHERE `id_prepa` = ' + id_prepa, []).then((articles) => {
+                if (articles == null) {
+                    return;
+                }
+
+                if (articles.rows) {
+                    if (articles.rows.length > 0) {
+                        for (let i = 0; i < articles.rows.length; i++) {
+                            list.push(articles.rows.item(i));
+                        }
+                    }
+                }
+                resolve(list);
+            }).catch(err => console.log(err));
+        });
+        return resp;
+    }
+
+    public findMvtByArticle(id_art: number) {
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('SELECT * FROM `mouvement` WHERE `id_article_prepa` = ' + id_art + ' LIMIT 1', []).then((mvt) => {
+                if (mvt && mvt.rows && mvt.rows.length > 0 && mvt.rows.item(0).url !== '') {
+                    resolve(mvt.rows.item(0));
+                } else {
+                    resolve(null);
+                }
+            }).catch(err => console.log(err));
+        });
+        return resp;
+    }
+
+    public finishPrepa(id_prepa: number, emplacement) {
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('UPDATE `preparation` SET date_end = \'' + moment().format() + '\', emplacement = \'' + emplacement + '\' WHERE id = ' + id_prepa, []).then(() => {
+                resolve();
+            })
+        });
+        return resp;
+    }
+
+    public finishMvt(id_mvt: number, location_to: string) {
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('UPDATE `mouvement` SET date_drop = \'' + moment().format() + '\', location_to = \'' + location_to + '\' WHERE id = ' + id_mvt, []).then(() => {
+                resolve();
+            })
+        });
+        return resp;
+    }
+
+    public moveArticle(id_article: number) {
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('UPDATE `article_prepa` SET has_moved = 1 WHERE id = ' + id_article, []).then(() => {
+                resolve();
+            }).catch(err => console.log(err));
+        });
+        return resp;
+    }
+
+    public updateArticleQuantity(id_article: number, quantite: number) {
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('UPDATE `article_prepa` SET quantite = ' + quantite + ' WHERE id = ' + id_article, []).then(() => {
+                resolve();
+            }).catch(err => console.log(err));
+        });
+        return resp;
+    }
+
+    public deletePreparations(preparations : Array<Preparation>) {
+        let resp = new Promise<any>((resolve) => {
+            preparations.forEach(preparation => {
+                this.db.executeSql('DELETE FROM `preparation` WHERE id = ' + preparation.id, []).then(() => {
+                    if (preparations.indexOf(preparation) === preparations.length - 1) resolve();
+                }).catch(err => console.log(err));
+            });
+        });
+        return resp;
+    }
+
+    public deleteMvts(mvts : Array<Mouvement>) {
+        let resp = new Promise<any>((resolve) => {
+            mvts.forEach(mouvement => {
+                this.db.executeSql('DELETE FROM `mouvement` WHERE id = ' + mouvement.id, []).then(() => {
+                    if (mvts.indexOf(mouvement) === mvts.length - 1) resolve();
+                }).catch(err => console.log(err));
+            });
+        });
+        return resp;
     }
 
 }
