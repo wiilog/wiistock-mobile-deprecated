@@ -43,7 +43,12 @@ export class ParamsPage {
     testURL() {
         let url: string = this.URL + 'ping';
         this.http.post<any>(url, {}).subscribe(
-            res => this.showToast('URL correcte!'),
+            res => {
+                this.registerURL();
+                this.showToast('URL correcte!').then(() => {
+                    this.navCtrl.setRoot(ConnectPage);
+                });
+            },
             error => this.showToast('URL incorrecte...')
         );
     }

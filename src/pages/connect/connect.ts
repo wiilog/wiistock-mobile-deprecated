@@ -63,7 +63,9 @@ export class ConnectPage {
     }
 
     public goToParams() {
-        this.navCtrl.push(ParamsPage);
+        if (!this.hasLoaded) {
+            this.navCtrl.push(ParamsPage);
+        }
     }
 
 }

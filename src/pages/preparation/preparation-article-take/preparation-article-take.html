@@ -6,14 +6,28 @@
 
 <ion-content padding>
 
-    <div class="d-flex">
-        <ion-label>Article : {{article.reference}}. Quantité : {{ article.quantite }}</ion-label>
-    </div>
-    <div class="d-flex">
-        <ion-label>Quantité de prélèvement</ion-label>
-        <ion-input clearInput type="number" value="{{quantite}}" [(ngModel)]="quantite"></ion-input>
-    </div>
+    <ion-row class="row-menu-stats" no-border no-lines>
+        <ion-col col-12 class="col-menu-stats">
+            <p>Article : </p>
+            <p class="number">{{article.reference}}</p>
+            <br>
+        </ion-col>
+        <ion-col col-12 class="col-menu-stats">
+            <p>Quantité disponible : </p>
+            <p class="number">{{article.quantite}}</p>
+            <br>
+        </ion-col>
+        <ion-col col-12 class="col-menu-stats">
+            <ion-item no-border no-lines>
+                <ion-label>Quantité à prélever</ion-label>
+                <ion-input name="quantite" type="number" value="{{quantite}}" [(ngModel)]="quantite" max="{{quantite}}"></ion-input>
+            </ion-item>
+            <br>
+        </ion-col>
+        <ion-col col-12 class="col-menu-stats">
+            <ion-icon class="big-icon" name="checkmark-circle" (click)="addArticle()"></ion-icon>
+        </ion-col>
+    </ion-row>
 
-    <ion-icon class="big-icon" name="checkmark-circle" (click)="addArticle()"></ion-icon>
 
 </ion-content>

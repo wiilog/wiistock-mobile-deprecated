@@ -1,8 +1,6 @@
-// import { NavController, NavParams } from 'ionic-angular';
 import {SQLite, SQLiteObject} from "@ionic-native/sqlite";
 import {Injectable} from '@angular/core';
 import {StorageService} from "../../app/services/storage.service";
-import {Pro} from "@ionic/pro";
 import moment from "moment";
 import {Preparation} from "../../app/entities/preparation";
 import {Mouvement} from "../../app/entities/mouvement";
@@ -54,7 +52,7 @@ export class SqliteProvider {
                                                         this.db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []).then(() => {
                                                             console.log('inserted single api param');
                                                             this.db.executeSql('DROP TABLE IF EXISTS `preparation`', []).then(() => {
-                                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []).then(() => {
+                                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER)', []).then(() => {
                                                                     console.log('table prepa créee');
                                                                     this.db.executeSql('DROP TABLE IF EXISTS `article_prepa`', []).then(() => {
                                                                         this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []).then(() => {
@@ -92,8 +90,8 @@ export class SqliteProvider {
                                                     .then(() => {
                                                         console.log('Tables cleansed');
                                                     }).catch(err => {
-                                                    console.log(err);
-                                                }));
+                                                        console.log(err);
+                                                    }));
                                             }).catch(err => {
                                             console.log(err);
                                         });
@@ -124,76 +122,94 @@ export class SqliteProvider {
     }
 
     public async importData(data, refresh = false) {
-        if (!refresh) this.storageService.setApiKey(data['apiKey']);
 
-        let articles = data['articles'];
-        let articleValues = [];
-        for (let article of articles) {
-            articleValues.push("(" + null + ", '" + article.reference + "', " + (article.quantiteStock || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ")");
-        }
-        let articleValuesStr = articleValues.join(', ');
-        let sqlArticles = 'INSERT INTO `article` (`id`, `reference`, `quantite`) VALUES ' + articleValuesStr + ';';
-        console.log(sqlArticles);
-
-
-        let emplacements = data['emplacements'];
-        let emplacementValues = [];
-        for (let emplacement of emplacements) {
-            emplacementValues.push("(" + emplacement.id + ", '" + emplacement.label.replace(/(\"|\')/g, "\'$1") + "')");
-        }
-        let emplacementValuesStr = emplacementValues.join(', ');
-        let sqlEmplacements = 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';';
-        console.log(sqlEmplacements);
-
-
-        let prepas = data['preparations'];
-        let prepasValues = [];
-        for (let prepa of prepas) {
-            this.findOne('preparation', prepa.id).then((prepaInserted) => {
-                console.log(prepaInserted);
-                if (prepaInserted === null) {
-                    prepasValues.push("(" + prepa.id + ", '" + prepa.number + "', " + null + ", " + null + ")");
+        return new Promise<any>((resolve) => {
+            let promisePreps = new Promise<any>((resolvePrepsStorage) => {
+                if (!refresh) {
+                    this.storageService.setApiKey(data['apiKey']);
+                    this.storageService.setPreps().then(() => {
+                        resolvePrepsStorage();
+                    })
+                } else {
+                    resolvePrepsStorage();
                 }
-                if (prepas.indexOf(prepa) === prepas.length - 1) {
-                    let prepasValuesStr = prepasValues.join(', ');
-                    let sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`) VALUES ' + prepasValuesStr + ';';
-                    console.log(sqlPrepas);
-                    let articlesPrepa = data['articlesPrepa'];
-                    let articlesPrepaValues = [];
-                    for (let article of articlesPrepa) {
-                        this.findArticlesByPrepa(article.id_prepa).then((articles) => {
-                            console.log(article);
-                            console.log(articles);
-                            if (articles.find(articlePrepa => articlePrepa.reference === article.reference && articlePrepa.is_ref === article.is_ref) === undefined) {
-                                articlesPrepaValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_prepa + ", " + 0 + ", '" + article.location + "')");
+            });
+            promisePreps.then(() => {
+                let articles = data['articles'];
+                let articleValues = [];
+                for (let article of articles) {
+                    articleValues.push("(" + null + ", '" + article.reference + "', " + (article.quantiteStock || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ")");
+                }
+                let articleValuesStr = articleValues.join(', ');
+                let sqlArticles = 'INSERT INTO `article` (`id`, `reference`, `quantite`) VALUES ' + articleValuesStr + ';';
+                console.log(sqlArticles);
+
+
+                let emplacements = data['emplacements'];
+                let emplacementValues = [];
+                for (let emplacement of emplacements) {
+                    emplacementValues.push("(" + emplacement.id + ", '" + emplacement.label.replace(/(\"|\')/g, "\'$1") + "')");
+                }
+                let emplacementValuesStr = emplacementValues.join(', ');
+                let sqlEmplacements = 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';';
+
+                let prepas = data['preparations'];
+                let prepasValues = [];
+                let promisePrepas = new Promise<any>((resolvePreps) => {
+                    if (prepas.length === 0) resolvePreps();
+                    for (let prepa of prepas) {
+                        this.findOne('preparation', prepa.id).then((prepaInserted) => {
+                            console.log(prepaInserted);
+                            if (prepaInserted === null) {
+                                prepasValues.push("(" + prepa.id + ", '" + prepa.number + "', " + null + ", " + null + ", 0)");
                             }
-                            if (articlesPrepa.indexOf(article) === articlesPrepa.length - 1) {
-                                let articlesPrepaValuesStr = articlesPrepaValues.join(', ');
-                                let sqlArticlesPrepa = 'INSERT INTO `article_prepa` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_prepa`, `has_moved`, `emplacement`) VALUES ' + articlesPrepaValuesStr + ';';
-                                console.log(sqlArticlesPrepa);
-                                let resp;
-                                resp = new Promise<any>((resolve) => {
-                                    this.db.executeSql(sqlArticles, [])
-                                        .then(val => val).catch((err) => console.log(err)).then(() => {
-                                        this.db.executeSql(sqlEmplacements, [])
-                                            .then(val => val).catch((err) => console.log(err)).then(() => {
-                                            this.db.executeSql(sqlPrepas, [])
-                                                .then(val => val).catch((err) => console.log(err)).then(() => {
-                                                resolve(this.db.executeSql(sqlArticlesPrepa, [])
-                                                    .then(val => val).catch((err) => console.log(err)).then(() => {
-                                                        console.log("fdf");
-                                                    }));
-                                            });
-                                        });
+                            if (prepas.indexOf(prepa) === prepas.length - 1) {
+                                this.findAll('`preparation`').then((preparations) => {
+                                    if (preparations.length === 0) resolvePreps();
+                                    this.deletePreparations(preparations.filter(p => prepas.find(prep => prep.id === p.id) === undefined)).then(() => {
+                                        resolvePreps();
                                     });
                                 });
-                                return resp;
                             }
                         });
                     }
-                }
-            });
-        }
+                });
+                promisePrepas.then(() => {
+                    let prepasValuesStr = prepasValues.join(', ');
+                    let sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`) VALUES ' + prepasValuesStr + ';';
+                    let articlesPrepa = data['articlesPrepa'];
+                    let articlesPrepaValues = [];
+                    let promiseAP = new Promise<any>((resolveAP) => {
+                        for (let article of articlesPrepa) {
+                            if (articlesPrepa.length === 0) resolveAP();
+                            this.findArticlesByPrepa(article.id_prepa).then((articles) => {
+                                if (articles.find(articlePrepa => articlePrepa.reference === article.reference && articlePrepa.is_ref === article.is_ref) === undefined) {
+                                    articlesPrepaValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_prepa + ", " + 0 + ", '" + article.location + "')");
+                                }
+                                if (articlesPrepa.indexOf(article) === articlesPrepa.length - 1) resolveAP()
+                            });
+                        }
+                    });
+                    promiseAP.then(() => {
+                        let articlesPrepaValuesStr = articlesPrepaValues.join(', ');
+                        let sqlArticlesPrepa = 'INSERT INTO `article_prepa` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_prepa`, `has_moved`, `emplacement`) VALUES ' + articlesPrepaValuesStr + ';';
+                        this.db.executeSql(sqlArticles, [])
+                            .then(val => val).catch((err) => console.log(err)).then(() => {
+                            this.db.executeSql(sqlEmplacements, [])
+                                .then(val => val).catch((err) => console.log(err)).then(() => {
+                                this.db.executeSql(sqlPrepas, [])
+                                    .then(val => val).catch((err) => console.log(err)).then(() => {
+                                    resolve(this.db.executeSql(sqlArticlesPrepa, [])
+                                        .then(val => val).catch((err) => console.log(err)).then(() => {
+                                            console.log('Inserted data');
+                                        }));
+                                });
+                            });
+                        });
+                    });
+                });
+            })
+        })
 
     }
 
@@ -428,6 +444,26 @@ export class SqliteProvider {
         });
     }
 
+    public finishPrepaStorage() {
+        return new Promise<any>((resolve) => {
+            this.storageService.addPrep().then(() => {
+                resolve();
+            });
+        })
+    }
+
+    public getFinishedPreps() {
+        return new Promise<any>((resolve) => {
+            this.storageService.getPreps().then((preps) => {
+                resolve(preps);
+            })
+        });
+    }
+
+    public initPreps() {
+        return this.storageService.setPreps();
+    }
+
     public findArticlesByPrepa(id_prepa: number) {
         let list = [];
         let resp = new Promise<any>((resolve) => {
@@ -498,8 +534,9 @@ export class SqliteProvider {
         return resp;
     }
 
-    public deletePreparations(preparations : Array<Preparation>) {
+    public deletePreparations(preparations: Array<Preparation>) {
         let resp = new Promise<any>((resolve) => {
+            if (preparations.length ===0) resolve();
             preparations.forEach(preparation => {
                 this.db.executeSql('DELETE FROM `preparation` WHERE id = ' + preparation.id, []).then(() => {
                     if (preparations.indexOf(preparation) === preparations.length - 1) resolve();
@@ -509,7 +546,7 @@ export class SqliteProvider {
         return resp;
     }
 
-    public deleteMvts(mvts : Array<Mouvement>) {
+    public deleteMvts(mvts: Array<Mouvement>) {
         let resp = new Promise<any>((resolve) => {
             mvts.forEach(mouvement => {
                 this.db.executeSql('DELETE FROM `mouvement` WHERE id = ' + mouvement.id, []).then(() => {

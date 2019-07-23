@@ -104,39 +104,41 @@ export class PreparationEmplacementPage {
             });
         });
         promise.then(() => {
-            this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label).then(() => {
-                this.sqliteProvider.getAPI_URL().then((result) => {
-                    this.sqliteProvider.getApiKey().then((key) => {
-                        if (result !== null) {
-                            this.sqliteProvider.findAll('`preparation`').then(preparationsToSend => {
-                                this.sqliteProvider.findAll('`mouvement`').then((mvts) => {
-                                    let url: string = result + this.apiFinish;
-                                    let params = {
-                                        preparations: preparationsToSend.filter(p => p.date_end !== null),
-                                        mouvements: mvts,
-                                        apiKey: key
-                                    };
-                                    this.http.post<any>(url, params).subscribe(resp => {
-                                            if (resp.success) {
-                                                this.sqliteProvider.deletePreparations(params.preparations).then(() => {
-                                                    this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
-                                                        this.navCtrl.push(PreparationMenuPage);
+            this.sqliteProvider.finishPrepaStorage().then(() => {
+                this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label).then(() => {
+                    this.sqliteProvider.getAPI_URL().then((result) => {
+                        this.sqliteProvider.getApiKey().then((key) => {
+                            if (result !== null) {
+                                this.sqliteProvider.findAll('`preparation`').then(preparationsToSend => {
+                                    this.sqliteProvider.findAll('`mouvement`').then((mvts) => {
+                                        let url: string = result + this.apiFinish;
+                                        let params = {
+                                            preparations: preparationsToSend.filter(p => p.date_end !== null),
+                                            mouvements: mvts,
+                                            apiKey: key
+                                        };
+                                        this.http.post<any>(url, params).subscribe(resp => {
+                                                if (resp.success) {
+                                                    this.sqliteProvider.deletePreparations(params.preparations).then(() => {
+                                                        this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
+                                                            this.navCtrl.push(PreparationMenuPage);
+                                                        });
                                                     });
-                                                });
-                                            } else {
-                                                this.showToast(resp.msg);
+                                                } else {
+                                                    this.showToast(resp.msg);
+                                                }
+                                            },
+                                            error => {
+                                                this.navCtrl.push(PreparationMenuPage);
+                                                console.log(error);
                                             }
-                                        },
-                                        error => {
-                                            this.navCtrl.push(PreparationMenuPage);
-                                            console.log(error);
-                                        }
-                                    );
+                                        );
+                                    });
                                 });
-                            });
-                        }
+                            }
+                        });
                     });
-                });
+                })
             })
         })
     }

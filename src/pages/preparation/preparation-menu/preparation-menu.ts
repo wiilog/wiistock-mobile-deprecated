@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
 import {MenuPage} from "../../menu/menu";
 import {Preparation} from "../../../app/entities/preparation";
@@ -29,8 +29,7 @@ export class PreparationMenuPage {
         public navParams: NavParams,
         public sqlLiteProvider: SqliteProvider,
         public toastController: ToastController,
-        public http: HttpClient,
-        private changeDetectorRef: ChangeDetectorRef) {
+        public http: HttpClient,) {
     }
 
     goHome() {
@@ -50,26 +49,30 @@ export class PreparationMenuPage {
     }
 
     synchronise(fromStart: boolean) {
-        console.log('import data');
         this.hasLoaded = false;
         this.sqlLiteProvider.getAPI_URL().then((result) => {
             if (result !== null) {
                 let url: string = result + this.dataApi;
-                console.log(url);
-                this.http.post<any>(url, {}).subscribe(resp => {
-                    if (resp.success) {
-                        console.log('ccc');
-                        this.sqlLiteProvider.importData(resp.data, true)
-                            .then(() => {
-                                this.sqlLiteProvider.findAll('`preparation`').then(preparations => {
-                                    this.preparations = preparations.filter(p => p.date_end === null);
-                                    this.hasLoaded = true;
+                this.sqlLiteProvider.getApiKey().then((key) => {
+                    console.log(url);
+                    this.http.post<any>(url, {apiKey : key}).subscribe(resp => {
+                        if (resp.success) {
+                            console.log('ccc');
+                            this.sqlLiteProvider.importData(resp.data, true)
+                                .then(() => {
+                                    this.sqlLiteProvider.findAll('`preparation`').then(preparations => {
+                                        this.preparations = preparations.filter(p => p.date_end === null);
+                                        this.hasLoaded = true;
+                                    });
                                 });
-                            });
-                    } else {
+                        } else {
+                            this.hasLoaded = true;
+                            this.showToast('Erreur');
+                        }
+                    }, error => {
                         this.hasLoaded = true;
-                        this.showToast('Erreur');
-                    }
+                        this.showToast('Erreur réseau');
+                    });
                 });
             } else {
                 this.showToast('Aucune configuration URL...')

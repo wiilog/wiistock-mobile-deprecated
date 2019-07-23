@@ -4,6 +4,7 @@ import {Storage} from '@ionic/storage';
 
 const API_KEY = 'api-key';
 const OPERATEUR = 'operateur';
+const NB_PREPS = 'prep';
 
 @Injectable()
 export class StorageService {
@@ -15,12 +16,20 @@ export class StorageService {
         this.storage.set(API_KEY, apiKey);
     }
 
+    setPreps() {
+        return this.storage.set(NB_PREPS, 0);
+    }
+
     setOperateur(operateur) {
         this.storage.set(OPERATEUR, operateur);
     }
 
     getOperateur() {
         return this.storage.get(OPERATEUR);
+    }
+
+    getPreps() {
+        return this.storage.get(NB_PREPS);
     }
 
     public setPriseValue(value: string, number: number) {
@@ -86,6 +95,16 @@ export class StorageService {
 
     clear() {
         return this.storage.clear();
+    }
+
+    addPrep() {
+        return new Promise<any>((resolve) => {
+            this.storage.get(NB_PREPS).then((nb_preps) => {
+                this.storage.set(NB_PREPS, nb_preps + 1).then(() => {
+                    resolve();
+                });
+            })
+        });
     }
 
 }

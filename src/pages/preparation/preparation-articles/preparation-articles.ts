@@ -73,6 +73,9 @@ export class PreparationArticlesPage {
             this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
                 this.articlesNT = articles.filter(article => article.has_moved === 0);
                 this.articlesT = articles.filter(article => article.has_moved === 1);
+                if (this.articlesT.length > 0) {
+                    this.started = true;
+                }
             })
         }
 

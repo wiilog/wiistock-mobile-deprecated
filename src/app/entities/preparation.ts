@@ -3,4 +3,5 @@ export class Preparation {
     numero : string;
     emplacement: string;
     date_end : string;
+    started: number;
 }
