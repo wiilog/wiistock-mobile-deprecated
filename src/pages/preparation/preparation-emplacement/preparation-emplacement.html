@@ -1,13 +1,12 @@
 <ion-header>
-  <ion-toolbar>
+  <ion-navbar>
     <ion-buttons start>
       <button ion-button icon-only (click)="goHome()">
         <ion-icon name="home"></ion-icon>
       </button>
     </ion-buttons>
-
     <ion-title>Finaliser une préparation</ion-title>
-  </ion-toolbar>
+  </ion-navbar>
 </ion-header>
 
 <ion-content padding>
@@ -67,8 +66,7 @@
 
 <ion-footer padding>
   <div class="d-flex">
-    <ion-icon class="big-icon" name="arrow-dropleft-circle" navPop></ion-icon>
     <ion-icon class="big-icon" name="qr-scanner" (click)="scan()"></ion-icon>
-    <ion-icon class="big-icon" name="checkmark-circle" (click)="validate()"></ion-icon>
+    <ion-icon class="big-icon" name="checkmark-circle" (click)="validate()" *ngIf="emplacement"></ion-icon>
   </div>
 </ion-footer>

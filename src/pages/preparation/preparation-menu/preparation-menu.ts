@@ -55,16 +55,18 @@ export class PreparationMenuPage {
                 let url: string = result + this.dataApi;
                 this.sqlLiteProvider.getApiKey().then((key) => {
                     console.log(url);
-                    this.http.post<any>(url, {apiKey : key}).subscribe(resp => {
+                    this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
                         if (resp.success) {
                             console.log('ccc');
-                            this.sqlLiteProvider.importData(resp.data, true)
-                                .then(() => {
-                                    this.sqlLiteProvider.findAll('`preparation`').then(preparations => {
-                                        this.preparations = preparations.filter(p => p.date_end === null);
-                                        this.hasLoaded = true;
+                            this.sqlLiteProvider.cleanDataBase(true).then(() => {
+                                this.sqlLiteProvider.importData(resp.data, true)
+                                    .then(() => {
+                                        this.sqlLiteProvider.findAll('`preparation`').then(preparations => {
+                                            this.preparations = preparations.filter(p => p.date_end === null);
+                                            this.hasLoaded = true;
+                                        });
                                     });
-                                });
+                            });
                         } else {
                             this.hasLoaded = true;
                             this.showToast('Erreur');

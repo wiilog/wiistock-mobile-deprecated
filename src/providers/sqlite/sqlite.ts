@@ -79,19 +79,20 @@ export class SqliteProvider {
                         .then(() => {
                             this.db.executeSql('DELETE FROM `mouvement_traca`;', [])
                                 .then(() => {
-                                    resolve();
                                     if (!fromAfter) {
-                                        // this.db.executeSql('DELETE FROM `preparation`;', [])
-                                        //     .then(() => {
-                                        //         resolve(this.db.executeSql('DELETE FROM `article_prepa`;', [])
-                                        //             .then(() => {
-                                        //                 console.log('Tables cleansed');
-                                        //             }).catch(err => {
-                                        //                 console.log(err);
-                                        //             }));
-                                        //     }).catch(err => {
-                                        //     console.log(err);
-                                        // });
+                                        this.db.executeSql('DELETE FROM `preparation`;', [])
+                                            .then(() => {
+                                                resolve(this.db.executeSql('DELETE FROM `article_prepa`;', [])
+                                                    .then(() => {
+                                                        console.log('Tables cleansed');
+                                                    }).catch(err => {
+                                                        console.log(err);
+                                                    }));
+                                            }).catch(err => {
+                                            console.log(err);
+                                        });
+                                    } else {
+                                        resolve();
                                     }
                                 }).catch(err => {
                                 console.log(err);

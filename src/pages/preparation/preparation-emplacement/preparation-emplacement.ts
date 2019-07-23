@@ -1,5 +1,5 @@
-import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
+import {Component, ViewChild} from '@angular/core';
+import {IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
 import {MenuPage} from "../../menu/menu";
 import {Emplacement} from "../../../app/entities/emplacement";
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
@@ -22,6 +22,7 @@ import {HttpClient} from "@angular/common/http";
     templateUrl: 'preparation-emplacement.html',
 })
 export class PreparationEmplacementPage {
+    @ViewChild(Navbar) navBar: Navbar;
 
     emplacement: Emplacement;
     db_locations: Array<Emplacement>;
@@ -39,7 +40,22 @@ export class PreparationEmplacementPage {
             if (typeof (navParams.get('preparation')) !== undefined) {
                 this.preparation = navParams.get('preparation');
             }
+            if (typeof (navParams.get('emplacement')) !== undefined) {
+                this.emplacement = navParams.get('emplacement');
+            }
         });
+        let instance = this;
+        (<any>window).plugins.intentShim.registerBroadcastReceiver({
+                filterActions: [
+                    'io.ionic.starter.ACTION'
+                ],
+                filterCategories: [
+                    'android.intent.category.DEFAULT'
+                ]
+            },
+            function (intent) {
+                instance.testIfBarcodeEquals(intent.extras['com.symbol.datawedge.data_string']);
+            });
     }
 
     goHome() {
@@ -58,6 +74,17 @@ export class PreparationEmplacementPage {
         event.component.endSearch();
     }
 
+    ionViewDidEnter() {
+        this.setBackButtonAction();
+    }
+
+    setBackButtonAction() {
+        this.navBar.backButtonClick = () => {
+            //Write here wherever you wanna do
+            this.navCtrl.push(MenuPage);
+        }
+    }
+
     scan() {
         this.barcodeScanner.scan().then(res => {
             this.testIfBarcodeEquals(res.text);
@@ -72,6 +99,10 @@ export class PreparationEmplacementPage {
                 if (element.label === text) {
                     found = true;
                     instance.emplacement = element;
+                    instance.navCtrl.push(PreparationEmplacementPage, {
+                        preparation : instance.preparation,
+                        emplacement : element
+                    })
                 }
             });
             if (!found) {
@@ -91,56 +122,60 @@ export class PreparationEmplacementPage {
     }
 
     validate() {
-        let instance = this;
-        let promise = new Promise<any>((resolve) => {
-            this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
-                articles.forEach(function (article) {
-                    instance.sqliteProvider.findMvtByArticle(article.id).then((mvt) => {
-                        instance.sqliteProvider.finishMvt(mvt.id, instance.emplacement.label).then(() => {
-                            if (articles.indexOf(article) === articles.length - 1) resolve();
+        if (this.emplacement.label !== '') {
+            let instance = this;
+            let promise = new Promise<any>((resolve) => {
+                this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
+                    articles.forEach(function (article) {
+                        instance.sqliteProvider.findMvtByArticle(article.id).then((mvt) => {
+                            instance.sqliteProvider.finishMvt(mvt.id, instance.emplacement.label).then(() => {
+                                if (articles.indexOf(article) === articles.length - 1) resolve();
+                            });
                         });
                     });
                 });
             });
-        });
-        promise.then(() => {
-            this.sqliteProvider.finishPrepaStorage().then(() => {
-                this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label).then(() => {
-                    this.sqliteProvider.getAPI_URL().then((result) => {
-                        this.sqliteProvider.getApiKey().then((key) => {
-                            if (result !== null) {
-                                this.sqliteProvider.findAll('`preparation`').then(preparationsToSend => {
-                                    this.sqliteProvider.findAll('`mouvement`').then((mvts) => {
-                                        let url: string = result + this.apiFinish;
-                                        let params = {
-                                            preparations: preparationsToSend.filter(p => p.date_end !== null),
-                                            mouvements: mvts,
-                                            apiKey: key
-                                        };
-                                        this.http.post<any>(url, params).subscribe(resp => {
-                                                if (resp.success) {
-                                                    this.sqliteProvider.deletePreparations(params.preparations).then(() => {
-                                                        this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
-                                                            this.navCtrl.push(PreparationMenuPage);
+            promise.then(() => {
+                this.sqliteProvider.finishPrepaStorage().then(() => {
+                    this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label).then(() => {
+                        this.sqliteProvider.getAPI_URL().then((result) => {
+                            this.sqliteProvider.getApiKey().then((key) => {
+                                if (result !== null) {
+                                    this.sqliteProvider.findAll('`preparation`').then(preparationsToSend => {
+                                        this.sqliteProvider.findAll('`mouvement`').then((mvts) => {
+                                            let url: string = result + this.apiFinish;
+                                            let params = {
+                                                preparations: preparationsToSend.filter(p => p.date_end !== null),
+                                                mouvements: mvts,
+                                                apiKey: key
+                                            };
+                                            this.http.post<any>(url, params).subscribe(resp => {
+                                                    if (resp.success) {
+                                                        this.sqliteProvider.deletePreparations(params.preparations).then(() => {
+                                                            this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
+                                                                this.navCtrl.push(PreparationMenuPage);
+                                                            });
                                                         });
-                                                    });
-                                                } else {
-                                                    this.showToast(resp.msg);
+                                                    } else {
+                                                        this.showToast(resp.msg);
+                                                    }
+                                                },
+                                                error => {
+                                                    this.navCtrl.push(PreparationMenuPage);
+                                                    console.log(error);
                                                 }
-                                            },
-                                            error => {
-                                                this.navCtrl.push(PreparationMenuPage);
-                                                console.log(error);
-                                            }
-                                        );
+                                            );
+                                        });
                                     });
-                                });
-                            }
+                                }
+                            });
                         });
-                    });
+                    })
                 })
             })
-        })
+        } else {
+            this.showToast('Veuillez sélectionner ou scanner un emplacement.');
+        }
     }
 
 }
