@@ -53,8 +53,10 @@ export class PreparationArticlesPage {
                                 if (resp.success) {
                                     this.started = true;
                                     this.isValid = true;
-                                    this.showToast('Préparation commencée.');
-                                    this.registerMvt();
+                                    this.sqliteProvider.startPrepa(this.preparation.id).then(() => {
+                                        this.showToast('Préparation commencée.');
+                                        this.registerMvt();
+                                    });
                                 } else {
                                     this.isValid = false;
                                     this.showToast(resp.msg);

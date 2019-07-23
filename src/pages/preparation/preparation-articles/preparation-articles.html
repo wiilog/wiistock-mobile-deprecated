@@ -19,12 +19,12 @@
     <div class="d-flex">
         <h4>Préparation n°{{preparation.numero}}</h4>
     </div>
-    <div class="d-flex">
+    <div class="d-flex" [hidden]="articlesNT && articlesNT.length === 0">
         <p>Liste des articles à traiter</p>
     </div>
-
-    <p>Veuillez scanner un article pour commencer son traitement.</p>
-    <ion-list>
+    <p [hidden]="articlesNT && articlesNT.length > 0">Tous les articles ont étés traités, vous pouvez valider la préparation.</p>
+    <p [hidden]="articlesNT && articlesNT.length === 0">Veuillez scanner un article pour commencer son traitement.</p>
+    <ion-list [hidden]="articlesNT && articlesNT.length === 0">
         <ion-grid>
             <button [disabled]="!isValid" (click)="testIfBarcodeEquals(article, false)" class="list" ion-item *ngFor="let article of articlesNT">
                 <ion-row>
@@ -36,11 +36,11 @@
         </ion-grid>
     </ion-list>
 
-    <div class="d-flex">
+    <div class="d-flex" [hidden]="articlesT && articlesT.length === 0">
         <p>Liste des articles traités</p>
     </div>
 
-    <ion-list>
+    <ion-list [hidden]="articlesT && articlesT.length === 0">
         <ion-grid>
             <button [disabled]="!isValid" class="list" ion-item *ngFor="let article of articlesT">
                 <ion-row>
@@ -55,7 +55,7 @@
 </ion-content>
 <ion-footer padding>
     <div class="d-flex">
-        <ion-icon class="big-icon" name="checkmark" (click)="validate()"></ion-icon>
-        <ion-icon class="big-icon" name="qr-scanner" (click)="scan()"></ion-icon>
+        <ion-icon class="big-icon" name="checkmark" (click)="validate()" [class.alert]="articlesNT && articlesNT.length === 0"></ion-icon>
+        <ion-icon class="big-icon" name="qr-scanner" (click)="scan()" [hidden]="articlesNT && articlesNT.length === 0"></ion-icon>
     </div>
 </ion-footer>

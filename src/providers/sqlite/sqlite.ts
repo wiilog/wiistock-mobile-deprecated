@@ -51,17 +51,13 @@ export class SqliteProvider {
                                                         console.log('table api_params créée!');
                                                         this.db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []).then(() => {
                                                             console.log('inserted single api param');
-                                                            this.db.executeSql('DROP TABLE IF EXISTS `preparation`', []).then(() => {
-                                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER)', []).then(() => {
-                                                                    console.log('table prepa créee');
-                                                                    this.db.executeSql('DROP TABLE IF EXISTS `article_prepa`', []).then(() => {
-                                                                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []).then(() => {
-                                                                            console.log('table article prepa crée');
-                                                                        }).catch(err => console.log(err));
-                                                                    });
+                                                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER)', []).then(() => {
+                                                                console.log('table prepa créee');
+                                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []).then(() => {
+                                                                    console.log('table article prepa crée');
                                                                 }).catch(err => console.log(err));
                                                             });
-                                                        }).catch(err => console.log(err));
+                                                        });
                                                     })
                                                 })
                                                 .catch(e => console.log(e));
@@ -83,18 +79,19 @@ export class SqliteProvider {
                         .then(() => {
                             this.db.executeSql('DELETE FROM `mouvement_traca`;', [])
                                 .then(() => {
+                                    resolve();
                                     if (!fromAfter) {
-                                        this.db.executeSql('DELETE FROM `preparation`;', [])
-                                            .then(() => {
-                                                resolve(this.db.executeSql('DELETE FROM `article_prepa`;', [])
-                                                    .then(() => {
-                                                        console.log('Tables cleansed');
-                                                    }).catch(err => {
-                                                        console.log(err);
-                                                    }));
-                                            }).catch(err => {
-                                            console.log(err);
-                                        });
+                                        // this.db.executeSql('DELETE FROM `preparation`;', [])
+                                        //     .then(() => {
+                                        //         resolve(this.db.executeSql('DELETE FROM `article_prepa`;', [])
+                                        //             .then(() => {
+                                        //                 console.log('Tables cleansed');
+                                        //             }).catch(err => {
+                                        //                 console.log(err);
+                                        //             }));
+                                        //     }).catch(err => {
+                                        //     console.log(err);
+                                        // });
                                     }
                                 }).catch(err => {
                                 console.log(err);
@@ -188,7 +185,6 @@ export class SqliteProvider {
                         console.log(articlesPrepa);
                         if (articlesPrepa.length === 0) resolveAP();
                         for (let article of articlesPrepa) {
-                            console.log('bdghfdsalt');
                             this.findArticlesByPrepa(article.id_prepa).then((articles) => {
                                 console.log(articles);
                                 if (articles.find(articlePrepa => articlePrepa.reference === article.reference && articlePrepa.is_ref === article.is_ref) === undefined) {
@@ -515,6 +511,15 @@ export class SqliteProvider {
         return resp;
     }
 
+    public startPrepa(id_prepa: number) {
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('UPDATE `preparation` SET started = 1 WHERE id = ' + id_prepa, []).then(() => {
+                resolve();
+            })
+        });
+        return resp;
+    }
+
     public finishMvt(id_mvt: number, location_to: string) {
         let resp = new Promise<any>((resolve) => {
             this.db.executeSql('UPDATE `mouvement` SET date_drop = \'' + moment().format() + '\', location_to = \'' + location_to + '\' WHERE id = ' + id_mvt, []).then(() => {
@@ -551,7 +556,11 @@ export class SqliteProvider {
                 console.log('"gfdgdfgd');
                 preparations.forEach(preparation => {
                     this.db.executeSql('DELETE FROM `preparation` WHERE id = ' + preparation.id, []).then(() => {
-                        if (preparations.indexOf(preparation) === preparations.length - 1) resolve();
+                        this.db.executeSql('DELETE FROM `article_prepa` WHERE id_prepa = ' + preparation.id, []).then(() => {
+                            if (preparations.indexOf(preparation) === preparations.length - 1) {
+                                resolve();
+                            }
+                        }).catch(err => console.log(err));
                     }).catch(err => console.log(err));
                 });
             }
