@@ -34,7 +34,7 @@ export class PreparationArticleTakePage {
     }
 
     addArticle() {
-        if (this.quantite > this.article.quantite && this.quantite <= 0) {
+        if (this.quantite > this.article.quantite || this.quantite <= 0) {
             this.showToast('Veuillez selectionner une quantité valide.');
         } else {
             this.navCtrl.push(PreparationArticlesPage, {
