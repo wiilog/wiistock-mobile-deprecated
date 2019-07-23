@@ -165,10 +165,15 @@ export class SqliteProvider {
                             }
                             if (prepas.indexOf(prepa) === prepas.length - 1) {
                                 this.findAll('`preparation`').then((preparations) => {
-                                    if (preparations.length === 0) resolvePreps();
-                                    this.deletePreparations(preparations.filter(p => prepas.find(prep => prep.id === p.id) === undefined)).then(() => {
+                                    if (preparations.length === 0) {
+                                        console.log('resolved');
                                         resolvePreps();
-                                    });
+                                    } else {
+                                        this.deletePreparations(preparations.filter(p => prepas.find(prep => prep.id === p.id) === undefined)).then(() => {
+                                            console.log("gfdgfdYESSS");
+                                            resolvePreps();
+                                        });
+                                    }
                                 });
                             }
                         });
@@ -180,9 +185,12 @@ export class SqliteProvider {
                     let articlesPrepa = data['articlesPrepa'];
                     let articlesPrepaValues = [];
                     let promiseAP = new Promise<any>((resolveAP) => {
+                        console.log(articlesPrepa);
+                        if (articlesPrepa.length === 0) resolveAP();
                         for (let article of articlesPrepa) {
-                            if (articlesPrepa.length === 0) resolveAP();
+                            console.log('bdghfdsalt');
                             this.findArticlesByPrepa(article.id_prepa).then((articles) => {
+                                console.log(articles);
                                 if (articles.find(articlePrepa => articlePrepa.reference === article.reference && articlePrepa.is_ref === article.is_ref) === undefined) {
                                     articlesPrepaValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_prepa + ", " + 0 + ", '" + article.location + "')");
                                 }
@@ -536,12 +544,17 @@ export class SqliteProvider {
 
     public deletePreparations(preparations: Array<Preparation>) {
         let resp = new Promise<any>((resolve) => {
-            if (preparations.length ===0) resolve();
-            preparations.forEach(preparation => {
-                this.db.executeSql('DELETE FROM `preparation` WHERE id = ' + preparation.id, []).then(() => {
-                    if (preparations.indexOf(preparation) === preparations.length - 1) resolve();
-                }).catch(err => console.log(err));
-            });
+            if (preparations.length === 0) {
+                console.log('"gfdgdfgd');
+                resolve();
+            } else {
+                console.log('"gfdgdfgd');
+                preparations.forEach(preparation => {
+                    this.db.executeSql('DELETE FROM `preparation` WHERE id = ' + preparation.id, []).then(() => {
+                        if (preparations.indexOf(preparation) === preparations.length - 1) resolve();
+                    }).catch(err => console.log(err));
+                });
+            }
         });
         return resp;
     }
