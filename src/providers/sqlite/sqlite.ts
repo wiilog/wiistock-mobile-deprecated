@@ -4,6 +4,7 @@ import {StorageService} from "../../app/services/storage.service";
 import moment from "moment";
 import {Preparation} from "../../app/entities/preparation";
 import {Mouvement} from "../../app/entities/mouvement";
+import {ArticlePrepa} from "../../app/entities/articlePrepa";
 
 const DB_NAME: string = 'follow_gt';
 
@@ -78,12 +79,18 @@ export class SqliteProvider {
                                     if (!fromAfter) {
                                         this.db.executeSql('DELETE FROM `preparation`;', [])
                                             .then(() => {
-                                                resolve(this.db.executeSql('DELETE FROM `article_prepa`;', [])
+                                                this.db.executeSql('DELETE FROM `article_prepa`;', [])
                                                     .then(() => {
-                                                        console.log('Tables cleansed');
+                                                        this.db.executeSql('DELETE FROM `mouvement`;', [])
+                                                            .then(() => {
+                                                                resolve();
+                                                                console.log('Tables cleansed');
+                                                            }).catch(err => {
+                                                            console.log(err);
+                                                        });
                                                     }).catch(err => {
                                                         console.log(err);
-                                                    }));
+                                                    });
                                             }).catch(err => {
                                             console.log(err);
                                         });
@@ -572,6 +579,15 @@ export class SqliteProvider {
                     if (mvts.indexOf(mouvement) === mvts.length - 1) resolve();
                 }).catch(err => console.log(err));
             });
+        });
+        return resp;
+    }
+
+    public delete(table, id) {
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('DELETE FROM ' + table + 'WHERE id = ' + id, []).then(() => {
+                resolve();
+            }).catch(err => console.log(err));
         });
         return resp;
     }

@@ -41,35 +41,6 @@ export class PreparationArticlesPage {
         public sqliteProvider: SqliteProvider,
         public http: HttpClient,
         public barcodeScanner: BarcodeScanner) {
-        if (navParams.get('article') !== undefined && navParams.get('quantite') !== undefined) {
-            this.isValid = this.navParams.get('valid');
-            this.started = this.navParams.get('started');
-            if (!this.started) {
-                this.sqliteProvider.getAPI_URL().then((result) => {
-                    this.sqliteProvider.getApiKey().then((key) => {
-                        if (result !== null) {
-                            let url: string = result + this.apiStartPrepa;
-                            this.http.post<any>(url, {id: this.preparation.id, apiKey: key}).subscribe(resp => {
-                                if (resp.success) {
-                                    this.started = true;
-                                    this.isValid = true;
-                                    this.sqliteProvider.startPrepa(this.preparation.id).then(() => {
-                                        this.showToast('Préparation commencée.');
-                                        this.registerMvt();
-                                    });
-                                } else {
-                                    this.isValid = false;
-                                    this.showToast(resp.msg);
-                                }
-                            });
-                        }
-                    });
-                });
-            } else {
-                this.registerMvt();
-            }
-        }
-
         if (typeof (navParams.get('preparation')) !== undefined) {
             this.preparation = navParams.get('preparation');
             this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
@@ -77,6 +48,34 @@ export class PreparationArticlesPage {
                 this.articlesT = articles.filter(article => article.has_moved === 1);
                 if (this.articlesT.length > 0) {
                     this.started = true;
+                }
+                if (navParams.get('article') !== undefined && navParams.get('quantite') !== undefined) {
+                    this.isValid = this.navParams.get('valid');
+                    this.started = this.navParams.get('started');
+                    if (!this.started) {
+                        this.sqliteProvider.getAPI_URL().then((result) => {
+                            this.sqliteProvider.getApiKey().then((key) => {
+                                if (result !== null) {
+                                    let url: string = result + this.apiStartPrepa;
+                                    this.http.post<any>(url, {id: this.preparation.id, apiKey: key}).subscribe(resp => {
+                                        if (resp.success) {
+                                            this.started = true;
+                                            this.isValid = true;
+                                            this.sqliteProvider.startPrepa(this.preparation.id).then(() => {
+                                                this.showToast('Préparation commencée.');
+                                                this.registerMvt();
+                                            });
+                                        } else {
+                                            this.isValid = false;
+                                            this.showToast(resp.msg);
+                                        }
+                                    });
+                                }
+                            });
+                        });
+                    } else {
+                        this.registerMvt();
+                    }
                 }
             })
         }
@@ -116,7 +115,7 @@ export class PreparationArticlesPage {
     }
 
 
-    setBackButtonAction(){
+    setBackButtonAction() {
         this.navBar.backButtonClick = () => {
 
             //Write here wherever you wanna do
@@ -137,8 +136,8 @@ export class PreparationArticlesPage {
                     has_moved: 1,
                     emplacement: this.navParams.get('article').emplacement
                 };
-                this.sqliteProvider.insert('`article_prepa`', newArticle).then((rowInserted) => {
-                    console.log(rowInserted.insertId);
+                let articleAlready = this.articlesT.find(art => art.id_prepa === newArticle.id_prepa && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
+                if (articleAlready !== undefined) {
                     let mouvement: Mouvement = {
                         id: null,
                         reference: newArticle.reference,
@@ -149,18 +148,46 @@ export class PreparationArticlesPage {
                         location: null,
                         type: 'prise-dépose',
                         is_ref: newArticle.is_ref,
-                        id_article_prepa: rowInserted.insertId,
-                        id_prepa : newArticle.id_prepa
+                        id_article_prepa: articleAlready.id,
+                        id_prepa: newArticle.id_prepa
                     };
-                    this.sqliteProvider.updateArticleQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - Number(this.navParams.get('quantite'))).then(() => {
-                        this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
-                            this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
-                                this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                this.articlesT = articles.filter(article => article.has_moved === 1);
-                            })
+                    this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
+                        this.sqliteProvider.updateArticleQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite).then(() => {
+                            this.sqliteProvider.updateArticleQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - newArticle.quantite).then(() => {
+                                this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
+                                    console.log(articles);
+                                    this.articlesNT = articles.filter(article => article.has_moved === 0);
+                                    this.articlesT = articles.filter(article => article.has_moved === 1);
+                                })
+                            });
                         });
                     });
-                });
+                } else {
+                    this.sqliteProvider.insert('`article_prepa`', newArticle).then((rowInserted) => {
+                        console.log(rowInserted.insertId);
+                        let mouvement: Mouvement = {
+                            id: null,
+                            reference: newArticle.reference,
+                            quantity: newArticle.quantite,
+                            date_pickup: moment().format(),
+                            location_from: newArticle.emplacement,
+                            date_drop: null,
+                            location: null,
+                            type: 'prise-dépose',
+                            is_ref: newArticle.is_ref,
+                            id_article_prepa: rowInserted.insertId,
+                            id_prepa: newArticle.id_prepa
+                        };
+                        this.sqliteProvider.updateArticleQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - Number(this.navParams.get('quantite'))).then(() => {
+                            this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
+                                this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
+                                    this.articlesNT = articles.filter(article => article.has_moved === 0);
+                                    this.articlesT = articles.filter(article => article.has_moved === 1);
+                                })
+                            });
+                        });
+                    });
+                }
             } else {
                 let mouvement: Mouvement = {
                     id: null,
@@ -173,17 +200,32 @@ export class PreparationArticlesPage {
                     type: 'prise-dépose',
                     is_ref: this.navParams.get('article').is_ref,
                     id_article_prepa: this.navParams.get('article').id,
-                    id_prepa : this.navParams.get('article').id_prepa
+                    id_prepa: this.navParams.get('article').id_prepa
                 };
-                this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
-                    this.sqliteProvider.moveArticle(this.navParams.get('article').id).then(() => {
-                        this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
-                            console.log(articles);
-                            this.articlesNT = articles.filter(article => article.has_moved === 0);
-                            this.articlesT = articles.filter(article => article.has_moved === 1);
-                        })
+                let articleAlready = this.articlesT.find(art => art.id_prepa === mouvement.id_prepa && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
+                if (articleAlready !== undefined) {
+                    this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
+                        this.sqliteProvider.updateArticleQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite).then(() => {
+                            this.sqliteProvider.delete('`article_prepa`', mouvement.id_article_prepa).then(() => {
+                                this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
+                                    console.log(articles);
+                                    this.articlesNT = articles.filter(article => article.has_moved === 0);
+                                    this.articlesT = articles.filter(article => article.has_moved === 1);
+                                })
+                            });
+                        });
                     });
-                });
+                } else {
+                    this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
+                        this.sqliteProvider.moveArticle(this.navParams.get('article').id).then(() => {
+                            this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
+                                console.log(articles);
+                                this.articlesNT = articles.filter(article => article.has_moved === 0);
+                                this.articlesT = articles.filter(article => article.has_moved === 1);
+                            })
+                        });
+                    });
+                }
             }
         }
     }
@@ -197,7 +239,7 @@ export class PreparationArticlesPage {
         if (this.articlesNT.length > 0) {
             this.showToast('Veuillez traiter tous les articles concernés');
         } else {
-            this.navCtrl.push(PreparationEmplacementPage, {preparation : this.preparation})
+            this.navCtrl.push(PreparationEmplacementPage, {preparation: this.preparation})
         }
     }
 

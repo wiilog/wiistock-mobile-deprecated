@@ -30,7 +30,7 @@ export class ConnectPage {
                 this.usersApiProvider.setProvider(this.form, url).subscribe(resp => {
                     if (resp.success) {
                         this.sqliteProvider.setOperateur(this.form.login);
-                        this.sqliteProvider.cleanDataBase(true)
+                        this.sqliteProvider.cleanDataBase()
                             .then(() => {
                                 this.sqliteProvider.clearStorage().then(() => {
                                     this.sqliteProvider.importData(resp.data)

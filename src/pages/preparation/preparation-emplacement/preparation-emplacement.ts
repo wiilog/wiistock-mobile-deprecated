@@ -7,6 +7,7 @@ import {BarcodeScanner} from "@ionic-native/barcode-scanner";
 import {Preparation} from "../../../app/entities/preparation";
 import {PreparationMenuPage} from "../preparation-menu/preparation-menu";
 import {HttpClient} from "@angular/common/http";
+import {PreparationArticlesPage} from "../preparation-articles/preparation-articles";
 
 /**
  * Generated class for the PreparationEmplacementPage page.
@@ -76,7 +77,9 @@ export class PreparationEmplacementPage {
     setBackButtonAction() {
         this.navBar.backButtonClick = () => {
             //Write here wherever you wanna do
-            this.navCtrl.push(MenuPage);
+            this.navCtrl.push(PreparationArticlesPage, {
+                preparation : this.preparation
+            });
         }
     }
 
