@@ -37,36 +37,32 @@ export class SqliteProvider {
                 this.db.executeSql('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))', [])
                     .then(() => {
                         console.log('table emplacement créée !')
-                        this.db.executeSql('DROP TABLE IF EXISTS `mouvement`', []).then(() => {
-                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location_to` TEXT, `type` VARCHAR(255), `is_ref` TEXT, `id_article_prepa` INTEGER)', [])
-                                .then(() => {
-                                    console.log('table mouvement créée !')
-                                    this.db.executeSql('DROP TABLE IF EXISTS `mouvement_traca`', [])
-                                        .then(() => {
-                                            console.log('table mouvement traca deleted !');
-                                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255))', [])
-                                                .then(() => {
-                                                    console.log('table mouvement traca créée !')
-                                                    this.db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []).then(() => {
-                                                        console.log('table api_params créée!');
-                                                        this.db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []).then(() => {
-                                                            console.log('inserted single api param');
-                                                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER)', []).then(() => {
-                                                                console.log('table prepa créee');
-                                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []).then(() => {
-                                                                    console.log('table article prepa crée');
-                                                                }).catch(err => console.log(err));
-                                                            });
+                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location_to` TEXT, `type` VARCHAR(255), `is_ref` TEXT, `id_article_prepa` INTEGER)', [])
+                            .then(() => {
+                                console.log('table mouvement créée !')
+                                this.db.executeSql('DROP TABLE IF EXISTS `mouvement_traca`', [])
+                                    .then(() => {
+                                        console.log('table mouvement traca deleted !');
+                                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255))', [])
+                                            .then(() => {
+                                                console.log('table mouvement traca créée !')
+                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []).then(() => {
+                                                    console.log('table api_params créée!');
+                                                    this.db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []).then(() => {
+                                                        console.log('inserted single api param');
+                                                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER)', []).then(() => {
+                                                            console.log('table prepa créee');
+                                                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []).then(() => {
+                                                                console.log('table article prepa crée');
+                                                            }).catch(err => console.log(err));
                                                         });
-                                                    })
+                                                    });
                                                 })
-                                                .catch(e => console.log(e));
-
-                                        })
-                                        .catch(e => console.log(e));
-                                })
-                                .catch(e => console.log(e));
-                        });
+                                            })
+                                            .catch(e => console.log(e));
+                                    })
+                                    .catch(e => console.log(e));
+                            });
                     });
             });
     }
@@ -204,10 +200,10 @@ export class SqliteProvider {
                                 .then(val => val).catch((err) => console.log(err)).then(() => {
                                 this.db.executeSql(sqlPrepas, [])
                                     .then(val => val).catch((err) => console.log(err)).then(() => {
-                                    resolve(this.db.executeSql(sqlArticlesPrepa, [])
+                                    this.db.executeSql(sqlArticlesPrepa, [])
                                         .then(val => val).catch((err) => console.log(err)).then(() => {
-                                            console.log('Inserted data');
-                                        }));
+                                            resolve();
+                                        });
                                 });
                             });
                         });

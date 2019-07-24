@@ -18,11 +18,11 @@
     <button ion-button type="submit" [disabled]="hasLoaded" block>Connexion</button>
   </form>
   <ion-spinner *ngIf="hasLoaded"></ion-spinner>
-  <img *ngIf="!hasLoaded" src="assets/icon/iconGT.png">
+  <img *ngIf="!hasLoaded" src="assets/icon/followgt.png">
 
 </ion-content>
 <ion-footer padding>
   <div class="d-flex">
-    <ion-icon class="big-icon" name="cog" (click)="goToParams()"></ion-icon>
+    <ion-icon class="big-icon" name="settings" (click)="goToParams()"></ion-icon>
   </div>
 </ion-footer>

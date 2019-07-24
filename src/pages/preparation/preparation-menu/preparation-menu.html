@@ -16,12 +16,8 @@
 </ion-header>
 
 <ion-content padding>
-  <div class="d-flex">
-    <p>Liste des préparations à traiter</p>
-  </div>
-
+  <ion-title *ngIf="preparations && preparations.length === 0">Aucune préparation<br>à traiter.</ion-title>
   <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
-  <p *ngIf="hasLoaded">Veuillez sélectionner une préparation pour commencer son traitement.</p>
   <ion-list *ngIf="hasLoaded">
     <ion-grid>
       <button (click)="goToArticles(preparation)" class="list" ion-item *ngFor="let preparation of preparations">
@@ -35,6 +31,6 @@
 </ion-content>
 <ion-footer padding *ngIf="hasLoaded">
   <div class="d-flex">
-    <ion-icon class="big-icon" name="refresh" (click)="synchronise(false)"></ion-icon>
+    <ion-icon class="big-icon" name="refresh" item-right (click)="synchronise(false)"></ion-icon>
   </div>
 </ion-footer>

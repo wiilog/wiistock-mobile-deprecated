@@ -1,9 +1,8 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
+import {IonicPage, ModalController, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
 import {MenuPage} from "../../menu/menu";
 import {Emplacement} from "../../../app/entities/emplacement";
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import {IonicSelectableComponent} from "ionic-selectable";
 import {BarcodeScanner} from "@ionic-native/barcode-scanner";
 import {Preparation} from "../../../app/entities/preparation";
 import {PreparationMenuPage} from "../preparation-menu/preparation-menu";
@@ -34,7 +33,8 @@ export class PreparationEmplacementPage {
                 public sqliteProvider: SqliteProvider,
                 public toastController: ToastController,
                 public barcodeScanner: BarcodeScanner,
-                public http: HttpClient) {
+                public http: HttpClient,
+                public modal : ModalController) {
         this.sqliteProvider.findAll('emplacement').then((value) => {
             this.db_locations = value;
             if (typeof (navParams.get('preparation')) !== undefined) {
@@ -62,16 +62,11 @@ export class PreparationEmplacementPage {
         this.navCtrl.push(MenuPage);
     }
 
-    emplacementChange(event: { component: IonicSelectableComponent, value: any }) {
-        this.emplacement = event.value;
-        console.log(this.emplacement);
-    }
-
-    searchEmplacement(event: { component: IonicSelectableComponent, text: string }) {
-        let text = event.text.trim();
-        event.component.startSearch();
-        event.component.items = this.sqliteProvider.findByElement('emplacement', 'label', text);
-        event.component.endSearch();
+    searchEmplacementModal() {
+        const myModal = this.modal.create('PreparationModalSearchEmplacementPage', {
+            preparation : this.preparation
+        });
+        myModal.present();
     }
 
     ionViewDidEnter() {

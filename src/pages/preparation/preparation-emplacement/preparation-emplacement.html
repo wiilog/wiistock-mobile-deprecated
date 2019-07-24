@@ -1,72 +1,30 @@
 <ion-header>
-  <ion-navbar>
-    <ion-buttons start>
-      <button ion-button icon-only (click)="goHome()">
-        <ion-icon name="home"></ion-icon>
-      </button>
-    </ion-buttons>
-    <ion-title>Finaliser une préparation</ion-title>
-  </ion-navbar>
+    <ion-navbar>
+        <ion-buttons start>
+            <button ion-button icon-only (click)="searchEmplacementModal()">
+                <ion-icon name="search"></ion-icon>
+            </button>
+        </ion-buttons>
+        <ion-title>Finaliser une préparation</ion-title>
+    </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-  <div>
-    <div>
-      <ion-title *ngIf="!emplacement">Veuillez flasher ou sélectionner<br>un emplacement</ion-title>
-      <ion-card>
-        <ion-card-header>
-          <ion-card-title>Emplacement :</ion-card-title>
-        </ion-card-header>
-        <ion-card-content>
-          <ion-item>
-            <ion-label *ngIf="!emplacement">Emplacement</ion-label>
-            <ionic-selectable
-                    item-content
-                    [(ngModel)]="emplacement"
-                    [items]="db_locations"
-                    itemValueField="id"
-                    itemTextField="label"
-                    [canSearch]="true"
-                    (onSearch)="searchEmplacement($event)"
-                    (onChange)="emplacementChange($event)">
-              <ng-template ionicSelectableSearchFailTemplate>
-                <div padding>
-                  Tapez votre recherche...
-                </div>
-              </ng-template>
-            </ionic-selectable>
-          </ion-item>
-        </ion-card-content>
-      </ion-card>
-
-      <!--<div class="autocomplete">-->
-      <!--<ion-searchbar-->
-      <!--[(ngModel)]="locationLabel">-->
-      <!--&lt;!&ndash;(ionFocus)="addFocus()"&ndash;&gt;-->
-      <!--&lt;!&ndash;(ionInput)="search()"&ndash;&gt;-->
-      <!--&lt;!&ndash;(ionBlur)="removeFocus()"&ndash;&gt;-->
-      <!--&lt;!&ndash;debounce=500&ndash;&gt;-->
-      <!--</ion-searchbar>-->
-      <!--<ion-list>-->
-      <!--<ion-item *ngFor="let db_location of db_locations">{{ db_location.label }}</ion-item>-->
-      <!--</ion-list>-->
-      <!--</div>-->
-    </div>
-
-    <!--<button (click)="vibrate()">-->
-    <!--vibration-->
-    <!--</button>-->
-    <!--<ion-content text-center>-->
-    <!--<ion-icon name="barcode" color="danger"></ion-icon>-->
-    <!--</ion-content>-->
-
-  </div>
-
+    <ion-row class="row-menu-stats">
+        <ion-col class="col-menu-stats" *ngIf="emplacement">
+            <p class="smaller">Emplacement sélectionné :</p>
+            <p class="smaller">{{emplacement.label}}</p>
+        </ion-col>
+        <ion-col class="col-menu-stats">
+            <p class="big">SCANNER</p>
+            <ion-icon name="barcode"></ion-icon>
+        </ion-col>
+    </ion-row>
 </ion-content>
 
 <ion-footer padding>
-  <div class="d-flex">
-    <ion-icon class="big-icon" name="qr-scanner" (click)="scan()"></ion-icon>
-    <ion-icon class="big-icon" name="checkmark-circle" (click)="validate()" *ngIf="emplacement"></ion-icon>
-  </div>
+    <div class="d-flex">
+        <ion-icon class="big-icon" name="qr-scanner" (click)="scan()"></ion-icon>
+        <ion-icon class="big-icon" name="checkmark-circle" (click)="validate()" *ngIf="emplacement"></ion-icon>
+    </div>
 </ion-footer>
