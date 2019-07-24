@@ -5,6 +5,7 @@ import moment from "moment";
 import {Preparation} from "../../app/entities/preparation";
 import {Mouvement} from "../../app/entities/mouvement";
 import {ArticlePrepa} from "../../app/entities/articlePrepa";
+import {Livraison} from "../../app/entities/livraison";
 
 const DB_NAME: string = 'follow_gt';
 
@@ -55,6 +56,12 @@ export class SqliteProvider {
                                                             console.log('table prepa créee');
                                                             this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []).then(() => {
                                                                 console.log('table article prepa crée');
+                                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []).then(() => {
+                                                                    console.log('table prepa créee');
+                                                                    this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_livraison` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_livraison` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []).then(() => {
+                                                                        console.log('table article prepa crée');
+                                                                    }).catch(err => console.log(err));
+                                                                });
                                                             }).catch(err => console.log(err));
                                                         });
                                                     });
@@ -83,14 +90,24 @@ export class SqliteProvider {
                                                     .then(() => {
                                                         this.db.executeSql('DELETE FROM `mouvement`;', [])
                                                             .then(() => {
-                                                                resolve();
-                                                                console.log('Tables cleansed');
+                                                                this.db.executeSql('DELETE FROM `livraison`;', [])
+                                                                    .then(() => {
+                                                                        this.db.executeSql('DELETE FROM `article_livraison`;', [])
+                                                                            .then(() => {
+                                                                                resolve();
+                                                                                console.log('Tables cleansed');
+                                                                            }).catch(err => {
+                                                                            console.log(err);
+                                                                        });
+                                                                    }).catch(err => {
+                                                                    console.log(err);
+                                                                });
                                                             }).catch(err => {
                                                             console.log(err);
                                                         });
                                                     }).catch(err => {
-                                                        console.log(err);
-                                                    });
+                                                    console.log(err);
+                                                });
                                             }).catch(err => {
                                             console.log(err);
                                         });
@@ -201,15 +218,70 @@ export class SqliteProvider {
                     promiseAP.then(() => {
                         let articlesPrepaValuesStr = articlesPrepaValues.join(', ');
                         let sqlArticlesPrepa = 'INSERT INTO `article_prepa` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_prepa`, `has_moved`, `emplacement`) VALUES ' + articlesPrepaValuesStr + ';';
-                        this.db.executeSql(sqlArticles, [])
-                            .then(val => val).catch((err) => console.log(err)).then(() => {
-                            this.db.executeSql(sqlEmplacements, [])
-                                .then(val => val).catch((err) => console.log(err)).then(() => {
-                                this.db.executeSql(sqlPrepas, [])
+                        let livraisons = data['livraisons'];
+                        let livraisonsValues = [];
+                        let promiseLivraison = new Promise<any>((resolveLivraison) => {
+                            if (livraisons.length === 0) resolveLivraison();
+                            for (let livraison of livraisons) {
+                                this.findOne('livraison', livraison.id).then((livraisonInserted) => {
+                                    if (livraisonInserted === null) {
+                                        livraisonsValues.push("(" + livraison.id + ", '" + livraison.number + "', " + null + ", " + null + ")");
+                                    }
+                                    if (livraisons.indexOf(livraison) === livraisons.length - 1) {
+                                        this.findAll('`livraison`').then((livraisonsDB) => {
+                                            if (livraisonsDB.length === 0) {
+                                                console.log('resolved');
+                                                resolveLivraison();
+                                            } else {
+                                                this.deleteLivraisons(livraisonsDB.filter(l => livraisons.find(livr => livr.id === l.id) === undefined)).then(() => {
+                                                    console.log("gfdgfdYESSS");
+                                                    resolveLivraison();
+                                                });
+                                            }
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                        promiseLivraison.then(() => {
+                            let livraisonsValuesStr = prepasValues.join(', ');
+                            let sqlLivraisons = 'INSERT INTO `livraison` (`id`, `numero`, `emplacement`, `date_end`) VALUES ' + livraisonsValuesStr + ';';
+                            let articlesLivrs = data['articlesLivraison'];
+                            let articlesLivraisonValues = [];
+                            let promiseAL = new Promise<any>((resolveAL) => {
+                                console.log(articlesLivrs);
+                                if (articlesLivrs.length === 0) resolveAL();
+                                for (let article of articlesLivrs) {
+                                    this.findArticlesByLivraison(article.id_livraison).then((articles) => {
+                                        console.log(articles);
+                                        if (articles.find(articleLivr => articleLivr.reference === article.reference && articleLivr.is_ref === article.is_ref) === undefined) {
+                                            articlesLivraisonValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_prepa + ", " + 0 + ", '" + article.location + "')");
+                                        }
+                                        if (articlesLivrs.indexOf(article) === articlesLivrs.length - 1) resolveAL()
+                                    });
+                                }
+                            });
+                            promiseAL.then(() => {
+                                let articlesLivraisonValuesStr = articlesPrepaValues.join(', ');
+                                let sqlArticlesLivraison = 'INSERT INTO `article_livraison` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_livraison`, `has_moved`, `emplacement`) VALUES ' + articlesLivraisonValuesStr + ';';
+                                this.db.executeSql(sqlArticles, [])
                                     .then(val => val).catch((err) => console.log(err)).then(() => {
-                                    this.db.executeSql(sqlArticlesPrepa, [])
+                                    this.db.executeSql(sqlEmplacements, [])
                                         .then(val => val).catch((err) => console.log(err)).then(() => {
-                                        resolve();
+                                        this.db.executeSql(sqlPrepas, [])
+                                            .then(val => val).catch((err) => console.log(err)).then(() => {
+                                            this.db.executeSql(sqlArticlesPrepa, [])
+                                                .then(val => val).catch((err) => console.log(err)).then(() => {
+                                                this.db.executeSql(sqlLivraisons, [])
+                                                    .then(val => val).catch((err) => console.log(err)).then(() => {
+                                                    this.db.executeSql(sqlArticlesLivraison, [])
+                                                        .then(val => val).catch((err) => console.log(err)).then(() => {
+                                                            resolve();
+                                                            console.log('inserted all data');
+                                                    });
+                                                });
+                                            });
+                                        });
                                     });
                                 });
                             });
@@ -493,6 +565,27 @@ export class SqliteProvider {
         return resp;
     }
 
+    public findArticlesByLivraison(id_livr: number) {
+        let list = [];
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('SELECT * FROM `article_livraison` WHERE `id_livraison` = ' + id_livr, []).then((articles) => {
+                if (articles == null) {
+                    return;
+                }
+
+                if (articles.rows) {
+                    if (articles.rows.length > 0) {
+                        for (let i = 0; i < articles.rows.length; i++) {
+                            list.push(articles.rows.item(i));
+                        }
+                    }
+                }
+                resolve(list);
+            }).catch(err => console.log(err));
+        });
+        return resp;
+    }
+
     public findMvtByArticle(id_art: number) {
         let resp = new Promise<any>((resolve) => {
             this.db.executeSql('SELECT * FROM `mouvement` WHERE `id_article_prepa` = ' + id_art + ' LIMIT 1', []).then((mvt) => {
@@ -562,6 +655,27 @@ export class SqliteProvider {
                     this.db.executeSql('DELETE FROM `preparation` WHERE id = ' + preparation.id, []).then(() => {
                         this.db.executeSql('DELETE FROM `article_prepa` WHERE id_prepa = ' + preparation.id, []).then(() => {
                             if (preparations.indexOf(preparation) === preparations.length - 1) {
+                                resolve();
+                            }
+                        }).catch(err => console.log(err));
+                    }).catch(err => console.log(err));
+                });
+            }
+        });
+        return resp;
+    }
+
+    public deleteLivraisons(livraisons: Array<Livraison>) {
+        let resp = new Promise<any>((resolve) => {
+            if (livraisons.length === 0) {
+                console.log('"gfdgdfgd');
+                resolve();
+            } else {
+                console.log('"gfdgdfgd');
+                livraisons.forEach(livraison => {
+                    this.db.executeSql('DELETE FROM `livraison` WHERE id = ' + livraison.id, []).then(() => {
+                        this.db.executeSql('DELETE FROM `article_livraison` WHERE id_livraison = ' + livraison.id, []).then(() => {
+                            if (livraisons.indexOf(livraison) === livraisons.length - 1) {
                                 resolve();
                             }
                         }).catch(err => console.log(err));

@@ -44,7 +44,8 @@ export class MyApp {
         this.pages = [
             {title: 'Accueil', component: MenuPage},
             {title: 'Traça', component: StockageMenuPageTraca},
-            {title: 'Préparation', component: PreparationMenuPage}
+            {title: 'Préparation', component: PreparationMenuPage},
+            {title: 'Livraison', component: PreparationMenuPage}
         ];
 
     }

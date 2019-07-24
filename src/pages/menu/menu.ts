@@ -20,7 +20,8 @@ export class MenuPage {
 
         this.items = [
             {title: 'Traça', icon: 'cube', page: StockageMenuPageTraca},
-            {title: 'Préparation', icon: 'cube', page: PreparationMenuPage}
+            {title: 'Préparation', icon: 'cube', page: PreparationMenuPage},
+            {title: 'Livraison', icon: 'cube', page: PreparationMenuPage}
         ];
         this.sqliteProvider.findAll('`preparation`').then((preparations: Array<Preparation>) => {
             this.nbPrep = preparations.filter(p => p.date_end === null).length;
