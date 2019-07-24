@@ -138,28 +138,13 @@ export class PreparationArticlesPage {
                 };
                 let articleAlready = this.articlesT.find(art => art.id_prepa === newArticle.id_prepa && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
                 if (articleAlready !== undefined) {
-                    let mouvement: Mouvement = {
-                        id: null,
-                        reference: newArticle.reference,
-                        quantity: newArticle.quantite,
-                        date_pickup: moment().format(),
-                        location_from: newArticle.emplacement,
-                        date_drop: null,
-                        location: null,
-                        type: 'prise-dépose',
-                        is_ref: newArticle.is_ref,
-                        id_article_prepa: articleAlready.id,
-                        id_prepa: newArticle.id_prepa
-                    };
-                    this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
-                        this.sqliteProvider.updateArticleQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite).then(() => {
-                            this.sqliteProvider.updateArticleQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - newArticle.quantite).then(() => {
-                                this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
-                                    console.log(articles);
-                                    this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                    this.articlesT = articles.filter(article => article.has_moved === 1);
-                                })
-                            });
+                    this.sqliteProvider.updateArticleQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite).then(() => {
+                        this.sqliteProvider.updateArticleQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - newArticle.quantite).then(() => {
+                            this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
+                                console.log(articles);
+                                this.articlesNT = articles.filter(article => article.has_moved === 0);
+                                this.articlesT = articles.filter(article => article.has_moved === 1);
+                            })
                         });
                     });
                 } else {
@@ -204,15 +189,13 @@ export class PreparationArticlesPage {
                 };
                 let articleAlready = this.articlesT.find(art => art.id_prepa === mouvement.id_prepa && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
                 if (articleAlready !== undefined) {
-                    this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
-                        this.sqliteProvider.updateArticleQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite).then(() => {
-                            this.sqliteProvider.delete('`article_prepa`', mouvement.id_article_prepa).then(() => {
-                                this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
-                                    console.log(articles);
-                                    this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                    this.articlesT = articles.filter(article => article.has_moved === 1);
-                                })
-                            });
+                    this.sqliteProvider.updateArticleQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite).then(() => {
+                        this.sqliteProvider.delete('`article_prepa`', mouvement.id_article_prepa).then(() => {
+                            this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
+                                console.log(articles);
+                                this.articlesNT = articles.filter(article => article.has_moved === 0);
+                                this.articlesT = articles.filter(article => article.has_moved === 1);
+                            })
                         });
                     });
                 } else {

@@ -151,7 +151,7 @@ export class PreparationEmplacementPage {
                                                     if (resp.success) {
                                                         this.sqliteProvider.deletePreparations(params.preparations).then(() => {
                                                             this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
-                                                                this.navCtrl.push(PreparationMenuPage);
+                                                                this.navCtrl.setRoot(PreparationMenuPage);
                                                             });
                                                         });
                                                     } else {
