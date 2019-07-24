@@ -70,10 +70,11 @@ export class PriseArticlesPage {
         date_pickup: date,
         location_from: this.emplacement.label,
         date_drop: null,
-        location_to: null,
+        location: null,
         type: 'prise-depose',
         is_ref : null,
-        id_article_prepa : article.id
+        id_article_prepa : article.id,
+        id_prepa : null
       };
       if (this.articles.indexOf(article) === this.articles.length - 1) {
         this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {

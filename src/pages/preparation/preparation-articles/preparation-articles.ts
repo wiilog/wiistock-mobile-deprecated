@@ -146,10 +146,11 @@ export class PreparationArticlesPage {
                         date_pickup: moment().format(),
                         location_from: newArticle.emplacement,
                         date_drop: null,
-                        location_to: null,
+                        location: null,
                         type: 'prise-dépose',
                         is_ref: newArticle.is_ref,
-                        id_article_prepa: rowInserted.insertId
+                        id_article_prepa: rowInserted.insertId,
+                        id_prepa : newArticle.id_prepa
                     };
                     this.sqliteProvider.updateArticleQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - Number(this.navParams.get('quantite'))).then(() => {
                         this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
@@ -168,10 +169,11 @@ export class PreparationArticlesPage {
                     date_pickup: moment().format(),
                     location_from: this.navParams.get('article').emplacement,
                     date_drop: null,
-                    location_to: null,
+                    location: null,
                     type: 'prise-dépose',
                     is_ref: this.navParams.get('article').is_ref,
-                    id_article_prepa: this.navParams.get('article').id
+                    id_article_prepa: this.navParams.get('article').id,
+                    id_prepa : this.navParams.get('article').id_prepa
                 };
                 this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
                     this.sqliteProvider.moveArticle(this.navParams.get('article').id).then(() => {

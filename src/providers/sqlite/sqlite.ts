@@ -37,7 +37,7 @@ export class SqliteProvider {
                 this.db.executeSql('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))', [])
                     .then(() => {
                         console.log('table emplacement créée !')
-                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location_to` TEXT, `type` VARCHAR(255), `is_ref` TEXT, `id_article_prepa` INTEGER)', [])
+                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location` TEXT, `type` VARCHAR(255), `is_ref` TEXT, `id_article_prepa` INTEGER, `id_prepa` INTEGER)', [])
                             .then(() => {
                                 console.log('table mouvement créée !')
                                 this.db.executeSql('DROP TABLE IF EXISTS `mouvement_traca`', [])
@@ -202,8 +202,8 @@ export class SqliteProvider {
                                     .then(val => val).catch((err) => console.log(err)).then(() => {
                                     this.db.executeSql(sqlArticlesPrepa, [])
                                         .then(val => val).catch((err) => console.log(err)).then(() => {
-                                            resolve();
-                                        });
+                                        resolve();
+                                    });
                                 });
                             });
                         });
@@ -519,7 +519,7 @@ export class SqliteProvider {
 
     public finishMvt(id_mvt: number, location_to: string) {
         let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('UPDATE `mouvement` SET date_drop = \'' + moment().format() + '\', location_to = \'' + location_to + '\' WHERE id = ' + id_mvt, []).then(() => {
+            this.db.executeSql('UPDATE `mouvement` SET date_drop = \'' + moment().format() + '\', location = \'' + location_to + '\' WHERE id = ' + id_mvt, []).then(() => {
                 resolve();
             })
         });

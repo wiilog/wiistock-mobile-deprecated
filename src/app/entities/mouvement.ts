@@ -5,8 +5,9 @@ export class Mouvement {
     date_pickup: string;
     location_from: string;
     date_drop: string;
-    location_to: string;
+    location: string;
     type: string;
     is_ref : string;
     id_article_prepa: number;
+    id_prepa : number;
 }
