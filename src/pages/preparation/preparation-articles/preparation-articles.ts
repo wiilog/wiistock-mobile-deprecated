@@ -200,7 +200,9 @@ export class PreparationArticlesPage {
                     this.sqliteProvider.updateArticleQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite).then(() => {
                         this.sqliteProvider.delete('`article_prepa`', mouvement.id_article_prepa).then(() => {
                             this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
-                                console.log(articles);
+                                if (articles.filter(article => article.has_moved === 0).length === 0) {
+                                    this.refresh();
+                                }
                                 this.articlesNT = articles.filter(article => article.has_moved === 0);
                                 this.articlesT = articles.filter(article => article.has_moved === 1);
                             })
