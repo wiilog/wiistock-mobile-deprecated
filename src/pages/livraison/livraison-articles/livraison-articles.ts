@@ -98,8 +98,12 @@ export class LivraisonArticlesPage {
         });
     }
 
-    refresh() {
+    refreshOver() {
         this.showToast('Livraison prête à être finalisée.')
+    }
+
+    refresh() {
+        this.showToast('Quantité bien prélevée.')
     }
 
     async showToast(msg) {
@@ -143,7 +147,11 @@ export class LivraisonArticlesPage {
                     this.sqliteProvider.updateArticleLivraisonQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite).then(() => {
                         this.sqliteProvider.updateArticleLivraisonQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - newArticle.quantite).then(() => {
                             this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
-                                console.log(articles);
+                                if (articles.filter(article => article.has_moved === 0).length === 0) {
+                                    this.refreshOver();
+                                } else {
+                                    this.refresh();
+                                }
                                 this.articlesNT = articles.filter(article => article.has_moved === 0);
                                 this.articlesT = articles.filter(article => article.has_moved === 1);
                             })
@@ -170,6 +178,11 @@ export class LivraisonArticlesPage {
                         this.sqliteProvider.updateArticleLivraisonQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - Number(this.navParams.get('quantite'))).then(() => {
                             this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
                                 this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
+                                    if (articles.filter(article => article.has_moved === 0).length === 0) {
+                                        this.refreshOver();
+                                    } else {
+                                        this.refresh();
+                                    }
                                     this.articlesNT = articles.filter(article => article.has_moved === 0);
                                     this.articlesT = articles.filter(article => article.has_moved === 1);
                                 })
@@ -199,6 +212,8 @@ export class LivraisonArticlesPage {
                         this.sqliteProvider.delete('`article_livraison`', mouvement.id_article_livraison).then(() => {
                             this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
                                 if (articles.filter(article => article.has_moved === 0).length === 0) {
+                                    this.refreshOver();
+                                } else {
                                     this.refresh();
                                 }
                                 this.articlesNT = articles.filter(article => article.has_moved === 0);
@@ -211,6 +226,8 @@ export class LivraisonArticlesPage {
                         this.sqliteProvider.moveArticleLivraison(this.navParams.get('article').id).then(() => {
                             this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
                                 if (articles.filter(article => article.has_moved === 0).length === 0) {
+                                    this.refreshOver();
+                                } else {
                                     this.refresh();
                                 }
                                 this.articlesNT = articles.filter(article => article.has_moved === 0);

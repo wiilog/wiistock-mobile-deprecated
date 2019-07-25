@@ -114,10 +114,13 @@ export class PreparationArticlesPage {
         this.setBackButtonAction();
     }
 
-    refresh() {
+    refreshOver() {
         this.showToast('Préparation prête à être finalisée.')
     }
 
+    refresh() {
+        this.showToast('Quantité bien prélevée.')
+    }
 
     setBackButtonAction() {
         this.navBar.backButtonClick = () => {
@@ -145,7 +148,11 @@ export class PreparationArticlesPage {
                     this.sqliteProvider.updateArticleQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite).then(() => {
                         this.sqliteProvider.updateArticleQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - newArticle.quantite).then(() => {
                             this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
-                                console.log(articles);
+                                if (articles.filter(article => article.has_moved === 0).length === 0) {
+                                    this.refreshOver();
+                                } else {
+                                    this.refresh();
+                                }
                                 this.articlesNT = articles.filter(article => article.has_moved === 0);
                                 this.articlesT = articles.filter(article => article.has_moved === 1);
                             })
@@ -172,6 +179,11 @@ export class PreparationArticlesPage {
                         this.sqliteProvider.updateArticleQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - Number(this.navParams.get('quantite'))).then(() => {
                             this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
                                 this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
+                                    if (articles.filter(article => article.has_moved === 0).length === 0) {
+                                        this.refreshOver();
+                                    } else {
+                                        this.refresh();
+                                    }
                                     this.articlesNT = articles.filter(article => article.has_moved === 0);
                                     this.articlesT = articles.filter(article => article.has_moved === 1);
                                 })
@@ -201,6 +213,8 @@ export class PreparationArticlesPage {
                         this.sqliteProvider.delete('`article_prepa`', mouvement.id_article_prepa).then(() => {
                             this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
                                 if (articles.filter(article => article.has_moved === 0).length === 0) {
+                                    this.refreshOver();
+                                } else {
                                     this.refresh();
                                 }
                                 this.articlesNT = articles.filter(article => article.has_moved === 0);
@@ -213,6 +227,8 @@ export class PreparationArticlesPage {
                         this.sqliteProvider.moveArticle(this.navParams.get('article').id).then(() => {
                             this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
                                 if (articles.filter(article => article.has_moved === 0).length === 0) {
+                                    this.refreshOver();
+                                } else {
                                     this.refresh();
                                 }
                                 this.articlesNT = articles.filter(article => article.has_moved === 0);
