@@ -114,6 +114,10 @@ export class PreparationArticlesPage {
         this.setBackButtonAction();
     }
 
+    refresh() {
+        this.showToast('Préparation prête à être finalisée.')
+    }
+
 
     setBackButtonAction() {
         this.navBar.backButtonClick = () => {
@@ -162,8 +166,8 @@ export class PreparationArticlesPage {
                             is_ref: newArticle.is_ref,
                             id_article_prepa: rowInserted.insertId,
                             id_prepa: newArticle.id_prepa,
-                            id_article_livraison : null,
-                            id_livraison : null
+                            id_article_livraison: null,
+                            id_livraison: null
                         };
                         this.sqliteProvider.updateArticleQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - Number(this.navParams.get('quantite'))).then(() => {
                             this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
@@ -188,8 +192,8 @@ export class PreparationArticlesPage {
                     is_ref: this.navParams.get('article').is_ref,
                     id_article_prepa: this.navParams.get('article').id,
                     id_prepa: this.navParams.get('article').id_prepa,
-                    id_article_livraison : null,
-                    id_livraison : null
+                    id_article_livraison: null,
+                    id_livraison: null
                 };
                 let articleAlready = this.articlesT.find(art => art.id_prepa === mouvement.id_prepa && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
                 if (articleAlready !== undefined) {
@@ -207,13 +211,10 @@ export class PreparationArticlesPage {
                         this.sqliteProvider.moveArticle(this.navParams.get('article').id).then(() => {
                             this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
                                 if (articles.filter(article => article.has_moved === 0).length === 0) {
-                                    this.navCtrl.setRoot(this.navCtrl.getActive().component, {
-                                        preparation : this.preparation
-                                    });
-                                } else {
-                                    this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                    this.articlesT = articles.filter(article => article.has_moved === 1);
+                                    this.refresh();
                                 }
+                                this.articlesNT = articles.filter(article => article.has_moved === 0);
+                                this.articlesT = articles.filter(article => article.has_moved === 1);
                             })
                         });
                     });

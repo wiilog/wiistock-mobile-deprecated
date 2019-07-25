@@ -98,6 +98,10 @@ export class LivraisonArticlesPage {
         });
     }
 
+    refresh() {
+        this.showToast('Livraison prête à être finalisée.')
+    }
+
     async showToast(msg) {
         const toast = await this.toastController.create({
             message: msg,
@@ -160,8 +164,8 @@ export class LivraisonArticlesPage {
                             is_ref: newArticle.is_ref,
                             id_article_prepa: null,
                             id_prepa: null,
-                            id_article_livraison : rowInserted.insertId,
-                            id_livraison : newArticle.id_livraison
+                            id_article_livraison: rowInserted.insertId,
+                            id_livraison: newArticle.id_livraison
                         };
                         this.sqliteProvider.updateArticleLivraisonQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - Number(this.navParams.get('quantite'))).then(() => {
                             this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
@@ -186,8 +190,8 @@ export class LivraisonArticlesPage {
                     is_ref: this.navParams.get('article').is_ref,
                     id_article_prepa: null,
                     id_prepa: null,
-                    id_article_livraison : this.navParams.get('article').id,
-                    id_livraison : this.navParams.get('article').id_livraison
+                    id_article_livraison: this.navParams.get('article').id,
+                    id_livraison: this.navParams.get('article').id_livraison
                 };
                 let articleAlready = this.articlesT.find(art => art.id_livraison === mouvement.id_livraison && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
                 if (articleAlready !== undefined) {
@@ -205,13 +209,10 @@ export class LivraisonArticlesPage {
                         this.sqliteProvider.moveArticleLivraison(this.navParams.get('article').id).then(() => {
                             this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
                                 if (articles.filter(article => article.has_moved === 0).length === 0) {
-                                    this.navCtrl.setRoot(this.navCtrl.getActive().component, {
-                                        livraison : this.livraison
-                                    });
-                                } else {
-                                    this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                    this.articlesT = articles.filter(article => article.has_moved === 1);
+                                    this.refresh();
                                 }
+                                this.articlesNT = articles.filter(article => article.has_moved === 0);
+                                this.articlesT = articles.filter(article => article.has_moved === 1);
                             })
                         });
                     });
