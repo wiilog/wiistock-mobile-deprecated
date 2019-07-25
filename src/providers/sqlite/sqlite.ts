@@ -181,7 +181,13 @@ export class SqliteProvider {
         return new Promise<any>((resolve) => {
             let prepas = data['preparations'];
             let prepasValues = [];
-            if (prepas.length === 0) resolve();
+            if (prepas.length === 0) {
+                this.findAll('`preparation`').then((preparationsDB) => {
+                    this.deletePreparations(preparationsDB).then(() => {
+                        resolve(false);
+                    });
+                });
+            }
             for (let prepa of prepas) {
                 this.findOne('preparation', prepa.id).then((prepaInserted) => {
                     if (prepaInserted === null) {
@@ -209,7 +215,9 @@ export class SqliteProvider {
         return new Promise<any>((resolve) => {
             let articlesPrepa = data['articlesPrepa'];
             let articlesPrepaValues = [];
-            if (articlesPrepa.length === 0) resolve();
+            if (articlesPrepa.length === 0) {
+                resolve(false);
+            }
             for (let article of articlesPrepa) {
                 this.findArticlesByPrepa(article.id_prepa).then((articles) => {
                     if (articles.find(articlePrepa => articlePrepa.reference === article.reference && articlePrepa.is_ref === article.is_ref) === undefined) {
@@ -229,7 +237,13 @@ export class SqliteProvider {
         return new Promise<any>((resolve) => {
             let livraisons = data['livraisons'];
             let livraisonsValues = [];
-            if (livraisons.length === 0) resolve();
+            if (livraisons.length === 0) {
+                this.findAll('`livraison`').then((livraisonsDB) => {
+                    this.deleteLivraisons(livraisonsDB).then(() => {
+                        resolve(false);
+                    });
+                });
+            }
             for (let livraison of livraisons) {
                 this.findOne('livraison', livraison.id).then((livraisonInserted) => {
                     if (livraisonInserted === null) {
@@ -257,7 +271,9 @@ export class SqliteProvider {
         return new Promise<any>((resolve) => {
             let articlesLivrs = data['articlesLivraison'];
             let articlesLivraisonValues = [];
-            if (articlesLivrs.length === 0) resolve();
+            if (articlesLivrs.length === 0) {
+                resolve(false);
+            }
             for (let article of articlesLivrs) {
                 this.findArticlesByLivraison(article.id_livraison).then((articles) => {
                     if (articles.find(articleLivr => articleLivr.reference === article.reference && articleLivr.is_ref === article.is_ref) === undefined) {
@@ -274,15 +290,13 @@ export class SqliteProvider {
     }
 
     executeAllImports(imports: Array<string>) {
+        let instance = this;
         return new Promise<any>((resolve) => {
-            imports.forEach((importSql) => {
-                this.db.executeSql(importSql, [])
-                    .then()
-                    .catch(err => console.log(err + ' ' + importSql))
-                    .then(() => {
-                        if (imports.indexOf(importSql) === imports.length - 1) resolve();
-                    });
-            });
+            imports.forEach(function (importSql, index) {
+                instance.db.executeSql(importSql, []).then().catch(_ => console.log(importSql)).then(() => {
+                    if (index === imports.length - 1) resolve();
+                })
+            })
         });
     }
 
@@ -291,17 +305,17 @@ export class SqliteProvider {
             let imports = [];
             this.initPrepsCount(data, refresh).then(() => {
                 this.importArticles(data).then((sqlArticles) => {
-                    imports.push(sqlArticles);
+                    if (sqlArticles !== false) imports.push(sqlArticles);
                     this.importEmplacements(data).then((sqlEmplacements) => {
-                        imports.push(sqlEmplacements);
+                        if (sqlEmplacements !== false) imports.push(sqlEmplacements);
                         this.importPreparations(data).then((sqlPrepas) => {
-                            imports.push(sqlPrepas);
+                            if (sqlPrepas !== false) imports.push(sqlPrepas);
                             this.importArticlesPrepas(data).then((sqlArticlesPrepa) => {
-                                imports.push(sqlArticlesPrepa);
+                                if (sqlPrepas !== false) imports.push(sqlArticlesPrepa);
                                 this.importLivraisons(data).then((sqlLivraisons) => {
-                                    imports.push(sqlLivraisons);
+                                    if (sqlLivraisons !== false) imports.push(sqlLivraisons);
                                     this.importArticlesLivraison(data).then((sqlArticlesLivraison) => {
-                                        imports.push(sqlArticlesLivraison);
+                                        if (sqlLivraisons !== false) imports.push(sqlArticlesLivraison);
                                         this.executeAllImports(imports).then(() => {
                                             console.log('Imported All Data');
                                             resolve();
@@ -710,10 +724,8 @@ export class SqliteProvider {
     public deletePreparations(preparations: Array<Preparation>) {
         let resp = new Promise<any>((resolve) => {
             if (preparations.length === 0) {
-                console.log('"gfdgdfgd');
                 resolve();
             } else {
-                console.log('"gfdgdfgd');
                 preparations.forEach(preparation => {
                     this.db.executeSql('DELETE FROM `preparation` WHERE id = ' + preparation.id, []).then(() => {
                         this.db.executeSql('DELETE FROM `article_prepa` WHERE id_prepa = ' + preparation.id, []).then(() => {
