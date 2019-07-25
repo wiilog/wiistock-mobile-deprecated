@@ -153,7 +153,7 @@ export class PreparationArticlesPage {
                         let mouvement: Mouvement = {
                             id: null,
                             reference: newArticle.reference,
-                            quantity: newArticle.quantite,
+                            quantity: this.navParams.get('article').quantite,
                             date_pickup: moment().format(),
                             location_from: newArticle.emplacement,
                             date_drop: null,
@@ -179,7 +179,7 @@ export class PreparationArticlesPage {
                 let mouvement: Mouvement = {
                     id: null,
                     reference: this.navParams.get('article').reference,
-                    quantity: Number(this.navParams.get('quantite')),
+                    quantity: this.navParams.get('article').quantite,
                     date_pickup: moment().format(),
                     location_from: this.navParams.get('article').emplacement,
                     date_drop: null,
