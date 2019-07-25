@@ -41,7 +41,7 @@ export class PreparationModalSearchEmplacementPage {
 
     selectEmplacement(emplacement: Emplacement) {
         this.emplacement = emplacement;
-        this.navCtrl.push(PreparationEmplacementPage, {
+        this.navCtrl.setRoot(PreparationEmplacementPage, {
             preparation: this.preparation,
             emplacement: this.emplacement
         })

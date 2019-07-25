@@ -51,7 +51,7 @@ export class StockageMenuPageTraca {
     }
 
     goHome() {
-        this.navCtrl.push(MenuPage);
+        this.navCtrl.setRoot(MenuPage);
     }
 
     synchronise() {
@@ -76,6 +76,7 @@ export class StockageMenuPageTraca {
             }
         });
     }
+
 
     async showToast(msg) {
         const toast = await this.toastController.create({

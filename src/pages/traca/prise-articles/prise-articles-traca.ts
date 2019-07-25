@@ -95,7 +95,7 @@ export class PriseArticlesPageTraca {
     }
 
     redirectAfterTake() {
-        this.navCtrl.push(StockageMenuPageTraca)
+        this.navCtrl.setRoot(StockageMenuPageTraca)
             .then(() => {
                 this.showToast('Prise enregistrée.')
             });
@@ -112,7 +112,7 @@ export class PriseArticlesPageTraca {
     }
 
     goHome() {
-        this.navCtrl.push(MenuPage);
+        this.navCtrl.setRoot(MenuPage);
     }
 
     scan() {

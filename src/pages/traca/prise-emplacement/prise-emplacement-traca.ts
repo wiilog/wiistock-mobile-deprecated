@@ -74,7 +74,7 @@ export class PriseEmplacementPageTraca {
     }
 
     goHome() {
-        this.navCtrl.push(MenuPage);
+        this.navCtrl.setRoot(MenuPage);
     }
 
     scan() {

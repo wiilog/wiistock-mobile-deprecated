@@ -37,7 +37,7 @@ export class PreparationArticleTakePage {
         if (this.quantite > this.article.quantite || this.quantite <= 0) {
             this.showToast('Veuillez selectionner une quantité valide.');
         } else {
-            this.navCtrl.push(PreparationArticlesPage, {
+            this.navCtrl.setRoot(PreparationArticlesPage, {
                 article : this.article,
                 quantite : this.quantite,
                 preparation : this.preparation,

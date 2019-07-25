@@ -27,7 +27,7 @@ export class StockageMenuPage {
   }
 
   goHome() {
-    this.navCtrl.push(MenuPage);
+    this.navCtrl.setRoot(MenuPage);
   }
 
 }

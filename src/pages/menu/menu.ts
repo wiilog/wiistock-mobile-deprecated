@@ -33,7 +33,7 @@ export class MenuPage {
     }
 
     itemTapped(event, item) {
-        this.navCtrl.push(item.page);
+        this.navCtrl.setRoot(item.page);
     }
 
 }

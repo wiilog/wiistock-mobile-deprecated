@@ -139,159 +139,183 @@ export class SqliteProvider {
         });
     }
 
-    public async importData(data, refresh = false) {
-
+    initPrepsCount(data, refresh) {
         return new Promise<any>((resolve) => {
-            let promisePreps = new Promise<any>((resolvePrepsStorage) => {
-                if (!refresh) {
-                    this.storageService.setApiKey(data['apiKey']);
-                    this.storageService.setPreps().then(() => {
-                        resolvePrepsStorage();
-                    })
-                } else {
-                    resolvePrepsStorage();
-                }
+            if (!refresh) {
+                this.storageService.setApiKey(data['apiKey']);
+                this.storageService.setPreps().then(() => {
+                    resolve();
+                })
+            } else {
+                resolve();
+            }
+        });
+    }
+
+    importArticles(data) {
+        return new Promise<any>((resolve) => {
+            let articles = data['articles'];
+            let articleValues = [];
+            articles.forEach((article) => {
+                articleValues.push("(" + null + ", '" + article.reference + "', " + (article.quantiteStock || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ")");
             });
-            promisePreps.then(() => {
-                let articles = data['articles'];
-                let articleValues = [];
-                for (let article of articles) {
-                    articleValues.push("(" + null + ", '" + article.reference + "', " + (article.quantiteStock || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ")");
-                }
-                let articleValuesStr = articleValues.join(', ');
-                let sqlArticles = 'INSERT INTO `article` (`id`, `reference`, `quantite`) VALUES ' + articleValuesStr + ';';
-                console.log(sqlArticles);
+            let articleValuesStr = articleValues.join(', ');
+            let sqlArticles = 'INSERT INTO `article` (`id`, `reference`, `quantite`) VALUES ' + articleValuesStr + ';';
+            resolve(sqlArticles);
+        });
+    }
 
+    importEmplacements(data) {
+        return new Promise<any>((resolve) => {
+            let emplacements = data['emplacements'];
+            let emplacementValues = [];
+            emplacements.forEach((emplacement) => {
+                emplacementValues.push("(" + emplacement.id + ", '" + emplacement.label.replace(/(\"|\')/g, "\'$1") + "')");
+            });
+            let emplacementValuesStr = emplacementValues.join(', ');
+            let sqlEmplacements = 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';';
+            resolve(sqlEmplacements);
+        });
+    }
 
-                let emplacements = data['emplacements'];
-                let emplacementValues = [];
-                for (let emplacement of emplacements) {
-                    emplacementValues.push("(" + emplacement.id + ", '" + emplacement.label.replace(/(\"|\')/g, "\'$1") + "')");
-                }
-                let emplacementValuesStr = emplacementValues.join(', ');
-                let sqlEmplacements = 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';';
-
-                let prepas = data['preparations'];
-                let prepasValues = [];
-                let promisePrepas = new Promise<any>((resolvePreps) => {
-                    if (prepas.length === 0) resolvePreps();
-                    for (let prepa of prepas) {
-                        this.findOne('preparation', prepa.id).then((prepaInserted) => {
-                            console.log(prepaInserted);
-                            if (prepaInserted === null) {
-                                prepasValues.push("(" + prepa.id + ", '" + prepa.number + "', " + null + ", " + null + ", 0)");
-                            }
-                            if (prepas.indexOf(prepa) === prepas.length - 1) {
-                                this.findAll('`preparation`').then((preparations) => {
-                                    if (preparations.length === 0) {
-                                        console.log('resolved');
-                                        resolvePreps();
-                                    } else {
-                                        this.deletePreparations(preparations.filter(p => prepas.find(prep => prep.id === p.id) === undefined)).then(() => {
-                                            console.log("gfdgfdYESSS");
-                                            resolvePreps();
-                                        });
-                                    }
+    importPreparations(data) {
+        return new Promise<any>((resolve) => {
+            let prepas = data['preparations'];
+            let prepasValues = [];
+            if (prepas.length === 0) resolve();
+            for (let prepa of prepas) {
+                this.findOne('preparation', prepa.id).then((prepaInserted) => {
+                    if (prepaInserted === null) {
+                        prepasValues.push("(" + prepa.id + ", '" + prepa.number + "', " + null + ", " + null + ", 0)");
+                    }
+                    if (prepas.indexOf(prepa) === prepas.length - 1) {
+                        this.findAll('`preparation`').then((preparations) => {
+                            let prepasValuesStr = prepasValues.join(', ');
+                            let sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`) VALUES ' + prepasValuesStr + ';';
+                            if (preparations.length === 0) {
+                                resolve(sqlPrepas);
+                            } else {
+                                this.deletePreparations(preparations.filter(p => prepas.find(prep => prep.id === p.id) === undefined)).then(() => {
+                                    resolve(sqlPrepas);
                                 });
                             }
                         });
                     }
                 });
-                promisePrepas.then(() => {
-                    let prepasValuesStr = prepasValues.join(', ');
-                    let sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`) VALUES ' + prepasValuesStr + ';';
-                    let articlesPrepa = data['articlesPrepa'];
-                    let articlesPrepaValues = [];
-                    let promiseAP = new Promise<any>((resolveAP) => {
-                        console.log(articlesPrepa);
-                        if (articlesPrepa.length === 0) resolveAP();
-                        for (let article of articlesPrepa) {
-                            this.findArticlesByPrepa(article.id_prepa).then((articles) => {
-                                console.log(articles);
-                                if (articles.find(articlePrepa => articlePrepa.reference === article.reference && articlePrepa.is_ref === article.is_ref) === undefined) {
-                                    articlesPrepaValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_prepa + ", " + 0 + ", '" + article.location + "')");
-                                }
-                                if (articlesPrepa.indexOf(article) === articlesPrepa.length - 1) resolveAP()
-                            });
-                        }
-                    });
-                    promiseAP.then(() => {
+            }
+        });
+    }
+
+    importArticlesPrepas(data) {
+        return new Promise<any>((resolve) => {
+            let articlesPrepa = data['articlesPrepa'];
+            let articlesPrepaValues = [];
+            if (articlesPrepa.length === 0) resolve();
+            for (let article of articlesPrepa) {
+                this.findArticlesByPrepa(article.id_prepa).then((articles) => {
+                    if (articles.find(articlePrepa => articlePrepa.reference === article.reference && articlePrepa.is_ref === article.is_ref) === undefined) {
+                        articlesPrepaValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_prepa + ", " + 0 + ", '" + article.location + "')");
+                    }
+                    if (articlesPrepa.indexOf(article) === articlesPrepa.length - 1) {
                         let articlesPrepaValuesStr = articlesPrepaValues.join(', ');
                         let sqlArticlesPrepa = 'INSERT INTO `article_prepa` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_prepa`, `has_moved`, `emplacement`) VALUES ' + articlesPrepaValuesStr + ';';
-                        let livraisons = data['livraisons'];
-                        let livraisonsValues = [];
-                        let promiseLivraison = new Promise<any>((resolveLivraison) => {
-                            if (livraisons.length === 0) resolveLivraison();
-                            for (let livraison of livraisons) {
-                                this.findOne('livraison', livraison.id).then((livraisonInserted) => {
-                                    if (livraisonInserted === null) {
-                                        livraisonsValues.push("(" + livraison.id + ", '" + livraison.number + "', " + null + ", " + null + ")");
-                                    }
-                                    if (livraisons.indexOf(livraison) === livraisons.length - 1) {
-                                        this.findAll('`livraison`').then((livraisonsDB) => {
-                                            if (livraisonsDB.length === 0) {
-                                                console.log('resolved');
-                                                resolveLivraison();
-                                            } else {
-                                                this.deleteLivraisons(livraisonsDB.filter(l => livraisons.find(livr => livr.id === l.id) === undefined)).then(() => {
-                                                    console.log("gfdgfdYESSS");
-                                                    resolveLivraison();
-                                                });
-                                            }
-                                        });
-                                    }
+                        resolve(sqlArticlesPrepa);
+                    }
+                });
+            }
+        });
+    }
+
+    importLivraisons(data) {
+        return new Promise<any>((resolve) => {
+            let livraisons = data['livraisons'];
+            let livraisonsValues = [];
+            if (livraisons.length === 0) resolve();
+            for (let livraison of livraisons) {
+                this.findOne('livraison', livraison.id).then((livraisonInserted) => {
+                    if (livraisonInserted === null) {
+                        livraisonsValues.push("(" + livraison.id + ", '" + livraison.number + "', " + null + ", " + null + ")");
+                    }
+                    if (livraisons.indexOf(livraison) === livraisons.length - 1) {
+                        this.findAll('`livraison`').then((livraisonsDB) => {
+                            let livraisonsValuesStr = livraisonsValues.join(', ');
+                            let sqlLivraisons = 'INSERT INTO `livraison` (`id`, `numero`, `emplacement`, `date_end`) VALUES ' + livraisonsValuesStr + ';';
+                            if (livraisonsDB.length === 0) {
+                                resolve(sqlLivraisons);
+                            } else {
+                                this.deleteLivraisons(livraisonsDB.filter(l => livraisons.find(livr => livr.id === l.id) === undefined)).then(() => {
+                                    resolve(sqlLivraisons);
                                 });
                             }
                         });
-                        promiseLivraison.then(() => {
-                            let livraisonsValuesStr = prepasValues.join(', ');
-                            let sqlLivraisons = 'INSERT INTO `livraison` (`id`, `numero`, `emplacement`, `date_end`) VALUES ' + livraisonsValuesStr + ';';
-                            let articlesLivrs = data['articlesLivraison'];
-                            let articlesLivraisonValues = [];
-                            let promiseAL = new Promise<any>((resolveAL) => {
-                                console.log(articlesLivrs);
-                                if (articlesLivrs.length === 0) resolveAL();
-                                for (let article of articlesLivrs) {
-                                    this.findArticlesByLivraison(article.id_livraison).then((articles) => {
-                                        console.log(articles);
-                                        if (articles.find(articleLivr => articleLivr.reference === article.reference && articleLivr.is_ref === article.is_ref) === undefined) {
-                                            articlesLivraisonValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_prepa + ", " + 0 + ", '" + article.location + "')");
-                                        }
-                                        if (articlesLivrs.indexOf(article) === articlesLivrs.length - 1) resolveAL()
-                                    });
-                                }
-                            });
-                            promiseAL.then(() => {
-                                let articlesLivraisonValuesStr = articlesPrepaValues.join(', ');
-                                let sqlArticlesLivraison = 'INSERT INTO `article_livraison` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_livraison`, `has_moved`, `emplacement`) VALUES ' + articlesLivraisonValuesStr + ';';
-                                this.db.executeSql(sqlArticles, [])
-                                    .then(val => val).catch((err) => console.log(err)).then(() => {
-                                    this.db.executeSql(sqlEmplacements, [])
-                                        .then(val => val).catch((err) => console.log(err)).then(() => {
-                                        this.db.executeSql(sqlPrepas, [])
-                                            .then(val => val).catch((err) => console.log(err)).then(() => {
-                                            this.db.executeSql(sqlArticlesPrepa, [])
-                                                .then(val => val).catch((err) => console.log(err)).then(() => {
-                                                this.db.executeSql(sqlLivraisons, [])
-                                                    .then(val => val).catch((err) => console.log(err)).then(() => {
-                                                    this.db.executeSql(sqlArticlesLivraison, [])
-                                                        .then(val => val).catch((err) => console.log(err)).then(() => {
-                                                            resolve();
-                                                            console.log('inserted all data');
-                                                    });
-                                                });
-                                            });
-                                        });
+                    }
+                });
+            }
+        });
+    }
+
+    importArticlesLivraison(data) {
+        return new Promise<any>((resolve) => {
+            let articlesLivrs = data['articlesLivraison'];
+            let articlesLivraisonValues = [];
+            if (articlesLivrs.length === 0) resolve();
+            for (let article of articlesLivrs) {
+                this.findArticlesByLivraison(article.id_livraison).then((articles) => {
+                    if (articles.find(articleLivr => articleLivr.reference === article.reference && articleLivr.is_ref === article.is_ref) === undefined) {
+                        articlesLivraisonValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_livraison + ", " + 0 + ", '" + article.location + "')");
+                    }
+                    if (articlesLivrs.indexOf(article) === articlesLivrs.length - 1) {
+                        let articlesLivraisonValuesStr = articlesLivraisonValues.join(', ');
+                        let sqlArticlesLivraison = 'INSERT INTO `article_livraison` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_livraison`, `has_moved`, `emplacement`) VALUES ' + articlesLivraisonValuesStr + ';';
+                        resolve(sqlArticlesLivraison)
+                    }
+                });
+            }
+        });
+    }
+
+    executeAllImports(imports : Array<string>) {
+        return new Promise<any>((resolve) => {
+            imports.forEach((importSql) => {
+                this.db.executeSql(importSql, [])
+                    .then()
+                    .catch(err => console.log(err + ' ' + importSql))
+                    .then(() => {
+                        if (imports.indexOf(importSql) === imports.length -1) resolve();
+                });
+            });
+        });
+    }
+
+    public async importData(data, refresh = false) {
+        return new Promise<any>((resolve) => {
+            let imports = [];
+            this.initPrepsCount(data, refresh).then(() => {
+                this.importArticles(data).then((sqlArticles) => {
+                    imports.push(sqlArticles);
+                    this.importEmplacements(data).then((sqlEmplacements) => {
+                        imports.push(sqlEmplacements);
+                        this.importPreparations(data).then((sqlPrepas) => {
+                            imports.push(sqlPrepas);
+                            this.importArticlesPrepas(data).then((sqlArticlesPrepa) => {
+                                imports.push(sqlArticlesPrepa);
+                                this.importLivraisons(data).then((sqlLivraisons) => {
+                                    imports.push(sqlLivraisons);
+                                    this.importArticlesLivraison(data).then((sqlArticlesLivraison) => {
+                                        imports.push(sqlArticlesLivraison);
+                                        this.executeAllImports(imports).then(() => {
+                                            console.log('Imported All Data');
+                                            resolve();
+                                        })
                                     });
                                 });
                             });
                         });
                     });
                 });
-            })
-        })
-
-    }
+            });
+        });
+    };
 
     static openDatabase() {
         let resp = new Promise<SQLiteObject>(function (resolve) {

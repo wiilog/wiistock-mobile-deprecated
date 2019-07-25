@@ -60,7 +60,7 @@ export class DeposeConfirmPageTraca {
                         } else {
                             this.articles = [this.article];
                         }
-                        this.navCtrl.push(DeposeArticlesPageTraca, {articles: this.articles, emplacement: this.emplacement});
+                        this.navCtrl.setRoot(DeposeArticlesPageTraca, {articles: this.articles, emplacement: this.emplacement});
                     } else {
                         this.showToast('Cet article est déjà enregistré assez de fois dans le panier.');
                     }

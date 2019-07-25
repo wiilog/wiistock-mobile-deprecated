@@ -33,7 +33,7 @@ export class PreparationMenuPage {
     }
 
     goHome() {
-        this.navCtrl.push(MenuPage);
+        this.navCtrl.setRoot(MenuPage);
     }
 
     ionViewDidEnter() {
@@ -44,7 +44,7 @@ export class PreparationMenuPage {
     setBackButtonAction() {
         this.navBar.backButtonClick = () => {
             //Write here wherever you wanna do
-            this.navCtrl.push(MenuPage);
+            this.navCtrl.setRoot(MenuPage);
         }
     }
 

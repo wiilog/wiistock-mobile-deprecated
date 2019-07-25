@@ -119,7 +119,7 @@ export class PreparationArticlesPage {
         this.navBar.backButtonClick = () => {
 
             //Write here wherever you wanna do
-            this.navCtrl.push(PreparationMenuPage);
+            this.navCtrl.setRoot(PreparationMenuPage);
         }
     }
 
@@ -215,7 +215,7 @@ export class PreparationArticlesPage {
 
 
     goHome() {
-        this.navCtrl.push(MenuPage);
+        this.navCtrl.setRoot(MenuPage);
     }
 
     validate() {

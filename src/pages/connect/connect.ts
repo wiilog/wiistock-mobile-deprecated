@@ -36,7 +36,7 @@ export class ConnectPage {
                                     this.sqliteProvider.importData(resp.data)
                                         .then(() => {
                                             console.log('connect');
-                                            this.navCtrl.push(MenuPage);
+                                            this.navCtrl.setRoot(MenuPage);
                                         });
                                 }).catch(err => console.log(err));
                             });
@@ -64,7 +64,7 @@ export class ConnectPage {
 
     public goToParams() {
         if (!this.hasLoaded) {
-            this.navCtrl.push(ParamsPage);
+            this.navCtrl.setRoot(ParamsPage);
         }
     }
 

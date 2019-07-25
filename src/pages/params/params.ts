@@ -30,6 +30,8 @@ export class ParamsPage {
         });
     }
 
+
+
     registerURL() {
         this.sqLiteProvider.setAPI_URL(this.URL).then((result) => {
             if (result === true) {
@@ -64,6 +66,6 @@ export class ParamsPage {
     }
 
     goToConnect() {
-        this.navCtrl.push(ConnectPage);
+        this.navCtrl.setRoot(ConnectPage);
     }
 }

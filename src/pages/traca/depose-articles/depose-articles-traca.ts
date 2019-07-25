@@ -96,7 +96,7 @@ export class DeposeArticlesPageTraca {
     }
 
     redirectAfterTake() {
-        this.navCtrl.push(StockageMenuPageTraca)
+        this.navCtrl.setRoot(StockageMenuPageTraca)
             .then(() => {
                 this.showToast('Dépose enregistrée.')
             });
@@ -113,7 +113,7 @@ export class DeposeArticlesPageTraca {
     }
 
     goHome() {
-        this.navCtrl.push(MenuPage);
+        this.navCtrl.setRoot(MenuPage);
     }
 
     scan() {

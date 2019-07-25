@@ -60,7 +60,7 @@ export class PreparationEmplacementPage {
     }
 
     goHome() {
-        this.navCtrl.push(MenuPage);
+        this.navCtrl.setRoot(MenuPage);
     }
 
     searchEmplacementModal() {
@@ -159,7 +159,7 @@ export class PreparationEmplacementPage {
                                                     }
                                                 },
                                                 error => {
-                                                    this.navCtrl.push(PreparationMenuPage);
+                                                    this.navCtrl.setRoot(PreparationMenuPage);
                                                     console.log(error);
                                                 }
                                             );
