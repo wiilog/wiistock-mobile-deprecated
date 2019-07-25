@@ -41,6 +41,10 @@ import {PreparationMenuPage} from "../pages/preparation/preparation-menu/prepara
 import {PreparationArticlesPage} from "../pages/preparation/preparation-articles/preparation-articles";
 import {PreparationArticleTakePage} from "../pages/preparation/preparation-article-take/preparation-article-take";
 import {PreparationEmplacementPage} from "../pages/preparation/preparation-emplacement/preparation-emplacement";
+import {LivraisonArticleTakePage} from "../pages/livraison/livraison-article-take/livraison-article-take";
+import {LivraisonMenuPage} from "../pages/livraison/livraison-menu/livraison-menu";
+import {LivraisonArticlesPage} from "../pages/livraison/livraison-articles/livraison-articles";
+import {LivraisonEmplacementPage} from "../pages/livraison/livraison-emplacement/livraison-emplacement";
 
 @NgModule({
     declarations: [
@@ -58,6 +62,10 @@ import {PreparationEmplacementPage} from "../pages/preparation/preparation-empla
         PriseEmplacementPageTraca,
         PriseArticlesPageTraca,
         PreparationArticleTakePage,
+        LivraisonArticleTakePage,
+        LivraisonMenuPage,
+        LivraisonArticlesPage,
+        LivraisonEmplacementPage,
         PreparationEmplacementPage,
         PriseConfirmPageTraca,
         DeposeEmplacementPageTraca,
@@ -92,6 +100,10 @@ import {PreparationEmplacementPage} from "../pages/preparation/preparation-empla
         PreparationArticleTakePage,
         PreparationEmplacementPage,
         PreparationArticlesPage,
+        LivraisonArticleTakePage,
+        LivraisonMenuPage,
+        LivraisonArticlesPage,
+        LivraisonEmplacementPage,
         PriseArticlesPageTraca,
         PriseConfirmPageTraca,
         DeposeEmplacementPageTraca,

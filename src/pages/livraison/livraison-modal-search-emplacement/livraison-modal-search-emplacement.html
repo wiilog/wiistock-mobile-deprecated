@@ -1,0 +1,37 @@
+<!--
+  Generated template for the LivraisonModalSearchEmplacementPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+    <ion-navbar>
+        <ion-title>Choisir un emplacement</ion-title>
+        <ion-buttons end>
+            <button ion-button (click)="closeModal()">
+                Fermer
+            </button>
+        </ion-buttons>
+    </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+    <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
+    <ion-list class="list-emplacement">
+        <ion-item *ngFor="let emplacement of emplacements" (click)="selectEmplacement(emplacement)">
+            {{emplacement.label}}
+        </ion-item>
+    </ion-list>
+</ion-content>
+<ion-footer>
+    <ion-item>
+        <button ion-button icon-only item-left clear color="danger" (click)="clearSearch()">
+            <ion-icon name="close"></ion-icon>
+        </button>
+        <ion-input type="text" [(ngModel)]="filterString"
+                   [ngModelOptions]="{standalone: true}" placeholder="Recherche par code, ..."></ion-input>
+        <button ion-button icon-only item-right clear (click)="searchEmplacement()">
+            <ion-icon name="search"></ion-icon>
+        </button>
+    </ion-item>
+</ion-footer>

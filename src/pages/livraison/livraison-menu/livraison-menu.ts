@@ -1,13 +1,13 @@
 import {Component, ViewChild} from '@angular/core';
 import {IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
 import {MenuPage} from "../../menu/menu";
-import {Preparation} from "../../../app/entities/preparation";
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 import {HttpClient} from "@angular/common/http";
-import {PreparationArticlesPage} from "../preparation-articles/preparation-articles";
+import { LivraisonArticlesPage } from "../livraison-articles/livraison-articles";
+import {Livraison} from "../../../app/entities/livraison";
 
 /**
- * Generated class for the PreparationMenuPage page.
+ * Generated class for the LivraisonMenuPage page.
  *
  * See https://ionicframework.com/docs/components/#navigation for more info on
  * Ionic pages and navigation.
@@ -15,12 +15,12 @@ import {PreparationArticlesPage} from "../preparation-articles/preparation-artic
 
 @IonicPage()
 @Component({
-    selector: 'page-preparation-menu',
-    templateUrl: 'preparation-menu.html',
+    selector: 'page-livraison-menu',
+    templateUrl: 'livraison-menu.html',
 })
-export class PreparationMenuPage {
+export class LivraisonMenuPage {
     @ViewChild(Navbar) navBar: Navbar;
-    preparations: Array<Preparation>;
+    livraisons: Array<Livraison>;
     dataApi: string = 'getData';
     hasLoaded: boolean;
 
@@ -54,15 +54,13 @@ export class PreparationMenuPage {
             if (result !== null) {
                 let url: string = result + this.dataApi;
                 this.sqlLiteProvider.getApiKey().then((key) => {
-                    console.log(url);
                     this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
                         if (resp.success) {
-                            console.log('ccc');
                             this.sqlLiteProvider.cleanDataBase(true).then(() => {
                                 this.sqlLiteProvider.importData(resp.data, true)
                                     .then(() => {
-                                        this.sqlLiteProvider.findAll('`livraison`').then(preparations => {
-                                            this.preparations = preparations.filter(p => p.date_end === null);
+                                        this.sqlLiteProvider.findAll('`livraison`').then(livraisons => {
+                                            this.livraisons = livraisons.filter(p => p.date_end === null);
                                             this.hasLoaded = true;
                                         });
                                     });
@@ -92,8 +90,8 @@ export class PreparationMenuPage {
         toast.present();
     }
 
-    goToArticles(preparation) {
-        this.navCtrl.push(PreparationArticlesPage, {preparation: preparation});
+    goToArticles(livraison) {
+        this.navCtrl.push(LivraisonArticlesPage, {livraison: livraison});
     }
 
 }

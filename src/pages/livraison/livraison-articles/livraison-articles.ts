@@ -1,19 +1,19 @@
 import {Component, ViewChild} from '@angular/core';
 import {IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
 import {MenuPage} from "../../menu/menu";
-import {Preparation} from "../../../app/entities/preparation";
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import {ArticlePrepa} from "../../../app/entities/articlePrepa";
-import {PreparationMenuPage} from "../preparation-menu/preparation-menu";
+import {LivraisonMenuPage} from "../livraison-menu/livraison-menu";
 import {Mouvement} from "../../../app/entities/mouvement";
-import {PreparationArticleTakePage} from "../preparation-article-take/preparation-article-take";
+import {LivraisonArticleTakePage} from "../livraison-article-take/livraison-article-take";
 import {HttpClient} from "@angular/common/http";
 import {BarcodeScanner} from "@ionic-native/barcode-scanner";
-import {PreparationEmplacementPage} from "../preparation-emplacement/preparation-emplacement";
+import {LivraisonEmplacementPage} from "../livraison-emplacement/livraison-emplacement";
 import moment from "moment";
+import {ArticleLivraison} from "../../../app/entities/articleLivraison";
+import {Livraison} from "../../../app/entities/livraison";
 
 /**
- * Generated class for the PreparationArticlesPage page.
+ * Generated class for the LivraisonArticlesPage page.
  *
  * See https://ionicframework.com/docs/components/#navigation for more info on
  * Ionic pages and navigation.
@@ -21,17 +21,17 @@ import moment from "moment";
 
 @IonicPage()
 @Component({
-    selector: 'page-preparation-articles',
-    templateUrl: 'preparation-articles.html',
+    selector: 'page-livraison-articles',
+    templateUrl: 'livraison-articles.html',
 })
-export class PreparationArticlesPage {
+export class LivraisonArticlesPage {
 
     @ViewChild(Navbar) navBar: Navbar;
-    preparation: Preparation;
-    articlesNT: Array<ArticlePrepa>;
-    articlesT: Array<ArticlePrepa>;
+    livraison: Livraison;
+    articlesNT: Array<ArticleLivraison>;
+    articlesT: Array<ArticleLivraison>;
     started: boolean = false;
-    apiStartPrepa = 'beginPrepa';
+    apiStartLivraison = 'beginLivraison';
     isValid: boolean = true;
 
     constructor(
@@ -41,9 +41,9 @@ export class PreparationArticlesPage {
         public sqliteProvider: SqliteProvider,
         public http: HttpClient,
         public barcodeScanner: BarcodeScanner) {
-        if (typeof (navParams.get('preparation')) !== undefined) {
-            this.preparation = navParams.get('preparation');
-            this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
+        if (typeof (navParams.get('livraison')) !== undefined) {
+            this.livraison = navParams.get('livraison');
+            this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
                 this.articlesNT = articles.filter(article => article.has_moved === 0);
                 this.articlesT = articles.filter(article => article.has_moved === 1);
                 if (this.articlesT.length > 0) {
@@ -56,15 +56,13 @@ export class PreparationArticlesPage {
                         this.sqliteProvider.getAPI_URL().then((result) => {
                             this.sqliteProvider.getApiKey().then((key) => {
                                 if (result !== null) {
-                                    let url: string = result + this.apiStartPrepa;
-                                    this.http.post<any>(url, {id: this.preparation.id, apiKey: key}).subscribe(resp => {
+                                    let url: string = result + this.apiStartLivraison;
+                                    this.http.post<any>(url, {id: this.livraison.id, apiKey: key}).subscribe(resp => {
                                         if (resp.success) {
                                             this.started = true;
                                             this.isValid = true;
-                                            this.sqliteProvider.startPrepa(this.preparation.id).then(() => {
-                                                this.showToast('Préparation commencée.');
-                                                this.registerMvt();
-                                            });
+                                            this.showToast('Livraison commencée.');
+                                            this.registerMvt();
                                         } else {
                                             this.isValid = false;
                                             this.showToast(resp.msg);
@@ -119,28 +117,28 @@ export class PreparationArticlesPage {
         this.navBar.backButtonClick = () => {
 
             //Write here wherever you wanna do
-            this.navCtrl.setRoot(PreparationMenuPage);
+            this.navCtrl.setRoot(LivraisonMenuPage);
         }
     }
 
     registerMvt() {
         if (this.isValid) {
             if (this.navParams.get('article').quantite !== Number(this.navParams.get('quantite'))) {
-                let newArticle: ArticlePrepa = {
+                let newArticle: ArticleLivraison = {
                     id: null,
                     label: this.navParams.get('article').label,
                     reference: this.navParams.get('article').reference,
                     quantite: Number(this.navParams.get('quantite')),
                     is_ref: this.navParams.get('article').is_ref,
-                    id_prepa: this.navParams.get('article').id_prepa,
+                    id_livraison: this.navParams.get('article').id_livraison,
                     has_moved: 1,
                     emplacement: this.navParams.get('article').emplacement
                 };
-                let articleAlready = this.articlesT.find(art => art.id_prepa === newArticle.id_prepa && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
+                let articleAlready = this.articlesT.find(art => art.id_livraison === newArticle.id_livraison && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
                 if (articleAlready !== undefined) {
-                    this.sqliteProvider.updateArticleQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite).then(() => {
-                        this.sqliteProvider.updateArticleQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - newArticle.quantite).then(() => {
-                            this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
+                    this.sqliteProvider.updateArticleLivraisonQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite).then(() => {
+                        this.sqliteProvider.updateArticleLivraisonQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - newArticle.quantite).then(() => {
+                            this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
                                 console.log(articles);
                                 this.articlesNT = articles.filter(article => article.has_moved === 0);
                                 this.articlesT = articles.filter(article => article.has_moved === 1);
@@ -148,7 +146,7 @@ export class PreparationArticlesPage {
                         });
                     });
                 } else {
-                    this.sqliteProvider.insert('`article_prepa`', newArticle).then((rowInserted) => {
+                    this.sqliteProvider.insert('`article_livraison`', newArticle).then((rowInserted) => {
                         console.log(rowInserted.insertId);
                         let mouvement: Mouvement = {
                             id: null,
@@ -160,14 +158,14 @@ export class PreparationArticlesPage {
                             location: null,
                             type: 'prise-dépose',
                             is_ref: newArticle.is_ref,
-                            id_article_prepa: rowInserted.insertId,
-                            id_prepa: newArticle.id_prepa,
-                            id_article_livraison : null,
-                            id_livraison : null
+                            id_article_prepa: null,
+                            id_prepa: null,
+                            id_article_livraison : rowInserted.insertId,
+                            id_livraison : newArticle.id_livraison
                         };
-                        this.sqliteProvider.updateArticleQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - Number(this.navParams.get('quantite'))).then(() => {
+                        this.sqliteProvider.updateArticleLivraisonQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - Number(this.navParams.get('quantite'))).then(() => {
                             this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
-                                this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
+                                this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
                                     this.articlesNT = articles.filter(article => article.has_moved === 0);
                                     this.articlesT = articles.filter(article => article.has_moved === 1);
                                 })
@@ -186,16 +184,16 @@ export class PreparationArticlesPage {
                     location: null,
                     type: 'prise-dépose',
                     is_ref: this.navParams.get('article').is_ref,
-                    id_article_prepa: this.navParams.get('article').id,
-                    id_prepa: this.navParams.get('article').id_prepa,
-                    id_article_livraison : null,
-                    id_livraison : null
+                    id_article_prepa: null,
+                    id_prepa: null,
+                    id_article_livraison : this.navParams.get('article').id,
+                    id_livraison : this.navParams.get('article').id_livraison
                 };
-                let articleAlready = this.articlesT.find(art => art.id_prepa === mouvement.id_prepa && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
+                let articleAlready = this.articlesT.find(art => art.id_livraison === mouvement.id_livraison && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
                 if (articleAlready !== undefined) {
-                    this.sqliteProvider.updateArticleQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite).then(() => {
-                        this.sqliteProvider.delete('`article_prepa`', mouvement.id_article_prepa).then(() => {
-                            this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
+                    this.sqliteProvider.updateArticleLivraisonQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite).then(() => {
+                        this.sqliteProvider.delete('`article_livraison`', mouvement.id_article_livraison).then(() => {
+                            this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
                                 console.log(articles);
                                 this.articlesNT = articles.filter(article => article.has_moved === 0);
                                 this.articlesT = articles.filter(article => article.has_moved === 1);
@@ -204,8 +202,8 @@ export class PreparationArticlesPage {
                     });
                 } else {
                     this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
-                        this.sqliteProvider.moveArticle(this.navParams.get('article').id).then(() => {
-                            this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
+                        this.sqliteProvider.moveArticleLivraison(this.navParams.get('article').id).then(() => {
+                            this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
                                 console.log(articles);
                                 this.articlesNT = articles.filter(article => article.has_moved === 0);
                                 this.articlesT = articles.filter(article => article.has_moved === 1);
@@ -226,22 +224,22 @@ export class PreparationArticlesPage {
         if (this.articlesNT.length > 0) {
             this.showToast('Veuillez traiter tous les articles concernés');
         } else {
-            this.navCtrl.push(PreparationEmplacementPage, {preparation: this.preparation})
+            this.navCtrl.push(LivraisonEmplacementPage, {livraison: this.livraison})
         }
     }
 
     testIfBarcodeEquals(text, fromText) {
         if (fromText && this.articlesNT.some(article => article.reference === text)) {
-            this.navCtrl.push(PreparationArticleTakePage, {
+            this.navCtrl.push(LivraisonArticleTakePage, {
                 article: this.articlesNT.find(article => article.reference === text),
-                preparation: this.preparation,
+                livraison: this.livraison,
                 started: this.started,
                 valid: this.isValid
             });
         } else if (!fromText) {
-            this.navCtrl.push(PreparationArticleTakePage, {
+            this.navCtrl.push(LivraisonArticleTakePage, {
                 article: text,
-                preparation: this.preparation,
+                livraison: this.livraison,
                 started: this.started,
                 valid: this.isValid
             })

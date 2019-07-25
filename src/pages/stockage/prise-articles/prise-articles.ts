@@ -74,7 +74,9 @@ export class PriseArticlesPage {
         type: 'prise-depose',
         is_ref : null,
         id_article_prepa : article.id,
-        id_prepa : null
+        id_prepa : null,
+        id_livraison : null,
+        id_article_livraison : null
       };
       if (this.articles.indexOf(article) === this.articles.length - 1) {
         this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {

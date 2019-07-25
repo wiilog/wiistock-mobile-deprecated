@@ -4,7 +4,6 @@ import {StorageService} from "../../app/services/storage.service";
 import moment from "moment";
 import {Preparation} from "../../app/entities/preparation";
 import {Mouvement} from "../../app/entities/mouvement";
-import {ArticlePrepa} from "../../app/entities/articlePrepa";
 import {Livraison} from "../../app/entities/livraison";
 
 const DB_NAME: string = 'follow_gt';
@@ -39,38 +38,40 @@ export class SqliteProvider {
                 this.db.executeSql('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))', [])
                     .then(() => {
                         console.log('table emplacement créée !')
-                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location` TEXT, `type` VARCHAR(255), `is_ref` TEXT, `id_article_prepa` INTEGER, `id_prepa` INTEGER)', [])
-                            .then(() => {
-                                console.log('table mouvement créée !')
-                                this.db.executeSql('DROP TABLE IF EXISTS `mouvement_traca`', [])
-                                    .then(() => {
-                                        console.log('table mouvement traca deleted !');
-                                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255))', [])
-                                            .then(() => {
-                                                console.log('table mouvement traca créée !')
-                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []).then(() => {
-                                                    console.log('table api_params créée!');
-                                                    this.db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []).then(() => {
-                                                        console.log('inserted single api param');
-                                                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER)', []).then(() => {
-                                                            console.log('table prepa créee');
-                                                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []).then(() => {
-                                                                console.log('table article prepa crée');
-                                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []).then(() => {
-                                                                    console.log('table prepa créee');
-                                                                    this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_livraison` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_livraison` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []).then(() => {
-                                                                        console.log('table article prepa crée');
-                                                                    }).catch(err => console.log(err));
-                                                                });
-                                                            }).catch(err => console.log(err));
+                        this.db.executeSql('DROP TABLE IF EXISTS `mouvement`', []).then(() => {
+                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location` TEXT, `type` VARCHAR(255), `is_ref` TEXT, `id_article_prepa` INTEGER, `id_prepa` INTEGER, `id_article_livraison` INTEGER, `id_livraison` INTEGER)', [])
+                                .then(() => {
+                                    console.log('table mouvement créée !')
+                                    this.db.executeSql('DROP TABLE IF EXISTS `mouvement_traca`', [])
+                                        .then(() => {
+                                            console.log('table mouvement traca deleted !');
+                                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255))', [])
+                                                .then(() => {
+                                                    console.log('table mouvement traca créée !')
+                                                    this.db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []).then(() => {
+                                                        console.log('table api_params créée!');
+                                                        this.db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []).then(() => {
+                                                            console.log('inserted single api param');
+                                                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER)', []).then(() => {
+                                                                console.log('table prepa créee');
+                                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []).then(() => {
+                                                                    console.log('table article prepa crée');
+                                                                    this.db.executeSql('CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []).then(() => {
+                                                                        console.log('table prepa créee');
+                                                                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_livraison` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_livraison` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []).then(() => {
+                                                                            console.log('table article prepa crée');
+                                                                        }).catch(err => console.log(err));
+                                                                    });
+                                                                }).catch(err => console.log(err));
+                                                            });
                                                         });
-                                                    });
+                                                    })
                                                 })
-                                            })
-                                            .catch(e => console.log(e));
-                                    })
-                                    .catch(e => console.log(e));
-                            });
+                                                .catch(e => console.log(e));
+                                        })
+                                        .catch(e => console.log(e));
+                                });
+                        });
                     });
             });
     }
@@ -274,15 +275,15 @@ export class SqliteProvider {
         });
     }
 
-    executeAllImports(imports : Array<string>) {
+    executeAllImports(imports: Array<string>) {
         return new Promise<any>((resolve) => {
             imports.forEach((importSql) => {
                 this.db.executeSql(importSql, [])
                     .then()
                     .catch(err => console.log(err + ' ' + importSql))
                     .then(() => {
-                        if (imports.indexOf(importSql) === imports.length -1) resolve();
-                });
+                        if (imports.indexOf(importSql) === imports.length - 1) resolve();
+                    });
             });
         });
     }
@@ -623,6 +624,19 @@ export class SqliteProvider {
         return resp;
     }
 
+    public findMvtByArticleLivraison(id_art: number) {
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('SELECT * FROM `mouvement` WHERE `id_article_livraison` = ' + id_art + ' LIMIT 1', []).then((mvt) => {
+                if (mvt && mvt.rows && mvt.rows.length > 0 && mvt.rows.item(0).url !== '') {
+                    resolve(mvt.rows.item(0));
+                } else {
+                    resolve(null);
+                }
+            }).catch(err => console.log(err));
+        });
+        return resp;
+    }
+
     public finishPrepa(id_prepa: number, emplacement) {
         let resp = new Promise<any>((resolve) => {
             this.db.executeSql('UPDATE `preparation` SET date_end = \'' + moment().format() + '\', emplacement = \'' + emplacement + '\' WHERE id = ' + id_prepa, []).then(() => {
@@ -635,6 +649,15 @@ export class SqliteProvider {
     public startPrepa(id_prepa: number) {
         let resp = new Promise<any>((resolve) => {
             this.db.executeSql('UPDATE `preparation` SET started = 1 WHERE id = ' + id_prepa, []).then(() => {
+                resolve();
+            })
+        });
+        return resp;
+    }
+
+    public finishLivraison(id_livraison: number, emplacement) {
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('UPDATE `livraison` SET date_end = \'' + moment().format() + '\', emplacement = \'' + emplacement + '\' WHERE id = ' + id_livraison, []).then(() => {
                 resolve();
             })
         });
@@ -659,9 +682,27 @@ export class SqliteProvider {
         return resp;
     }
 
+    public moveArticleLivraison(id_article: number) {
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('UPDATE `article_livraison` SET has_moved = 1 WHERE id = ' + id_article, []).then(() => {
+                resolve();
+            }).catch(err => console.log(err));
+        });
+        return resp;
+    }
+
     public updateArticleQuantity(id_article: number, quantite: number) {
         let resp = new Promise<any>((resolve) => {
             this.db.executeSql('UPDATE `article_prepa` SET quantite = ' + quantite + ' WHERE id = ' + id_article, []).then(() => {
+                resolve();
+            }).catch(err => console.log(err));
+        });
+        return resp;
+    }
+
+    public updateArticleLivraisonQuantity(id_article: number, quantite: number) {
+        let resp = new Promise<any>((resolve) => {
+            this.db.executeSql('UPDATE `article_livraison` SET quantite = ' + quantite + ' WHERE id = ' + id_article, []).then(() => {
                 resolve();
             }).catch(err => console.log(err));
         });

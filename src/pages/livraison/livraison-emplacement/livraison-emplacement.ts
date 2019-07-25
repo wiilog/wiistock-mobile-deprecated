@@ -4,10 +4,10 @@ import {MenuPage} from "../../menu/menu";
 import {Emplacement} from "../../../app/entities/emplacement";
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 import {BarcodeScanner} from "@ionic-native/barcode-scanner";
-import {Preparation} from "../../../app/entities/preparation";
-import {PreparationMenuPage} from "../preparation-menu/preparation-menu";
+import {LivraisonMenuPage} from "../livraison-menu/livraison-menu";
 import {HttpClient} from "@angular/common/http";
-import {PreparationArticlesPage} from "../preparation-articles/preparation-articles";
+import {LivraisonArticlesPage} from "../livraison-articles/livraison-articles";
+import {Livraison} from "../../../app/entities/livraison";
 
 /**
  * Generated class for the LivraisonEmplacementPage page.
@@ -18,16 +18,16 @@ import {PreparationArticlesPage} from "../preparation-articles/preparation-artic
 
 @IonicPage()
 @Component({
-    selector: 'page-preparation-emplacement',
-    templateUrl: 'preparation-emplacement.html',
+    selector: 'page-livraison-emplacement',
+    templateUrl: 'livraison-emplacement.html',
 })
-export class PreparationEmplacementPage {
+export class LivraisonEmplacementPage {
     @ViewChild(Navbar) navBar: Navbar;
 
     emplacement: Emplacement;
     db_locations: Array<Emplacement>;
-    preparation: Preparation;
-    apiFinish: string = 'finishPrepa';
+    livraison: Livraison;
+    apiFinish: string = 'finishLivraison';
 
     constructor(public navCtrl: NavController,
                 public navParams: NavParams,
@@ -35,11 +35,11 @@ export class PreparationEmplacementPage {
                 public toastController: ToastController,
                 public barcodeScanner: BarcodeScanner,
                 public http: HttpClient,
-                public modal : ModalController) {
+                public modal: ModalController) {
         this.sqliteProvider.findAll('emplacement').then((value) => {
             this.db_locations = value;
-            if (typeof (navParams.get('preparation')) !== undefined) {
-                this.preparation = navParams.get('preparation');
+            if (typeof (navParams.get('livraison')) !== undefined) {
+                this.livraison = navParams.get('livraison');
             }
             if (typeof (navParams.get('emplacement')) !== undefined) {
                 this.emplacement = navParams.get('emplacement');
@@ -65,7 +65,7 @@ export class PreparationEmplacementPage {
 
     searchEmplacementModal() {
         const myModal = this.modal.create('LivraisonModalSearchEmplacementPage', {
-            preparation : this.preparation
+            livraison: this.livraison
         });
         myModal.present();
     }
@@ -77,8 +77,8 @@ export class PreparationEmplacementPage {
     setBackButtonAction() {
         this.navBar.backButtonClick = () => {
             //Write here wherever you wanna do
-            this.navCtrl.push(PreparationArticlesPage, {
-                preparation : this.preparation
+            this.navCtrl.push(LivraisonArticlesPage, {
+                livraison: this.livraison
             });
         }
     }
@@ -97,9 +97,9 @@ export class PreparationEmplacementPage {
                 if (element.label === text) {
                     found = true;
                     instance.emplacement = element;
-                    instance.navCtrl.push(PreparationEmplacementPage, {
-                        preparation : instance.preparation,
-                        emplacement : element
+                    instance.navCtrl.push(LivraisonEmplacementPage, {
+                        livraison: instance.livraison,
+                        emplacement: element
                     })
                 }
             });
@@ -123,9 +123,9 @@ export class PreparationEmplacementPage {
         if (this.emplacement.label !== '') {
             let instance = this;
             let promise = new Promise<any>((resolve) => {
-                this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
+                this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
                     articles.forEach(function (article) {
-                        instance.sqliteProvider.findMvtByArticle(article.id).then((mvt) => {
+                        instance.sqliteProvider.findMvtByArticleLivraison(article.id).then((mvt) => {
                             instance.sqliteProvider.finishMvt(mvt.id, instance.emplacement.label).then(() => {
                                 if (articles.indexOf(article) === articles.length - 1) resolve();
                             });
@@ -134,39 +134,37 @@ export class PreparationEmplacementPage {
                 });
             });
             promise.then(() => {
-                this.sqliteProvider.finishPrepaStorage().then(() => {
-                    this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label).then(() => {
-                        this.sqliteProvider.getAPI_URL().then((result) => {
-                            this.sqliteProvider.getApiKey().then((key) => {
-                                if (result !== null) {
-                                    this.sqliteProvider.findAll('`livraison`').then(preparationsToSend => {
-                                        this.sqliteProvider.findAll('`mouvement`').then((mvts) => {
-                                            let url: string = result + this.apiFinish;
-                                            let params = {
-                                                preparations: preparationsToSend.filter(p => p.date_end !== null),
-                                                mouvements: mvts.filter(m => m.id_livraison === null),
-                                                apiKey: key
-                                            };
-                                            this.http.post<any>(url, params).subscribe(resp => {
-                                                    if (resp.success) {
-                                                        this.sqliteProvider.deletePreparations(params.preparations).then(() => {
-                                                            this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
-                                                                this.navCtrl.setRoot(PreparationMenuPage);
-                                                            });
+                this.sqliteProvider.finishLivraison(this.livraison.id, this.emplacement.label).then(() => {
+                    this.sqliteProvider.getAPI_URL().then((result) => {
+                        this.sqliteProvider.getApiKey().then((key) => {
+                            if (result !== null) {
+                                this.sqliteProvider.findAll('`livraison`').then(livraisonsToSend => {
+                                    this.sqliteProvider.findAll('`mouvement`').then((mvts) => {
+                                        let url: string = result + this.apiFinish;
+                                        let params = {
+                                            livraisons: livraisonsToSend.filter(p => p.date_end !== null),
+                                            mouvements: mvts.filter(m => m.id_prepa === null),
+                                            apiKey: key
+                                        };
+                                        this.http.post<any>(url, params).subscribe(resp => {
+                                                if (resp.success) {
+                                                    this.sqliteProvider.deleteLivraisons(params.livraisons).then(() => {
+                                                        this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
+                                                            this.navCtrl.setRoot(LivraisonMenuPage);
                                                         });
-                                                    } else {
-                                                        this.showToast(resp.msg);
-                                                    }
-                                                },
-                                                error => {
-                                                    this.navCtrl.setRoot(PreparationMenuPage);
-                                                    console.log(error);
+                                                    });
+                                                } else {
+                                                    this.showToast(resp.msg);
                                                 }
-                                            );
-                                        });
+                                            },
+                                            error => {
+                                                this.navCtrl.setRoot(LivraisonMenuPage);
+                                                console.log(error);
+                                            }
+                                        );
                                     });
-                                }
-                            });
+                                });
+                            }
                         });
                     })
                 })

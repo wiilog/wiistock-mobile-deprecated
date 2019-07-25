@@ -1,0 +1,30 @@
+<ion-header>
+    <ion-navbar>
+        <ion-buttons start>
+            <button ion-button icon-only (click)="searchEmplacementModal()">
+                <ion-icon name="search"></ion-icon>
+            </button>
+        </ion-buttons>
+        <ion-title>Finaliser une livraison</ion-title>
+    </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+    <ion-row class="row-menu-stats">
+        <ion-col class="col-menu-stats" *ngIf="emplacement">
+            <p class="smaller">Emplacement sélectionné :</p>
+            <p class="smaller">{{emplacement.label}}</p>
+        </ion-col>
+        <ion-col class="col-menu-stats">
+            <p class="big">SCANNER</p>
+            <ion-icon name="barcode"></ion-icon>
+        </ion-col>
+    </ion-row>
+</ion-content>
+
+<ion-footer padding>
+    <div class="d-flex">
+        <ion-icon class="big-icon" name="qr-scanner" (click)="scan()"></ion-icon>
+        <ion-icon class="big-icon" name="checkmark-circle" (click)="validate()" *ngIf="emplacement"></ion-icon>
+    </div>
+</ion-footer>

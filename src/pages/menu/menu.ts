@@ -5,6 +5,7 @@ import {Page} from "ionic-angular/navigation/nav-util";
 import {PreparationMenuPage} from "../preparation/preparation-menu/preparation-menu";
 import {SqliteProvider} from "../../providers/sqlite/sqlite";
 import {Preparation} from "../../app/entities/preparation";
+import {LivraisonMenuPage} from "../livraison/livraison-menu/livraison-menu";
 
 @Component({
     selector: 'page-menu',
@@ -21,7 +22,7 @@ export class MenuPage {
         this.items = [
             {title: 'Traça', icon: 'cube', page: StockageMenuPageTraca},
             {title: 'Préparation', icon: 'cube', page: PreparationMenuPage},
-            {title: 'Livraison', icon: 'cube', page: PreparationMenuPage}
+            {title: 'Livraison', icon: 'cube', page: LivraisonMenuPage}
         ];
         this.sqliteProvider.findAll('`preparation`').then((preparations: Array<Preparation>) => {
             this.nbPrep = preparations.filter(p => p.date_end === null).length;
