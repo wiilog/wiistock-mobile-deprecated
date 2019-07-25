@@ -15,7 +15,7 @@ export class ConnectPage {
         login: '',
         password: ''
     };
-    connectURL : string = 'connect';
+    connectURL : string = '/api/connect';
     hasLoaded : boolean;
 
     constructor(public navCtrl: NavController, public navParams: NavParams, public usersApiProvider: UsersApiProvider, private toastController: ToastController, public sqliteProvider: SqliteProvider) {
