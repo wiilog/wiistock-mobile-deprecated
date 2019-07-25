@@ -24,13 +24,16 @@ export class MenuPage {
             {title: 'Préparation', icon: 'cube', page: PreparationMenuPage},
             {title: 'Livraison', icon: 'cube', page: LivraisonMenuPage}
         ];
+
+    }
+
+    ionViewDidEnter() {
         this.sqliteProvider.findAll('`preparation`').then((preparations: Array<Preparation>) => {
             this.nbPrep = preparations.filter(p => p.date_end === null).length;
             this.sqliteProvider.getFinishedPreps().then((preps) => {
                 this.nbPrepT = preps;
             });
         })
-
     }
 
     itemTapped(event, item) {
