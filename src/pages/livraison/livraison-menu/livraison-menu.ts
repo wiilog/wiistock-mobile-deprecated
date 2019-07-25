@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
+import {Content, IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
 import {MenuPage} from "../../menu/menu";
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 import {HttpClient} from "@angular/common/http";
@@ -20,6 +20,7 @@ import {Livraison} from "../../../app/entities/livraison";
 })
 export class LivraisonMenuPage {
     @ViewChild(Navbar) navBar: Navbar;
+    @ViewChild(Content) content: Content;
     livraisons: Array<Livraison>;
     dataApi: string = 'getData';
     hasLoaded: boolean;
@@ -61,7 +62,10 @@ export class LivraisonMenuPage {
                                     .then(() => {
                                         this.sqlLiteProvider.findAll('`livraison`').then(livraisons => {
                                             this.livraisons = livraisons.filter(p => p.date_end === null);
-                                            this.hasLoaded = true;
+                                            setTimeout(() => {
+                                                this.hasLoaded = true;
+                                                this.content.resize();
+                                            }, 1000);
                                         });
                                     });
                             });

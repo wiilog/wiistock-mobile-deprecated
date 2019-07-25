@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
+import {Content, IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
 import {MenuPage} from "../../menu/menu";
 import {Preparation} from "../../../app/entities/preparation";
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
@@ -20,6 +20,7 @@ import {PreparationArticlesPage} from "../preparation-articles/preparation-artic
 })
 export class PreparationMenuPage {
     @ViewChild(Navbar) navBar: Navbar;
+    @ViewChild(Content) content: Content;
     preparations: Array<Preparation>;
     dataApi: string = 'getData';
     hasLoaded: boolean;
@@ -63,7 +64,10 @@ export class PreparationMenuPage {
                                     .then(() => {
                                         this.sqlLiteProvider.findAll('`livraison`').then(preparations => {
                                             this.preparations = preparations.filter(p => p.date_end === null);
-                                            this.hasLoaded = true;
+                                            setTimeout(() => {
+                                                this.hasLoaded = true;
+                                                this.content.resize();
+                                            }, 1000);
                                         });
                                     });
                             });
