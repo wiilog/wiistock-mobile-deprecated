@@ -10,7 +10,7 @@ import {HttpClient} from "@angular/common/http";
 import {PreparationArticlesPage} from "../preparation-articles/preparation-articles";
 
 /**
- * Generated class for the LivraisonEmplacementPage page.
+ * Generated class for the PreparationEmplacementPage page.
  *
  * See https://ionicframework.com/docs/components/#navigation for more info on
  * Ionic pages and navigation.
@@ -64,7 +64,7 @@ export class PreparationEmplacementPage {
     }
 
     searchEmplacementModal() {
-        const myModal = this.modal.create('LivraisonModalSearchEmplacementPage', {
+        const myModal = this.modal.create('PreparationModalSearchEmplacementPage', {
             preparation : this.preparation
         });
         myModal.present();
@@ -139,7 +139,7 @@ export class PreparationEmplacementPage {
                         this.sqliteProvider.getAPI_URL().then((result) => {
                             this.sqliteProvider.getApiKey().then((key) => {
                                 if (result !== null) {
-                                    this.sqliteProvider.findAll('`livraison`').then(preparationsToSend => {
+                                    this.sqliteProvider.findAll('`preparation`').then(preparationsToSend => {
                                         this.sqliteProvider.findAll('`mouvement`').then((mvts) => {
                                             let url: string = result + this.apiFinish;
                                             let params = {

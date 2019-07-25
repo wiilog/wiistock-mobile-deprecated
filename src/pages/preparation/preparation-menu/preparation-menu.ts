@@ -62,7 +62,7 @@ export class PreparationMenuPage {
                             this.sqlLiteProvider.cleanDataBase(true).then(() => {
                                 this.sqlLiteProvider.importData(resp.data, true)
                                     .then(() => {
-                                        this.sqlLiteProvider.findAll('`livraison`').then(preparations => {
+                                        this.sqlLiteProvider.findAll('`preparation`').then(preparations => {
                                             this.preparations = preparations.filter(p => p.date_end === null);
                                             setTimeout(() => {
                                                 this.hasLoaded = true;
