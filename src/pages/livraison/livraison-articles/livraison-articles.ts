@@ -204,9 +204,14 @@ export class LivraisonArticlesPage {
                     this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
                         this.sqliteProvider.moveArticleLivraison(this.navParams.get('article').id).then(() => {
                             this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
-                                console.log(articles);
-                                this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                this.articlesT = articles.filter(article => article.has_moved === 1);
+                                if (articles.filter(article => article.has_moved === 0).length === 0) {
+                                    this.navCtrl.setRoot(this.navCtrl.getActive().component, {
+                                        livraison : this.livraison
+                                    });
+                                } else {
+                                    this.articlesNT = articles.filter(article => article.has_moved === 0);
+                                    this.articlesT = articles.filter(article => article.has_moved === 1);
+                                }
                             })
                         });
                     });

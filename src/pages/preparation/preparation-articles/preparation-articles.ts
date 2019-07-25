@@ -206,9 +206,14 @@ export class PreparationArticlesPage {
                     this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
                         this.sqliteProvider.moveArticle(this.navParams.get('article').id).then(() => {
                             this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
-                                console.log(articles);
-                                this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                this.articlesT = articles.filter(article => article.has_moved === 1);
+                                if (articles.filter(article => article.has_moved === 0).length === 0) {
+                                    this.navCtrl.setRoot(this.navCtrl.getActive().component, {
+                                        preparation : this.preparation
+                                    });
+                                } else {
+                                    this.articlesNT = articles.filter(article => article.has_moved === 0);
+                                    this.articlesT = articles.filter(article => article.has_moved === 1);
+                                }
                             })
                         });
                     });
