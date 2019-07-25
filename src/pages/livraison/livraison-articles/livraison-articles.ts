@@ -31,7 +31,7 @@ export class LivraisonArticlesPage {
     articlesNT: Array<ArticleLivraison>;
     articlesT: Array<ArticleLivraison>;
     started: boolean = false;
-    apiStartLivraison = 'beginLivraison';
+    apiStartLivraison = '/api/beginLivraison';
     isValid: boolean = true;
 
     constructor(

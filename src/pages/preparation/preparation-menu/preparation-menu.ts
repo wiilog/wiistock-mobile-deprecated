@@ -22,7 +22,7 @@ export class PreparationMenuPage {
     @ViewChild(Navbar) navBar: Navbar;
     @ViewChild(Content) content: Content;
     preparations: Array<Preparation>;
-    dataApi: string = 'getData';
+    dataApi: string = '/api/getData';
     hasLoaded: boolean;
 
     constructor(

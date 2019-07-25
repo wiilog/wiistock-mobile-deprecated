@@ -25,7 +25,7 @@ export class MyApp {
     rootPage = ConnectPage;
     pages: Array<{ title: string, component: any }>;
     homePage = MenuPage;
-    addMvtURL: string = 'addMouvementTraca';
+    addMvtURL: string = '/api/addMouvementTraca';
 
     constructor(
         public platform: Platform,

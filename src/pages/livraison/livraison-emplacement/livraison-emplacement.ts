@@ -27,7 +27,7 @@ export class LivraisonEmplacementPage {
     emplacement: Emplacement;
     db_locations: Array<Emplacement>;
     livraison: Livraison;
-    apiFinish: string = 'finishLivraison';
+    apiFinish: string = '/api/finishLivraison';
 
     constructor(public navCtrl: NavController,
                 public navParams: NavParams,

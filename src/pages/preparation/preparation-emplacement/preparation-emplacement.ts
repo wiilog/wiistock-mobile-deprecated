@@ -27,7 +27,7 @@ export class PreparationEmplacementPage {
     emplacement: Emplacement;
     db_locations: Array<Emplacement>;
     preparation: Preparation;
-    apiFinish: string = 'finishPrepa';
+    apiFinish: string = '/api/finishPrepa';
 
     constructor(public navCtrl: NavController,
                 public navParams: NavParams,

@@ -31,7 +31,7 @@ export class PreparationArticlesPage {
     articlesNT: Array<ArticlePrepa>;
     articlesT: Array<ArticlePrepa>;
     started: boolean = false;
-    apiStartPrepa = 'beginPrepa';
+    apiStartPrepa = '/api/beginPrepa';
     isValid: boolean = true;
 
     constructor(

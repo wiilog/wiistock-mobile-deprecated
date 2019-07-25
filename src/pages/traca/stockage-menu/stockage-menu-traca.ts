@@ -19,7 +19,7 @@ export class StockageMenuPageTraca {
     unfinishedMvts: boolean;
     type: string;
     sqlProvider : SqliteProvider;
-    addMvtURL : string = 'addMouvementTraca';
+    addMvtURL : string = '/api/addMouvementTraca';
 
     constructor(public navCtrl: NavController,
                 public navParams: NavParams,

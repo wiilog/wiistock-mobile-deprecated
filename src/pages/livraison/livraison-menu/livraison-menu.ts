@@ -22,7 +22,7 @@ export class LivraisonMenuPage {
     @ViewChild(Navbar) navBar: Navbar;
     @ViewChild(Content) content: Content;
     livraisons: Array<Livraison>;
-    dataApi: string = 'getData';
+    dataApi: string = '/api/getData';
     hasLoaded: boolean;
 
     constructor(
