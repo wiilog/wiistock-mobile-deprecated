@@ -6,6 +6,8 @@ import {PreparationMenuPage} from "../preparation/preparation-menu/preparation-m
 import {SqliteProvider} from "../../providers/sqlite/sqlite";
 import {Preparation} from "../../app/entities/preparation";
 import {LivraisonMenuPage} from "../livraison/livraison-menu/livraison-menu";
+import {ParamsPage} from "../params/params";
+import {ConnectPage} from "../connect/connect";
 
 @Component({
     selector: 'page-menu',
@@ -22,7 +24,8 @@ export class MenuPage {
         this.items = [
             {title: 'Traça', icon: 'cube', page: StockageMenuPageTraca},
             {title: 'Préparation', icon: 'cube', page: PreparationMenuPage},
-            {title: 'Livraison', icon: 'cube', page: LivraisonMenuPage}
+            {title: 'Livraison', icon: 'cube', page: LivraisonMenuPage},
+            {title: 'Déconnexion', icon: 'log-out', page: null}
         ];
 
     }
@@ -37,7 +40,15 @@ export class MenuPage {
     }
 
     itemTapped(event, item) {
-        this.navCtrl.setRoot(item.page);
+        if (item.page === null) {
+            this.navCtrl.setRoot(ConnectPage);
+        } else {
+            this.navCtrl.setRoot(item.page);
+        }
+    }
+
+    goToParams() {
+        this.navCtrl.push(ParamsPage);
     }
 
 }

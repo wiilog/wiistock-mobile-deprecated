@@ -1,7 +1,6 @@
 import {Component} from '@angular/core';
 import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
 import {SqliteProvider} from "../../providers/sqlite/sqlite";
-import {ConnectPage} from '../connect/connect'
 import {HttpClient} from '@angular/common/http';
 
 /**
@@ -48,7 +47,7 @@ export class ParamsPage {
             res => {
                 this.registerURL();
                 this.showToast('URL correcte!').then(() => {
-                    this.navCtrl.setRoot(ConnectPage);
+                    this.navCtrl.pop();
                 });
             },
             error => this.showToast('URL incorrecte...')
@@ -66,6 +65,6 @@ export class ParamsPage {
     }
 
     goToConnect() {
-        this.navCtrl.setRoot(ConnectPage);
+        this.navCtrl.pop();
     }
 }
