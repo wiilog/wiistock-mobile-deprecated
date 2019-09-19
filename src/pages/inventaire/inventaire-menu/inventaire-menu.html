@@ -1,0 +1,69 @@
+<!--
+  Generated template for the InventaireMenuPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+  <ion-navbar>
+    <ion-buttons start>
+      <button ion-button icon-only (click)="goHome()">
+        <ion-icon name="home"></ion-icon>
+      </button>
+    </ion-buttons>
+    <ion-title>Inventaire</ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+    <ion-title *ngIf="articles && articles.length === 0">Tous les inventaires sont à jour.</ion-title>
+    <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
+
+    <ion-list *ngIf="hasLoaded">
+        <ion-grid>
+            <button (click)="openModalQuantity(article)" class="list" ion-item *ngFor="let article of articles">
+                <ion-row>
+                    <ion-col>{{ article.reference }}</ion-col>
+                    <ion-col>{{ article.location }}</ion-col>
+                </ion-row>
+            </button>
+        </ion-grid>
+
+<!--        <div class="d-flex" [hidden]="articles && articles.length === 0">-->
+<!--            <p>Liste des références et articles traités</p>-->
+<!--        </div>-->
+    </ion-list>
+
+
+<!--    <ion-list [hidden]="articles && articles.length === 0">-->
+<!--        <ion-grid>-->
+<!--            <button [disabled]="!isValid" class="list" ion-item *ngFor="let article of articlesT">-->
+<!--                <ion-row>-->
+<!--                    <ion-col>{{ article.reference }}</ion-col>-->
+<!--                    <ion-col>{{ article.emplacement === "null" ? '' : article.emplacement }}</ion-col>-->
+<!--                    <ion-col>{{ article.quantite }}</ion-col>-->
+<!--                </ion-row>-->
+<!--            </button>-->
+<!--        </ion-grid>-->
+<!--    </ion-list>-->
+
+
+
+
+</ion-content>
+<ion-footer padding *ngIf="hasLoaded">
+<!--  <div class="d-flex">-->
+<!--    <ion-icon class="big-icon" name="refresh" item-right (click)="synchronise(false)"></ion-icon>-->
+<!--  </div>-->
+</ion-footer>
+
+
+
+
+<!--<ion-footer padding>-->
+<!--    <div class="d-flex">-->
+<!--        <ion-icon class="big-icon" name="qr-scanner" (click)="scan()" [hidden]="articlesNT && articlesNT.length === 0"></ion-icon>-->
+<!--        <ion-icon class="big-icon" item-right name="checkmark-circle" (click)="validate()" [class.alert]="articlesNT && articlesNT.length === 0"></ion-icon>-->
+<!--    </div>-->
+<!--</ion-footer>-->
+

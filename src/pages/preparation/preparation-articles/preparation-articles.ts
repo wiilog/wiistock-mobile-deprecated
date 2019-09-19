@@ -210,7 +210,7 @@ export class PreparationArticlesPage {
                 let articleAlready = this.articlesT.find(art => art.id_prepa === mouvement.id_prepa && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
                 if (articleAlready !== undefined) {
                     this.sqliteProvider.updateArticleQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite).then(() => {
-                        this.sqliteProvider.delete('`article_prepa`', mouvement.id_article_prepa).then(() => {
+                        this.sqliteProvider.deleteById('`article_prepa`', mouvement.id_article_prepa).then(() => {
                             this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
                                 if (articles.filter(article => article.has_moved === 0).length === 0) {
                                     this.refreshOver();

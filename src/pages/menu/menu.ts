@@ -8,6 +8,7 @@ import {Preparation} from "../../app/entities/preparation";
 import {LivraisonMenuPage} from "../livraison/livraison-menu/livraison-menu";
 import {ParamsPage} from "../params/params";
 import {ConnectPage} from "../connect/connect";
+import {InventaireMenuPage} from "../inventaire/inventaire-menu/inventaire-menu";
 
 @Component({
     selector: 'page-menu',
@@ -18,16 +19,17 @@ export class MenuPage {
     items: Array<{ title: string, icon: string, page: Page }>;
     nbPrep: number;
     nbPrepT: number;
+    nbArtInvent: number;
 
     constructor(public app: App, public navCtrl: NavController, public navParams: NavParams, public sqliteProvider: SqliteProvider) {
 
         this.items = [
             {title: 'Traça', icon: 'cube', page: StockageMenuPageTraca},
-            {title: 'Préparation', icon: 'cube', page: PreparationMenuPage},
-            {title: 'Livraison', icon: 'cube', page: LivraisonMenuPage},
+            {title: 'Préparation', icon: 'cart', page: PreparationMenuPage},
+            {title: 'Livraison', icon: 'paper-plane', page: LivraisonMenuPage},
+            {title: 'Inventaire', icon: 'list-box', page: InventaireMenuPage},
             {title: 'Déconnexion', icon: 'log-out', page: null}
         ];
-
     }
 
     ionViewDidEnter() {
@@ -36,7 +38,10 @@ export class MenuPage {
             this.sqliteProvider.getFinishedPreps().then((preps) => {
                 this.nbPrepT = preps;
             });
-        })
+        });
+        this.sqliteProvider.count('`article_inventaire`', []).then((nbArticlesInventaire: number) => {
+            this.nbArtInvent = nbArticlesInventaire;
+        });
     }
 
     itemTapped(event, item) {

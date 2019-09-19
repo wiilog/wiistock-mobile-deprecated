@@ -209,7 +209,7 @@ export class LivraisonArticlesPage {
                 let articleAlready = this.articlesT.find(art => art.id_livraison === mouvement.id_livraison && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
                 if (articleAlready !== undefined) {
                     this.sqliteProvider.updateArticleLivraisonQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite).then(() => {
-                        this.sqliteProvider.delete('`article_livraison`', mouvement.id_article_livraison).then(() => {
+                        this.sqliteProvider.deleteById('`article_livraison`', mouvement.id_article_livraison).then(() => {
                             this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
                                 if (articles.filter(article => article.has_moved === 0).length === 0) {
                                     this.refreshOver();

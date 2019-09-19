@@ -72,7 +72,7 @@ export class StockageMenuPageTraca {
                     });
                 });
             } else {
-                this.showToast('Aucune configuration URL...')
+                this.showToast('Veuillez configurer votre URL dans les paramètres.')
             }
         });
     }

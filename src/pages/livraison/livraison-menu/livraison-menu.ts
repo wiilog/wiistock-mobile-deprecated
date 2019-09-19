@@ -79,7 +79,7 @@ export class LivraisonMenuPage {
                     });
                 });
             } else {
-                this.showToast('Aucune configuration URL...')
+                this.showToast('Veuillez configurer votre URL dans les paramètres.')
             }
         }).catch(err => console.log(err));
     }

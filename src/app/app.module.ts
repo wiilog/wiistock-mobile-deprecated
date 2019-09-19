@@ -45,6 +45,7 @@ import {LivraisonArticleTakePage} from "../pages/livraison/livraison-article-tak
 import {LivraisonMenuPage} from "../pages/livraison/livraison-menu/livraison-menu";
 import {LivraisonArticlesPage} from "../pages/livraison/livraison-articles/livraison-articles";
 import {LivraisonEmplacementPage} from "../pages/livraison/livraison-emplacement/livraison-emplacement";
+import {InventaireMenuPage} from "../pages/inventaire/inventaire-menu/inventaire-menu";
 
 @NgModule({
     declarations: [
@@ -73,6 +74,7 @@ import {LivraisonEmplacementPage} from "../pages/livraison/livraison-emplacement
         DeposeConfirmPageTraca,
         DeposePage,
         DeposePageTraca,
+        InventaireMenuPage
     ],
     imports: [
         IonicSelectableModule,
@@ -111,6 +113,7 @@ import {LivraisonEmplacementPage} from "../pages/livraison/livraison-emplacement
         DeposeConfirmPageTraca,
         DeposePage,
         DeposePageTraca,
+        InventaireMenuPage
     ],
     providers: [
         StatusBar,

@@ -1,13 +1,12 @@
 import {Component, ViewChild} from '@angular/core';
-import {Content, IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
+import {Content, IonicPage, Navbar, NavController, NavParams, ToastController, ModalController} from 'ionic-angular';
 import {MenuPage} from "../../menu/menu";
-import {Preparation} from "../../../app/entities/preparation";
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 import {HttpClient} from "@angular/common/http";
-import {PreparationArticlesPage} from "../preparation-articles/preparation-articles";
+import {ArticleInventaire} from "../../../app/entities/articleInventaire";
 
 /**
- * Generated class for the PreparationMenuPage page.
+ * Generated class for the InventaireMenuPage page.
  *
  * See https://ionicframework.com/docs/components/#navigation for more info on
  * Ionic pages and navigation.
@@ -15,13 +14,13 @@ import {PreparationArticlesPage} from "../preparation-articles/preparation-artic
 
 @IonicPage()
 @Component({
-    selector: 'page-preparation-menu',
-    templateUrl: 'preparation-menu.html',
+    selector: 'page-inventaire-menu',
+    templateUrl: 'inventaire-menu.html',
 })
-export class PreparationMenuPage {
+export class InventaireMenuPage {
     @ViewChild(Navbar) navBar: Navbar;
     @ViewChild(Content) content: Content;
-    preparations: Array<Preparation>;
+    articles: Array<ArticleInventaire>;
     dataApi: string = '/api/getData';
     hasLoaded: boolean;
 
@@ -30,8 +29,8 @@ export class PreparationMenuPage {
         public navParams: NavParams,
         public sqlLiteProvider: SqliteProvider,
         public toastController: ToastController,
-        public http: HttpClient,) {
-    }
+        public http: HttpClient,
+    ) {}
 
     goHome() {
         this.navCtrl.setRoot(MenuPage);
@@ -44,7 +43,6 @@ export class PreparationMenuPage {
 
     setBackButtonAction() {
         this.navBar.backButtonClick = () => {
-            //Write here wherever you wanna do
             this.navCtrl.setRoot(MenuPage);
         }
     }
@@ -55,15 +53,16 @@ export class PreparationMenuPage {
             if (result !== null) {
                 let url: string = result + this.dataApi;
                 this.sqlLiteProvider.getApiKey().then((key) => {
-                    console.log(url);
                     this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
                         if (resp.success) {
-                            console.log('ccc');
+                            //TODO CG clean ??
                             this.sqlLiteProvider.cleanDataBase(true).then(() => {
-                                this.sqlLiteProvider.importData(resp.data, true)
+                            // this.sqlLiteProvider.deleteTable('`article_inventaire`').then(() => {
+                                this.sqlLiteProvider.importArticlesInventaire(resp.data)
                                     .then(() => {
-                                        this.sqlLiteProvider.findAll('`preparation`').then(preparations => {
-                                            this.preparations = preparations.filter(p => p.date_end === null);
+                                        this.sqlLiteProvider.findAll('`article_inventaire`').then(articles => {
+                                            console.log(articles);
+                                            this.articles = articles;
                                             setTimeout(() => {
                                                 this.hasLoaded = true;
                                                 this.content.resize();
@@ -73,11 +72,11 @@ export class PreparationMenuPage {
                             });
                         } else {
                             this.hasLoaded = true;
-                            this.showToast('Erreur');
+                            this.showToast('Une erreur est survenue.');
                         }
                     }, error => {
                         this.hasLoaded = true;
-                        this.showToast('Erreur réseau');
+                        this.showToast('Une erreur réseau est survenue.');
                     });
                 });
             } else {
@@ -96,8 +95,17 @@ export class PreparationMenuPage {
         toast.present();
     }
 
-    goToArticles(preparation) {
-        this.navCtrl.push(PreparationArticlesPage, {preparation: preparation});
+    openModalQuantity(article) {
+
     }
 
+    // goToArticles(livraison) {
+    //     this.navCtrl.push(LivraisonArticlesPage, {livraison: livraison});
+    // }
+
+  ionViewDidLoad() {
+    console.log('ionViewDidLoad InventaireMenuPage');
+  }
+
 }
+

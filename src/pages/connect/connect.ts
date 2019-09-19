@@ -46,7 +46,7 @@ export class ConnectPage {
                     }
                 });
             } else {
-                this.showToast('Aucune configuration URL...');
+                this.showToast('Veuillez configurer votre URL dans les paramètres.');
                 this.hasLoaded = false;
             }
         });
