@@ -1,5 +1,6 @@
 import {Component, ViewChild} from '@angular/core';
 import {Content, IonicPage, Navbar, NavController, NavParams, ToastController, ModalController} from 'ionic-angular';
+import {ModalQuantityPage} from "./modal-quantity";
 import {MenuPage} from "../../menu/menu";
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 import {HttpClient} from "@angular/common/http";
@@ -30,6 +31,7 @@ export class InventaireMenuPage {
         public sqlLiteProvider: SqliteProvider,
         public toastController: ToastController,
         public http: HttpClient,
+        private modalController: ModalController,
     ) {}
 
     goHome() {
@@ -95,13 +97,19 @@ export class InventaireMenuPage {
         toast.present();
     }
 
-    openModalQuantity(article) {
+    async openModalQuantity(article) {
+        let modal = this.modalController.create(ModalQuantityPage, {article: article});
+        modal.onDidDismiss(data => {
+            //TODO créer saisie inventaire et envoyer vers api (data.quentite);
 
+            //supprime l'article de la base
+            this.sqlLiteProvider.deleteById('`article_livraison`', article.id);
+            // supprime la ligne du tableau
+            let index = this.articles.indexOf(article);
+            if (index > -1) this.articles.splice(index, 1);
+        });
+        modal.present();
     }
-
-    // goToArticles(livraison) {
-    //     this.navCtrl.push(LivraisonArticlesPage, {livraison: livraison});
-    // }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad InventaireMenuPage');

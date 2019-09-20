@@ -16,7 +16,6 @@ import {SplashScreen} from '@ionic-native/splash-screen';
 import {HttpClientModule} from "@angular/common/http";
 import {UsersApiProvider} from '../providers/users-api/users-api';
 
-
 import {PriseArticlesPage} from "../pages/stockage/prise-articles/prise-articles";
 import {PriseConfirmPage} from "../pages/stockage/prise-confirm/prise-confirm";
 import {PriseEmplacementPage} from "../pages/stockage/prise-emplacement/prise-emplacement";
@@ -46,6 +45,7 @@ import {LivraisonMenuPage} from "../pages/livraison/livraison-menu/livraison-men
 import {LivraisonArticlesPage} from "../pages/livraison/livraison-articles/livraison-articles";
 import {LivraisonEmplacementPage} from "../pages/livraison/livraison-emplacement/livraison-emplacement";
 import {InventaireMenuPage} from "../pages/inventaire/inventaire-menu/inventaire-menu";
+import {ModalQuantityPage} from "../pages/inventaire/inventaire-menu/modal-quantity";
 
 @NgModule({
     declarations: [
@@ -74,7 +74,8 @@ import {InventaireMenuPage} from "../pages/inventaire/inventaire-menu/inventaire
         DeposeConfirmPageTraca,
         DeposePage,
         DeposePageTraca,
-        InventaireMenuPage
+        InventaireMenuPage,
+        ModalQuantityPage,
     ],
     imports: [
         IonicSelectableModule,
@@ -85,6 +86,9 @@ import {InventaireMenuPage} from "../pages/inventaire/inventaire-menu/inventaire
         }),
         HttpClientModule,
         IonicStorageModule.forRoot({name: 'follow_gt', driverOrder: ['sqlite', 'websql', 'indexeddb']})
+    ],
+    exports: [
+        InventaireMenuPage,
     ],
     bootstrap: [IonicApp],
     entryComponents: [
@@ -113,7 +117,8 @@ import {InventaireMenuPage} from "../pages/inventaire/inventaire-menu/inventaire
         DeposeConfirmPageTraca,
         DeposePage,
         DeposePageTraca,
-        InventaireMenuPage
+        InventaireMenuPage,
+        ModalQuantityPage
     ],
     providers: [
         StatusBar,

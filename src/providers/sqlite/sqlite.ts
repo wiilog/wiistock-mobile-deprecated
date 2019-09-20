@@ -310,8 +310,6 @@ export class SqliteProvider {
                 if (articlesInventaire.indexOf(article) === articlesInventaire.length - 1) {
                     let articlesInventaireValuesStr = articlesInventaireValues.join(', ');
                     let sqlArticlesInventaire = 'INSERT INTO `article_inventaire` (`id`, `id_mission`, `reference`, `is_ref`, `location`) VALUES ' + articlesInventaireValuesStr + ';';
-                    console.log('sqlite 313');
-                    console.log(sqlArticlesInventaire);
                     resolve(sqlArticlesInventaire);
                 }
             }
