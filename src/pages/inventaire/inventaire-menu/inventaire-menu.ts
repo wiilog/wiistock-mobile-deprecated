@@ -5,6 +5,8 @@ import {MenuPage} from "../../menu/menu";
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 import {HttpClient} from "@angular/common/http";
 import {ArticleInventaire} from "../../../app/entities/articleInventaire";
+import {SaisieInventaire} from "../../../app/entities/saisieInventaire";
+import moment from "moment";
 
 /**
  * Generated class for the InventaireMenuPage page.
@@ -24,6 +26,7 @@ export class InventaireMenuPage {
     articles: Array<ArticleInventaire>;
     dataApi: string = '/api/getData';
     hasLoaded: boolean;
+    addEntryURL : string = '/api/addInventoryEntries';
 
     constructor(
         public navCtrl: NavController,
@@ -39,7 +42,7 @@ export class InventaireMenuPage {
     }
 
     ionViewDidEnter() {
-        this.synchronise(true);
+        this.synchronize();
         this.setBackButtonAction();
     }
 
@@ -49,7 +52,33 @@ export class InventaireMenuPage {
         }
     }
 
-    synchronise(fromStart: boolean) {
+    addInventoryEntries() {
+        this.sqlLiteProvider.getAPI_URL().then(baseUrl => {
+           if (baseUrl !== null) {
+               let url: string = baseUrl + this.addEntryURL;
+               this.sqlLiteProvider.findAll('`saisie_inventaire`').then(data => {
+                   if (data.length > 0) {
+                       this.sqlLiteProvider.getApiKey().then(apiKey => {
+                           let params = {
+                               entries: data,
+                               apiKey: apiKey
+                           };
+                           this.http.post<any>(url, params).subscribe(resp => {
+                               if (resp.success) {
+                                   this.sqlLiteProvider.deleteTable('`saisie_inventaire`');
+                                   this.showToast(resp.data.status);
+                               }
+                           });
+                       });
+                   }
+               })
+           } else {
+               this.showToast('Veuillez configurer votre URL dans les paramètres.')
+           }
+        });
+    }
+
+    synchronize() {
         this.hasLoaded = false;
         this.sqlLiteProvider.getAPI_URL().then((result) => {
             if (result !== null) {
@@ -63,7 +92,6 @@ export class InventaireMenuPage {
                                 this.sqlLiteProvider.importArticlesInventaire(resp.data)
                                     .then(() => {
                                         this.sqlLiteProvider.findAll('`article_inventaire`').then(articles => {
-                                            console.log(articles);
                                             this.articles = articles;
                                             setTimeout(() => {
                                                 this.hasLoaded = true;
@@ -71,6 +99,7 @@ export class InventaireMenuPage {
                                             }, 1000);
                                         });
                                     });
+                                this.addInventoryEntries();
                             });
                         } else {
                             this.hasLoaded = true;
@@ -100,20 +129,31 @@ export class InventaireMenuPage {
     async openModalQuantity(article) {
         let modal = this.modalController.create(ModalQuantityPage, {article: article});
         modal.onDidDismiss(data => {
-            //TODO créer saisie inventaire et envoyer vers api (data.quentite);
-
-            //supprime l'article de la base
-            this.sqlLiteProvider.deleteById('`article_livraison`', article.id);
-            // supprime la ligne du tableau
-            let index = this.articles.indexOf(article);
-            if (index > -1) this.articles.splice(index, 1);
+            //crée saisie inventaire et envoie vers api
+            let saisieInventaire: SaisieInventaire = {
+                id: null,
+                id_mission: article.id_mission,
+                date: moment().format(),
+                reference: article.reference,
+                is_ref: article.is_ref,
+                quantity: data.quantity,
+                location: article.location,
+            };
+            this.sqlLiteProvider.insert('`saisie_inventaire`', saisieInventaire).then(() => {
+                //supprime l'article de la base
+                this.sqlLiteProvider.deleteById('`article_livraison`', article.id);
+                // supprime la ligne du tableau
+                let index = this.articles.indexOf(article);
+                if (index > -1) this.articles.splice(index, 1);
+                this.addInventoryEntries();
+            });
         });
         modal.present();
     }
 
-  ionViewDidLoad() {
-    console.log('ionViewDidLoad InventaireMenuPage');
-  }
+    ionViewDidLoad() {
+        console.log('ionViewDidLoad InventaireMenuPage');
+    }
 
 }
 

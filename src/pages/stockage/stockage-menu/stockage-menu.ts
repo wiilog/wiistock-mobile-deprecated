@@ -23,7 +23,7 @@ export class StockageMenuPage {
   }
 
   goToDepose() {
-    this.navCtrl.push(PriseEmplacementPage); //TODO CG
+    this.navCtrl.push(PriseEmplacementPage);
   }
 
   goHome() {

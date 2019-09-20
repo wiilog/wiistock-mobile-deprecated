@@ -41,7 +41,7 @@ export class ConnectPage {
                                 }).catch(err => console.log(err));
                             });
                     } else {
-                        this.showToast('Identifiants incorrects...');
+                        this.showToast('Identifiants incorrects.');
                         this.hasLoaded = false;
                     }
                 });

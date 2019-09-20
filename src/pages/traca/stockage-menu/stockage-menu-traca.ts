@@ -47,7 +47,7 @@ export class StockageMenuPageTraca {
     }
 
     goToDepose() {
-        this.navCtrl.push(DeposeEmplacementPageTraca); //TODO CG
+        this.navCtrl.push(DeposeEmplacementPageTraca);
     }
 
     goHome() {

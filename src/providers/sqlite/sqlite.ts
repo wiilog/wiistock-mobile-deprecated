@@ -61,7 +61,10 @@ export class SqliteProvider {
                                                                         console.log('table article_livraison created');
                                                                         this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_inventaire` (`id` INTEGER PRIMARY KEY, `id_mission` INTEGER, `reference` TEXT, `is_ref` TEXT, `location` TEXT)', []).then(() => {
                                                                             console.log('table article_inventaire created');
-                                                                        }).catch(err => console.log(err));
+                                                                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `saisie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_mission` INTEGER, `date` TEXT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT)', []).then(() => {
+                                                                                console.log('table saisie_inventaire created');
+                                                                            }).catch(err => console.log(err));
+                                                                        });
                                                                     });
                                                                 }).catch(err => console.log(err));
                                                             });
@@ -96,12 +99,17 @@ export class SqliteProvider {
                                                                             .then(() => {
                                                                                 this.db.executeSql('DELETE FROM `article_inventaire`;', [])
                                                                                     .then(() => {
-                                                                                        resolve();
-                                                                                        console.log('Tables cleaned');
-                                                                                    }).catch(err => {
-                                                                                    console.log(err);
-                                                                                });
-                                                                            });
+                                                                                        this.db.executeSql('DELETE FROM `saisie_inventaire`;', [])
+                                                                                            .then(() => {
+                                                                                                resolve();
+                                                                                                console.log('Tables cleaned');
+                                                                                            }).catch(err => {
+                                                                                            console.log(err);
+                                                                                        });
+                                                                                    });
+                                                                            }).catch(err => {
+                                                                            console.log(err);
+                                                                        });
                                                                     }).catch(err => {
                                                                     console.log(err);
                                                                 });
@@ -296,14 +304,9 @@ export class SqliteProvider {
     importArticlesInventaire(data) {
         return new Promise<any>((resolve) => {
             let articlesInventaire = data['inventoryMission'];
-            let articlesInventaireValues = [];
-            //TODO CG
 
-            // if (articlesInventaire.length === 0) {
-            //     this.deleteTable('`article_inventaire`').then(() => {
-            //         resolve(false);
-            //     });
-            // }
+            let articlesInventaireValues = [];
+
             for (let article of articlesInventaire) {
                 articlesInventaireValues.push("(" + null + ", '" + article.id_mission + "', '" + article.reference + "', '" + article.is_ref + "', '" + article.location + "')");
 

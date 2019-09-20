@@ -46,11 +46,11 @@ export class ParamsPage {
         this.http.post<any>(url, {}).subscribe(
             res => {
                 this.registerURL();
-                this.showToast('URL correcte!').then(() => {
+                this.showToast('URL valide.').then(() => {
                     this.navCtrl.pop();
                 });
             },
-            error => this.showToast('URL incorrecte...')
+            error => this.showToast('URL non valide.')
         );
     }
 

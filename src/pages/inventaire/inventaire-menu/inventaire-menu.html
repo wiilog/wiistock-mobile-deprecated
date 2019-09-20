@@ -17,6 +17,7 @@
 
 <ion-content padding>
     <ion-title *ngIf="articles && articles.length === 0">Tous les inventaires sont à jour.</ion-title>
+    <ion-title *ngIf="articles && articles.length !== 0">{{ articles.length }} articles à inventorier.</ion-title>
     <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
 
     <ion-list *ngIf="hasLoaded">
@@ -37,7 +38,7 @@
 
 </ion-content>
 <ion-footer padding *ngIf="hasLoaded">
-<!--  <div class="d-flex">-->
-<!--    <ion-icon class="big-icon" name="refresh" item-right (click)="synchronise(false)"></ion-icon>-->
-<!--  </div>-->
+  <div class="d-flex">
+<!--    <ion-icon class="big-icon" name="refresh" item-right (click)="synchronize()"></ion-icon>-->
+  </div>
 </ion-footer>
