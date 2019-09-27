@@ -6,6 +6,7 @@ import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 import {HttpClient} from "@angular/common/http";
 import {ArticleInventaire} from "../../../app/entities/articleInventaire";
 import {SaisieInventaire} from "../../../app/entities/saisieInventaire";
+import {InventaireAnomaliePage} from "../../inventaire-anomalie/inventaire-anomalie";
 import moment from "moment";
 
 /**
@@ -27,6 +28,7 @@ export class InventaireMenuPage {
     dataApi: string = '/api/getData';
     hasLoaded: boolean;
     addEntryURL : string = '/api/addInventoryEntries';
+    isInventoryManager: boolean;
 
     constructor(
         public navCtrl: NavController,
@@ -35,7 +37,11 @@ export class InventaireMenuPage {
         public toastController: ToastController,
         public http: HttpClient,
         private modalController: ModalController,
-    ) {}
+    ) {
+        this.sqlLiteProvider.getInventoryManagerRight().then(isInventoryManager => {
+            this.isInventoryManager = isInventoryManager;
+        });
+    }
 
     goHome() {
         this.navCtrl.setRoot(MenuPage);
@@ -65,7 +71,7 @@ export class InventaireMenuPage {
                            };
                            this.http.post<any>(url, params).subscribe(resp => {
                                if (resp.success) {
-                                   this.sqlLiteProvider.deleteTable('`saisie_inventaire`');
+                                   this.sqlLiteProvider.cleanTable('`saisie_inventaire`');
                                    this.showToast(resp.data.status);
                                }
                            });
@@ -86,11 +92,14 @@ export class InventaireMenuPage {
                 this.sqlLiteProvider.getApiKey().then((key) => {
                     this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
                         if (resp.success) {
-                            //TODO CG clean ??
-                            this.sqlLiteProvider.cleanDataBase(true).then(() => {
-                            // this.sqlLiteProvider.deleteTable('`article_inventaire`').then(() => {
-                                this.sqlLiteProvider.importArticlesInventaire(resp.data)
-                                    .then(() => {
+                            this.sqlLiteProvider.cleanTable('`article_inventaire`').then(() => {
+                                this.sqlLiteProvider.importArticlesInventaire(resp.data).then((sqlArticlesInventaire) => {
+                                    if (sqlArticlesInventaire !== false) {
+                                        this.sqlLiteProvider.executeQuery(sqlArticlesInventaire).then(() => {
+                                            console.log('Imported articles inventaire');
+                                        });
+                                    }
+                                }).then(() => {
                                         this.sqlLiteProvider.findAll('`article_inventaire`').then(articles => {
                                             this.articles = articles;
                                             setTimeout(() => {
@@ -149,6 +158,10 @@ export class InventaireMenuPage {
             });
         });
         modal.present();
+    }
+
+    async goToAnomalies() {
+        this.navCtrl.push(InventaireAnomaliePage);
     }
 
     ionViewDidLoad() {

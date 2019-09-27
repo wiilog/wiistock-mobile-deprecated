@@ -46,6 +46,7 @@ import {LivraisonArticlesPage} from "../pages/livraison/livraison-articles/livra
 import {LivraisonEmplacementPage} from "../pages/livraison/livraison-emplacement/livraison-emplacement";
 import {InventaireMenuPage} from "../pages/inventaire/inventaire-menu/inventaire-menu";
 import {ModalQuantityPage} from "../pages/inventaire/inventaire-menu/modal-quantity";
+import {InventaireAnomaliePage} from "../pages/inventaire-anomalie/inventaire-anomalie";
 
 @NgModule({
     declarations: [
@@ -76,6 +77,7 @@ import {ModalQuantityPage} from "../pages/inventaire/inventaire-menu/modal-quant
         DeposePageTraca,
         InventaireMenuPage,
         ModalQuantityPage,
+        InventaireAnomaliePage,
     ],
     imports: [
         IonicSelectableModule,
@@ -118,7 +120,8 @@ import {ModalQuantityPage} from "../pages/inventaire/inventaire-menu/modal-quant
         DeposePage,
         DeposePageTraca,
         InventaireMenuPage,
-        ModalQuantityPage
+        ModalQuantityPage,
+        InventaireAnomaliePage,
     ],
     providers: [
         StatusBar,

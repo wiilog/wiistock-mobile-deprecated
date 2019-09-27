@@ -16,8 +16,11 @@
 </ion-header>
 
 <ion-content padding>
+    <button ion-button block color="danger" outline (click)="goToAnomalies()" *ngIf="isInventoryManager">Anomalies à traiter</button>
+
     <ion-title *ngIf="articles && articles.length === 0">Tous les inventaires sont à jour.</ion-title>
-    <ion-title *ngIf="articles && articles.length !== 0">{{ articles.length }} articles à inventorier.</ion-title>
+    <ion-title *ngIf="articles && articles.length !== 0">{{ articles.length }} articles à compter</ion-title>
+
     <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
 
     <ion-list *ngIf="hasLoaded">
@@ -33,12 +36,9 @@
         </ion-grid>
     </ion-list>
 
-
-
-
 </ion-content>
 <ion-footer padding *ngIf="hasLoaded">
   <div class="d-flex">
-<!--    <ion-icon class="big-icon" name="refresh" item-right (click)="synchronize()"></ion-icon>-->
+    <ion-icon class="big-icon" name="refresh" item-right (click)="synchronize()"></ion-icon>
   </div>
 </ion-footer>

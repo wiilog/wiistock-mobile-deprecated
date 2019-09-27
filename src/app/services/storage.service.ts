@@ -3,6 +3,7 @@ import {Storage} from '@ionic/storage';
 
 
 const API_KEY = 'api-key';
+const INVENTORY_MANAGER = 'inventory-manager';
 const OPERATEUR = 'operateur';
 const NB_PREPS = 'prep';
 
@@ -14,6 +15,10 @@ export class StorageService {
 
     setApiKey(apiKey: string) {
         this.storage.set(API_KEY, apiKey);
+    }
+
+    setInventoryManagerRight(right: number) {
+        this.storage.set(INVENTORY_MANAGER, right);
     }
 
     setPreps() {
@@ -91,6 +96,10 @@ export class StorageService {
 
     getApiKey() {
         return this.storage.get(API_KEY);
+    }
+
+    getInventoryManagerRight() {
+        return this.storage.get(INVENTORY_MANAGER);
     }
 
     clear() {
