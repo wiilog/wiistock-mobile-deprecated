@@ -334,7 +334,7 @@ export class SqliteProvider {
 
     importAnomaliesInventaire(data) {
         return new Promise<any>((resolve) => {
-            let anomalies = data;
+            let anomalies = data.data;
 
             let anomaliesValues = [];
             if (anomalies.length === 0) {
@@ -545,8 +545,13 @@ export class SqliteProvider {
                         }
                     }
                 }).catch(err => console.log(err));
+            console.log(list);
             return list;
         }
+    }
+
+    public findOneByElement(table: string, element: string, value: string) {
+        return this.findByElement(table, element, value) ? this.findByElement(table, element, value)[0] : null;
     }
 
     public insert(name: string, object: any) {

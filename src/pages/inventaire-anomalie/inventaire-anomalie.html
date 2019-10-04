@@ -5,5 +5,43 @@
 </ion-header>
 
 <ion-content padding>
+    <ion-title *ngIf="anomalies && anomalies.length === 0">Aucune anomalie à traiter</ion-title>
+    <ion-badge *ngIf="anomalies && anomalies.length !== 0" text-right>{{ anomalies.length }}</ion-badge>
 
+    <ion-title *ngIf="location"><ion-icon class="pin"></ion-icon>{{ location }}</ion-title>
+    <ion-title *ngIf="location"><ion-icon class="big-icon" name="barcode" (click)="scanRef()"></ion-icon><br>Flashez un article</ion-title>
+
+    <ion-title *ngIf="!location"><ion-icon class="big-icon" name="barcode" (click)="scanLocation()"></ion-icon><br>Flashez un emplacement</ion-title>
+
+    <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
+    <ion-list *ngIf="hasLoaded">
+        <div *ngIf="location">
+            <ion-grid>
+                <button class="list" ion-item *ngFor="let anomaly of anomalies" id="{{anomaly.id}}">
+                    <ion-row>
+                        <ion-col>{{ anomaly.reference }}</ion-col>
+                        <ion-col>{{ anomaly.quantity }}</ion-col>
+                    </ion-row>
+<!--                    <ion-row>-->
+<!--                        <ion-col class="dark-grey">{{ anomaly.location !== 'null' ? anomaly.location : 'N/A'}}</ion-col>-->
+<!--                    </ion-row>-->
+                </button>
+            </ion-grid>
+        </div>
+        <div *ngIf="!location">
+            <ion-grid>
+                <button class="list" ion-item *ngFor="let location of locations">
+                    <ion-row>
+                        <ion-col>{{ location }}</ion-col>
+                    </ion-row>
+                </button>
+            </ion-grid>
+        </div>
+    </ion-list>
 </ion-content>
+
+<ion-footer padding *ngIf="hasLoaded">
+    <div class="d-flex">
+        <ion-icon class="big-icon" name="refresh" item-right (click)="synchronize()"></ion-icon>
+    </div>
+</ion-footer>
