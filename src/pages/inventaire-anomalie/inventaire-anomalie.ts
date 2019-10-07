@@ -25,6 +25,7 @@ export class InventaireAnomaliePage {
     locations: Array<string>;
     location: string;
     dataApi: string = '/api/getAnomalies';
+    updateAnomaliesURL : string = '/api/treatAnomalies';
     hasLoaded: boolean;
 
     constructor(
@@ -47,10 +48,30 @@ export class InventaireAnomaliePage {
 
     synchronize() {
         this.hasLoaded = false;
-        this.sqlLiteProvider.getAPI_URL().then((result) => {
-            if (result !== null) {
-                let url: string = result + this.dataApi;
+        this.sqlLiteProvider.getAPI_URL().then((baseUrl) => {
+            if (baseUrl !== null) {
+
                 this.sqlLiteProvider.getApiKey().then((key) => {
+                    // envoi des anomalies traitées
+                    let anomalies = this.sqlLiteProvider.findByElement(`anomalie_inventaire`, 'treated', '1');
+                    let urlAnomalies: string = baseUrl + this.updateAnomaliesURL;
+                    let params = {
+                        anomalies: anomalies,
+                        apiKey: key
+                    };
+                    this.http.post<any>(urlAnomalies, params).subscribe(resp => {
+                        if (resp.success) {
+                            // supprime les anomalies traitée de la base
+                            this.sqlLiteProvider.deleteAnomalies(anomalies);
+                            this.showToast(resp.data.status);
+                        } else {
+                            this.hasLoaded = true;
+                            this.showToast('Une erreur est survenue lors de la mise à jour des anomalies.');
+                        }
+                    });
+
+                    // mise à jour de la base locale des anomalies d'inventaire
+                    let url: string = baseUrl + this.dataApi;
                     this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
                         if (resp.success) {
                             this.sqlLiteProvider.cleanTable('`anomalie_inventaire`').then(() => {
@@ -64,13 +85,11 @@ export class InventaireAnomaliePage {
                                     this.sqlLiteProvider.findAll('`anomalie_inventaire`').then(anomalies => {
                                         this.anomalies = anomalies;
                                         let locations = [];
-                                        console.log(anomalies);
                                         anomalies.forEach(anomaly => {
                                             if (locations.indexOf(anomaly.location) < 0 && anomaly.location) {
                                                 locations.push(anomaly.location);
                                             }
                                         });
-                                        console.log(locations);
                                         this.locations = locations;
 
                                         setTimeout(() => {
@@ -82,7 +101,7 @@ export class InventaireAnomaliePage {
                             });
                         } else {
                             this.hasLoaded = true;
-                            this.showToast('Une erreur est survenue.');
+                            this.showToast('Une erreur est survenue lors de la mise à jour des anomalies d\'inventaire.');
                         }
                     }, error => {
                         this.hasLoaded = true;
@@ -120,7 +139,7 @@ export class InventaireAnomaliePage {
     checkBarcodeIsLocation(text) {
         if (this.anomalies.some(anomaly => anomaly.location === text)) {
             this.location = text;
-            this.anomalies = this.anomalies.filter(anomaly => anomaly.location == this.location);
+            this.anomaliesByLocation = this.anomalies.filter(anomaly => anomaly.location == this.location);
         } else {
             this.showToast('Ce code-barre ne correspond à aucun emplacement.');
         }
@@ -128,10 +147,9 @@ export class InventaireAnomaliePage {
 
     checkBarcodeIsRef(text) {
         if (this.anomalies.some(anomaly => anomaly.reference === text)) {
-            //TODO CG récupérer id anomaly pour le mettre dans anomaly ?
             this.article = new Article();
             this.article.reference = text;
-            console.log(this.article);
+            this.anomaly = this.anomaliesByLocation.find(anomaly => anomaly.reference == text);
             this.openModalQuantity(this.article);
         } else {
             this.showToast('Ce code-barre ne correspond à aucune référence ou article.');
@@ -141,17 +159,50 @@ export class InventaireAnomaliePage {
     async openModalQuantity(article) {
         let modal = this.modalController.create(ModalQuantityPage, {article: article});
         modal.onDidDismiss(data => {
-            console.log(data);
-            console.log(this.anomaly);
-            this.sqlLiteProvider.findOne('`anomalie_inventaire`', this.anomaly.id).then((data) => {
-                console.log(data);
-                //TODO CG
-                // envoie l'anomalie modifiée à l'api
-                // supprime l'anomalie de la base
-                // supprime l'anomalie de la liste
+            this.anomaly.quantity = data.quantity;
+            this.anomaly.treated = "1";
+
+            // envoi de l'anomalie modifiée à l'API
+            this.sqlLiteProvider.getAPI_URL().then(baseUrl => {
+                if (baseUrl !== null) {
+                    let url: string = baseUrl + this.updateAnomaliesURL;
+                    this.sqlLiteProvider.getApiKey().then(apiKey => {
+                        let params = {
+                            anomalies: [this.anomaly],
+                            apiKey: apiKey
+                        };
+                        this.http.post<any>(url, params).subscribe(resp => {
+                            if (resp.success) {
+                                // supprime l'anomalie traitée de la base
+                                this.sqlLiteProvider.deleteById(`anomalie_inventaire`, this.anomaly.id);
+                                this.showToast(resp.data.status);
+                                // supprime l'anomalie de la liste
+                                this.anomaliesByLocation = this.anomaliesByLocation.filter(anomaly => parseInt(anomaly.treated) !== 1);
+                                // si liste vide retour aux emplacements
+                                if (this.anomaliesByLocation.length === 0) {
+                                    this.backToLocations();
+                                }
+                            }
+                        });
+                    });
+                } else {
+                    this.showToast('Veuillez configurer votre URL dans les paramètres.')
+                }
             });
         });
         modal.present();
+    }
+
+    backToLocations() {
+        this.anomalies = this.anomalies.filter(anomaly => parseInt(anomaly.treated) !== 1);
+        this.location = null;
+        let locations = [];
+        this.anomalies.forEach(anomaly => {
+            if (locations.indexOf(anomaly.location) < 0 && anomaly.location) {
+                locations.push(anomaly.location);
+            }
+        });
+        this.locations = locations;
     }
 
 }

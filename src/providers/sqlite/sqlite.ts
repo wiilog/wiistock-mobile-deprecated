@@ -5,6 +5,7 @@ import moment from "moment";
 import {Preparation} from "../../app/entities/preparation";
 import {Mouvement} from "../../app/entities/mouvement";
 import {Livraison} from "../../app/entities/livraison";
+import {Anomalie} from "../../app/entities/anomalie";
 
 const DB_NAME: string = 'follow_gt';
 
@@ -63,7 +64,7 @@ export class SqliteProvider {
                                                                             console.log('table article_inventaire created');
                                                                             this.db.executeSql('CREATE TABLE IF NOT EXISTS `saisie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_mission` INTEGER, `date` TEXT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT)', []).then(() => {
                                                                                 console.log('table saisie_inventaire created');
-                                                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `anomalie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT, `comment` TEXT)', []).then(() => {
+                                                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `anomalie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT, `comment` TEXT, `treated` TEXT)', []).then(() => {
                                                                                     console.log('table anomalie_inventaire created');
                                                                                 }).catch(err => console.log(err));
                                                                             });
@@ -342,7 +343,7 @@ export class SqliteProvider {
             }
 
             for (let anomaly of anomalies) {
-                anomaliesValues.push("(" + null + ", '" + anomaly.reference + "', '" + anomaly.is_ref + "', '" + anomaly.quantity + "', '" + anomaly.location + "')");
+                anomaliesValues.push("(" + null + ", '" + anomaly.reference + "', '" + anomaly.is_ref + "', '" + anomaly.quantity + "', '" + (anomaly.location ? anomaly.location : 'N/A') + "')");
 
                 if (anomalies.indexOf(anomaly) === anomalies.length - 1) {
                     let anomaliesValuesStr = anomaliesValues.join(', ');
@@ -833,6 +834,20 @@ export class SqliteProvider {
                                 resolve();
                             }
                         }).catch(err => console.log(err));
+                    }).catch(err => console.log(err));
+                });
+            }
+        });
+        return resp;
+    }
+
+    public deleteAnomalies(anomalies: Array<Anomalie>) {
+        let resp = new Promise<any>((resolve) => {
+            if (anomalies.length === 0) {
+                resolve();
+            } else {
+                anomalies.forEach(anomaly => {
+                    this.db.executeSql('DELETE FROM `anomalie_inventaire` WHERE id = ' + anomaly.id, []).then(() => {
                     }).catch(err => console.log(err));
                 });
             }

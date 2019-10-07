@@ -5,4 +5,5 @@ export class Anomalie {
     quantity: number;
     location: string;
     comment: string;
+    treated: string;
 }

@@ -28,12 +28,12 @@ page-list {
     margin-bottom: 0px;
     font-weight: 100;
     color: black;
+    &.number {
+      font-size: 34px;
+      margin-top: 0;
+      margin-bottom: 0;
+    }
   }
-  p.number {
-    font-size: 34px;
-    margin-top: 0px;
-  }
-
   ion-slide {
     padding-bottom: 10px;
   }

@@ -1,12 +1,12 @@
 <ion-header>
     <ion-toolbar>
         <ion-title>
-            Description
+            Saisir la quantité
         </ion-title>
         <ion-buttons start>
             <button ion-button (click)="dismiss()">
                 <span ion-text color="primary" showWhen="ios">Annuler</span>
-                <ion-icon name="md-close" showWhen="android,windows"></ion-icon>
+                <ion-icon name="checkmark-circle" showWhen="android,windows"></ion-icon>
             </button>
         </ion-buttons>
     </ion-toolbar>
@@ -15,7 +15,6 @@
 <ion-content>
     <ion-list>
         <ion-item>
-            <ion-label>Quantité</ion-label>
             <ion-input #inputQuantity type="number" [(ngModel)]="quantity">{{ quantity }}</ion-input>
         </ion-item>
     </ion-list>
