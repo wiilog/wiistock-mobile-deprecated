@@ -321,7 +321,7 @@ export class SqliteProvider {
             }
 
             for (let article of articlesInventaire) {
-                articlesInventaireValues.push("(" + null + ", '" + article.id_mission + "', '" + article.reference + "', '" + article.is_ref + "', '" + article.location + "')");
+                articlesInventaireValues.push("(" + null + ", '" + article.id_mission + "', '" + article.reference + "', '" + article.is_ref + "', '" + (article.location ? article.location : 'N/A') + "')");
 
                 if (articlesInventaire.indexOf(article) === articlesInventaire.length - 1) {
                     let articlesInventaireValuesStr = articlesInventaireValues.join(', ');

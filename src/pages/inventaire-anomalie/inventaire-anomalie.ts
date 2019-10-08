@@ -144,7 +144,7 @@ export class InventaireAnomaliePage {
             this.showToast('Ce code-barre ne correspond à aucun emplacement.');
         }
     }
-
+    //TODO CG plutôt sur anomaliesByLocation ??
     checkBarcodeIsRef(text) {
         if (this.anomalies.some(anomaly => anomaly.reference === text)) {
             this.article = new Article();

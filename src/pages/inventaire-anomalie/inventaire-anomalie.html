@@ -16,7 +16,6 @@
         </ion-row>
     </ion-grid>
 
-
     <ion-title *ngIf="location"><ion-icon class="small-icon" name="pin"></ion-icon>   {{ location }}</ion-title>
     <ion-title *ngIf="location && anomalies && anomalies.length !== 0">
         <ion-icon class="big-icon" name="barcode" (click)="scanRef()"></ion-icon>
@@ -28,7 +27,6 @@
 
     <ion-badge *ngIf="anomalies && anomalies.length !== 0 && location">{{ anomalies.length }}</ion-badge>
     <ion-badge *ngIf="locations && locations.length !== 0 && !location">{{ locations.length }}</ion-badge>
-
 
     <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
     <ion-list *ngIf="hasLoaded">
