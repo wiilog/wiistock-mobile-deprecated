@@ -9,6 +9,8 @@ export class ModalQuantityPage {
     @ViewChild('inputQuantity') inputQuantity;
     article: ArticleInventaire;
     quantity: number;
+    locations: Array<string>;
+    location: string;
 
     constructor(params: NavParams, public viewCtrl: ViewController) {
         this.article = params.data.article;

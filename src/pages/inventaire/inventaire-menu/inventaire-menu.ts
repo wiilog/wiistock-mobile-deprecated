@@ -8,13 +8,8 @@ import {ArticleInventaire} from "../../../app/entities/articleInventaire";
 import {SaisieInventaire} from "../../../app/entities/saisieInventaire";
 import {InventaireAnomaliePage} from "../../inventaire-anomalie/inventaire-anomalie";
 import moment from "moment";
+import {BarcodeScanner} from "@ionic-native/barcode-scanner";
 
-/**
- * Generated class for the InventaireMenuPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
 
 @IonicPage()
 @Component({
@@ -25,17 +20,22 @@ export class InventaireMenuPage {
     @ViewChild(Navbar) navBar: Navbar;
     @ViewChild(Content) content: Content;
     articles: Array<ArticleInventaire>;
+    articlesByLocation: Array<ArticleInventaire>;
+    article: ArticleInventaire;
+    locations: Array<string>;
+    location: string;
     dataApi: string = '/api/getData';
-    hasLoaded: boolean;
     addEntryURL : string = '/api/addInventoryEntries';
     isInventoryManager: boolean;
+    hasLoaded: boolean;
 
     constructor(
         public navCtrl: NavController,
         public navParams: NavParams,
         public sqlLiteProvider: SqliteProvider,
-        public toastController: ToastController,
         public http: HttpClient,
+        public toastController: ToastController,
+        private barcodeScanner: BarcodeScanner,
         private modalController: ModalController,
     ) {
         this.sqlLiteProvider.getInventoryManagerRight().then(isInventoryManager => {
@@ -103,6 +103,14 @@ export class InventaireMenuPage {
                                     }).then(() => {
                                             this.sqlLiteProvider.findAll('`article_inventaire`').subscribe(articles => {
                                                 this.articles = articles;
+                                                let locations = [];
+                                                articles.forEach(article => {
+                                                   if (locations.indexOf(article.location) < 0 && article.location) {
+                                                       locations.push(article.location);
+                                                   }
+                                                });
+                                                this.locations = locations;
+
                                                 setTimeout(() => {
                                                     this.hasLoaded = true;
                                                     this.content.resize();
@@ -124,7 +132,8 @@ export class InventaireMenuPage {
                     this.showToast('Veuillez configurer votre URL dans les paramètres.')
                 }
             },
-            err => console.log(err));
+            err => console.log(err)
+        );
     }
 
     async showToast(msg) {
@@ -151,12 +160,18 @@ export class InventaireMenuPage {
                 location: article.location,
             };
             this.sqlLiteProvider.insert('`saisie_inventaire`', saisieInventaire).subscribe(() => {
-                //supprime l'article de la base
+                // supprime l'article de la base
                 this.sqlLiteProvider.deleteById('`article_livraison`', article.id);
-                // supprime la ligne du tableau
-                let index = this.articles.indexOf(article);
-                if (index > -1) this.articles.splice(index, 1);
+                // supprime la ligne des tableaux
+                let index1 = this.articles.indexOf(article);
+                if (index1 > -1) this.articles.splice(index1, 1);
+                let index2 = this.articlesByLocation.indexOf(article);
+                if (index2 > -1) this.articlesByLocation.splice(index2, 1);
                 this.addInventoryEntries();
+                // si liste vide retour aux emplacements
+                if (this.articlesByLocation.length === 0) {
+                    this.backToLocations();
+                }
             });
         });
         modal.present();
@@ -164,6 +179,47 @@ export class InventaireMenuPage {
 
     async goToAnomalies() {
         this.navCtrl.push(InventaireAnomaliePage);
+    }
+
+    scanLocation() {
+        this.barcodeScanner.scan().then(res => {
+            this.checkBarcodeIsLocation(res.text);
+        });
+    }
+
+    checkBarcodeIsLocation(text) {
+        if (this.articles.some(article => article.location === text)) {
+            this.location = text;
+            this.articlesByLocation = this.articles.filter(article => article.location == this.location);
+        } else {
+            this.showToast('Ce code-barre ne correspond à aucun emplacement.');
+        }
+    }
+
+    scanRef() {
+        this.barcodeScanner.scan().then(res => {
+            this.checkBarcodeIsRef(res.text);
+        });
+    }
+
+    checkBarcodeIsRef(text) {
+        if (this.articlesByLocation.some(article => article.reference === text)) {
+            this.article = this.articlesByLocation.find(article => article.reference == text);
+            this.openModalQuantity(this.article);
+        } else {
+            this.showToast('Ce code-barre ne correspond à aucune référence ou article sur cet emplacement.');
+        }
+    }
+
+    backToLocations() {
+        this.location = null;
+        let locations = [];
+        this.articles.forEach(anomaly => {
+            if (locations.indexOf(anomaly.location) < 0 && anomaly.location) {
+                locations.push(anomaly.location);
+            }
+        });
+        this.locations = locations;
     }
 
     ionViewDidLoad() {
