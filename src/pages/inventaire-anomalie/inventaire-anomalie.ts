@@ -7,6 +7,8 @@ import {BarcodeScanner} from "@ionic-native/barcode-scanner";
 import {ArticleInventaire} from "../../app/entities/articleInventaire";
 import {ModalQuantityPage} from "../inventaire/inventaire-menu/modal-quantity";
 import {Article} from "../../app/entities/article";
+import {flatMap} from "rxjs/operators";
+import {of} from "rxjs/observable/of";
 
 
 @IonicPage()
@@ -35,14 +37,14 @@ export class InventaireAnomaliePage {
         public http: HttpClient,
         public toastController: ToastController,
         public barcodeScanner: BarcodeScanner,
-        private modalController: ModalController,
+        public modalController: ModalController,
     ) {}
 
-    ionViewDidLoad() {
+    public ionViewDidLoad() {
         console.log('ionViewDidLoad InventaireAnomaliePage');
     }
 
-    ionViewDidEnter() {
+    public ionViewDidEnter() {
         this.synchronize();
     }
 
@@ -77,15 +79,21 @@ export class InventaireAnomaliePage {
                         let url: string = baseUrl + this.dataApi;
                         this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
                             if (resp.success) {
-                                this.sqlLiteProvider.cleanTable('`anomalie_inventaire`').subscribe(() => {
-                                    this.sqlLiteProvider.importAnomaliesInventaire(resp).then((sqlAnomaliesInventaire) => {
-                                        if (sqlAnomaliesInventaire !== false) {
-                                            this.sqlLiteProvider.executeQuery(sqlAnomaliesInventaire).subscribe(() => {
-                                                console.log('Imported anomalies inventaire');
-                                            });
-                                        }
-                                    }).then(() => {
+                                this.sqlLiteProvider
+                                    .cleanTable('`anomalie_inventaire`')
+                                    .pipe(
+                                        flatMap(() => this.sqlLiteProvider.importAnomaliesInventaire(resp)),
+                                        flatMap((sqlAnomaliesInventaire) => (
+                                            (sqlAnomaliesInventaire !== false)
+                                                ? this.sqlLiteProvider.executeQuery(sqlAnomaliesInventaire)
+                                                : of(undefined)
+                                        ))
+                                    )
+                                    .subscribe(() => {
+                                        console.log('PLOP 1')
                                         this.sqlLiteProvider.findAll('`anomalie_inventaire`').subscribe(anomalies => {
+
+                                            console.log('PLOP 2', anomalies);
                                             this.anomalies = anomalies;
                                             let locations = [];
                                             anomalies.forEach(anomaly => {
@@ -101,7 +109,6 @@ export class InventaireAnomaliePage {
                                             }, 1000);
                                         });
                                     });
-                                });
                             } else {
                                 this.hasLoaded = true;
                                 this.showToast('Une erreur est survenue lors de la mise à jour des anomalies d\'inventaire.');
@@ -114,8 +121,7 @@ export class InventaireAnomaliePage {
                 } else {
                     this.showToast('Veuillez configurer votre URL dans les paramètres.')
                 }
-            },
-            err => console.log(err)
+            }
         );
     }
 

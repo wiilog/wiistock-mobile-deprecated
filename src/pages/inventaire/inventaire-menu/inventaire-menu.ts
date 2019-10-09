@@ -9,6 +9,8 @@ import {SaisieInventaire} from "../../../app/entities/saisieInventaire";
 import {InventaireAnomaliePage} from "../../inventaire-anomalie/inventaire-anomalie";
 import moment from "moment";
 import {BarcodeScanner} from "@ionic-native/barcode-scanner";
+import {flatMap} from "rxjs/operators";
+import {of} from "rxjs/observable/of";
 
 
 @IonicPage()
@@ -63,6 +65,7 @@ export class InventaireMenuPage {
            if (baseUrl !== null) {
                let url: string = baseUrl + this.addEntryURL;
                this.sqlLiteProvider.findAll('`saisie_inventaire`').subscribe(data => {
+                   console.log('PPLOP', data)
                    if (data.length > 0) {
                        this.sqlLiteProvider.getApiKey().then(apiKey => {
                            let params = {
@@ -93,32 +96,40 @@ export class InventaireMenuPage {
                     this.sqlLiteProvider.getApiKey().then((key) => {
                         this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
                             if (resp.success) {
-                                this.sqlLiteProvider.cleanTable('`article_inventaire`').subscribe(() => {
-                                    this.sqlLiteProvider.importArticlesInventaire(resp.data).then((sqlArticlesInventaire) => {
-                                        if (sqlArticlesInventaire !== false) {
-                                            this.sqlLiteProvider.executeQuery(sqlArticlesInventaire).subscribe(() => {
-                                                console.log('Imported articles inventaire');
+                                this.sqlLiteProvider.cleanTable('`article_inventaire`')
+                                    .pipe(
+                                        flatMap(() => this.sqlLiteProvider.importArticlesInventaire(resp.data)),
+                                        flatMap((sqlArticlesInventaire) => {
+                                            console.log('SQLARTICLEINVETAIRE ========', sqlArticlesInventaire)
+                                            return (sqlArticlesInventaire !== false)
+                                                ? this.sqlLiteProvider.executeQuery(sqlArticlesInventaire)
+                                                : of(undefined)
+                                        })
+                                    )
+                                    .subscribe((plop) => {
+                                        console.log('ON PASSE ICI', plop)
+                                        this.sqlLiteProvider.findAll('`article_inventaire`').subscribe(articles => {
+                                            console.log('article ===> ', articles)
+                                            this.articles = articles;
+                                            let locations = [];
+                                            articles.forEach(article => {
+                                               if (locations.indexOf(article.location) < 0 && article.location) {
+                                                   locations.push(article.location);
+                                               }
                                             });
-                                        }
-                                    }).then(() => {
-                                            this.sqlLiteProvider.findAll('`article_inventaire`').subscribe(articles => {
-                                                this.articles = articles;
-                                                let locations = [];
-                                                articles.forEach(article => {
-                                                   if (locations.indexOf(article.location) < 0 && article.location) {
-                                                       locations.push(article.location);
-                                                   }
-                                                });
-                                                this.locations = locations;
+                                            this.locations = locations;
 
-                                                setTimeout(() => {
-                                                    this.hasLoaded = true;
-                                                    this.content.resize();
-                                                }, 1000);
-                                            });
+                                            setTimeout(() => {
+                                                this.hasLoaded = true;
+                                                this.content.resize();
+                                            }, 1000);
                                         });
-                                    this.addInventoryEntries();
-                                });
+                                        this.addInventoryEntries();
+                                    },
+
+                                        (err) => {
+                                        console.log('ERRR PLOP => ', err)
+                                        });
                             } else {
                                 this.hasLoaded = true;
                                 this.showToast('Une erreur est survenue.');
