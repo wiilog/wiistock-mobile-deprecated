@@ -33,13 +33,13 @@ export class MenuPage {
     }
 
     ionViewDidEnter() {
-        this.sqliteProvider.findAll('`preparation`').then((preparations: Array<Preparation>) => {
+        this.sqliteProvider.findAll('`preparation`').subscribe((preparations: Array<Preparation>) => {
             this.nbPrep = preparations.filter(p => p.date_end === null).length;
             this.sqliteProvider.getFinishedPreps().then((preps) => {
                 this.nbPrepT = preps;
             });
         });
-        this.sqliteProvider.count('`article_inventaire`', []).then((nbArticlesInventaire: number) => {
+        this.sqliteProvider.count('`article_inventaire`', []).subscribe((nbArticlesInventaire: number) => {
             this.nbArtInvent = nbArticlesInventaire;
         });
     }

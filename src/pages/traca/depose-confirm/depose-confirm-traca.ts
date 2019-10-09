@@ -25,7 +25,7 @@ export class DeposeConfirmPageTraca {
             this.article = navParams.get('selectedArticle');
             this.db_articles = [navParams.get('selectedArticle')];
         } else {
-            this.sqliteProvider.findAll('article').then((value) => {
+            this.sqliteProvider.findAll('article').subscribe((value) => {
                 this.db_articles = value;
             });
         }
@@ -38,8 +38,10 @@ export class DeposeConfirmPageTraca {
     searchArticle(event: { component: IonicSelectableComponent, text: string }) {
         let text = event.text.trim();
         event.component.startSearch();
-        event.component.items = this.sqliteProvider.findByElement('article', 'id_article', text);
-        event.component.endSearch();
+        this.sqliteProvider.findByElement('article', 'id', text).subscribe((items) => {
+            event.component.items = items;
+            event.component.endSearch();
+        });
     }
 
     addArticle() {

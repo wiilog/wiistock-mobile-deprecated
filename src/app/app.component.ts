@@ -68,10 +68,10 @@ export class MyApp {
 
             // Online event
             this.events.subscribe('network:online', () => {
-                this.sqlProvider.getAPI_URL().then((resultUrl) => {
+                this.sqlProvider.getAPI_URL().subscribe((resultUrl) => {
                     if (resultUrl !== null) {
                         let url: string = resultUrl + this.addMvtURL;
-                        this.sqlProvider.findAll('`mouvement_traca`').then((data) => {
+                        this.sqlProvider.findAll('`mouvement_traca`').subscribe((data) => {
                             this.sqlProvider.getApiKey().then(result => {
                                 let toInsert = {
                                     mouvements: data,

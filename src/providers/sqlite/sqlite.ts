@@ -6,145 +6,111 @@ import {Preparation} from "../../app/entities/preparation";
 import {Mouvement} from "../../app/entities/mouvement";
 import {Livraison} from "../../app/entities/livraison";
 import {Anomalie} from "../../app/entities/anomalie";
-
-const DB_NAME: string = 'follow_gt';
+import {Observable, ReplaySubject, Subject} from "rxjs";
+import {flatMap, map, take} from "rxjs/operators";
+import {from} from "rxjs/observable/from";
+import {of} from "rxjs/observable/of";
+import {Platform} from "ionic-angular";
 
 
 @Injectable()
 export class SqliteProvider {
 
-    private db: SQLiteObject = null;
+    private static readonly DB_NAME: string = 'follow_gt';
 
-    constructor(private sqlite: SQLite, private storageService: StorageService) {
-        this.createDbFile();
+    private sqliteObject$: Subject<SQLiteObject>;
+    private dbcreated$: Subject<boolean>;
+
+    public constructor(private sqlite: SQLite,
+                       private storageService: StorageService,
+                       private platform: Platform) {
+        this.sqliteObject$ = new ReplaySubject<SQLiteObject>(1);
+        this.dbcreated$ = new ReplaySubject<boolean>(1);
+
+        this.createDB();
+        this.createTables();
     }
 
-    private createDbFile(): void {
-        this.sqlite.create({
-            name: DB_NAME,
-            location: 'default'
-        })
-            .then((db: SQLiteObject) => {
-                console.log('bdd créée');
-                this.db = db;
-                this.createTables();
-            })
-            .catch(e => console.log(e));
+    private get db$(): Observable<SQLiteObject> {
+        return this.sqliteObject$.pipe(take(1));
+    }
+
+    private get isDBCreated$(): Observable<boolean> {
+        return this.dbcreated$.pipe(take(1));
+    }
+
+    private createDB(): void {
+        // We wait sqlite plugin loading and we create the database
+        from(this.platform.ready())
+            .pipe(flatMap(() => this.sqlite.create({
+                name: SqliteProvider.DB_NAME,
+                location: 'default'
+            })))
+            .subscribe(
+                (sqliteObject: SQLiteObject) => {
+                    console.log('bdd created');
+                    this.sqliteObject$.next(sqliteObject);
+                },
+                e => console.log(e)
+            );
     }
 
     private createTables(): void {
-        this.db.executeSql('CREATE TABLE IF NOT EXISTS `article` (`id` INTEGER PRIMARY KEY, `reference` VARCHAR(255), `quantite` INTEGER)', [])
-            .then(() => {
-                console.log('table article créée');
-                this.db.executeSql('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))', [])
-                    .then(() => {
-                        console.log('table emplacement créée !')
-                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location` TEXT, `type` VARCHAR(255), `is_ref` TEXT, `id_article_prepa` INTEGER, `id_prepa` INTEGER, `id_article_livraison` INTEGER, `id_livraison` INTEGER)', [])
-                            .then(() => {
-                                console.log('table mouvement créée !')
-                                this.db.executeSql('DROP TABLE IF EXISTS `mouvement_traca`', [])
-                                    .then(() => {
-                                        console.log('table mouvement traca deleted !');
-                                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255))', [])
-                                            .then(() => {
-                                                console.log('table mouvement traca created')
-                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []).then(() => {
-                                                    console.log('table api_params created');
-                                                    this.db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []).then(() => {
-                                                        console.log('inserted single api param');
-                                                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER)', []).then(() => {
-                                                            console.log('table preparation created');
-                                                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []).then(() => {
-                                                                console.log('table article_prepa created');
-                                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []).then(() => {
-                                                                    console.log('table livraison created');
-                                                                    this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_livraison` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_livraison` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []).then(() => {
-                                                                        console.log('table article_livraison created');
-                                                                        this.db.executeSql('CREATE TABLE IF NOT EXISTS `article_inventaire` (`id` INTEGER PRIMARY KEY, `id_mission` INTEGER, `reference` TEXT, `is_ref` TEXT, `location` TEXT)', []).then(() => {
-                                                                            console.log('table article_inventaire created');
-                                                                            this.db.executeSql('CREATE TABLE IF NOT EXISTS `saisie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_mission` INTEGER, `date` TEXT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT)', []).then(() => {
-                                                                                console.log('table saisie_inventaire created');
-                                                                                this.db.executeSql('CREATE TABLE IF NOT EXISTS `anomalie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT, `comment` TEXT, `treated` TEXT)', []).then(() => {
-                                                                                    console.log('table anomalie_inventaire created');
-                                                                                }).catch(err => console.log(err));
-                                                                            });
-                                                                        });
-                                                                    });
-                                                                }).catch(err => console.log(err));
-                                                            });
-                                                        });
-                                                    });
-                                                }).catch(e => console.log(e));
-                                            }).catch(e => console.log(e));
-                                    }).catch(e => console.log(e));
-                            });
-                    });
-            });
+        this.db$.pipe(
+            flatMap((db) => from(Promise.all([
+                db.executeSql('CREATE TABLE IF NOT EXISTS `article` (`id` INTEGER PRIMARY KEY, `reference` VARCHAR(255), `quantite` INTEGER)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location` TEXT, `type` VARCHAR(255), `is_ref` TEXT, `id_article_prepa` INTEGER, `id_prepa` INTEGER, `id_article_livraison` INTEGER, `id_livraison` INTEGER)', []),
+                db.executeSql('DROP TABLE IF EXISTS `mouvement_traca`', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255))', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []),
+                db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `article_livraison` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_livraison` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `article_inventaire` (`id` INTEGER PRIMARY KEY, `id_mission` INTEGER, `reference` TEXT, `is_ref` TEXT, `location` TEXT)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `saisie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_mission` INTEGER, `date` TEXT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `anomalie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT, `comment` TEXT, `treated` TEXT)', [])
+            ])))
+        )
+        .subscribe(() => {
+            console.log('All tables created');
+            this.dbcreated$.next(true);
+        });
     }
 
-    public cleanDataBase(fromAfter = false): Promise<any> {
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('DELETE FROM `article`;', [])
-                .then(() => {
-                    this.db.executeSql('DELETE FROM `emplacement`;', [])
-                        .then(() => {
-                            this.db.executeSql('DELETE FROM `mouvement_traca`;', [])
-                                .then(() => {
-                                    if (!fromAfter) {
-                                        this.db.executeSql('DELETE FROM `preparation`;', [])
-                                            .then(() => {
-                                                this.db.executeSql('DELETE FROM `article_prepa`;', [])
-                                                    .then(() => {
-                                                        this.db.executeSql('DELETE FROM `mouvement`;', [])
-                                                            .then(() => {
-                                                                this.db.executeSql('DELETE FROM `livraison`;', [])
-                                                                    .then(() => {
-                                                                        this.db.executeSql('DELETE FROM `article_livraison`;', [])
-                                                                            .then(() => {
-                                                                                this.db.executeSql('DELETE FROM `article_inventaire`;', [])
-                                                                                    .then(() => {
-                                                                                        this.db.executeSql('DELETE FROM `saisie_inventaire`;', [])
-                                                                                            .then(() => {
-                                                                                                this.db.executeSql('DELETE FROM `anomalie_inventaire`;', [])
-                                                                                                    .then(() => {
-                                                                                                        resolve();
-                                                                                                        console.log('Tables cleaned');
-                                                                                                    }).catch(err => {
-                                                                                                    console.log(err);
-                                                                                                });
-                                                                                            }).catch(err => {
-                                                                                            console.log(err);
-                                                                                        });
-                                                                                    });
-                                                                            }).catch(err => {
-                                                                            console.log(err);
-                                                                        });
-                                                                    }).catch(err => {
-                                                                    console.log(err);
-                                                                });
-                                                            }).catch(err => {
-                                                            console.log(err);
-                                                        });
-                                                    }).catch(err => {
-                                                    console.log(err);
-                                                });
-                                            }).catch(err => {
-                                            console.log(err);
-                                        });
-                                    } else {
-                                        resolve();
-                                    }
-                                }).catch(err => {
-                                console.log(err);
-                            })
-                        }).catch(err => {
-                        console.log(err);
-                    }).catch(err => {
-                        console.log(err);
-                    });
-                });
-        });
-        return resp;
+    public cleanDataBase(fromAfter = false): Observable<any> {
+        const databaseCleaned = new ReplaySubject<SQLiteObject>(1);
+        this.isDBCreated$
+            .pipe(
+                flatMap(() => this.db$),
+                flatMap((db) => from(Promise.all([
+                    db.executeSql('DELETE FROM `article`;', []),
+                    db.executeSql('DELETE FROM `emplacement`;', []),
+                    db.executeSql('DELETE FROM `mouvement_traca`;', []),
+                    ...(
+                        !fromAfter
+                            ? [
+                                db.executeSql('DELETE FROM `preparation`;', []),
+                                db.executeSql('DELETE FROM `article_prepa`;', []),
+                                db.executeSql('DELETE FROM `mouvement`;', []),
+                                db.executeSql('DELETE FROM `livraison`;', []),
+                                db.executeSql('DELETE FROM `article_livraison`;', []),
+                                db.executeSql('DELETE FROM `article_inventaire`;', []),
+                                db.executeSql('DELETE FROM `saisie_inventaire`;', []),
+                                db.executeSql('DELETE FROM `anomalie_inventaire`;', [])
+                            ]
+                            : []
+                    )
+                ])))
+            )
+            .subscribe(() => {
+                console.log('All tables created');
+                databaseCleaned.next(undefined);
+            });
+
+        return databaseCleaned.pipe(take(1));
     }
 
     public setOperateur(operateur) {
@@ -204,19 +170,19 @@ export class SqliteProvider {
             let prepas = data['preparations'];
             let prepasValues = [];
             if (prepas.length === 0) {
-                this.findAll('`preparation`').then((preparationsDB) => {
+                this.findAll('`preparation`').subscribe((preparationsDB) => {
                     this.deletePreparations(preparationsDB).then(() => {
                         resolve(false);
                     });
                 });
             }
             for (let prepa of prepas) {
-                this.findOne('preparation', prepa.id).then((prepaInserted) => {
+                this.findOne('preparation', prepa.id).subscribe((prepaInserted) => {
                     if (prepaInserted === null) {
                         prepasValues.push("(" + prepa.id + ", '" + prepa.number + "', " + null + ", " + null + ", 0)");
                     }
                     if (prepas.indexOf(prepa) === prepas.length - 1) {
-                        this.findAll('`preparation`').then((preparations) => {
+                        this.findAll('`preparation`').subscribe((preparations) => {
                             let prepasValuesStr = prepasValues.join(', ');
                             let sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`) VALUES ' + prepasValuesStr + ';';
                             if (preparations.length === 0) {
@@ -241,7 +207,7 @@ export class SqliteProvider {
                 resolve(false);
             }
             for (let article of articlesPrepa) {
-                this.findArticlesByPrepa(article.id_prepa).then((articles) => {
+                this.findArticlesByPrepa(article.id_prepa).subscribe((articles) => {
                     if (articles.find(articlePrepa => articlePrepa.reference === article.reference && articlePrepa.is_ref === article.is_ref) === undefined) {
                         articlesPrepaValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_prepa + ", " + 0 + ", '" + article.location + "')");
                     }
@@ -260,19 +226,19 @@ export class SqliteProvider {
             let livraisons = data['livraisons'];
             let livraisonsValues = [];
             if (livraisons.length === 0) {
-                this.findAll('`livraison`').then((livraisonsDB) => {
+                this.findAll('`livraison`').subscribe((livraisonsDB) => {
                     this.deleteLivraisons(livraisonsDB).then(() => {
                         resolve(false);
                     });
                 });
             }
             for (let livraison of livraisons) {
-                this.findOne('livraison', livraison.id).then((livraisonInserted) => {
+                this.findOne('livraison', livraison.id).subscribe((livraisonInserted) => {
                     if (livraisonInserted === null) {
                         livraisonsValues.push("(" + livraison.id + ", '" + livraison.number + "', " + null + ", " + null + ")");
                     }
                     if (livraisons.indexOf(livraison) === livraisons.length - 1) {
-                        this.findAll('`livraison`').then((livraisonsDB) => {
+                        this.findAll('`livraison`').subscribe((livraisonsDB) => {
                             let livraisonsValuesStr = livraisonsValues.join(', ');
                             let sqlLivraisons = 'INSERT INTO `livraison` (`id`, `numero`, `emplacement`, `date_end`) VALUES ' + livraisonsValuesStr + ';';
                             if (livraisonsDB.length === 0) {
@@ -297,7 +263,7 @@ export class SqliteProvider {
                 resolve(false);
             }
             for (let article of articlesLivrs) {
-                this.findArticlesByLivraison(article.id_livraison).then((articles) => {
+                this.findArticlesByLivraison(article.id_livraison).subscribe((articles) => {
                     if (articles.find(articleLivr => articleLivr.reference === article.reference && articleLivr.is_ref === article.is_ref) === undefined) {
                         articlesLivraisonValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_livraison + ", " + 0 + ", '" + article.location + "')");
                     }
@@ -355,15 +321,20 @@ export class SqliteProvider {
         });
     }
 
-    executeAllImports(imports: Array<string>) {
-        let instance = this;
-        return new Promise<any>((resolve) => {
+    public executeAllImports(imports: Array<string>): Observable<any> {
+        const allImportExecuted = new ReplaySubject<undefined>(1);
+
+        this.db$.subscribe((db) => {
             imports.forEach(function (importSql, index) {
-                instance.db.executeSql(importSql, []).then().catch(_ => console.log(importSql)).then(() => {
-                    if (index === imports.length - 1) resolve();
+                db.executeSql(importSql, []).then().catch(_ => console.log(importSql)).then(() => {
+                    if (index === imports.length - 1) {
+                        allImportExecuted.next(undefined);
+                    }
                 })
             })
         });
+
+        return allImportExecuted;
     }
 
     public async importData(data, refresh = false) {
@@ -384,7 +355,7 @@ export class SqliteProvider {
                                         if (sqlArticlesLivraison !== false) imports.push(sqlArticlesLivraison);
                                         this.importArticlesInventaire(data).then((sqlArticlesInventaire) => {
                                             if (sqlArticlesInventaire !== false) imports.push(sqlArticlesInventaire);
-                                            this.executeAllImports(imports).then(() => {
+                                            this.executeAllImports(imports).subscribe(() => {
                                                 console.log('Imported All Data');
                                                 resolve();
                                             })
@@ -399,33 +370,24 @@ export class SqliteProvider {
         });
     };
 
-    static openDatabase() {
-        let resp = new Promise<SQLiteObject>(function (resolve) {
-            if (this.db == null) {
-                this.createDbFile();
-            } else {
-                resolve(this.db);
-            }
-        });
-        return resp;
-    }
-
-    public findOne(table: string, id: number): Promise<any> {
+    public findOne(table: string, id: number): Observable<any> {
         let query: string = "SELECT * FROM " + table + " WHERE id = ? ";
 
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql(query, [id]).then((data) => {
+        const findOneExecuted = new ReplaySubject<any>(1);
+
+        this.db$.subscribe((db) => {
+            db.executeSql(query, [id]).then((data) => {
                 let object = null;
                 if (data.rows.length > 0) {
                     object = data.rows.item(0);
                 }
-                resolve(object);
+                findOneExecuted.next(object);
             });
         });
-        return resp;
+        return findOneExecuted;
     }
 
-    public count(table: string, where?: any[]): Promise<any> {
+    public count(table: string, where?: any[]): Observable<number> {
         let query = "SELECT COUNT(*) AS nb FROM " + table;
 
         let values = [];
@@ -435,40 +397,43 @@ export class SqliteProvider {
             values = res.values;
         }
 
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql(query, values).then((data) => {
+        const countExecuted = new ReplaySubject<number>(1);
+
+        this.db$.subscribe((db) => {
+            db.executeSql(query, values).then((data) => {
                 let count = 0;
                 if (data.rows.length > 0) {
                     let item = data.rows.item(0);
                     count = item.nb;
                 }
-                resolve(count);
+                countExecuted.next(count);
             });
         });
-        return resp;
+
+        return countExecuted;
     }
 
-    public findAll(table: string) {
-        let list = [];
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('SELECT * FROM ' + table, [])
+    public findAll(table: string): Observable<any> {
+        const findAllExecuted = new ReplaySubject<any>(1);
+        this.db$.subscribe((db) => {
+            db.executeSql('SELECT * FROM ' + table, [])
                 .then((data) => {
-
                     if (data == null) {
-                        return;
-                    }
-
-                    if (data.rows) {
-                        if (data.rows.length > 0) {
-                            for (let i = 0; i < data.rows.length; i++) {
-                                list.push(data.rows.item(i));
+                        findAllExecuted.next(undefined);
+                    } else {
+                        const list = [];
+                        if (data.rows) {
+                            if (data.rows.length > 0) {
+                                for (let i = 0; i < data.rows.length; i++) {
+                                    list.push(data.rows.item(i));
+                                }
                             }
                         }
+                        findAllExecuted.next(list);
                     }
-                    resolve(list);
                 });
         });
-        return resp;
+        return findAllExecuted;
     }
 
     public async priseAreUnfinished() {
@@ -506,56 +471,40 @@ export class SqliteProvider {
         });
     };
 
-    public findByElementNull(table: string, element: string) {
-        let list = [];
-        this.db.executeSql('SELECT * FROM ' + table + 'WHERE ' + element + ' IS NULL', [])
-            .then((data) => {
-
-                if (data == null) {
-                    return;
+    public findByElementNull(table: string, element: string): Observable<Array<any>> {
+        return this.db$.pipe(
+            flatMap((db: SQLiteObject) => from(db.executeSql('SELECT * FROM ' + table + 'WHERE ' + element + ' IS NULL', []))),
+            map((data) => {
+                const list = [];
+                if (data && data.rows) {
+                    for (let i = 0; i < data.rows.length; i++) {
+                        list.push(data.rows.item(i));
+                    }
                 }
+                return list;
+            })
+        );
+    }
 
-                if (data.rows) {
-                    if (data.rows.length > 0) {
+    public findByElement(table: string, element: string, value: string): Observable<Array<any>> {
+        const query = ('SELECT * FROM ' + table + ' WHERE ' + element + ' LIKE \'%' + value + '%\'');
+        return (value !== '')
+            ? this.db$.pipe(
+                flatMap((db: SQLiteObject) => from(db.executeSql(query, []))),
+                map((data) => {
+                    const list = [];
+                    if (data && data.rows) {
                         for (let i = 0; i < data.rows.length; i++) {
                             list.push(data.rows.item(i));
                         }
                     }
-                }
-            });
-        return list;
+                    return list;
+                })
+            )
+            : of(undefined);
     }
 
-    public findByElement(table: string, element: string, value: string) {
-        if (value !== '') {
-            let list = [];
-            let query = 'SELECT * FROM ' + table + ' WHERE ' + element + ' LIKE \'%' + value + '%\'';
-            console.log(query);
-            this.db.executeSql(query, [])
-                .then((data) => {
-
-                    if (data == null) {
-                        return;
-                    }
-
-                    if (data.rows) {
-                        if (data.rows.length > 0) {
-                            for (let i = 0; i < data.rows.length; i++) {
-                                list.push(data.rows.item(i));
-                            }
-                        }
-                    }
-                }).catch(err => console.log(err));
-            console.log(list);
-            return list;
-        }
-    }
-
-    public findOneByElement(table: string, element: string, value: string) {
-        return this.findByElement(table, element, value) ? this.findByElement(table, element, value)[0] : null;
-    }
-
-    public insert(name: string, object: any) {
+    public insert(name: string, object: any): Observable<number> {
         let values = [];
         let query = "INSERT INTO " + name + " VALUES (";
         Object.keys(object).forEach((key) => {
@@ -563,17 +512,19 @@ export class SqliteProvider {
             query += '?, '
         });
         query = query.slice(0, -2) + ");";
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql(query, values).then((id) => {
-                resolve(id);
+
+        const insertExecuted = new ReplaySubject<any>(1);
+        this.db$.subscribe((db) => {
+            db.executeSql(query, values).then((id) => {
+                insertExecuted.next(id);
             }).catch(err => console.log(err));
+
         });
-        return resp;
+        return insertExecuted;
     }
 
-    public executeQuery(query: string) {
-        console.log(query);
-        return this.db.executeSql(query).then(() => console.log("query executed")).catch(err => console.log(err));
+    public executeQuery(query: string): Observable<any> {
+        return this.db$.pipe(flatMap((db) => from(db.executeSql(query))));
     }
 
 
@@ -600,31 +551,34 @@ export class SqliteProvider {
         return {query: query, values: values};
     }
 
-    public async setAPI_URL(url) {
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('UPDATE `API_PARAMS` SET url = \'' + url + '\'', []).then(() => {
-                resolve(true);
+    public setAPI_URL(url): Observable<any> {
+        const apiUrlSet = new ReplaySubject<any>(1);
+        this.db$.subscribe((db) => {
+            db.executeSql('UPDATE `API_PARAMS` SET url = \'' + url + '\'', []).then(() => {
+                apiUrlSet.next(true);
             }).catch((err) => {
-                resolve(err);
+                apiUrlSet.next(err);
             })
+
         });
-        return resp;
+        return apiUrlSet;
     }
 
-    public getAPI_URL() {
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('SELECT * FROM `API_PARAMS` LIMIT 1', []).then((data) => {
+    public getAPI_URL(): Observable<any> {
+        const apiUrl$ = new ReplaySubject<any>(1);
+        this.db$.subscribe((db) => {
+            db.executeSql('SELECT * FROM `API_PARAMS` LIMIT 1', []).then((data) => {
                 if (data && data.rows && data.rows.length > 0 && data.rows.item(0).url !== '') {
-                    resolve(data.rows.item(0).url);
+                    apiUrl$.next(data.rows.item(0).url);
                 } else {
-                    resolve(null);
+                    apiUrl$.next(null);
                 }
             }).catch((err) => {
                 console.log(err);
-                resolve(false);
-            })
+                apiUrl$.next(false);
+            });
         });
-        return resp;
+        return apiUrl$;
     }
 
     public getApiKey() {
@@ -663,159 +617,130 @@ export class SqliteProvider {
         return this.storageService.setPreps();
     }
 
-    public findArticlesByPrepa(id_prepa: number) {
-        let list = [];
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('SELECT * FROM `article_prepa` WHERE `id_prepa` = ' + id_prepa, []).then((articles) => {
-                if (articles == null) {
-                    return;
-                }
-
-                if (articles.rows) {
-                    if (articles.rows.length > 0) {
-                        for (let i = 0; i < articles.rows.length; i++) {
-                            list.push(articles.rows.item(i));
-                        }
+    public findArticlesByPrepa(id_prepa: number): Observable<Array<any>> {
+        return this.db$.pipe(
+            flatMap((db: SQLiteObject) => from(db.executeSql('SELECT * FROM `article_prepa` WHERE `id_prepa` = ' + id_prepa, []))),
+            map((articles) => {
+                const list = [];
+                if (articles && articles.rows) {
+                    for (let i = 0; i < articles.rows.length; i++) {
+                        list.push(articles.rows.item(i));
                     }
                 }
-                resolve(list);
-            }).catch(err => console.log(err));
-        });
-        return resp;
+                return list;
+            })
+        );
     }
 
-    public findArticlesByLivraison(id_livr: number) {
-        let list = [];
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('SELECT * FROM `article_livraison` WHERE `id_livraison` = ' + id_livr, []).then((articles) => {
-                if (articles == null) {
-                    return;
-                }
-
-                if (articles.rows) {
-                    if (articles.rows.length > 0) {
-                        for (let i = 0; i < articles.rows.length; i++) {
-                            list.push(articles.rows.item(i));
-                        }
+    public findArticlesByLivraison(id_livr: number): Observable<Array<any>> {
+        return this.db$.pipe(
+            flatMap((db: SQLiteObject) => from(db.executeSql('SELECT * FROM `article_livraison` WHERE `id_livraison` = ' + id_livr, []))),
+            map((articles) => {
+                const list = [];
+                if (articles && articles.rows) {
+                    for (let i = 0; i < articles.rows.length; i++) {
+                        list.push(articles.rows.item(i));
                     }
                 }
-                resolve(list);
-            }).catch(err => console.log(err));
-        });
-        return resp;
-    }
-
-    public findMvtByArticle(id_art: number) {
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('SELECT * FROM `mouvement` WHERE `id_article_prepa` = ' + id_art + ' LIMIT 1', []).then((mvt) => {
-                if (mvt && mvt.rows && mvt.rows.length > 0 && mvt.rows.item(0).url !== '') {
-                    resolve(mvt.rows.item(0));
-                } else {
-                    resolve(null);
-                }
-            }).catch(err => console.log(err));
-        });
-        return resp;
-    }
-
-    public findMvtByArticleLivraison(id_art: number) {
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('SELECT * FROM `mouvement` WHERE `id_article_livraison` = ' + id_art + ' LIMIT 1', []).then((mvt) => {
-                if (mvt && mvt.rows && mvt.rows.length > 0 && mvt.rows.item(0).url !== '') {
-                    resolve(mvt.rows.item(0));
-                } else {
-                    resolve(null);
-                }
-            }).catch(err => console.log(err));
-        });
-        return resp;
-    }
-
-    public finishPrepa(id_prepa: number, emplacement) {
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('UPDATE `preparation` SET date_end = \'' + moment().format() + '\', emplacement = \'' + emplacement + '\' WHERE id = ' + id_prepa, []).then(() => {
-                resolve();
+                return list;
             })
-        });
-        return resp;
+        );
     }
 
-    public startPrepa(id_prepa: number) {
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('UPDATE `preparation` SET started = 1 WHERE id = ' + id_prepa, []).then(() => {
-                resolve();
-            })
-        });
-        return resp;
+    public findMvtByArticle(id_art: number): Observable<any> {
+        return this.db$.pipe(
+            flatMap((db: SQLiteObject) => from(db.executeSql('SELECT * FROM `mouvement` WHERE `id_article_prepa` = ' + id_art + ' LIMIT 1', []))),
+            map((mvt) => (
+                (mvt && mvt.rows && mvt.rows.length > 0 && mvt.rows.item(0).url !== '')
+                    ? mvt.rows.item(0)
+                    : null
+            ))
+        );
     }
 
-    public finishLivraison(id_livraison: number, emplacement) {
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('UPDATE `livraison` SET date_end = \'' + moment().format() + '\', emplacement = \'' + emplacement + '\' WHERE id = ' + id_livraison, []).then(() => {
-                resolve();
-            })
-        });
-        return resp;
+    public findMvtByArticleLivraison(id_art: number): Observable<any> {
+        return this.db$.pipe(
+            flatMap((db: SQLiteObject) => from(db.executeSql('SELECT * FROM `mouvement` WHERE `id_article_livraison` = ' + id_art + ' LIMIT 1', []))),
+            map((mvt) => (
+                (mvt && mvt.rows && mvt.rows.length > 0 && mvt.rows.item(0).url !== '')
+                    ? mvt.rows.item(0)
+                    : null
+            ))
+        );
     }
 
-    public finishMvt(id_mvt: number, location_to: string) {
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('UPDATE `mouvement` SET date_drop = \'' + moment().format() + '\', location = \'' + location_to + '\' WHERE id = ' + id_mvt, []).then(() => {
-                resolve();
-            })
-        });
-        return resp;
+    public finishPrepa(id_prepa: number, emplacement): Observable<undefined> {
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql('UPDATE `preparation` SET date_end = \'' + moment().format() + '\', emplacement = \'' + emplacement + '\' WHERE id = ' + id_prepa, []))),
+            map(() => undefined)
+        );
     }
 
-    public moveArticle(id_article: number) {
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('UPDATE `article_prepa` SET has_moved = 1 WHERE id = ' + id_article, []).then(() => {
-                resolve();
-            }).catch(err => console.log(err));
-        });
-        return resp;
+    public startPrepa(id_prepa: number): Observable<undefined> {
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql('UPDATE `preparation` SET started = 1 WHERE id = ' + id_prepa, []))),
+            map(() => undefined)
+        );
     }
 
-    public moveArticleLivraison(id_article: number) {
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('UPDATE `article_livraison` SET has_moved = 1 WHERE id = ' + id_article, []).then(() => {
-                resolve();
-            }).catch(err => console.log(err));
-        });
-        return resp;
+    public finishLivraison(id_livraison: number, emplacement): Observable<undefined> {
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql('UPDATE `livraison` SET date_end = \'' + moment().format() + '\', emplacement = \'' + emplacement + '\' WHERE id = ' + id_livraison, []))),
+            map(() => undefined)
+        );
     }
 
-    public updateArticleQuantity(id_article: number, quantite: number) {
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('UPDATE `article_prepa` SET quantite = ' + quantite + ' WHERE id = ' + id_article, []).then(() => {
-                resolve();
-            }).catch(err => console.log(err));
-        });
-        return resp;
+    public finishMvt(id_mvt: number, location_to: string): Observable<undefined> {
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql('UPDATE `mouvement` SET date_drop = \'' + moment().format() + '\', location = \'' + location_to + '\' WHERE id = ' + id_mvt, []))),
+            map(() => undefined)
+        );
     }
 
-    public updateArticleLivraisonQuantity(id_article: number, quantite: number) {
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('UPDATE `article_livraison` SET quantite = ' + quantite + ' WHERE id = ' + id_article, []).then(() => {
-                resolve();
-            }).catch(err => console.log(err));
-        });
-        return resp;
+    public moveArticle(id_article: number): Observable<undefined> {
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql('UPDATE `article_prepa` SET has_moved = 1 WHERE id = ' + id_article, []))),
+            map(() => undefined)
+        );
+    }
+
+    public moveArticleLivraison(id_article: number): Observable<undefined> {
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql('UPDATE `article_livraison` SET has_moved = 1 WHERE id = ' + id_article, []))),
+            map(() => undefined)
+        );
+    }
+
+    public updateArticleQuantity(id_article: number, quantite: number): Observable<undefined> {
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql('UPDATE `article_prepa` SET quantite = ' + quantite + ' WHERE id = ' + id_article, []))),
+            map(() => undefined)
+        );
+    }
+
+    public updateArticleLivraisonQuantity(id_article: number, quantite: number): Observable<undefined> {
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql('UPDATE `article_livraison` SET quantite = ' + quantite + ' WHERE id = ' + id_article, []))),
+            map(() => undefined)
+        );
     }
 
     public deletePreparations(preparations: Array<Preparation>) {
+
         let resp = new Promise<any>((resolve) => {
             if (preparations.length === 0) {
                 resolve();
             } else {
-                preparations.forEach(preparation => {
-                    this.db.executeSql('DELETE FROM `preparation` WHERE id = ' + preparation.id, []).then(() => {
-                        this.db.executeSql('DELETE FROM `article_prepa` WHERE id_prepa = ' + preparation.id, []).then(() => {
-                            if (preparations.indexOf(preparation) === preparations.length - 1) {
-                                resolve();
-                            }
+                this.db$.subscribe((db) => {
+                    preparations.forEach(preparation => {
+                        db.executeSql('DELETE FROM `preparation` WHERE id = ' + preparation.id, []).then(() => {
+                            db.executeSql('DELETE FROM `article_prepa` WHERE id_prepa = ' + preparation.id, []).then(() => {
+                                if (preparations.indexOf(preparation) === preparations.length - 1) {
+                                    resolve();
+                                }
+                            }).catch(err => console.log(err));
                         }).catch(err => console.log(err));
-                    }).catch(err => console.log(err));
+                    });
                 });
             }
         });
@@ -827,14 +752,16 @@ export class SqliteProvider {
             if (livraisons.length === 0) {
                 resolve();
             } else {
-                livraisons.forEach(livraison => {
-                    this.db.executeSql('DELETE FROM `livraison` WHERE id = ' + livraison.id, []).then(() => {
-                        this.db.executeSql('DELETE FROM `article_livraison` WHERE id_livraison = ' + livraison.id, []).then(() => {
-                            if (livraisons.indexOf(livraison) === livraisons.length - 1) {
-                                resolve();
-                            }
+                this.db$.subscribe((db) => {
+                    livraisons.forEach(livraison => {
+                        db.executeSql('DELETE FROM `livraison` WHERE id = ' + livraison.id, []).then(() => {
+                            db.executeSql('DELETE FROM `article_livraison` WHERE id_livraison = ' + livraison.id, []).then(() => {
+                                if (livraisons.indexOf(livraison) === livraisons.length - 1) {
+                                    resolve();
+                                }
+                            }).catch(err => console.log(err));
                         }).catch(err => console.log(err));
-                    }).catch(err => console.log(err));
+                    });
                 });
             }
         });
@@ -846,9 +773,11 @@ export class SqliteProvider {
             if (anomalies.length === 0) {
                 resolve();
             } else {
-                anomalies.forEach(anomaly => {
-                    this.db.executeSql('DELETE FROM `anomalie_inventaire` WHERE id = ' + anomaly.id, []).then(() => {
-                    }).catch(err => console.log(err));
+                this.db$.subscribe((db) => {
+                    anomalies.forEach(anomaly => {
+                        db.executeSql('DELETE FROM `anomalie_inventaire` WHERE id = ' + anomaly.id, []).then(() => {
+                        }).catch(err => console.log(err));
+                    });
                 });
             }
         });
@@ -857,31 +786,28 @@ export class SqliteProvider {
 
     public deleteMvts(mvts: Array<Mouvement>) {
         let resp = new Promise<any>((resolve) => {
-            mvts.forEach(mouvement => {
-                this.db.executeSql('DELETE FROM `mouvement` WHERE id = ' + mouvement.id, []).then(() => {
-                    if (mvts.indexOf(mouvement) === mvts.length - 1) resolve();
-                }).catch(err => console.log(err));
+            this.db$.subscribe((db) => {
+                mvts.forEach(mouvement => {
+                    db.executeSql('DELETE FROM `mouvement` WHERE id = ' + mouvement.id, []).then(() => {
+                        if (mvts.indexOf(mouvement) === mvts.length - 1) resolve();
+                    }).catch(err => console.log(err));
+                });
             });
         });
         return resp;
     }
 
-    public deleteById(table, id) {
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('DELETE FROM ' + table + 'WHERE id = ' + id, []).then(() => {
-                resolve();
-            }).catch(err => console.log(err));
-        });
-        return resp;
+    public deleteById(table, id): Observable<undefined> {
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql('DELETE FROM ' + table + 'WHERE id = ' + id, []))),
+            map(() => undefined)
+        );
     }
 
-    public cleanTable(table) {
-        let resp = new Promise<any>((resolve) => {
-            this.db.executeSql('DELETE FROM ' + table + ';', []).then(() => {
-                console.log('Table ' + table + ' cleaned');
-                resolve();
-            }).catch(err => console.log(err));
-        });
-        return resp;
+    public cleanTable(table): Observable<undefined> {
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql('DELETE FROM ' + table + ';', []))),
+            map(() => undefined)
+        );
     }
 }

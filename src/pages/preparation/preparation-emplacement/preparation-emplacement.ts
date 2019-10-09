@@ -36,7 +36,7 @@ export class PreparationEmplacementPage {
                 public barcodeScanner: BarcodeScanner,
                 public http: HttpClient,
                 public modal : ModalController) {
-        this.sqliteProvider.findAll('emplacement').then((value) => {
+        this.sqliteProvider.findAll('emplacement').subscribe((value) => {
             this.db_locations = value;
             if (typeof (navParams.get('preparation')) !== undefined) {
                 this.preparation = navParams.get('preparation');
@@ -91,7 +91,7 @@ export class PreparationEmplacementPage {
 
     testIfBarcodeEquals(text) {
         let instance = this;
-        this.sqliteProvider.findAll('`emplacement`').then(resp => {
+        this.sqliteProvider.findAll('`emplacement`').subscribe(resp => {
             let found = false;
             resp.forEach(function (element) {
                 if (element.label === text) {
@@ -123,10 +123,10 @@ export class PreparationEmplacementPage {
         if (this.emplacement.label !== '') {
             let instance = this;
             let promise = new Promise<any>((resolve) => {
-                this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
+                this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
                     articles.forEach(function (article) {
-                        instance.sqliteProvider.findMvtByArticle(article.id).then((mvt) => {
-                            instance.sqliteProvider.finishMvt(mvt.id, instance.emplacement.label).then(() => {
+                        instance.sqliteProvider.findMvtByArticle(article.id).subscribe((mvt) => {
+                            instance.sqliteProvider.finishMvt(mvt.id, instance.emplacement.label).subscribe(() => {
                                 if (articles.indexOf(article) === articles.length - 1) resolve();
                             });
                         });
@@ -135,12 +135,12 @@ export class PreparationEmplacementPage {
             });
             promise.then(() => {
                 this.sqliteProvider.finishPrepaStorage().then(() => {
-                    this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label).then(() => {
-                        this.sqliteProvider.getAPI_URL().then((result) => {
+                    this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label).subscribe(() => {
+                        this.sqliteProvider.getAPI_URL().subscribe((result) => {
                             this.sqliteProvider.getApiKey().then((key) => {
                                 if (result !== null) {
-                                    this.sqliteProvider.findAll('`preparation`').then(preparationsToSend => {
-                                        this.sqliteProvider.findAll('`mouvement`').then((mvts) => {
+                                    this.sqliteProvider.findAll('`preparation`').subscribe(preparationsToSend => {
+                                        this.sqliteProvider.findAll('`mouvement`').subscribe((mvts) => {
                                             let url: string = result + this.apiFinish;
                                             let params = {
                                                 preparations: preparationsToSend.filter(p => p.date_end !== null),

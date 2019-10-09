@@ -30,7 +30,7 @@ export class PriseArticlesPageTraca {
         private sqliteProvider: SqliteProvider,
         private barcodeScanner: BarcodeScanner,
         private changeDetectorRef: ChangeDetectorRef) {
-        this.sqliteProvider.findAll('article').then((value) => {
+        this.sqliteProvider.findAll('article').subscribe((value) => {
             this.db_articles = value;
         });
         if (typeof (navParams.get('emplacement')) !== undefined) {
@@ -81,11 +81,14 @@ export class PriseArticlesPageTraca {
                 };
                 this.sqliteProvider.setPriseValue(mouvement.ref_article, numberOfArticles).then(() => {
                     if (this.articles.indexOf(article) === this.articles.length - 1) {
-                        this.sqliteProvider.insert('`mouvement_traca`', mouvement).then(() => {
-                            this.redirectAfterTake();
-                        }).catch(err => console.log(err));
+                        this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(
+                            () => {
+                                this.redirectAfterTake();
+                            },
+                            err => console.log(err)
+                        );
                     } else {
-                        this.sqliteProvider.insert('`mouvement_traca`', mouvement).catch(err => console.log(err));
+                        this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(() => {}, (err) => console.log(err));
                     }
                 });
             });

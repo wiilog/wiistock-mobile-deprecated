@@ -33,9 +33,9 @@ export class DeposeEmplacementPageTraca {
         if (navParams.get('selectedEmplacement') !== undefined) {
             this.emplacement = navParams.get('selectedEmplacement');
         }
-        this.sqliteProvider.findAll('emplacement').then((value) => {
+        this.sqliteProvider.findAll('emplacement').subscribe((value) => {
             this.db_locations = value;
-            this.sqliteProvider.findAll('article').then((value) => {
+            this.sqliteProvider.findAll('article').subscribe((value) => {
                 this.db_articles = value;
             })
         });
@@ -70,8 +70,10 @@ export class DeposeEmplacementPageTraca {
     searchEmplacement(event: { component: IonicSelectableComponent, text: string }) {
         let text = event.text.trim();
         event.component.startSearch();
-        event.component.items = this.sqliteProvider.findByElement('emplacement', 'label', text);
-        event.component.endSearch();
+        this.sqliteProvider.findByElement('emplacement', 'label', text).subscribe((items) => {
+            event.component.items = items;
+            event.component.endSearch();
+        });
     }
 
     goHome() {
@@ -86,7 +88,7 @@ export class DeposeEmplacementPageTraca {
 
     testIfBarcodeEquals(text) {
         let instance = this;
-        this.sqliteProvider.findAll('`emplacement`').then(resp => {
+        this.sqliteProvider.findAll('`emplacement`').subscribe(resp => {
             let found = false;
             resp.forEach(function(element) {
                 if (element.label === text) {

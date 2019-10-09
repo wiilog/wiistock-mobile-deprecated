@@ -59,10 +59,10 @@ export class InventaireMenuPage {
     }
 
     addInventoryEntries() {
-        this.sqlLiteProvider.getAPI_URL().then(baseUrl => {
+        this.sqlLiteProvider.getAPI_URL().subscribe(baseUrl => {
            if (baseUrl !== null) {
                let url: string = baseUrl + this.addEntryURL;
-               this.sqlLiteProvider.findAll('`saisie_inventaire`').then(data => {
+               this.sqlLiteProvider.findAll('`saisie_inventaire`').subscribe(data => {
                    if (data.length > 0) {
                        this.sqlLiteProvider.getApiKey().then(apiKey => {
                            let params = {
@@ -86,43 +86,45 @@ export class InventaireMenuPage {
 
     synchronize() {
         this.hasLoaded = false;
-        this.sqlLiteProvider.getAPI_URL().then((result) => {
-            if (result !== null) {
-                let url: string = result + this.dataApi;
-                this.sqlLiteProvider.getApiKey().then((key) => {
-                    this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
-                        if (resp.success) {
-                            this.sqlLiteProvider.cleanTable('`article_inventaire`').then(() => {
-                                this.sqlLiteProvider.importArticlesInventaire(resp.data).then((sqlArticlesInventaire) => {
-                                    if (sqlArticlesInventaire !== false) {
-                                        this.sqlLiteProvider.executeQuery(sqlArticlesInventaire).then(() => {
-                                            console.log('Imported articles inventaire');
+        this.sqlLiteProvider.getAPI_URL().subscribe(
+            (result) => {
+                if (result !== null) {
+                    let url: string = result + this.dataApi;
+                    this.sqlLiteProvider.getApiKey().then((key) => {
+                        this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
+                            if (resp.success) {
+                                this.sqlLiteProvider.cleanTable('`article_inventaire`').subscribe(() => {
+                                    this.sqlLiteProvider.importArticlesInventaire(resp.data).then((sqlArticlesInventaire) => {
+                                        if (sqlArticlesInventaire !== false) {
+                                            this.sqlLiteProvider.executeQuery(sqlArticlesInventaire).subscribe(() => {
+                                                console.log('Imported articles inventaire');
+                                            });
+                                        }
+                                    }).then(() => {
+                                            this.sqlLiteProvider.findAll('`article_inventaire`').subscribe(articles => {
+                                                this.articles = articles;
+                                                setTimeout(() => {
+                                                    this.hasLoaded = true;
+                                                    this.content.resize();
+                                                }, 1000);
+                                            });
                                         });
-                                    }
-                                }).then(() => {
-                                        this.sqlLiteProvider.findAll('`article_inventaire`').then(articles => {
-                                            this.articles = articles;
-                                            setTimeout(() => {
-                                                this.hasLoaded = true;
-                                                this.content.resize();
-                                            }, 1000);
-                                        });
-                                    });
-                                this.addInventoryEntries();
-                            });
-                        } else {
+                                    this.addInventoryEntries();
+                                });
+                            } else {
+                                this.hasLoaded = true;
+                                this.showToast('Une erreur est survenue.');
+                            }
+                        }, error => {
                             this.hasLoaded = true;
-                            this.showToast('Une erreur est survenue.');
-                        }
-                    }, error => {
-                        this.hasLoaded = true;
-                        this.showToast('Une erreur réseau est survenue.');
+                            this.showToast('Une erreur réseau est survenue.');
+                        });
                     });
-                });
-            } else {
-                this.showToast('Veuillez configurer votre URL dans les paramètres.')
-            }
-        }).catch(err => console.log(err));
+                } else {
+                    this.showToast('Veuillez configurer votre URL dans les paramètres.')
+                }
+            },
+            err => console.log(err));
     }
 
     async showToast(msg) {
@@ -148,7 +150,7 @@ export class InventaireMenuPage {
                 quantity: data.quantity,
                 location: article.location,
             };
-            this.sqlLiteProvider.insert('`saisie_inventaire`', saisieInventaire).then(() => {
+            this.sqlLiteProvider.insert('`saisie_inventaire`', saisieInventaire).subscribe(() => {
                 //supprime l'article de la base
                 this.sqlLiteProvider.deleteById('`article_livraison`', article.id);
                 // supprime la ligne du tableau
