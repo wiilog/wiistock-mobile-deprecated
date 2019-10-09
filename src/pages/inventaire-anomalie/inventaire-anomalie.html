@@ -25,7 +25,7 @@
 
     <ion-title *ngIf="anomalies && anomalies.length !== 0 && !location"><ion-icon class="big-icon" name="barcode" (click)="scanLocation()"></ion-icon><br>Flashez un emplacement</ion-title>
 
-    <ion-badge *ngIf="anomalies && anomalies.length !== 0 && location">{{ anomalies.length }}</ion-badge>
+    <ion-badge *ngIf="anomaliesByLocation && anomaliesByLocation.length !== 0 && location">{{ anomaliesByLocation.length }}</ion-badge>
     <ion-badge *ngIf="locations && locations.length !== 0 && !location">{{ locations.length }}</ion-badge>
 
     <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
