@@ -47,6 +47,7 @@ import {LivraisonEmplacementPage} from "../pages/livraison/livraison-emplacement
 import {InventaireMenuPage} from "../pages/inventaire/inventaire-menu/inventaire-menu";
 import {ModalQuantityPage} from "../pages/inventaire/inventaire-menu/modal-quantity";
 import {InventaireAnomaliePage} from "../pages/inventaire-anomalie/inventaire-anomalie";
+import {ZebraBarcodeScannerService} from "./services/zebra-barcode-scanner.service";
 
 @NgModule({
     declarations: [
@@ -135,6 +136,7 @@ import {InventaireAnomaliePage} from "../pages/inventaire-anomalie/inventaire-an
         BarcodeScanner,
         NetworkProvider,
         Network,
+        ZebraBarcodeScannerService
     ]
 })
 export class AppModule {

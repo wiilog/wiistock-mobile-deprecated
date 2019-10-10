@@ -7,6 +7,8 @@ import {BarcodeScanner} from "@ionic-native/barcode-scanner";
 import {ArticleInventaire} from "../../app/entities/articleInventaire";
 import {ModalQuantityPage} from "../inventaire/inventaire-menu/modal-quantity";
 import {Article} from "../../app/entities/article";
+import {Subscription} from "rxjs";
+import {ZebraBarcodeScannerService} from "../../app/services/zebra-barcode-scanner.service";
 
 
 @IonicPage()
@@ -28,6 +30,8 @@ export class InventaireAnomaliePage {
     updateAnomaliesURL : string = '/api/treatAnomalies';
     hasLoaded: boolean;
 
+    private zebraScannerSubscription: Subscription;
+
     constructor(
         public navCtrl: NavController,
         public navParams: NavParams,
@@ -36,14 +40,31 @@ export class InventaireAnomaliePage {
         public toastController: ToastController,
         public barcodeScanner: BarcodeScanner,
         private modalController: ModalController,
+        private zebraBarcodeScannerService: ZebraBarcodeScannerService
     ) {}
 
     ionViewDidLoad() {
         console.log('ionViewDidLoad InventaireAnomaliePage');
     }
 
-    ionViewDidEnter() {
+    public ionViewDidEnter(): void {
         this.synchronize();
+
+        this.zebraScannerSubscription = this.zebraBarcodeScannerService.zebraScan$.subscribe((barcode: string) => {
+            if (this.location && this.anomalies && this.anomalies.length !== 0) {
+                this.checkBarcodeIsRef(barcode);
+            }
+            else if(this.anomalies && this.anomalies.length !== 0 && !this.location) {
+                this.checkBarcodeIsLocation(barcode);
+            }
+        });
+    }
+
+    public ionViewDidLeave(): void {
+        if (this.zebraScannerSubscription) {
+            this.zebraScannerSubscription.unsubscribe();
+            this.zebraScannerSubscription = undefined;
+        }
     }
 
     synchronize() {

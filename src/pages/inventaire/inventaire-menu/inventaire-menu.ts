@@ -9,6 +9,8 @@ import {SaisieInventaire} from "../../../app/entities/saisieInventaire";
 import {InventaireAnomaliePage} from "../../inventaire-anomalie/inventaire-anomalie";
 import moment from "moment";
 import {BarcodeScanner} from "@ionic-native/barcode-scanner";
+import {Subscription} from "rxjs";
+import {ZebraBarcodeScannerService} from "../../../app/services/zebra-barcode-scanner.service";
 
 
 @IonicPage()
@@ -29,15 +31,16 @@ export class InventaireMenuPage {
     isInventoryManager: boolean;
     hasLoaded: boolean;
 
-    constructor(
-        public navCtrl: NavController,
-        public navParams: NavParams,
-        public sqlLiteProvider: SqliteProvider,
-        public http: HttpClient,
-        public toastController: ToastController,
-        private barcodeScanner: BarcodeScanner,
-        private modalController: ModalController,
-    ) {
+    private zebraScannerSubscription: Subscription;
+
+    public constructor(public navCtrl: NavController,
+                       public navParams: NavParams,
+                       public sqlLiteProvider: SqliteProvider,
+                       public http: HttpClient,
+                       public toastController: ToastController,
+                       private barcodeScanner: BarcodeScanner,
+                       private modalController: ModalController,
+                       private zebraBarcodeScannerService: ZebraBarcodeScannerService) {
         this.sqlLiteProvider.getInventoryManagerRight().then(isInventoryManager => {
             this.isInventoryManager = isInventoryManager;
         });
@@ -47,9 +50,25 @@ export class InventaireMenuPage {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    ionViewDidEnter() {
+    public ionViewDidEnter(): void {
         this.synchronize();
         this.setBackButtonAction();
+
+        this.zebraScannerSubscription = this.zebraBarcodeScannerService.zebraScan$.subscribe((barcode: string) => {
+            if (this.articles && this.articles.length !== 0 && !this.location) {
+                this.checkBarcodeIsLocation(barcode);
+            }
+            else if(this.location && this.articles && this.articles.length > 0) {
+                this.checkBarcodeIsRef(barcode);
+            }
+        });
+    }
+
+    public ionViewDidLeave(): void {
+        if (this.zebraScannerSubscription) {
+            this.zebraScannerSubscription.unsubscribe();
+            this.zebraScannerSubscription = undefined;
+        }
     }
 
     setBackButtonAction() {
