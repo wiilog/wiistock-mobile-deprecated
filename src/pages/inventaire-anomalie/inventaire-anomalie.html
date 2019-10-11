@@ -28,8 +28,8 @@
     <ion-badge *ngIf="anomaliesByLocation && anomaliesByLocation.length !== 0 && location">{{ anomaliesByLocation.length }}</ion-badge>
     <ion-badge *ngIf="locations && locations.length !== 0 && !location">{{ locations.length }}</ion-badge>
 
-    <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
-    <ion-list *ngIf="hasLoaded">
+    <ion-spinner *ngIf="!isLoaded"></ion-spinner>
+    <ion-list *ngIf="isLoaded">
         <div *ngIf="location">
             <ion-grid>
                 <button class="list" ion-item *ngFor="let anomaly of anomaliesByLocation" id="{{anomaly.id}}">
@@ -52,7 +52,7 @@
     </ion-list>
 </ion-content>
 
-<ion-footer padding *ngIf="hasLoaded && !location">
+<ion-footer padding *ngIf="isLoaded && !location">
     <div class="d-flex">
         <ion-icon class="big-icon" name="refresh" item-right (click)="synchronize()"></ion-icon>
     </div>

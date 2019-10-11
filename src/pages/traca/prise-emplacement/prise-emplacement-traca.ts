@@ -8,9 +8,6 @@ import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {ChangeDetectorRef} from '@angular/core';
 import {IonicSelectableComponent} from 'ionic-selectable';
-import {Subscription} from "rxjs";
-import {ZebraBarcodeScannerService} from "../../../app/services/zebra-barcode-scanner.service";
-
 
 @IonicPage()
 @Component({
@@ -24,16 +21,14 @@ export class PriseEmplacementPageTraca {
     db_locations: Array<Emplacement>;
     db_articles: Array<Article>;
 
-    private zebraScannerSubscription: Subscription;
-
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public app: App,
-                       public sqliteProvider: SqliteProvider,
-                       private barcodeScanner: BarcodeScanner,
-                       private changeDetectorRef: ChangeDetectorRef,
-                       private zebraBarcodeScannerService: ZebraBarcodeScannerService) {
-
+    constructor(public navCtrl: NavController,
+                public navParams: NavParams,
+                public app: App,
+                public sqliteProvider: SqliteProvider,
+                private barcodeScanner: BarcodeScanner,
+                private changeDetectorRef: ChangeDetectorRef) {
+        // constructor(public navCtrl: NavController, public navParams: NavParams, private barcodeScanner: BarcodeScanner) {
+        //   this.scan();
         if (navParams.get('selectedEmplacement') !== undefined) {
             this.emplacement = navParams.get('selectedEmplacement');
         }
@@ -43,20 +38,23 @@ export class PriseEmplacementPageTraca {
                 this.db_articles = value;
             })
         });
+        let instance = this;
+        (<any>window).plugins.intentShim.registerBroadcastReceiver({
+                filterActions: [
+                    'io.ionic.starter.ACTION'
+                ],
+                filterCategories: [
+                    'android.intent.category.DEFAULT'
+                ]
+            },
+            function (intent) {
+                instance.testIfBarcodeEquals(intent.extras['com.symbol.datawedge.data_string'])
+            });
     }
 
-    public ionViewDidLoad(): void {
-        this.zebraScannerSubscription = this.zebraBarcodeScannerService.zebraScan$.subscribe((barcode: string) => {
-            this.testIfBarcodeEquals(barcode);
-        });
-    }
-
-    public ionViewDidLeave(): void {
-        if (this.zebraScannerSubscription) {
-            this.zebraScannerSubscription.unsubscribe();
-            this.zebraScannerSubscription = undefined;
-        }
-    }
+    // vibrate() {
+    //     navigator.vibrate(3000);
+    // }
 
     goToArticles() {
         console.log(this.emplacement);

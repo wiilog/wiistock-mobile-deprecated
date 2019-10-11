@@ -10,8 +10,6 @@ import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {ChangeDetectorRef} from '@angular/core';
 import {MouvementTraca} from "../../../app/entities/mouvementTraca";
 import moment from "moment";
-import {ZebraBarcodeScannerService} from "../../../app/services/zebra-barcode-scanner.service";
-import {Subscription} from "rxjs";
 
 
 @IonicPage()
@@ -25,16 +23,13 @@ export class DeposeArticlesPageTraca {
     articles: Array<Article>;
     db_articles: Array<Article>;
 
-    private zebraScannerSubscription: Subscription;
-
-    public constructor(
+    constructor(
         public navCtrl: NavController,
         public navParams: NavParams,
         private toastController: ToastController,
         private sqliteProvider: SqliteProvider,
         private barcodeScanner: BarcodeScanner,
-        private changeDetectorRef: ChangeDetectorRef,
-        private zebraBarcodeScannerService: ZebraBarcodeScannerService) {
+        private changeDetectorRef: ChangeDetectorRef) {
         this.sqliteProvider.findAll('article').then((value) => {
             this.db_articles = value;
         });
@@ -45,19 +40,18 @@ export class DeposeArticlesPageTraca {
         if (typeof (navParams.get('articles')) !== undefined) {
             this.articles = navParams.get('articles');
         }
-    }
-
-    public ionViewDidLoad(): void {
-        this.zebraScannerSubscription = this.zebraBarcodeScannerService.zebraScan$.subscribe((barcode: string) => {
-            this.testIfBarcodeEquals(barcode);
-        });
-    }
-
-    public ionViewDidLeave(): void {
-        if (this.zebraScannerSubscription) {
-            this.zebraScannerSubscription.unsubscribe();
-            this.zebraScannerSubscription = undefined;
-        }
+        let instance = this;
+        (<any>window).plugins.intentShim.registerBroadcastReceiver({
+                filterActions: [
+                    'io.ionic.starter.ACTION'
+                ],
+                filterCategories: [
+                    'android.intent.category.DEFAULT'
+                ]
+            },
+            function (intent) {
+                instance.testIfBarcodeEquals(intent.extras['com.symbol.datawedge.data_string']);
+            });
     }
 
     addArticleManually() {

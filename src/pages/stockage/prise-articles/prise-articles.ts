@@ -1,16 +1,14 @@
-import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
-import {PriseConfirmPage} from "../prise-confirm/prise-confirm";
-import {MenuPage} from "../../menu/menu";
-import {Article} from "../../../app/entities/article";
-import {Emplacement} from "../../../app/entities/emplacement";
-import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import {StockageMenuPage} from "../stockage-menu/stockage-menu";
-import {Mouvement} from '../../../app/entities/mouvement';
-import {BarcodeScanner} from '@ionic-native/barcode-scanner';
-import {ChangeDetectorRef} from '@angular/core';
-import {Subscription} from "rxjs";
-import {ZebraBarcodeScannerService} from "../../../app/services/zebra-barcode-scanner.service";
+import { Component } from '@angular/core';
+import { IonicPage, NavController, NavParams, ToastController } from 'ionic-angular';
+import { PriseConfirmPage } from "../prise-confirm/prise-confirm";
+import { MenuPage } from "../../menu/menu";
+import { Article } from "../../../app/entities/article";
+import { Emplacement } from "../../../app/entities/emplacement";
+import { SqliteProvider } from "../../../providers/sqlite/sqlite";
+import { StockageMenuPage } from "../stockage-menu/stockage-menu";
+import { Mouvement } from '../../../app/entities/mouvement';
+import { BarcodeScanner } from '@ionic-native/barcode-scanner';
+import { ChangeDetectorRef } from '@angular/core';
 
 
 @IonicPage()
@@ -23,16 +21,13 @@ export class PriseArticlesPage {
     emplacement: Emplacement;
     articles: Array<Article>;
     db_articles: Array<Article>;
-
-    private zebraScannerSubscription: Subscription;
-
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       private toastController: ToastController,
-                       private sqliteProvider: SqliteProvider,
-                       private barcodeScanner: BarcodeScanner,
-                       private changeDetectorRef: ChangeDetectorRef,
-                       private zebraBarcodeScannerService: ZebraBarcodeScannerService) {
+    constructor(
+        public navCtrl: NavController,
+        public navParams: NavParams,
+        private toastController: ToastController,
+        private sqliteProvider: SqliteProvider,
+        private barcodeScanner: BarcodeScanner,
+        private changeDetectorRef: ChangeDetectorRef) {
         this.sqliteProvider.findAll('article').then((value) => {
             this.db_articles = value;
         });
@@ -43,19 +38,18 @@ export class PriseArticlesPage {
         if (typeof (navParams.get('articles')) !== undefined) {
             this.articles = navParams.get('articles');
         }
-    }
-
-    public ionViewDidLoad(): void {
-        this.zebraScannerSubscription = this.zebraBarcodeScannerService.zebraScan$.subscribe((barcode: string) => {
-            this.testIfBarcodeEquals(barcode);
-        });
-    }
-
-    public ionViewDidLeave(): void {
-        if (this.zebraScannerSubscription) {
-            this.zebraScannerSubscription.unsubscribe();
-            this.zebraScannerSubscription = undefined;
-        }
+        let instance = this;
+        (<any>window).plugins.intentShim.registerBroadcastReceiver({
+                filterActions: [
+                    'io.ionic.starter.ACTION'
+                ],
+                filterCategories: [
+                    'android.intent.category.DEFAULT'
+                ]
+            },
+            function (intent) {
+                instance.testIfBarcodeEquals(intent.extras['com.symbol.datawedge.data_string']);
+            });
     }
 
     addArticleManually() {
@@ -78,11 +72,11 @@ export class PriseArticlesPage {
                 date_drop: null,
                 location: null,
                 type: 'prise-depose',
-                is_ref: null,
-                id_article_prepa: article.id,
-                id_prepa: null,
-                id_livraison: null,
-                id_article_livraison: null
+                is_ref : null,
+                id_article_prepa : article.id,
+                id_prepa : null,
+                id_livraison : null,
+                id_article_livraison : null
             };
             if (this.articles.indexOf(article) === this.articles.length - 1) {
                 this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {

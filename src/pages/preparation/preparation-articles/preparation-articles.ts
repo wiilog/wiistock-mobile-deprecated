@@ -11,8 +11,6 @@ import {HttpClient} from "@angular/common/http";
 import {BarcodeScanner} from "@ionic-native/barcode-scanner";
 import {PreparationEmplacementPage} from "../preparation-emplacement/preparation-emplacement";
 import moment from "moment";
-import {Subscription} from "rxjs";
-import {ZebraBarcodeScannerService} from "../../../app/services/zebra-barcode-scanner.service";
 
 /**
  * Generated class for the PreparationArticlesPage page.
@@ -36,15 +34,13 @@ export class PreparationArticlesPage {
     apiStartPrepa = '/api/beginPrepa';
     isValid: boolean = true;
 
-    private zebraScannerSubscription: Subscription;
-
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public toastController: ToastController,
-                       public sqliteProvider: SqliteProvider,
-                       public http: HttpClient,
-                       public barcodeScanner: BarcodeScanner,
-                       private zebraBarcodeScannerService: ZebraBarcodeScannerService) {
+    constructor(
+        public navCtrl: NavController,
+        public navParams: NavParams,
+        public toastController: ToastController,
+        public sqliteProvider: SqliteProvider,
+        public http: HttpClient,
+        public barcodeScanner: BarcodeScanner) {
         if (typeof (navParams.get('preparation')) !== undefined) {
             this.preparation = navParams.get('preparation');
             this.sqliteProvider.findArticlesByPrepa(this.preparation.id).then((articles) => {
@@ -83,21 +79,20 @@ export class PreparationArticlesPage {
                 }
             })
         }
-    }
 
-    public ionViewDidLoad(): void {
-        this.zebraScannerSubscription = this.zebraBarcodeScannerService.zebraScan$.subscribe((barcode: string) => {
-            this.testIfBarcodeEquals(barcode, true);
-        });
+        let instance = this;
+        (<any>window).plugins.intentShim.registerBroadcastReceiver({
+                filterActions: [
+                    'io.ionic.starter.ACTION'
+                ],
+                filterCategories: [
+                    'android.intent.category.DEFAULT'
+                ]
+            },
+            function (intent) {
+                instance.testIfBarcodeEquals(intent.extras['com.symbol.datawedge.data_string'], true);
+            });
     }
-
-    public ionViewDidLeave(): void {
-        if (this.zebraScannerSubscription) {
-            this.zebraScannerSubscription.unsubscribe();
-            this.zebraScannerSubscription = undefined;
-        }
-    }
-
 
     scan() {
         this.barcodeScanner.scan().then(res => {

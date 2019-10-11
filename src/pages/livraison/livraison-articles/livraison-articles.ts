@@ -11,8 +11,6 @@ import {LivraisonEmplacementPage} from "../livraison-emplacement/livraison-empla
 import moment from "moment";
 import {ArticleLivraison} from "../../../app/entities/articleLivraison";
 import {Livraison} from "../../../app/entities/livraison";
-import {ZebraBarcodeScannerService} from "../../../app/services/zebra-barcode-scanner.service";
-import {Subscription} from "rxjs";
 
 /**
  * Generated class for the LivraisonArticlesPage page.
@@ -36,17 +34,13 @@ export class LivraisonArticlesPage {
     apiStartLivraison = '/api/beginLivraison';
     isValid: boolean = true;
 
-    private zebraScannerSubscription: Subscription;
-
-    public constructor(
+    constructor(
         public navCtrl: NavController,
         public navParams: NavParams,
         public toastController: ToastController,
         public sqliteProvider: SqliteProvider,
         public http: HttpClient,
-        public barcodeScanner: BarcodeScanner,
-        private zebraBarcodeScannerService: ZebraBarcodeScannerService) {
-
+        public barcodeScanner: BarcodeScanner) {
         if (typeof (navParams.get('livraison')) !== undefined) {
             this.livraison = navParams.get('livraison');
             this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
@@ -83,19 +77,19 @@ export class LivraisonArticlesPage {
                 }
             })
         }
-    }
 
-    public ionViewDidLoad(): void {
-        this.zebraScannerSubscription = this.zebraBarcodeScannerService.zebraScan$.subscribe((barcode: string) => {
-            this.testIfBarcodeEquals(barcode, true);
-        });
-    }
-
-    public ionViewDidLeave(): void {
-        if (this.zebraScannerSubscription) {
-            this.zebraScannerSubscription.unsubscribe();
-            this.zebraScannerSubscription = undefined;
-        }
+        let instance = this;
+        (<any>window).plugins.intentShim.registerBroadcastReceiver({
+                filterActions: [
+                    'io.ionic.starter.ACTION'
+                ],
+                filterCategories: [
+                    'android.intent.category.DEFAULT'
+                ]
+            },
+            function (intent) {
+                instance.testIfBarcodeEquals(intent.extras['com.symbol.datawedge.data_string'], true);
+            });
     }
 
     scan() {
