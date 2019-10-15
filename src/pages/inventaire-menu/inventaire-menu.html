@@ -43,9 +43,9 @@
     <ion-badge *ngIf="articlesByLocation && articlesByLocation.length !== 0 && location">{{ articlesByLocation.length }}</ion-badge>
     <ion-badge *ngIf="locations && locations.length !== 0 && !location">{{ locations.length }}</ion-badge>
 
-    <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
+    <ion-spinner *ngIf="!isLoaded"></ion-spinner>
 
-    <ion-list *ngIf="hasLoaded">
+    <ion-list *ngIf="isLoaded">
         <div *ngIf="location">
             <ion-grid>
                 <button class="list" ion-item *ngFor="let article of articlesByLocation" id="{{ article.id }}">
@@ -69,7 +69,7 @@
     </ion-list>
 
 </ion-content>
-<ion-footer padding *ngIf="hasLoaded && !location">
+<ion-footer padding *ngIf="isLoaded && !location">
   <div class="d-flex">
     <ion-icon class="big-icon" name="refresh" item-right (click)="synchronize()"></ion-icon>
   </div>

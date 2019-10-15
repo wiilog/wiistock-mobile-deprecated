@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {Content, IonicPage, ModalController, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
 import {SqliteProvider} from "../../providers/sqlite/sqlite";
 import {HttpClient} from "@angular/common/http";
@@ -7,7 +7,9 @@ import {BarcodeScanner} from "@ionic-native/barcode-scanner";
 import {ArticleInventaire} from "../../app/entities/articleInventaire";
 import {ModalQuantityPage} from "../inventaire-menu/modal-quantity";
 import {Article} from "../../app/entities/article";
-import {flatMap} from "rxjs/operators";
+import {Subscription} from "rxjs";
+import {ZebraBarcodeScannerService} from "../../app/services/zebra-barcode-scanner.service";
+import {filter, flatMap} from "rxjs/operators";
 import {of} from "rxjs/observable/of";
 
 
@@ -28,32 +30,51 @@ export class InventaireAnomaliePage {
     location: string;
     dataApi: string = '/api/getAnomalies';
     updateAnomaliesURL : string = '/api/treatAnomalies';
-    hasLoaded: boolean;
+    isLoaded: boolean;
 
-    constructor(
-        public navCtrl: NavController,
-        public navParams: NavParams,
-        public sqlLiteProvider: SqliteProvider,
-        public http: HttpClient,
-        public toastController: ToastController,
-        public barcodeScanner: BarcodeScanner,
-        public modalController: ModalController,
-    ) {}
+    private zebraScannerSubscription: Subscription;
+
+    public constructor(public navCtrl: NavController,
+                       public navParams: NavParams,
+                       public sqlLiteProvider: SqliteProvider,
+                       public http: HttpClient,
+                       public toastController: ToastController,
+                       public barcodeScanner: BarcodeScanner,
+                       private changeDetector: ChangeDetectorRef,
+                       private modalController: ModalController,
+                       private zebraBarcodeScannerService: ZebraBarcodeScannerService) {}
 
     public ionViewDidLoad() {
         console.log('ionViewDidLoad InventaireAnomaliePage');
     }
 
-    public ionViewDidEnter() {
+    public ionViewDidEnter(): void {
         this.synchronize();
+
+        this.zebraScannerSubscription = this.zebraBarcodeScannerService.zebraScan$
+            .pipe(filter(() => this.isLoaded && this.anomalies && this.anomalies.length > 0 ))
+            .subscribe((barcode: string) => {
+                if (this.location) {
+                    this.checkBarcodeIsRef(barcode);
+                }
+                else {
+                    this.checkBarcodeIsLocation(barcode);
+                }
+            });
+    }
+
+    public ionViewDidLeave(): void {
+        if (this.zebraScannerSubscription) {
+            this.zebraScannerSubscription.unsubscribe();
+            this.zebraScannerSubscription = undefined;
+        }
     }
 
     synchronize() {
-        this.hasLoaded = false;
+        this.isLoaded = false;
         this.sqlLiteProvider.getAPI_URL().subscribe(
             (baseUrl) => {
                 if (baseUrl !== null) {
-
                     this.sqlLiteProvider.getApiKey().then((key) => {
                         // envoi des anomalies traitées
                         this.sqlLiteProvider.findByElement(`anomalie_inventaire`, 'treated', '1').subscribe((anomalies) => {
@@ -61,18 +82,18 @@ export class InventaireAnomaliePage {
                                 anomalies: anomalies,
                                 apiKey: key
                             };
+                            let urlAnomalies: string = baseUrl + this.updateAnomaliesURL;
                             this.http.post<any>(urlAnomalies, params).subscribe(resp => {
                                 if (resp.success) {
                                     // supprime les anomalies traitée de la base
                                     this.sqlLiteProvider.deleteAnomalies(anomalies);
                                     this.showToast(resp.data.status);
                                 } else {
-                                    this.hasLoaded = true;
+                                    this.isLoaded = true;
                                     this.showToast('Une erreur est survenue lors de la mise à jour des anomalies.');
                                 }
                             });
                         });
-                        let urlAnomalies: string = baseUrl + this.updateAnomaliesURL;
 
 
                         // mise à jour de la base locale des anomalies d'inventaire
@@ -90,10 +111,7 @@ export class InventaireAnomaliePage {
                                         ))
                                     )
                                     .subscribe(() => {
-                                        console.log('PLOP 1')
                                         this.sqlLiteProvider.findAll('`anomalie_inventaire`').subscribe(anomalies => {
-
-                                            console.log('PLOP 2', anomalies);
                                             this.anomalies = anomalies;
                                             let locations = [];
                                             anomalies.forEach(anomaly => {
@@ -104,17 +122,17 @@ export class InventaireAnomaliePage {
                                             this.locations = locations;
 
                                             setTimeout(() => {
-                                                this.hasLoaded = true;
+                                                this.isLoaded = true;
                                                 this.content.resize();
                                             }, 1000);
                                         });
                                     });
                             } else {
-                                this.hasLoaded = true;
+                                this.isLoaded = true;
                                 this.showToast('Une erreur est survenue lors de la mise à jour des anomalies d\'inventaire.');
                             }
                         }, error => {
-                            this.hasLoaded = true;
+                            this.isLoaded = true;
                             this.showToast('Une erreur réseau est survenue.');
                         });
                     });
@@ -147,20 +165,22 @@ export class InventaireAnomaliePage {
         });
     }
 
-    checkBarcodeIsLocation(text) {
-        if (this.anomalies.some(anomaly => anomaly.location === text)) {
-            this.location = text;
-            this.anomaliesByLocation = this.anomalies.filter(anomaly => anomaly.location == this.location);
+    public checkBarcodeIsLocation(barcode: string): void {
+        if (this.anomalies.some(anomaly => (anomaly.location === barcode))) {
+            this.location = barcode;
+            this.anomaliesByLocation = this.anomalies.filter(anomaly => (anomaly.location === this.location));
+            this.changeDetector.detectChanges();
         } else {
             this.showToast('Ce code-barre ne correspond à aucun emplacement.');
         }
     }
     //TODO CG plutôt sur anomaliesByLocation ??
-    checkBarcodeIsRef(text) {
-        if (this.anomalies.some(anomaly => anomaly.reference === text)) {
+    public checkBarcodeIsRef(barcode: string): void {
+        if (this.anomalies.some(anomaly => (anomaly.reference === barcode))) {
             this.article = new Article();
-            this.article.reference = text;
-            this.anomaly = this.anomaliesByLocation.find(anomaly => anomaly.reference == text);
+            this.article.reference = barcode;
+            this.anomaly = this.anomaliesByLocation.find(anomaly => (anomaly.reference === barcode));
+            this.changeDetector.detectChanges();
             this.openModalQuantity(this.article);
         } else {
             this.showToast('Ce code-barre ne correspond à aucune référence ou article.');

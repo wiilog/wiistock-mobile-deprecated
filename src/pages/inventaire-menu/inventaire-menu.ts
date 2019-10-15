@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {Content, IonicPage, Navbar, NavController, NavParams, ToastController, ModalController} from 'ionic-angular';
 import {ModalQuantityPage} from "./modal-quantity";
 import {MenuPage} from "../menu/menu";
@@ -9,8 +9,10 @@ import {SaisieInventaire} from "../../app/entities/saisieInventaire";
 import {InventaireAnomaliePage} from "../inventaire-anomalie/inventaire-anomalie";
 import moment from "moment";
 import {BarcodeScanner} from "@ionic-native/barcode-scanner";
-import {flatMap} from "rxjs/operators";
+import {flatMap, filter} from "rxjs/operators";
 import {of} from "rxjs/observable/of";
+import {Subscription} from "rxjs";
+import {ZebraBarcodeScannerService} from "../../app/services/zebra-barcode-scanner.service";
 
 
 @IonicPage()
@@ -29,17 +31,19 @@ export class InventaireMenuPage {
     dataApi: string = '/api/getData';
     addEntryURL : string = '/api/addInventoryEntries';
     isInventoryManager: boolean;
-    hasLoaded: boolean;
+    isLoaded: boolean;
 
-    constructor(
-        public navCtrl: NavController,
-        public navParams: NavParams,
-        public sqlLiteProvider: SqliteProvider,
-        public http: HttpClient,
-        public toastController: ToastController,
-        private barcodeScanner: BarcodeScanner,
-        private modalController: ModalController,
-    ) {
+    private zebraScannerSubscription: Subscription;
+
+    public constructor(public navCtrl: NavController,
+                       public navParams: NavParams,
+                       public sqlLiteProvider: SqliteProvider,
+                       public http: HttpClient,
+                       public toastController: ToastController,
+                       private barcodeScanner: BarcodeScanner,
+                       private modalController: ModalController,
+                       private changeDetector: ChangeDetectorRef,
+                       private zebraBarcodeScannerService: ZebraBarcodeScannerService) {
         this.sqlLiteProvider.getInventoryManagerRight().then(isInventoryManager => {
             this.isInventoryManager = isInventoryManager;
         });
@@ -49,9 +53,27 @@ export class InventaireMenuPage {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    ionViewDidEnter() {
+    public ionViewDidEnter(): void {
         this.synchronize();
         this.setBackButtonAction();
+
+        this.zebraScannerSubscription = this.zebraBarcodeScannerService.zebraScan$
+            .pipe(filter(() => (this.isLoaded && this.articles && this.articles.length > 0)))
+            .subscribe((barcode: string) => {
+                if (!this.location) {
+                    this.checkBarcodeIsLocation(barcode);
+                }
+                else {
+                    this.checkBarcodeIsRef(barcode);
+                }
+            });
+    }
+
+    public ionViewDidLeave(): void {
+        if (this.zebraScannerSubscription) {
+            this.zebraScannerSubscription.unsubscribe();
+            this.zebraScannerSubscription = undefined;
+        }
     }
 
     setBackButtonAction() {
@@ -65,7 +87,6 @@ export class InventaireMenuPage {
            if (baseUrl !== null) {
                let url: string = baseUrl + this.addEntryURL;
                this.sqlLiteProvider.findAll('`saisie_inventaire`').subscribe(data => {
-                   console.log('PPLOP', data)
                    if (data.length > 0) {
                        this.sqlLiteProvider.getApiKey().then(apiKey => {
                            let params = {
@@ -100,16 +121,13 @@ export class InventaireMenuPage {
                                     .pipe(
                                         flatMap(() => this.sqlLiteProvider.importArticlesInventaire(resp.data)),
                                         flatMap((sqlArticlesInventaire) => {
-                                            console.log('SQLARTICLEINVETAIRE ========', sqlArticlesInventaire)
                                             return (sqlArticlesInventaire !== false)
                                                 ? this.sqlLiteProvider.executeQuery(sqlArticlesInventaire)
                                                 : of(undefined)
                                         })
                                     )
                                     .subscribe((plop) => {
-                                        console.log('ON PASSE ICI', plop)
                                         this.sqlLiteProvider.findAll('`article_inventaire`').subscribe(articles => {
-                                            console.log('article ===> ', articles)
                                             this.articles = articles;
                                             let locations = [];
                                             articles.forEach(article => {
@@ -120,7 +138,7 @@ export class InventaireMenuPage {
                                             this.locations = locations;
 
                                             setTimeout(() => {
-                                                this.hasLoaded = true;
+                                                this.isLoaded = true;
                                                 this.content.resize();
                                             }, 1000);
                                         });
@@ -131,11 +149,11 @@ export class InventaireMenuPage {
                                         console.log('ERRR PLOP => ', err)
                                         });
                             } else {
-                                this.hasLoaded = true;
+                                this.isLoaded = true;
                                 this.showToast('Une erreur est survenue.');
                             }
                         }, error => {
-                            this.hasLoaded = true;
+                            this.isLoaded = true;
                             this.showToast('Une erreur réseau est survenue.');
                         });
                     });
@@ -198,10 +216,11 @@ export class InventaireMenuPage {
         });
     }
 
-    checkBarcodeIsLocation(text) {
-        if (this.articles.some(article => article.location === text)) {
-            this.location = text;
-            this.articlesByLocation = this.articles.filter(article => article.location == this.location);
+    public checkBarcodeIsLocation(barcode: string): void {
+        if (this.articles.some(article => (article.location === barcode))) {
+            this.location = barcode;
+            this.articlesByLocation = this.articles.filter(article => (article.location === this.location));
+            this.changeDetector.detectChanges();
         } else {
             this.showToast('Ce code-barre ne correspond à aucun emplacement.');
         }
@@ -213,9 +232,10 @@ export class InventaireMenuPage {
         });
     }
 
-    checkBarcodeIsRef(text) {
-        if (this.articlesByLocation.some(article => article.reference === text)) {
-            this.article = this.articlesByLocation.find(article => article.reference == text);
+    checkBarcodeIsRef(barcode: string) {
+        if (this.articlesByLocation.some(article => (article.reference === barcode))) {
+            this.article = this.articlesByLocation.find(article => (article.reference === barcode));
+            this.changeDetector.detectChanges();
             this.openModalQuantity(this.article);
         } else {
             this.showToast('Ce code-barre ne correspond à aucune référence ou article sur cet emplacement.');
