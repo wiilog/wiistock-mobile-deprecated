@@ -104,7 +104,7 @@ export class PreparationEmplacementPage {
                 }
             });
             if (!found) {
-                this.showToast('Veuillez flasher ou séléctionner un emplacement connu.');
+                this.showToast('Veuillez flasher ou sélectionner un emplacement connu.');
             }
         });
     }
