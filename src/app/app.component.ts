@@ -13,7 +13,7 @@ import {HttpClient} from "@angular/common/http";
 import {StockageMenuPageTraca} from "../pages/traca/stockage-menu/stockage-menu-traca";
 import {PreparationMenuPage} from "../pages/preparation/preparation-menu/preparation-menu";
 import {LivraisonMenuPage} from "../pages/livraison/livraison-menu/livraison-menu";
-import {InventaireMenuPage} from "../pages/inventaire/inventaire-menu/inventaire-menu";
+import {InventaireMenuPage} from "../pages/inventaire-menu/inventaire-menu";
 
 @Injectable()
 @Component({

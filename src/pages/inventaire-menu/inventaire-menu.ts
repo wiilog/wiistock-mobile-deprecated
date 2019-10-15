@@ -1,12 +1,12 @@
 import {Component, ViewChild} from '@angular/core';
 import {Content, IonicPage, Navbar, NavController, NavParams, ToastController, ModalController} from 'ionic-angular';
 import {ModalQuantityPage} from "./modal-quantity";
-import {MenuPage} from "../../menu/menu";
-import {SqliteProvider} from "../../../providers/sqlite/sqlite";
+import {MenuPage} from "../menu/menu";
+import {SqliteProvider} from "../../providers/sqlite/sqlite";
 import {HttpClient} from "@angular/common/http";
-import {ArticleInventaire} from "../../../app/entities/articleInventaire";
-import {SaisieInventaire} from "../../../app/entities/saisieInventaire";
-import {InventaireAnomaliePage} from "../../inventaire-anomalie/inventaire-anomalie";
+import {ArticleInventaire} from "../../app/entities/articleInventaire";
+import {SaisieInventaire} from "../../app/entities/saisieInventaire";
+import {InventaireAnomaliePage} from "../inventaire-anomalie/inventaire-anomalie";
 import moment from "moment";
 import {BarcodeScanner} from "@ionic-native/barcode-scanner";
 import {flatMap} from "rxjs/operators";

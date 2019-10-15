@@ -5,7 +5,7 @@ import {HttpClient} from "@angular/common/http";
 import {Anomalie} from "../../app/entities/anomalie";
 import {BarcodeScanner} from "@ionic-native/barcode-scanner";
 import {ArticleInventaire} from "../../app/entities/articleInventaire";
-import {ModalQuantityPage} from "../inventaire/inventaire-menu/modal-quantity";
+import {ModalQuantityPage} from "../inventaire-menu/modal-quantity";
 import {Article} from "../../app/entities/article";
 import {flatMap} from "rxjs/operators";
 import {of} from "rxjs/observable/of";

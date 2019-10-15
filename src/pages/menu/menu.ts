@@ -8,7 +8,7 @@ import {Preparation} from "../../app/entities/preparation";
 import {LivraisonMenuPage} from "../livraison/livraison-menu/livraison-menu";
 import {ParamsPage} from "../params/params";
 import {ConnectPage} from "../connect/connect";
-import {InventaireMenuPage} from "../inventaire/inventaire-menu/inventaire-menu";
+import {InventaireMenuPage} from "../inventaire-menu/inventaire-menu";
 
 @Component({
     selector: 'page-menu',
