@@ -1,16 +1,16 @@
-import {SQLite, SQLiteObject} from "@ionic-native/sqlite";
+import {SQLite, SQLiteObject} from '@ionic-native/sqlite';
 import {Injectable} from '@angular/core';
-import {StorageService} from "../../app/services/storage.service";
-import moment from "moment";
-import {Preparation} from "../../app/entities/preparation";
-import {Mouvement} from "../../app/entities/mouvement";
-import {Livraison} from "../../app/entities/livraison";
-import {Anomalie} from "../../app/entities/anomalie";
-import {Observable, ReplaySubject, Subject} from "rxjs";
-import {flatMap, map, take} from "rxjs/operators";
-import {from} from "rxjs/observable/from";
-import {of} from "rxjs/observable/of";
-import {Platform} from "ionic-angular";
+import {StorageService} from '@app/services/storage.service';
+import moment from 'moment';
+import {Preparation} from '@app/entities/preparation';
+import {Mouvement} from '@app/entities/mouvement';
+import {Livraison} from '@app/entities/livraison';
+import {Anomalie} from '@app/entities/anomalie';
+import {Observable, ReplaySubject, Subject} from 'rxjs';
+import {flatMap, map, take} from 'rxjs/operators';
+import {from} from 'rxjs/observable/from';
+import {of} from 'rxjs/observable/of';
+import {Platform} from 'ionic-angular';
 
 
 @Injectable()
@@ -19,13 +19,13 @@ export class SqliteProvider {
     private static readonly DB_NAME: string = 'follow_gt';
 
     private sqliteObject$: Subject<SQLiteObject>;
-    private dbcreated$: Subject<boolean>;
+    private dbCreated$: Subject<boolean>;
 
     public constructor(private sqlite: SQLite,
                        private storageService: StorageService,
                        private platform: Platform) {
         this.sqliteObject$ = new ReplaySubject<SQLiteObject>(1);
-        this.dbcreated$ = new ReplaySubject<boolean>(1);
+        this.dbCreated$ = new ReplaySubject<boolean>(1);
 
         this.createDB();
         this.createTables();
@@ -36,7 +36,7 @@ export class SqliteProvider {
     }
 
     private get isDBCreated$(): Observable<boolean> {
-        return this.dbcreated$.pipe(take(1));
+        return this.dbCreated$.pipe(take(1));
     }
 
     private createDB(): void {
@@ -76,7 +76,7 @@ export class SqliteProvider {
         )
         .subscribe(() => {
             console.log('All tables created');
-            this.dbcreated$.next(true);
+            this.dbCreated$.next(true);
         });
     }
 

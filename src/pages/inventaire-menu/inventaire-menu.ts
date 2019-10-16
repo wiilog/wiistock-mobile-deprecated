@@ -1,18 +1,18 @@
 import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {Content, IonicPage, Navbar, NavController, NavParams, ToastController, ModalController} from 'ionic-angular';
-import {ModalQuantityPage} from "./modal-quantity";
-import {MenuPage} from "../menu/menu";
-import {SqliteProvider} from "../../providers/sqlite/sqlite";
-import {HttpClient} from "@angular/common/http";
-import {ArticleInventaire} from "../../app/entities/articleInventaire";
-import {SaisieInventaire} from "../../app/entities/saisieInventaire";
-import {InventaireAnomaliePage} from "../inventaire-anomalie/inventaire-anomalie";
-import moment from "moment";
-import {BarcodeScanner} from "@ionic-native/barcode-scanner";
-import {flatMap, filter} from "rxjs/operators";
-import {of} from "rxjs/observable/of";
-import {Subscription} from "rxjs";
-import {ZebraBarcodeScannerService} from "../../app/services/zebra-barcode-scanner.service";
+import {ModalQuantityPage} from '@pages/inventaire-menu/modal-quantity';
+import {MenuPage} from '@pages/menu/menu';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {HttpClient} from '@angular/common/http';
+import {ArticleInventaire} from '@app/entities/article-inventaire';
+import {SaisieInventaire} from '@app/entities/saisie-inventaire';
+import {InventaireAnomaliePage} from '@pages/inventaire-anomalie/inventaire-anomalie';
+import moment from 'moment';
+import {BarcodeScanner} from '@ionic-native/barcode-scanner';
+import {flatMap, filter} from 'rxjs/operators';
+import {of} from 'rxjs/observable/of';
+import {Subscription} from 'rxjs';
+import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.service';
 
 
 @IonicPage()
@@ -109,7 +109,7 @@ export class InventaireMenuPage {
     }
 
     synchronize() {
-        this.hasLoaded = false;
+        this.isLoaded = false;
         this.sqlLiteProvider.getAPI_URL().subscribe(
             (result) => {
                 if (result !== null) {
@@ -256,6 +256,4 @@ export class InventaireMenuPage {
     ionViewDidLoad() {
         console.log('ionViewDidLoad InventaireMenuPage');
     }
-
 }
-

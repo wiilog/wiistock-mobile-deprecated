@@ -1,15 +1,15 @@
 import {Component} from '@angular/core';
 import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
-import {PriseConfirmPageTraca} from "../prise-confirm/prise-confirm-traca";
-import {MenuPage} from "../../menu/menu";
-import {Article} from "../../../app/entities/article";
-import {Emplacement} from "../../../app/entities/emplacement";
-import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import {StockageMenuPageTraca} from "../stockage-menu/stockage-menu-traca";
+import {PriseConfirmPageTraca} from '@pages/traca/prise-confirm/prise-confirm-traca';
+import {MenuPage} from '@pages/menu/menu';
+import {Article} from '@app/entities/article';
+import {Emplacement} from '@app/entities/emplacement';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {StockageMenuPageTraca} from '@pages/traca/stockage-menu/stockage-menu-traca';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {ChangeDetectorRef} from '@angular/core';
-import {MouvementTraca} from "../../../app/entities/mouvementTraca";
-import moment from "moment";
+import {MouvementTraca} from '@app/entities/mouvement-traca';
+import moment from 'moment';
 
 
 @IonicPage()
@@ -68,10 +68,9 @@ export class PriseArticlesPageTraca {
                     numberOfArticles++;
                 }
             });
-            let mouvement = new MouvementTraca();
-            let date = moment().format();
+            const date = moment().format();
             this.sqliteProvider.getOperateur().then((value) => {
-                mouvement = {
+                const mouvement: MouvementTraca = {
                     id: null,
                     ref_article: article.reference,
                     date: date + '_' + Math.random().toString(36).substr(2, 9),

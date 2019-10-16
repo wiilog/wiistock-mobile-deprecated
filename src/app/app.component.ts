@@ -1,19 +1,18 @@
 import {Component, ViewChild, Injectable} from '@angular/core';
 import {Platform, MenuController, Nav, Events, ToastController} from 'ionic-angular';
-
 import {MenuPage} from '@pages/menu/menu';
 import {ConnectPage} from '@pages/connect/connect';
-
 import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
-import {NetworkProvider} from '../providers/network/network';
+import {NetworkProvider} from '@providers/network/network';
 import {Network} from '@ionic-native/network';
-import {SqliteProvider} from '../providers/sqlite/sqlite';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
 import {StockageMenuPageTraca} from '@pages/traca/stockage-menu/stockage-menu-traca';
 import {PreparationMenuPage} from '@pages/preparation/preparation-menu/preparation-menu';
 import {LivraisonMenuPage} from '@pages/livraison/livraison-menu/livraison-menu';
 import {InventaireMenuPage} from '@pages/inventaire-menu/inventaire-menu';
+
 
 @Injectable()
 @Component({
@@ -29,18 +28,16 @@ export class AppComponent {
     public homePage = MenuPage;
     public addMvtURL: string = '/api/addMouvementTraca';
 
-    constructor(
-        public platform: Platform,
-        public menu: MenuController,
-        public statusBar: StatusBar,
-        public splashScreen: SplashScreen,
-        public networkProvider: NetworkProvider,
-        public events: Events,
-        public http: HttpClient,
-        public network: Network,
-        public sqlProvider: SqliteProvider,
-        public toastController: ToastController,
-    ) {
+    public constructor(public platform: Platform,
+                       public menu: MenuController,
+                       public statusBar: StatusBar,
+                       public splashScreen: SplashScreen,
+                       public networkProvider: NetworkProvider,
+                       public events: Events,
+                       public http: HttpClient,
+                       public network: Network,
+                       public sqlProvider: SqliteProvider,
+                       public toastController: ToastController) {
         this.initializeApp();
 
         // set our app's pages

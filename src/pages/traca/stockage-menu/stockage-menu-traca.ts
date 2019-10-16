@@ -1,13 +1,13 @@
 import {Component} from '@angular/core';
 import {Events, NavController, NavParams, ToastController} from 'ionic-angular';
-import {MenuPage} from "../../menu/menu";
-import {PriseEmplacementPageTraca} from "../prise-emplacement/prise-emplacement-traca";
-import {DeposeEmplacementPageTraca} from "../depose-emplacement/depose-emplacement-traca";
-import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import {MouvementTraca} from "../../../app/entities/mouvementTraca";
-import {HttpClient} from "@angular/common/http";
-import {NetworkProvider} from "../../../providers/network/network";
-import {Network} from "@ionic-native/network";
+import {MenuPage} from '@pages/menu/menu';
+import {PriseEmplacementPageTraca} from '@pages/traca/prise-emplacement/prise-emplacement-traca';
+import {DeposeEmplacementPageTraca} from '@pages/traca/depose-emplacement/depose-emplacement-traca';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {MouvementTraca} from '@app/entities/mouvement-traca';
+import {HttpClient} from '@angular/common/http';
+import {NetworkProvider} from '@providers/network/network';
+import {Network} from '@ionic-native/network';
 
 
 @Component({

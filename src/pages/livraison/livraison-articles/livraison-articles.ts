@@ -1,17 +1,17 @@
 import {Component, ViewChild} from '@angular/core';
 import {IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
-import {MenuPage} from "../../menu/menu";
-import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import {LivraisonMenuPage} from "../livraison-menu/livraison-menu";
-import {Mouvement} from "../../../app/entities/mouvement";
-import {LivraisonArticleTakePage} from "../livraison-article-take/livraison-article-take";
-import {HttpClient} from "@angular/common/http";
-import {BarcodeScanner} from "@ionic-native/barcode-scanner";
-import {LivraisonEmplacementPage} from "../livraison-emplacement/livraison-emplacement";
-import moment from "moment";
-import {ArticleLivraison} from "../../../app/entities/articleLivraison";
-import {Livraison} from "../../../app/entities/livraison";
-import {flatMap} from "rxjs/operators";
+import {MenuPage} from '@pages/menu/menu';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {LivraisonMenuPage} from '@pages/livraison/livraison-menu/livraison-menu';
+import {Mouvement} from '@app/entities/mouvement';
+import {LivraisonArticleTakePage} from '@pages/livraison/livraison-article-take/livraison-article-take';
+import {HttpClient} from '@angular/common/http';
+import {BarcodeScanner} from '@ionic-native/barcode-scanner';
+import {LivraisonEmplacementPage} from '@pages/livraison/livraison-emplacement/livraison-emplacement';
+import moment from 'moment';
+import {ArticleLivraison} from '@app/entities/article-livraison';
+import {Livraison} from '@app/entities/livraison';
+import {flatMap} from 'rxjs/operators';
 
 /**
  * Generated class for the LivraisonArticlesPage page.

@@ -1,8 +1,8 @@
 import {Component} from '@angular/core';
 import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
-import {ArticlePrepa} from "../../../app/entities/articlePrepa";
-import {PreparationArticlesPage} from "../preparation-articles/preparation-articles";
-import {Preparation} from "../../../app/entities/preparation";
+import {ArticlePrepa} from '@app/entities/article-prepa';
+import {PreparationArticlesPage} from '@pages/preparation/preparation-articles/preparation-articles';
+import {Preparation} from '@app/entities/preparation';
 
 /**
  * Generated class for the PreparationArticleTakePage page.

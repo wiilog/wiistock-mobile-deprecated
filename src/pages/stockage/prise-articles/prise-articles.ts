@@ -62,9 +62,8 @@ export class PriseArticlesPage {
     finishTaking() {
 
         for (let article of this.articles) {
-            let mouvement = new Mouvement();
-            let date = new Date().toISOString();
-            mouvement = {
+            const date = new Date().toISOString();
+            const mouvement: Mouvement = {
                 id: null,
                 reference: article.reference,
                 quantity: article.quantite,
