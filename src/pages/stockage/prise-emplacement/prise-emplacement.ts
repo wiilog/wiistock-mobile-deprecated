@@ -28,8 +28,6 @@ export class PriseEmplacementPage {
                 private barcodeScanner: BarcodeScanner,
                 private toast: ToastController,
                 private changeDetectorRef: ChangeDetectorRef) {
-        // constructor(public navCtrl: NavController, public navParams: NavParams, private barcodeScanner: BarcodeScanner) {
-        //   this.scan();
         if (navParams.get('selectedEmplacement') !== undefined) {
             this.emplacement = navParams.get('selectedEmplacement');
         }

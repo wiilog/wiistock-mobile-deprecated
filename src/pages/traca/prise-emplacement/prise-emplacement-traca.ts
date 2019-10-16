@@ -27,8 +27,6 @@ export class PriseEmplacementPageTraca {
                 public sqliteProvider: SqliteProvider,
                 private barcodeScanner: BarcodeScanner,
                 private changeDetectorRef: ChangeDetectorRef) {
-        // constructor(public navCtrl: NavController, public navParams: NavParams, private barcodeScanner: BarcodeScanner) {
-        //   this.scan();
         if (navParams.get('selectedEmplacement') !== undefined) {
             this.emplacement = navParams.get('selectedEmplacement');
         }
@@ -57,13 +55,11 @@ export class PriseEmplacementPageTraca {
     // }
 
     goToArticles() {
-        console.log(this.emplacement);
         this.navCtrl.push(PriseArticlesPageTraca, {emplacement: this.emplacement});
     }
 
     emplacementChange(event: { component: IonicSelectableComponent, value: any }) {
         this.emplacement = event.value;
-        console.log(this.emplacement);
     }
 
     searchEmplacement(event: { component: IonicSelectableComponent, text: string }) {
@@ -80,7 +76,7 @@ export class PriseEmplacementPageTraca {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    scan() {
+    scanLocation() {
         this.barcodeScanner.scan().then(res => {
             this.testIfBarcodeEquals(res.text);
         });

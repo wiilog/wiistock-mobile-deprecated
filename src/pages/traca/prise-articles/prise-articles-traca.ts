@@ -125,17 +125,21 @@ export class PriseArticlesPageTraca {
     }
 
     testIfBarcodeEquals(text) {
-        let a: Article;
-        a = {
-            id: new Date().getUTCMilliseconds(),
-            label: null,
-            reference: text,
-            quantite: null
-        };
-        this.navCtrl.push(PriseConfirmPageTraca, {
-            articles: this.articles, emplacement: this.emplacement, selectedArticle: a
-        });
-        this.changeDetectorRef.detectChanges();
+        if (this.articles && this.articles.some(article => (article.reference === text))) {
+            this.showToast('Cet article a déjà été ajouté à la prise.');
+        } else {
+            let a: Article;
+            a = {
+                id: new Date().getUTCMilliseconds(),
+                label: null,
+                reference: text,
+                quantite: null
+            };
+            this.navCtrl.push(PriseConfirmPageTraca, {
+                articles: this.articles, emplacement: this.emplacement, selectedArticle: a
+            });
+            this.changeDetectorRef.detectChanges();
+        }
     }
 
 }

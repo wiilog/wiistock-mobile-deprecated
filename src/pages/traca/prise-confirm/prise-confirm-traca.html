@@ -20,15 +20,16 @@
                     (onSearch)="searchArticle($event)"
                     (onChange)="articleChange($event)">
                 <ng-template ionicSelectableSearchFailTemplate>
-                    <div padding>
-                        Tapez votre recherche...
-                    </div>
                 </ng-template>
             </ionic-selectable>
         </ion-item>
 
     </ion-list>
-
-    <ion-icon class="big-icon" name="checkmark-circle" (click)="addArticle()"></ion-icon>
-
 </ion-content>
+
+<ion-footer padding>
+    <div class="d-flex">
+        <ion-icon class="big-icon" name="arrow-dropleft-circle" navPop></ion-icon>
+        <ion-icon class="big-icon" name="checkmark-circle" (click)="addArticle()"></ion-icon>
+    </div>
+</ion-footer>

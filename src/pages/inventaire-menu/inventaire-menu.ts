@@ -109,7 +109,7 @@ export class InventaireMenuPage {
     }
 
     synchronize() {
-        this.hasLoaded = false;
+        this.isLoaded = false;
         this.sqlLiteProvider.getAPI_URL().subscribe(
             (result) => {
                 if (result !== null) {

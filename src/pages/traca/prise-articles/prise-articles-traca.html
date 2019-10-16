@@ -1,21 +1,22 @@
 <ion-header>
-  <ion-navbar>
-    <ion-buttons start>
-      <button ion-button icon-only (click)="goHome()">
-        <ion-icon name="home"></ion-icon>
-      </button>
-    </ion-buttons>
-    <ion-title>Prise</ion-title>
-  </ion-navbar>
+    <ion-navbar>
+        <ion-buttons start>
+            <button ion-button icon-only (click)="goHome()">
+                <ion-icon name="home"></ion-icon>
+            </button>
+        </ion-buttons>
+        <ion-title>Prise</ion-title>
+    </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-  <div class="d-flex">
-    <p>Emplacement {{ emplacement.label }}</p>
-    <ion-icon class="big-icon" name="checkmark-circle" (click)="finishTaking()"></ion-icon>
-  </div>
+    <ion-title><ion-icon class="small-icon" name="pin"></ion-icon>   {{ emplacement.label }}</ion-title>
+    <ion-title>
+        <ion-icon class="big-icon" name="barcode" (click)="scan()"></ion-icon>
+        <br>
+        Flashez un article
+    </ion-title>
 
-  <p>Veuillez flasher ou saisir manuellement des colis.</p>
   <ion-list>
     <ion-grid>
       <button class="list" ion-item *ngFor="let article of articles">
@@ -25,11 +26,11 @@
       </button>
     </ion-grid>
   </ion-list>
-  <ion-icon class="big-icon" name="hand" (click)="addArticleManually()"></ion-icon>
-
 </ion-content>
+
 <ion-footer padding>
   <div class="d-flex">
-    <ion-icon class="big-icon" name="qr-scanner" (click)="scan()"></ion-icon>
+      <ion-icon class="big-icon" (click)="addArticleManually()" name="search"></ion-icon>
+      <ion-icon class="big-icon" name="checkmark-circle" (click)="finishTaking()"></ion-icon>
   </div>
 </ion-footer>

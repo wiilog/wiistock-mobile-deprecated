@@ -28,8 +28,6 @@ export class DeposeEmplacementPageTraca {
                 private barcodeScanner: BarcodeScanner,
                 private changeDetectorRef: ChangeDetectorRef,
                 public toastController: ToastController) {
-        // constructor(public navCtrl: NavController, public navParams: NavParams, private barcodeScanner: BarcodeScanner) {
-        //   this.scan();
         if (navParams.get('selectedEmplacement') !== undefined) {
             this.emplacement = navParams.get('selectedEmplacement');
         }
@@ -58,7 +56,6 @@ export class DeposeEmplacementPageTraca {
     // }
 
     goToArticles() {
-        console.log(this.emplacement);
         this.navCtrl.push(DeposeArticlesPageTraca, {emplacement: this.emplacement});
     }
 
@@ -80,7 +77,7 @@ export class DeposeEmplacementPageTraca {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    scan() {
+    scanLocation() {
         this.barcodeScanner.scan().then(res => {
             this.testIfBarcodeEquals(res.text);
         });

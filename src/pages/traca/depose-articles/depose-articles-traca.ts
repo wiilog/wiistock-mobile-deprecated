@@ -124,13 +124,10 @@ export class DeposeArticlesPageTraca {
 
     testIfBarcodeEquals(text) {
         let numberOfArticles = 0;
-        if (this.articles) {
-            this.articles.forEach((article) => {
-                if (article.reference === text) {
-                    numberOfArticles++;
-                }
-            });
+        if (this.articles && this.articles.some(article => (article.reference === text))) {
+            numberOfArticles++;
         }
+
         let a: Article;
         a = {
             id: new Date().getUTCMilliseconds(),
@@ -145,7 +142,7 @@ export class DeposeArticlesPageTraca {
                         articles: this.articles, emplacement: this.emplacement, selectedArticle: a
                     });
                 } else {
-                    this.showToast('Ce colis est déjà enregistré assez de fois dans le panier.');
+                    this.showToast('Cet article est déjà enregistré assez de fois dans le panier.');
                 }
             } else {
                 this.showToast('Ce colis ne correspond à aucune prise.');
