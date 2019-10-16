@@ -1,4 +1,4 @@
-export class Livraison {
+export interface Livraison {
     id: number;
     numero : string;
     emplacement: string;

@@ -1,4 +1,4 @@
-export class Article {
+export interface Article {
     id: number;
     label: string;
     reference: string;

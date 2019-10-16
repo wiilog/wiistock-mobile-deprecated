@@ -1,4 +1,4 @@
-export class Emplacement {
+export interface Emplacement {
     id: number;
     label: string;
 }

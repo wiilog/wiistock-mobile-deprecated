@@ -1,4 +1,4 @@
-export class Mouvement {
+export interface Mouvement {
     id: number;
     reference: string;
     quantity: number;

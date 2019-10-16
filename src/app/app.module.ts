@@ -1,7 +1,7 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule, ErrorHandler} from '@angular/core';
 import {IonicApp, IonicModule, IonicErrorHandler} from 'ionic-angular';
-import {MyApp} from './app.component';
+import {AppComponent} from './app.component';
 import {SQLite} from "@ionic-native/sqlite";
 
 import {ConnectPage} from '../pages/connect/connect';
@@ -51,7 +51,7 @@ import {ZebraBarcodeScannerService} from "./services/zebra-barcode-scanner.servi
 
 @NgModule({
     declarations: [
-        MyApp,
+        AppComponent,
         ConnectPage,
         MenuPage,
         ParamsPage,
@@ -83,7 +83,7 @@ import {ZebraBarcodeScannerService} from "./services/zebra-barcode-scanner.servi
     imports: [
         IonicSelectableModule,
         BrowserModule,
-        IonicModule.forRoot(MyApp, {
+        IonicModule.forRoot(AppComponent, {
             backButtonText: '',
             backButtonIcon: 'ios-arrow-dropleft'
         }),
@@ -95,7 +95,7 @@ import {ZebraBarcodeScannerService} from "./services/zebra-barcode-scanner.servi
     ],
     bootstrap: [IonicApp],
     entryComponents: [
-        MyApp,
+        AppComponent,
         ConnectPage,
         MenuPage,
         ParamsPage,
@@ -129,7 +129,7 @@ import {ZebraBarcodeScannerService} from "./services/zebra-barcode-scanner.servi
         SplashScreen,
         {provide: ErrorHandler, useClass: IonicErrorHandler},
         UsersApiProvider,
-        MyApp,
+        AppComponent,
         SQLite,
         SqliteProvider,
         StorageService,

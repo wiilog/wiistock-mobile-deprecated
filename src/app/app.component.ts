@@ -1,32 +1,33 @@
 import {Component, ViewChild, Injectable} from '@angular/core';
 import {Platform, MenuController, Nav, Events, ToastController} from 'ionic-angular';
 
-import {MenuPage} from '../pages/menu/menu';
-import {ConnectPage} from "../pages/connect/connect";
+import {MenuPage} from '@pages/menu/menu';
+import {ConnectPage} from '@pages/connect/connect';
 
 import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
 import {NetworkProvider} from '../providers/network/network';
-import {Network} from "@ionic-native/network";
-import {SqliteProvider} from "../providers/sqlite/sqlite";
-import {HttpClient} from "@angular/common/http";
-import {StockageMenuPageTraca} from "../pages/traca/stockage-menu/stockage-menu-traca";
-import {PreparationMenuPage} from "../pages/preparation/preparation-menu/preparation-menu";
-import {LivraisonMenuPage} from "../pages/livraison/livraison-menu/livraison-menu";
-import {InventaireMenuPage} from "../pages/inventaire-menu/inventaire-menu";
+import {Network} from '@ionic-native/network';
+import {SqliteProvider} from '../providers/sqlite/sqlite';
+import {HttpClient} from '@angular/common/http';
+import {StockageMenuPageTraca} from '@pages/traca/stockage-menu/stockage-menu-traca';
+import {PreparationMenuPage} from '@pages/preparation/preparation-menu/preparation-menu';
+import {LivraisonMenuPage} from '@pages/livraison/livraison-menu/livraison-menu';
+import {InventaireMenuPage} from '@pages/inventaire-menu/inventaire-menu';
 
 @Injectable()
 @Component({
-    templateUrl: 'app.html'
+    templateUrl: 'app.component.html'
 })
-export class MyApp {
-    @ViewChild(Nav) nav: Nav;
+export class AppComponent {
+    @ViewChild(Nav)
+    public nav: Nav;
 
     // make ConnectPage the root (or first) page
-    rootPage = ConnectPage;
-    pages: Array<{ title: string, component: any }>;
-    homePage = MenuPage;
-    addMvtURL: string = '/api/addMouvementTraca';
+    public rootPage = ConnectPage;
+    public pages: Array<{ title: string, component: any }>;
+    public homePage = MenuPage;
+    public addMvtURL: string = '/api/addMouvementTraca';
 
     constructor(
         public platform: Platform,
@@ -53,7 +54,7 @@ export class MyApp {
 
     }
 
-    initializeApp() {
+    public initializeApp() {
         this.platform.ready().then(() => {
             // Okay, so the platform is ready and our plugins are available.
             // Here you can do any higher level native things you might need.
@@ -70,10 +71,10 @@ export class MyApp {
             this.events.subscribe('network:online', () => {
                 this.sqlProvider.getAPI_URL().subscribe((resultUrl) => {
                     if (resultUrl !== null) {
-                        let url: string = resultUrl + this.addMvtURL;
+                        const url: string = resultUrl + this.addMvtURL;
                         this.sqlProvider.findAll('`mouvement_traca`').subscribe((data) => {
                             this.sqlProvider.getApiKey().then(result => {
-                                let toInsert = {
+                                const toInsert = {
                                     mouvements: data,
                                     apikey: result
                                 };
@@ -90,18 +91,18 @@ export class MyApp {
         });
     }
 
-    openPage(page) {
+    public openPage(page) {
         // close the menu when clicking a link from the menu
         this.menu.close();
         // navigate to the new page if it is not the current page
         this.nav.setRoot(page.component);
     }
 
-    goHome() {
+    public goHome() {
         this.nav.setRoot(this.homePage);
     }
 
-    async showToast(msg) {
+    public async showToast(msg) {
         const toast = await this.toastController.create({
             message: msg,
             duration: 2000,

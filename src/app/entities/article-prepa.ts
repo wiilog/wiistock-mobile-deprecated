@@ -1,10 +1,10 @@
-export class ArticleLivraison {
+export interface ArticlePrepa {
     id: number;
     label: string;
     reference: string;
     quantite: number;
     is_ref : string;
-    id_livraison : number;
+    id_prepa : number;
     has_moved : number;
     emplacement : string;
 }
