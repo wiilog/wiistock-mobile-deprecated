@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {NavController, NavParams, ToastController} from 'ionic-angular';
 import {UsersApiProvider} from "../../providers/users-api/users-api";
 import {MenuPage} from "../menu/menu";
@@ -8,6 +8,8 @@ import {SqliteProvider} from "../../providers/sqlite/sqlite";
 @Component({
     selector: 'page-connect',
     templateUrl: 'connect.html',
+    // to resolve ExpressionChangedAfterItHasBeenCheckedError error on emulator
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConnectPage {
 
@@ -15,23 +17,20 @@ export class ConnectPage {
         login: '',
         password: ''
     };
-
-    public connectURL: string = '/api/connect';
-    public isLoaded: boolean;
+    public connectURL : string = '/api/connect';
+    public isLoaded : boolean;
 
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
                        public usersApiProvider: UsersApiProvider,
-                       public sqliteProvider: SqliteProvider,
                        private toastController: ToastController,
-                       private changeDetector: ChangeDetectorRef) {
+                       public sqliteProvider: SqliteProvider) {
         this.isLoaded = false;
     }
 
     public logForm(): void {
         this.sqliteProvider.getAPI_URL().subscribe((result) => {
             this.isLoaded = true;
-            this.changeDetector.detectChanges();
             if (result !== null) {
                 let url : string = result + this.connectURL;
                 this.usersApiProvider.setProvider(this.form, url).subscribe(resp => {
@@ -41,14 +40,13 @@ export class ConnectPage {
                             this.sqliteProvider.clearStorage().then(() => {
                                 this.sqliteProvider.importData(resp.data)
                                     .then(() => {
-                                        console.log('connect');
+                                        this.isLoaded = false;
                                         this.navCtrl.setRoot(MenuPage);
                                     });
                             }).catch(err => console.log(err));
                         });
                     } else {
                         this.isLoaded = false;
-                        this.changeDetector.detectChanges();
                         this.showToast('Identifiants incorrects.');
                     }
                 });
