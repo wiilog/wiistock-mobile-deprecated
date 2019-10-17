@@ -1,9 +1,3 @@
-<!--
-  Generated template for the InventaireMenuPage page.
-
-  See http://ionicframework.com/docs/components/#navigation for more info on
-  Ionic pages and navigation.
--->
 <ion-header>
   <ion-navbar>
     <ion-buttons start>
@@ -38,7 +32,10 @@
         Flashez un article
     </ion-title>
 
-    <ion-title *ngIf="articles && articles.length !== 0 && !location"><ion-icon class="big-icon" name="barcode" (click)="scanLocation()"></ion-icon><br>Flashez un emplacement</ion-title>
+    <ion-title *ngIf="articles && articles.length !== 0 && !location"><ion-icon class="big-icon" name="barcode" (click)="scanLocation()"></ion-icon>
+        <br>
+        Flashez un emplacement
+    </ion-title>
 
     <ion-badge *ngIf="articlesByLocation && articlesByLocation.length !== 0 && location">{{ articlesByLocation.length }}</ion-badge>
     <ion-badge *ngIf="locations && locations.length !== 0 && !location">{{ locations.length }}</ion-badge>

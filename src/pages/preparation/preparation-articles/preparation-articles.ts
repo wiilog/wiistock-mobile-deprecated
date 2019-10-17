@@ -271,7 +271,7 @@ export class PreparationArticlesPage {
                 valid: this.isValid
             })
         } else if (fromText && !this.articlesNT.some(article => article.reference === text)) {
-
+            this.showToast('L\'article scanné n\'est pas dans la liste.');
         }
     }
 
