@@ -19,7 +19,6 @@ export class DeposePageTraca {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad DeposePage');
   }
 
 }

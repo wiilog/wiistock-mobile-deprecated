@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {App, IonicPage, NavController, NavParams} from 'ionic-angular';
+import {App, IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
 import {PriseArticlesPageTraca} from "../prise-articles/prise-articles-traca";
 import {MenuPage} from "../../menu/menu";
 import {Emplacement} from "../../../app/entities/emplacement";
@@ -26,7 +26,8 @@ export class PriseEmplacementPageTraca {
                 public app: App,
                 public sqliteProvider: SqliteProvider,
                 private barcodeScanner: BarcodeScanner,
-                private changeDetectorRef: ChangeDetectorRef) {
+                private changeDetectorRef: ChangeDetectorRef,
+                public toastController: ToastController) {
         if (navParams.get('selectedEmplacement') !== undefined) {
             this.emplacement = navParams.get('selectedEmplacement');
         }
@@ -93,7 +94,18 @@ export class PriseEmplacementPageTraca {
             this.changeDetectorRef.detectChanges();
         } else {
             this.navCtrl.push(PriseEmplacementPageTraca);
+            this.showToast('Veuillez flasher ou sélectionner un emplacement.');
         }
+    }
+
+    async showToast(msg) {
+        const toast = await this.toastController.create({
+            message: msg,
+            duration: 2000,
+            position: 'center',
+            cssClass: 'toast-error'
+        });
+        toast.present();
     }
 
 }

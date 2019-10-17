@@ -56,7 +56,6 @@ export class PreparationMenuPage {
                 if (result !== null) {
                     let url: string = result + this.dataApi;
                     this.sqlLiteProvider.getApiKey().then((key) => {
-                        console.log(url);
                         this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
                             if (resp.success) {
                                 this.sqlLiteProvider.cleanDataBase(true).subscribe(() => {

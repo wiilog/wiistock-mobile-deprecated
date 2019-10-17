@@ -48,6 +48,7 @@ import {InventaireMenuPage} from "../pages/inventaire-menu/inventaire-menu";
 import {ModalQuantityPage} from "../pages/inventaire-menu/modal-quantity";
 import {InventaireAnomaliePage} from "../pages/inventaire-anomalie/inventaire-anomalie";
 import {ZebraBarcodeScannerService} from "./services/zebra-barcode-scanner.service";
+import {BarcodeScannerManagerService} from "./services/barcode-scanner-manager.service";
 
 @NgModule({
     declarations: [
@@ -125,6 +126,7 @@ import {ZebraBarcodeScannerService} from "./services/zebra-barcode-scanner.servi
         InventaireAnomaliePage,
     ],
     providers: [
+        BarcodeScannerManagerService,
         StatusBar,
         SplashScreen,
         {provide: ErrorHandler, useClass: IonicErrorHandler},

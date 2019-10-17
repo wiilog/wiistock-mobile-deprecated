@@ -45,7 +45,6 @@ export class InventaireAnomaliePage {
                        private zebraBarcodeScannerService: ZebraBarcodeScannerService) {}
 
     public ionViewDidLoad() {
-        console.log('ionViewDidLoad InventaireAnomaliePage');
     }
 
     public ionViewDidEnter(): void {

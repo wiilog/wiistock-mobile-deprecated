@@ -19,7 +19,6 @@ export class DeposePage {
   }
 
   ionViewDidLoad() {
-    console.log('ionViewDidLoad DeposePage');
   }
 
 }
