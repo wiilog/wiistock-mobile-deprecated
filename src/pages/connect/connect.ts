@@ -1,24 +1,31 @@
-import {Component} from '@angular/core';
+import {ChangeDetectionStrategy, Component} from '@angular/core';
 import {NavController, NavParams, ToastController} from 'ionic-angular';
 import {UsersApiProvider} from "../../providers/users-api/users-api";
 import {MenuPage} from "../menu/menu";
 import {ParamsPage} from "../params/params"
 import {SqliteProvider} from "../../providers/sqlite/sqlite";
 
+
 @Component({
     selector: 'page-connect',
     templateUrl: 'connect.html',
+    // to resolve ExpressionChangedAfterItHasBeenCheckedError error on emulator
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConnectPage {
 
-    form = {
+    public form = {
         login: '',
         password: ''
     };
-    connectURL : string = '/api/connect';
-    hasLoaded : boolean;
+    public connectURL : string = '/api/connect';
+    public hasLoaded : boolean;
 
-    constructor(public navCtrl: NavController, public navParams: NavParams, public usersApiProvider: UsersApiProvider, private toastController: ToastController, public sqliteProvider: SqliteProvider) {
+    public constructor(public navCtrl: NavController,
+                       public navParams: NavParams,
+                       public usersApiProvider: UsersApiProvider,
+                       private toastController: ToastController,
+                       public sqliteProvider: SqliteProvider) {
         this.hasLoaded = false;
     }
 
@@ -35,8 +42,8 @@ export class ConnectPage {
                                 this.sqliteProvider.clearStorage().then(() => {
                                     this.sqliteProvider.importData(resp.data)
                                         .then(() => {
-                                            console.log('connect');
                                             this.navCtrl.setRoot(MenuPage);
+                                            this.hasLoaded = false;
                                         });
                                 }).catch(err => console.log(err));
                             });
