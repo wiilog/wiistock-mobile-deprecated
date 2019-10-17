@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
 import {NavController, NavParams, ToastController} from 'ionic-angular';
 import {UsersApiProvider} from "../../providers/users-api/users-api";
 import {MenuPage} from "../menu/menu";
@@ -24,7 +24,8 @@ export class ConnectPage {
                        public navParams: NavParams,
                        public usersApiProvider: UsersApiProvider,
                        private toastController: ToastController,
-                       public sqliteProvider: SqliteProvider) {
+                       public sqliteProvider: SqliteProvider,
+                       private changeDetector: ChangeDetectorRef) {
         this.isLoaded = false;
     }
 
