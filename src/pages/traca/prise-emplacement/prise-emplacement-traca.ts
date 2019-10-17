@@ -83,13 +83,17 @@ export class PriseEmplacementPageTraca {
     }
 
     testIfBarcodeEquals(text) {
-        let emplacement: Emplacement;
-        emplacement = {
-            id: new Date().getUTCMilliseconds(),
-            label: text
-        };
-        this.navCtrl.push(PriseEmplacementPageTraca, {selectedEmplacement: emplacement});
-        this.changeDetectorRef.detectChanges();
+        if (text.length > 0) {
+            let emplacement: Emplacement;
+            emplacement = {
+                id: new Date().getUTCMilliseconds(),
+                label: text
+            };
+            this.navCtrl.push(PriseEmplacementPageTraca, {selectedEmplacement: emplacement});
+            this.changeDetectorRef.detectChanges();
+        } else {
+            this.navCtrl.push(PriseEmplacementPageTraca);
+        }
     }
 
 }
