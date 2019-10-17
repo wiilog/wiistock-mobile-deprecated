@@ -30,7 +30,7 @@ export class PreparationModalSearchEmplacementPage {
                 public sqliteProvider: SqliteProvider,
                 public view: ViewController) {
         this.hasLoaded = false;
-        this.sqliteProvider.findAll('`emplacement`').then((emplacements) => {
+        this.sqliteProvider.findAll('`emplacement`').subscribe((emplacements) => {
             this.emplacements = emplacements;
             if (typeof (navParams.get('preparation')) !== undefined) {
                 this.preparation = navParams.get('preparation');
@@ -49,7 +49,7 @@ export class PreparationModalSearchEmplacementPage {
 
     searchEmplacement() {
         this.hasLoaded = false;
-        this.sqliteProvider.findAll('`emplacement`').then((emplacements) => {
+        this.sqliteProvider.findAll('`emplacement`').subscribe((emplacements) => {
             this.emplacements = emplacements.filter(emp =>
                 emp.label.toLocaleLowerCase() === this.filterString.toLocaleLowerCase() ||
                 emp.label.toLocaleLowerCase().includes(this.filterString.toLocaleLowerCase()) ||
@@ -62,7 +62,7 @@ export class PreparationModalSearchEmplacementPage {
     clearSearch() {
         this.filterString = "";
         this.hasLoaded = false;
-        this.sqliteProvider.findAll('`emplacement`').then((emplacements) => {
+        this.sqliteProvider.findAll('`emplacement`').subscribe((emplacements) => {
             this.emplacements = emplacements;
             this.hasLoaded = true;
         })

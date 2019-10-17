@@ -30,7 +30,7 @@ export class DeposeArticlesPageTraca {
         private sqliteProvider: SqliteProvider,
         private barcodeScanner: BarcodeScanner,
         private changeDetectorRef: ChangeDetectorRef) {
-        this.sqliteProvider.findAll('article').then((value) => {
+        this.sqliteProvider.findAll('article').subscribe((value) => {
             this.db_articles = value;
         });
         if (typeof (navParams.get('emplacement')) !== undefined) {
@@ -82,7 +82,7 @@ export class DeposeArticlesPageTraca {
                 };
                 this.sqliteProvider.setDeposeValue(mouvement.ref_article, numberOfArticles).then(() => {
                     if (this.articles.indexOf(article) === this.articles.length - 1) {
-                        this.sqliteProvider.insert('`mouvement_traca`', mouvement).then(() => {
+                        this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(() => {
                             this.redirectAfterTake();
                         });
                     } else {

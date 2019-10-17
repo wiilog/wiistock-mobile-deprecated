@@ -21,7 +21,7 @@ export class PriseConfirmPage {
   constructor(public navCtrl: NavController, public navParams: NavParams, public sqliteProvider: SqliteProvider, private toastController: ToastController) {
     this.articles = navParams.get('articles');
     this.emplacement = navParams.get('emplacement');
-    this.sqliteProvider.findAll('article').then((value) => {
+    this.sqliteProvider.findAll('article').subscribe((value) => {
         this.db_articles = value;
     });
     if (navParams.get('selectedArticle') !== undefined) {
@@ -30,7 +30,7 @@ export class PriseConfirmPage {
   }
 
   addArticle() {
-      this.sqliteProvider.findOne('article', this.id).then((article) => {
+      this.sqliteProvider.findOne('article', this.id).subscribe((article) => {
           if (article) {
               article.quantite = this.quantite;
 

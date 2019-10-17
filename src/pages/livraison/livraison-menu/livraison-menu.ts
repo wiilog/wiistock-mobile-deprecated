@@ -51,37 +51,40 @@ export class LivraisonMenuPage {
 
     synchronise(fromStart: boolean) {
         this.hasLoaded = false;
-        this.sqlLiteProvider.getAPI_URL().then((result) => {
-            if (result !== null) {
-                let url: string = result + this.dataApi;
-                this.sqlLiteProvider.getApiKey().then((key) => {
-                    this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
-                        if (resp.success) {
-                            this.sqlLiteProvider.cleanDataBase(true).then(() => {
-                                this.sqlLiteProvider.importData(resp.data, true)
-                                    .then(() => {
-                                        this.sqlLiteProvider.findAll('`livraison`').then(livraisons => {
-                                            this.livraisons = livraisons.filter(p => p.date_end === null);
-                                            setTimeout(() => {
-                                                this.hasLoaded = true;
-                                                this.content.resize();
-                                            }, 1000);
+        this.sqlLiteProvider.getAPI_URL().subscribe(
+            (result) => {
+                if (result !== null) {
+                    let url: string = result + this.dataApi;
+                    this.sqlLiteProvider.getApiKey().then((key) => {
+                        this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
+                            if (resp.success) {
+                                this.sqlLiteProvider.cleanDataBase(true).subscribe(() => {
+                                    this.sqlLiteProvider.importData(resp.data, true)
+                                        .then(() => {
+                                            this.sqlLiteProvider.findAll('`livraison`').subscribe(livraisons => {
+                                                this.livraisons = livraisons.filter(p => p.date_end === null);
+                                                setTimeout(() => {
+                                                    this.hasLoaded = true;
+                                                    this.content.resize();
+                                                }, 1000);
+                                            });
                                         });
-                                    });
-                            });
-                        } else {
+                                });
+                            } else {
+                                this.hasLoaded = true;
+                                this.showToast('Erreur');
+                            }
+                        }, error => {
                             this.hasLoaded = true;
-                            this.showToast('Erreur');
-                        }
-                    }, error => {
-                        this.hasLoaded = true;
-                        this.showToast('Erreur réseau');
+                            this.showToast('Erreur réseau');
+                        });
                     });
-                });
-            } else {
-                this.showToast('Veuillez configurer votre URL dans les paramètres.')
-            }
-        }).catch(err => console.log(err));
+                } else {
+                    this.showToast('Veuillez configurer votre URL dans les paramètres.')
+                }
+            },
+            err => console.log(err)
+        );
     }
 
     async showToast(msg) {

@@ -11,6 +11,7 @@ import {LivraisonEmplacementPage} from "../livraison-emplacement/livraison-empla
 import moment from "moment";
 import {ArticleLivraison} from "../../../app/entities/articleLivraison";
 import {Livraison} from "../../../app/entities/livraison";
+import {flatMap} from "rxjs/operators";
 
 /**
  * Generated class for the LivraisonArticlesPage page.
@@ -43,7 +44,7 @@ export class LivraisonArticlesPage {
         public barcodeScanner: BarcodeScanner) {
         if (typeof (navParams.get('livraison')) !== undefined) {
             this.livraison = navParams.get('livraison');
-            this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
+            this.sqliteProvider.findArticlesByLivraison(this.livraison.id).subscribe((articles) => {
                 this.articlesNT = articles.filter(article => article.has_moved === 0);
                 this.articlesT = articles.filter(article => article.has_moved === 1);
                 if (this.articlesT.length > 0) {
@@ -53,7 +54,7 @@ export class LivraisonArticlesPage {
                     this.isValid = this.navParams.get('valid');
                     this.started = this.navParams.get('started');
                     if (!this.started) {
-                        this.sqliteProvider.getAPI_URL().then((result) => {
+                        this.sqliteProvider.getAPI_URL().subscribe((result) => {
                             this.sqliteProvider.getApiKey().then((key) => {
                                 if (result !== null) {
                                     let url: string = result + this.apiStartLivraison;
@@ -144,9 +145,9 @@ export class LivraisonArticlesPage {
                 };
                 let articleAlready = this.articlesT.find(art => art.id_livraison === newArticle.id_livraison && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
                 if (articleAlready !== undefined) {
-                    this.sqliteProvider.updateArticleLivraisonQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite).then(() => {
-                        this.sqliteProvider.updateArticleLivraisonQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - newArticle.quantite).then(() => {
-                            this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
+                    this.sqliteProvider.updateArticleLivraisonQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite).subscribe(() => {
+                        this.sqliteProvider.updateArticleLivraisonQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - newArticle.quantite).subscribe(() => {
+                            this.sqliteProvider.findArticlesByLivraison(this.livraison.id).subscribe((articles) => {
                                 if (articles.filter(article => article.has_moved === 0).length === 0) {
                                     this.refreshOver();
                                 } else {
@@ -158,8 +159,7 @@ export class LivraisonArticlesPage {
                         });
                     });
                 } else {
-                    this.sqliteProvider.insert('`article_livraison`', newArticle).then((rowInserted) => {
-                        console.log(rowInserted.insertId);
+                    this.sqliteProvider.insert('`article_livraison`', newArticle).subscribe((insertId) => {
                         let mouvement: Mouvement = {
                             id: null,
                             reference: newArticle.reference,
@@ -172,22 +172,22 @@ export class LivraisonArticlesPage {
                             is_ref: newArticle.is_ref,
                             id_article_prepa: null,
                             id_prepa: null,
-                            id_article_livraison: rowInserted.insertId,
+                            id_article_livraison: insertId,
                             id_livraison: newArticle.id_livraison
                         };
-                        this.sqliteProvider.updateArticleLivraisonQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - Number(this.navParams.get('quantite'))).then(() => {
-                            this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
-                                this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
-                                    if (articles.filter(article => article.has_moved === 0).length === 0) {
-                                        this.refreshOver();
-                                    } else {
-                                        this.refresh();
-                                    }
-                                    this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                    this.articlesT = articles.filter(article => article.has_moved === 1);
-                                })
+                        this.sqliteProvider.updateArticleLivraisonQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - Number(this.navParams.get('quantite')))
+                            .pipe(
+                                flatMap(() => this.sqliteProvider.insert('`mouvement`', mouvement)),
+                                flatMap(() => this.sqliteProvider.findArticlesByLivraison(this.livraison.id)))
+                            .subscribe((articles) => {
+                                if (articles.filter(article => article.has_moved === 0).length === 0) {
+                                    this.refreshOver();
+                                } else {
+                                    this.refresh();
+                                }
+                                this.articlesNT = articles.filter(article => article.has_moved === 0);
+                                this.articlesT = articles.filter(article => article.has_moved === 1);
                             });
-                        });
                     });
                 }
             } else {
@@ -208,9 +208,9 @@ export class LivraisonArticlesPage {
                 };
                 let articleAlready = this.articlesT.find(art => art.id_livraison === mouvement.id_livraison && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
                 if (articleAlready !== undefined) {
-                    this.sqliteProvider.updateArticleLivraisonQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite).then(() => {
-                        this.sqliteProvider.deleteById('`article_livraison`', mouvement.id_article_livraison).then(() => {
-                            this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
+                    this.sqliteProvider.updateArticleLivraisonQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite).subscribe(() => {
+                        this.sqliteProvider.deleteById('`article_livraison`', mouvement.id_article_livraison).subscribe(() => {
+                            this.sqliteProvider.findArticlesByLivraison(this.livraison.id).subscribe((articles) => {
                                 if (articles.filter(article => article.has_moved === 0).length === 0) {
                                     this.refreshOver();
                                 } else {
@@ -222,19 +222,21 @@ export class LivraisonArticlesPage {
                         });
                     });
                 } else {
-                    this.sqliteProvider.insert('`mouvement`', mouvement).then(() => {
-                        this.sqliteProvider.moveArticleLivraison(this.navParams.get('article').id).then(() => {
-                            this.sqliteProvider.findArticlesByLivraison(this.livraison.id).then((articles) => {
-                                if (articles.filter(article => article.has_moved === 0).length === 0) {
-                                    this.refreshOver();
-                                } else {
-                                    this.refresh();
-                                }
-                                this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                this.articlesT = articles.filter(article => article.has_moved === 1);
-                            })
+                    this.sqliteProvider
+                        .insert('`mouvement`', mouvement)
+                        .pipe(
+                            flatMap(() => this.sqliteProvider.moveArticleLivraison(this.navParams.get('article').id)),
+                            flatMap(() => this.sqliteProvider.findArticlesByLivraison(this.livraison.id))
+                        )
+                        .subscribe((articles) => {
+                            if (articles.filter(article => article.has_moved === 0).length === 0) {
+                                this.refreshOver();
+                            } else {
+                                this.refresh();
+                            }
+                            this.articlesNT = articles.filter(article => article.has_moved === 0);
+                            this.articlesT = articles.filter(article => article.has_moved === 1);
                         });
-                    });
                 }
             }
         }

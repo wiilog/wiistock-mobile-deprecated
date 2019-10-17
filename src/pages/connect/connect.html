@@ -1,28 +1,28 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>Follow GT</ion-title>
-  </ion-toolbar>
+    <ion-toolbar>
+        <ion-title>Follow GT</ion-title>
+    </ion-toolbar>
 </ion-header>
 
 <ion-content padding>
-
-  <form (ngSubmit)="logForm()">
-    <ion-item>
-      <ion-label>Login</ion-label>
-      <ion-input [disabled]="hasLoaded" type="text" [(ngModel)]="form.login" name="login"></ion-input>
-    </ion-item>
-    <ion-item>
-      <ion-label>Mot de passe</ion-label>
-      <ion-input [disabled]="hasLoaded" type="password" [(ngModel)]="form.password" name="passsword"></ion-input>
-    </ion-item>
-    <button ion-button type="submit" [disabled]="hasLoaded" block>Connexion</button>
-  </form>
-  <ion-spinner *ngIf="hasLoaded"></ion-spinner>
-  <img *ngIf="!hasLoaded" src="assets/icon/followgt.png">
+    <form (ngSubmit)="logForm()">
+        <ion-item>
+            <ion-label>Login</ion-label>
+            <ion-input [disabled]="isLoaded" type="text" [(ngModel)]="form.login" name="login"></ion-input>
+        </ion-item>
+        <ion-item>
+            <ion-label>Mot de passe</ion-label>
+            <ion-input [disabled]="isLoaded" type="password" [(ngModel)]="form.password" name="passsword"></ion-input>
+        </ion-item>
+        <button ion-button type="submit" [disabled]="isLoaded" block>Connexion</button>
+    </form>
+    <ion-spinner *ngIf="isLoaded"></ion-spinner>
+    <img *ngIf="!isLoaded" src="assets/icon/followgt.png">
 
 </ion-content>
+
 <ion-footer padding>
-  <div class="d-flex">
-    <ion-icon class="big-icon" name="settings" (click)="goToParams()"></ion-icon>
-  </div>
+    <div class="d-flex">
+        <ion-icon class="big-icon" name="settings" (click)="goToParams()"></ion-icon>
+    </div>
 </ion-footer>

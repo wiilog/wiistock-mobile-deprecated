@@ -32,9 +32,9 @@ export class PriseEmplacementPageTraca {
         if (navParams.get('selectedEmplacement') !== undefined) {
             this.emplacement = navParams.get('selectedEmplacement');
         }
-        this.sqliteProvider.findAll('emplacement').then((value) => {
+        this.sqliteProvider.findAll('emplacement').subscribe((value) => {
             this.db_locations = value;
-            this.sqliteProvider.findAll('article').then((value) => {
+            this.sqliteProvider.findAll('article').subscribe((value) => {
                 this.db_articles = value;
             })
         });
@@ -69,7 +69,10 @@ export class PriseEmplacementPageTraca {
     searchEmplacement(event: { component: IonicSelectableComponent, text: string }) {
         let text = event.text.trim();
         event.component.startSearch();
-        event.component.items = this.sqliteProvider.findByElement('emplacement', 'label', text);
+        this.sqliteProvider.findByElement('emplacement', 'label', text).subscribe((items) => {
+            event.component.items = items;
+            event.component.endSearch();
+        });
         event.component.endSearch();
     }
 

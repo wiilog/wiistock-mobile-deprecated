@@ -20,7 +20,7 @@ export class ParamsPage {
     private URL: string;
 
     constructor(public navCtrl: NavController, public navParams: NavParams, public toastController: ToastController, public sqLiteProvider: SqliteProvider, public http: HttpClient) {
-        this.sqLiteProvider.getAPI_URL().then((result) => {
+        this.sqLiteProvider.getAPI_URL().subscribe((result) => {
             if (result !== null) {
                 this.URL = result;
             } else {
@@ -32,7 +32,7 @@ export class ParamsPage {
 
 
     registerURL() {
-        this.sqLiteProvider.setAPI_URL(this.URL).then((result) => {
+        this.sqLiteProvider.setAPI_URL(this.URL).subscribe((result) => {
             if (result === true) {
                 this.showToast('URL enregistrée!');
             } else {

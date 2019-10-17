@@ -44,8 +44,8 @@ import {LivraisonArticleTakePage} from "../pages/livraison/livraison-article-tak
 import {LivraisonMenuPage} from "../pages/livraison/livraison-menu/livraison-menu";
 import {LivraisonArticlesPage} from "../pages/livraison/livraison-articles/livraison-articles";
 import {LivraisonEmplacementPage} from "../pages/livraison/livraison-emplacement/livraison-emplacement";
-import {InventaireMenuPage} from "../pages/inventaire/inventaire-menu/inventaire-menu";
-import {ModalQuantityPage} from "../pages/inventaire/inventaire-menu/modal-quantity";
+import {InventaireMenuPage} from "../pages/inventaire-menu/inventaire-menu";
+import {ModalQuantityPage} from "../pages/inventaire-menu/modal-quantity";
 import {InventaireAnomaliePage} from "../pages/inventaire-anomalie/inventaire-anomalie";
 import {ZebraBarcodeScannerService} from "./services/zebra-barcode-scanner.service";
 

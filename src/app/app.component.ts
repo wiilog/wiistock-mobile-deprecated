@@ -13,7 +13,7 @@ import {HttpClient} from "@angular/common/http";
 import {StockageMenuPageTraca} from "../pages/traca/stockage-menu/stockage-menu-traca";
 import {PreparationMenuPage} from "../pages/preparation/preparation-menu/preparation-menu";
 import {LivraisonMenuPage} from "../pages/livraison/livraison-menu/livraison-menu";
-import {InventaireMenuPage} from "../pages/inventaire/inventaire-menu/inventaire-menu";
+import {InventaireMenuPage} from "../pages/inventaire-menu/inventaire-menu";
 
 @Injectable()
 @Component({
@@ -68,10 +68,10 @@ export class MyApp {
 
             // Online event
             this.events.subscribe('network:online', () => {
-                this.sqlProvider.getAPI_URL().then((resultUrl) => {
+                this.sqlProvider.getAPI_URL().subscribe((resultUrl) => {
                     if (resultUrl !== null) {
                         let url: string = resultUrl + this.addMvtURL;
-                        this.sqlProvider.findAll('`mouvement_traca`').then((data) => {
+                        this.sqlProvider.findAll('`mouvement_traca`').subscribe((data) => {
                             this.sqlProvider.getApiKey().then(result => {
                                 let toInsert = {
                                     mouvements: data,

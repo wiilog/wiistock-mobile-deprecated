@@ -8,7 +8,7 @@ import {Preparation} from "../../app/entities/preparation";
 import {LivraisonMenuPage} from "../livraison/livraison-menu/livraison-menu";
 import {ParamsPage} from "../params/params";
 import {ConnectPage} from "../connect/connect";
-import {InventaireMenuPage} from "../inventaire/inventaire-menu/inventaire-menu";
+import {InventaireMenuPage} from "../inventaire-menu/inventaire-menu";
 
 @Component({
     selector: 'page-menu',
@@ -33,13 +33,13 @@ export class MenuPage {
     }
 
     ionViewDidEnter() {
-        this.sqliteProvider.findAll('`preparation`').then((preparations: Array<Preparation>) => {
+        this.sqliteProvider.findAll('`preparation`').subscribe((preparations: Array<Preparation>) => {
             this.nbPrep = preparations.filter(p => p.date_end === null).length;
             this.sqliteProvider.getFinishedPreps().then((preps) => {
                 this.nbPrepT = preps;
             });
         });
-        this.sqliteProvider.count('`article_inventaire`', []).then((nbArticlesInventaire: number) => {
+        this.sqliteProvider.count('`article_inventaire`', []).subscribe((nbArticlesInventaire: number) => {
             this.nbArtInvent = nbArticlesInventaire;
         });
     }
