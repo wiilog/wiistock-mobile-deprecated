@@ -4,13 +4,6 @@ import {ArticlePrepa} from "../../../app/entities/articlePrepa";
 import {PreparationArticlesPage} from "../preparation-articles/preparation-articles";
 import {Preparation} from "../../../app/entities/preparation";
 
-/**
- * Generated class for the PreparationArticleTakePage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
-
 @IonicPage()
 @Component({
     selector: 'page-preparation-article-take',
@@ -35,7 +28,7 @@ export class PreparationArticleTakePage {
 
     addArticle() {
         if (this.quantite > this.article.quantite || this.quantite <= 0) {
-            this.showToast('Veuillez selectionner une quantité valide.');
+            this.showToast('Veuillez sélectionner une quantité valide.');
         } else {
             this.navCtrl.setRoot(PreparationArticlesPage, {
                 article : this.article,

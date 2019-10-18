@@ -93,18 +93,24 @@ export class LivraisonEmplacementPage {
         let instance = this;
         this.sqliteProvider.findAll('`emplacement`').subscribe(resp => {
             let found = false;
-            resp.forEach(function (element) {
-                if (element.label === text) {
-                    found = true;
-                    instance.emplacement = element;
-                    instance.navCtrl.push(LivraisonEmplacementPage, {
-                        livraison: instance.livraison,
-                        emplacement: element
-                    })
+            let wrongLocation = false;
+            resp.forEach(function (emplacement) {
+                if (emplacement.label === text) {
+                    if (instance.livraison.emplacement === text) {
+                        found = true;
+                        instance.emplacement = emplacement;
+                        instance.navCtrl.push(LivraisonEmplacementPage, {
+                            livraison: instance.livraison,
+                            emplacement: emplacement
+                        });
+                    } else {
+                        wrongLocation = true;
+                        instance.showToast("Vous n'avez pas scanné le bon emplacement (destination demandée : " + instance.livraison.emplacement + ")")
+                    }
                 }
             });
-            if (!found) {
-                this.showToast('Veuillez flasher ou séléctionner un emplacement connu.');
+            if (!found && !wrongLocation) {
+                this.showToast('Veuillez scanner ou sélectionner un emplacement connu.');
             }
         });
     }

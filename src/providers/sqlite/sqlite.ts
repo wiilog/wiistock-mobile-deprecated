@@ -48,7 +48,6 @@ export class SqliteProvider {
             })))
             .subscribe(
                 (sqliteObject: SQLiteObject) => {
-                    console.log('bdd created');
                     this.sqliteObject$.next(sqliteObject);
                 },
                 e => console.log(e)
@@ -75,7 +74,6 @@ export class SqliteProvider {
             ])))
         )
         .subscribe(() => {
-            console.log('All tables created');
             this.dbcreated$.next(true);
         });
     }
@@ -106,7 +104,6 @@ export class SqliteProvider {
                 ])))
             )
             .subscribe(() => {
-                console.log('All tables created');
                 databaseCleaned.next(undefined);
             });
 
@@ -235,7 +232,7 @@ export class SqliteProvider {
             for (let livraison of livraisons) {
                 this.findOne('livraison', livraison.id).subscribe((livraisonInserted) => {
                     if (livraisonInserted === null) {
-                        livraisonsValues.push("(" + livraison.id + ", '" + livraison.number + "', " + null + ", " + null + ")");
+                        livraisonsValues.push("(" + livraison.id + ", '" + livraison.number + "', '" + livraison.location + "', " + null + ")");
                     }
                     if (livraisons.indexOf(livraison) === livraisons.length - 1) {
                         this.findAll('`livraison`').subscribe((livraisonsDB) => {
@@ -419,12 +416,9 @@ export class SqliteProvider {
 
     public findAll(table: string): Observable<any> {
         const findAllExecuted = new ReplaySubject<any>(1);
-        console.log('PLOP 3');
         this.db$.subscribe((db) => {
-            console.log('PLOP 4', 'SELECT * FROM ' + table);
             db.executeSql('SELECT * FROM ' + table, [])
                 .then((data) => {
-                    console.log('PLOP 5', data);
                     if (data == null) {
                         findAllExecuted.next(undefined);
                     }
