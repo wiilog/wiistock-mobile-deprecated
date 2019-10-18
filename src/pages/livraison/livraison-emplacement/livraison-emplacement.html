@@ -15,17 +15,17 @@
             <p class="smaller">Emplacement sélectionné :</p>
             <p class="smaller">{{emplacement.label}}</p>
         </ion-col>
-        <ion-col class="col-menu-stats">
-            <p class="big">SCANNER</p>
+
+        <ion-col *ngIf="!emplacement" class="col-menu-stats">
             <p><span class="big">SCANNER</span><br>EMPLACEMENT</p>
-            <ion-icon name="barcode"></ion-icon>
+            <ion-icon name="barcode" (click)="scan()"></ion-icon>
         </ion-col>
     </ion-row>
 </ion-content>
 
 <ion-footer padding>
     <div class="d-flex">
-        <ion-icon class="big-icon" name="qr-scanner" (click)="scan()"></ion-icon>
+        <ion-icon class="big-icon" name="arrow-dropleft-circle" navPop></ion-icon>
         <ion-icon class="big-icon" name="checkmark-circle" (click)="validate()" *ngIf="emplacement"></ion-icon>
     </div>
 </ion-footer>
