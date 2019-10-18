@@ -143,7 +143,7 @@ export class InventaireMenuPage {
                                             }, 1000);
                                         });
                                         this.addInventoryEntries();
-                                    }
+                                    });
                             } else {
                                 this.isLoaded = true;
                                 this.showToast('Une erreur est survenue.');

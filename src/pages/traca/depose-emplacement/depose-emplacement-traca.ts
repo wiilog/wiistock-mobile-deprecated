@@ -80,16 +80,15 @@ export class DeposeEmplacementPageTraca {
         this.barcodeScannerManager.scan().subscribe((barcode) => this.testIfBarcodeEquals(barcode));
     }
 
-    testIfBarcodeEquals(text) {
+    testIfBarcodeEquals(barcode) {
         this.sqliteProvider.findAll('`emplacement`').subscribe(resp => {
-            if (resp.some(element => element.label === text)) {
-                let emplacement = resp.find(element => element.label === text);
+            if (resp.some(element => element.label === barcode)) {
+                let emplacement = resp.find(element => element.label === barcode);
                 this.navCtrl.push(DeposeEmplacementPageTraca, {selectedEmplacement: emplacement});
                 this.changeDetectorRef.detectChanges();
             } else {
                 this.showToast('Veuillez flasher ou sélectionner un emplacement connu.');
             }
-
         });
     }
 
