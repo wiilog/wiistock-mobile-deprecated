@@ -1,0 +1,42 @@
+<ion-header>
+    <ion-navbar>
+        <ion-buttons left>
+            <button ion-button icon-only (click)="synchronise(false)">
+                <ion-icon name="refresh" color="white"></ion-icon>
+            </button>
+        </ion-buttons>
+        <ion-buttons right>
+            <button ion-button icon-only (click)="goHome()">
+                <ion-icon name="home" color="white"></ion-icon>
+            </button>
+        </ion-buttons>
+    </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+    <div class="titles" *ngIf="hasLoaded">
+        <ion-title *ngIf="manutentions && manutentions.length === 0">Aucune manutentions<br>à traiter.</ion-title>
+        <ion-title *ngIf="manutentions && manutentions.length > 0">Menu | Manutentions</ion-title>
+        <ion-title *ngIf="manutentions && manutentions.length > 0">{{ manutentions.length }} manutentions.</ion-title>
+    </div>
+    <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
+    <br>
+    <ion-scroll scrollY="true" *ngIf="hasLoaded" class="body">
+        <br>
+        <ng-container *ngIf="manutentions && manutentions.length > 0 && hasLoaded">
+            <ion-card *ngFor="let manutention of manutentions">
+                <ion-card-header>
+                    <p>Demandeur <b>{{ manutention.demandeur }} </b></p>
+                </ion-card-header>
+                <ion-card-content (click)="goToManut(manutention)">
+                    <br>
+                    <p>Date et Heure <b>{{ manutention.date_attendue }}</b></p>
+                    <p>Source <b>{{ manutention.source }}</b></p>
+                    <p>Destination <b>{{ manutention.destination }}</b></p>
+                </ion-card-content>
+            </ion-card>
+        </ng-container>
+        <br>
+    </ion-scroll>
+
+</ion-content>

@@ -11,6 +11,7 @@ import {flatMap, map, take} from 'rxjs/operators';
 import {from} from 'rxjs/observable/from';
 import {of} from 'rxjs/observable/of';
 import {Platform} from 'ionic-angular';
+import {Manutention} from "@app/entities/manutention";
 
 
 @Injectable()
@@ -70,12 +71,13 @@ export class SqliteProvider {
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_livraison` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_livraison` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_inventaire` (`id` INTEGER PRIMARY KEY, `id_mission` INTEGER, `reference` TEXT, `is_ref` TEXT, `location` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `saisie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_mission` INTEGER, `date` TEXT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT)', []),
-                db.executeSql('CREATE TABLE IF NOT EXISTS `anomalie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT, `comment` TEXT, `treated` TEXT)', [])
+                db.executeSql('CREATE TABLE IF NOT EXISTS `anomalie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT, `comment` TEXT, `treated` TEXT)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `manutention` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `demandeur` TEXT, `date_attendue` TEXT, `commentaire` TEXT, `destination` TEXT, `source` TEXT)', [])
             ])))
         )
-        .subscribe(() => {
-            this.dbCreated$.next(true);
-        });
+            .subscribe(() => {
+                this.dbCreated$.next(true);
+            });
     }
 
     public cleanDataBase(fromAfter = false): Observable<any> {
@@ -97,7 +99,8 @@ export class SqliteProvider {
                                 db.executeSql('DELETE FROM `article_livraison`;', []),
                                 db.executeSql('DELETE FROM `article_inventaire`;', []),
                                 db.executeSql('DELETE FROM `saisie_inventaire`;', []),
-                                db.executeSql('DELETE FROM `anomalie_inventaire`;', [])
+                                db.executeSql('DELETE FROM `anomalie_inventaire`;', []),
+                                db.executeSql('DELETE FROM `manutention`;', []),
                             ]
                             : []
                     )
@@ -193,6 +196,43 @@ export class SqliteProvider {
                     }
                 });
             }
+        });
+    }
+
+    importManutentions(data) {
+        return new Promise<any>(resolve => {
+            let manutentions = data['manutentions'];
+            let manutValues = [];
+            if (manutentions.length === 0) {
+                this.findAll('`manutention`').subscribe((manutentionsDB) => {
+                    this.deleteManutentions(manutentionsDB).then(() => {
+                        resolve(false);
+                    });
+                });
+            }
+            for (let manut of manutentions) {
+                this.findOne('manutention', manut.id).subscribe((manutInserted) => {
+                    if (manutInserted === null) {
+                        manutValues.push("(" + manut.id + ", '" + manut.date_attendue.date + "', '" + manut.demandeur + "', '" + (manut.commentaire === null ? '' : manut.commentaire) + "', '"  + manut.source + "', '"  + manut.destination + "')");
+                    }
+                    if (manutentions.indexOf(manut) === manutentions.length - 1) {
+                        this.findAll('`manutention`').subscribe((manutentionsDB) => {
+                            let manutValuesStr = manutValues.join(', ');
+                            let sqlManut = 'INSERT INTO `manutention` (`id`, `date_attendue`, `demandeur`, `commentaire`, `source`, `destination`) VALUES ' + manutValuesStr + ';';
+
+                            if (manutentionsDB.length === 0) {
+                                console.log('gfdgfdgd');
+                                resolve(sqlManut);
+                            } else {
+                                this.deleteManutentions(manutentionsDB.filter(m => manutentions.find(manut => manut.id === m.id) === undefined)).then(() => {
+                                    resolve(sqlManut);
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+
         });
     }
 
@@ -306,8 +346,7 @@ export class SqliteProvider {
         let anomaliesValues = [];
         if (anomalies.length === 0) {
             importExecuted.next(false);
-        }
-        else {
+        } else {
             for (let anomaly of anomalies) {
                 anomaliesValues.push("(" + null + ", '" + anomaly.reference + "', '" + anomaly.is_ref + "', '" + anomaly.quantity + "', '" + (anomaly.location ? anomaly.location : 'N/A') + "')");
 
@@ -328,13 +367,13 @@ export class SqliteProvider {
         this.db$.subscribe((db) => {
             imports.forEach(function (importSql, index) {
                 db.executeSql(importSql, []).then().catch(_ => console.log(importSql)).then(() => {
+                    console.log(importSql);
                     if (index === imports.length - 1) {
                         allImportExecuted.next(undefined);
                     }
                 })
             })
         });
-
         return allImportExecuted;
     }
 
@@ -356,10 +395,13 @@ export class SqliteProvider {
                                         if (sqlArticlesLivraison !== false) imports.push(sqlArticlesLivraison);
                                         this.importArticlesInventaire(data).subscribe((sqlArticlesInventaire) => {
                                             if (sqlArticlesInventaire !== false) imports.push(sqlArticlesInventaire);
-                                            this.executeAllImports(imports).subscribe(() => {
-                                                console.log('Imported All Data');
-                                                resolve();
-                                            })
+                                            this.importManutentions(data).then((sqlManutentions) => {
+                                                if (sqlManutentions !== false) imports.push(sqlManutentions);
+                                                this.executeAllImports(imports).subscribe(() => {
+                                                    console.log('Imported All Data');
+                                                    resolve();
+                                                });
+                                            });
                                         });
                                     });
                                 });
@@ -421,8 +463,7 @@ export class SqliteProvider {
                 .then((data) => {
                     if (data == null) {
                         findAllExecuted.next(undefined);
-                    }
-                    else {
+                    } else {
                         const list = [];
                         if (data.rows) {
                             if (data.rows.length > 0) {
@@ -741,6 +782,23 @@ export class SqliteProvider {
                                     resolve();
                                 }
                             }).catch(err => console.log(err));
+                        }).catch(err => console.log(err));
+                    });
+                });
+            }
+        });
+        return resp;
+    }
+
+    public deleteManutentions(manutentions: Array<Manutention>) {
+        let resp = new Promise<any>((resolve) => {
+            if (manutentions.length === 0) {
+                resolve();
+            } else {
+                this.db$.subscribe((db) => {
+                    manutentions.forEach(manutention => {
+                        db.executeSql('DELETE FROM `manutention` WHERE id = ' + manutention.id, []).then(() => {
+                            resolve();
                         }).catch(err => console.log(err));
                     });
                 });

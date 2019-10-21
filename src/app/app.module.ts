@@ -42,6 +42,8 @@ import {InventaireMenuPage} from '@pages/inventaire-menu/inventaire-menu';
 import {ModalQuantityPage} from '@pages/inventaire-menu/modal-quantity';
 import {InventaireAnomaliePage} from '@pages/inventaire-anomalie/inventaire-anomalie';
 import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.service';
+import {ManutentionMenuPage} from "@pages/manutention/manutention-menu/manutention-menu";
+import {ManutentionValidatePage} from "@pages/manutention/manutention-validate/manutention-validate";
 
 @NgModule({
     declarations: [
@@ -59,6 +61,7 @@ import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.se
         PriseEmplacementPageTraca,
         PriseArticlesPageTraca,
         PreparationArticleTakePage,
+        ManutentionMenuPage,
         LivraisonArticleTakePage,
         LivraisonMenuPage,
         LivraisonArticlesPage,
@@ -68,6 +71,7 @@ import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.se
         DeposeEmplacementPageTraca,
         DeposeArticlesPageTraca,
         DeposeConfirmPageTraca,
+        ManutentionValidatePage,
         DeposePage,
         DeposePageTraca,
         InventaireMenuPage,
@@ -109,6 +113,8 @@ import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.se
         LivraisonEmplacementPage,
         PriseArticlesPageTraca,
         PriseConfirmPageTraca,
+        ManutentionMenuPage,
+        ManutentionValidatePage,
         DeposeEmplacementPageTraca,
         DeposeArticlesPageTraca,
         DeposeConfirmPageTraca,
