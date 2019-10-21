@@ -12,13 +12,10 @@
         "clean": "ionic-app-scripts clean",
         "build": "ionic-app-scripts build",
         "lint": "ionic-app-scripts lint",
-        "ionic:run": "ionic cordova run android",
-        "ionic:run:livereload": "ionic cordova run android -l",
-        "ionic:build": "ionic cordova build android",
         "wiis:clean": "cordova clean",
-        "wiis:build": "npm run wiis:clean && npm run ionic:build",
-        "wiis:run": "npm run wiis:clean && npm run ionic:run",
-        "wiis:run:livereload": "npm run wiis:clean && npm run ionic:run:livereload"
+        "wiis:build": "npm run wiis:clean && ionic cordova build android",
+        "wiis:run": "npm run wiis:clean && ionic cordova run android",
+        "wiis:run:livereload": "npm run wiis:clean && ionic cordova run android --livereload"
     },
     "dependencies": {
         "@angular/animations": "5.2.11",
@@ -60,6 +57,7 @@
         "moment": "^2.24.0",
         "node": "^10.16.0",
         "phone-vibrate": "^2.0.0",
+        "phonegap-plugin-barcodescanner": "^8.1.0",
         "rxjs": "5.5.11",
         "sw-toolbox": "3.6.0",
         "zone.js": "0.8.29"
@@ -83,7 +81,9 @@
             "cordova-plugin-ionic-keyboard": {},
             "cordova-plugin-vibration": {},
             "cordova-sqlite-storage": {},
-            "phonegap-plugin-barcodescanner": {},
+            "phonegap-plugin-barcodescanner": {
+                "ANDROID_SUPPORT_V4_VERSION": "27.+"
+            },
             "com-darryncampbell-cordova-plugin-intent": {},
             "cordova-plugin-network-information": {}
         },
