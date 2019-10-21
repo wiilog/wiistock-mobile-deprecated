@@ -3,7 +3,7 @@
     <name>Follow GT</name>
     <description>Follow your supply chain with GT Logistics.</description>
     <author email="bonjour@wiilog.fr" href="http://wiilog.fr/">Wiilog Team</author>
-    <content original-src="index.html" src="http://192.168.0.54:8100" />
+    <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
@@ -20,6 +20,7 @@
     <preference name="SplashScreen" value="screen" />
     <preference name="SplashScreenDelay" value="3000" />
     <preference name="KeyboardDisplayRequiresUserAction" value="false" />
+    <preference name="orientation" value="portrait" />
     <platform name="android">
         <allow-intent href="market:*" />
         <icon density="ldpi" src="resources/android/icon/drawable-ldpi-icon.png" />
@@ -101,5 +102,4 @@
     <plugin name="com-darryncampbell-cordova-plugin-intent" spec="1.1.7" />
     <plugin name="cordova-plugin-network-information" spec="2.0.1" />
     <allow-navigation href="http://192.168.0.54:8100" />
-    <allow-navigation href="http://10.1.8.81:8100" />
 </widget>
