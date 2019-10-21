@@ -8,14 +8,17 @@
         "ionic_webpack": "./config/webpack.config.js"
     },
     "scripts": {
+        "start": "ionic-app-scripts serve",
+        "clean": "ionic-app-scripts clean",
+        "build": "ionic-app-scripts build",
+        "lint": "ionic-app-scripts lint",
         "ionic:run": "ionic cordova run android",
         "ionic:run:livereload": "ionic cordova run android -l",
         "ionic:build": "ionic cordova build android",
-        "build": "npm run clean ; npm run ionic:build",
-        "clean": "cordova clean",
-        "run": "npm run clean ; npm run ionic:run",
-        "run:livereload": "npm run clean ; npm run ionic:run:livereload",
-        "lint": "ionic-app-scripts lint"
+        "wiis:clean": "cordova clean",
+        "wiis:build": "npm run wiis:clean && npm run ionic:build",
+        "wiis:run": "npm run wiis:clean && npm run ionic:run",
+        "wiis:run:livereload": "npm run wiis:clean && npm run ionic:run:livereload"
     },
     "dependencies": {
         "@angular/animations": "5.2.11",
