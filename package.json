@@ -8,9 +8,13 @@
         "ionic_webpack": "./config/webpack.config.js"
     },
     "scripts": {
-        "start": "ionic-app-scripts serve",
-        "clean": "ionic-app-scripts clean",
-        "build": "ionic-app-scripts build",
+        "ionic:run": "ionic cordova run android",
+        "ionic:run:livereload": "ionic cordova run android -l",
+        "ionic:build": "ionic cordova build android",
+        "build": "npm run clean ; npm run ionic:build",
+        "clean": "cordova clean",
+        "run": "npm run clean ; npm run ionic:run",
+        "run:livereload": "npm run clean ; npm run ionic:run:livereload",
         "lint": "ionic-app-scripts lint"
     },
     "dependencies": {
