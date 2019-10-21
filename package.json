@@ -11,10 +11,10 @@
         "ionic:run": "ionic cordova run android",
         "ionic:run:livereload": "ionic cordova run android -l",
         "ionic:build": "ionic cordova build android",
-        "build": "npm run clean ; npm run ionic:build",
+        "build": "npm run clean && npm run ionic:build",
         "clean": "cordova clean",
-        "run": "npm run clean ; npm run ionic:run",
-        "run:livereload": "npm run clean ; npm run ionic:run:livereload",
+        "run": "npm run clean && npm run ionic:run",
+        "run:livereload": "npm run clean && npm run ionic:run:livereload",
         "lint": "ionic-app-scripts lint"
     },
     "dependencies": {
