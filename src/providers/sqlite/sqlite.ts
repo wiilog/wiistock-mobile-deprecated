@@ -114,7 +114,11 @@ export class SqliteProvider {
     }
 
     public setOperateur(operateur) {
-        this.storageService.setOperateur(operateur);
+        return new Promise<any>(resolve => {
+            this.storageService.setOperateur(operateur).then(() => {
+                resolve();
+            });
+        });
     }
 
     public getOperateur() {

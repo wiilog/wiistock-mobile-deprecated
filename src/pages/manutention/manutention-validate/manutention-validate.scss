@@ -1,3 +1,141 @@
 page-manutention-validate {
 
+
+  .toolbar-background {
+    background-color: #030F4C !important;
+  }
+
+  .toolbar-title {
+    font-family: "Myriad Pro" !important;
+  }
+
+  p {
+    font-family: 'Myriad Pro' !important;
+  }
+
+  span {
+    font-family: 'Myriad Pro' !important;
+    color: white !important;
+    font-size: 20px;
+  }
+
+  .user-title {
+    .toolbar-title {
+      color: white;
+    }
+
+    text-align: center !important;
+  }
+
+  .subtitle {
+    font-size: 20px;
+    color: #030F4C;
+  }
+
+  .custom-button,
+  .custom-button.icon:before {
+    font-size: 30px !important;
+    color: white !important;
+  }
+
+  .button-custom {
+    margin: -5px 0 -5px -5px !important;
+  }
+
+  ion-navbar.toolbar {
+    min-height: 60px;
+  }
+
+  ion-card-header {
+    background-color: #149914;
+    height: 30px;
+    padding: 5px !important;
+
+    p {
+      color: white !important;
+    }
+  }
+
+  ion-card-content {
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+  }
+
+  .titles {
+    background-color: #FFFFFF !important;
+    text-align: center !important;
+    align-content: center !important;
+  }
+
+  .body {
+    background-color: #F2F2F4 !important;
+    height: 80%;
+  }
+
+  .important {
+    color: #030F4C;
+  }
+
+  .spinner {
+    position: fixed;
+    top: 40%;
+    left: 40%;
+    text-align: center;
+  }
+
+  .main_spinner {
+    height: 100px !important;
+    width: 100px !important;
+  }
+
+  .arrow {
+    width: 15px !important;
+    height: 15px !important;
+    display: inline-block;
+  }
+
+  ion-icon {
+    font-size: 100% !important;
+  }
+
+  .readonly {
+    pointer-events: none !important;
+  }
+
+  ion-label {
+    width: 30% !important;
+    font-family: 'Myriad Pro' !important;
+  }
+
+  ion-textarea {
+    font-family: 'Myriad Pro' !important;
+  }
+
+  .validate_button {
+    margin: auto;
+    display: block;
+    background-color: #149914;
+    text-align: center;
+    height: 70px;
+    width: 80%;
+  }
+
+  .commentaire {
+    margin-bottom: 7%;
+    padding: 5px;
+  }
+
+  .commentaire_button {
+    span {
+      margin-right: 5px;
+      color: black !important;
+    }
+    margin: auto;
+    display: block;
+    background-color: #F2F2F4;
+    text-align: center;
+    height: 70px;
+    width: 100%;
+  }
+
 }

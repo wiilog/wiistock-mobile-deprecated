@@ -1,38 +1,43 @@
 <ion-header>
-    <ion-navbar>
+    <ion-navbar *ngIf="hasLoaded">
         <ion-buttons left>
-            <button ion-button icon-only (click)="synchronise(false)">
-                <ion-icon name="refresh" color="white"></ion-icon>
+            <button ion-button icon-only (click)="synchronise(false)" class="custom-button">
+                <ion-icon name="custom-refresh-icon"></ion-icon>
             </button>
         </ion-buttons>
+        <ion-title class="user-title">
+            {{ user }}
+        </ion-title>
         <ion-buttons right>
-            <button ion-button icon-only (click)="goHome()">
-                <ion-icon name="home" color="white"></ion-icon>
+            <button ion-button icon-only (click)="goHome()" class="custom-button">
+                <ion-icon name="custom-home-icon"></ion-icon>
             </button>
         </ion-buttons>
     </ion-navbar>
 </ion-header>
 
-<ion-content padding>
+<ion-content>
+    <br>
     <div class="titles" *ngIf="hasLoaded">
         <ion-title *ngIf="manutentions && manutentions.length === 0">Aucune manutentions<br>à traiter.</ion-title>
-        <ion-title *ngIf="manutentions && manutentions.length > 0">Menu | Manutentions</ion-title>
-        <ion-title *ngIf="manutentions && manutentions.length > 0">{{ manutentions.length }} manutentions.</ion-title>
+        <ion-title *ngIf="manutentions && manutentions.length > 0">Menu | <b class="important">Manutentions</b></ion-title>
+        <p *ngIf="manutentions && manutentions.length > 0" class="subtitle">{{ manutentions.length }} manutention(s)</p>
     </div>
-    <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
-    <br>
+    <div class="spinner" *ngIf="!hasLoaded" >
+        <ion-spinner class="main_spinner"></ion-spinner>
+    </div>
     <ion-scroll scrollY="true" *ngIf="hasLoaded" class="body">
         <br>
+        <img src="assets/icon/manut_icon.svg" height="50px" width="50px">
+        <br>
         <ng-container *ngIf="manutentions && manutentions.length > 0 && hasLoaded">
-            <ion-card *ngFor="let manutention of manutentions">
+            <ion-card *ngFor="let manutention of manutentions" (click)="goToManut(manutention)">
                 <ion-card-header>
                     <p>Demandeur <b>{{ manutention.demandeur }} </b></p>
                 </ion-card-header>
-                <ion-card-content (click)="goToManut(manutention)">
-                    <br>
-                    <p>Date et Heure <b>{{ manutention.date_attendue }}</b></p>
-                    <p>Source <b>{{ manutention.source }}</b></p>
-                    <p>Destination <b>{{ manutention.destination }}</b></p>
+                <ion-card-content>
+                    <span>Date et Heure <b>{{ toDate(manutention) | date:'dd/MM/yyyy h:mm:ss' }}</b></span>
+                    <img src="assets/icon/side_arrow.svg" class="arrow">
                 </ion-card-content>
             </ion-card>
         </ng-container>

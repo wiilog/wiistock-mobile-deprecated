@@ -25,6 +25,7 @@ export class ManutentionMenuPage {
     manutentions: Array<Manutention>;
     dataApi: string = '/api/getData';
     hasLoaded: boolean;
+    user : string;
 
     constructor(
         public navCtrl: NavController,
@@ -39,16 +40,8 @@ export class ManutentionMenuPage {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    ionViewDidEnter() {
+    ionViewDidLoad() {
         this.synchronise(true);
-        this.setBackButtonAction();
-    }
-
-    setBackButtonAction() {
-        this.navBar.backButtonClick = () => {
-            //Write here wherever you wanna do
-            this.navCtrl.setRoot(MenuPage);
-        }
     }
 
     synchronise(fromStart: boolean) {
@@ -63,12 +56,16 @@ export class ManutentionMenuPage {
                                 this.sqlLiteProvider.cleanDataBase(fromStart).subscribe(() => {
                                     this.sqlLiteProvider.importData(resp.data, true)
                                         .then(() => {
-                                            this.sqlLiteProvider.findAll('`manutention`').subscribe(manutentions => {
-                                                this.manutentions = manutentions;
-                                                setTimeout(() => {
-                                                    this.hasLoaded = true;
-                                                    this.content.resize();
-                                                }, 1000);
+                                            this.sqlLiteProvider.getOperateur().then((username) => {
+                                                console.log(username);
+                                                this.user = username;
+                                                this.sqlLiteProvider.findAll('`manutention`').subscribe(manutentions => {
+                                                    this.manutentions = manutentions;
+                                                    setTimeout(() => {
+                                                        this.hasLoaded = true;
+                                                        this.content.resize();
+                                                    }, 1000);
+                                                });
                                             });
                                         });
                                 });
@@ -101,6 +98,10 @@ export class ManutentionMenuPage {
 
     goToManut(manutention: Manutention) {
         this.navCtrl.push(ManutentionValidatePage, {manutention: manutention});
+    }
+
+    toDate(manutention : Manutention) {
+        return new Date(manutention.date_attendue);
     }
 
 }

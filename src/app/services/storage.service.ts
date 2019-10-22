@@ -26,7 +26,7 @@ export class StorageService {
     }
 
     setOperateur(operateur) {
-        this.storage.set(OPERATEUR, operateur);
+        return this.storage.set(OPERATEUR, operateur);
     }
 
     getOperateur() {

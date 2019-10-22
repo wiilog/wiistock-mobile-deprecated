@@ -1,19 +1,60 @@
-<!--
-  Generated template for the ManutentionValidatePage page.
-
-  See http://ionicframework.com/docs/components/#navigation for more info on
-  Ionic pages and navigation.
--->
 <ion-header>
-  <ion-navbar>
-    <ion-title>Valider une manutention.</ion-title>
-  </ion-navbar>
+    <ion-navbar *ngIf="hasLoaded">
+        <ion-buttons left>
+            <button ion-button icon-only (click)="synchronise(false)" class="custom-button">
+                <ion-icon name="custom-refresh-icon"></ion-icon>
+            </button>
+        </ion-buttons>
+        <ion-title class="user-title">
+            {{ user }}
+        </ion-title>
+        <ion-buttons right>
+            <button ion-button icon-only (click)="goHome()" class="custom-button">
+                <ion-icon name="custom-home-icon"></ion-icon>
+            </button>
+        </ion-buttons>
+    </ion-navbar>
 </ion-header>
 
-<ion-content padding>
-  <p>{{ manutention.id }}</p>
-  <ion-item>
-    <ion-textarea placeholder="Entrez le commentaire associé à la manutention..." [(ngModel)]="commentaire"></ion-textarea>
-  </ion-item>
-  <button (click)="validateManut()"></button>
+<ion-content>
+    <br>
+    <div class="titles" *ngIf="hasLoaded">
+        <ion-title *ngIf="!manutention">Aucune manutention<br>à traiter.</ion-title>
+        <ion-title *ngIf="manutention">Menu | <b class="important">Manutentions</b></ion-title>
+        <p *ngIf="manutention" class="subtitle">Détails</p>
+    </div>
+    <div class="spinner" *ngIf="!hasLoaded">
+        <ion-spinner class="main_spinner"></ion-spinner>
+    </div>
+    <ion-scroll scrollY="true" *ngIf="hasLoaded" class="body">
+        <br>
+        <ion-item class="readonly" text-wrap>
+            <ion-label>Demandeur</ion-label>
+            <ion-textarea value="{{ manutention.demandeur }}" [readonly]="true"></ion-textarea>
+        </ion-item>
+        <ion-item class="readonly" text-wrap>
+            <ion-label>Date attendue</ion-label>
+            <ion-textarea value="{{ toDate(manutention) | date:'dd/MM/yyyy h:mm:ss'  }}"
+                          [readonly]="true"></ion-textarea>
+        </ion-item>
+        <ion-item class="readonly" text-wrap>
+            <ion-label>Source</ion-label>
+            <ion-textarea value="{{ manutention.source  }}" [readonly]="true"></ion-textarea>
+        </ion-item>
+        <ion-item class="readonly" text-wrap>
+            <ion-label>Destination</ion-label>
+            <ion-textarea value="{{ manutention.destination }}" [readonly]="true"></ion-textarea>
+        </ion-item>
+        <button class="commentaire_button" (click)="showCommentaire()">
+            <span><b>Commentaire</b></span>
+            <img src="assets/icon/search.svg" class="arrow">
+        </button>
+        <div class="commentaire" *ngIf="showCom">
+            <p>{{ htmlToPlaintext(manutention.commentaire) }}</p>
+        </div>
+        <button class="validate_button" (click)="validateManut()">
+            <span><b>VALIDER</b></span>
+            <img src="assets/icon/valider01.svg" class="arrow">
+        </button>
+    </ion-scroll>
 </ion-content>

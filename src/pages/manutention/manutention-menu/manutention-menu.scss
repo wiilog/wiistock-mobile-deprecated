@@ -4,20 +4,98 @@ page-manutention-menu {
     background-color: #030F4C !important;
   }
 
+  .toolbar-title {
+    font-family: "Myriad Pro" !important;
+  }
+
+  p {
+    font-family: 'Myriad Pro' !important;
+  }
+
+  span {
+    font-family: 'Myriad Pro' !important;
+    margin-right: 15px;
+  }
+
+  .user-title {
+    .toolbar-title {
+      color: white;
+    }
+
+    text-align: center !important;
+  }
+
+  .subtitle {
+    font-size: 20px;
+    color: #030F4C;
+  }
+
+  .custom-button,
+  .custom-button.icon:before {
+    font-size: 30px !important;
+    color: white !important;
+  }
+
+  .button-custom {
+    margin: -5px 0 -5px -5px !important;
+  }
+
+  ion-navbar.toolbar {
+    min-height: 60px;
+  }
+
   ion-card-header {
     background-color: #149914;
-    height: fit-content !important;
+    height: 30px;
+    padding: 5px !important;
+
     p {
       color: white !important;
     }
   }
 
+  ion-card-content {
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+  }
+
   .titles {
     background-color: #FFFFFF !important;
+    text-align: center !important;
+    align-content: center !important;
   }
 
   .body {
     background-color: #F2F2F4 !important;
-    height: 90%;
+    height: 80%;
   }
+
+  .important {
+    color: #030F4C;
+  }
+
+  .spinner {
+    position: fixed;
+    top: 40%;
+    left: 40%;
+    text-align : center;
+  }
+
+  .main_spinner {
+    height: 100px !important;
+    width: 100px !important;
+  }
+
+  .arrow {
+    width: 15px !important;
+    height: 15px !important;
+    float: right;
+    margin-top: 1% !important;
+  }
+
+  ion-icon {
+    font-size: 85% !important;
+  }
+
+
 }

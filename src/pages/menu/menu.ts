@@ -17,7 +17,7 @@ import {ManutentionMenuPage} from "@pages/manutention/manutention-menu/manutenti
 })
 export class MenuPage {
     @ViewChild(Slides) slides: Slides;
-    items: Array<{ title: string, icon: string, page: Page }>;
+    items: Array<{ title: string, icon: string, page: Page, img: string }>;
     nbPrep: number;
     nbPrepT: number;
     nbArtInvent: number;
@@ -25,12 +25,12 @@ export class MenuPage {
     constructor(public app: App, public navCtrl: NavController, public navParams: NavParams, public sqliteProvider: SqliteProvider) {
 
         this.items = [
-            {title: 'Traça', icon: 'cube', page: StockageMenuPageTraca},
-            {title: 'Préparation', icon: 'cart', page: PreparationMenuPage},
-            {title: 'Livraison', icon: 'paper-plane', page: LivraisonMenuPage},
-            {title: 'Inventaire', icon: 'list-box', page: InventaireMenuPage},
-            {title: 'Manutention', icon: 'list-box', page: ManutentionMenuPage},
-            {title: 'Déconnexion', icon: 'log-out', page: null}
+            {title: 'Traça', icon: 'cube', page: StockageMenuPageTraca, img: null},
+            {title: 'Préparation', icon: 'cart', page: PreparationMenuPage, img: null},
+            {title: 'Livraison', icon: 'paper-plane', page: LivraisonMenuPage, img: null},
+            {title: 'Inventaire', icon: 'list-box', page: InventaireMenuPage, img: null},
+            {title: 'Manutention', icon: 'list-box', page: ManutentionMenuPage, img: 'assets/icon/manut_icon.svg'},
+            {title: 'Déconnexion', icon: 'log-out', page: null, img: null}
         ];
     }
 
@@ -44,6 +44,10 @@ export class MenuPage {
         this.sqliteProvider.count('`article_inventaire`', []).subscribe((nbArticlesInventaire: number) => {
             this.nbArtInvent = nbArticlesInventaire;
         });
+
+        this.sqliteProvider.getOperateur().then((username) => {
+            console.log(username);
+        })
     }
 
     itemTapped(event, item) {
