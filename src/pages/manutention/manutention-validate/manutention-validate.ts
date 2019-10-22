@@ -51,7 +51,8 @@ export class ManutentionValidatePage {
                 handler: commentaire =>{
                     this.commentaire = commentaire.commentaire;
                     this.notifyApi();
-                }
+                },
+                cssClass : 'alert'
             }]
         }).present();
     }
