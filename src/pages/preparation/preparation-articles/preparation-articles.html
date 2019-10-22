@@ -25,7 +25,7 @@
     </div>
     <ion-list [hidden]="articlesNT && articlesNT.length === 0">
         <ion-grid>
-            <button [disabled]="!isValid" (click)="testIfBarcodeEquals(article, false)" class="list" ion-item *ngFor="let article of articlesNT">
+            <button [disabled]="!isValid" (click)="testIfBarcodeEquals(article, true)" class="list" ion-item *ngFor="let article of articlesNT">
                 <ion-row>
                     <ion-col>{{ article.reference }}</ion-col>
                     <ion-col>{{ article.emplacement === "null" ? '' : article.emplacement }}</ion-col>

@@ -42,6 +42,9 @@ import {InventaireMenuPage} from '@pages/inventaire-menu/inventaire-menu';
 import {ModalQuantityPage} from '@pages/inventaire-menu/modal-quantity';
 import {InventaireAnomaliePage} from '@pages/inventaire-anomalie/inventaire-anomalie';
 import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.service';
+import {ToastService} from "@app/services/toast.service";
+import {PreparationRefArticlesPage} from "@pages/preparation/preparation-ref-articles/preparation-ref-articles";
+
 
 @NgModule({
     declarations: [
@@ -73,6 +76,7 @@ import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.se
         InventaireMenuPage,
         ModalQuantityPage,
         InventaireAnomaliePage,
+        PreparationRefArticlesPage
     ],
     imports: [
         IonicSelectableModule,
@@ -117,6 +121,7 @@ import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.se
         InventaireMenuPage,
         ModalQuantityPage,
         InventaireAnomaliePage,
+        PreparationRefArticlesPage
     ],
     providers: [
         StatusBar,
@@ -130,7 +135,8 @@ import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.se
         BarcodeScanner,
         NetworkProvider,
         Network,
-        ZebraBarcodeScannerService
+        ZebraBarcodeScannerService,
+        ToastService
     ]
 })
 export class AppModule {

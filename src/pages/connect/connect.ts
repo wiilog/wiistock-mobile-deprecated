@@ -1,10 +1,11 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
-import {NavController, NavParams, ToastController} from 'ionic-angular';
+import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
 import {UsersApiProvider} from "../../providers/users-api/users-api";
 import {MenuPage} from "../menu/menu";
 import {ParamsPage} from "../params/params"
 import {SqliteProvider} from "../../providers/sqlite/sqlite";
 
+@IonicPage()
 @Component({
     selector: 'page-connect',
     templateUrl: 'connect.html',
@@ -34,23 +35,31 @@ export class ConnectPage {
             this.isLoaded = true;
             if (result !== null) {
                 let url : string = result + this.connectURL;
-                this.usersApiProvider.setProvider(this.form, url).subscribe(resp => {
-                    if (resp.success) {
-                        this.sqliteProvider.setOperateur(this.form.login);
-                        this.sqliteProvider.cleanDataBase().subscribe(() => {
-                            this.sqliteProvider.clearStorage().then(() => {
-                                this.sqliteProvider.importData(resp.data)
-                                    .then(() => {
-                                        this.isLoaded = false;
-                                        this.navCtrl.setRoot(MenuPage);
-                                    });
-                            }).catch(err => console.log(err));
-                        });
-                    } else {
+                this.usersApiProvider.setProvider(this.form, url).subscribe(
+                    resp => {
+                        if (resp.success) {
+                            this.sqliteProvider.setOperateur(this.form.login);
+                            this.sqliteProvider.cleanDataBase().subscribe(() => {
+                                this.sqliteProvider.clearStorage().then(() => {
+                                    this.sqliteProvider.importData(resp.data)
+                                        .subscribe(() => {
+                                            this.isLoaded = false;
+                                            this.navCtrl.setRoot(MenuPage);
+                                        });
+                                }).catch(err => console.log(err));
+                            });
+                        }
+                        else {
+                            this.isLoaded = false;
+                            this.changeDetector.detectChanges();
+                            this.showToast('Identifiants incorrects.');
+                        }
+                    },
+                    () => {
                         this.isLoaded = false;
-                        this.showToast('Identifiants incorrects.');
-                    }
-                });
+                        this.changeDetector.detectChanges();
+                        this.showToast('Un problème est survenu, veuillez vérifier vos identifiants ainsi que l\'URL saisie sans les paramètres.');
+                    });
             } else {
                 this.isLoaded = false;
                 this.changeDetector.detectChanges();

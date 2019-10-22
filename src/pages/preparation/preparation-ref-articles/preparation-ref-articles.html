@@ -1,0 +1,44 @@
+<!--
+  Generated template for the PreparationMenuPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+    <ion-navbar>
+        <ion-buttons start>
+            <button ion-button icon-only (click)="goHome()">
+                <ion-icon name="home"></ion-icon>
+            </button>
+        </ion-buttons>
+        <ion-title>Préparation</ion-title>
+    </ion-navbar>
+</ion-header>
+
+<ion-content padding *ngIf="refArticle && articles">
+    <div class="d-flex">
+        <h4>Articles liés à la référence : {{ refArticle.reference }}</h4>
+    </div>
+    <ion-list>
+        <ion-grid>
+            <button class="list" ion-item *ngFor="let article of articles">
+                <ion-row>
+                    <ion-col>
+                        <!--                    TODO Changer class avec le theme-->
+                        <p class="title-tmp">{{article.reference}}</p>
+                        <div class="sub">
+                            <p *ngIf="article.location !== 'null'">Emplacement : {{article.location}}</p>
+                            <p *ngIf="article.quantity">Quantité restante : {{article.quantity}}</p>
+                        </div>
+                    </ion-col>
+                </ion-row>
+            </button>
+        </ion-grid>
+    </ion-list>
+</ion-content>
+<!--<ion-footer padding>-->
+<!--    <div class="d-flex">-->
+<!--        <ion-icon class="big-icon" name="qr-scanner" (click)="scan()" [hidden]="articlesNT && articlesNT.length === 0"></ion-icon>-->
+<!--        <ion-icon class="big-icon" item-right name="checkmark-circle" (click)="validate()" [class.alert]="articlesNT && articlesNT.length === 0"></ion-icon>-->
+<!--    </div>-->
+<!--</ion-footer>-->
