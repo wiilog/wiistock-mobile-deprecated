@@ -52,7 +52,7 @@ export class ManutentionValidatePage {
                     this.commentaire = commentaire.commentaire;
                     this.notifyApi();
                 },
-                cssClass : 'alert'
+                cssClass : 'alertAlert'
             }]
         }).present();
     }
