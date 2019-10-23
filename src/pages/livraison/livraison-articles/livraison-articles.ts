@@ -173,7 +173,9 @@ export class LivraisonArticlesPage {
                             id_article_prepa: null,
                             id_prepa: null,
                             id_article_livraison: insertId,
-                            id_livraison: newArticle.id_livraison
+                            id_livraison: newArticle.id_livraison,
+                            id_article_collecte: null,
+                            id_collecte: null,
                         };
                         this.sqliteProvider.updateArticleLivraisonQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - Number(this.navParams.get('quantite')))
                             .pipe(
@@ -204,7 +206,9 @@ export class LivraisonArticlesPage {
                     id_article_prepa: null,
                     id_prepa: null,
                     id_article_livraison: this.navParams.get('article').id,
-                    id_livraison: this.navParams.get('article').id_livraison
+                    id_livraison: this.navParams.get('article').id_livraison,
+                    id_article_collecte: null,
+                    id_collecte: null,
                 };
                 let articleAlready = this.articlesT.find(art => art.id_livraison === mouvement.id_livraison && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
                 if (articleAlready !== undefined) {

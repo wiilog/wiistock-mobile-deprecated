@@ -76,7 +76,9 @@ export class PriseArticlesPage {
                 id_article_prepa: article.id,
                 id_prepa: null,
                 id_livraison: null,
-                id_article_livraison: null
+                id_article_livraison: null,
+                id_article_collecte: null,
+                id_collecte: null,
             };
             if (this.articles.indexOf(article) === this.articles.length - 1) {
                 this.sqliteProvider.insert('`mouvement`', mouvement).subscribe(() => {
