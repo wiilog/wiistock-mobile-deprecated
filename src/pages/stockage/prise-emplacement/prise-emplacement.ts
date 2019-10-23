@@ -56,13 +56,11 @@ export class PriseEmplacementPage {
     // }
 
     goToArticles() {
-        console.log(this.emplacement);
         this.navCtrl.push(PriseArticlesPage, {emplacement: this.emplacement});
     }
 
     emplacementChange(event: { component: IonicSelectableComponent, value: any }) {
         this.emplacement = event.value;
-        console.log(this.emplacement);
     }
 
     searchEmplacement(event: { component: IonicSelectableComponent, text: string }) {

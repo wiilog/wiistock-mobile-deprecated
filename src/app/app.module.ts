@@ -125,6 +125,7 @@ import {ManutentionValidatePage} from "@pages/manutention/manutention-validate/m
         InventaireAnomaliePage,
     ],
     providers: [
+        BarcodeScannerManagerService,
         StatusBar,
         SplashScreen,
         {provide: ErrorHandler, useClass: IonicErrorHandler},

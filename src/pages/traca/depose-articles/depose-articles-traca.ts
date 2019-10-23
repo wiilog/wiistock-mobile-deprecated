@@ -144,6 +144,7 @@ export class DeposeArticlesPageTraca {
                     this.showToast('Cet article est déjà enregistré assez de fois dans le panier.');
                 }
             } else {
+                this.navCtrl.push(DeposeArticlesPageTraca, {emplacement : this.emplacement});
                 this.showToast('Ce colis ne correspond à aucune prise.');
             }
         });

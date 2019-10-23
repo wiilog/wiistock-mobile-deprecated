@@ -102,5 +102,4 @@
     <plugin name="com-darryncampbell-cordova-plugin-intent" spec="1.1.7" />
     <plugin name="cordova-plugin-network-information" spec="2.0.1" />
     <allow-navigation href="http://192.168.0.54:8100" />
-    <allow-navigation href="http://localhost:8100" sessionid="7f1d7e01" />
 </widget>

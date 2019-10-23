@@ -161,7 +161,6 @@ export class PreparationArticlesPage {
                     });
                 } else {
                     this.sqliteProvider.insert('`article_prepa`', newArticle).subscribe((insertId) => {
-                        console.log(insertId);
                         let mouvement: Mouvement = {
                             id: null,
                             reference: newArticle.reference,
