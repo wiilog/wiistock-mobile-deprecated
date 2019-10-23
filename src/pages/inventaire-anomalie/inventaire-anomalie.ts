@@ -1,16 +1,16 @@
 import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {Content, IonicPage, ModalController, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
-import {SqliteProvider} from "../../providers/sqlite/sqlite";
-import {HttpClient} from "@angular/common/http";
-import {Anomalie} from "../../app/entities/anomalie";
-import {BarcodeScanner} from "@ionic-native/barcode-scanner";
-import {ArticleInventaire} from "../../app/entities/articleInventaire";
-import {ModalQuantityPage} from "../inventaire-menu/modal-quantity";
-import {Article} from "../../app/entities/article";
-import {Subscription} from "rxjs";
-import {ZebraBarcodeScannerService} from "../../app/services/zebra-barcode-scanner.service";
-import {filter, flatMap} from "rxjs/operators";
-import {of} from "rxjs/observable/of";
+import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {HttpClient} from '@angular/common/http';
+import {Anomalie} from '@app/entities/anomalie';
+import {BarcodeScanner} from '@ionic-native/barcode-scanner';
+import {ArticleInventaire} from '@app/entities/article-inventaire';
+import {ModalQuantityPage} from '../inventaire-menu/modal-quantity';
+import {Article} from '@app/entities/article';
+import {Subscription} from 'rxjs';
+import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.service';
+import {filter, flatMap} from 'rxjs/operators';
+import {of} from 'rxjs/observable/of';
 
 
 @IonicPage()
@@ -176,8 +176,7 @@ export class InventaireAnomaliePage {
     //TODO CG plutôt sur anomaliesByLocation ??
     public checkBarcodeIsRef(barcode: string): void {
         if (this.anomalies.some(anomaly => (anomaly.reference === barcode))) {
-            this.article = new Article();
-            this.article.reference = barcode;
+            this.article = {reference: barcode};
             this.anomaly = this.anomaliesByLocation.find(anomaly => (anomaly.reference === barcode));
             this.changeDetector.detectChanges();
             this.openModalQuantity(this.article);

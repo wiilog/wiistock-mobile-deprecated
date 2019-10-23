@@ -1,8 +1,8 @@
 import {Component} from '@angular/core';
 import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
-import {LivraisonArticlesPage} from "../livraison-articles/livraison-articles";
-import {ArticleLivraison} from "../../../app/entities/articleLivraison";
-import {Livraison} from "../../../app/entities/livraison";
+import {LivraisonArticlesPage} from '@pages/livraison/livraison-articles/livraison-articles';
+import {ArticleLivraison} from '@app/entities/article-livraison';
+import {Livraison} from '@app/entities/livraison';
 
 /**
  * Generated class for the LivraisonArticleTakePage page.

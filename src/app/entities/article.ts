@@ -1,6 +1,6 @@
-export class Article {
-    id: number;
-    label: string;
+export interface Article {
+    id?: number;
+    label?: string;
     reference: string;
-    quantite: number;
+    quantite?: number;
 }

@@ -1,4 +1,4 @@
-export class MouvementTraca {
+export interface MouvementTraca {
     id: number;
     ref_article: string;
     date: string;

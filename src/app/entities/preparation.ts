@@ -1,4 +1,4 @@
-export class Preparation {
+export interface Preparation {
     id: number;
     numero : string;
     emplacement: string;

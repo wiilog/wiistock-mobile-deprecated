@@ -1,4 +1,4 @@
-export class Anomalie {
+export interface Anomalie {
     id: number;
     reference: string;
     is_ref: string;

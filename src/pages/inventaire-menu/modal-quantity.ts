@@ -1,6 +1,6 @@
 import {Component, ViewChild} from '@angular/core';
-import {NavParams, ViewController} from "ionic-angular";
-import {ArticleInventaire} from "../../app/entities/articleInventaire";
+import {NavParams, ViewController} from 'ionic-angular';
+import {ArticleInventaire} from '@app/entities/article-inventaire';
 
 @Component({
     templateUrl: 'modal-quantity.html',

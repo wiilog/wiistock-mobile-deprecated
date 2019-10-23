@@ -1,16 +1,16 @@
 import {SQLite, SQLiteObject} from "@ionic-native/sqlite";
 import {Injectable} from '@angular/core';
-import {StorageService} from "../../app/services/storage.service";
-import moment from "moment";
-import {Preparation} from "../../app/entities/preparation";
-import {Mouvement} from "../../app/entities/mouvement";
-import {Livraison} from "../../app/entities/livraison";
-import {Anomalie} from "../../app/entities/anomalie";
-import {Observable, ReplaySubject, Subject} from "rxjs";
-import {flatMap, map, take} from "rxjs/operators";
-import {from} from "rxjs/observable/from";
-import {of} from "rxjs/observable/of";
-import {Platform} from "ionic-angular";
+import {StorageService} from '@app/services/storage.service';
+import moment from 'moment';
+import {Preparation} from '@app/entities/preparation';
+import {Mouvement} from '@app/entities/mouvement';
+import {Livraison} from '@app/entities/livraison';
+import {Anomalie} from '@app/entities/anomalie';
+import {Observable, ReplaySubject, Subject} from 'rxjs';
+import {flatMap, map, take} from 'rxjs/operators';
+import {from} from 'rxjs/observable/from';
+import {of} from 'rxjs/observable/of';
+import {Platform} from 'ionic-angular';
 
 
 @Injectable()
@@ -19,13 +19,13 @@ export class SqliteProvider {
     private static readonly DB_NAME: string = 'follow_gt';
 
     private sqliteObject$: Subject<SQLiteObject>;
-    private dbcreated$: Subject<boolean>;
+    private dbCreated$: Subject<boolean>;
 
     public constructor(private sqlite: SQLite,
                        private storageService: StorageService,
                        private platform: Platform) {
         this.sqliteObject$ = new ReplaySubject<SQLiteObject>(1);
-        this.dbcreated$ = new ReplaySubject<boolean>(1);
+        this.dbCreated$ = new ReplaySubject<boolean>(1);
 
         this.createDB();
         this.createTables();
@@ -36,7 +36,7 @@ export class SqliteProvider {
     }
 
     private get isDBCreated$(): Observable<boolean> {
-        return this.dbcreated$.pipe(take(1));
+        return this.dbCreated$.pipe(take(1));
     }
 
     private createDB(): void {
@@ -48,7 +48,6 @@ export class SqliteProvider {
             })))
             .subscribe(
                 (sqliteObject: SQLiteObject) => {
-                    console.log('bdd created');
                     this.sqliteObject$.next(sqliteObject);
                 },
                 e => console.log(e)
@@ -75,8 +74,7 @@ export class SqliteProvider {
             ])))
         )
         .subscribe(() => {
-            console.log('All tables created');
-            this.dbcreated$.next(true);
+            this.dbCreated$.next(true);
         });
     }
 
@@ -106,7 +104,6 @@ export class SqliteProvider {
                 ])))
             )
             .subscribe(() => {
-                console.log('All tables created');
                 databaseCleaned.next(undefined);
             });
 
@@ -235,7 +232,7 @@ export class SqliteProvider {
             for (let livraison of livraisons) {
                 this.findOne('livraison', livraison.id).subscribe((livraisonInserted) => {
                     if (livraisonInserted === null) {
-                        livraisonsValues.push("(" + livraison.id + ", '" + livraison.number + "', " + null + ", " + null + ")");
+                        livraisonsValues.push("(" + livraison.id + ", '" + livraison.number + "', '" + livraison.location + "', " + null + ")");
                     }
                     if (livraisons.indexOf(livraison) === livraisons.length - 1) {
                         this.findAll('`livraison`').subscribe((livraisonsDB) => {
@@ -419,12 +416,9 @@ export class SqliteProvider {
 
     public findAll(table: string): Observable<any> {
         const findAllExecuted = new ReplaySubject<any>(1);
-        console.log('PLOP 3');
         this.db$.subscribe((db) => {
-            console.log('PLOP 4', 'SELECT * FROM ' + table);
             db.executeSql('SELECT * FROM ' + table, [])
                 .then((data) => {
-                    console.log('PLOP 5', data);
                     if (data == null) {
                         findAllExecuted.next(undefined);
                     }

@@ -1,16 +1,17 @@
 import {Component, ViewChild} from '@angular/core';
 import {IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
-import {MenuPage} from "../../menu/menu";
-import {Preparation} from "../../../app/entities/preparation";
-import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import {ArticlePrepa} from "../../../app/entities/articlePrepa";
-import {PreparationMenuPage} from "../preparation-menu/preparation-menu";
-import {Mouvement} from "../../../app/entities/mouvement";
-import {PreparationArticleTakePage} from "../preparation-article-take/preparation-article-take";
-import {HttpClient} from "@angular/common/http";
-import {BarcodeScanner} from "@ionic-native/barcode-scanner";
-import {PreparationEmplacementPage} from "../preparation-emplacement/preparation-emplacement";
-import moment from "moment";
+import {MenuPage} from '@pages/menu/menu';
+import {Preparation} from '@app/entities/preparation';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {ArticlePrepa} from '@app/entities/article-prepa';
+import {PreparationMenuPage} from '@pages/preparation/preparation-menu/preparation-menu';
+import {Mouvement} from '@app/entities/mouvement';
+import {PreparationArticleTakePage} from '@pages/preparation/preparation-article-take/preparation-article-take';
+import {HttpClient} from '@angular/common/http';
+import {BarcodeScanner} from '@ionic-native/barcode-scanner';
+import {PreparationEmplacementPage} from '@pages/preparation/preparation-emplacement/preparation-emplacement';
+import moment from 'moment';
+
 
 /**
  * Generated class for the PreparationArticlesPage page.
