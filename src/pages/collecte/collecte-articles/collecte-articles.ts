@@ -2,7 +2,6 @@ import {Component, ViewChild} from '@angular/core';
 import {IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {CollecteMenuPage} from '@pages/collecte/collecte-menu/collecte-menu';
 import {Mouvement} from '@app/entities/mouvement';
 import {CollecteArticleTakePage} from '@pages/collecte/collecte-article-take/collecte-article-take';
 import {HttpClient} from '@angular/common/http';
@@ -12,13 +11,6 @@ import moment from 'moment';
 import {ArticleCollecte} from '@app/entities/article-collecte';
 import {Collecte} from '@app/entities/collecte';
 import {flatMap} from 'rxjs/operators';
-
-/**
- * Generated class for the LivraisonArticlesPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
 
 @IonicPage()
 @Component({
@@ -117,18 +109,16 @@ export class CollecteArticlesPage {
         toast.present();
     }
 
-    ionViewDidEnter() {
-        this.setBackButtonAction();
-    }
-
-
-    setBackButtonAction() {
-        this.navBar.backButtonClick = () => {
-
-            //Write here wherever you wanna do
-            this.navCtrl.setRoot(CollecteMenuPage);
-        }
-    }
+    // ionViewDidEnter() {
+    //     this.setBackButtonAction();
+    // }
+    //
+    //
+    // setBackButtonAction() {
+    //     this.navBar.backButtonClick = () => {
+    //         // this.navCtrl.setRoot(CollecteMenuPage);
+    //     }
+    // }
 
     registerMvt() {
         if (this.isValid) {

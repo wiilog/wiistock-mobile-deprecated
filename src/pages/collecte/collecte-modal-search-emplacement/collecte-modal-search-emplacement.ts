@@ -5,13 +5,6 @@ import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 import { CollecteEmplacementPage } from "../collecte-emplacement/collecte-emplacement";
 import { Collecte } from "../../../app/entities/collecte";
 
-/**
- * Generated class for the LivraisonModalSearchEmplacementPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
-
 @IonicPage()
 @Component({
     selector: 'page-collecte-modal-search-emplacement',

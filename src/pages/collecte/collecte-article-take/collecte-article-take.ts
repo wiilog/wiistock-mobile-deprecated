@@ -4,13 +4,6 @@ import {CollecteArticlesPage} from '@pages/collecte/collecte-articles/collecte-a
 import {ArticleCollecte} from '@app/entities/article-collecte';
 import {Collecte} from '@app/entities/collecte';
 
-/**
- * Generated class for the LivraisonArticleTakePage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
-
 @IonicPage()
 @Component({
     selector: 'page-collecte-article-take',

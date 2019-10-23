@@ -401,7 +401,6 @@ export class SqliteProvider {
     }
 
     public async importData(data, refresh = false) {
-        console.log("started importing data");
         return new Promise<any>((resolve) => {
             let imports = [];
             this.initPrepsCount(data, refresh).then(() => {
@@ -419,7 +418,6 @@ export class SqliteProvider {
                                         if (sqlArticlesLivraison !== false) imports.push(sqlArticlesLivraison);
                                         this.importArticlesInventaire(data).subscribe((sqlArticlesInventaire) => {
                                             if (sqlArticlesInventaire !== false) imports.push(sqlArticlesInventaire);
-                                            console.log("started importing collectes");
                                             this.importCollectes(data).then((sqlCollectes) => {
                                                 if (sqlCollectes !== false) imports.push(sqlCollectes);
                                                 this.importArticlesCollecte(data).then((sqlArticlesCollecte) => {
@@ -577,15 +575,12 @@ export class SqliteProvider {
 
     public insert(name: string, object: any): Observable<number> {
         let values = [];
-        console.log(object);
         let query = "INSERT INTO " + name + " VALUES (";
         Object.keys(object).forEach((key) => {
             values.push(object[key]);
             query += '?, '
         });
         query = query.slice(0, -2) + ");";
-        console.log(query);
-        console.log(values);
         const insertExecuted = new ReplaySubject<any>(1);
         this.db$.subscribe((db) => {
             db.executeSql(query, values).then((id) => {
@@ -724,7 +719,6 @@ export class SqliteProvider {
         return this.db$.pipe(
             flatMap((db: SQLiteObject) => from(db.executeSql('SELECT * FROM `article_collecte` WHERE `id_collecte` = ' + id_col, []))),
             map((articles) => {
-                console.log('in request');
                 const list = [];
                 if (articles && articles.rows) {
                     for (let i = 0; i < articles.rows.length; i++) {

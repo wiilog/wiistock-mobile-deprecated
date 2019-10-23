@@ -6,13 +6,6 @@ import {HttpClient} from "@angular/common/http";
 import { CollecteArticlesPage } from "../collecte-articles/collecte-articles";
 import {Collecte} from "../../../app/entities/collecte";
 
-/**
- * Generated class for the LivraisonMenuPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
-
 @IonicPage()
 @Component({
     selector: 'page-collectes-menu',
@@ -44,7 +37,6 @@ export class CollecteMenuPage {
 
     setBackButtonAction() {
         this.navBar.backButtonClick = () => {
-            //Write here wherever you wanna do
             this.navCtrl.setRoot(MenuPage);
         }
     }

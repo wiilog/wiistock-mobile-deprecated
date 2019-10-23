@@ -9,13 +9,6 @@ import {HttpClient} from "@angular/common/http";
 import {CollecteArticlesPage} from "../collecte-articles/collecte-articles";
 import {Collecte} from "../../../app/entities/collecte";
 
-/**
- * Generated class for the LivraisonEmplacementPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
-
 @IonicPage()
 @Component({
     selector: 'page-collecte-emplacement',
@@ -76,7 +69,6 @@ export class CollecteEmplacementPage {
 
     setBackButtonAction() {
         this.navBar.backButtonClick = () => {
-            //Write here wherever you wanna do
             this.navCtrl.push(CollecteArticlesPage, {
                 collecte: this.collecte
             });
