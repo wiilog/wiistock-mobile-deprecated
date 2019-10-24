@@ -66,6 +66,9 @@ export class PreparationArticlesPage {
         });
     }
     public saveSelectedArticle(selectedArticle: ArticlePrepa|ArticlePrepaByRefArticle, selectedQuantity: number): void {
+        console.log(selectedArticle);
+
+
         // if preparation is valid
         if (this.isValid) {
 
@@ -95,8 +98,9 @@ export class PreparationArticlesPage {
                     (art.reference === newArticle.reference)
                 ));
                 if (articleAlready !== undefined) {
+                    console.log('PLOP 1')
                     // we update the quantity in the list of treated article
-                    this.sqliteProvider.updateArticlePrepaQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite)
+                    this.sqliteProvider.updateArticlePrepaQuantity(articleAlready.id, Number(newArticle.quantite) + Number(articleAlready.quantite))
                         .pipe(
                             // we update quantity in the list of untreated articles
                             flatMap(() => this.sqliteProvider.updateArticlePrepaQuantity((selectedArticle as ArticlePrepa).id, (selectedArticle as ArticlePrepa).quantite - newArticle.quantite)),
@@ -107,9 +111,15 @@ export class PreparationArticlesPage {
                 }
                 else {
                     if (isSelectableByUser) {
+                        console.log('PLOP 2');
+
                         this.moveArticle(selectedArticle, selectedQuantity)
+                            .subscribe(() => {
+                                this.updateViewLists();
+                            });
                     }
                     else {
+                        console.log('PLOP 2 bis');
                         this.sqliteProvider.insert('`article_prepa`', newArticle).subscribe((insertId) => {
                             let mouvement: Mouvement = {
                                 id: null,
@@ -139,10 +149,11 @@ export class PreparationArticlesPage {
             }
             // if we select all the article
             else {
+
                 let mouvement: Mouvement = {
                     id: null,
                     reference: selectedArticle.reference,
-                    selected_by_article: isSelectableByUser,
+                    selected_by_article: isSelectableByUser ? 1 : 0,
                     quantity: isSelectableByUser
                         ? (selectedArticle as ArticlePrepaByRefArticle).quantity
                         : (selectedArticle as ArticlePrepa).quantite,
@@ -154,7 +165,7 @@ export class PreparationArticlesPage {
                     location: null,
                     type: 'prise-dépose',
                     is_ref: isSelectableByUser
-                        ? null
+                        ? '0'
                         : (selectedArticle as ArticlePrepa).is_ref,
                     id_article_prepa: isSelectableByUser
                         ? null
@@ -174,19 +185,22 @@ export class PreparationArticlesPage {
 
 
                 if (articleAlready) { // we don't enter here if it's an article selected by the user in the liste of article_prepa_by_ref_article
+                    console.log('PLOP 3')
                     this.sqliteProvider
                         .updateArticlePrepaQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite)
-                        .pipe(flatMap(() => this.sqliteProvider.deleteById('`article_prepa`', (selectedArticle as ArticlePrepa).id)))
+                        .pipe(flatMap(() => {
+                            console.log('DELETE BY ID');
+                            return this.sqliteProvider.deleteById('`article_prepa`', (selectedArticle as ArticlePrepa).id)
+                        }))
                         .subscribe(() => {
-                            this.updateLists();
+                            console.log('UPDATE LLIST')
+                            this.updateViewLists();
                         });
                 }
-                else {
-                    this.sqliteProvider
-                        .insert('`mouvement`', mouvement)
-                        .pipe(flatMap(() => this.moveArticle(selectedArticle)))
+                else {console.log('PLOP 4')
+                    this.moveArticle(selectedArticle)
                         .subscribe(() => {
-                            this.updateLists();
+                            this.updateViewLists();
                         });
                 }
             }
@@ -286,7 +300,7 @@ export class PreparationArticlesPage {
                 started: this.started,
                 valid: this.isValid,
                 getArticleByBarcode: (barcode: string) => this.getArticleByBarcode(barcode),
-                selectArticle: (selectedQuantity: number) => this.selectArticle(selectedArticle, selectedQuantity)
+                selectArticle: (selectedQuantity: number, selectedArticleByRef: ArticlePrepaByRefArticle) => this.selectArticle(selectedArticleByRef, selectedQuantity)
             });
         }
         else {
@@ -337,10 +351,17 @@ export class PreparationArticlesPage {
         }
     }
 
-    private updateLists(): void {
-        this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articlesPrepa: Array<ArticlePrepa>) => {
-            this.articlesNT = articlesPrepa.filter(article => article.has_moved === 0);
-            this.articlesT = articlesPrepa.filter(article => article.has_moved === 1);
+    private updateLists(): Observable<undefined> {
+        return this.sqliteProvider.findArticlesByPrepa(this.preparation.id).pipe(
+            flatMap((articlesPrepa: Array<ArticlePrepa>) => {
+                this.articlesNT = articlesPrepa.filter(article => article.has_moved === 0);
+                this.articlesT = articlesPrepa.filter(article => article.has_moved === 1);
+                return of(undefined);
+            }));
+    }
+
+    private updateViewLists(): void {
+        this.updateLists().subscribe(() => {
             if (this.articlesNT.length === 0) {
                 this.refreshOver();
             }
@@ -351,6 +372,8 @@ export class PreparationArticlesPage {
     }
 
     private moveArticle(selectedArticle, selectedQuantity?: number): Observable<any> {
+        console.log('IDDDDDDD', selectedArticle)
+        const selectedQuantityValid = selectedQuantity ? selectedQuantity : (selectedArticle as ArticlePrepaByRefArticle).quantity;
         return ((selectedArticle as ArticlePrepaByRefArticle).isSelectableByUser)
             ? this.sqliteProvider
                 .insert('article_prepa', {
@@ -358,26 +381,59 @@ export class PreparationArticlesPage {
                     reference: (selectedArticle as ArticlePrepaByRefArticle).reference,
                     is_ref: 1,
                     has_moved: 1,
-                    emplacement: (selectedArticle as ArticlePrepaByRefArticle).reference,
-                    quantite: selectedQuantity ? selectedQuantity : (selectedArticle as ArticlePrepaByRefArticle).quantity
+                    id_prepa: this.preparation.id,
+                    isSelectableByUser: true,
+                    emplacement: (selectedArticle as ArticlePrepaByRefArticle).location,
+                    quantite: selectedQuantityValid
                 })
                 .pipe(
-                    flatMap(() => this.sqliteProvider.deleteById('article_prepa_by_ref_article', selectedArticle.id)),
+                    flatMap((insertId) => {
+
+                        let mouvement: Mouvement = {
+                            id: null,
+                            reference: (selectedArticle as ArticlePrepaByRefArticle).reference,
+                            quantity: selectedQuantityValid,
+                            date_pickup: moment().format(),
+                            location_from: (selectedArticle as ArticlePrepaByRefArticle).location,
+                            date_drop: null,
+                            location: null,
+                            type: 'prise-dépose',
+                            is_ref: '0',
+                            selected_by_article: 1,
+                            id_article_prepa: insertId,
+                            id_prepa: this.preparation.id,
+                            id_article_livraison: null,
+                            id_livraison: null
+                        };
+                        return this.sqliteProvider.insert('`mouvement`', mouvement);
+                    }),
+                    flatMap((res) => {
+                        console.log('RES ', res)
+                        return this.sqliteProvider.deleteById('article_prepa_by_ref_article', selectedArticle.id)
+                    }),
+                    flatMap(() => this.updateLists()),
 
                     // delete articlePrepa if all quantity has been selected
-                    flatMap(() => this.sqliteProvider.findOneBy('article_prepa', 'reference', (selectedArticle as ArticlePrepaByRefArticle).reference_article)),
-                    flatMap((referenceArticle: ArticlePrepa) => {
+                    flatMap(() => {
+                        console.log('NEXT 1');
+                        return this.sqliteProvider.findOneBy('article_prepa', 'reference', (selectedArticle as ArticlePrepaByRefArticle).reference_article);
+                    }),
+                    flatMap((referenceArticle) => {
+
                         // we get all quantity picked for this refArticle plus the current quantity which is selected
                         const quantityPicked = this.articlesT.reduce((acc: number, article: ArticlePrepa) => (
                             acc +
                             ((article.isSelectableByUser && ((selectedArticle as ArticlePrepaByRefArticle).reference_article === article.reference))
-                                ? article.quantite
+                                ? Number(article.quantite)
                                 : 0)
-                        ), (selectedArticle as ArticlePrepaByRefArticle).quantity);
+                        ), selectedQuantityValid);
+
+                        console.log('QUANTITY PICKED', this.articlesT);
+                        console.log('QUANTITY PICKED', selectedQuantityValid, quantityPicked, referenceArticle.quantite);
 
                         return (referenceArticle.quantite === quantityPicked)
                             ? this.sqliteProvider.deleteById('article_prepa', referenceArticle.id)
-                            : of(undefined)
+                            : this.sqliteProvider.updateArticlePrepaQuantity(referenceArticle.id, referenceArticle.quantite - selectedQuantityValid)
                     })
                 )
             : this.sqliteProvider.moveArticle((selectedArticle as ArticlePrepa).id)

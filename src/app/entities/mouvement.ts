@@ -12,5 +12,5 @@ export interface Mouvement {
     id_prepa: number;
     id_article_livraison: number;
     id_livraison: number;
-    selected_by_article?: boolean;
+    selected_by_article?: number;
 }

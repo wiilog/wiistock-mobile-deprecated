@@ -18,24 +18,30 @@ export class PreparationArticleTakePage {
     public quantite: number;
     public preparation: Preparation;
 
+    private onlyOne: boolean;
     private selectArticle: (quantity: number) => void;
 
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
                        public toastService: ToastService) {}
 
-    public ionViewDidEnter(): void {
+    public ionViewWillEnter(): void {
         this.article = this.navParams.get('article');
         this.refArticle = this.navParams.get('refArticle');
         this.preparation = this.navParams.get('preparation');
         this.selectArticle = this.navParams.get('selectArticle');
+        this.onlyOne = this.navParams.get('onlyOne');
 
         this.quantite = this.maxQuantityAvailable;
     }
 
     public addArticle(): void {
-        if (this.quantite > this.maxQuantityAvailable || this.quantite <= 0) {
+        const maxQuantityAvailable = this.maxQuantityAvailable;
+        if (this.quantite > maxQuantityAvailable || this.quantite <= 0) {
             this.toastService.showToast('Veuillez sélectionner une quantité valide.');
+        }
+        else if (this.onlyOne && this.quantite !== maxQuantityAvailable) {
+            this.toastService.showToast(`La quantité souhaitée doit obligatoirement être égale à `);
         }
         else {
             this.selectArticle(this.quantite);

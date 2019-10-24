@@ -65,7 +65,7 @@ export class SqliteProvider {
                 db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []),
                 db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER)', []),
-                db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `type_quantite` TEXT)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `type_quantite` TEXT, `isSelectableByUser` INTEGER)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa_by_ref_article` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `reference` TEXT, `label` TEXT, `location` TEXT, `quantity` INTEGER, `reference_article` TEXT, `isSelectableByUser` INTEGER)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_livraison` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_livraison` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []),
@@ -357,8 +357,6 @@ export class SqliteProvider {
                 articleValues + ';';
         }
 
-        console.log(ret);
-
         return ret;
     }
 
@@ -430,10 +428,8 @@ export class SqliteProvider {
     }
 
     public findOneBy(table: string, name: string, value: string): Observable<any> {
-        let query: string = "SELECT * FROM " + table + " WHERE ? LIKE '?'";
-
         return this.db$.pipe(
-            flatMap((db) => from(db.executeSql(query, [name, value]))),
+            flatMap((db) => from(db.executeSql(`SELECT * FROM ${table} WHERE ${name} LIKE '${value}'`, []))),
             map((data) => (
                 (data.rows.length > 0)
                     ? data.rows.item(0)
@@ -567,6 +563,9 @@ export class SqliteProvider {
 
 
     public insert(name: string, object: any): Observable<number> {
+        if (name === 'mouvement') {
+            console.log('INSERT MOVEMENT ');
+        }
         const objectKeys = Object.keys(object);
         const valuesMap = objectKeys
             .map((key) => (((typeof object[key] === 'number') || object[key] === null)
@@ -863,7 +862,7 @@ export class SqliteProvider {
 
     public deleteById(table, id): Observable<undefined> {
         return this.db$.pipe(
-            flatMap((db) => from(db.executeSql('DELETE FROM ' + table + 'WHERE id = ' + id, []))),
+            flatMap((db) => from(db.executeSql(`DELETE FROM ${table} WHERE id = ${id}`, []))),
             map(() => undefined)
         );
     }

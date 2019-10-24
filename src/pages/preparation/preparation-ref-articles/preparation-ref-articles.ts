@@ -10,6 +10,7 @@ import {ArticlePrepaByRefArticle} from "@app/entities/article-prepa-by-ref-artic
 import {ZebraBarcodeScannerService} from "@app/services/zebra-barcode-scanner.service";
 import {Observable, Subscription} from "rxjs";
 import {PreparationArticleTakePage} from "@pages/preparation/preparation-article-take/preparation-article-take";
+import {IonicSelectableComponent} from "ionic-selectable";
 
 
 @IonicPage()
@@ -19,11 +20,19 @@ import {PreparationArticleTakePage} from "@pages/preparation/preparation-article
 })
 export class PreparationRefArticlesPage {
 
+    public static readonly LIST_WHERE_CLAUSE = (reference) => ([
+        `reference_article LIKE '${reference}'`
+    ]);
+
     @ViewChild(Navbar)
     public navBar: Navbar;
-
     public refArticle: ArticlePrepa;
     public articles: Array<ArticlePrepaByRefArticle>;
+
+    public articlesToShow: Array<ArticlePrepaByRefArticle>;
+
+    public searchArticle: string;
+    public readonly MAX_DISPLAY_ITEM: number = 30;
 
     private zebraBarcodeSubscription: Subscription;
 
@@ -37,15 +46,10 @@ export class PreparationRefArticlesPage {
                        private barcodeScanner: BarcodeScanner,
                        private zebraBarcodeScannerService: ZebraBarcodeScannerService) {
         this.articles = [];
+        this.articlesToShow = [];
     }
 
-    scan() {
-        this.barcodeScanner.scan().then(res => {
-            this.testIfBarcodeEquals(res.text);
-        });
-    }
-
-    public ionViewDidEnter(): void {
+    public ionViewWillEnter(): void {
         this.refArticle = this.navParams.get('article');
         this.getArticleByBarcode = this.navParams.get('getArticleByBarcode');
 
@@ -53,6 +57,7 @@ export class PreparationRefArticlesPage {
             .findBy('article_prepa_by_ref_article', [`reference_article LIKE '${this.refArticle.reference}'`])
             .subscribe((articles) => {
                 this.articles = articles;
+                this.articlesToShow = articles;
             });
 
         this.zebraBarcodeSubscription = this.zebraBarcodeScannerService.zebraScan$.subscribe((barcode: string) => {
@@ -60,32 +65,55 @@ export class PreparationRefArticlesPage {
         });
     }
 
-    public ionViewDidLeave(): void {
+    public ionViewWillLeave(): void {
         if (this.zebraBarcodeSubscription) {
             this.zebraBarcodeSubscription.unsubscribe();
             this.zebraBarcodeSubscription = undefined;
         }
     }
 
-    private testIfBarcodeEquals(barcode: string): void {
+    public scan(): void {
+        this.barcodeScanner.scan().then(res => {
+            this.testIfBarcodeEquals(res.text);
+        });
+    }
 
+    private testIfBarcodeEquals(barcode: string): void {
         this.getArticleByBarcode(barcode).subscribe(({selectedArticle}) => {
             if (selectedArticle) {
-                this.navCtrl.push(PreparationArticleTakePage, {
-                    article: selectedArticle,
-                    refArticle: this.refArticle,
-                    preparation: this.navParams.get('preparation'),
-                    started: this.navParams.get('started'),
-                    valid: this.navParams.get('valid'),
-                    selectArticle: (selectedQuantity: number) => {
-                        const selectArticle = this.navParams.get('selectArticle');
-                        selectArticle(selectedQuantity);
-                        this.navCtrl.pop();
-                    }
-                });
+                this.selectArticle(selectedArticle);
             }
             else {
                 this.toastService.showToast('L\'article scanné n\'est pas présent dans la liste.');
+            }
+        });
+    }
+
+    public onArticleSearch(event: { component: IonicSelectableComponent, text: string }) {
+        let text = event.text.trim();
+        event.component.startSearch();
+        this.sqliteProvider.findBy('article_prepa_by_ref_article', [
+            ...PreparationRefArticlesPage.LIST_WHERE_CLAUSE(this.refArticle.reference),
+            `reference LIKE '%${text}%'`
+        ]).subscribe((items) => {
+            this.articlesToShow = items;
+            event.component.endSearch();
+        });
+    }
+
+    public selectArticle(selectedArticle: ArticlePrepaByRefArticle): void {
+        this.navCtrl.push(PreparationArticleTakePage, {
+            article: selectedArticle,
+            refArticle: this.refArticle,
+            preparation: this.navParams.get('preparation'),
+            onlyOne: (this.articles.length === 1),
+            started: this.navParams.get('started'),
+            valid: this.navParams.get('valid'),
+            selectArticle: (selectedQuantity: number) => {
+                console.log('REF ARTICLE ---> ', selectedArticle);
+                const selectArticle = this.navParams.get('selectArticle');
+                selectArticle(selectedQuantity, selectedArticle);
+                this.navCtrl.pop();
             }
         });
     }
