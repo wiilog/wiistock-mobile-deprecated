@@ -229,7 +229,7 @@ export class SqliteProvider {
                 this.findOne('manutention', manut.id).subscribe((manutInserted) => {
                     if (manutInserted === null) {
                         let comment = manut.commentaire === null ? '' : this.escapeQuotes(manut.commentaire);
-                        manutValues.push("(" + manut.id + ", '" + manut.date_attendue.date + "', '" + manut.demandeur + "', '" + comment + "', '" + manut.source + "', '" + manut.destination + "')");
+                        manutValues.push("(" + manut.id + ", '" + manut.date_attendue.date + "', '" + manut.demandeur + "', '" + comment + "', '" + this.escapeQuotes(manut.source) + "', '" + this.escapeQuotes(manut.destination) + "')");
                     }
                     if (manutentions.indexOf(manut) === manutentions.length - 1) {
                         this.findAll('`manutention`').subscribe((manutentionsDB) => {
