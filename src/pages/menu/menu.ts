@@ -10,6 +10,7 @@ import {ParamsPage} from "../params/params";
 import {ConnectPage} from "../connect/connect";
 import {InventaireMenuPage} from "../inventaire-menu/inventaire-menu";
 import {CollecteMenuPage} from "@pages/collecte/collecte-menu/collecte-menu";
+import {ManutentionMenuPage} from "@pages/manutention/manutention-menu/manutention-menu";
 
 @Component({
     selector: 'page-menu',
@@ -30,6 +31,7 @@ export class MenuPage {
             {title: 'Livraison', icon: 'paper-plane', page: LivraisonMenuPage, img: null},
             {title: 'Inventaire', icon: 'list-box', page: InventaireMenuPage, img: null},
             {title: 'Manutention', icon: 'list-box', page: ManutentionMenuPage, img: 'assets/icon/manut_icon.svg'},
+            {title: 'Collecte', icon: 'list-box', page: CollecteMenuPage, img: null},
             {title: 'Déconnexion', icon: 'log-out', page: null, img: null}
         ];
     }

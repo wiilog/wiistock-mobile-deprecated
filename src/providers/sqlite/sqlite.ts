@@ -222,7 +222,7 @@ export class SqliteProvider {
             for (let manut of manutentions) {
                 this.findOne('manutention', manut.id).subscribe((manutInserted) => {
                     if (manutInserted === null) {
-                        manutValues.push("(" + manut.id + ", '" + manut.date_attendue.date + "', '" + manut.demandeur + "', '" + (manut.commentaire === null ? '' : manut.commentaire) + "', '"  + manut.source + "', '"  + manut.destination + "')");
+                        manutValues.push("(" + manut.id + ", '" + manut.date_attendue.date + "', '" + manut.demandeur + "', '" + (manut.commentaire === null ? '' : manut.commentaire) + "', '" + manut.source + "', '" + manut.destination + "')");
                     }
                     if (manutentions.indexOf(manut) === manutentions.length - 1) {
                         this.findAll('`manutention`').subscribe((manutentionsDB) => {
@@ -463,21 +463,18 @@ export class SqliteProvider {
                                             if (sqlArticlesInventaire !== false) imports.push(sqlArticlesInventaire);
                                             this.importManutentions(data).then((sqlManutentions) => {
                                                 if (sqlManutentions !== false) imports.push(sqlManutentions);
-                                                this.executeAllImports(imports).subscribe(() => {
-                                                    console.log('Imported All Data');
-                                                    resolve();
+                                                this.importCollectes(data).then((sqlCollectes) => {
+                                                    if (sqlCollectes !== false) imports.push(sqlCollectes);
+                                                    this.importArticlesCollecte(data).then((sqlArticlesCollecte) => {
+                                                        if (sqlArticlesCollecte !== false) imports.push(sqlArticlesCollecte);
+                                                        this.executeAllImports(imports).subscribe(() => {
+                                                            console.log('Imported All Data');
+                                                            resolve();
+                                                        })
+                                                    });
                                                 });
                                             });
-                                            this.importCollectes(data).then((sqlCollectes) => {
-                                                if (sqlCollectes !== false) imports.push(sqlCollectes);
-                                                this.importArticlesCollecte(data).then((sqlArticlesCollecte) => {
-                                                    if (sqlArticlesCollecte !== false) imports.push(sqlArticlesCollecte);
-                                                    this.executeAllImports(imports).subscribe(() => {
-                                                        console.log('Imported All Data');
-                                                        resolve();
-                                                    })
-                                                });
-                                            });
+
                                         });
                                     });
                                 });

@@ -47,6 +47,8 @@ import {CollecteMenuPage} from "@pages/collecte/collecte-menu/collecte-menu";
 import {CollecteArticleTakePage} from "@pages/collecte/collecte-article-take/collecte-article-take";
 import {CollecteArticlesPage} from "@pages/collecte/collecte-articles/collecte-articles";
 import {CollecteEmplacementPage} from "@pages/collecte/collecte-emplacement/collecte-emplacement";
+import {ManutentionValidatePage} from "@pages/manutention/manutention-validate/manutention-validate";
+import {ManutentionMenuPage} from "@pages/manutention/manutention-menu/manutention-menu";
 
 @NgModule({
     declarations: [
