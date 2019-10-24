@@ -1,29 +1,22 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
+import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {Preparation} from '@app/entities/preparation';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ArticlePrepa} from '@app/entities/article-prepa';
-import {PreparationMenuPage} from '@pages/preparation/preparation-menu/preparation-menu';
 import {Mouvement} from '@app/entities/mouvement';
 import {PreparationArticleTakePage} from '@pages/preparation/preparation-article-take/preparation-article-take';
 import {HttpClient} from '@angular/common/http';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {PreparationEmplacementPage} from '@pages/preparation/preparation-emplacement/preparation-emplacement';
 import moment from 'moment';
-import {PreparationRefArticlesPage} from "@pages/preparation/preparation-ref-articles/preparation-ref-articles";
-import {Observable} from "rxjs";
-import {flatMap, map} from "rxjs/operators";
-import {ArticlePrepaByRefArticle} from "@app/entities/article-prepa-by-ref-article";
-import {of} from "rxjs/observable/of";
+import {PreparationRefArticlesPage} from '@pages/preparation/preparation-ref-articles/preparation-ref-articles';
+import {Observable} from 'rxjs';
+import {flatMap, map} from 'rxjs/operators';
+import {ArticlePrepaByRefArticle} from '@app/entities/article-prepa-by-ref-article';
+import {of} from 'rxjs/observable/of';
+import {ToastService} from '@app/services/toast.service';
 
-
-/**
- * Generated class for the PreparationArticlesPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
 
 @IonicPage()
 @Component({
@@ -32,59 +25,22 @@ import {of} from "rxjs/observable/of";
 })
 export class PreparationArticlesPage {
 
-    @ViewChild(Navbar) navBar: Navbar;
-    preparation: Preparation;
-    articlesNT: Array<ArticlePrepa>;
-    articlesT: Array<ArticlePrepa>;
-    started: boolean = false;
-    apiStartPrepa = '/api/beginPrepa';
-    isValid: boolean = true;
+    @ViewChild(Navbar)
+    public navBar: Navbar;
 
-    constructor(
-        public navCtrl: NavController,
-        public navParams: NavParams,
-        public toastController: ToastController,
-        public sqliteProvider: SqliteProvider,
-        public http: HttpClient,
-        public barcodeScanner: BarcodeScanner) {
-        if (typeof (navParams.get('preparation')) !== undefined) {
-            this.preparation = navParams.get('preparation');
-            this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
-                this.articlesNT = articles.filter(article => article.has_moved === 0);
-                this.articlesT = articles.filter(article => article.has_moved === 1);
-                if (this.articlesT.length > 0) {
-                    this.started = true;
-                }
-                if (navParams.get('article') !== undefined && navParams.get('quantite') !== undefined) {
-                    this.isValid = this.navParams.get('valid');
-                    this.started = this.navParams.get('started');
-                    if (!this.started) {
-                        this.sqliteProvider.getAPI_URL().subscribe((result) => {
-                            this.sqliteProvider.getApiKey().then((key) => {
-                                if (result !== null) {
-                                    let url: string = result + this.apiStartPrepa;
-                                    this.http.post<any>(url, {id: this.preparation.id, apiKey: key}).subscribe(resp => {
-                                        if (resp.success) {
-                                            this.started = true;
-                                            this.isValid = true;
-                                            this.sqliteProvider.startPrepa(this.preparation.id).subscribe(() => {
-                                                this.showToast('Préparation commencée.');
-                                                this.selectArticle();
-                                            });
-                                        } else {
-                                            this.isValid = false;
-                                            this.showToast(resp.msg);
-                                        }
-                                    });
-                                }
-                            });
-                        });
-                    } else {
-                        this.selectArticle();
-                    }
-                }
-            })
-        }
+    public preparation: Preparation;
+    public articlesNT: Array<ArticlePrepa>;
+    public articlesT: Array<ArticlePrepa>;
+    public started: boolean = false;
+    public apiStartPrepa = '/api/beginPrepa';
+    public isValid: boolean = true;
+
+    public constructor(public navCtrl: NavController,
+                       public navParams: NavParams,
+                       public sqliteProvider: SqliteProvider,
+                       public http: HttpClient,
+                       public barcodeScanner: BarcodeScanner,
+                       private toastService: ToastService) {
 
         let instance = this;
         (<any>window).plugins.intentShim.registerBroadcastReceiver({
@@ -100,46 +56,16 @@ export class PreparationArticlesPage {
             });
     }
 
-    scan() {
+    public ionViewDidEnter(): void {
+        this.initializeScreen();
+    }
+
+    public scan(): void {
         this.barcodeScanner.scan().then(res => {
             this.testIfBarcodeEquals(res.text);
         });
     }
-
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
-    }
-
-    ionViewDidEnter() {
-        this.setBackButtonAction();
-    }
-
-    refreshOver() {
-        this.showToast('Préparation prête à être finalisée.')
-    }
-
-    refresh() {
-        this.showToast('Quantité bien prélevée.')
-    }
-
-    setBackButtonAction() {
-        this.navBar.backButtonClick = () => {
-
-            //Write here wherever you wanna do
-            this.navCtrl.setRoot(PreparationMenuPage);
-        }
-    }
-
-    public selectArticle(selectedArticle: ArticlePrepa|ArticlePrepaByRefArticle, selectedQuantity: number): void {
-        // const selectedArticle = this.navParams.get('article');
-        // const selectedQuantity = Number(this.navParams.get('quantite'));
-
+    public saveSelectedArticle(selectedArticle: ArticlePrepa|ArticlePrepaByRefArticle, selectedQuantity: number): void {
         // if preparation is valid
         if (this.isValid) {
 
@@ -181,7 +107,7 @@ export class PreparationArticlesPage {
                 }
                 else {
                     if (isSelectableByUser) {
-                        this.selectAnArticle(selectedArticle, selectedQuantity)
+                        this.moveArticle(selectedArticle, selectedQuantity)
                     }
                     else {
                         this.sqliteProvider.insert('`article_prepa`', newArticle).subscribe((insertId) => {
@@ -201,7 +127,8 @@ export class PreparationArticlesPage {
                                 id_livraison: null
                             };
                             // we update value quantity of selected article
-                            this.sqliteProvider.updateArticlePrepaQuantity((selectedArticle as ArticlePrepa).id, (selectedArticle as ArticlePrepa).quantite - selectedQuantity)
+                            this.sqliteProvider
+                                .updateArticlePrepaQuantity((selectedArticle as ArticlePrepa).id, (selectedArticle as ArticlePrepa).quantite - selectedQuantity)
                                 .pipe(flatMap(() => this.sqliteProvider.insert('`mouvement`', mouvement)))
                                 .subscribe(() => {
                                     this.updateLists();
@@ -257,7 +184,7 @@ export class PreparationArticlesPage {
                 else {
                     this.sqliteProvider
                         .insert('`mouvement`', mouvement)
-                        .pipe(flatMap(() => this.selectAnArticle(selectedArticle)))
+                        .pipe(flatMap(() => this.moveArticle(selectedArticle)))
                         .subscribe(() => {
                             this.updateLists();
                         });
@@ -266,15 +193,72 @@ export class PreparationArticlesPage {
         }
     }
 
+    private refreshOver(): void {
+        this.toastService.showToast('Préparation prête à être finalisée.')
+    }
 
-    goHome() {
+    private refresh(): void {
+        this.toastService.showToast('Quantité bien prélevée.')
+    }
+
+    private initializeScreen(): void {
+        const preparation = this.navParams.get('preparation');
+        if (preparation) {
+            this.preparation = preparation;
+            this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
+                this.articlesNT = articles.filter(article => article.has_moved === 0);
+                this.articlesT = articles.filter(article => article.has_moved === 1);
+                if (this.articlesT.length > 0) {
+                    this.started = true;
+                }
+            });
+        }
+    }
+
+
+    private selectArticle(selectedArticle: ArticlePrepa|ArticlePrepaByRefArticle, selectedQuantity: number): void {
+        if (selectedArticle && selectedQuantity) {
+            this.isValid = this.navParams.get('valid');
+            this.started = this.navParams.get('started');
+            // we start preparation
+            if (!this.started) {
+                this.sqliteProvider.getAPI_URL().subscribe((result) => {
+                    this.sqliteProvider.getApiKey().then((key) => {
+                        if (result !== null) {
+                            let url: string = result + this.apiStartPrepa;
+                            this.http.post<any>(url, {id: this.preparation.id, apiKey: key}).subscribe(resp => {
+                                if (resp.success) {
+                                    this.started = true;
+                                    this.isValid = true;
+                                    this.sqliteProvider.startPrepa(this.preparation.id).subscribe(() => {
+                                        this.toastService.showToast('Préparation commencée.');
+                                        this.saveSelectedArticle(selectedArticle, selectedQuantity);
+                                    });
+                                }
+                                else {
+                                    this.isValid = false;
+                                    this.toastService.showToast(resp.msg);
+                                }
+                            });
+                        }
+                    });
+                });
+            }
+            else {
+                this.saveSelectedArticle(selectedArticle, selectedQuantity);
+            }
+        }
+    }
+
+    public goHome(): void {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    validate() {
+    public validate(): void {
         if (this.articlesNT.length > 0) {
-            this.showToast('Veuillez traiter tous les articles concernés');
-        } else {
+            this.toastService.showToast('Veuillez traiter tous les articles concernés');
+        }
+        else {
             this.navCtrl.push(PreparationEmplacementPage, {preparation: this.preparation})
         }
     }
@@ -298,8 +282,11 @@ export class PreparationArticlesPage {
         else if (selectedArticle && (selectedArticle as ArticlePrepa).type_quantite === 'article') {
             this.navCtrl.push(PreparationRefArticlesPage, {
                 article: selectedArticle,
+                preparation: this.preparation,
+                started: this.started,
+                valid: this.isValid,
                 getArticleByBarcode: (barcode: string) => this.getArticleByBarcode(barcode),
-                selectArticle:
+                selectArticle: (selectedQuantity: number) => this.selectArticle(selectedArticle, selectedQuantity)
             });
         }
         else {
@@ -309,7 +296,7 @@ export class PreparationArticlesPage {
     }
 
     private getArticleByBarcode(barcode: string): Observable<{selectedArticle?: ArticlePrepaByRefArticle, refArticle?: ArticlePrepa}> {
-        return this.sqliteProvider.findBy('article_prepa_by_ref_article', [`reference LIKE ${barcode}`]).pipe(
+        return this.sqliteProvider.findBy('article_prepa_by_ref_article', [`reference LIKE '${barcode}'`]).pipe(
             // we get the article
             map((result) => (
                 (result && result.length > 0)
@@ -341,11 +328,12 @@ export class PreparationArticlesPage {
                 refArticle,
                 preparation: this.preparation,
                 started: this.started,
-                valid: this.isValid
+                valid: this.isValid,
+                selectArticle: (selectedQuantity: number) => this.selectArticle(selectedArticle, selectedQuantity)
             });
         }
         else {
-            this.showToast('L\'article scanné n\'est pas dans la liste.');
+            this.toastService.showToast('L\'article scanné n\'est pas dans la liste.');
         }
     }
 
@@ -362,16 +350,36 @@ export class PreparationArticlesPage {
         });
     }
 
-    private selectAnArticle(selectedArticle, selectedQuantity?: number): Observable<any> {
+    private moveArticle(selectedArticle, selectedQuantity?: number): Observable<any> {
         return ((selectedArticle as ArticlePrepaByRefArticle).isSelectableByUser)
-            ? this.sqliteProvider.insert('article_prepa', {
-                label: (selectedArticle as ArticlePrepaByRefArticle).label,
-                reference: (selectedArticle as ArticlePrepaByRefArticle).reference,
-                is_ref: 1,
-                has_moved: 1,
-                emplacement: (selectedArticle as ArticlePrepaByRefArticle).reference,
-                quantite: selectedQuantity ? selectedQuantity : (selectedArticle as ArticlePrepaByRefArticle).quantity
-            }).pipe(flatMap(() => this.sqliteProvider.deleteById('article_prepa_by_ref_article', selectedArticle.id)))
+            ? this.sqliteProvider
+                .insert('article_prepa', {
+                    label: (selectedArticle as ArticlePrepaByRefArticle).label,
+                    reference: (selectedArticle as ArticlePrepaByRefArticle).reference,
+                    is_ref: 1,
+                    has_moved: 1,
+                    emplacement: (selectedArticle as ArticlePrepaByRefArticle).reference,
+                    quantite: selectedQuantity ? selectedQuantity : (selectedArticle as ArticlePrepaByRefArticle).quantity
+                })
+                .pipe(
+                    flatMap(() => this.sqliteProvider.deleteById('article_prepa_by_ref_article', selectedArticle.id)),
+
+                    // delete articlePrepa if all quantity has been selected
+                    flatMap(() => this.sqliteProvider.findOneBy('article_prepa', 'reference', (selectedArticle as ArticlePrepaByRefArticle).reference_article)),
+                    flatMap((referenceArticle: ArticlePrepa) => {
+                        // we get all quantity picked for this refArticle plus the current quantity which is selected
+                        const quantityPicked = this.articlesT.reduce((acc: number, article: ArticlePrepa) => (
+                            acc +
+                            ((article.isSelectableByUser && ((selectedArticle as ArticlePrepaByRefArticle).reference_article === article.reference))
+                                ? article.quantite
+                                : 0)
+                        ), (selectedArticle as ArticlePrepaByRefArticle).quantity);
+
+                        return (referenceArticle.quantite === quantityPicked)
+                            ? this.sqliteProvider.deleteById('article_prepa', referenceArticle.id)
+                            : of(undefined)
+                    })
+                )
             : this.sqliteProvider.moveArticle((selectedArticle as ArticlePrepa).id)
     }
 

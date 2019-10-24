@@ -28,7 +28,7 @@ export class SqliteProvider {
         this.dbCreated$ = new ReplaySubject<boolean>(1);
 
         this.createDB();
-        this.createTables();
+        this.createTablesAndNotity();
     }
 
     private get db$(): Observable<SQLiteObject> {
@@ -54,63 +54,63 @@ export class SqliteProvider {
             );
     }
 
-    private createTables(): void {
-        this.db$.pipe(
+    private createTables(): Observable<undefined> {
+        return this.db$.pipe(
             flatMap((db) => from(Promise.all([
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article` (`id` INTEGER PRIMARY KEY, `reference` VARCHAR(255), `quantite` INTEGER)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))', []),
-                db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location` TEXT, `type` VARCHAR(255), `is_ref` TEXT, `id_article_prepa` INTEGER, `id_prepa` INTEGER, `id_article_livraison` INTEGER, `id_livraison` INTEGER)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location` TEXT, `type` VARCHAR(255), `is_ref` TEXT, `id_article_prepa` INTEGER, `id_prepa` INTEGER, `id_article_livraison` INTEGER, `id_livraison` INTEGER, selected_by_article INTEGER)', []),
                 db.executeSql('DROP TABLE IF EXISTS `mouvement_traca`', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255))', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []),
                 db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `type_quantite` TEXT)', []),
-                db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa_by_ref_article` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `reference` TEXT, `label` TEXT, `location` TEXT, `quantity` INTEGER, `reference_article` TEXT)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa_by_ref_article` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `reference` TEXT, `label` TEXT, `location` TEXT, `quantity` INTEGER, `reference_article` TEXT, `isSelectableByUser` INTEGER)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_livraison` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_livraison` INTEGER, `has_moved` INTEGER, `emplacement` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_inventaire` (`id` INTEGER PRIMARY KEY, `id_mission` INTEGER, `reference` TEXT, `is_ref` TEXT, `location` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `saisie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_mission` INTEGER, `date` TEXT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `anomalie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT, `comment` TEXT, `treated` TEXT)', [])
-            ])))
-        )
-        .subscribe(() => {
+            ]))),
+            map(() => undefined)
+        );
+    }
+
+    private createTablesAndNotity(): void {
+        this.createTables().subscribe(() => {
             this.dbCreated$.next(true);
         });
     }
 
     public cleanDataBase(fromAfter = false): Observable<any> {
-        console.log('----> CLEAN DATABASE a');
-        const databaseCleaned = new ReplaySubject<SQLiteObject>(1);
-        this.isDBCreated$
+        return this.isDBCreated$
             .pipe(
                 flatMap(() => this.db$),
                 flatMap((db) => from(Promise.all([
-                    db.executeSql('DELETE FROM `article`;', []),
-                    db.executeSql('DELETE FROM `emplacement`;', []),
-                    db.executeSql('DELETE FROM `mouvement_traca`;', []),
+                    db.executeSql('DROP TABLE `article`;', []),
+                    db.executeSql('DROP TABLE `emplacement`;', []),
+                    db.executeSql('DROP TABLE `mouvement_traca`;', []),
                     ...(
                         !fromAfter
                             ? [
-                                db.executeSql('DELETE FROM `preparation`;', []),
-                                db.executeSql('DELETE FROM `article_prepa`;', []),
-                                db.executeSql('DELETE FROM `article_prepa_by_ref_article`;', []),
-                                db.executeSql('DELETE FROM `mouvement`;', []),
-                                db.executeSql('DELETE FROM `livraison`;', []),
-                                db.executeSql('DELETE FROM `article_livraison`;', []),
-                                db.executeSql('DELETE FROM `article_inventaire`;', []),
-                                db.executeSql('DELETE FROM `saisie_inventaire`;', []),
-                                db.executeSql('DELETE FROM `anomalie_inventaire`;', [])
+                                db.executeSql('DROP TABLE `preparation`;', []),
+                                db.executeSql('DROP TABLE `article_prepa`;', []),
+                                db.executeSql('DROP TABLE `article_prepa_by_ref_article`;', []),
+                                db.executeSql('DROP TABLE `mouvement`;', []),
+                                db.executeSql('DROP TABLE `livraison`;', []),
+                                db.executeSql('DROP TABLE `article_livraison`;', []),
+                                db.executeSql('DROP TABLE `article_inventaire`;', []),
+                                db.executeSql('DROP TABLE `saisie_inventaire`;', []),
+                                db.executeSql('DROP TABLE `anomalie_inventaire`;', [])
                             ]
                             : []
                     )
-                ])))
-            )
-            .subscribe(() => {
-                databaseCleaned.next(undefined);
-            });
-
-        return databaseCleaned.pipe(take(1));
+                ]))),
+                flatMap(() => this.createTables()),
+                map(() => undefined),
+                take(1)
+            );
     }
 
     public setOperateur(operateur) {
@@ -183,7 +183,7 @@ export class SqliteProvider {
             });
         }
         for (let prepa of prepas) {
-            this.findOne('preparation', prepa.id).subscribe((prepaInserted) => {
+            this.findOneById('preparation', prepa.id).subscribe((prepaInserted) => {
                 if (prepaInserted === null) {
                     prepasValues.push("(" + prepa.id + ", '" + prepa.number + "', " + null + ", " + null + ", 0)");
                 }
@@ -259,7 +259,7 @@ export class SqliteProvider {
             });
         }
         for (let livraison of livraisons) {
-            this.findOne('livraison', livraison.id).subscribe((livraisonInserted) => {
+            this.findOneById('livraison', livraison.id).subscribe((livraisonInserted) => {
                 if (livraisonInserted === null) {
                     livraisonsValues.push("(" + livraison.id + ", '" + livraison.number + "', '" + livraison.location + "', " + null + ")");
                 }
@@ -347,15 +347,17 @@ export class SqliteProvider {
             const articleValues = articlesPrepaByRefArticle.map((article) => {
                 const articleTmp = {
                     ...article,
-                    isSelectableByUser: true
+                    isSelectableByUser: 1
                 };
                 return '(' + (articleKeys.map((key) => ("'" + articleTmp[key] + "'")).join(', ') + ')')
             });
 
             ret = 'INSERT INTO `article_prepa_by_ref_article` (' +
-                articleKeys.map((key) => `\`${key}\``).join(', ') + ', isSelectableByUser) VALUES ' +
+                articleKeys.map((key) => `\`${key}\``).join(', ') + ') VALUES ' +
                 articleValues + ';';
         }
+
+        console.log(ret);
 
         return ret;
     }
@@ -397,7 +399,6 @@ export class SqliteProvider {
     }
 
     public importData(data, refresh = false): Observable<undefined> {
-        console.log('----> IMPORT DATABASE');
         const concatSqlImports = (imports: Array<string>, sql: string) => ([...imports, sql]);
         const createMapSqlImportObs = (imports: Array<string>) => map((sql: string) => concatSqlImports(imports, sql));
 
@@ -415,11 +416,24 @@ export class SqliteProvider {
         );
     }
 
-    public findOne(table: string, id: number): Observable<any> {
+    public findOneById(table: string, id: number): Observable<any> {
         let query: string = "SELECT * FROM " + table + " WHERE id = ? ";
 
         return this.db$.pipe(
             flatMap((db) => from(db.executeSql(query, [id]))),
+            map((data) => (
+                (data.rows.length > 0)
+                    ? data.rows.item(0)
+                    : null
+            ))
+        );
+    }
+
+    public findOneBy(table: string, name: string, value: string): Observable<any> {
+        let query: string = "SELECT * FROM " + table + " WHERE ? LIKE '?'";
+
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql(query, [name, value]))),
             map((data) => (
                 (data.rows.length > 0)
                     ? data.rows.item(0)
@@ -489,12 +503,7 @@ export class SqliteProvider {
     }
 
     public async priseAreUnfinished() {
-        return new Promise<any>((resolve, reject) => {
-            this.storageService.prisesAreUnfinished().then((value) => {
-                console.log(value);
-                resolve(value);
-            });
-        });
+        return this.storageService.prisesAreUnfinished();
     }
 
     public async clearStorage() {
@@ -556,28 +565,28 @@ export class SqliteProvider {
             : of(undefined);
     }
 
+
     public insert(name: string, object: any): Observable<number> {
-        let values = [];
-
         const objectKeys = Object.keys(object);
+        const valuesMap = objectKeys
+            .map((key) => (((typeof object[key] === 'number') || object[key] === null)
+                ? `${object[key]}`
+                    : (object[key] === undefined)
+                        ? 'null'
+                        : `'${object[key]}'`))
+            .join(', ');
         let query = "INSERT INTO " + name +
-            ' (' + objectKeys.join(', ') + ') '
-            "VALUES (";
-        objectKeys.forEach((key) => {
-            values.push(object[key]);
-            query += '?, '
-        });
-        query = query.slice(0, -2) + ");";
+            ' (' + objectKeys.join(', ') + ') ' +
+            "VALUES " +
+            "(" + valuesMap + ");";
 
-        const insertExecuted = new ReplaySubject<any>(1);
-        this.db$.subscribe((db) => {
-            db.executeSql(query, values).then((id) => {
-                insertExecuted.next(id);
-            }).catch(err => console.log(err));
-
-        });
-        return insertExecuted;
+        return this.db$
+            .pipe(
+                flatMap((db) => from(db.executeSql(query, []))),
+                map(({insertId}) => insertId)
+            );
     }
+
 
     public executeQuery(query: string): Observable<any> {
         return this.db$.pipe(flatMap((db) => from(db.executeSql(query, []))));
@@ -630,7 +639,6 @@ export class SqliteProvider {
                     apiUrl$.next(null);
                 }
             }).catch((err) => {
-                console.log(err);
                 apiUrl$.next(false);
             });
         });

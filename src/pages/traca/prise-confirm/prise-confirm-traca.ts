@@ -39,8 +39,6 @@ export class PriseConfirmPageTraca {
         let text = event.text.trim();
         event.component.startSearch();
         this.sqliteProvider.findByElement('article', 'id', text).subscribe((items) => {
-
-            console.log(text, '=>', items)
             event.component.items = items;
             event.component.endSearch();
         });

@@ -21,11 +21,13 @@
     </div>
     <ion-list>
         <ion-grid>
-            <button class="list" ion-item *ngFor="let article of articles">
+            <button class="list"
+                    ion-item *ngFor="let article of articles"
+                    (click)="testIfBarcodeEquals(article.reference)">
                 <ion-row>
                     <ion-col>
                         <!--                    TODO Changer class avec le theme-->
-                        <p class="title-tmp">{{article.reference}}</p>
+                        <p class="title-tmp">Article {{article.reference}}</p>
                         <div class="sub">
                             <p *ngIf="article.location !== 'null'">Emplacement : {{article.location}}</p>
                             <p *ngIf="article.quantity">Quantité restante : {{article.quantity}}</p>

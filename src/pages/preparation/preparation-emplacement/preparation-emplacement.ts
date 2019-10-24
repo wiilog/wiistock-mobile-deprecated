@@ -1,20 +1,14 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, ModalController, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
-import {MenuPage} from "../../menu/menu";
-import {Emplacement} from "../../../app/entities/emplacement";
-import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import {BarcodeScanner} from "@ionic-native/barcode-scanner";
-import {Preparation} from "../../../app/entities/preparation";
-import {PreparationMenuPage} from "../preparation-menu/preparation-menu";
-import {HttpClient} from "@angular/common/http";
-import {PreparationArticlesPage} from "../preparation-articles/preparation-articles";
+import {IonicPage, ModalController, Navbar, NavController, NavParams} from 'ionic-angular';
+import {MenuPage} from '@pages/menu/menu';
+import {Emplacement} from '@app/entities/emplacement';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {BarcodeScanner} from '@ionic-native/barcode-scanner';
+import {Preparation} from '@app/entities/preparation';
+import {PreparationMenuPage} from '@pages/preparation/preparation-menu/preparation-menu';
+import {HttpClient} from '@angular/common/http';
+import {ToastService} from '@app/services/toast.service';
 
-/**
- * Generated class for the PreparationEmplacementPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
 
 @IonicPage()
 @Component({
@@ -29,13 +23,13 @@ export class PreparationEmplacementPage {
     preparation: Preparation;
     apiFinish: string = '/api/finishPrepa';
 
-    constructor(public navCtrl: NavController,
-                public navParams: NavParams,
-                public sqliteProvider: SqliteProvider,
-                public toastController: ToastController,
-                public barcodeScanner: BarcodeScanner,
-                public http: HttpClient,
-                public modal : ModalController) {
+    public constructor(public navCtrl: NavController,
+                       public navParams: NavParams,
+                       public sqliteProvider: SqliteProvider,
+                       public barcodeScanner: BarcodeScanner,
+                       public http: HttpClient,
+                       public modal: ModalController,
+                       private toastService: ToastService) {
         this.sqliteProvider.findAll('emplacement').subscribe((value) => {
             this.db_locations = value;
             if (typeof (navParams.get('preparation')) !== undefined) {
@@ -71,16 +65,6 @@ export class PreparationEmplacementPage {
     }
 
     ionViewDidEnter() {
-        this.setBackButtonAction();
-    }
-
-    setBackButtonAction() {
-        this.navBar.backButtonClick = () => {
-            //Write here wherever you wanna do
-            this.navCtrl.push(PreparationArticlesPage, {
-                preparation : this.preparation
-            });
-        }
     }
 
     scan() {
@@ -90,33 +74,20 @@ export class PreparationEmplacementPage {
     }
 
     testIfBarcodeEquals(text) {
-        let instance = this;
-        this.sqliteProvider.findAll('`emplacement`').subscribe(resp => {
-            let found = false;
-            resp.forEach(function (element) {
-                if (element.label === text) {
-                    found = true;
-                    instance.emplacement = element;
-                    instance.navCtrl.push(PreparationEmplacementPage, {
-                        preparation : instance.preparation,
-                        emplacement : element
-                    })
-                }
-            });
-            if (!found) {
-                this.showToast('Veuillez flasher ou sélectionner un emplacement connu.');
+        this.sqliteProvider.findAll('`emplacement`').subscribe((resp: Array<Emplacement>) => {
+            const foundEmplacement = resp.find((emplacement: Emplacement) => (emplacement.label === text));
+
+            if (foundEmplacement) {
+                this.emplacement = foundEmplacement;
+                this.navCtrl.push(PreparationEmplacementPage, {
+                    preparation: this.preparation,
+                    emplacement: foundEmplacement
+                })
+            }
+            else {
+                this.toastService.showToast('Veuillez flasher ou sélectionner un emplacement connu.');
             }
         });
-    }
-
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
     }
 
     validate() {
@@ -155,12 +126,11 @@ export class PreparationEmplacementPage {
                                                             });
                                                         });
                                                     } else {
-                                                        this.showToast(resp.msg);
+                                                        this.toastService.showToast(resp.msg);
                                                     }
                                                 },
                                                 error => {
                                                     this.navCtrl.setRoot(PreparationMenuPage);
-                                                    console.log(error);
                                                 }
                                             );
                                         });
@@ -172,7 +142,7 @@ export class PreparationEmplacementPage {
                 })
             })
         } else {
-            this.showToast('Veuillez sélectionner ou scanner un emplacement.');
+            this.toastService.showToast('Veuillez sélectionner ou scanner un emplacement.');
         }
     }
 

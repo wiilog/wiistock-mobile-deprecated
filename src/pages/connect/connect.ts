@@ -1,9 +1,10 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
 import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
-import {UsersApiProvider} from "../../providers/users-api/users-api";
-import {MenuPage} from "../menu/menu";
-import {ParamsPage} from "../params/params"
-import {SqliteProvider} from "../../providers/sqlite/sqlite";
+import {UsersApiProvider} from '@providers/users-api/users-api';
+import {MenuPage} from '@pages/menu/menu';
+import {ParamsPage} from '@pages/params/params'
+import {SqliteProvider} from '@providers/sqlite/sqlite';
+
 
 @IonicPage()
 @Component({
@@ -31,41 +32,45 @@ export class ConnectPage {
     }
 
     public logForm(): void {
-        this.sqliteProvider.getAPI_URL().subscribe((result) => {
+        if (!this.isLoaded) {
             this.isLoaded = true;
-            if (result !== null) {
-                let url : string = result + this.connectURL;
-                this.usersApiProvider.setProvider(this.form, url).subscribe(
-                    resp => {
-                        if (resp.success) {
-                            this.sqliteProvider.setOperateur(this.form.login);
-                            this.sqliteProvider.cleanDataBase().subscribe(() => {
-                                this.sqliteProvider.clearStorage().then(() => {
-                                    this.sqliteProvider.importData(resp.data)
-                                        .subscribe(() => {
-                                            this.isLoaded = false;
-                                            this.navCtrl.setRoot(MenuPage);
-                                        });
-                                }).catch(err => console.log(err));
-                            });
-                        }
-                        else {
+
+            this.sqliteProvider.getAPI_URL().subscribe((result) => {
+                if (result !== null) {
+                    let url: string = result + this.connectURL;
+                    this.usersApiProvider.setProvider(this.form, url).subscribe(
+                        resp => {
+                            if (resp.success) {
+                                this.sqliteProvider.setOperateur(this.form.login);
+                                this.sqliteProvider.cleanDataBase().subscribe(() => {
+                                    this.sqliteProvider.clearStorage().then(() => {
+                                        this.sqliteProvider.importData(resp.data)
+                                            .subscribe(() => {
+                                                this.isLoaded = false;
+                                                this.navCtrl.setRoot(MenuPage);
+                                            });
+                                    }).catch(err => console.log(err));
+                                });
+                            }
+                            else {
+                                this.isLoaded = false;
+                                this.changeDetector.detectChanges();
+                                this.showToast('Identifiants incorrects.');
+                            }
+                        },
+                        () => {
                             this.isLoaded = false;
                             this.changeDetector.detectChanges();
-                            this.showToast('Identifiants incorrects.');
-                        }
-                    },
-                    () => {
-                        this.isLoaded = false;
-                        this.changeDetector.detectChanges();
-                        this.showToast('Un problème est survenu, veuillez vérifier vos identifiants ainsi que l\'URL saisie sans les paramètres.');
-                    });
-            } else {
-                this.isLoaded = false;
-                this.changeDetector.detectChanges();
-                this.showToast('Veuillez configurer votre URL dans les paramètres.');
-            }
-        });
+                            this.showToast('Un problème est survenu, veuillez vérifier vos identifiants ainsi que l\'URL saisie sans les paramètres.');
+                        });
+                }
+                else {
+                    this.isLoaded = false;
+                    this.changeDetector.detectChanges();
+                    this.showToast('Veuillez configurer votre URL dans les paramètres.');
+                }
+            });
+        }
     }
 
     public async showToast(msg) {

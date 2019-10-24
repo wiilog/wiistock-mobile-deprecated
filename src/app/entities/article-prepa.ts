@@ -8,4 +8,9 @@ export interface ArticlePrepa {
     id_prepa: number;
     has_moved: number;
     emplacement: string;
+
+    // ArticlePrepaByRefArticle
+    isSelectableByUser?: boolean;
+    reference_article?: string;
+
 }

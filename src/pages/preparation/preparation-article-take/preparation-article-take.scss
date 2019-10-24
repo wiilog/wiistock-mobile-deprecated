@@ -1,33 +1,36 @@
 page-preparation-article-take {
 
 
-  .col-menu-stats {
-    margin: 0 auto;
-    border: none !important;
-  }
-
-  .row-menu-stats {
-    display: flex;
-    justify-content: center;
-    background-color: white;
-    text-align: center;
-    >ion-col {
-      padding-bottom: 10px;
-    }
-    p {
-      font-size: 23px;
-      margin-bottom: 0px;
-      font-weight: 100;
-      color: black;
-    }
-    p.number {
-      font-size: 34px;
-      margin-top: 0px;
+    .col-menu-stats {
+        margin: 0 auto;
+        border: none !important;
     }
 
-    ion-slide {
-      padding-bottom: 10px;
-    }
+    .row-menu-stats {
+        display: flex;
+        justify-content: center;
+        background-color: white;
+        text-align: center;
 
-  }
+        > ion-col {
+            padding-bottom: 10px;
+        }
+
+        p, span {
+            font-size: 20px;
+            margin-bottom: 0;
+            font-weight: 100;
+            color: black;
+
+            &.number {
+                font-size: 28px;
+                margin-top: 0;
+            }
+        }
+
+        ion-slide {
+            padding-bottom: 10px;
+        }
+
+    }
 }
