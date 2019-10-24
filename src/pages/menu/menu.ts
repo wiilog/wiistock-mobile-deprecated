@@ -9,7 +9,7 @@ import {LivraisonMenuPage} from "../livraison/livraison-menu/livraison-menu";
 import {ParamsPage} from "../params/params";
 import {ConnectPage} from "../connect/connect";
 import {InventaireMenuPage} from "../inventaire-menu/inventaire-menu";
-import {ManutentionMenuPage} from "@pages/manutention/manutention-menu/manutention-menu";
+import {CollecteMenuPage} from "@pages/collecte/collecte-menu/collecte-menu";
 
 @Component({
     selector: 'page-menu',

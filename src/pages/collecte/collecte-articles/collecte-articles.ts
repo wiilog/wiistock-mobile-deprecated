@@ -1,38 +1,30 @@
 import {Component, ViewChild} from '@angular/core';
 import {IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
-import {Preparation} from '@app/entities/preparation';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {ArticlePrepa} from '@app/entities/article-prepa';
-import {PreparationMenuPage} from '@pages/preparation/preparation-menu/preparation-menu';
 import {Mouvement} from '@app/entities/mouvement';
-import {PreparationArticleTakePage} from '@pages/preparation/preparation-article-take/preparation-article-take';
+import {CollecteArticleTakePage} from '@pages/collecte/collecte-article-take/collecte-article-take';
 import {HttpClient} from '@angular/common/http';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
-import {PreparationEmplacementPage} from '@pages/preparation/preparation-emplacement/preparation-emplacement';
+import {CollecteEmplacementPage} from '@pages/collecte/collecte-emplacement/collecte-emplacement';
 import moment from 'moment';
-
-
-/**
- * Generated class for the PreparationArticlesPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
+import {ArticleCollecte} from '@app/entities/article-collecte';
+import {Collecte} from '@app/entities/collecte';
+import {flatMap} from 'rxjs/operators';
 
 @IonicPage()
 @Component({
-    selector: 'page-preparation-articles',
-    templateUrl: 'preparation-articles.html',
+    selector: 'page-collecte-articles',
+    templateUrl: 'collecte-articles.html',
 })
-export class PreparationArticlesPage {
+export class CollecteArticlesPage {
 
     @ViewChild(Navbar) navBar: Navbar;
-    preparation: Preparation;
-    articlesNT: Array<ArticlePrepa>;
-    articlesT: Array<ArticlePrepa>;
+    collecte: Collecte;
+    articlesNT: Array<ArticleCollecte>;
+    articlesT: Array<ArticleCollecte>;
     started: boolean = false;
-    apiStartPrepa = '/api/beginPrepa';
+    apiStartCollecte = '/api/beginCollecte';
     isValid: boolean = true;
 
     constructor(
@@ -42,9 +34,9 @@ export class PreparationArticlesPage {
         public sqliteProvider: SqliteProvider,
         public http: HttpClient,
         public barcodeScanner: BarcodeScanner) {
-        if (typeof (navParams.get('preparation')) !== undefined) {
-            this.preparation = navParams.get('preparation');
-            this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
+        if (typeof (navParams.get('collecte')) !== undefined) {
+            this.collecte = navParams.get('collecte');
+            this.sqliteProvider.findArticlesByCollecte(this.collecte.id).subscribe((articles) => {
                 this.articlesNT = articles.filter(article => article.has_moved === 0);
                 this.articlesT = articles.filter(article => article.has_moved === 1);
                 if (this.articlesT.length > 0) {
@@ -57,15 +49,13 @@ export class PreparationArticlesPage {
                         this.sqliteProvider.getAPI_URL().subscribe((result) => {
                             this.sqliteProvider.getApiKey().then((key) => {
                                 if (result !== null) {
-                                    let url: string = result + this.apiStartPrepa;
-                                    this.http.post<any>(url, {id: this.preparation.id, apiKey: key}).subscribe(resp => {
+                                    let url: string = result + this.apiStartCollecte;
+                                    this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
                                         if (resp.success) {
                                             this.started = true;
                                             this.isValid = true;
-                                            this.sqliteProvider.startPrepa(this.preparation.id).subscribe(() => {
-                                                this.showToast('Préparation commencée.');
-                                                this.registerMvt();
-                                            });
+                                            this.showToast('Collecte commencée.');
+                                            this.registerMvt();
                                         } else {
                                             this.isValid = false;
                                             this.showToast(resp.msg);
@@ -101,6 +91,14 @@ export class PreparationArticlesPage {
         });
     }
 
+    refreshOver() {
+        this.showToast('Collecte prête à être finalisée.')
+    }
+
+    refresh() {
+        this.showToast('Quantité bien prélevée.')
+    }
+
     async showToast(msg) {
         const toast = await this.toastController.create({
             message: msg,
@@ -111,44 +109,35 @@ export class PreparationArticlesPage {
         toast.present();
     }
 
-    ionViewDidEnter() {
-        this.setBackButtonAction();
-    }
-
-    refreshOver() {
-        this.showToast('Préparation prête à être finalisée.')
-    }
-
-    refresh() {
-        this.showToast('Quantité bien prélevée.')
-    }
-
-    setBackButtonAction() {
-        this.navBar.backButtonClick = () => {
-
-            //Write here wherever you wanna do
-            this.navCtrl.setRoot(PreparationMenuPage);
-        }
-    }
+    // ionViewDidEnter() {
+    //     this.setBackButtonAction();
+    // }
+    //
+    //
+    // setBackButtonAction() {
+    //     this.navBar.backButtonClick = () => {
+    //         // this.navCtrl.setRoot(CollecteMenuPage);
+    //     }
+    // }
 
     registerMvt() {
         if (this.isValid) {
             if (this.navParams.get('article').quantite !== Number(this.navParams.get('quantite'))) {
-                let newArticle: ArticlePrepa = {
+                let newArticle: ArticleCollecte = {
                     id: null,
                     label: this.navParams.get('article').label,
                     reference: this.navParams.get('article').reference,
                     quantite: Number(this.navParams.get('quantite')),
                     is_ref: this.navParams.get('article').is_ref,
-                    id_prepa: this.navParams.get('article').id_prepa,
+                    id_collecte: this.navParams.get('article').id_collecte,
                     has_moved: 1,
                     emplacement: this.navParams.get('article').emplacement
                 };
-                let articleAlready = this.articlesT.find(art => art.id_prepa === newArticle.id_prepa && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
+                let articleAlready = this.articlesT.find(art => art.id_collecte === newArticle.id_collecte && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
                 if (articleAlready !== undefined) {
-                    this.sqliteProvider.updateArticleQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite).subscribe(() => {
-                        this.sqliteProvider.updateArticleQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - newArticle.quantite).subscribe(() => {
-                            this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
+                    this.sqliteProvider.updateArticleCollecteQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite).subscribe(() => {
+                        this.sqliteProvider.updateArticleCollecteQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - newArticle.quantite).subscribe(() => {
+                            this.sqliteProvider.findArticlesByCollecte(this.collecte.id).subscribe((articles) => {
                                 if (articles.filter(article => article.has_moved === 0).length === 0) {
                                     this.refreshOver();
                                 } else {
@@ -160,7 +149,7 @@ export class PreparationArticlesPage {
                         });
                     });
                 } else {
-                    this.sqliteProvider.insert('`article_prepa`', newArticle).subscribe((insertId) => {
+                    this.sqliteProvider.insert('`article_collecte`', newArticle).subscribe((insertId) => {
                         let mouvement: Mouvement = {
                             id: null,
                             reference: newArticle.reference,
@@ -171,26 +160,26 @@ export class PreparationArticlesPage {
                             location: null,
                             type: 'prise-dépose',
                             is_ref: newArticle.is_ref,
-                            id_article_prepa: insertId,
-                            id_prepa: newArticle.id_prepa,
+                            id_article_prepa: null,
+                            id_prepa: null,
                             id_article_livraison: null,
                             id_livraison: null,
-                            id_article_collecte: null,
-                            id_collecte: null,
+                            id_article_collecte: insertId,
+                            id_collecte: newArticle.id_collecte
                         };
-                        this.sqliteProvider.updateArticleQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - Number(this.navParams.get('quantite'))).subscribe(() => {
-                            this.sqliteProvider.insert('`mouvement`', mouvement).subscribe(() => {
-                                this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
-                                    if (articles.filter(article => article.has_moved === 0).length === 0) {
-                                        this.refreshOver();
-                                    } else {
-                                        this.refresh();
-                                    }
-                                    this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                    this.articlesT = articles.filter(article => article.has_moved === 1);
-                                })
+                        this.sqliteProvider.updateArticleCollecteQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - Number(this.navParams.get('quantite')))
+                            .pipe(
+                                flatMap(() => this.sqliteProvider.insert('`mouvement`', mouvement)),
+                                flatMap(() => this.sqliteProvider.findArticlesByCollecte(this.collecte.id)))
+                            .subscribe((articles) => {
+                                if (articles.filter(article => article.has_moved === 0).length === 0) {
+                                    this.refreshOver();
+                                } else {
+                                    this.refresh();
+                                }
+                                this.articlesNT = articles.filter(article => article.has_moved === 0);
+                                this.articlesT = articles.filter(article => article.has_moved === 1);
                             });
-                        });
                     });
                 }
             } else {
@@ -204,18 +193,18 @@ export class PreparationArticlesPage {
                     location: null,
                     type: 'prise-dépose',
                     is_ref: this.navParams.get('article').is_ref,
-                    id_article_prepa: this.navParams.get('article').id,
-                    id_prepa: this.navParams.get('article').id_prepa,
+                    id_article_prepa: null,
+                    id_prepa: null,
                     id_article_livraison: null,
                     id_livraison: null,
-                    id_article_collecte: null,
-                    id_collecte: null,
+                    id_article_collecte: this.navParams.get('article').id,
+                    id_collecte: this.navParams.get('article').id_collecte
                 };
-                let articleAlready = this.articlesT.find(art => art.id_prepa === mouvement.id_prepa && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
+                let articleAlready = this.articlesT.find(art => art.id_collecte === mouvement.id_collecte && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
                 if (articleAlready !== undefined) {
-                    this.sqliteProvider.updateArticleQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite).subscribe(() => {
-                        this.sqliteProvider.deleteById('`article_prepa`', mouvement.id_article_prepa).subscribe(() => {
-                            this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
+                    this.sqliteProvider.updateArticleCollecteQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite).subscribe(() => {
+                        this.sqliteProvider.deleteById('`article_collecte`', mouvement.id_article_collecte).subscribe(() => {
+                            this.sqliteProvider.findArticlesByCollecte(this.collecte.id).subscribe((articles) => {
                                 if (articles.filter(article => article.has_moved === 0).length === 0) {
                                     this.refreshOver();
                                 } else {
@@ -227,19 +216,21 @@ export class PreparationArticlesPage {
                         });
                     });
                 } else {
-                    this.sqliteProvider.insert('`mouvement`', mouvement).subscribe(() => {
-                        this.sqliteProvider.moveArticle(this.navParams.get('article').id).subscribe(() => {
-                            this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
-                                if (articles.filter(article => article.has_moved === 0).length === 0) {
-                                    this.refreshOver();
-                                } else {
-                                    this.refresh();
-                                }
-                                this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                this.articlesT = articles.filter(article => article.has_moved === 1);
-                            })
+                    this.sqliteProvider
+                        .insert('`mouvement`', mouvement)
+                        .pipe(
+                            flatMap(() => this.sqliteProvider.moveArticleCollecte(this.navParams.get('article').id)),
+                            flatMap(() => this.sqliteProvider.findArticlesByCollecte(this.collecte.id))
+                        )
+                        .subscribe((articles) => {
+                            if (articles.filter(article => article.has_moved === 0).length === 0) {
+                                this.refreshOver();
+                            } else {
+                                this.refresh();
+                            }
+                            this.articlesNT = articles.filter(article => article.has_moved === 0);
+                            this.articlesT = articles.filter(article => article.has_moved === 1);
                         });
-                    });
                 }
             }
         }
@@ -254,22 +245,22 @@ export class PreparationArticlesPage {
         if (this.articlesNT.length > 0) {
             this.showToast('Veuillez traiter tous les articles concernés');
         } else {
-            this.navCtrl.push(PreparationEmplacementPage, {preparation: this.preparation})
+            this.navCtrl.push(CollecteEmplacementPage, {collecte: this.collecte})
         }
     }
 
     testIfBarcodeEquals(text, fromText) {
         if (fromText && this.articlesNT.some(article => article.reference === text)) {
-            this.navCtrl.push(PreparationArticleTakePage, {
+            this.navCtrl.push(CollecteArticleTakePage, {
                 article: this.articlesNT.find(article => article.reference === text),
-                preparation: this.preparation,
+                collecte: this.collecte,
                 started: this.started,
                 valid: this.isValid
             });
         } else if (!fromText) {
-            this.navCtrl.push(PreparationArticleTakePage, {
+            this.navCtrl.push(CollecteArticleTakePage, {
                 article: text,
-                preparation: this.preparation,
+                collecte: this.collecte,
                 started: this.started,
                 valid: this.isValid
             })

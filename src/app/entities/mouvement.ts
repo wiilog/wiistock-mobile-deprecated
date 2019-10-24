@@ -11,5 +11,7 @@ export interface Mouvement {
     id_article_prepa: number;
     id_prepa : number;
     id_article_livraison: number;
+    id_article_collecte: number;
     id_livraison : number;
+    id_collecte: number;
 }
