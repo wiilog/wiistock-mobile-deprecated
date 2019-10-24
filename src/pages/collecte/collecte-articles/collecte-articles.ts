@@ -132,7 +132,7 @@ export class CollecteArticlesPage {
                     id_collecte: this.navParams.get('article').id_collecte,
                     has_moved: 1,
                     emplacement: this.navParams.get('article').emplacement,
-                    code_barre: this.navParams.get('article').code_barre,
+                    barcode: this.navParams.get('article').barcode,
                 };
                 let articleAlready = this.articlesT.find(art => art.id_collecte === newArticle.id_collecte && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
                 if (articleAlready !== undefined) {
@@ -251,10 +251,9 @@ export class CollecteArticlesPage {
     }
 
     testIfBarcodeEquals(text, fromText) {
-        console.log(this.articlesNT);
-        if (fromText && this.articlesNT.some(article => article.code_barre === text)) {
+        if (fromText && this.articlesNT.some(article => article.barcode === text)) {
             this.navCtrl.push(CollecteArticleTakePage, {
-                article: this.articlesNT.find(article => article.code_barre === text),
+                article: this.articlesNT.find(article => article.barcode === text),
                 collecte: this.collecte,
                 started: this.started,
                 valid: this.isValid
@@ -266,7 +265,7 @@ export class CollecteArticlesPage {
                 started: this.started,
                 valid: this.isValid
             })
-        } else if (fromText && !this.articlesNT.some(article => article.code_barre === text)) {
+        } else if (fromText && !this.articlesNT.some(article => article.barcode === text)) {
             this.showToast('L\'article scanné n\'est pas dans la liste.');
         }
     }

@@ -3,5 +3,5 @@ export interface Article {
     label?: string;
     reference: string;
     quantite?: number;
-    code_barre?: string;
+    barcode?: string;
 }

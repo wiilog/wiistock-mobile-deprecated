@@ -7,5 +7,5 @@ export interface ArticleLivraison {
     id_livraison : number;
     has_moved : number;
     emplacement : string;
-    code_barre?: string;
+    barcode?: string;
 }

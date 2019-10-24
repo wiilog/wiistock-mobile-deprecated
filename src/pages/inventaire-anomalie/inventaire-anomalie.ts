@@ -175,9 +175,9 @@ export class InventaireAnomaliePage {
     }
     //TODO CG plutôt sur anomaliesByLocation ??
     public checkBarcodeIsRef(barcode: string): void {
-        if (this.anomalies.some(anomaly => (anomaly.code_barre === barcode))) {
+        if (this.anomalies.some(anomaly => (anomaly.barcode === barcode))) {
             this.article = {reference: barcode};
-            this.anomaly = this.anomaliesByLocation.find(anomaly => (anomaly.code_barre === barcode));
+            this.anomaly = this.anomaliesByLocation.find(anomaly => (anomaly.barcode === barcode));
             this.changeDetector.detectChanges();
             this.openModalQuantity(this.article);
         } else {

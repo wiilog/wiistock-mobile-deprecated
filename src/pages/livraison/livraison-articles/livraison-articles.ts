@@ -142,7 +142,7 @@ export class LivraisonArticlesPage {
                     id_livraison: this.navParams.get('article').id_livraison,
                     has_moved: 1,
                     emplacement: this.navParams.get('article').emplacement,
-                    code_barre: this.navParams.get('article').code_barre
+                    barcode: this.navParams.get('article').barcode
                 };
                 let articleAlready = this.articlesT.find(art => art.id_livraison === newArticle.id_livraison && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
                 if (articleAlready !== undefined) {
@@ -261,9 +261,9 @@ export class LivraisonArticlesPage {
     }
 
     testIfBarcodeEquals(text, fromText) {
-        if (fromText && this.articlesNT.some(article => article.code_barre === text)) {
+        if (fromText && this.articlesNT.some(article => article.barcode === text)) {
             this.navCtrl.push(LivraisonArticleTakePage, {
-                article: this.articlesNT.find(article => article.code_barre === text),
+                article: this.articlesNT.find(article => article.barcode === text),
                 livraison: this.livraison,
                 started: this.started,
                 valid: this.isValid
@@ -275,7 +275,7 @@ export class LivraisonArticlesPage {
                 started: this.started,
                 valid: this.isValid
             })
-        } else if (fromText && !this.articlesNT.some(article => article.code_barre === text)) {
+        } else if (fromText && !this.articlesNT.some(article => article.barcode === text)) {
             this.showToast('L\'article scanné n\'est pas dans la liste.');
         }
     }
