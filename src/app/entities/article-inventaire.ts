@@ -4,4 +4,5 @@ export interface ArticleInventaire {
     reference: string;
     is_ref: string;
     location: string;
+    code_barre: string;
 }

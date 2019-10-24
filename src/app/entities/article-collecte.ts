@@ -7,4 +7,6 @@ export interface ArticleCollecte {
     id_collecte : number;
     has_moved : number;
     emplacement : string;
+    code_barre: string;
+
 }
