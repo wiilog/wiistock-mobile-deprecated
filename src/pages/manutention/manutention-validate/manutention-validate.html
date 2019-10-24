@@ -34,7 +34,7 @@
         </ion-item>
         <ion-item class="readonly" text-wrap>
             <ion-label>Date attendue</ion-label>
-            <ion-textarea value="{{ toDate(manutention) | date:'dd/MM/yyyy h:mm:ss'  }}"
+            <ion-textarea value="{{ toDate(manutention) | date:'dd/MM/yyyy H:mm'  }}"
                           [readonly]="true"></ion-textarea>
         </ion-item>
         <ion-item class="readonly" text-wrap>
@@ -49,8 +49,7 @@
             <span><b>Commentaire</b></span>
             <img src="assets/icon/search.svg" class="arrow">
         </button>
-        <div class="commentaire" *ngIf="showCom">
-            <p>{{ htmlToPlaintext(manutention.commentaire) }}</p>
+        <div class="commentaire" *ngIf="showCom" [innerHTML]="manutention.commentaire">
         </div>
         <button class="validate_button" (click)="validateManut()">
             <span><b>VALIDER</b></span>

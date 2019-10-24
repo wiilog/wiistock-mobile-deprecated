@@ -222,7 +222,8 @@ export class SqliteProvider {
             for (let manut of manutentions) {
                 this.findOne('manutention', manut.id).subscribe((manutInserted) => {
                     if (manutInserted === null) {
-                        manutValues.push("(" + manut.id + ", '" + manut.date_attendue.date + "', '" + manut.demandeur + "', '" + (manut.commentaire === null ? '' : manut.commentaire) + "', '" + manut.source + "', '" + manut.destination + "')");
+                        let comment = manut.commentaire === null ? '' : this.escapeQuotes(manut.commentaire);
+                        manutValues.push("(" + manut.id + ", '" + manut.date_attendue.date + "', '" + manut.demandeur + "', '" + comment + "', '" + manut.source + "', '" + manut.destination + "')");
                     }
                     if (manutentions.indexOf(manut) === manutentions.length - 1) {
                         this.findAll('`manutention`').subscribe((manutentionsDB) => {
@@ -230,7 +231,6 @@ export class SqliteProvider {
                             let sqlManut = 'INSERT INTO `manutention` (`id`, `date_attendue`, `demandeur`, `commentaire`, `source`, `destination`) VALUES ' + manutValuesStr + ';';
 
                             if (manutentionsDB.length === 0) {
-                                console.log('gfdgfdgd');
                                 resolve(sqlManut);
                             } else {
                                 this.deleteManutentions(manutentionsDB.filter(m => manutentions.find(manut => manut.id === m.id) === undefined)).then(() => {
@@ -243,6 +243,10 @@ export class SqliteProvider {
             }
 
         });
+    }
+
+    escapeQuotes(string) {
+        return string.replace(/'/g, "\''");
     }
 
     importArticlesPrepas(data) {
@@ -364,7 +368,6 @@ export class SqliteProvider {
             if (articlesCols.length === 0) {
                 resolve(false);
             }
-            console.log(articlesCols);
             for (let article of articlesCols) {
                 this.findArticlesByCollecte(article.id_collecte).subscribe((articles) => {
                     if (articles.find(articleCol => articleCol.reference === article.reference && articleCol.is_ref === article.is_ref) === undefined) {
@@ -377,7 +380,6 @@ export class SqliteProvider {
                     }
                 });
             }
-            console.log('imported artcols');
         });
     }
 
@@ -433,7 +435,7 @@ export class SqliteProvider {
 
         this.db$.subscribe((db) => {
             imports.forEach(function (importSql, index) {
-                db.executeSql(importSql, []).then().catch(_ => console.log(importSql)).then(() => {
+                db.executeSql(importSql, []).then().catch(err => console.log(importSql, err)).then(() => {
                     if (index === imports.length - 1) {
                         allImportExecuted.next(undefined);
                     }
@@ -468,7 +470,6 @@ export class SqliteProvider {
                                                     this.importArticlesCollecte(data).then((sqlArticlesCollecte) => {
                                                         if (sqlArticlesCollecte !== false) imports.push(sqlArticlesCollecte);
                                                         this.executeAllImports(imports).subscribe(() => {
-                                                            console.log('Imported All Data');
                                                             resolve();
                                                         })
                                                     });
