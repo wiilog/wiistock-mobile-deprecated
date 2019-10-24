@@ -19,8 +19,8 @@ export class ConnectPage {
         login: '',
         password: ''
     };
-    public connectURL : string = '/api/connect';
-    public isLoaded : boolean;
+    public connectURL: string = '/api/connect';
+    public isLoaded: boolean;
 
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
@@ -44,12 +44,14 @@ export class ConnectPage {
                                 this.sqliteProvider.setOperateur(this.form.login);
                                 this.sqliteProvider.cleanDataBase().subscribe(() => {
                                     this.sqliteProvider.clearStorage().then(() => {
-                                        this.sqliteProvider.importData(resp.data)
-                                            .subscribe(() => {
-                                                this.isLoaded = false;
-                                                this.navCtrl.setRoot(MenuPage);
-                                            });
-                                    }).catch(err => console.log(err));
+                                        this.sqliteProvider.setOperateur(this.form.login).then(() => {
+                                            this.sqliteProvider.importData(resp.data)
+                                                .subscribe(() => {
+                                                    this.isLoaded = false;
+                                                    this.navCtrl.setRoot(MenuPage);
+                                                });
+                                        }).catch(err => console.log(err));
+                                    });
                                 });
                             }
                             else {
@@ -88,5 +90,4 @@ export class ConnectPage {
             this.navCtrl.push(ParamsPage);
         }
     }
-
 }

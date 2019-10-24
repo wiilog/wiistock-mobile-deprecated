@@ -1,0 +1,52 @@
+<ion-header>
+    <ion-navbar>
+        <ion-buttons start>
+            <button ion-button icon-only (click)="goHome()">
+                <ion-icon name="home"></ion-icon>
+            </button>
+        </ion-buttons>
+        <ion-title>Collecte</ion-title>
+    </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+    <div class="d-flex">
+        <h4>Collecte n°{{collecte.numero}}</h4>
+    </div>
+    <div class="d-flex" [hidden]="articlesNT && articlesNT.length === 0">
+        <p>Liste des articles à traiter</p>
+    </div>
+    <ion-list [hidden]="articlesNT && articlesNT.length === 0">
+        <ion-grid>
+            <button [disabled]="!isValid" (click)="testIfBarcodeEquals(article, false)" class="list" ion-item *ngFor="let article of articlesNT">
+                <ion-row>
+                    <ion-col>{{ article.reference }}</ion-col>
+                    <ion-col>{{ article.emplacement === "null" ? '' : article.emplacement }}</ion-col>
+                    <ion-col>{{ article.quantite }}</ion-col>
+                </ion-row>
+            </button>
+        </ion-grid>
+    </ion-list>
+
+    <div class="d-flex" [hidden]="articlesT && articlesT.length === 0">
+        <p>Liste des articles traités</p>
+    </div>
+
+    <ion-list [hidden]="articlesT && articlesT.length === 0">
+        <ion-grid>
+            <button [disabled]="!isValid" class="list" ion-item *ngFor="let article of articlesT">
+                <ion-row>
+                    <ion-col>{{ article.reference }}</ion-col>
+                    <ion-col>{{ article.emplacement === "null" ? '' : article.emplacement }}</ion-col>
+                    <ion-col>{{ article.quantite }}</ion-col>
+                </ion-row>
+            </button>
+        </ion-grid>
+    </ion-list>
+</ion-content>
+<ion-footer padding>
+    <div class="d-flex">
+        <ion-icon class="big-icon" name="barcode" (click)="scan()" [hidden]="articlesNT && articlesNT.length === 0"></ion-icon>
+        <ion-icon class="big-icon" item-right name="checkmark-circle" (click)="validate()" [class.alert]="articlesNT && articlesNT.length === 0"></ion-icon>
+    </div>
+</ion-footer>

@@ -13,4 +13,6 @@ export interface Mouvement {
     id_article_livraison: number;
     id_livraison: number;
     selected_by_article?: number;
+    id_article_collecte: number;
+    id_collecte: number;
 }

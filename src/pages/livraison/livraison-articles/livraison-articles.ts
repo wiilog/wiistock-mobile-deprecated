@@ -141,7 +141,8 @@ export class LivraisonArticlesPage {
                     is_ref: this.navParams.get('article').is_ref,
                     id_livraison: this.navParams.get('article').id_livraison,
                     has_moved: 1,
-                    emplacement: this.navParams.get('article').emplacement
+                    emplacement: this.navParams.get('article').emplacement,
+                    barcode: this.navParams.get('article').barcode
                 };
                 let articleAlready = this.articlesT.find(art => art.id_livraison === newArticle.id_livraison && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
                 if (articleAlready !== undefined) {
@@ -173,7 +174,9 @@ export class LivraisonArticlesPage {
                             id_article_prepa: null,
                             id_prepa: null,
                             id_article_livraison: insertId,
-                            id_livraison: newArticle.id_livraison
+                            id_livraison: newArticle.id_livraison,
+                            id_article_collecte: null,
+                            id_collecte: null,
                         };
                         this.sqliteProvider.updateArticleLivraisonQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - Number(this.navParams.get('quantite')))
                             .pipe(
@@ -204,7 +207,9 @@ export class LivraisonArticlesPage {
                     id_article_prepa: null,
                     id_prepa: null,
                     id_article_livraison: this.navParams.get('article').id,
-                    id_livraison: this.navParams.get('article').id_livraison
+                    id_livraison: this.navParams.get('article').id_livraison,
+                    id_article_collecte: null,
+                    id_collecte: null,
                 };
                 let articleAlready = this.articlesT.find(art => art.id_livraison === mouvement.id_livraison && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
                 if (articleAlready !== undefined) {
@@ -256,9 +261,9 @@ export class LivraisonArticlesPage {
     }
 
     testIfBarcodeEquals(text, fromText) {
-        if (fromText && this.articlesNT.some(article => article.reference === text)) {
+        if (fromText && this.articlesNT.some(article => article.barcode === text)) {
             this.navCtrl.push(LivraisonArticleTakePage, {
-                article: this.articlesNT.find(article => article.reference === text),
+                article: this.articlesNT.find(article => article.barcode === text),
                 livraison: this.livraison,
                 started: this.started,
                 valid: this.isValid
@@ -270,7 +275,7 @@ export class LivraisonArticlesPage {
                 started: this.started,
                 valid: this.isValid
             })
-        } else if (fromText && !this.articlesNT.some(article => article.reference === text)) {
+        } else if (fromText && !this.articlesNT.some(article => article.barcode === text)) {
             this.showToast('L\'article scanné n\'est pas dans la liste.');
         }
     }

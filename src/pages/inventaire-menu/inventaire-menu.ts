@@ -126,7 +126,7 @@ export class InventaireMenuPage {
                                                 : of(undefined)
                                         })
                                     )
-                                    .subscribe((plop) => {
+                                    .subscribe(() => {
                                         this.sqlLiteProvider.findAll('`article_inventaire`').subscribe(articles => {
                                             this.articles = articles;
                                             let locations = [];
@@ -143,11 +143,7 @@ export class InventaireMenuPage {
                                             }, 1000);
                                         });
                                         this.addInventoryEntries();
-                                    },
-
-                                        (err) => {
-                                        console.log('ERRR PLOP => ', err)
-                                        });
+                                    });
                             } else {
                                 this.isLoaded = true;
                                 this.showToast('Une erreur est survenue.');
@@ -233,8 +229,8 @@ export class InventaireMenuPage {
     }
 
     checkBarcodeIsRef(barcode: string) {
-        if (this.articlesByLocation.some(article => (article.reference === barcode))) {
-            this.article = this.articlesByLocation.find(article => (article.reference === barcode));
+        if (this.articlesByLocation.some(article => (article.barcode === barcode))) {
+            this.article = this.articlesByLocation.find(article => (article.barcode === barcode));
             this.changeDetector.detectChanges();
             this.openModalQuantity(this.article);
         } else {
@@ -254,6 +250,5 @@ export class InventaireMenuPage {
     }
 
     ionViewDidLoad() {
-        console.log('ionViewDidLoad InventaireMenuPage');
     }
 }

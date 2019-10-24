@@ -4,10 +4,10 @@ import {MenuPage} from "../../menu/menu";
 import {Emplacement} from "../../../app/entities/emplacement";
 import {Article} from "../../../app/entities/article";
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {ChangeDetectorRef} from '@angular/core';
 import {IonicSelectableComponent} from 'ionic-selectable';
 import {DeposeArticlesPageTraca} from "../depose-articles/depose-articles-traca";
+import {BarcodeScannerManagerService} from "../../../app/services/barcode-scanner-manager.service";
 
 @IonicPage()
 @Component({
@@ -15,17 +15,17 @@ import {DeposeArticlesPageTraca} from "../depose-articles/depose-articles-traca"
     templateUrl: 'depose-emplacement-traca.html',
 })
 export class DeposeEmplacementPageTraca {
-
     emplacement: Emplacement;
     // locationLabel = '';
     db_locations: Array<Emplacement>;
     db_articles: Array<Article>;
+    public canGoBackService = true;
 
     constructor(public navCtrl: NavController,
                 public navParams: NavParams,
                 public app: App,
                 public sqliteProvider: SqliteProvider,
-                private barcodeScanner: BarcodeScanner,
+                public barcodeScannerManager: BarcodeScannerManagerService,
                 private changeDetectorRef: ChangeDetectorRef,
                 public toastController: ToastController) {
         if (navParams.get('selectedEmplacement') !== undefined) {
@@ -51,17 +51,12 @@ export class DeposeEmplacementPageTraca {
             });
     }
 
-    // vibrate() {
-    //     navigator.vibrate(3000);
-    // }
-
     goToArticles() {
         this.navCtrl.push(DeposeArticlesPageTraca, {emplacement: this.emplacement});
     }
 
     emplacementChange(event: { component: IonicSelectableComponent, value: any }) {
         this.emplacement = event.value;
-        console.log(this.emplacement);
     }
 
     searchEmplacement(event: { component: IonicSelectableComponent, text: string }) {
@@ -73,29 +68,26 @@ export class DeposeEmplacementPageTraca {
         });
     }
 
+    ionViewCanLeave() {
+        return this.barcodeScannerManager.canGoBack;
+    }
+
     goHome() {
         this.navCtrl.setRoot(MenuPage);
     }
 
     scanLocation() {
-        this.barcodeScanner.scan().then(res => {
-            this.testIfBarcodeEquals(res.text);
-        });
+        this.barcodeScannerManager.scan().subscribe((barcode) => this.testIfBarcodeEquals(barcode));
     }
 
-    testIfBarcodeEquals(text) {
-        let instance = this;
+    testIfBarcodeEquals(barcode) {
         this.sqliteProvider.findAll('`emplacement`').subscribe(resp => {
-            let found = false;
-            resp.forEach(function(element) {
-                if (element.label === text) {
-                    found = true;
-                    instance.navCtrl.push(DeposeEmplacementPageTraca, {selectedEmplacement: element});
-                    instance.changeDetectorRef.detectChanges();
-                }
-            });
-            if (!found) {
-                this.showToast('Veuillez flasher ou séléctionner un emplacement connu.');
+            if (resp.some(element => element.label === barcode)) {
+                let emplacement = resp.find(element => element.label === barcode);
+                this.navCtrl.push(DeposeEmplacementPageTraca, {selectedEmplacement: emplacement});
+                this.changeDetectorRef.detectChanges();
+            } else {
+                this.showToast('Veuillez flasher ou sélectionner un emplacement connu.');
             }
         });
     }

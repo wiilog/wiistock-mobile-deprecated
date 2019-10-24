@@ -79,7 +79,7 @@ export class DeposeArticlesPageTraca {
                     type: 'depose',
                     operateur: value
                 };
-                this.sqliteProvider.setDeposeValue(mouvement.ref_article, numberOfArticles).then(() => {
+                this.sqliteProvider.setDeposeValue(article.barcode, numberOfArticles).then(() => {
                     if (this.articles.indexOf(article) === this.articles.length - 1) {
                         this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(() => {
                             this.redirectAfterTake();
@@ -144,6 +144,7 @@ export class DeposeArticlesPageTraca {
                     this.showToast('Cet article est déjà enregistré assez de fois dans le panier.');
                 }
             } else {
+                this.navCtrl.push(DeposeArticlesPageTraca, {emplacement : this.emplacement});
                 this.showToast('Ce colis ne correspond à aucune prise.');
             }
         });

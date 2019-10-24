@@ -78,7 +78,7 @@ export class PriseArticlesPageTraca {
                     type: 'prise',
                     operateur: value
                 };
-                this.sqliteProvider.setPriseValue(mouvement.ref_article, numberOfArticles).then(() => {
+                this.sqliteProvider.setPriseValue(article.barcode, numberOfArticles).then(() => {
                     if (this.articles.indexOf(article) === this.articles.length - 1) {
                         this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(
                             () => {
@@ -124,7 +124,7 @@ export class PriseArticlesPageTraca {
     }
 
     testIfBarcodeEquals(text) {
-        if (this.articles && this.articles.some(article => (article.reference === text))) {
+        if (this.articles && this.articles.some(article => (article.barcode === text))) {
             this.showToast('Cet article a déjà été ajouté à la prise.');
         } else {
             let a: Article;
@@ -132,7 +132,8 @@ export class PriseArticlesPageTraca {
                 id: new Date().getUTCMilliseconds(),
                 label: null,
                 reference: text,
-                quantite: null
+                quantite: null,
+                barcode: text
             };
             this.navCtrl.push(PriseConfirmPageTraca, {
                 articles: this.articles, emplacement: this.emplacement, selectedArticle: a

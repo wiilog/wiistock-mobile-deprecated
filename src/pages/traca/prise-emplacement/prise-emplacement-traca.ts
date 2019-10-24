@@ -1,13 +1,13 @@
 import {Component} from '@angular/core';
-import {App, IonicPage, NavController, NavParams} from 'ionic-angular';
+import {App, IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
 import {PriseArticlesPageTraca} from "../prise-articles/prise-articles-traca";
 import {MenuPage} from "../../menu/menu";
 import {Emplacement} from "../../../app/entities/emplacement";
 import {Article} from "../../../app/entities/article";
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {ChangeDetectorRef} from '@angular/core';
 import {IonicSelectableComponent} from 'ionic-selectable';
+import {BarcodeScannerManagerService} from "../../../app/services/barcode-scanner-manager.service";
 
 @IonicPage()
 @Component({
@@ -25,8 +25,9 @@ export class PriseEmplacementPageTraca {
                 public navParams: NavParams,
                 public app: App,
                 public sqliteProvider: SqliteProvider,
-                private barcodeScanner: BarcodeScanner,
-                private changeDetectorRef: ChangeDetectorRef) {
+                public barcodeScannerManager: BarcodeScannerManagerService,
+                private changeDetectorRef: ChangeDetectorRef,
+                public toastController: ToastController) {
         if (navParams.get('selectedEmplacement') !== undefined) {
             this.emplacement = navParams.get('selectedEmplacement');
         }
@@ -50,9 +51,9 @@ export class PriseEmplacementPageTraca {
             });
     }
 
-    // vibrate() {
-    //     navigator.vibrate(3000);
-    // }
+    ionViewCanLeave() {
+        return this.barcodeScannerManager.canGoBack;
+    }
 
     goToArticles() {
         this.navCtrl.push(PriseArticlesPageTraca, {emplacement: this.emplacement});
@@ -77,19 +78,31 @@ export class PriseEmplacementPageTraca {
     }
 
     scanLocation() {
-        this.barcodeScanner.scan().then(res => {
-            this.testIfBarcodeEquals(res.text);
-        });
+        this.barcodeScannerManager.scan().subscribe((barcode) => this.testIfBarcodeEquals(barcode));
     }
 
-    testIfBarcodeEquals(text) {
-        let emplacement: Emplacement;
-        emplacement = {
-            id: new Date().getUTCMilliseconds(),
-            label: text
-        };
-        this.navCtrl.push(PriseEmplacementPageTraca, {selectedEmplacement: emplacement});
-        this.changeDetectorRef.detectChanges();
+    testIfBarcodeEquals(barcode) {
+        if (barcode.length > 0) {
+            let emplacement: Emplacement;
+            emplacement = {
+                id: new Date().getUTCMilliseconds(),
+                label: barcode
+            };
+            this.navCtrl.push(PriseEmplacementPageTraca, {selectedEmplacement: emplacement});
+            this.changeDetectorRef.detectChanges();
+        } else {
+            this.showToast('Veuillez flasher ou sélectionner un emplacement.');
+        }
+    }
+
+    async showToast(msg) {
+        const toast = await this.toastController.create({
+            message: msg,
+            duration: 2000,
+            position: 'center',
+            cssClass: 'toast-error'
+        });
+        toast.present();
     }
 
 }

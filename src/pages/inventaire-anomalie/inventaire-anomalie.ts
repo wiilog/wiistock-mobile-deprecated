@@ -45,7 +45,6 @@ export class InventaireAnomaliePage {
                        private zebraBarcodeScannerService: ZebraBarcodeScannerService) {}
 
     public ionViewDidLoad() {
-        console.log('ionViewDidLoad InventaireAnomaliePage');
     }
 
     public ionViewDidEnter(): void {
@@ -176,9 +175,9 @@ export class InventaireAnomaliePage {
     }
     //TODO CG plutôt sur anomaliesByLocation ??
     public checkBarcodeIsRef(barcode: string): void {
-        if (this.anomalies.some(anomaly => (anomaly.reference === barcode))) {
+        if (this.anomalies.some(anomaly => (anomaly.barcode === barcode))) {
             this.article = {reference: barcode};
-            this.anomaly = this.anomaliesByLocation.find(anomaly => (anomaly.reference === barcode));
+            this.anomaly = this.anomaliesByLocation.find(anomaly => (anomaly.barcode === barcode));
             this.changeDetector.detectChanges();
             this.openModalQuantity(this.article);
         } else {
