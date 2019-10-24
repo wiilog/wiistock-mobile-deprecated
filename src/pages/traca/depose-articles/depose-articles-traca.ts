@@ -79,7 +79,7 @@ export class DeposeArticlesPageTraca {
                     type: 'depose',
                     operateur: value
                 };
-                this.sqliteProvider.setDeposeValue(mouvement.ref_article, numberOfArticles).then(() => {
+                this.sqliteProvider.setDeposeValue(article.code_barre, numberOfArticles).then(() => {
                     if (this.articles.indexOf(article) === this.articles.length - 1) {
                         this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(() => {
                             this.redirectAfterTake();

@@ -120,7 +120,7 @@ export class PriseArticlesPage {
     testIfBarcodeEquals(text) {
         let found = false;
         this.db_articles.forEach(article => {
-            if (article['reference'] === text && !found) {
+            if (article['code_barre'] === text && !found) {
                 found = true;
                 this.navCtrl.push(PriseConfirmPage, {
                     articles: this.articles, emplacement: this.emplacement, selectedArticle: article

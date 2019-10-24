@@ -6,4 +6,5 @@ export interface Anomalie {
     location: string;
     comment: string;
     treated: string;
+    code_barre? : string;
 }

@@ -142,7 +142,8 @@ export class PreparationArticlesPage {
                     is_ref: this.navParams.get('article').is_ref,
                     id_prepa: this.navParams.get('article').id_prepa,
                     has_moved: 1,
-                    emplacement: this.navParams.get('article').emplacement
+                    emplacement: this.navParams.get('article').emplacement,
+                    code_barre: this.navParams.get('article').code_barre
                 };
                 let articleAlready = this.articlesT.find(art => art.id_prepa === newArticle.id_prepa && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
                 if (articleAlready !== undefined) {
@@ -259,9 +260,9 @@ export class PreparationArticlesPage {
     }
 
     testIfBarcodeEquals(text, fromText) {
-        if (fromText && this.articlesNT.some(article => article.reference === text)) {
+        if (fromText && this.articlesNT.some(article => article.code_barre === text)) {
             this.navCtrl.push(PreparationArticleTakePage, {
-                article: this.articlesNT.find(article => article.reference === text),
+                article: this.articlesNT.find(article => article.code_barre === text),
                 preparation: this.preparation,
                 started: this.started,
                 valid: this.isValid
@@ -273,7 +274,7 @@ export class PreparationArticlesPage {
                 started: this.started,
                 valid: this.isValid
             })
-        } else if (fromText && !this.articlesNT.some(article => article.reference === text)) {
+        } else if (fromText && !this.articlesNT.some(article => article.code_barre === text)) {
             this.showToast('L\'article scanné n\'est pas dans la liste.');
         }
     }

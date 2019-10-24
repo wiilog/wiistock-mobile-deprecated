@@ -229,8 +229,8 @@ export class InventaireMenuPage {
     }
 
     checkBarcodeIsRef(barcode: string) {
-        if (this.articlesByLocation.some(article => (article.reference === barcode))) {
-            this.article = this.articlesByLocation.find(article => (article.reference === barcode));
+        if (this.articlesByLocation.some(article => (article.code_barre === barcode))) {
+            this.article = this.articlesByLocation.find(article => (article.code_barre === barcode));
             this.changeDetector.detectChanges();
             this.openModalQuantity(this.article);
         } else {
