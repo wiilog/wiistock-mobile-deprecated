@@ -48,7 +48,6 @@ export class MenuPage {
         });
 
         this.sqliteProvider.getOperateur().then((username) => {
-            console.log(username);
         })
     }
 

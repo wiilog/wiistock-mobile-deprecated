@@ -4,7 +4,6 @@ import {Manutention} from "@app/entities/manutention";
 import {SqliteProvider} from "@providers/sqlite/sqlite";
 import {HttpClient} from "@angular/common/http";
 import {MenuPage} from "@pages/menu/menu";
-import {LivraisonArticlesPage} from "@pages/livraison/livraison-articles/livraison-articles";
 import {ManutentionValidatePage} from "@pages/manutention/manutention-validate/manutention-validate";
 
 /**
@@ -57,7 +56,6 @@ export class ManutentionMenuPage {
                                     this.sqlLiteProvider.importData(resp.data, true)
                                         .then(() => {
                                             this.sqlLiteProvider.getOperateur().then((username) => {
-                                                console.log(username);
                                                 this.user = username;
                                                 this.sqlLiteProvider.findAll('`manutention`').subscribe(manutentions => {
                                                     this.manutentions = manutentions;

@@ -12,7 +12,6 @@ import {StockageMenuPageTraca} from '@pages/traca/stockage-menu/stockage-menu-tr
 import {PreparationMenuPage} from '@pages/preparation/preparation-menu/preparation-menu';
 import {LivraisonMenuPage} from '@pages/livraison/livraison-menu/livraison-menu';
 import {InventaireMenuPage} from '@pages/inventaire-menu/inventaire-menu';
-import {ManutentionMenuPage} from "@pages/manutention/manutention-menu/manutention-menu";
 
 
 @Injectable()
