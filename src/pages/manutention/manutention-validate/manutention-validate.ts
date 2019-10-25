@@ -76,7 +76,6 @@ export class ManutentionValidatePage {
                     apiKey : key,
                     commentaire : this.commentaire
                 };
-                console.log(this.commentaire);
                 this.client.post<any>(url, params).subscribe((response) =>{
                     if (response.success) {
                         this.navCtrl.setRoot(ManutentionMenuPage);
@@ -99,10 +98,10 @@ export class ManutentionValidatePage {
                             if (resp.success) {
                                 this.sqLiteProvider.cleanDataBase(fromStart).subscribe(() => {
                                     this.sqLiteProvider.importData(resp.data, true)
-                                        .then(() => {
+                                        .subscribe(() => {
                                             this.sqLiteProvider.getOperateur().then((username) => {
                                                 this.user = username;
-                                                this.sqLiteProvider.findOne('`manutention`', this.manutention.id).subscribe(manutention => {
+                                                this.sqLiteProvider.findOneById('`manutention`', this.manutention.id).subscribe(manutention => {
                                                     this.manutention = manutention;
                                                     setTimeout(() => {
                                                         this.hasLoaded = true;

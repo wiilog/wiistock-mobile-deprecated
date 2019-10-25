@@ -54,7 +54,7 @@ export class ManutentionMenuPage {
                             if (resp.success) {
                                 this.sqlLiteProvider.cleanDataBase(fromStart).subscribe(() => {
                                     this.sqlLiteProvider.importData(resp.data, true)
-                                        .then(() => {
+                                        .subscribe(() => {
                                             this.sqlLiteProvider.getOperateur().then((username) => {
                                                 this.user = username;
                                                 this.sqlLiteProvider.findAll('`manutention`').subscribe(manutentions => {

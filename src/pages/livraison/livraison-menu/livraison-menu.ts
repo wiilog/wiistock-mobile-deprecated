@@ -60,7 +60,7 @@ export class LivraisonMenuPage {
                             if (resp.success) {
                                 this.sqlLiteProvider.cleanDataBase(true).subscribe(() => {
                                     this.sqlLiteProvider.importData(resp.data, true)
-                                        .then(() => {
+                                        .subscribe(() => {
                                             this.sqlLiteProvider.findAll('`livraison`').subscribe(livraisons => {
                                                 this.livraisons = livraisons.filter(p => p.date_end === null);
                                                 setTimeout(() => {

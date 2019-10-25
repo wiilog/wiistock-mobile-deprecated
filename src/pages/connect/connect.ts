@@ -1,10 +1,12 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
-import {NavController, NavParams, ToastController} from 'ionic-angular';
-import {UsersApiProvider} from "../../providers/users-api/users-api";
-import {MenuPage} from "../menu/menu";
-import {ParamsPage} from "../params/params"
-import {SqliteProvider} from "../../providers/sqlite/sqlite";
+import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
+import {UsersApiProvider} from '@providers/users-api/users-api';
+import {MenuPage} from '@pages/menu/menu';
+import {ParamsPage} from '@pages/params/params'
+import {SqliteProvider} from '@providers/sqlite/sqlite';
 
+
+@IonicPage()
 @Component({
     selector: 'page-connect',
     templateUrl: 'connect.html',
@@ -30,60 +32,47 @@ export class ConnectPage {
     }
 
     public logForm(): void {
-        this.isLoaded = true;
-        this.sqliteProvider.getAPI_URL().subscribe((result) => {
-            console.log(this.isLoaded);
-            if (result !== null) {
-                let url: string = result + this.connectURL;
-                this.usersApiProvider.setProvider(this.form, url).subscribe(resp => {
-                    if (resp.success) {
-                        this.sqliteProvider.cleanDataBase().subscribe(
-                            () => {
-                                this.sqliteProvider.clearStorage().then(
-                                    () => {
+        if (!this.isLoaded) {
+            this.isLoaded = true;
+
+            this.sqliteProvider.getAPI_URL().subscribe((result) => {
+                if (result !== null) {
+                    let url: string = result + this.connectURL;
+                    this.usersApiProvider.setProvider(this.form, url).subscribe(
+                        resp => {
+                            if (resp.success) {
+                                this.sqliteProvider.setOperateur(this.form.login);
+                                this.sqliteProvider.resetDataBase().subscribe(() => {
+                                    this.sqliteProvider.clearStorage().then(() => {
                                         this.sqliteProvider.setOperateur(this.form.login).then(() => {
                                             this.sqliteProvider.importData(resp.data)
-                                                .then(() => {
+                                                .subscribe(() => {
                                                     this.isLoaded = false;
                                                     this.navCtrl.setRoot(MenuPage);
-                                                }).catch(_ => {
-                                                this.isLoaded = false;
-                                                this.changeDetector.detectChanges();
-                                            });
-                                        }).catch(err => {
-                                            this.isLoaded = false;
-                                            console.log(err);
-                                            this.changeDetector.detectChanges();
-                                            console.log(this.isLoaded);
-                                        });
-                                    }, () => {
-                                        this.isLoaded = false;
-                                        this.changeDetector.detectChanges();
-                                        console.log(this.isLoaded);
+                                                });
+                                        }).catch(err => console.log(err));
                                     });
-                            }, () => {
+                                });
+                            }
+                            else {
                                 this.isLoaded = false;
                                 this.changeDetector.detectChanges();
-                                console.log(this.isLoaded);
-                            });
-                    } else {
-                        this.isLoaded = false;
-                        this.changeDetector.detectChanges();
-                        this.showToast('Identifiants incorrects.');
-                        console.log(this.isLoaded);
-                    }
-                });
-            } else {
-                this.isLoaded = false;
-                this.changeDetector.detectChanges();
-                this.showToast('Veuillez configurer votre URL dans les paramètres.');
-                console.log(this.isLoaded);
-            }
-        }, () => {
-            this.isLoaded = false;
-            this.changeDetector.detectChanges();
-            console.log(this.isLoaded);
-        });
+                                this.showToast('Identifiants incorrects.');
+                            }
+                        },
+                        () => {
+                            this.isLoaded = false;
+                            this.changeDetector.detectChanges();
+                            this.showToast('Un problème est survenu, veuillez vérifier vos identifiants ainsi que l\'URL saisie sans les paramètres.');
+                        });
+                }
+                else {
+                    this.isLoaded = false;
+                    this.changeDetector.detectChanges();
+                    this.showToast('Veuillez configurer votre URL dans les paramètres.');
+                }
+            });
+        }
     }
 
     public async showToast(msg) {
@@ -101,5 +90,4 @@ export class ConnectPage {
             this.navCtrl.push(ParamsPage);
         }
     }
-
 }

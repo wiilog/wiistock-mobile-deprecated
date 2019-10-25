@@ -42,13 +42,16 @@ import {InventaireMenuPage} from '@pages/inventaire-menu/inventaire-menu';
 import {ModalQuantityPage} from '@pages/inventaire-menu/modal-quantity';
 import {InventaireAnomaliePage} from '@pages/inventaire-anomalie/inventaire-anomalie';
 import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.service';
-import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
-import {CollecteMenuPage} from "@pages/collecte/collecte-menu/collecte-menu";
-import {CollecteArticleTakePage} from "@pages/collecte/collecte-article-take/collecte-article-take";
-import {CollecteArticlesPage} from "@pages/collecte/collecte-articles/collecte-articles";
-import {CollecteEmplacementPage} from "@pages/collecte/collecte-emplacement/collecte-emplacement";
-import {ManutentionValidatePage} from "@pages/manutention/manutention-validate/manutention-validate";
-import {ManutentionMenuPage} from "@pages/manutention/manutention-menu/manutention-menu";
+import {ToastService} from '@app/services/toast.service';
+import {PreparationRefArticlesPage} from '@pages/preparation/preparation-ref-articles/preparation-ref-articles';
+import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
+import {CollecteMenuPage} from '@pages/collecte/collecte-menu/collecte-menu';
+import {CollecteArticleTakePage} from '@pages/collecte/collecte-article-take/collecte-article-take';
+import {CollecteArticlesPage} from '@pages/collecte/collecte-articles/collecte-articles';
+import {CollecteEmplacementPage} from '@pages/collecte/collecte-emplacement/collecte-emplacement';
+import {ManutentionValidatePage} from '@pages/manutention/manutention-validate/manutention-validate';
+import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutention-menu';
+
 
 @NgModule({
     declarations: [
@@ -85,7 +88,8 @@ import {ManutentionMenuPage} from "@pages/manutention/manutention-menu/manutenti
         CollecteMenuPage,
         CollecteArticleTakePage,
         CollecteArticlesPage,
-        CollecteEmplacementPage
+        CollecteEmplacementPage,
+        PreparationRefArticlesPage
     ],
     imports: [
         IonicSelectableModule,
@@ -135,7 +139,8 @@ import {ManutentionMenuPage} from "@pages/manutention/manutention-menu/manutenti
         CollecteMenuPage,
         CollecteArticleTakePage,
         CollecteArticlesPage,
-        CollecteEmplacementPage
+        CollecteEmplacementPage,
+        PreparationRefArticlesPage
     ],
     providers: [
         BarcodeScannerManagerService,
@@ -150,7 +155,8 @@ import {ManutentionMenuPage} from "@pages/manutention/manutention-menu/manutenti
         BarcodeScanner,
         NetworkProvider,
         Network,
-        ZebraBarcodeScannerService
+        ZebraBarcodeScannerService,
+        ToastService
     ]
 })
 export class AppModule {

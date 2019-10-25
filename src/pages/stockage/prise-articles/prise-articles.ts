@@ -117,6 +117,7 @@ export class PriseArticlesPage {
         });
     }
 
+    // TODO AB merge supprime foreach
     testIfBarcodeEquals(text) {
         let found = false;
         this.db_articles.forEach(article => {

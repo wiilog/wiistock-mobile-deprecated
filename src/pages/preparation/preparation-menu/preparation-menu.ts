@@ -5,6 +5,7 @@ import {Preparation} from "../../../app/entities/preparation";
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 import {HttpClient} from "@angular/common/http";
 import {PreparationArticlesPage} from "../preparation-articles/preparation-articles";
+import {flatMap} from "rxjs/operators";
 
 /**
  * Generated class for the PreparationMenuPage page.
@@ -58,18 +59,18 @@ export class PreparationMenuPage {
                     this.sqlLiteProvider.getApiKey().then((key) => {
                         this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
                             if (resp.success) {
-                                this.sqlLiteProvider.cleanDataBase(true).subscribe(() => {
-                                    this.sqlLiteProvider.importData(resp.data, true)
-                                        .then(() => {
-                                            this.sqlLiteProvider.findAll('`preparation`').subscribe(preparations => {
-                                                this.preparations = preparations.filter(p => p.date_end === null);
-                                                setTimeout(() => {
-                                                    this.hasLoaded = true;
-                                                    this.content.resize();
-                                                }, 1000);
-                                            });
-                                        });
-                                });
+                                this.sqlLiteProvider.cleanDataBase(true)
+                                    .pipe(
+                                        flatMap(() => this.sqlLiteProvider.importData(resp.data, true)),
+                                        flatMap(() => this.sqlLiteProvider.findAll('`preparation`'))
+                                    )
+                                    .subscribe(preparations => {
+                                        this.preparations = preparations.filter(p => p.date_end === null);
+                                        setTimeout(() => {
+                                            this.hasLoaded = true;
+                                            this.content.resize();
+                                        }, 1000);
+                                    });
                             } else {
                                 this.hasLoaded = true;
                                 this.showToast('Erreur');

@@ -16,40 +16,42 @@
 </ion-header>
 
 <ion-content padding>
-    <div class="d-flex">
+    <div class="d-flex"
+         *ngIf="preparation">
         <h4>Préparation n°{{preparation.numero}}</h4>
     </div>
-    <div class="d-flex" [hidden]="articlesNT && articlesNT.length === 0">
-        <p>Liste des articles à traiter</p>
-        <ion-icon item-right name="barcode"> </ion-icon>
+    <div *ngIf="articlesNT && articlesNT.length > 0">
+        <div class="d-flex" >
+            <p>Liste des articles à traiter</p>
+            <ion-icon item-right name="barcode"> </ion-icon>
+        </div>
+        <ion-list>
+            <ion-grid>
+                <button [disabled]="!isValid" (click)="testIfBarcodeEquals(article, true)" class="list" ion-item *ngFor="let article of articlesNT">
+                    <ion-row>
+                        <ion-col>{{ article.reference }}</ion-col>
+                        <ion-col>{{ article.emplacement === "null" ? '' : article.emplacement }}</ion-col>
+                        <ion-col>{{ article.quantite }}</ion-col>
+                    </ion-row>
+                </button>
+            </ion-grid>
+        </ion-list>
     </div>
-    <ion-list [hidden]="articlesNT && articlesNT.length === 0">
-        <ion-grid>
-            <button [disabled]="!isValid" (click)="testIfBarcodeEquals(article, false)" class="list" ion-item *ngFor="let article of articlesNT">
-                <ion-row>
-                    <ion-col>{{ article.reference }}</ion-col>
-                    <ion-col>{{ article.emplacement === "null" ? '' : article.emplacement }}</ion-col>
-                    <ion-col>{{ article.quantite }}</ion-col>
-                </ion-row>
-            </button>
-        </ion-grid>
-    </ion-list>
 
-    <div class="d-flex" [hidden]="articlesT && articlesT.length === 0">
+    <div *ngIf="articlesT && articlesT.length > 0">
         <p>Liste des articles traités</p>
+        <ion-list>
+            <ion-grid>
+                <button [disabled]="!isValid" class="list" ion-item *ngFor="let article of articlesT">
+                    <ion-row>
+                        <ion-col>{{ article.reference }}</ion-col>
+                        <ion-col>{{ article.emplacement === "null" ? '' : article.emplacement }}</ion-col>
+                        <ion-col>{{ article.quantite }}</ion-col>
+                    </ion-row>
+                </button>
+            </ion-grid>
+        </ion-list>
     </div>
-
-    <ion-list [hidden]="articlesT && articlesT.length === 0">
-        <ion-grid>
-            <button [disabled]="!isValid" class="list" ion-item *ngFor="let article of articlesT">
-                <ion-row>
-                    <ion-col>{{ article.reference }}</ion-col>
-                    <ion-col>{{ article.emplacement === "null" ? '' : article.emplacement }}</ion-col>
-                    <ion-col>{{ article.quantite }}</ion-col>
-                </ion-row>
-            </button>
-        </ion-grid>
-    </ion-list>
 </ion-content>
 <ion-footer padding>
     <div class="d-flex">

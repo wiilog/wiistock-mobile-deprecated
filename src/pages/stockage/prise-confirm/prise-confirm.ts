@@ -30,7 +30,7 @@ export class PriseConfirmPage {
   }
 
   addArticle() {
-      this.sqliteProvider.findOne('article', this.id).subscribe((article) => {
+      this.sqliteProvider.findOneById('article', this.id).subscribe((article) => {
           if (article) {
               article.quantite = this.quantite;
 

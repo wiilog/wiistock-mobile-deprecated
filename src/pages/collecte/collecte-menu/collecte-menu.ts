@@ -52,7 +52,7 @@ export class CollecteMenuPage {
                             if (resp.success) {
                                 this.sqlLiteProvider.cleanDataBase(true).subscribe(() => {
                                     this.sqlLiteProvider.importData(resp.data, true)
-                                        .then(() => {
+                                        .subscribe(() => {
                                             this.sqlLiteProvider.findAll('`collecte`').subscribe(collectes => {
                                                 this.collectes = collectes.filter(c => c.date_end === null);
                                                 setTimeout(() => {

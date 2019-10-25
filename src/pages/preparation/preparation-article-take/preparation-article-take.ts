@@ -1,8 +1,10 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
+import {IonicPage, NavController, NavParams} from 'ionic-angular';
 import {ArticlePrepa} from '@app/entities/article-prepa';
-import {PreparationArticlesPage} from '@pages/preparation/preparation-articles/preparation-articles';
 import {Preparation} from '@app/entities/preparation';
+import {ToastService} from "@app/services/toast.service";
+import {ArticlePrepaByRefArticle} from "@app/entities/article-prepa-by-ref-article";
+
 
 @IonicPage()
 @Component({
@@ -11,43 +13,53 @@ import {Preparation} from '@app/entities/preparation';
 })
 export class PreparationArticleTakePage {
 
-    article: ArticlePrepa;
-    quantite: number;
-    preparation : Preparation;
+    public article: ArticlePrepa & ArticlePrepaByRefArticle;
+    public refArticle: ArticlePrepa;
+    public quantite: number;
+    public preparation: Preparation;
 
-    constructor(
-        public navCtrl: NavController,
-        public navParams: NavParams,
-        public toastController: ToastController) {
-        if (typeof(navParams.get('article') !== undefined)) {
-            this.article = navParams.get('article');
-            this.quantite = this.article.quantite;
-            this.preparation = navParams.get('preparation');
+    private onlyOne: boolean;
+    private selectArticle: (quantity: number) => void;
+
+    public constructor(public navCtrl: NavController,
+                       public navParams: NavParams,
+                       public toastService: ToastService) {}
+
+    public ionViewWillEnter(): void {
+        this.article = this.navParams.get('article');
+        this.refArticle = this.navParams.get('refArticle');
+        this.preparation = this.navParams.get('preparation');
+        this.selectArticle = this.navParams.get('selectArticle');
+        this.onlyOne = this.navParams.get('onlyOne');
+
+        this.quantite = this.maxQuantityAvailable;
+    }
+
+    public addArticle(): void {
+        const maxQuantityAvailable = this.maxQuantityAvailable;
+        if (this.quantite > maxQuantityAvailable || this.quantite <= 0) {
+            this.toastService.showToast('Veuillez sélectionner une quantité valide.');
+        }
+        else if (this.onlyOne && this.quantite !== maxQuantityAvailable) {
+            this.toastService.showToast(`La quantité souhaitée doit obligatoirement être égale à `);
+        }
+        else {
+            this.selectArticle(this.quantite);
+            this.navCtrl.pop();
         }
     }
 
-    addArticle() {
-        if (this.quantite > this.article.quantite || this.quantite <= 0) {
-            this.showToast('Veuillez sélectionner une quantité valide.');
-        } else {
-            this.navCtrl.setRoot(PreparationArticlesPage, {
-                article : this.article,
-                quantite : this.quantite,
-                preparation : this.preparation,
-                started : this.navParams.get('started'),
-                valid : this.navParams.get('valid')
-            })
-        }
+    public get availableQuantity(): number {
+        return this.article && (this.article.isSelectableByUser ? this.article.quantity : this.article.quantite);
     }
 
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
+    public get quantityToSelect(): number {
+        return this.article && (this.article.isSelectableByUser ? this.refArticle.quantite : this.article.quantite);
     }
 
+    public get maxQuantityAvailable(): number {
+        const availableQuantity = this.availableQuantity;
+        const quantityToSelect = this.quantityToSelect;
+        return (availableQuantity < quantityToSelect) ? availableQuantity : quantityToSelect;
+    }
 }
