@@ -5,6 +5,8 @@ import {SqliteProvider} from "@providers/sqlite/sqlite";
 import {HttpClient} from "@angular/common/http";
 import {ManutentionMenuPage} from "@pages/manutention/manutention-menu/manutention-menu";
 import {MenuPage} from "@pages/menu/menu";
+import {Network} from "@ionic-native/network";
+import {ToastService} from "@app/services/toast.service";
 
 /**
  * Generated class for the ManutentionValidatePage page.
@@ -28,43 +30,45 @@ export class ManutentionValidatePage {
     user : string;
     showCom : boolean = false;
 
-    constructor(public alertController : AlertController, public navCtrl: NavController, public navParams: NavParams, public sqLiteProvider: SqliteProvider, public client : HttpClient, public toastController : ToastController) {
-        if (navParams.get('manutention') !== undefined) {
-            this.manutention = navParams.get('manutention');
-        }
+    constructor(public alertController: AlertController,
+                public navCtrl: NavController,
+                public navParams: NavParams,
+                public sqLiteProvider: SqliteProvider,
+                public client: HttpClient,
+                public toastController: ToastController,
+                private toastService: ToastService,
+                private network: Network) {
     }
 
-    ionViewDidLoad() {
+    public ionViewWillEnter(): void {
+        if (this.navParams.get('manutention') !== undefined) {
+            this.manutention = this.navParams.get('manutention');
+        }
         this.synchronise(true);
     }
 
     validateManut() {
-        this.alertController.create({
-            title:'Commentez la validation',
-            inputs:[{
-                name:'commentaire',
-                placeholder: 'Commentaire',
-                type: 'text'
-            }],
-            buttons:[{
-                text: 'Valider',
-                handler: commentaire =>{
-                    this.commentaire = commentaire.commentaire;
-                    this.notifyApi();
-                },
-                cssClass : 'alertAlert'
-            }]
-        }).present();
-    }
-
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
+        if (this.network.type !== 'none') {
+            this.alertController.create({
+                title:'Commentez la validation',
+                inputs:[{
+                    name:'commentaire',
+                    placeholder: 'Commentaire',
+                    type: 'text'
+                }],
+                buttons:[{
+                    text: 'Valider',
+                    handler: commentaire =>{
+                        this.commentaire = commentaire.commentaire;
+                        this.notifyApi();
+                    },
+                    cssClass : 'alertAlert'
+                }]
+            }).present();
+        }
+        else {
+            this.toastService.showToast('Vous devez être connecté à internet pour valider la demande');
+        }
     }
 
     notifyApi() {
@@ -80,7 +84,7 @@ export class ManutentionValidatePage {
                     if (response.success) {
                         this.navCtrl.setRoot(ManutentionMenuPage);
                     } else {
-                        this.showToast(response.msg);
+                        this.toastService.showToast(response.msg);
                     }
                 });
             });
@@ -113,15 +117,15 @@ export class ManutentionValidatePage {
                                 });
                             } else {
                                 this.hasLoaded = true;
-                                this.showToast('Erreur');
+                                this.toastService.showToast('Erreur');
                             }
                         }, error => {
                             this.hasLoaded = true;
-                            this.showToast('Erreur réseau');
+                            this.toastService.showToast('Erreur réseau');
                         });
                     });
                 } else {
-                    this.showToast('Veuillez configurer votre URL dans les paramètres.')
+                    this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.')
                 }
             },
             err => console.log(err)
