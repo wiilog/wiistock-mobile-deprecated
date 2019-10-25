@@ -19,8 +19,8 @@ export class BarcodeScannerManagerService {
                 setTimeout(() => {this._canGoBack = true}, 500);
             } else {
                 this._canGoBack = true;
+                subject.next(res.text);
             }
-            subject.next(res.text);
         });
 
         return subject;

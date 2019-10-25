@@ -74,8 +74,7 @@ export class PriseEmplacementPageTraca {
     }
 
     goHome() {
-        console.log("sdfsfsd");
-        this.navCtrl.setRoot(MenuPage).then(then => console.log('then' , then)).catch(err => console.log(err));
+        this.navCtrl.setRoot(MenuPage);
     }
 
     scanLocation() {
