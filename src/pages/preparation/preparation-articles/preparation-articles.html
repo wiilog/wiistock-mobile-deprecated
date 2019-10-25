@@ -16,9 +16,9 @@
 </ion-header>
 
 <ion-content padding>
-    <div class="d-flex"
-         *ngIf="preparation">
-        <h4>Préparation n°{{preparation.numero}}</h4>
+    <div class="page-title" *ngIf="preparation">
+        <h4>Préparation {{preparation.numero}}</h4>
+        <p>Emplacement de destination<br/>{{preparation.destination}}</p>
     </div>
     <div *ngIf="articlesNT && articlesNT.length > 0">
         <div class="d-flex" >

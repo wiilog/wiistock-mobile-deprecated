@@ -3,7 +3,7 @@
     <name>Follow GT</name>
     <description>Follow your supply chain with GT Logistics.</description>
     <author email="bonjour@wiilog.fr" href="http://wiilog.fr/">Wiilog Team</author>
-    <content src="index.html" />
+    <content original-src="index.html" src="http://localhost:8100" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
     <allow-intent href="https://*/*" />
@@ -104,4 +104,5 @@
     <plugin name="com-darryncampbell-cordova-plugin-intent" spec="1.1.7" />
     <plugin name="cordova-plugin-network-information" spec="2.0.1" />
     <allow-navigation href="http://192.168.0.54:8100" />
+    <allow-navigation href="http://localhost:8100" sessionid="1bccee23" />
 </widget>

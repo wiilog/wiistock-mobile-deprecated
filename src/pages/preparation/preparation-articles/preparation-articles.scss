@@ -2,4 +2,16 @@ page-preparation-articles {
   .alert {
     color: green;
   }
+
+    .page-title {
+        text-align: center;
+        h4 {
+            font-size: 15pt;
+            font-weight: lighter;
+        }
+        p {
+            font-size: 12pt;
+            font-weight: lighter;
+        }
+    }
 }

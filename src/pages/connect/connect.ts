@@ -1,9 +1,10 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
-import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
+import {IonicPage, NavController, NavParams} from 'ionic-angular';
 import {UsersApiProvider} from '@providers/users-api/users-api';
 import {MenuPage} from '@pages/menu/menu';
 import {ParamsPage} from '@pages/params/params'
 import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {ToastService} from '@app/services/toast.service';
 
 
 @IonicPage()
@@ -25,8 +26,8 @@ export class ConnectPage {
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
                        public usersApiProvider: UsersApiProvider,
-                       private toastController: ToastController,
                        public sqliteProvider: SqliteProvider,
+                       private toastService: ToastService,
                        private changeDetector: ChangeDetectorRef) {
         this.isLoaded = false;
     }
@@ -57,32 +58,22 @@ export class ConnectPage {
                             else {
                                 this.isLoaded = false;
                                 this.changeDetector.detectChanges();
-                                this.showToast('Identifiants incorrects.');
+                                this.toastService.showToast('Identifiants incorrects.');
                             }
                         },
                         () => {
                             this.isLoaded = false;
                             this.changeDetector.detectChanges();
-                            this.showToast('Un problème est survenu, veuillez vérifier vos identifiants ainsi que l\'URL saisie sans les paramètres.');
+                            this.toastService.showToast('Un problème est survenu, veuillez vérifier vos identifiants ainsi que l\'URL saisie sans les paramètres.');
                         });
                 }
                 else {
                     this.isLoaded = false;
                     this.changeDetector.detectChanges();
-                    this.showToast('Veuillez configurer votre URL dans les paramètres.');
+                    this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.');
                 }
             });
         }
-    }
-
-    public async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
     }
 
     public goToParams(): void {
