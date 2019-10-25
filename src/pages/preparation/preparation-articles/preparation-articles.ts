@@ -287,6 +287,9 @@ export class PreparationArticlesPage {
     }
 
     private getArticleByBarcode(barcode: string): Observable<{selectedArticle?: ArticlePrepaByRefArticle, refArticle?: ArticlePrepa}> {
+        this.sqliteProvider.findAll('article_prepa_by_ref_article').subscribe((arts) => {
+            console.log(arts);
+        });
         return this.sqliteProvider.findBy('article_prepa_by_ref_article', [`barcode LIKE '${barcode}'`]).pipe(
             // we get the article
             map((result) => (
