@@ -182,13 +182,15 @@ export class SqliteProvider {
     }
 
     private importArticles(data): string {
-
         let articles = data['articles'];
         if (articles.length > 0) {
             let articleValues = articles.map((article) => (
-                "(" + null + ", " +
-                "'" + article.reference + "', " +
-                (article.quantiteStock || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ")"
+                "(" +
+                "NULL, " +
+                `'${article.reference}',` +
+                (article.quantiteStock || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ', ' +
+                (article.barCode ? `'${article.barCode}'` : 'null') +
+                ")"
             ));
             let articleValuesStr = articleValues.join(', ');
             return 'INSERT INTO `article` (`id`, `reference`, `quantite`, `barcode`) VALUES ' + articleValuesStr + ';';
@@ -220,7 +222,7 @@ export class SqliteProvider {
         if (prepas.length === 0) {
             this.findAll('`preparation`').subscribe((preparationsDB) => {
                 this.deletePreparations(preparationsDB).then(() => {
-                    ret$.next(undefined)
+                    ret$.next(undefined);
                 });
             });
         }
@@ -237,7 +239,8 @@ export class SqliteProvider {
                             ret$.next((prepasValues.length > 0)
                                 ? sqlPrepas
                                 : undefined);
-                        } else {
+                        }
+                        else {
                             this.deletePreparations(preparations.filter(p => prepas.find(prep => prep.id === p.id) === undefined)).then(() => {
                                 ret$.next((prepasValues.length > 0)
                                     ? sqlPrepas
@@ -377,7 +380,18 @@ export class SqliteProvider {
         for (let article of articlesLivrs) {
             this.findArticlesByLivraison(article.id_livraison).subscribe((articles) => {
                 if (articles.find(articleLivr => articleLivr.reference === article.reference && articleLivr.is_ref === article.is_ref) === undefined) {
-                    articlesLivraisonValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_livraison + ", " + 0 + ", '" + article.location + "')");
+                    articlesLivraisonValues.push(
+                        "(" +
+                        "NULL, " +
+                        "'" + article.label + "', " +
+                        "'" + article.reference + "'," +
+                        article.quantity + ", " +
+                        "'" + article.is_ref + "', " +
+                        "" + article.id_livraison + ", " +
+                        "0, " +
+                        "'" + article.location + "'," +
+                        "'" + article.barCode + "'" +
+                        ")");
                 }
                 if (articlesLivrs.indexOf(article) === articlesLivrs.length - 1) {
                     if (articlesLivraisonValues.length) {
@@ -637,7 +651,7 @@ export class SqliteProvider {
             : undefined;
 
         const sqlQuery = 'SELECT * FROM ' + table + (sqlWhereClauses ? sqlWhereClauses : '');
-        console.log('_>>>>>>>>>>>>>>>>' , sqlQuery);
+
         return this.db$.pipe(
             flatMap((db) => from(db.executeSql(sqlQuery, []))),
             map((data) => {
