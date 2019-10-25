@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
-import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
+import {IonicPage, NavController, NavParams} from 'ionic-angular';
 import {UsersApiProvider} from '@providers/users-api/users-api';
 import {MenuPage} from '@pages/menu/menu';
 import {ParamsPage} from '@pages/params/params'
