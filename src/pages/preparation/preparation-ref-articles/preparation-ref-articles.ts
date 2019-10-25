@@ -4,7 +4,6 @@ import {MenuPage} from '@pages/menu/menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ArticlePrepa} from '@app/entities/article-prepa';
 import {HttpClient} from '@angular/common/http';
-import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {ToastService} from "@app/services/toast.service";
 import {ArticlePrepaByRefArticle} from "@app/entities/article-prepa-by-ref-article";
 import {ZebraBarcodeScannerService} from "@app/services/zebra-barcode-scanner.service";

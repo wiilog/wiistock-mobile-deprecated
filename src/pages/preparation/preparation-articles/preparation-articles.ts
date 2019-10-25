@@ -7,7 +7,6 @@ import {ArticlePrepa} from '@app/entities/article-prepa';
 import {Mouvement} from '@app/entities/mouvement';
 import {PreparationArticleTakePage} from '@pages/preparation/preparation-article-take/preparation-article-take';
 import {HttpClient} from '@angular/common/http';
-import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {PreparationEmplacementPage} from '@pages/preparation/preparation-emplacement/preparation-emplacement';
 import moment from 'moment';
 import {PreparationRefArticlesPage} from '@pages/preparation/preparation-ref-articles/preparation-ref-articles';
