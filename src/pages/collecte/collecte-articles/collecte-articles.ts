@@ -109,17 +109,6 @@ export class CollecteArticlesPage {
         toast.present();
     }
 
-    // ionViewDidEnter() {
-    //     this.setBackButtonAction();
-    // }
-    //
-    //
-    // setBackButtonAction() {
-    //     this.navBar.backButtonClick = () => {
-    //         // this.navCtrl.setRoot(CollecteMenuPage);
-    //     }
-    // }
-
     registerMvt() {
         if (this.isValid) {
             if (this.navParams.get('article').quantite !== Number(this.navParams.get('quantite'))) {

@@ -16,6 +16,7 @@ import {flatMap, map} from 'rxjs/operators';
 import {ArticlePrepaByRefArticle} from '@app/entities/article-prepa-by-ref-article';
 import {of} from 'rxjs/observable/of';
 import {ToastService} from '@app/services/toast.service';
+import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
 
 
 @IonicPage()
@@ -39,7 +40,7 @@ export class PreparationArticlesPage {
                        public navParams: NavParams,
                        public sqliteProvider: SqliteProvider,
                        public http: HttpClient,
-                       public barcodeScanner: BarcodeScanner,
+                       private barcodeScanner: BarcodeScannerManagerService,
                        private toastService: ToastService) {
 
         let instance = this;
@@ -61,14 +62,14 @@ export class PreparationArticlesPage {
     }
 
     public scan(): void {
-        this.barcodeScanner.scan().then(res => {
-            this.testIfBarcodeEquals(res.text);
+        this.barcodeScanner.scan().subscribe(barcode => {
+            this.testIfBarcodeEquals(barcode);
         });
     }
+
     public saveSelectedArticle(selectedArticle: ArticlePrepa|ArticlePrepaByRefArticle, selectedQuantity: number): void {
         // if preparation is valid
         if (this.isValid) {
-
             // check if article is managed by 'article'
             const isSelectableByUser = ((selectedArticle as ArticlePrepaByRefArticle).isSelectableByUser);
             const availableQuantity = isSelectableByUser
@@ -77,30 +78,20 @@ export class PreparationArticlesPage {
 
             // if the quantity selected is smaller than the number of article
             if (availableQuantity !== selectedQuantity) {
-                let newArticle: ArticlePrepa = {
-                    id: null,
-                    label: (selectedArticle as ArticlePrepa).label,
-                    reference: selectedArticle.reference,
-                    quantite: selectedQuantity,
-                    is_ref: (selectedArticle as ArticlePrepa).is_ref,
-                    id_prepa: (selectedArticle as ArticlePrepa).id_prepa,
-                    has_moved: 1,
-                    emplacement: (selectedArticle as ArticlePrepa).emplacement,
-                    barcode: this.navParams.get('article').barcode
-                };
+                const {id_prepa, is_ref, reference} = (selectedArticle as ArticlePrepa);
 
                 // check if we alreay have selected the article
                 let articleAlready = this.articlesT.find(art => (
-                    (art.id_prepa === newArticle.id_prepa) &&
-                    (art.is_ref === newArticle.is_ref) &&
-                    (art.reference === newArticle.reference)
+                    (art.id_prepa === id_prepa) &&
+                    (art.is_ref === is_ref) &&
+                    (art.reference === reference)
                 ));
                 if (articleAlready !== undefined) {
                     // we update the quantity in the list of treated article
-                    this.sqliteProvider.updateArticlePrepaQuantity(articleAlready.id, Number(newArticle.quantite) + Number(articleAlready.quantite))
+                    this.sqliteProvider.updateArticlePrepaQuantity(articleAlready.id, Number(selectedQuantity) + Number(articleAlready.quantite))
                         .pipe(
                             // we update quantity in the list of untreated articles
-                            flatMap(() => this.sqliteProvider.updateArticlePrepaQuantity((selectedArticle as ArticlePrepa).id, (selectedArticle as ArticlePrepa).quantite - newArticle.quantite)),
+                            flatMap(() => this.sqliteProvider.updateArticlePrepaQuantity((selectedArticle as ArticlePrepa).id, (selectedArticle as ArticlePrepa).quantite - selectedQuantity)),
                         )
                         .subscribe(() => {
                             this.updateLists();
@@ -114,38 +105,35 @@ export class PreparationArticlesPage {
                             });
                     }
                     else {
-                        this.sqliteProvider.insert('`article_prepa`', newArticle).subscribe((insertId) => {
-                            let mouvement: Mouvement = {
-                                id: null,
-                                reference: newArticle.reference,
-                                quantity: (selectedArticle as ArticlePrepa).quantite,
-                                date_pickup: moment().format(),
-                                location_from: newArticle.emplacement,
-                                date_drop: null,
-                                location: null,
-                                type: 'prise-dépose',
-                                is_ref: newArticle.is_ref,
-                                id_article_prepa: insertId,
-                                id_prepa: newArticle.id_prepa,
-                                id_article_livraison: null,
-                                id_livraison: null,
-                                id_article_collecte: null,
-                                id_collecte: null,
-                            };
-                            // we update value quantity of selected article
-                            this.sqliteProvider
-                                .updateArticlePrepaQuantity((selectedArticle as ArticlePrepa).id, (selectedArticle as ArticlePrepa).quantite - selectedQuantity)
-                                .pipe(flatMap(() => this.sqliteProvider.insert('`mouvement`', mouvement)))
-                                .subscribe(() => {
-                                    this.updateLists();
-                                })
-                        });
+                        let mouvement: Mouvement = {
+                            id: null,
+                            reference: selectedArticle.reference,
+                            quantity: selectedQuantity,
+                            date_pickup: moment().format(),
+                            location_from: (selectedArticle as ArticlePrepa).emplacement,
+                            date_drop: null,
+                            location: null,
+                            type: 'prise-dépose',
+                            is_ref: (selectedArticle as ArticlePrepa).is_ref,
+                            id_article_prepa: selectedArticle.id,
+                            id_prepa: (selectedArticle as ArticlePrepa).id_prepa,
+                            id_article_livraison: null,
+                            id_livraison: null,
+                            id_article_collecte: null,
+                            id_collecte: null,
+                        };
+                        // we update value quantity of selected article
+                        this.sqliteProvider
+                            .updateArticlePrepaQuantity((selectedArticle as ArticlePrepa).id, (selectedArticle as ArticlePrepa).quantite - selectedQuantity)
+                            .pipe(flatMap(() => this.sqliteProvider.insert('`mouvement`', mouvement)))
+                            .subscribe(() => {
+                                this.updateLists();
+                            })
                     }
                 }
             }
             // if we select all the article
             else {
-
                 let mouvement: Mouvement = {
                     id: null,
                     reference: selectedArticle.reference,
@@ -180,7 +168,6 @@ export class PreparationArticlesPage {
                         (art.reference === mouvement.reference)
                     ));
                 }
-
 
                 if (articleAlready) { // we don't enter here if it's an article selected by the user in the liste of article_prepa_by_ref_article
                     this.sqliteProvider
@@ -301,7 +288,7 @@ export class PreparationArticlesPage {
     }
 
     private getArticleByBarcode(barcode: string): Observable<{selectedArticle?: ArticlePrepaByRefArticle, refArticle?: ArticlePrepa}> {
-        return this.sqliteProvider.findBy('article_prepa_by_ref_article', [`reference LIKE '${barcode}'`]).pipe(
+        return this.sqliteProvider.findBy('article_prepa_by_ref_article', [`barcode LIKE '${barcode}'`]).pipe(
             // we get the article
             map((result) => (
                 (result && result.length > 0)
@@ -393,6 +380,8 @@ export class PreparationArticlesPage {
                             id_article_prepa: insertId,
                             id_prepa: this.preparation.id,
                             id_article_livraison: null,
+                            id_article_collecte: null,
+                            id_collecte: null,
                             id_livraison: null
                         };
                         return this.sqliteProvider.insert('`mouvement`', mouvement);

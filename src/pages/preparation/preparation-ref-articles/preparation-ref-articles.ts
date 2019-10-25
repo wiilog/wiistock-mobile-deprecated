@@ -11,6 +11,7 @@ import {ZebraBarcodeScannerService} from "@app/services/zebra-barcode-scanner.se
 import {Observable, Subscription} from "rxjs";
 import {PreparationArticleTakePage} from "@pages/preparation/preparation-article-take/preparation-article-take";
 import {IonicSelectableComponent} from "ionic-selectable";
+import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
 
 
 @IonicPage()
@@ -43,7 +44,7 @@ export class PreparationRefArticlesPage {
                        public toastService: ToastService,
                        public sqliteProvider: SqliteProvider,
                        public http: HttpClient,
-                       private barcodeScanner: BarcodeScanner,
+                       private barcodeScanner: BarcodeScannerManagerService,
                        private zebraBarcodeScannerService: ZebraBarcodeScannerService) {
         this.articles = [];
         this.articlesToShow = [];
@@ -73,8 +74,8 @@ export class PreparationRefArticlesPage {
     }
 
     public scan(): void {
-        this.barcodeScanner.scan().then(res => {
-            this.testIfBarcodeEquals(res.text);
+        this.barcodeScanner.scan().subscribe(barcode => {
+            this.testIfBarcodeEquals(barcode);
         });
     }
 

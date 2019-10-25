@@ -42,7 +42,7 @@ export class ConnectPage {
                         resp => {
                             if (resp.success) {
                                 this.sqliteProvider.setOperateur(this.form.login);
-                                this.sqliteProvider.cleanDataBase().subscribe(() => {
+                                this.sqliteProvider.resetDataBase().subscribe(() => {
                                     this.sqliteProvider.clearStorage().then(() => {
                                         this.sqliteProvider.setOperateur(this.form.login).then(() => {
                                             this.sqliteProvider.importData(resp.data)
