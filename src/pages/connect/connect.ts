@@ -30,33 +30,59 @@ export class ConnectPage {
     }
 
     public logForm(): void {
+        this.isLoaded = true;
         this.sqliteProvider.getAPI_URL().subscribe((result) => {
-            this.isLoaded = true;
+            console.log(this.isLoaded);
             if (result !== null) {
                 let url: string = result + this.connectURL;
                 this.usersApiProvider.setProvider(this.form, url).subscribe(resp => {
                     if (resp.success) {
-                        this.sqliteProvider.cleanDataBase().subscribe(() => {
-                            this.sqliteProvider.clearStorage().then(() => {
-                                this.sqliteProvider.setOperateur(this.form.login).then(() => {
-                                    this.sqliteProvider.importData(resp.data)
-                                        .then(() => {
+                        this.sqliteProvider.cleanDataBase().subscribe(
+                            () => {
+                                this.sqliteProvider.clearStorage().then(
+                                    () => {
+                                        this.sqliteProvider.setOperateur(this.form.login).then(() => {
+                                            this.sqliteProvider.importData(resp.data)
+                                                .then(() => {
+                                                    this.isLoaded = false;
+                                                    this.navCtrl.setRoot(MenuPage);
+                                                }).catch(_ => {
+                                                this.isLoaded = false;
+                                                this.changeDetector.detectChanges();
+                                            });
+                                        }).catch(err => {
                                             this.isLoaded = false;
-                                            this.navCtrl.setRoot(MenuPage);
+                                            console.log(err);
+                                            this.changeDetector.detectChanges();
+                                            console.log(this.isLoaded);
                                         });
-                                }).catch(err => console.log(err));
+                                    }, () => {
+                                        this.isLoaded = false;
+                                        this.changeDetector.detectChanges();
+                                        console.log(this.isLoaded);
+                                    });
+                            }, () => {
+                                this.isLoaded = false;
+                                this.changeDetector.detectChanges();
+                                console.log(this.isLoaded);
                             });
-                        });
                     } else {
                         this.isLoaded = false;
+                        this.changeDetector.detectChanges();
                         this.showToast('Identifiants incorrects.');
+                        console.log(this.isLoaded);
                     }
                 });
             } else {
                 this.isLoaded = false;
                 this.changeDetector.detectChanges();
                 this.showToast('Veuillez configurer votre URL dans les paramètres.');
+                console.log(this.isLoaded);
             }
+        }, () => {
+            this.isLoaded = false;
+            this.changeDetector.detectChanges();
+            console.log(this.isLoaded);
         });
     }
 
