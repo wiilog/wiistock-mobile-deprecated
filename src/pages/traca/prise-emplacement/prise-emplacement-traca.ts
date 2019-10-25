@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {App, IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
 import {PriseArticlesPageTraca} from "../prise-articles/prise-articles-traca";
 import {MenuPage} from "../../menu/menu";
@@ -16,10 +16,13 @@ import {BarcodeScannerManagerService} from "../../../app/services/barcode-scanne
 })
 export class PriseEmplacementPageTraca {
 
+    @ViewChild('locationComponent') locationComponent: IonicSelectableComponent;
     emplacement: Emplacement;
     // locationLabel = '';
     db_locations: Array<Emplacement>;
+    db_locations_for_list: Array<Emplacement>;
     db_articles: Array<Article>;
+    endIndex : number = 20;
 
     constructor(public navCtrl: NavController,
                 public navParams: NavParams,
@@ -33,6 +36,7 @@ export class PriseEmplacementPageTraca {
         }
         this.sqliteProvider.findAll('emplacement').subscribe((value) => {
             this.db_locations = value;
+            this.db_locations_for_list = value;
             this.sqliteProvider.findAll('article').subscribe((value) => {
                 this.db_articles = value;
             })
@@ -64,13 +68,16 @@ export class PriseEmplacementPageTraca {
     }
 
     searchEmplacement(event: { component: IonicSelectableComponent, text: string }) {
-        let text = event.text.trim();
-        event.component.startSearch();
-        this.sqliteProvider.findByElement('emplacement', 'label', text).subscribe((items) => {
-            event.component.items = items;
-            event.component.endSearch();
-        });
-        event.component.endSearch();
+        this.locationComponent.showLoading();
+        if (event.text.trim() === '') {
+            this.db_locations_for_list = this.db_locations.slice(0, this.endIndex);
+            this.changeDetectorRef.detectChanges();
+        } else if (event.text.trim().length > 2) {
+            let text = event.text.trim();
+            this.db_locations_for_list = this.db_locations.filter(emplacement => emplacement.label.toLowerCase().includes(text.toLowerCase())).slice(0, this.endIndex);
+            this.changeDetectorRef.detectChanges();
+        }
+        this.locationComponent.hideLoading();
     }
 
     goHome() {
@@ -103,6 +110,27 @@ export class PriseEmplacementPageTraca {
             cssClass: 'toast-error'
         });
         toast.present();
+    }
+
+    getMoreLocations(event: { component: IonicSelectableComponent, text: string }) {
+        this.locationComponent.showLoading();
+        let text = event.text.trim();
+        if (this.endIndex >= this.db_locations.length) {
+            event.component.disableInfiniteScroll();
+            return;
+        }
+        if (this.endIndex + 20 >= this.db_locations.length) {
+            this.endIndex = this.db_locations.length;
+        } else {
+            this.endIndex+=20;
+        }
+        if (text !== '') {
+            this.db_locations_for_list = this.db_locations.filter(emplacement => emplacement.label.toLowerCase().includes(text.toLowerCase())).slice(0, this.endIndex);
+        } else {
+            this.db_locations_for_list = this.db_locations.slice(0, this.endIndex);
+        }
+        event.component.endInfiniteScroll();
+        this.locationComponent.hideLoading();
     }
 
 }

@@ -20,7 +20,7 @@ export class ConnectPage {
         password: ''
     };
     public connectURL: string = '/api/connect';
-    public isLoaded: boolean;
+    public isLoaded: boolean = false;
 
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
