@@ -494,7 +494,7 @@ export class SqliteProvider {
 
             if (articlesInventaire.indexOf(article) === articlesInventaire.length - 1) {
                 let articlesInventaireValuesStr = articlesInventaireValues.join(', ');
-                let sqlArticlesInventaire = 'INSERT INTO `article_inventaire` (`id`, `id_mission`, `reference`, `is_ref`, `location`, `barcode`) VALUES ' + articlesInventaireValuesStr + ';';
+                let sqlArticlesInventaire = 'INSERT INTO `article_inventaire` (`id`, `id_mission`, `reference`, `is_ref`, `location`, `code_barre`) VALUES ' + articlesInventaireValuesStr + ';';
                 importExecuted.next((articlesInventaireValues.length > 0)
                     ? sqlArticlesInventaire
                     : undefined);
