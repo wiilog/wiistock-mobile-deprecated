@@ -23,7 +23,7 @@ export class CollecteMenuPage {
         public navParams: NavParams,
         public sqlLiteProvider: SqliteProvider,
         public toastController: ToastController,
-        public http: HttpClient,) {
+        public http: HttpClient) {
     }
 
     goHome() {
@@ -54,7 +54,9 @@ export class CollecteMenuPage {
                                     this.sqlLiteProvider.importData(resp.data, true)
                                         .subscribe(() => {
                                             this.sqlLiteProvider.findAll('`collecte`').subscribe(collectes => {
-                                                this.collectes = collectes.filter(c => c.date_end === null);
+                                                this.collectes = collectes
+                                                    .filter(c => c.date_end === null)
+                                                    .sort(({emplacement: emplacement1}, {emplacement: emplacement2}) => ((emplacement1 < emplacement2) ? -1 : 1));
                                                 setTimeout(() => {
                                                     this.hasLoaded = true;
                                                     this.content.resize();
@@ -90,7 +92,7 @@ export class CollecteMenuPage {
     }
 
     goToArticles(collecte) {
-        this.navCtrl.push(CollecteArticlesPage, {collecte: collecte});
+        this.navCtrl.push(CollecteArticlesPage, {collecte});
     }
 
 }

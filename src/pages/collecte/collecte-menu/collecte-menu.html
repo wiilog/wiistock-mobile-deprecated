@@ -1,30 +1,31 @@
 <ion-header>
-  <ion-navbar>
-    <ion-buttons start>
-      <button ion-button icon-only (click)="goHome()">
-        <ion-icon name="home"></ion-icon>
-      </button>
-    </ion-buttons>
-    <ion-title>Collectes</ion-title>
-  </ion-navbar>
+    <ion-navbar>
+        <ion-buttons start>
+            <button ion-button icon-only (click)="goHome()">
+                <ion-icon name="home"></ion-icon>
+            </button>
+        </ion-buttons>
+        <ion-title>Collectes</ion-title>
+    </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-  <ion-title *ngIf="collectes && collectes.length === 0">Aucune collecte<br>à traiter.</ion-title>
-  <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
-  <ion-list *ngIf="hasLoaded">
-    <ion-grid>
-      <button (click)="goToArticles(collecte)" class="list" ion-item *ngFor="let collecte of collectes">
-        <ion-row>
-          <ion-col col-6>{{ collecte.numero }}</ion-col>
-        </ion-row>
-      </button>
-    </ion-grid>
-  </ion-list>
+    <ion-title *ngIf="collectes && collectes.length === 0">Aucune collecte<br>à traiter.</ion-title>
+    <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
+    <ion-list *ngIf="hasLoaded">
+        <ion-grid>
+            <button (click)="goToArticles(collecte)" class="list" ion-item *ngFor="let collecte of collectes">
+                <ion-row>
+                    <ion-col col-6>{{ collecte.numero }}</ion-col>
+                    <ion-col class="emplacement-collecte" col-6>{{ collecte.emplacement === "null" ? '' : collecte.emplacement }}</ion-col>
+                </ion-row>
+            </button>
+        </ion-grid>
+    </ion-list>
 
 </ion-content>
 <ion-footer padding *ngIf="hasLoaded">
-  <div class="d-flex">
-    <ion-icon class="big-icon" name="refresh" item-right (click)="synchronise(false)"></ion-icon>
-  </div>
+    <div class="d-flex">
+        <ion-icon class="big-icon" name="refresh" item-right (click)="synchronise(false)"></ion-icon>
+    </div>
 </ion-footer>
