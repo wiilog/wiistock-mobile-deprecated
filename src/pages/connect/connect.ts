@@ -5,6 +5,7 @@ import {MenuPage} from '@pages/menu/menu';
 import {ParamsPage} from '@pages/params/params'
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ToastService} from '@app/services/toast.service';
+import {Network} from "@ionic-native/network";
 
 
 @IonicPage()
@@ -28,62 +29,64 @@ export class ConnectPage {
                        public usersApiProvider: UsersApiProvider,
                        private toastService: ToastService,
                        public sqliteProvider: SqliteProvider,
-                       private changeDetector: ChangeDetectorRef) {
+                       private changeDetector: ChangeDetectorRef,
+                       private network: Network) {
         this.isLoaded = false;
     }
 
     public logForm(): void {
         if (!this.isLoaded) {
-            this.isLoaded = true;
-
-            this.sqliteProvider.getAPI_URL().subscribe((result) => {
-                if (result !== null) {
-                    let url: string = result + this.connectURL;
-                    this.usersApiProvider.setProvider(this.form, url).subscribe(
-                        resp => {
-                            if (resp.success) {
-                                this.sqliteProvider.setOperateur(this.form.login);
-                                this.sqliteProvider.resetDataBase().subscribe(
-                                    () => {
-                                        this.sqliteProvider.clearStorage().then(() => {
-                                            this.sqliteProvider.setOperateur(this.form.login)
-                                                .then(() => {
-                                                    this.sqliteProvider.importData(resp.data)
-                                                        .subscribe(
-                                                            () => {
-                                                                this.isLoaded = false;
-                                                                this.navCtrl.setRoot(MenuPage);
-                                                            },
-                                                            () => {
-                                                                this.finishLoading();
-                                                            }
-                                                        );
-                                                })
-                                                .catch(err => {
-                                                    this.finishLoading();
-                                                    console.log(err)
-                                                });
+            if (this.network.type !== 'none') {
+                this.isLoaded = true;
+                this.sqliteProvider.getAPI_URL().subscribe((result) => {
+                    if (result !== null) {
+                        let url: string = result + this.connectURL;
+                        this.usersApiProvider.setProvider(this.form, url).subscribe(
+                            resp => {
+                                if (resp.success) {
+                                    this.sqliteProvider.setOperateur(this.form.login);
+                                    this.sqliteProvider.resetDataBase().subscribe(
+                                        () => {
+                                            this.sqliteProvider.clearStorage().then(() => {
+                                                this.sqliteProvider.setOperateur(this.form.login)
+                                                    .then(() => {
+                                                        this.sqliteProvider.importData(resp.data)
+                                                            .subscribe(
+                                                                () => {
+                                                                    this.isLoaded = false;
+                                                                    this.navCtrl.setRoot(MenuPage);
+                                                                },
+                                                                () => {
+                                                                    this.finishLoading();
+                                                                }
+                                                            );
+                                                    })
+                                                    .catch(err => {
+                                                        this.finishLoading();
+                                                        console.log(err)
+                                                    });
+                                            });
+                                        },
+                                        () => {
+                                            this.finishLoading();
                                         });
-                                    },
-                                    () => {
-                                        this.finishLoading();
-                                    });
-                            }
-                            else {
+                                } else {
+                                    this.finishLoading();
+                                    this.toastService.showToast('Identifiants incorrects.');
+                                }
+                            },
+                            () => {
                                 this.finishLoading();
-                                this.toastService.showToast('Identifiants incorrects.');
-                            }
-                        },
-                        () => {
-                            this.finishLoading();
-                            this.toastService.showToast('Un problème est survenu, veuillez vérifier vos identifiants ainsi que l\'URL saisie sans les paramètres.');
-                        });
-                }
-                else {
-                    this.finishLoading();
-                    this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.');
-                }
-            });
+                                this.toastService.showToast('Un problème est survenu, veuillez vérifier vos identifiants ainsi que l\'URL saisie sans les paramètres.');
+                            });
+                    } else {
+                        this.finishLoading();
+                        this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.');
+                    }
+                });
+            } else {
+                this.toastService.showToast('Vous devez être connecté à internet pour vous authentifier');
+            }
         }
     }
 
