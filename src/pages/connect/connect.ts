@@ -28,7 +28,6 @@ export class ConnectPage {
                        public usersApiProvider: UsersApiProvider,
                        private toastService: ToastService,
                        public sqliteProvider: SqliteProvider,
-                       private toastService: ToastService,
                        private changeDetector: ChangeDetectorRef) {
         this.isLoaded = false;
     }
