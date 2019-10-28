@@ -26,6 +26,7 @@ export class ConnectPage {
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
                        public usersApiProvider: UsersApiProvider,
+                       private toastService: ToastService,
                        public sqliteProvider: SqliteProvider,
                        private toastService: ToastService,
                        private changeDetector: ChangeDetectorRef) {
@@ -43,33 +44,44 @@ export class ConnectPage {
                         resp => {
                             if (resp.success) {
                                 this.sqliteProvider.setOperateur(this.form.login);
-                                this.sqliteProvider.resetDataBase().subscribe(() => {
-                                    this.sqliteProvider.clearStorage().then(() => {
-                                        this.sqliteProvider.setOperateur(this.form.login).then(() => {
-                                            this.sqliteProvider.importData(resp.data)
-                                                .subscribe(() => {
-                                                    this.isLoaded = false;
-                                                    this.navCtrl.setRoot(MenuPage);
+                                this.sqliteProvider.resetDataBase().subscribe(
+                                    () => {
+                                        this.sqliteProvider.clearStorage().then(() => {
+                                            this.sqliteProvider.setOperateur(this.form.login)
+                                                .then(() => {
+                                                    this.sqliteProvider.importData(resp.data)
+                                                        .subscribe(
+                                                            () => {
+                                                                this.isLoaded = false;
+                                                                this.navCtrl.setRoot(MenuPage);
+                                                            },
+                                                            () => {
+                                                                this.finishLoading();
+                                                            }
+                                                        );
+                                                })
+                                                .catch(err => {
+                                                    this.finishLoading();
+                                                    console.log(err)
                                                 });
-                                        }).catch(err => console.log(err));
+                                        });
+                                    },
+                                    () => {
+                                        this.finishLoading();
                                     });
-                                });
                             }
                             else {
-                                this.isLoaded = false;
-                                this.changeDetector.detectChanges();
+                                this.finishLoading();
                                 this.toastService.showToast('Identifiants incorrects.');
                             }
                         },
                         () => {
-                            this.isLoaded = false;
-                            this.changeDetector.detectChanges();
+                            this.finishLoading();
                             this.toastService.showToast('Un problème est survenu, veuillez vérifier vos identifiants ainsi que l\'URL saisie sans les paramètres.');
                         });
                 }
                 else {
-                    this.isLoaded = false;
-                    this.changeDetector.detectChanges();
+                    this.finishLoading();
                     this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.');
                 }
             });
@@ -78,7 +90,13 @@ export class ConnectPage {
 
     public goToParams(): void {
         if (!this.isLoaded) {
+            this.isLoaded = false;
             this.navCtrl.push(ParamsPage);
         }
+    }
+
+    private finishLoading() {
+        this.isLoaded = false;
+        this.changeDetector.detectChanges();
     }
 }
