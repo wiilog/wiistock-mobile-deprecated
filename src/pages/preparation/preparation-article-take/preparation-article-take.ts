@@ -37,7 +37,7 @@ export class PreparationArticleTakePage {
 
     public addArticle(): void {
         const maxQuantityAvailable = this.maxQuantityAvailable;
-        if (this.quantite > maxQuantityAvailable || this.quantite <= 0) {
+        if (!this.quantite || (this.quantite > maxQuantityAvailable) || this.quantite <= 0) {
             this.toastService.showToast('Veuillez sélectionner une quantité valide.');
         }
         else if (this.onlyOne && this.quantite !== maxQuantityAvailable) {

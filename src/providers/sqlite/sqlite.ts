@@ -65,7 +65,7 @@ export class SqliteProvider {
                 db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255))', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []),
                 db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []),
-                db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER, `destination` INTEGER)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `type_quantite` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa_by_ref_article` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `reference` TEXT, `label` TEXT, `location` TEXT, `quantity` INTEGER, `reference_article` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []),
@@ -182,13 +182,15 @@ export class SqliteProvider {
     }
 
     private importArticles(data): string {
-
         let articles = data['articles'];
         if (articles.length > 0) {
             let articleValues = articles.map((article) => (
-                "(" + null + ", " +
-                "'" + article.reference + "', " +
-                (article.quantiteStock || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ")"
+                "(" +
+                "NULL, " +
+                `'${article.reference}',` +
+                (article.quantiteStock || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ', ' +
+                (article.barCode ? `'${article.barCode}'` : 'null') +
+                ")"
             ));
             let articleValuesStr = articleValues.join(', ');
             return 'INSERT INTO `article` (`id`, `reference`, `quantite`, `barcode`) VALUES ' + articleValuesStr + ';';
@@ -220,24 +222,25 @@ export class SqliteProvider {
         if (prepas.length === 0) {
             this.findAll('`preparation`').subscribe((preparationsDB) => {
                 this.deletePreparations(preparationsDB).then(() => {
-                    ret$.next(undefined)
+                    ret$.next(undefined);
                 });
             });
         }
         for (let prepa of prepas) {
             this.findOneById('preparation', prepa.id).subscribe((prepaInserted) => {
                 if (prepaInserted === null) {
-                    prepasValues.push("(" + prepa.id + ", '" + prepa.number + "', " + null + ", " + null + ", 0)");
+                    prepasValues.push(`(${prepa.id}, '${prepa.number}', NULL, NULL, 0, '${prepa.destination}')`);
                 }
                 if (prepas.indexOf(prepa) === prepas.length - 1) {
                     this.findAll('`preparation`').subscribe((preparations) => {
                         let prepasValuesStr = prepasValues.join(', ');
-                        let sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`) VALUES ' + prepasValuesStr + ';';
+                        let sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`, `destination`) VALUES ' + prepasValuesStr + ';';
                         if (preparations.length === 0) {
                             ret$.next((prepasValues.length > 0)
                                 ? sqlPrepas
                                 : undefined);
-                        } else {
+                        }
+                        else {
                             this.deletePreparations(preparations.filter(p => prepas.find(prep => prep.id === p.id) === undefined)).then(() => {
                                 ret$.next((prepasValues.length > 0)
                                     ? sqlPrepas
@@ -377,7 +380,18 @@ export class SqliteProvider {
         for (let article of articlesLivrs) {
             this.findArticlesByLivraison(article.id_livraison).subscribe((articles) => {
                 if (articles.find(articleLivr => articleLivr.reference === article.reference && articleLivr.is_ref === article.is_ref) === undefined) {
-                    articlesLivraisonValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_livraison + ", " + 0 + ", '" + article.location + "')");
+                    articlesLivraisonValues.push(
+                        "(" +
+                        "NULL, " +
+                        "'" + article.label + "', " +
+                        "'" + article.reference + "'," +
+                        article.quantity + ", " +
+                        "'" + article.is_ref + "', " +
+                        "" + article.id_livraison + ", " +
+                        "0, " +
+                        "'" + article.location + "'," +
+                        "'" + article.barCode + "'" +
+                        ")");
                 }
                 if (articlesLivrs.indexOf(article) === articlesLivrs.length - 1) {
                     if (articlesLivraisonValues.length) {
@@ -480,7 +494,7 @@ export class SqliteProvider {
 
             if (articlesInventaire.indexOf(article) === articlesInventaire.length - 1) {
                 let articlesInventaireValuesStr = articlesInventaireValues.join(', ');
-                let sqlArticlesInventaire = 'INSERT INTO `article_inventaire` (`id`, `id_mission`, `reference`, `is_ref`, `location`, `barcode`) VALUES ' + articlesInventaireValuesStr + ';';
+                let sqlArticlesInventaire = 'INSERT INTO `article_inventaire` (`id`, `id_mission`, `reference`, `is_ref`, `location`, `code_barre`) VALUES ' + articlesInventaireValuesStr + ';';
                 importExecuted.next((articlesInventaireValues.length > 0)
                     ? sqlArticlesInventaire
                     : undefined);
@@ -637,7 +651,7 @@ export class SqliteProvider {
             : undefined;
 
         const sqlQuery = 'SELECT * FROM ' + table + (sqlWhereClauses ? sqlWhereClauses : '');
-        console.log('_>>>>>>>>>>>>>>>>' , sqlQuery);
+
         return this.db$.pipe(
             flatMap((db) => from(db.executeSql(sqlQuery, []))),
             map((data) => {

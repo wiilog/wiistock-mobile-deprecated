@@ -6,7 +6,7 @@ import {BarcodeScanner} from "@ionic-native/barcode-scanner";
 @Injectable()
 export class BarcodeScannerManagerService {
 
-    private _canGoBack = false;
+    private _canGoBack = true;
 
     public constructor(private barcodeScanner: BarcodeScanner) {}
 
@@ -19,8 +19,8 @@ export class BarcodeScannerManagerService {
                 setTimeout(() => {this._canGoBack = true}, 500);
             } else {
                 this._canGoBack = true;
+                subject.next(res.text);
             }
-            subject.next(res.text);
         });
 
         return subject;

@@ -261,7 +261,6 @@ export class PreparationArticlesPage {
                 : (selectedArticleGiven as ArticlePrepa) // if it's a click we have the article directly
         );
 
-
         // if we scan an article which is not in the list
         // Then we check if it's linked to a refArticle in the list
         if (!fromClick && !selectedArticle) {
@@ -287,9 +286,6 @@ export class PreparationArticlesPage {
     }
 
     private getArticleByBarcode(barcode: string): Observable<{selectedArticle?: ArticlePrepaByRefArticle, refArticle?: ArticlePrepa}> {
-        this.sqliteProvider.findAll('article_prepa_by_ref_article').subscribe((arts) => {
-            console.log(arts);
-        });
         return this.sqliteProvider.findBy('article_prepa_by_ref_article', [`barcode LIKE '${barcode}'`]).pipe(
             // we get the article
             map((result) => (
@@ -302,7 +298,7 @@ export class PreparationArticlesPage {
                     ? of({selectedArticle})
                     : (
                         this.sqliteProvider
-                            .findByElement('article_prepa', 'reference', selectedArticle.reference_article)
+                            .findOneBy('article_prepa', 'reference', selectedArticle.reference_article)
                             .pipe(map((refArticle) => (
                                 refArticle
                                     ? ({ selectedArticle, refArticle })
