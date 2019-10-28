@@ -132,7 +132,8 @@ export class DeposeArticlesPageTraca {
             id: new Date().getUTCMilliseconds(),
             label: null,
             reference: text,
-            quantite: null
+            quantite: null,
+            barcode: text,
         };
         this.sqliteProvider.keyExists(text).then((value) => {
             if (value !== false) {

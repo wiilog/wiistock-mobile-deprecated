@@ -82,7 +82,7 @@ export class StorageService {
                 length = value;
             });
             this.storage.forEach((value: any, key: string, iterationNumber: Number) => {
-                if (value >= 1 && key !== API_KEY) {
+                if (value >= 1 && key !== API_KEY && key !== OPERATEUR && key !== INVENTORY_MANAGER && key !== NB_PREPS) {
                     console.log(true);
                     resolve(true);
                 }
