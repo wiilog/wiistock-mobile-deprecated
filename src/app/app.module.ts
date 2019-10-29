@@ -24,7 +24,7 @@ import {DeposeConfirmPageTraca} from '@pages/traca/depose-confirm/depose-confirm
 import {DeposeEmplacementPageTraca} from '@pages/traca/depose-emplacement/depose-emplacement-traca';
 import {StorageService} from './services/storage.service';
 import {StockageMenuPage} from '@pages/stockage/stockage-menu/stockage-menu';
-import {StockageMenuPageTraca} from '@pages/traca/stockage-menu/stockage-menu-traca';
+import {TracaMenuPage} from '@pages/traca/traca-menu/traca-menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {IonicSelectableModule} from 'ionic-selectable'
@@ -61,7 +61,7 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
         StockageMenuPage,
         PreparationMenuPage,
         PreparationArticlesPage,
-        StockageMenuPageTraca,
+        TracaMenuPage,
         PriseEmplacementPage,
         PriseArticlesPage,
         PriseConfirmPage,
@@ -110,7 +110,7 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
         MenuPage,
         ParamsPage,
         StockageMenuPage,
-        StockageMenuPageTraca,
+        TracaMenuPage,
         PriseEmplacementPage,
         PriseArticlesPage,
         PriseConfirmPage,

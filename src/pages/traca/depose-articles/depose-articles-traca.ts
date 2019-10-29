@@ -1,15 +1,17 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
+import {IonicPage, NavController, NavParams} from 'ionic-angular';
 import {DeposeConfirmPageTraca} from '@pages/traca/depose-confirm/depose-confirm-traca';
 import {MenuPage} from '@pages/menu/menu';
 import {Article} from '@app/entities/article';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {StockageMenuPageTraca} from '@pages/traca/stockage-menu/stockage-menu-traca';
-import {BarcodeScanner} from '@ionic-native/barcode-scanner';
+import {TracaMenuPage} from '@pages/traca/traca-menu/traca-menu';
 import {ChangeDetectorRef} from '@angular/core';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import moment from 'moment';
+import {ToastService} from '@app/services/toast.service';
+import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
+import {Subscription} from 'rxjs';
 
 
 @IonicPage()
@@ -19,27 +21,18 @@ import moment from 'moment';
 })
 export class DeposeArticlesPageTraca {
 
-    emplacement: Emplacement;
-    articles: Array<Article>;
-    db_articles: Array<Article>;
+    public emplacement: Emplacement;
+    public articles: Array<Article>;
+    public db_articles: Array<Article>;
 
-    constructor(
-        public navCtrl: NavController,
-        public navParams: NavParams,
-        private toastController: ToastController,
-        private sqliteProvider: SqliteProvider,
-        private barcodeScanner: BarcodeScanner,
-        private changeDetectorRef: ChangeDetectorRef) {
-        this.sqliteProvider.findAll('article').subscribe((value) => {
-            this.db_articles = value;
-        });
-        if (typeof (navParams.get('emplacement')) !== undefined) {
-            this.emplacement = navParams.get('emplacement');
-        }
+    private zebraScanSubscription: Subscription;
 
-        if (typeof (navParams.get('articles')) !== undefined) {
-            this.articles = navParams.get('articles');
-        }
+    public constructor(public navCtrl: NavController,
+                       public navParams: NavParams,
+                       private toastService: ToastService,
+                       private sqliteProvider: SqliteProvider,
+                       private barcodeScannerManager: BarcodeScannerManagerService,
+                       private changeDetectorRef: ChangeDetectorRef) {
         let instance = this;
         (<any>window).plugins.intentShim.registerBroadcastReceiver({
                 filterActions: [
@@ -52,6 +45,30 @@ export class DeposeArticlesPageTraca {
             function (intent) {
                 instance.testIfBarcodeEquals(intent.extras['com.symbol.datawedge.data_string']);
             });
+    }
+
+    public ionViewWillEnter(): void {
+        this.sqliteProvider.findAll('article').subscribe((value) => {
+            this.db_articles = value;
+        });
+
+        this.emplacement = this.navParams.get('emplacement');
+        this.articles = this.navParams.get('articles');
+
+        this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
+            this.testIfBarcodeEquals(barcode);
+        })
+    }
+
+    public ionViewWillLeave(): void {
+        if (this.zebraScanSubscription) {
+            this.zebraScanSubscription.unsubscribe();
+            this.zebraScanSubscription = undefined;
+        }
+    }
+
+    public ionViewCanLeave(): boolean {
+        return this.barcodeScannerManager.canGoBack;
     }
 
     addArticleManually() {
@@ -95,29 +112,19 @@ export class DeposeArticlesPageTraca {
     }
 
     redirectAfterTake() {
-        this.navCtrl.setRoot(StockageMenuPageTraca)
+        this.navCtrl.setRoot(TracaMenuPage)
             .then(() => {
-                this.showToast('Dépose enregistrée.')
+                this.toastService.showToast('Dépose enregistrée.')
             });
-    }
-
-    // Helper
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center'
-        });
-        toast.present();
     }
 
     goHome() {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    scan() {
-        this.barcodeScanner.scan().then(res => {
-            this.testIfBarcodeEquals(res.text);
+    public scan(): void {
+        this.barcodeScannerManager.scan().subscribe((barcode: string) => {
+            this.testIfBarcodeEquals(barcode);
         });
     }
 
@@ -127,8 +134,7 @@ export class DeposeArticlesPageTraca {
             numberOfArticles++;
         }
 
-        let a: Article;
-        a = {
+        let a: Article = {
             id: new Date().getUTCMilliseconds(),
             label: null,
             reference: text,
@@ -142,11 +148,11 @@ export class DeposeArticlesPageTraca {
                         articles: this.articles, emplacement: this.emplacement, selectedArticle: a
                     });
                 } else {
-                    this.showToast('Cet article est déjà enregistré assez de fois dans le panier.');
+                    this.toastService.showToast('Cet article est déjà enregistré assez de fois dans le panier.');
                 }
             } else {
                 this.navCtrl.push(DeposeArticlesPageTraca, {emplacement : this.emplacement});
-                this.showToast('Ce colis ne correspond à aucune prise.');
+                this.toastService.showToast('Ce colis ne correspond à aucune prise.');
             }
         });
         this.changeDetectorRef.detectChanges();

@@ -8,7 +8,7 @@ import {NetworkProvider} from '@providers/network/network';
 import {Network} from '@ionic-native/network';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
-import {StockageMenuPageTraca} from '@pages/traca/stockage-menu/stockage-menu-traca';
+import {TracaMenuPage} from '@pages/traca/traca-menu/traca-menu';
 import {PreparationMenuPage} from '@pages/preparation/preparation-menu/preparation-menu';
 import {LivraisonMenuPage} from '@pages/livraison/livraison-menu/livraison-menu';
 import {InventaireMenuPage} from '@pages/inventaire-menu/inventaire-menu';
@@ -43,11 +43,14 @@ export class AppComponent {
         // set our app's pages
         this.pages = [
             {title: 'Accueil', component: MenuPage},
-            {title: 'Traça', component: StockageMenuPageTraca},
+            {title: 'Traça', component: TracaMenuPage},
             {title: 'Préparation', component: PreparationMenuPage},
             {title: 'Livraison', component: LivraisonMenuPage},
             {title: 'Inventaire', component: InventaireMenuPage}
         ];
+
+        console.log('------------------ PLUGINS')
+        console.log((<any>window).plugins)
 
     }
 

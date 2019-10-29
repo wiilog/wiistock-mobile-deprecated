@@ -12,10 +12,15 @@
 <ion-content padding>
     <div>
         <div>
-            <ion-title *ngIf="!emplacement">
+            <ion-title>
                 <ion-icon class="big-icon" name="barcode" (click)="scanLocation()"></ion-icon>
-                <br>
-                Flasher un emplacement
+                <br/>
+                <span *ngIf="!emplacement" >Flasher un emplacement</span>
+                <span *ngIf="emplacement">
+                    Emplacement sélectionné
+                    <br/>
+                    <span>{{emplacement.label}}</span>
+                </span>
             </ion-title>
 
             <ion-card>
@@ -48,6 +53,9 @@
 <ion-footer padding>
     <div class="d-flex">
         <ion-icon class="big-icon" name="arrow-dropleft-circle" navPop></ion-icon>
-        <ion-icon class="big-icon" name="checkmark-circle" (click)="goToArticles()"></ion-icon>
+        <ion-icon *ngIf="emplacement"
+                  class="big-icon"
+                  name="checkmark-circle"
+                  (click)="goToArticles()"></ion-icon>
     </div>
 </ion-footer>

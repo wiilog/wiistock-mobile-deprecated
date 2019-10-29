@@ -1,20 +1,21 @@
 import {Component} from '@angular/core';
-import {Events, NavController, NavParams, ToastController} from 'ionic-angular';
-import {MenuPage} from '@pages/menu/menu';
+import {IonicPage, NavController, NavParams} from 'ionic-angular';
 import {PriseEmplacementPageTraca} from '@pages/traca/prise-emplacement/prise-emplacement-traca';
 import {DeposeEmplacementPageTraca} from '@pages/traca/depose-emplacement/depose-emplacement-traca';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import {HttpClient} from '@angular/common/http';
-import {NetworkProvider} from '@providers/network/network';
 import {Network} from '@ionic-native/network';
+import {ToastService} from "@app/services/toast.service";
+import {MenuPage} from "@pages/menu/menu";
 
 
+@IonicPage()
 @Component({
-    selector: 'page-stockage-menu',
-    templateUrl: 'stockage-menu-traca.html',
+    selector: 'page-traca-menu',
+    templateUrl: 'traca-menu.html',
 })
-export class StockageMenuPageTraca {
+export class TracaMenuPage {
     mvts: MouvementTraca[];
     unfinishedMvts: boolean;
     type: string;
@@ -25,10 +26,8 @@ export class StockageMenuPageTraca {
                 public navParams: NavParams,
                 sqlProvider: SqliteProvider,
                 public http: HttpClient,
-                public toastController: ToastController,
-                public networkProvider: NetworkProvider,
-                public events: Events,
-                public network: Network,) {
+                private toastService: ToastService,
+                public network: Network) {
         this.sqlProvider = sqlProvider;
         this.sqlProvider.findAll('`mouvement_traca`').subscribe((value) => {
             this.mvts = value;
@@ -66,27 +65,14 @@ export class StockageMenuPageTraca {
                     };
                         this.http.post<any>(url, toInsert).subscribe((resp) => {
                             if (resp.success) {
-                                this.showToast(resp.data.status);
+                                this.toastService.showToast(resp.data.status);
                             }
                         });
                     });
                 });
             } else {
-                this.showToast('Veuillez configurer votre URL dans les paramètres.')
+                this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.')
             }
         });
     }
-
-
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
-    }
-
-
 }
