@@ -23,6 +23,7 @@
       <button (click)="goToArticles(livraison)" class="list" ion-item *ngFor="let livraison of livraisons">
         <ion-row>
           <ion-col col-6>{{ livraison.numero }}</ion-col>
+          <ion-col class="text-right" col-6>{{ livraison.emplacement }}</ion-col>
         </ion-row>
       </button>
     </ion-grid>
