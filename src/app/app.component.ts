@@ -66,24 +66,7 @@ export class AppComponent {
 
             // Online event
             this.events.subscribe('network:online', () => {
-                this.sqlProvider.getAPI_URL().subscribe((resultUrl) => {
-                    if (resultUrl !== null) {
-                        const url: string = resultUrl + this.addMvtURL;
-                        this.sqlProvider.findAll('`mouvement_traca`').subscribe((data) => {
-                            this.sqlProvider.getApiKey().then(result => {
-                                const toInsert = {
-                                    mouvements: data,
-                                    apikey: result
-                                };
-                                this.http.post<any>(url, toInsert).subscribe((resp) => {
-                                    if (resp.success) {
-                                        this.showToast(resp.data.status);
-                                    }
-                                });
-                            });
-                        });
-                    }
-                });
+                console.log('network:online ==> ' + this.network.type);
             });
         });
     }

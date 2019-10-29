@@ -32,6 +32,8 @@ export class ConnectPage {
                        private changeDetector: ChangeDetectorRef,
                        private network: Network) {
         this.isLoaded = false;
+        (<any>window).plugins.intentShim.unregisterBroadcastReceiver();
+
     }
 
     public logForm(): void {
