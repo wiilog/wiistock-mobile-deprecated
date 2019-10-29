@@ -3,8 +3,9 @@ import {Content, IonicPage, Navbar, NavController, NavParams, ToastController} f
 import {MenuPage} from "../../menu/menu";
 import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 import {HttpClient} from "@angular/common/http";
-import { CollecteArticlesPage } from "../collecte-articles/collecte-articles";
+import {CollecteArticlesPage} from "../collecte-articles/collecte-articles";
 import {Collecte} from "../../../app/entities/collecte";
+import {Network} from "@ionic-native/network";
 
 @IonicPage()
 @Component({
@@ -15,7 +16,7 @@ export class CollecteMenuPage {
     @ViewChild(Navbar) navBar: Navbar;
     @ViewChild(Content) content: Content;
     collectes: Array<Collecte>;
-    dataApi: string = '/api/getData';
+    dataApi: string = '/api/getCollectes';
     hasLoaded: boolean;
 
     constructor(
@@ -23,7 +24,8 @@ export class CollecteMenuPage {
         public navParams: NavParams,
         public sqlLiteProvider: SqliteProvider,
         public toastController: ToastController,
-        public http: HttpClient) {
+        public http: HttpClient,
+        public network: Network) {
     }
 
     goHome() {
@@ -43,42 +45,49 @@ export class CollecteMenuPage {
 
     synchronise(fromStart: boolean) {
         this.hasLoaded = false;
-        this.sqlLiteProvider.getAPI_URL().subscribe(
-            (result) => {
-                if (result !== null) {
-                    let url: string = result + this.dataApi;
-                    this.sqlLiteProvider.getApiKey().then((key) => {
-                        this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
-                            if (resp.success) {
-                                this.sqlLiteProvider.cleanDataBase(true).subscribe(() => {
-                                    this.sqlLiteProvider.importData(resp.data, true)
-                                        .subscribe(() => {
-                                            this.sqlLiteProvider.findAll('`collecte`').subscribe(collectes => {
+        if (this.network.type !== 'none') {
+            this.sqlLiteProvider.getAPI_URL().subscribe(
+                (result) => {
+                    if (result !== null) {
+                        let url: string = result + this.dataApi;
+                        this.sqlLiteProvider.getApiKey().then((key) => {
+                            this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
+                                if (resp.success) {
+                                    this.sqlLiteProvider.importCollectes(resp).subscribe(() => {
+                                        this.sqlLiteProvider.importArticlesCollecte(resp).subscribe(() => {
+                                            this.sqlLiteProvider.findAll('`collecte`').subscribe((collectes) => {
                                                 this.collectes = collectes
                                                     .filter(c => c.date_end === null)
                                                     .sort(({emplacement: emplacement1}, {emplacement: emplacement2}) => ((emplacement1 < emplacement2) ? -1 : 1));
-                                                setTimeout(() => {
-                                                    this.hasLoaded = true;
-                                                    this.content.resize();
-                                                }, 1000);
-                                            });
+                                                this.hasLoaded = true;
+                                                this.content.resize();
+                                            })
                                         });
-                                });
-                            } else {
+                                    });
+                                } else {
+                                    this.hasLoaded = true;
+                                    this.showToast('Erreur');
+                                }
+                            }, error => {
                                 this.hasLoaded = true;
-                                this.showToast('Erreur');
-                            }
-                        }, error => {
-                            this.hasLoaded = true;
-                            this.showToast('Erreur réseau');
+                                this.showToast('Erreur réseau');
+                            });
                         });
-                    });
-                } else {
-                    this.showToast('Veuillez configurer votre URL dans les paramètres.')
-                }
-            },
-            err => console.log(err)
-        );
+                    } else {
+                        this.showToast('Veuillez configurer votre URL dans les paramètres.')
+                    }
+                },
+                err => console.log(err)
+            );
+        } else {
+            this.sqlLiteProvider.findAll('`collecte`').subscribe((collectes) => {
+                this.collectes = collectes
+                    .filter(c => c.date_end === null)
+                    .sort(({emplacement: emplacement1}, {emplacement: emplacement2}) => ((emplacement1 < emplacement2) ? -1 : 1));
+                this.hasLoaded = true;
+                this.content.resize();
+            })
+        }
     }
 
     async showToast(msg) {

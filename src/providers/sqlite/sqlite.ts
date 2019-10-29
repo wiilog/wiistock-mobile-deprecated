@@ -214,7 +214,7 @@ export class SqliteProvider {
         }
     }
 
-    private importPreparations(data): Observable<string> {
+    public importPreparations(data): Observable<string> {
         const ret$ = new ReplaySubject<string>(1);
 
         let prepas = data['preparations'];
@@ -291,7 +291,7 @@ export class SqliteProvider {
         return ret$;
     }
 
-    private importArticlesPrepas(data): Observable<string> {
+    public importArticlesPrepas(data): Observable<string> {
         const ret$ = new ReplaySubject<string>(1);
         let articlesPrepa = data['articlesPrepa'];
         let articlesPrepaValues = [];
@@ -334,7 +334,7 @@ export class SqliteProvider {
         return string.replace(/'/g, "\''");
     }
 
-    private importLivraisons(data): Observable<string> {
+    public importLivraisons(data): Observable<string> {
         const ret$ = new ReplaySubject<string>(1);
         let livraisons = data['livraisons'];
         let livraisonsValues = [];
@@ -370,7 +370,7 @@ export class SqliteProvider {
         return ret$;
     }
 
-    private importArticlesLivraison(data): Observable<string> {
+    public importArticlesLivraison(data): Observable<string> {
         const ret$ = new ReplaySubject<string>(1);
         let articlesLivrs = data['articlesLivraison'];
         let articlesLivraisonValues = [];
@@ -408,7 +408,7 @@ export class SqliteProvider {
         return ret$;
     }
 
-    private importCollectes(data): Observable<string> {
+    importCollectes(data): Observable<string> {
         const ret$ = new ReplaySubject<string>(1);
         let collectes = data['collectes'];
         let collectesValues = [];
@@ -457,7 +457,7 @@ export class SqliteProvider {
         );
     }
 
-    private importArticlesCollecte(data): Observable<string> {
+    importArticlesCollecte(data): Observable<string> {
         const ret$ = new ReplaySubject<string>(1);
         let articlesCols = data['articlesCollecte'];
         let articlesCollecteValues = [];
@@ -1112,4 +1112,6 @@ export class SqliteProvider {
             map(() => undefined)
         );
     }
+
+
 }
