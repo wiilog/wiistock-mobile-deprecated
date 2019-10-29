@@ -41,7 +41,6 @@ import {LivraisonEmplacementPage} from '@pages/livraison/livraison-emplacement/l
 import {InventaireMenuPage} from '@pages/inventaire-menu/inventaire-menu';
 import {ModalQuantityPage} from '@pages/inventaire-menu/modal-quantity';
 import {InventaireAnomaliePage} from '@pages/inventaire-anomalie/inventaire-anomalie';
-import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.service';
 import {ToastService} from '@app/services/toast.service';
 import {PreparationRefArticlesPage} from '@pages/preparation/preparation-ref-articles/preparation-ref-articles';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
@@ -155,7 +154,6 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
         BarcodeScanner,
         NetworkProvider,
         Network,
-        ZebraBarcodeScannerService,
         ToastService
     ]
 })

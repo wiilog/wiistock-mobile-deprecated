@@ -8,9 +8,9 @@ import {ArticleInventaire} from '@app/entities/article-inventaire';
 import {ModalQuantityPage} from '../inventaire-menu/modal-quantity';
 import {Article} from '@app/entities/article';
 import {Subscription} from 'rxjs';
-import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.service';
 import {filter, flatMap} from 'rxjs/operators';
 import {of} from 'rxjs/observable/of';
+import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
 
 
 @IonicPage()
@@ -42,15 +42,13 @@ export class InventaireAnomaliePage {
                        public barcodeScanner: BarcodeScanner,
                        private changeDetector: ChangeDetectorRef,
                        private modalController: ModalController,
-                       private zebraBarcodeScannerService: ZebraBarcodeScannerService) {}
+                       private barcodeScannerManager: BarcodeScannerManagerService) {}
 
-    public ionViewDidLoad() {
-    }
 
-    public ionViewDidEnter(): void {
+    public ionViewWillEnter(): void {
         this.synchronize();
 
-        this.zebraScannerSubscription = this.zebraBarcodeScannerService.zebraScan$
+        this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$
             .pipe(filter(() => this.isLoaded && this.anomalies && this.anomalies.length > 0 ))
             .subscribe((barcode: string) => {
                 if (this.location) {
