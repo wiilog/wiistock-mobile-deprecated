@@ -17,14 +17,13 @@ import {PriseArticlesPage} from '@pages/stockage/prise-articles/prise-articles';
 import {PriseConfirmPage} from '@pages/stockage/prise-confirm/prise-confirm';
 import {PriseEmplacementPage} from '@pages/stockage/prise-emplacement/prise-emplacement';
 import {PriseArticlesPageTraca} from '@pages/traca/prise-articles/prise-articles-traca';
-import {PriseConfirmPageTraca} from '@pages/traca/prise-confirm/prise-confirm-traca';
+import {SelectArticleManuallyPage} from '@pages/traca/select-article-manually/select-article-manually';
 import {PriseEmplacementPageTraca} from '@pages/traca/prise-emplacement/prise-emplacement-traca';
 import {DeposeArticlesPageTraca} from '@pages/traca/depose-articles/depose-articles-traca';
-import {DeposeConfirmPageTraca} from '@pages/traca/depose-confirm/depose-confirm-traca';
 import {DeposeEmplacementPageTraca} from '@pages/traca/depose-emplacement/depose-emplacement-traca';
 import {StorageService} from './services/storage.service';
 import {StockageMenuPage} from '@pages/stockage/stockage-menu/stockage-menu';
-import {StockageMenuPageTraca} from '@pages/traca/stockage-menu/stockage-menu-traca';
+import {TracaMenuPage} from '@pages/traca/traca-menu/traca-menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {IonicSelectableModule} from 'ionic-selectable'
@@ -41,7 +40,6 @@ import {LivraisonEmplacementPage} from '@pages/livraison/livraison-emplacement/l
 import {InventaireMenuPage} from '@pages/inventaire-menu/inventaire-menu';
 import {ModalQuantityPage} from '@pages/inventaire-menu/modal-quantity';
 import {InventaireAnomaliePage} from '@pages/inventaire-anomalie/inventaire-anomalie';
-import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.service';
 import {ToastService} from '@app/services/toast.service';
 import {PreparationRefArticlesPage} from '@pages/preparation/preparation-ref-articles/preparation-ref-articles';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
@@ -62,7 +60,7 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
         StockageMenuPage,
         PreparationMenuPage,
         PreparationArticlesPage,
-        StockageMenuPageTraca,
+        TracaMenuPage,
         PriseEmplacementPage,
         PriseArticlesPage,
         PriseConfirmPage,
@@ -75,10 +73,9 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
         LivraisonArticlesPage,
         LivraisonEmplacementPage,
         PreparationEmplacementPage,
-        PriseConfirmPageTraca,
+        SelectArticleManuallyPage,
         DeposeEmplacementPageTraca,
         DeposeArticlesPageTraca,
-        DeposeConfirmPageTraca,
         ManutentionValidatePage,
         DeposePage,
         DeposePageTraca,
@@ -111,7 +108,7 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
         MenuPage,
         ParamsPage,
         StockageMenuPage,
-        StockageMenuPageTraca,
+        TracaMenuPage,
         PriseEmplacementPage,
         PriseArticlesPage,
         PriseConfirmPage,
@@ -125,12 +122,11 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
         LivraisonArticlesPage,
         LivraisonEmplacementPage,
         PriseArticlesPageTraca,
-        PriseConfirmPageTraca,
+        SelectArticleManuallyPage,
         ManutentionMenuPage,
         ManutentionValidatePage,
         DeposeEmplacementPageTraca,
         DeposeArticlesPageTraca,
-        DeposeConfirmPageTraca,
         DeposePage,
         DeposePageTraca,
         InventaireMenuPage,
@@ -155,7 +151,6 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
         BarcodeScanner,
         NetworkProvider,
         Network,
-        ZebraBarcodeScannerService,
         ToastService
     ]
 })
