@@ -85,23 +85,17 @@ export class CollecteEmplacementPage {
         let instance = this;
         this.sqliteProvider.findAll('`emplacement`').subscribe(resp => {
             let found = false;
-            let wrongLocation = false;
             resp.forEach(function (emplacement) {
                 if (emplacement.label === text) {
-                    if (instance.collecte.emplacement === text) {
-                        found = true;
-                        instance.emplacement = emplacement;
-                        instance.navCtrl.push(CollecteEmplacementPage, {
-                            collecte: instance.collecte,
-                            emplacement: emplacement
-                        });
-                    } else {
-                        wrongLocation = true;
-                        instance.showToast("Vous n'avez pas scanné le bon emplacement (destination demandée : " + instance.collecte.emplacement + ")")
-                    }
+                    found = true;
+                    instance.emplacement = emplacement;
+                    instance.navCtrl.push(CollecteEmplacementPage, {
+                        collecte: instance.collecte,
+                        emplacement: emplacement
+                    });
                 }
             });
-            if (!found && !wrongLocation) {
+            if (!found) {
                 this.showToast('Veuillez scanner ou sélectionner un emplacement connu.');
             }
         });
