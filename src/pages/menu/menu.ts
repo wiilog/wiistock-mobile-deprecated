@@ -53,6 +53,7 @@ export class MenuPage {
 
     itemTapped(event, item) {
         if (item.page === null) {
+            (<any>window).plugins.intentShim.unregisterBroadcastReceiver();
             this.navCtrl.setRoot(ConnectPage);
         } else {
             this.navCtrl.setRoot(item.page);
