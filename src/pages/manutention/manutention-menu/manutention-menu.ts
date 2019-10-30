@@ -49,9 +49,12 @@ export class ManutentionMenuPage {
         this.hasLoaded = false;
         this.sqlLiteProvider.findAll('`manutention`').subscribe((manutentions) => {
             this.manutentions = manutentions;
-            this.hasLoaded = true;
-            this.content.resize();
-        })
+            this.sqlLiteProvider.getOperateur().then((userName) => {
+                this.user = userName;
+                this.hasLoaded = true;
+                this.content.resize();
+            });
+        });
     }
 
     async showToast(msg) {

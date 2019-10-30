@@ -9,8 +9,7 @@ import {ModalQuantityPage} from '../inventaire-menu/modal-quantity';
 import {Article} from '@app/entities/article';
 import {Subscription} from 'rxjs';
 import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.service';
-import {filter, flatMap} from 'rxjs/operators';
-import {of} from 'rxjs/observable/of';
+import {filter} from 'rxjs/operators';
 
 
 @IonicPage()
@@ -43,9 +42,6 @@ export class InventaireAnomaliePage {
                        private changeDetector: ChangeDetectorRef,
                        private modalController: ModalController,
                        private zebraBarcodeScannerService: ZebraBarcodeScannerService) {
-    }
-
-    public ionViewDidLoad() {
     }
 
     public ionViewDidEnter(): void {

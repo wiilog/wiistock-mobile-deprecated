@@ -1,11 +1,10 @@
 import {Component, ViewChild} from '@angular/core';
 import {Content, IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
-import {MenuPage} from "../../menu/menu";
-import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import {HttpClient} from "@angular/common/http";
-import {CollecteArticlesPage} from "../collecte-articles/collecte-articles";
-import {Collecte} from "../../../app/entities/collecte";
-import {Network} from "@ionic-native/network";
+import {MenuPage} from '@pages/menu/menu';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {CollecteArticlesPage} from '@pages/collecte/collecte-articles/collecte-articles';
+import {Collecte} from '@app/entities/collecte';
+
 
 @IonicPage()
 @Component({
@@ -16,16 +15,13 @@ export class CollecteMenuPage {
     @ViewChild(Navbar) navBar: Navbar;
     @ViewChild(Content) content: Content;
     collectes: Array<Collecte>;
-    dataApi: string = '/api/getCollectes';
     hasLoaded: boolean;
 
     constructor(
         public navCtrl: NavController,
         public navParams: NavParams,
         public sqlLiteProvider: SqliteProvider,
-        public toastController: ToastController,
-        public http: HttpClient,
-        public network: Network) {
+        public toastController: ToastController,) {
     }
 
     goHome() {

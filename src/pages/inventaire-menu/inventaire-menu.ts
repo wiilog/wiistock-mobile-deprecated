@@ -9,8 +9,7 @@ import {SaisieInventaire} from '@app/entities/saisie-inventaire';
 import {InventaireAnomaliePage} from '@pages/inventaire-anomalie/inventaire-anomalie';
 import moment from 'moment';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
-import {flatMap, filter} from 'rxjs/operators';
-import {of} from 'rxjs/observable/of';
+import {filter} from 'rxjs/operators';
 import {Observable, ReplaySubject, Subscription} from 'rxjs';
 import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.service';
 

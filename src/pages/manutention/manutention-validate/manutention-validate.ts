@@ -94,8 +94,11 @@ export class ManutentionValidatePage {
         this.hasLoaded = false;
         this.sqLiteProvider.findOneById('`manutention`', this.manutention.id).subscribe(manutention => {
             this.manutention = manutention;
-            this.hasLoaded = true;
-            this.content.resize();
+            this.sqLiteProvider.getOperateur().then((userName) => {
+                this.user = userName;
+                this.hasLoaded = true;
+                this.content.resize();
+            });
         })
     }
 
