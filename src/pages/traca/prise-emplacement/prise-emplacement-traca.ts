@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component, NgZone, ViewChild} from '@angular/core';
 import {App, IonicPage, NavController, NavParams} from 'ionic-angular';
 import {PriseArticlesPageTraca} from '@pages/traca/prise-articles/prise-articles-traca';
 import {MenuPage} from '@pages/menu/menu';
@@ -28,6 +28,8 @@ export class PriseEmplacementPageTraca {
     public db_locations: Array<Emplacement>;
     public db_locations_for_list: Array<Emplacement>;
     public db_articles: Array<Article>;
+
+    public zone : NgZone = new NgZone({enableLongStackTrace : false});
 
     private endIndex: number;
 
@@ -73,8 +75,7 @@ export class PriseEmplacementPageTraca {
                     this.navCtrl.pop();
                 }
             });
-        }
-        else {
+        } else {
             this.toastService.showToast('Veuillez sélectionner un emplacement')
         }
     }
@@ -105,15 +106,16 @@ export class PriseEmplacementPageTraca {
     }
 
     testIfBarcodeEquals(barcode) {
-        if (barcode.length > 0) {
-            this.emplacement = {
-                id: new Date().getUTCMilliseconds(),
-                label: barcode
-            };
-            this.changeDetectorRef.detectChanges();
-        } else {
-            this.toastService.showToast('Veuillez flasher ou sélectionner un emplacement.');
-        }
+        this.zone.run(() => {
+            if (barcode.length > 0) {
+                this.emplacement = {
+                    id: new Date().getUTCMilliseconds(),
+                    label: barcode
+                };
+            } else {
+                this.toastService.showToast('Veuillez flasher ou sélectionner un emplacement.');
+            }
+        });
     }
 
     getMoreLocations({text, component}: { component: IonicSelectableComponent, text: string }) {
@@ -121,12 +123,10 @@ export class PriseEmplacementPageTraca {
 
         if (this.endIndex >= this.db_locations.length) {
             component.disableInfiniteScroll();
-        }
-        else {
+        } else {
             if (this.endIndex + PriseEmplacementPageTraca.INIT_END_INDEX >= this.db_locations.length) {
                 this.endIndex = this.db_locations.length;
-            }
-            else {
+            } else {
                 this.endIndex += PriseEmplacementPageTraca.INIT_END_INDEX;
             }
 
@@ -146,8 +146,7 @@ export class PriseEmplacementPageTraca {
                     .filter(emplacement => emplacement.label.toLowerCase().includes(trimmedText.toLowerCase()))
                     .slice(0, this.endIndex);
             }
-        }
-        else {
+        } else {
             this.db_locations_for_list = this.db_locations.slice(0, this.endIndex);
         }
     }
