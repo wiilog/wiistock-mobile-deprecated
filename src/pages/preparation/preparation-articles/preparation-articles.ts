@@ -365,7 +365,7 @@ export class PreparationArticlesPage {
                 .pipe(
                     flatMap((insertId) => (
                         this.insertMouvement(
-                            selectedArticle as ArticlePrepaByRefArticle,
+                            selectedArticle as ArticlePrepaByRefArticle&ArticlePrepa,
                             selectedQuantityValid,
                             insertId
                         )
@@ -390,23 +390,23 @@ export class PreparationArticlesPage {
                             : this.sqliteProvider.updateArticlePrepaQuantity(referenceArticle.id, referenceArticle.quantite - selectedQuantityValid)
                     })
                 )
-            : this.insertMouvement(selectedArticle as ArticlePrepaByRefArticle, selectedQuantityValid)
+            : this.insertMouvement(selectedArticle as ArticlePrepaByRefArticle&ArticlePrepa, selectedQuantityValid)
                 .pipe(
                     flatMap(() => this.sqliteProvider.moveArticle((selectedArticle as ArticlePrepa).id))
                 )
     }
 
-    private insertMouvement(selectedArticle: ArticlePrepaByRefArticle, quantity: number, insertId?: number): Observable<number> {
+    private insertMouvement(selectedArticle: ArticlePrepaByRefArticle&ArticlePrepa, quantity: number, insertId?: number): Observable<number> {
         let mouvement: Mouvement = {
             id: null,
             reference: selectedArticle.reference,
-            quantity,
+            quantity: quantity ? quantity : selectedArticle.quantite,
             date_pickup: moment().format(),
-            location_from: selectedArticle.location,
+            location_from: selectedArticle.location ? selectedArticle.location : selectedArticle.emplacement,
             date_drop: null,
             location: null,
             type: 'prise-dépose',
-            is_ref: '0',
+            is_ref: selectedArticle.isSelectableByUser ? '0' : selectedArticle.is_ref,
             selected_by_article: 1,
             id_article_prepa: insertId ? insertId : selectedArticle.id,
             id_prepa: this.preparation.id,

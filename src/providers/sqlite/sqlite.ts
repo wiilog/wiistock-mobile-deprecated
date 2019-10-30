@@ -552,19 +552,13 @@ export class SqliteProvider {
     }
 
     private executeAllImports(imports: Array<string>): Observable<any> {
-        console.log(imports);
         return this.db$.pipe(
             flatMap((db) => from(Promise.all(imports.map((importSql) => (
-                db.executeSql(importSql, []).then(() => {
-                    console.log('OK ', importSql);
-                }).catch((err) => {
+                db.executeSql(importSql, []).catch((err) => {
                     console.log(importSql, err);
                 })
             ))))),
-            map(() => {
-                console.log('TUTU----------3213');
-                return undefined;
-            })
+            map(() => undefined)
         );
     }
 
