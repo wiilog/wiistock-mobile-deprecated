@@ -81,7 +81,9 @@ export class ManutentionValidatePage {
                 };
                 this.client.post<any>(url, params).subscribe((response) => {
                     if (response.success) {
-                        this.navCtrl.setRoot(ManutentionMenuPage);
+                        this.sqLiteProvider.deleteById('`manutention`', this.manutention.id).subscribe(() => {
+                            this.navCtrl.setRoot(ManutentionMenuPage);
+                        })
                     } else {
                         this.toastService.showToast(response.msg);
                     }
