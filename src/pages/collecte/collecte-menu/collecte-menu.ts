@@ -5,6 +5,7 @@ import {SqliteProvider} from "../../../providers/sqlite/sqlite";
 import {HttpClient} from "@angular/common/http";
 import { CollecteArticlesPage } from "../collecte-articles/collecte-articles";
 import {Collecte} from "../../../app/entities/collecte";
+import {ToastService} from "@app/services/toast.service";
 
 @IonicPage()
 @Component({
@@ -22,7 +23,7 @@ export class CollecteMenuPage {
         public navCtrl: NavController,
         public navParams: NavParams,
         public sqlLiteProvider: SqliteProvider,
-        public toastController: ToastController,
+        private toastService: ToastService,
         public http: HttpClient) {
     }
 
@@ -30,15 +31,8 @@ export class CollecteMenuPage {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    ionViewDidEnter() {
+    ionViewWillEnter() {
         this.synchronise(true);
-        this.setBackButtonAction();
-    }
-
-    setBackButtonAction() {
-        this.navBar.backButtonClick = () => {
-            this.navCtrl.setRoot(MenuPage);
-        }
     }
 
     synchronise(fromStart: boolean) {
@@ -66,29 +60,19 @@ export class CollecteMenuPage {
                                 });
                             } else {
                                 this.hasLoaded = true;
-                                this.showToast('Erreur');
+                                this.toastService.showToast('Erreur');
                             }
                         }, error => {
                             this.hasLoaded = true;
-                            this.showToast('Erreur réseau');
+                            this.toastService.showToast('Erreur réseau');
                         });
                     });
                 } else {
-                    this.showToast('Veuillez configurer votre URL dans les paramètres.')
+                    this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.')
                 }
             },
             err => console.log(err)
         );
-    }
-
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
     }
 
     goToArticles(collecte) {

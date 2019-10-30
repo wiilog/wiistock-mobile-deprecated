@@ -82,7 +82,7 @@ export class ManutentionValidatePage {
                 };
                 this.client.post<any>(url, params).subscribe((response) =>{
                     if (response.success) {
-                        this.navCtrl.setRoot(ManutentionMenuPage);
+                        this.navCtrl.pop();
                     } else {
                         this.toastService.showToast(response.msg);
                     }

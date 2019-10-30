@@ -1,16 +1,18 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
+import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Mouvement} from '@app/entities/mouvement';
 import {CollecteArticleTakePage} from '@pages/collecte/collecte-article-take/collecte-article-take';
 import {HttpClient} from '@angular/common/http';
-import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {CollecteEmplacementPage} from '@pages/collecte/collecte-emplacement/collecte-emplacement';
 import moment from 'moment';
 import {ArticleCollecte} from '@app/entities/article-collecte';
 import {Collecte} from '@app/entities/collecte';
 import {flatMap} from 'rxjs/operators';
+import {ToastService} from "@app/services/toast.service";
+import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
+import {Subscription} from "rxjs";
 
 @IonicPage()
 @Component({
@@ -27,86 +29,81 @@ export class CollecteArticlesPage {
     apiStartCollecte = '/api/beginCollecte';
     isValid: boolean = true;
 
-    constructor(
-        public navCtrl: NavController,
-        public navParams: NavParams,
-        public toastController: ToastController,
-        public sqliteProvider: SqliteProvider,
-        public http: HttpClient,
-        public barcodeScanner: BarcodeScanner) {
-        if (typeof (navParams.get('collecte')) !== undefined) {
-            this.collecte = navParams.get('collecte');
-            this.sqliteProvider.findArticlesByCollecte(this.collecte.id).subscribe((articles) => {
-                this.articlesNT = articles.filter(article => article.has_moved === 0);
-                this.articlesT = articles.filter(article => article.has_moved === 1);
-                if (this.articlesT.length > 0) {
-                    this.started = true;
-                }
-                if (navParams.get('article') !== undefined && navParams.get('quantite') !== undefined) {
-                    this.isValid = this.navParams.get('valid');
-                    this.started = this.navParams.get('started');
-                    if (!this.started) {
-                        this.sqliteProvider.getAPI_URL().subscribe((result) => {
-                            this.sqliteProvider.getApiKey().then((key) => {
-                                if (result !== null) {
-                                    let url: string = result + this.apiStartCollecte;
-                                    this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
-                                        if (resp.success) {
-                                            this.started = true;
-                                            this.isValid = true;
-                                            this.showToast('Collecte commencée.');
-                                            this.registerMvt();
-                                        } else {
-                                            this.isValid = false;
-                                            this.showToast(resp.msg);
-                                        }
-                                    });
-                                }
-                            });
-                        });
-                    } else {
-                        this.registerMvt();
-                    }
-                }
-            })
-        }
+    private zebraScannerSubscription: Subscription;
 
-        let instance = this;
-        (<any>window).plugins.intentShim.registerBroadcastReceiver({
-                filterActions: [
-                    'io.ionic.starter.ACTION'
-                ],
-                filterCategories: [
-                    'android.intent.category.DEFAULT'
-                ]
-            },
-            function (intent) {
-                instance.testIfBarcodeEquals(intent.extras['com.symbol.datawedge.data_string'], true);
-            });
+    public constructor(public navCtrl: NavController,
+                       public navParams: NavParams,
+                       public toastService: ToastService,
+                       public sqliteProvider: SqliteProvider,
+                       public http: HttpClient,
+                       public barcodeScannerManager: BarcodeScannerManagerService) {
     }
 
-    scan() {
-        this.barcodeScanner.scan().then(res => {
-            this.testIfBarcodeEquals(res.text, true);
+    public ionViewWillEnter(): void {
+        this.collecte = this.navParams.get('collecte');
+
+        this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
+            this.testIfBarcodeEquals(barcode, true);
+        });
+
+        this.sqliteProvider.findArticlesByCollecte(this.collecte.id).subscribe((articles) => {
+            this.articlesNT = articles.filter(article => article.has_moved === 0);
+            this.articlesT = articles.filter(article => article.has_moved === 1);
+            if (this.articlesT.length > 0) {
+                this.started = true;
+            }
+            if (this.navParams.get('article') !== undefined && this.navParams.get('quantite') !== undefined) {
+                this.isValid = this.navParams.get('valid');
+                this.started = this.navParams.get('started');
+                if (!this.started) {
+                    this.sqliteProvider.getAPI_URL().subscribe((result) => {
+                        this.sqliteProvider.getApiKey().then((key) => {
+                            if (result !== null) {
+                                let url: string = result + this.apiStartCollecte;
+                                this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
+                                    if (resp.success) {
+                                        this.started = true;
+                                        this.isValid = true;
+                                        this.toastService.showToast('Collecte commencée.');
+                                        this.registerMvt();
+                                    } else {
+                                        this.isValid = false;
+                                        this.toastService.showToast(resp.msg);
+                                    }
+                                });
+                            }
+                        });
+                    });
+                } else {
+                    this.registerMvt();
+                }
+            }
+        });
+    }
+
+    public ionViewWillLeave(): void {
+        if (this.zebraScannerSubscription) {
+            this.zebraScannerSubscription.unsubscribe();
+            this.zebraScannerSubscription = undefined;
+        }
+    }
+
+    public ionViewCanLeave(): boolean {
+        return this.barcodeScannerManager.canGoBack;
+    }
+
+    public scan(): void {
+        this.barcodeScannerManager.scan().subscribe((barcode) => {
+            this.testIfBarcodeEquals(barcode, true);
         });
     }
 
     refreshOver() {
-        this.showToast('Collecte prête à être finalisée.')
+        this.toastService.showToast('Collecte prête à être finalisée.')
     }
 
     refresh() {
-        this.showToast('Quantité bien prélevée.')
-    }
-
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
+        this.toastService.showToast('Quantité bien prélevée.')
     }
 
     registerMvt() {
@@ -233,9 +230,14 @@ export class CollecteArticlesPage {
 
     validate() {
         if (this.articlesNT.length > 0) {
-            this.showToast('Veuillez traiter tous les articles concernés');
+            this.toastService.showToast('Veuillez traiter tous les articles concernés');
         } else {
-            this.navCtrl.push(CollecteEmplacementPage, {collecte: this.collecte})
+            this.navCtrl.push(CollecteEmplacementPage, {
+                collecte: this.collecte,
+                validateCollecte: () => {
+                    this.navCtrl.pop();
+                }
+            })
         }
     }
 
@@ -255,7 +257,7 @@ export class CollecteArticlesPage {
                 valid: this.isValid
             })
         } else if (fromText && !this.articlesNT.some(article => article.barcode === text)) {
-            this.showToast('L\'article scanné n\'est pas dans la liste.');
+            this.toastService.showToast('L\'article scanné n\'est pas dans la liste.');
         }
     }
 

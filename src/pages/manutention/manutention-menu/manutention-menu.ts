@@ -1,10 +1,11 @@
 import {Component, ViewChild} from '@angular/core';
-import {Content, IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
+import {Content, IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
 import {Manutention} from "@app/entities/manutention";
 import {SqliteProvider} from "@providers/sqlite/sqlite";
-import {HttpClient} from "@angular/common/http";
-import {MenuPage} from "@pages/menu/menu";
-import {ManutentionValidatePage} from "@pages/manutention/manutention-validate/manutention-validate";
+import {HttpClient} from '@angular/common/http';
+import {MenuPage} from '@pages/menu/menu';
+import {ManutentionValidatePage} from '@pages/manutention/manutention-validate/manutention-validate';
+import {ToastService} from '@app/services/toast.service';
 
 /**
  * Generated class for the ManutentionMenuPage page.
@@ -30,7 +31,7 @@ export class ManutentionMenuPage {
         public navCtrl: NavController,
         public navParams: NavParams,
         public sqlLiteProvider: SqliteProvider,
-        public toastController: ToastController,
+        private toastService: ToastService,
         public http: HttpClient,
     ) {
     }
@@ -39,7 +40,7 @@ export class ManutentionMenuPage {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    ionViewDidLoad() {
+    ionViewWillEnter() {
         this.synchronise(true);
     }
 
@@ -69,29 +70,19 @@ export class ManutentionMenuPage {
                                 });
                             } else {
                                 this.hasLoaded = true;
-                                this.showToast('Erreur');
+                                this.toastService.showToast('Erreur');
                             }
                         }, error => {
                             this.hasLoaded = true;
-                            this.showToast('Erreur réseau');
+                            this.toastService.showToast('Erreur réseau');
                         });
                     });
                 } else {
-                    this.showToast('Veuillez configurer votre URL dans les paramètres.')
+                    this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.')
                 }
             },
             err => console.log(err)
         );
-    }
-
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
     }
 
     goToManut(manutention: Manutention) {
