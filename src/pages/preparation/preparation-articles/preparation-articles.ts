@@ -407,7 +407,7 @@ export class PreparationArticlesPage {
             location: null,
             type: 'prise-dépose',
             is_ref: selectedArticle.isSelectableByUser ? '0' : selectedArticle.is_ref,
-            selected_by_article: 1,
+            selected_by_article: selectedArticle.isSelectableByUser ? 1 : 0,
             id_article_prepa: insertId ? insertId : selectedArticle.id,
             id_prepa: this.preparation.id,
             id_article_livraison: null,
