@@ -1,41 +1,63 @@
-page-list {
+page-menu {
 
-}
-
-.gridMenu {
-  width: auto;
-  margin: auto;
-  display: block;
-}
-
-.col-menu-stats {
-  margin: 0 auto;
-}
-
-.row-menu-stats {
-  display: flex;
-  justify-content: center;
-  background-color: white;
-  text-align: center;
-  >ion-col {
-    padding-bottom: 10px;
+  .gridMenu {
+    width: auto;
+    margin: auto;
+    display: block;
   }
-  ion-col {
-    border: 1px solid #f4f4f7;
+
+  .col-menu-stats {
+    margin: 0 auto;
   }
-  p {
-    font-size: 23px;
-    margin-bottom: 0px;
-    font-weight: 100;
-    color: black;
-    &.number {
-      font-size: 34px;
-      margin-top: 0;
-      margin-bottom: 0;
+
+  .row-menu-stats {
+    display: flex;
+    justify-content: center;
+    background-color: white;
+    text-align: center;
+
+    > ion-col {
+      padding-bottom: 10px;
     }
-  }
-  ion-slide {
-    padding-bottom: 10px;
+
+    ion-col {
+      border: 1px solid #f4f4f7;
+    }
+
+    p {
+      font-size: 23px;
+      margin-bottom: 0px;
+      font-weight: 100;
+      color: black;
+
+      &.number {
+        font-size: 34px;
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+    }
+
+    ion-slide {
+      padding-bottom: 10px;
+    }
+
   }
 
+  .spinner {
+    position: fixed;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .main_spinner {
+    height: 100px !important;
+    width: 100px !important;
+    margin-top: 50%;
+    left: 35%;
+  }
+
+  .spinner_text {
+    margin-top: 90%;
+  }
 }
