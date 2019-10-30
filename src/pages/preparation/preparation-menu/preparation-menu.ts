@@ -53,44 +53,11 @@ export class PreparationMenuPage {
 
     synchronise(fromStart: boolean) {
         this.hasLoaded = false;
-        if (this.network.type !== 'none') {
-            this.sqlLiteProvider.getAPI_URL().subscribe(
-                (result) => {
-                    if (result !== null) {
-                        let url: string = result + this.dataApi;
-                        this.sqlLiteProvider.getApiKey().then((key) => {
-                            this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
-                                if (resp.success) {
-                                    this.sqlLiteProvider.importPreparations(resp).subscribe(() => {
-                                        this.sqlLiteProvider.importArticlesPrepas(resp).subscribe(() => {
-                                            this.sqlLiteProvider.findAll('`preparation`').subscribe((preparations) => {
-                                                this.preparations = preparations.filter(p => p.date_end === null);
-                                                this.hasLoaded = true;
-                                                this.content.resize();
-                                            });
-                                        });
-                                    });
-                                } else {
-                                    this.hasLoaded = true;
-                                    this.showToast('Erreur');
-                                }
-                            }, error => {
-                                this.hasLoaded = true;
-                                this.showToast('Erreur réseau');
-                            });
-                        });
-                    } else {
-                        this.showToast('Veuillez configurer votre URL dans les paramètres.')
-                    }
-                },
-                err => console.log(err));
-        } else {
-            this.sqlLiteProvider.findAll('`preparation`').subscribe((preparations) => {
-                this.preparations = preparations.filter(p => p.date_end === null);
-                this.hasLoaded = true;
-                this.content.resize();
-            })
-        }
+        this.sqlLiteProvider.findAll('`preparation`').subscribe((preparations) => {
+            this.preparations = preparations.filter(p => p.date_end === null);
+            this.hasLoaded = true;
+            this.content.resize();
+        })
     }
 
     async showToast(msg) {

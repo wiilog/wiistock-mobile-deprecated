@@ -54,7 +54,7 @@ export class ConnectPage {
                                                             .subscribe(
                                                                 () => {
                                                                     this.isLoaded = false;
-                                                                    this.navCtrl.setRoot(MenuPage);
+                                                                    this.navCtrl.setRoot(MenuPage, {needReload : false});
                                                                 },
                                                                 () => {
                                                                     this.finishLoading();

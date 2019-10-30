@@ -47,42 +47,11 @@ export class ManutentionMenuPage {
 
     synchronise(fromStart: boolean) {
         this.hasLoaded = false;
-        if (this.network.type !== 'none') {
-            this.sqlLiteProvider.getAPI_URL().subscribe(
-                (result) => {
-                    if (result !== null) {
-                        let url: string = result + this.dataApi;
-                        this.sqlLiteProvider.getApiKey().then((key) => {
-                            this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
-                                if (resp.success) {
-                                    this.manutentions = resp.manutentions.map(({date_attendue, ...remainingAttr}) => ({
-                                        ...remainingAttr,
-                                        date_attendue: date_attendue.date
-                                    }));
-                                    this.hasLoaded = true;
-                                    this.content.resize();
-                                } else {
-                                    this.hasLoaded = true;
-                                    this.showToast('Erreur');
-                                }
-                            }, error => {
-                                this.hasLoaded = true;
-                                this.showToast('Erreur réseau');
-                            });
-                        });
-                    } else {
-                        this.showToast('Veuillez configurer votre URL dans les paramètres.')
-                    }
-                },
-                err => console.log(err)
-            );
-        } else {
-            this.sqlLiteProvider.findAll('`manutention`').subscribe((manutentions) => {
-                this.manutentions = manutentions;
-                this.hasLoaded = true;
-                this.content.resize();
-            })
-        }
+        this.sqlLiteProvider.findAll('`manutention`').subscribe((manutentions) => {
+            this.manutentions = manutentions;
+            this.hasLoaded = true;
+            this.content.resize();
+        })
     }
 
     async showToast(msg) {

@@ -92,45 +92,11 @@ export class ManutentionValidatePage {
 
     synchronise(fromStart: boolean) {
         this.hasLoaded = false;
-        if (this.network.type !== 'none') {
-            this.sqLiteProvider.getAPI_URL().subscribe(
-                (result) => {
-                    if (result !== null) {
-                        let url: string = result + this.dataApi;
-                        this.sqLiteProvider.getApiKey().then((key) => {
-                            this.client.post<any>(url, {apiKey: key, id: this.manutention.id}).subscribe(resp => {
-                                if (resp.success) {
-                                    this.sqLiteProvider.getOperateur().then((username) => {
-                                        this.user = username;
-                                        this.manutention = {
-                                            ...resp.manutention,
-                                            date_attendue: resp.manutention.date_attendue.date
-                                        };
-                                        this.hasLoaded = true;
-                                        this.content.resize();
-                                    });
-                                } else {
-                                    this.hasLoaded = true;
-                                    this.toastService.showToast('Erreur');
-                                }
-                            }, error => {
-                                this.hasLoaded = true;
-                                this.toastService.showToast('Erreur réseau');
-                            });
-                        });
-                    } else {
-                        this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.')
-                    }
-                },
-                err => console.log(err)
-            );
-        } else {
-            this.sqLiteProvider.findOneById('`manutention`', this.manutention.id).subscribe(manutention => {
-                this.manutention = manutention;
-                this.hasLoaded = true;
-                this.content.resize();
-            })
-        }
+        this.sqLiteProvider.findOneById('`manutention`', this.manutention.id).subscribe(manutention => {
+            this.manutention = manutention;
+            this.hasLoaded = true;
+            this.content.resize();
+        })
     }
 
     goHome() {

@@ -529,50 +529,48 @@ export class SqliteProvider {
         return ret;
     }
 
-    public importAnomaliesInventaire(data): Observable<any> {
-        const importExecuted = new ReplaySubject<any>(1);
+    public importAnomaliesInventaire(data): string {
 
-        let anomalies = data.data;
+        let anomalies = data.anomalies;
 
         let anomaliesValues = [];
         if (anomalies.length === 0) {
-            importExecuted.next(false);
+            return undefined;
         }
         else {
             for (let anomaly of anomalies) {
                 anomaliesValues.push("(" + null + ", '" + anomaly.reference + "', '" + anomaly.is_ref + "', '" + anomaly.quantity + "', '" + (anomaly.location ? anomaly.location : 'N/A') + "', '" + anomaly.barCode + "')");
-
-                if (anomalies.indexOf(anomaly) === anomalies.length - 1) {
-                    let anomaliesValuesStr = anomaliesValues.join(', ');
-                    let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `location`) VALUES ' + anomaliesValuesStr + ';';
-
-                    if (anomaliesValues.length > 0) {
-                        importExecuted.next(sqlAnomaliesInventaire);
-                    }
-                    else {
-                        importExecuted.next(undefined);
-                    }
-                }
+            }
+            let anomaliesValuesStr = anomaliesValues.join(', ');
+            let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `location`) VALUES ' + anomaliesValuesStr + ';';
+            if (anomaliesValues.length > 0) {
+                return sqlAnomaliesInventaire;
+            } else {
+                return undefined;
             }
         }
-        return importExecuted;
     }
 
     private executeAllImports(imports: Array<string>): Observable<any> {
+        console.log(imports);
         return this.db$.pipe(
             flatMap((db) => from(Promise.all(imports.map((importSql) => (
-                db.executeSql(importSql, []).catch((err) => {
+                db.executeSql(importSql, []).then(() => {
+                    console.log('OK ', importSql);
+                }).catch((err) => {
                     console.log(importSql, err);
                 })
             ))))),
-            map(() => undefined)
+            map(() => {
+                console.log('TUTU----------3213');
+                return undefined;
+            })
         );
     }
 
     public importData(data, refresh = false): Observable<undefined> {
         const concatSqlImports = (imports: Array<string>, sql: string) => ([...imports, sql]);
         const createMapSqlImportObs = (imports: Array<string>) => map((sql: string) => concatSqlImports(imports, sql));
-
         return this.initPrepsCount(data, refresh).pipe(
             map(() => concatSqlImports([], this.importEmplacements(data))),
             map((imports) => concatSqlImports(imports, this.importArticlesPrepaByRefArticle(data))),
@@ -585,6 +583,23 @@ export class SqliteProvider {
             flatMap((imports) => this.importManutentions(data).pipe(createMapSqlImportObs(imports))),
             flatMap((imports) => this.importCollectes(data).pipe(createMapSqlImportObs(imports))),
             flatMap((imports) => this.importArticlesCollecte(data).pipe(createMapSqlImportObs(imports))),
+            flatMap((imports) => (
+                from(this.getInventoryManagerRight()).pipe(
+                    map((res) => {
+                        console.log(res);
+                        if (res) {
+                            console.log(this.importAnomaliesInventaire(data));
+                            console.log(imports);
+                            console.log(concatSqlImports(imports, this.importAnomaliesInventaire(data)));
+                            console.log('tgtre');
+                            return concatSqlImports(imports, this.importAnomaliesInventaire(data))
+                        } else {
+                            console.log(imports);
+                            return imports;
+                        }
+                    })
+                )
+            )),
             map((imports: Array<string>) => imports.filter((importSql) => importSql)),
             flatMap((imports) => this.executeAllImports(imports))
         );
