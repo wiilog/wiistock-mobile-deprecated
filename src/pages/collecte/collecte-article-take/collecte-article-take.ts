@@ -1,8 +1,7 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
-import {CollecteArticlesPage} from '@pages/collecte/collecte-articles/collecte-articles';
+import {IonicPage, NavController, NavParams} from 'ionic-angular';
 import {ArticleCollecte} from '@app/entities/article-collecte';
-import {Collecte} from '@app/entities/collecte';
+import {ToastService} from "@app/services/toast.service";
 
 @IonicPage()
 @Component({
@@ -11,43 +10,29 @@ import {Collecte} from '@app/entities/collecte';
 })
 export class CollecteArticleTakePage {
 
-    article: ArticleCollecte;
-    quantite: number;
-    collecte : Collecte;
+    public article: ArticleCollecte;
+    public quantity: number;
 
-    constructor(
-        public navCtrl: NavController,
-        public navParams: NavParams,
-        public toastController: ToastController) {
-        if (navParams.get('article') !== undefined) {
-            this.article = navParams.get('article');
-            this.quantite = this.article.quantite;
-            this.collecte = navParams.get('collecte');
+    private selectArticle: (quantity: number) => void;
+
+    public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private toastService: ToastService) {
+    }
+
+    public ionViewWillEnter(): void {
+        this.article = this.navParams.get('article');
+        this.quantity = this.article.quantite;
+        this.selectArticle = this.navParams.get('selectArticle');
+    }
+
+    public addArticle(): void {
+        if (this.quantity > this.article.quantite || this.quantity <= 0) {
+            this.toastService.showToast('Veuillez selectionner une quantité valide.');
+        }
+        else {
+            this.selectArticle(this.quantity);
+            this.navCtrl.pop();
         }
     }
-
-    addArticle() {
-        if (this.quantite > this.article.quantite || this.quantite <= 0) {
-            this.showToast('Veuillez selectionner une quantité valide.');
-        } else {
-            this.navCtrl.setRoot(CollecteArticlesPage, {
-                article : this.article,
-                quantite : this.quantite,
-                collecte : this.collecte,
-                started : this.navParams.get('started'),
-                valid : this.navParams.get('valid')
-            })
-        }
-    }
-
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
-    }
-
 }

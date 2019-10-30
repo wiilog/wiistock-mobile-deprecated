@@ -14,6 +14,7 @@ import {ToastService} from "@app/services/toast.service";
 import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
 import {Subscription} from "rxjs";
 
+
 @IonicPage()
 @Component({
     selector: 'page-collecte-articles',
@@ -52,32 +53,6 @@ export class CollecteArticlesPage {
             if (this.articlesT.length > 0) {
                 this.started = true;
             }
-            if (this.navParams.get('article') !== undefined && this.navParams.get('quantite') !== undefined) {
-                this.isValid = this.navParams.get('valid');
-                this.started = this.navParams.get('started');
-                if (!this.started) {
-                    this.sqliteProvider.getAPI_URL().subscribe((result) => {
-                        this.sqliteProvider.getApiKey().then((key) => {
-                            if (result !== null) {
-                                let url: string = result + this.apiStartCollecte;
-                                this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
-                                    if (resp.success) {
-                                        this.started = true;
-                                        this.isValid = true;
-                                        this.toastService.showToast('Collecte commencée.');
-                                        this.registerMvt();
-                                    } else {
-                                        this.isValid = false;
-                                        this.toastService.showToast(resp.msg);
-                                    }
-                                });
-                            }
-                        });
-                    });
-                } else {
-                    this.registerMvt();
-                }
-            }
         });
     }
 
@@ -106,24 +81,28 @@ export class CollecteArticlesPage {
         this.toastService.showToast('Quantité bien prélevée.')
     }
 
-    registerMvt() {
+    registerMvt(article, quantite) {
         if (this.isValid) {
-            if (this.navParams.get('article').quantite !== Number(this.navParams.get('quantite'))) {
+            if (article.quantite !== Number(quantite)) {
                 let newArticle: ArticleCollecte = {
                     id: null,
-                    label: this.navParams.get('article').label,
-                    reference: this.navParams.get('article').reference,
-                    quantite: Number(this.navParams.get('quantite')),
-                    is_ref: this.navParams.get('article').is_ref,
-                    id_collecte: this.navParams.get('article').id_collecte,
+                    label: article.label,
+                    reference: article.reference,
+                    quantite: Number(quantite),
+                    is_ref: article.is_ref,
+                    id_collecte: article.id_collecte,
                     has_moved: 1,
-                    emplacement: this.navParams.get('article').emplacement,
-                    barcode: this.navParams.get('article').barcode,
+                    emplacement: article.emplacement,
+                    barcode: article.barcode,
                 };
-                let articleAlready = this.articlesT.find(art => art.id_collecte === newArticle.id_collecte && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
+                let articleAlready = this.articlesT.find(art => (
+                    (art.id_collecte === newArticle.id_collecte) &&
+                    (art.is_ref === newArticle.is_ref) &&
+                    (art.reference === newArticle.reference)
+                ));
                 if (articleAlready !== undefined) {
                     this.sqliteProvider.updateArticleCollecteQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite).subscribe(() => {
-                        this.sqliteProvider.updateArticleCollecteQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - newArticle.quantite).subscribe(() => {
+                        this.sqliteProvider.updateArticleCollecteQuantity(article.id, article.quantite - newArticle.quantite).subscribe(() => {
                             this.sqliteProvider.findArticlesByCollecte(this.collecte.id).subscribe((articles) => {
                                 if (articles.filter(article => article.has_moved === 0).length === 0) {
                                     this.refreshOver();
@@ -140,7 +119,7 @@ export class CollecteArticlesPage {
                         let mouvement: Mouvement = {
                             id: null,
                             reference: newArticle.reference,
-                            quantity: this.navParams.get('article').quantite,
+                            quantity: article.quantite,
                             date_pickup: moment().format(),
                             location_from: newArticle.emplacement,
                             date_drop: null,
@@ -154,7 +133,7 @@ export class CollecteArticlesPage {
                             id_article_collecte: insertId,
                             id_collecte: newArticle.id_collecte
                         };
-                        this.sqliteProvider.updateArticleCollecteQuantity(this.navParams.get('article').id, this.navParams.get('article').quantite - Number(this.navParams.get('quantite')))
+                        this.sqliteProvider.updateArticleCollecteQuantity(article.id, article.quantite - Number(quantite))
                             .pipe(
                                 flatMap(() => this.sqliteProvider.insert('`mouvement`', mouvement)),
                                 flatMap(() => this.sqliteProvider.findArticlesByCollecte(this.collecte.id)))
@@ -172,22 +151,26 @@ export class CollecteArticlesPage {
             } else {
                 let mouvement: Mouvement = {
                     id: null,
-                    reference: this.navParams.get('article').reference,
-                    quantity: this.navParams.get('article').quantite,
+                    reference: article.reference,
+                    quantity: article.quantite,
                     date_pickup: moment().format(),
-                    location_from: this.navParams.get('article').emplacement,
+                    location_from: article.emplacement,
                     date_drop: null,
                     location: null,
                     type: 'prise-dépose',
-                    is_ref: this.navParams.get('article').is_ref,
+                    is_ref: article.is_ref,
                     id_article_prepa: null,
                     id_prepa: null,
                     id_article_livraison: null,
                     id_livraison: null,
-                    id_article_collecte: this.navParams.get('article').id,
-                    id_collecte: this.navParams.get('article').id_collecte
+                    id_article_collecte: article.id,
+                    id_collecte: article.id_collecte
                 };
-                let articleAlready = this.articlesT.find(art => art.id_collecte === mouvement.id_collecte && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
+                let articleAlready = this.articlesT.find(art => (
+                    (art.id_collecte === mouvement.id_collecte) &&
+                    (art.is_ref === mouvement.is_ref) &&
+                    (art.reference === mouvement.reference)
+                ));
                 if (articleAlready !== undefined) {
                     this.sqliteProvider.updateArticleCollecteQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite).subscribe(() => {
                         this.sqliteProvider.deleteById('`article_collecte`', mouvement.id_article_collecte).subscribe(() => {
@@ -206,7 +189,7 @@ export class CollecteArticlesPage {
                     this.sqliteProvider
                         .insert('`mouvement`', mouvement)
                         .pipe(
-                            flatMap(() => this.sqliteProvider.moveArticleCollecte(this.navParams.get('article').id)),
+                            flatMap(() => this.sqliteProvider.moveArticleCollecte(article.id)),
                             flatMap(() => this.sqliteProvider.findArticlesByCollecte(this.collecte.id))
                         )
                         .subscribe((articles) => {
@@ -231,7 +214,8 @@ export class CollecteArticlesPage {
     validate() {
         if (this.articlesNT.length > 0) {
             this.toastService.showToast('Veuillez traiter tous les articles concernés');
-        } else {
+        }
+        else {
             this.navCtrl.push(CollecteEmplacementPage, {
                 collecte: this.collecte,
                 validateCollecte: () => {
@@ -242,22 +226,46 @@ export class CollecteArticlesPage {
     }
 
     testIfBarcodeEquals(text, fromText) {
-        if (fromText && this.articlesNT.some(article => article.barcode === text)) {
+        const article = fromText
+            ? this.articlesNT.find(article => (article.barcode === text))
+            : text;
+        if (article) {
             this.navCtrl.push(CollecteArticleTakePage, {
-                article: this.articlesNT.find(article => article.barcode === text),
-                collecte: this.collecte,
-                started: this.started,
-                valid: this.isValid
+                article,
+                selectArticle: (quantity: number) => {
+                    this.selectArticle(article, quantity);
+                }
             });
-        } else if (!fromText) {
-            this.navCtrl.push(CollecteArticleTakePage, {
-                article: text,
-                collecte: this.collecte,
-                started: this.started,
-                valid: this.isValid
-            })
-        } else if (fromText && !this.articlesNT.some(article => article.barcode === text)) {
+        }
+        else {
             this.toastService.showToast('L\'article scanné n\'est pas dans la liste.');
+        }
+    }
+
+    private selectArticle(article, quantity): void {
+        this.isValid = this.navParams.get('valid');
+        this.started = this.navParams.get('started');
+        if (!this.started) {
+            this.sqliteProvider.getAPI_URL().subscribe((result) => {
+                this.sqliteProvider.getApiKey().then((key) => {
+                    if (result !== null) {
+                        let url: string = result + this.apiStartCollecte;
+                        this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
+                            if (resp.success) {
+                                this.started = true;
+                                this.isValid = true;
+                                this.toastService.showToast('Collecte commencée.');
+                                this.registerMvt(article, quantity);
+                            } else {
+                                this.isValid = false;
+                                this.toastService.showToast(resp.msg);
+                            }
+                        });
+                    }
+                });
+            });
+        } else {
+            this.registerMvt(article, quantity);
         }
     }
 
