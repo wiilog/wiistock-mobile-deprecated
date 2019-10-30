@@ -1,11 +1,10 @@
 import {Component} from '@angular/core';
 import {AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
-import {PriseConfirmPageTraca} from '@pages/traca/prise-confirm/prise-confirm-traca';
+import {SelectArticleManuallyPage} from '@pages/traca/select-article-manually/select-article-manually';
 import {MenuPage} from '@pages/menu/menu';
 import {Article} from '@app/entities/article';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {TracaMenuPage} from '@pages/traca/traca-menu/traca-menu';
 import {ChangeDetectorRef} from '@angular/core';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import moment from 'moment';
@@ -62,9 +61,8 @@ export class PriseArticlesPageTraca {
     }
 
     addArticleManually() {
-        this.navCtrl.push(PriseConfirmPageTraca, {
+        this.navCtrl.push(SelectArticleManuallyPage, {
             articles: this.articles,
-            emplacement: this.emplacement,
             selectArticle: (article) => {
                 this.articles.push(article);
             }

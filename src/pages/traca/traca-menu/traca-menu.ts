@@ -19,19 +19,21 @@ export class TracaMenuPage {
     mvts: MouvementTraca[];
     unfinishedMvts: boolean;
     type: string;
-    sqlProvider : SqliteProvider;
     addMvtURL : string = '/api/addMouvementTraca';
 
     constructor(public navCtrl: NavController,
                 public navParams: NavParams,
-                sqlProvider: SqliteProvider,
-                public http: HttpClient,
+                private sqlProvider: SqliteProvider,
+                private http: HttpClient,
                 private toastService: ToastService,
                 public network: Network) {
-        this.sqlProvider = sqlProvider;
+    }
+
+    public ionViewWillEnter(): void {
         this.sqlProvider.findAll('`mouvement_traca`').subscribe((value) => {
             this.mvts = value;
         });
+
         this.sqlProvider.priseAreUnfinished().then((value) => {
             this.unfinishedMvts = value;
             this.type = this.network.type;
@@ -46,7 +48,12 @@ export class TracaMenuPage {
     }
 
     goToDepose() {
-        this.navCtrl.push(DeposeEmplacementPageTraca);
+        if (this.unfinishedMvts) {
+            this.navCtrl.push(DeposeEmplacementPageTraca);
+        }
+        else {
+            this.toastService.showToast('Aucune prise n\'a été enregistrée');
+        }
     }
 
     goHome() {

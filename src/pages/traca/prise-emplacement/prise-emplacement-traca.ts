@@ -44,8 +44,6 @@ export class PriseEmplacementPageTraca {
     }
 
     public ionViewWillEnter(): void {
-        this.emplacement = this.navParams.get('selectedEmplacement');
-
         this.sqliteProvider.findAll('emplacement').subscribe((value) => {
             this.db_locations = value;
             this.db_locations_for_list = value;
@@ -67,13 +65,18 @@ export class PriseEmplacementPageTraca {
         return this.barcodeScannerManager.canGoBack;
     }
 
-    goToArticles() {
-        this.navCtrl.push(PriseArticlesPageTraca, {
-            emplacement: this.emplacement,
-            finishPrise: () => {
-                this.navCtrl.pop();
-            }
-        });
+    public goToArticles(): void {
+        if (this.emplacement) {
+            this.navCtrl.push(PriseArticlesPageTraca, {
+                emplacement: this.emplacement,
+                finishPrise: () => {
+                    this.navCtrl.pop();
+                }
+            });
+        }
+        else {
+            this.toastService.showToast('Veuillez sélectionner un emplacement')
+        }
     }
 
     emplacementChange(event: { component: IonicSelectableComponent, value: any }) {

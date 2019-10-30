@@ -45,8 +45,6 @@ export class DeposeEmplacementPageTraca {
     }
 
     public ionViewWillEnter(): void {
-        this.emplacement = this.navParams.get('selectedEmplacement');
-
         this.sqliteProvider.findAll('emplacement').subscribe((value) => {
             this.db_locations = value;
             this.db_locations_for_list = value;
@@ -69,7 +67,17 @@ export class DeposeEmplacementPageTraca {
     }
 
     goToArticles() {
-        this.navCtrl.push(DeposeArticlesPageTraca, {emplacement: this.emplacement});
+        if (this.emplacement) {
+            this.navCtrl.push(DeposeArticlesPageTraca, {
+                emplacement: this.emplacement,
+                finishDepose: () => {
+                    this.navCtrl.pop();
+                }
+            });
+        }
+        else {
+            this.toastService.showToast('Veuillez sélectionner un emplacement')
+        }
     }
 
     emplacementChange(event: { component: IonicSelectableComponent, value: any }) {
@@ -92,14 +100,16 @@ export class DeposeEmplacementPageTraca {
     }
 
     scanLocation() {
-        this.barcodeScannerManager.scan().subscribe((barcode) => this.testIfBarcodeEquals(barcode));
+        this.barcodeScannerManager.scan().subscribe((barcode) => {
+            this.testIfBarcodeEquals(barcode)
+        });
     }
 
     testIfBarcodeEquals(barcode) {
         this.sqliteProvider.findAll('`emplacement`').subscribe(resp => {
-            if (resp.some(element => element.label === barcode)) {
-                let emplacement = resp.find(element => element.label === barcode);
-                this.navCtrl.push(DeposeEmplacementPageTraca, {selectedEmplacement: emplacement});
+            let emplacement = resp.find(element => element.label === barcode);
+            if (emplacement) {
+                this.emplacement = emplacement;
                 this.changeDetectorRef.detectChanges();
             } else {
                 this.toastService.showToast('Veuillez flasher ou sélectionner un emplacement connu.');
@@ -113,7 +123,6 @@ export class DeposeEmplacementPageTraca {
             component.disableInfiniteScroll();
         }
         else {
-
             if (this.endIndex + DeposeEmplacementPageTraca.INIT_END_INDEX >= this.db_locations.length) {
                 this.endIndex = this.db_locations.length;
             }

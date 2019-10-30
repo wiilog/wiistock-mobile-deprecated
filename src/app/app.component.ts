@@ -48,10 +48,6 @@ export class AppComponent {
             {title: 'Livraison', component: LivraisonMenuPage},
             {title: 'Inventaire', component: InventaireMenuPage}
         ];
-
-        console.log('------------------ PLUGINS')
-        console.log((<any>window).plugins)
-
     }
 
     public initializeApp() {

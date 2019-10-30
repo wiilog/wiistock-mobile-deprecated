@@ -17,10 +17,9 @@ import {PriseArticlesPage} from '@pages/stockage/prise-articles/prise-articles';
 import {PriseConfirmPage} from '@pages/stockage/prise-confirm/prise-confirm';
 import {PriseEmplacementPage} from '@pages/stockage/prise-emplacement/prise-emplacement';
 import {PriseArticlesPageTraca} from '@pages/traca/prise-articles/prise-articles-traca';
-import {PriseConfirmPageTraca} from '@pages/traca/prise-confirm/prise-confirm-traca';
+import {SelectArticleManuallyPage} from '@pages/traca/select-article-manually/select-article-manually';
 import {PriseEmplacementPageTraca} from '@pages/traca/prise-emplacement/prise-emplacement-traca';
 import {DeposeArticlesPageTraca} from '@pages/traca/depose-articles/depose-articles-traca';
-import {DeposeConfirmPageTraca} from '@pages/traca/depose-confirm/depose-confirm-traca';
 import {DeposeEmplacementPageTraca} from '@pages/traca/depose-emplacement/depose-emplacement-traca';
 import {StorageService} from './services/storage.service';
 import {StockageMenuPage} from '@pages/stockage/stockage-menu/stockage-menu';
@@ -74,10 +73,9 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
         LivraisonArticlesPage,
         LivraisonEmplacementPage,
         PreparationEmplacementPage,
-        PriseConfirmPageTraca,
+        SelectArticleManuallyPage,
         DeposeEmplacementPageTraca,
         DeposeArticlesPageTraca,
-        DeposeConfirmPageTraca,
         ManutentionValidatePage,
         DeposePage,
         DeposePageTraca,
@@ -124,12 +122,11 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
         LivraisonArticlesPage,
         LivraisonEmplacementPage,
         PriseArticlesPageTraca,
-        PriseConfirmPageTraca,
+        SelectArticleManuallyPage,
         ManutentionMenuPage,
         ManutentionValidatePage,
         DeposeEmplacementPageTraca,
         DeposeArticlesPageTraca,
-        DeposeConfirmPageTraca,
         DeposePage,
         DeposePageTraca,
         InventaireMenuPage,

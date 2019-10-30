@@ -1,17 +1,16 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams} from 'ionic-angular';
-import {DeposeConfirmPageTraca} from '@pages/traca/depose-confirm/depose-confirm-traca';
+import {AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {Article} from '@app/entities/article';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {TracaMenuPage} from '@pages/traca/traca-menu/traca-menu';
 import {ChangeDetectorRef} from '@angular/core';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import moment from 'moment';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
+import {SelectArticleManuallyPage} from "@pages/traca/select-article-manually/select-article-manually";
 
 
 @IonicPage()
@@ -26,26 +25,15 @@ export class DeposeArticlesPageTraca {
     public db_articles: Array<Article>;
 
     private zebraScanSubscription: Subscription;
+    private finishDepose: () => void;
 
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
+                       private alertController: AlertController,
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
                        private barcodeScannerManager: BarcodeScannerManagerService,
-                       private changeDetectorRef: ChangeDetectorRef) {
-        let instance = this;
-        (<any>window).plugins.intentShim.registerBroadcastReceiver({
-                filterActions: [
-                    'io.ionic.starter.ACTION'
-                ],
-                filterCategories: [
-                    'android.intent.category.DEFAULT'
-                ]
-            },
-            function (intent) {
-                instance.testIfBarcodeEquals(intent.extras['com.symbol.datawedge.data_string']);
-            });
-    }
+                       private changeDetectorRef: ChangeDetectorRef) {}
 
     public ionViewWillEnter(): void {
         this.sqliteProvider.findAll('article').subscribe((value) => {
@@ -53,7 +41,8 @@ export class DeposeArticlesPageTraca {
         });
 
         this.emplacement = this.navParams.get('emplacement');
-        this.articles = this.navParams.get('articles');
+        this.finishDepose = this.navParams.get('finishDepose');
+        this.articles = this.navParams.get('articles') || [];
 
         this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
             this.testIfBarcodeEquals(barcode);
@@ -72,48 +61,71 @@ export class DeposeArticlesPageTraca {
     }
 
     addArticleManually() {
-        this.navCtrl.push(DeposeConfirmPageTraca, {
-            articles: this.articles, emplacement: this.emplacement
+        this.navCtrl.push(SelectArticleManuallyPage, {
+            articles: this.articles,
+            selectArticle: (article) => {
+                const nbDroppedArticle = this.articles
+                    .filter((articlePrise) => (articlePrise.reference === article.reference))
+                    .length;
+                this.sqliteProvider.keyExists(article.reference).then((value) => {
+                    if (value !== false) {
+                        if (value > nbDroppedArticle) {
+                            this.articles.push(article);
+                            this.changeDetectorRef.detectChanges();
+                        }
+                        else {
+                            this.toastService.showToast('Cet article est déjà enregistré assez de fois dans le panier.');
+                        }
+                    }
+                    else {
+                        this.toastService.showToast('Cet article ne correspond à aucune prise.');
+                    }
+                });
+            }
         });
     }
 
     finishTaking() {
-
-        for (let article of this.articles) {
-            let numberOfArticles = 0;
-            this.articles.forEach((articleToCmp) => {
-                if (articleToCmp.reference === article.reference) {
-                    numberOfArticles++;
-                }
-            });
-            const date = moment().format();
-            this.sqliteProvider.getOperateur().then((value) => {
-                const mouvement: MouvementTraca = {
-                    id: null,
-                    ref_article: article.reference,
-                    date: date + '_' + Math.random().toString(36).substr(2, 9),
-                    ref_emplacement: this.emplacement.label,
-                    type: 'depose',
-                    operateur: value
-                };
-                this.sqliteProvider.setDeposeValue(article.barcode, numberOfArticles).then(() => {
-                    if (this.articles.indexOf(article) === this.articles.length - 1) {
-                        this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(() => {
-                            this.redirectAfterTake();
-                        });
-                    } else {
-                        this.sqliteProvider.insert('`mouvement_traca`', mouvement);
+        if (this.articles && this.articles.length > 0) {
+            for (let article of this.articles) {
+                let numberOfArticles = 0;
+                this.articles.forEach((articleToCmp) => {
+                    if (articleToCmp.reference === article.reference) {
+                        numberOfArticles++;
                     }
                 });
-            });
+                const date = moment().format();
+                this.sqliteProvider.getOperateur().then((value) => {
+                    const mouvement: MouvementTraca = {
+                        id: null,
+                        ref_article: article.reference,
+                        date: date + '_' + Math.random().toString(36).substr(2, 9),
+                        ref_emplacement: this.emplacement.label,
+                        type: 'depose',
+                        operateur: value
+                    };
+                    this.sqliteProvider.setDeposeValue(article.barcode, numberOfArticles).then(() => {
+                        if (this.articles.indexOf(article) === this.articles.length - 1) {
+                            this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(() => {
+                                this.redirectAfterTake();
+                            });
+                        }
+                        else {
+                            this.sqliteProvider.insert('`mouvement_traca`', mouvement);
+                        }
+                    });
+                });
+            }
         }
-
-        //   });
+        else {
+            this.toastService.showToast('Vous devez sélectionner au moins un article')
+        }
     }
 
-    redirectAfterTake() {
-        this.navCtrl.setRoot(TracaMenuPage)
+    public redirectAfterTake(): void {
+        this.navCtrl.pop()
             .then(() => {
+                this.finishDepose();
                 this.toastService.showToast('Dépose enregistrée.')
             });
     }
@@ -128,11 +140,10 @@ export class DeposeArticlesPageTraca {
         });
     }
 
-    testIfBarcodeEquals(text) {
-        let numberOfArticles = 0;
-        if (this.articles && this.articles.some(article => (article.reference === text))) {
-            numberOfArticles++;
-        }
+    public testIfBarcodeEquals(text): void {
+        let numberOfArticles = this.articles
+            .filter(article => (article.reference === text))
+            .length;
 
         let a: Article = {
             id: new Date().getUTCMilliseconds(),
@@ -144,18 +155,32 @@ export class DeposeArticlesPageTraca {
         this.sqliteProvider.keyExists(text).then((value) => {
             if (value !== false) {
                 if (value > numberOfArticles) {
-                    this.navCtrl.push(DeposeConfirmPageTraca, {
-                        articles: this.articles, emplacement: this.emplacement, selectedArticle: a
-                    });
-                } else {
+                    this.alertController
+                        .create({
+                            title: `Vous avez sélectionné l'article ${text}`,
+                            buttons: [
+                                {
+                                    text: 'Annuler'
+                                },
+                                {
+                                    text: 'Confirmer',
+                                    handler: () => {
+                                        this.articles.push(a);
+                                        this.changeDetectorRef.detectChanges();
+                                    },
+                                    cssClass : 'alertAlert'
+                                }
+                            ]
+                        })
+                        .present();
+                }
+                else {
                     this.toastService.showToast('Cet article est déjà enregistré assez de fois dans le panier.');
                 }
-            } else {
-                this.navCtrl.push(DeposeArticlesPageTraca, {emplacement : this.emplacement});
+            }
+            else {
                 this.toastService.showToast('Ce colis ne correspond à aucune prise.');
             }
         });
-        this.changeDetectorRef.detectChanges();
     }
-
 }

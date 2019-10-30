@@ -1,16 +1,12 @@
 <ion-header>
     <ion-navbar>
-        <ion-title>Confirmation prise</ion-title>
+        <ion-title>Sélection mannuelle</ion-title>
     </ion-navbar>
 </ion-header>
 
 <ion-content padding>
 
     <ion-list inset>
-
-        <ion-item>
-            Article sélectionné
-        </ion-item>
         <ion-item>
             <ion-label>Article</ion-label>
             <ionic-selectable
@@ -33,6 +29,5 @@
 <ion-footer padding>
     <div class="d-flex">
         <ion-icon class="big-icon" name="arrow-dropleft-circle" navPop></ion-icon>
-        <ion-icon class="big-icon" name="checkmark-circle" (click)="addArticle()"></ion-icon>
     </div>
 </ion-footer>
