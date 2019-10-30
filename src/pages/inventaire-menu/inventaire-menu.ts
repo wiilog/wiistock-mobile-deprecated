@@ -9,10 +9,9 @@ import {SaisieInventaire} from '@app/entities/saisie-inventaire';
 import {InventaireAnomaliePage} from '@pages/inventaire-anomalie/inventaire-anomalie';
 import moment from 'moment';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
-import {flatMap, filter} from 'rxjs/operators';
-import {of} from 'rxjs/observable/of';
-import {Subscription} from 'rxjs';
-import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
+import {filter} from 'rxjs/operators';
+import {Observable, ReplaySubject, Subscription} from 'rxjs';
+import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
 
 
 @IonicPage()
@@ -29,7 +28,7 @@ export class InventaireMenuPage {
     locations: Array<string>;
     location: string;
     dataApi: string = '/api/getData';
-    addEntryURL : string = '/api/addInventoryEntries';
+    addEntryURL: string = '/api/addInventoryEntries';
     isInventoryManager: boolean;
     isLoaded: boolean;
 
@@ -62,8 +61,7 @@ export class InventaireMenuPage {
             .subscribe((barcode: string) => {
                 if (!this.location) {
                     this.checkBarcodeIsLocation(barcode);
-                }
-                else {
+                } else {
                     this.checkBarcodeIsRef(barcode);
                 }
             });
@@ -82,83 +80,56 @@ export class InventaireMenuPage {
         }
     }
 
-    addInventoryEntries() {
+    addInventoryEntries() : Observable<any> {
+        let ret$: ReplaySubject<any> = new ReplaySubject(1);
         this.sqlLiteProvider.getAPI_URL().subscribe(baseUrl => {
-           if (baseUrl !== null) {
-               let url: string = baseUrl + this.addEntryURL;
-               this.sqlLiteProvider.findAll('`saisie_inventaire`').subscribe(data => {
-                   if (data.length > 0) {
-                       this.sqlLiteProvider.getApiKey().then(apiKey => {
-                           let params = {
-                               entries: data,
-                               apiKey: apiKey
-                           };
-                           this.http.post<any>(url, params).subscribe(resp => {
-                               if (resp.success) {
-                                   this.sqlLiteProvider.cleanTable('`saisie_inventaire`');
-                                   this.showToast(resp.data.status);
-                               }
-                           });
-                       });
-                   }
-               })
-           } else {
-               this.showToast('Veuillez configurer votre URL dans les paramètres.')
-           }
+            if (baseUrl !== null) {
+                let url: string = baseUrl + this.addEntryURL;
+                this.sqlLiteProvider.findAll('`saisie_inventaire`').subscribe(data => {
+                    if (data.length > 0) {
+                        this.sqlLiteProvider.getApiKey().then(apiKey => {
+                            let params = {
+                                entries: data,
+                                apiKey: apiKey
+                            };
+                            this.http.post<any>(url, params).subscribe(resp => {
+                                if (resp.success) {
+                                    this.sqlLiteProvider.cleanTable('`saisie_inventaire`');
+                                    this.showToast(resp.data.status);
+                                    ret$.next(undefined);
+                                } else {
+                                    ret$.next(undefined);
+                                }
+                            }, err => ret$.next(undefined));
+                        });
+                    } else {
+                        ret$.next(undefined);
+                    }
+                })
+            } else {
+                ret$.next(undefined);
+                this.showToast('Veuillez configurer votre URL dans les paramètres.')
+            }
         });
+        return ret$;
     }
 
     synchronize() {
         this.isLoaded = false;
-        this.sqlLiteProvider.getAPI_URL().subscribe(
-            (result) => {
-                if (result !== null) {
-                    let url: string = result + this.dataApi;
-                    this.sqlLiteProvider.getApiKey().then((key) => {
-                        this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
-                            if (resp.success) {
-                                this.sqlLiteProvider.cleanTable('`article_inventaire`')
-                                    .pipe(
-                                        flatMap(() => this.sqlLiteProvider.importArticlesInventaire(resp.data)),
-                                        flatMap((sqlArticlesInventaire) => {
-                                            return (sqlArticlesInventaire !== false)
-                                                ? this.sqlLiteProvider.executeQuery(sqlArticlesInventaire)
-                                                : of(undefined)
-                                        })
-                                    )
-                                    .subscribe(() => {
-                                        this.sqlLiteProvider.findAll('`article_inventaire`').subscribe(articles => {
-                                            this.articles = articles;
-                                            let locations = [];
-                                            articles.forEach(article => {
-                                               if (locations.indexOf(article.location) < 0 && article.location) {
-                                                   locations.push(article.location);
-                                               }
-                                            });
-                                            this.locations = locations;
-
-                                            setTimeout(() => {
-                                                this.isLoaded = true;
-                                                this.content.resize();
-                                            }, 1000);
-                                        });
-                                        this.addInventoryEntries();
-                                    });
-                            } else {
-                                this.isLoaded = true;
-                                this.showToast('Une erreur est survenue.');
-                            }
-                        }, error => {
-                            this.isLoaded = true;
-                            this.showToast('Une erreur réseau est survenue.');
-                        });
-                    });
-                } else {
-                    this.showToast('Veuillez configurer votre URL dans les paramètres.')
+        this.sqlLiteProvider.findAll('`article_inventaire`').subscribe(articles => {
+            this.articles = articles;
+            let locations = [];
+            articles.forEach(article => {
+                if (locations.indexOf(article.location) < 0 && article.location) {
+                    locations.push(article.location);
                 }
-            },
-            err => console.log(err)
-        );
+            });
+            this.addInventoryEntries().subscribe(_ => {
+                this.locations = locations;
+                this.isLoaded = true;
+                this.content.resize();
+            });
+        });
     }
 
     async showToast(msg) {

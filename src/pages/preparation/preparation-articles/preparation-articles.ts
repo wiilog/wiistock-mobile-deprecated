@@ -168,7 +168,8 @@ export class PreparationArticlesPage {
                     ));
                 }
 
-                if (articleAlready) { // we don't enter here if it's an article selected by the user in the liste of article_prepa_by_ref_article
+                if (articleAlready) {
+                    // we don't enter here if it's an article selected by the user in the liste of article_prepa_by_ref_article
                     this.sqliteProvider
                         .updateArticlePrepaQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite)
                         .pipe(flatMap(() => this.sqliteProvider.deleteById('`article_prepa`', (selectedArticle as ArticlePrepa).id)))
@@ -362,28 +363,13 @@ export class PreparationArticlesPage {
                     quantite: selectedQuantityValid
                 })
                 .pipe(
-                    flatMap((insertId) => {
-
-                        let mouvement: Mouvement = {
-                            id: null,
-                            reference: (selectedArticle as ArticlePrepaByRefArticle).reference,
-                            quantity: selectedQuantityValid,
-                            date_pickup: moment().format(),
-                            location_from: (selectedArticle as ArticlePrepaByRefArticle).location,
-                            date_drop: null,
-                            location: null,
-                            type: 'prise-dépose',
-                            is_ref: '0',
-                            selected_by_article: 1,
-                            id_article_prepa: insertId,
-                            id_prepa: this.preparation.id,
-                            id_article_livraison: null,
-                            id_article_collecte: null,
-                            id_collecte: null,
-                            id_livraison: null
-                        };
-                        return this.sqliteProvider.insert('`mouvement`', mouvement);
-                    }),
+                    flatMap((insertId) => (
+                        this.insertMouvement(
+                            selectedArticle as ArticlePrepaByRefArticle&ArticlePrepa,
+                            selectedQuantityValid,
+                            insertId
+                        )
+                    )),
                     flatMap(() => this.sqliteProvider.deleteById('article_prepa_by_ref_article', selectedArticle.id)),
                     flatMap(() => this.updateLists()),
 
@@ -404,7 +390,32 @@ export class PreparationArticlesPage {
                             : this.sqliteProvider.updateArticlePrepaQuantity(referenceArticle.id, referenceArticle.quantite - selectedQuantityValid)
                     })
                 )
-            : this.sqliteProvider.moveArticle((selectedArticle as ArticlePrepa).id)
+            : this.insertMouvement(selectedArticle as ArticlePrepaByRefArticle&ArticlePrepa, selectedQuantityValid)
+                .pipe(
+                    flatMap(() => this.sqliteProvider.moveArticle((selectedArticle as ArticlePrepa).id))
+                )
+    }
+
+    private insertMouvement(selectedArticle: ArticlePrepaByRefArticle&ArticlePrepa, quantity: number, insertId?: number): Observable<number> {
+        let mouvement: Mouvement = {
+            id: null,
+            reference: selectedArticle.reference,
+            quantity: quantity ? quantity : selectedArticle.quantite,
+            date_pickup: moment().format(),
+            location_from: selectedArticle.location ? selectedArticle.location : selectedArticle.emplacement,
+            date_drop: null,
+            location: null,
+            type: 'prise-dépose',
+            is_ref: selectedArticle.isSelectableByUser ? '0' : selectedArticle.is_ref,
+            selected_by_article: selectedArticle.isSelectableByUser ? 1 : 0,
+            id_article_prepa: insertId ? insertId : selectedArticle.id,
+            id_prepa: this.preparation.id,
+            id_article_livraison: null,
+            id_article_collecte: null,
+            id_collecte: null,
+            id_livraison: null
+        };
+        return this.sqliteProvider.insert('`mouvement`', mouvement);
     }
 
 }
