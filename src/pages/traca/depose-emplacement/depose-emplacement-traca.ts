@@ -109,8 +109,9 @@ export class DeposeEmplacementPageTraca {
         this.sqliteProvider.findAll('`emplacement`').subscribe(resp => {
             let emplacement = resp.find(element => element.label === barcode);
             if (emplacement) {
-                this.emplacement = emplacement;
-                this.changeDetectorRef.detectChanges();
+                this.barcodeScannerManager.wrapZebraUpdate(() => {
+                    this.emplacement = emplacement;
+                });
             } else {
                 this.toastService.showToast('Veuillez flasher ou sélectionner un emplacement connu.');
             }

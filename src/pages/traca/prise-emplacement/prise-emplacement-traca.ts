@@ -1,4 +1,4 @@
-import {Component, NgZone, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {App, IonicPage, NavController, NavParams} from 'ionic-angular';
 import {PriseArticlesPageTraca} from '@pages/traca/prise-articles/prise-articles-traca';
 import {MenuPage} from '@pages/menu/menu';
@@ -28,8 +28,6 @@ export class PriseEmplacementPageTraca {
     public db_locations: Array<Emplacement>;
     public db_locations_for_list: Array<Emplacement>;
     public db_articles: Array<Article>;
-
-    public zone : NgZone = new NgZone({enableLongStackTrace : false});
 
     private endIndex: number;
 
@@ -106,7 +104,7 @@ export class PriseEmplacementPageTraca {
     }
 
     testIfBarcodeEquals(barcode) {
-        this.zone.run(() => {
+        this.barcodeScannerManager.wrapZebraUpdate(() => {
             if (barcode.length > 0) {
                 this.emplacement = {
                     id: new Date().getUTCMilliseconds(),
