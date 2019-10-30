@@ -32,6 +32,8 @@ export class ConnectPage {
                        private changeDetector: ChangeDetectorRef,
                        private network: Network) {
         this.isLoaded = false;
+        (<any>window).plugins.intentShim.unregisterBroadcastReceiver();
+
     }
 
     public logForm(): void {
@@ -54,7 +56,7 @@ export class ConnectPage {
                                                             .subscribe(
                                                                 () => {
                                                                     this.isLoaded = false;
-                                                                    this.navCtrl.setRoot(MenuPage);
+                                                                    this.navCtrl.setRoot(MenuPage, {needReload : false});
                                                                 },
                                                                 () => {
                                                                     this.finishLoading();

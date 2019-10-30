@@ -8,8 +8,7 @@ import {ArticleInventaire} from '@app/entities/article-inventaire';
 import {ModalQuantityPage} from '../inventaire-menu/modal-quantity';
 import {Article} from '@app/entities/article';
 import {Subscription} from 'rxjs';
-import {filter, flatMap} from 'rxjs/operators';
-import {of} from 'rxjs/observable/of';
+import {filter} from 'rxjs/operators';
 import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
 
 
@@ -29,7 +28,7 @@ export class InventaireAnomaliePage {
     locations: Array<string>;
     location: string;
     dataApi: string = '/api/getAnomalies';
-    updateAnomaliesURL : string = '/api/treatAnomalies';
+    updateAnomaliesURL: string = '/api/treatAnomalies';
     isLoaded: boolean;
 
     private zebraScannerSubscription: Subscription;
@@ -73,64 +72,35 @@ export class InventaireAnomaliePage {
             (baseUrl) => {
                 if (baseUrl !== null) {
                     this.sqlLiteProvider.getApiKey().then((key) => {
-                        // envoi des anomalies traitées
-                        this.sqlLiteProvider.findByElement(`anomalie_inventaire`, 'treated', '1').subscribe((anomalies) => {
-                            let params = {
-                                anomalies: anomalies,
-                                apiKey: key
-                            };
-                            let urlAnomalies: string = baseUrl + this.updateAnomaliesURL;
-                            this.http.post<any>(urlAnomalies, params).subscribe(resp => {
-                                if (resp.success) {
-                                    // supprime les anomalies traitée de la base
-                                    this.sqlLiteProvider.deleteAnomalies(anomalies);
-                                    this.showToast(resp.data.status);
-                                } else {
-                                    this.isLoaded = true;
-                                    this.showToast('Une erreur est survenue lors de la mise à jour des anomalies.');
+                        this.sqlLiteProvider.findAll('`anomalie_inventaire`').subscribe(anomalies => {
+                            this.anomalies = anomalies;
+                            let locations = [];
+                            anomalies.forEach(anomaly => {
+                                if (locations.indexOf(anomaly.location) < 0 && anomaly.location) {
+                                    locations.push(anomaly.location);
                                 }
                             });
-                        });
-
-
-                        // mise à jour de la base locale des anomalies d'inventaire
-                        let url: string = baseUrl + this.dataApi;
-                        this.http.post<any>(url, {apiKey: key}).subscribe(resp => {
-                            if (resp.success) {
-                                this.sqlLiteProvider
-                                    .cleanTable('`anomalie_inventaire`')
-                                    .pipe(
-                                        flatMap(() => this.sqlLiteProvider.importAnomaliesInventaire(resp)),
-                                        flatMap((sqlAnomaliesInventaire) => (
-                                            (sqlAnomaliesInventaire !== false)
-                                                ? this.sqlLiteProvider.executeQuery(sqlAnomaliesInventaire)
-                                                : of(undefined)
-                                        ))
-                                    )
-                                    .subscribe(() => {
-                                        this.sqlLiteProvider.findAll('`anomalie_inventaire`').subscribe(anomalies => {
-                                            this.anomalies = anomalies;
-                                            let locations = [];
-                                            anomalies.forEach(anomaly => {
-                                                if (locations.indexOf(anomaly.location) < 0 && anomaly.location) {
-                                                    locations.push(anomaly.location);
-                                                }
-                                            });
-                                            this.locations = locations;
-
-                                            setTimeout(() => {
-                                                this.isLoaded = true;
-                                                this.content.resize();
-                                            }, 1000);
-                                        });
-                                    });
-                            } else {
-                                this.isLoaded = true;
-                                this.showToast('Une erreur est survenue lors de la mise à jour des anomalies d\'inventaire.');
-                            }
-                        }, error => {
-                            this.isLoaded = true;
-                            this.showToast('Une erreur réseau est survenue.');
+                            // envoi des anomalies traitées
+                            this.sqlLiteProvider.findByElement(`anomalie_inventaire`, 'treated', '1').subscribe((anomalies) => {
+                                let params = {
+                                    anomalies: anomalies,
+                                    apiKey: key
+                                };
+                                let urlAnomalies: string = baseUrl + this.updateAnomaliesURL;
+                                this.http.post<any>(urlAnomalies, params).subscribe(resp => {
+                                    if (resp.success) {
+                                        // supprime les anomalies traitée de la base
+                                        this.sqlLiteProvider.deleteAnomalies(anomalies);
+                                        this.showToast(resp.data.status);
+                                    } else {
+                                        this.isLoaded = true;
+                                        this.showToast('Une erreur est survenue lors de la mise à jour des anomalies.');
+                                    }
+                                    this.locations = locations;
+                                    this.isLoaded = true;
+                                    this.content.resize();
+                                });
+                            });
                         });
                     });
                 } else {
@@ -171,6 +141,7 @@ export class InventaireAnomaliePage {
             this.showToast('Ce code-barre ne correspond à aucun emplacement.');
         }
     }
+
     //TODO CG plutôt sur anomaliesByLocation ??
     public checkBarcodeIsRef(barcode: string): void {
         if (this.anomalies.some(anomaly => (anomaly.barcode === barcode))) {

@@ -37,7 +37,7 @@ export class TracaMenuPage {
         this.sqlProvider.priseAreUnfinished().then((value) => {
             this.unfinishedMvts = value;
             this.type = this.network.type;
-            if(this.type !== "unknown" && this.type !== "none" && this.type !== undefined){
+            if (this.type !== "unknown" && this.type !== "none" && this.type !== undefined) {
                 this.synchronise();
             }
         });
@@ -69,10 +69,12 @@ export class TracaMenuPage {
                         let toInsert = {
                             mouvements: data,
                             apiKey: result
-                    };
+                        };
                         this.http.post<any>(url, toInsert).subscribe((resp) => {
                             if (resp.success) {
-                                this.toastService.showToast(resp.data.status);
+                                this.sqlProvider.cleanTable('`mouvement_traca`').subscribe(() => {
+                                    this.toastService.showToast(resp.data.status);
+                                });
                             }
                         });
                     });
