@@ -5,4 +5,5 @@ export interface Preparation {
     emplacement: string;
     date_end: string;
     started: number;
+    type: string;
 }

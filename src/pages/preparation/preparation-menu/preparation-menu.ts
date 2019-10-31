@@ -54,7 +54,7 @@ export class PreparationMenuPage {
     synchronise(fromStart: boolean) {
         this.hasLoaded = false;
         this.sqlLiteProvider.findAll('`preparation`').subscribe((preparations) => {
-            this.preparations = preparations.filter(p => p.date_end === null);
+            this.preparations = preparations.filter(p => p.date_end === null).sort(({type : type1}, {type : type2}) => (type1 > type2) ? 1 : ((type2 > type1) ? -1 : 0));
             this.hasLoaded = true;
             this.content.resize();
         })
