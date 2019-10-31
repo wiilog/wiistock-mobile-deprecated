@@ -8,6 +8,9 @@ import {LivraisonMenuPage} from "../livraison-menu/livraison-menu";
 import {HttpClient} from "@angular/common/http";
 import {LivraisonArticlesPage} from "../livraison-articles/livraison-articles";
 import {Livraison} from "../../../app/entities/livraison";
+import {ToastService} from "@app/services/toast.service";
+import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
+import {Subscription} from "rxjs";
 
 /**
  * Generated class for the LivraisonEmplacementPage page.
@@ -30,36 +33,41 @@ export class LivraisonEmplacementPage {
     apiFinish: string = '/api/finishLivraison';
 
     private validateIsLoading: boolean;
+    private validateLivraison: () => void;
+    private zebraScannerSubscription: Subscription;
 
     constructor(public navCtrl: NavController,
                 public navParams: NavParams,
                 public sqliteProvider: SqliteProvider,
-                public toastController: ToastController,
-                public barcodeScanner: BarcodeScanner,
+                public toastService: ToastService,
+                public barcodeScannerManager: BarcodeScannerManagerService,
+
                 public http: HttpClient,
                 public modal: ModalController) {
         this.validateIsLoading = false;
+    }
+
+    public ionViewWillEnter(): void {
+        this.validateLivraison = this.navParams.get('validateLivraison');
+        this.livraison = this.navParams.get('livraison');
+
+        this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
+            this.testLocation(barcode);
+        });
         this.sqliteProvider.findAll('emplacement').subscribe((value) => {
             this.db_locations = value;
-            if (typeof (navParams.get('livraison')) !== undefined) {
-                this.livraison = navParams.get('livraison');
-            }
-            if (typeof (navParams.get('emplacement')) !== undefined) {
-                this.emplacement = navParams.get('emplacement');
-            }
         });
-        let instance = this;
-        (<any>window).plugins.intentShim.registerBroadcastReceiver({
-                filterActions: [
-                    'io.ionic.starter.ACTION'
-                ],
-                filterCategories: [
-                    'android.intent.category.DEFAULT'
-                ]
-            },
-            function (intent) {
-                instance.testIfBarcodeEquals(intent.extras['com.symbol.datawedge.data_string']);
-            });
+    }
+
+    public ionViewWillLeave(): void {
+        if (this.zebraScannerSubscription) {
+            this.zebraScannerSubscription.unsubscribe();
+            this.zebraScannerSubscription = undefined;
+        }
+    }
+
+    public ionViewCanLeave(): boolean {
+        return this.barcodeScannerManager.canGoBack;
     }
 
     goHome() {
@@ -67,70 +75,46 @@ export class LivraisonEmplacementPage {
     }
 
     searchEmplacementModal() {
-        const myModal = this.modal.create('LivraisonModalSearchEmplacementPage', {
-            livraison: this.livraison
-        });
-        myModal.present();
-    }
-
-    ionViewDidEnter() {
-        this.setBackButtonAction();
-    }
-
-    setBackButtonAction() {
-        this.navBar.backButtonClick = () => {
-            //Write here wherever you wanna do
-            this.navCtrl.push(LivraisonArticlesPage, {
-                livraison: this.livraison
+        if (!this.validateIsLoading) {
+            const myModal = this.modal.create('LivraisonModalSearchEmplacementPage', {
+                livraison: this.livraison,
+                selectLocation(location) {
+                    this.testLocation(location, false);
+                }
             });
+            myModal.present();
         }
     }
 
     scan() {
-        this.barcodeScanner.scan().then(res => {
-            this.testIfBarcodeEquals(res.text);
+        this.barcodeScannerManager.scan().subscribe((barcode) => {
+            this.testLocation(barcode);
         });
     }
 
-    testIfBarcodeEquals(text) {
-        let instance = this;
-        this.sqliteProvider.findAll('`emplacement`').subscribe(resp => {
-            let found = false;
-            let wrongLocation = false;
-            resp.forEach(function (emplacement) {
-                if (emplacement.label === text) {
-                    if (instance.livraison.emplacement === text) {
-                        found = true;
-                        instance.emplacement = emplacement;
-                        instance.navCtrl.push(LivraisonEmplacementPage, {
-                            livraison: instance.livraison,
-                            emplacement: emplacement
-                        });
-                    } else {
-                        wrongLocation = true;
-                        instance.showToast("Vous n'avez pas scanné le bon emplacement (destination demandée : " + instance.livraison.emplacement + ")")
-                    }
-                }
-            });
-            if (!found && !wrongLocation) {
-                this.showToast('Veuillez scanner ou sélectionner un emplacement connu.');
+    testLocation(locationToTest, fromBarcode: boolean = true) {
+        const location = fromBarcode
+            ? this.db_locations.find(({label}) => (label === locationToTest))
+            : locationToTest;
+        const locationLabel = fromBarcode
+            ? locationToTest
+            : location.text;
+        if (location) {
+            if (this.livraison.emplacement === locationLabel) {
+                this.emplacement = location;
             }
-        });
-    }
-
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
+            else {
+                this.toastService.showToast("Vous n'avez pas scanné le bon emplacement (destination demandée : " + this.livraison.emplacement + ")")
+            }
+        }
+        else {
+            this.toastService.showToast('Veuillez scanner ou sélectionner un emplacement connu.');
+        }
     }
 
     validate() {
         if (!this.validateIsLoading) {
-            if (this.emplacement.label !== '') {
+            if (this.emplacement && this.emplacement.label !== '') {
                 this.validateIsLoading = true;
                 let instance = this;
                 let promise = new Promise<any>((resolve) => {
@@ -161,19 +145,22 @@ export class LivraisonEmplacementPage {
                                                     if (resp.success) {
                                                         this.sqliteProvider.deleteLivraisons(params.livraisons).then(() => {
                                                             this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
-                                                                this.navCtrl.setRoot(LivraisonMenuPage);
+                                                                this.navCtrl.pop().then(() => {
+                                                                    this.validateLivraison();
+                                                                })
                                                             });
                                                         });
                                                     }
                                                     else {
-                                                        this.showToast(resp.msg);
+                                                        this.toastService.showToast(resp.msg);
                                                     }
                                                     this.validateIsLoading = false;
                                                 },
-                                                error => {
+                                                () => {
                                                     this.validateIsLoading = false;
-                                                    this.navCtrl.setRoot(LivraisonMenuPage);
-                                                    console.log(error);
+                                                    this.navCtrl.pop().then(() => {
+                                                        this.validateLivraison();
+                                                    })
                                                 }
                                             );
                                         });
@@ -188,7 +175,7 @@ export class LivraisonEmplacementPage {
                 })
             }
             else {
-                this.showToast('Veuillez sélectionner ou scanner un emplacement.');
+                this.toastService.showToast('Veuillez sélectionner ou scanner un emplacement.');
             }
         }
     }

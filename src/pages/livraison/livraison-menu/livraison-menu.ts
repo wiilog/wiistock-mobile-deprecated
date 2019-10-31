@@ -21,11 +21,11 @@ export class LivraisonMenuPage {
                        private sqliteProvider: SqliteProvider) {
     }
 
-    goHome() {
+    public goHome(): void {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    ionViewDidEnter() {
+    public ionViewDidEnter(): void {
         this.synchronise(true);
     }
 
@@ -38,7 +38,7 @@ export class LivraisonMenuPage {
         })
     }
 
-    goToArticles(livraison) {
+    public goToLivraison(livraison): void {
         this.navCtrl.push(LivraisonArticlesPage, {livraison});
     }
 

@@ -5,8 +5,8 @@
 </ion-header>
 
 <ion-content padding>
-
-    <ion-row class="row-menu-stats" no-border no-lines>
+    <ion-row class="row-menu-stats" no-border no-lines
+             *ngIf="article">
         <ion-col col-12 class="col-menu-stats">
             <p>Article : </p>
             <p class="number">{{article.reference}}</p>
@@ -20,7 +20,11 @@
         <ion-col col-12 class="col-menu-stats">
             <ion-item no-border no-lines>
                 <ion-label>Quantité souhaitée</ion-label>
-                <ion-input name="quantite" type="number" value="{{quantite}}" [(ngModel)]="quantite" max="{{quantite}}"></ion-input>
+                <ion-input name="quantite"
+                           type="number"
+                           value="{{quantite}}"
+                           [(ngModel)]="quantite"
+                           max="{{quantite}}"></ion-input>
             </ion-item>
             <br>
         </ion-col>
@@ -28,6 +32,4 @@
             <ion-icon class="big-icon" name="checkmark-circle" (click)="addArticle()"></ion-icon>
         </ion-col>
     </ion-row>
-
-
 </ion-content>
