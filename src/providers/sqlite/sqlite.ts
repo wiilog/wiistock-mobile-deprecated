@@ -173,8 +173,7 @@ export class SqliteProvider {
             this.storageService.setApiKey(data['apiKey']);
             this.storageService.setInventoryManagerRight(data['isInventoryManager']);
             ret$ = from(this.storageService.setPreps());
-        }
-        else {
+        } else {
             ret$ = of(undefined);
         }
 
@@ -194,8 +193,7 @@ export class SqliteProvider {
             ));
             let articleValuesStr = articleValues.join(', ');
             return 'INSERT INTO `article` (`id`, `reference`, `quantite`, `barcode`) VALUES ' + articleValuesStr + ';';
-        }
-        else {
+        } else {
             return undefined;
         }
     }
@@ -208,8 +206,7 @@ export class SqliteProvider {
             ));
             let emplacementValuesStr = emplacementValues.join(', ');
             return 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';';
-        }
-        else {
+        } else {
             return undefined;
         }
     }
@@ -239,8 +236,7 @@ export class SqliteProvider {
                             ret$.next((prepasValues.length > 0)
                                 ? sqlPrepas
                                 : undefined);
-                        }
-                        else {
+                        } else {
                             this.deletePreparations(preparations.filter(p => prepas.find(prep => prep.id === p.id) === undefined)).then(() => {
                                 ret$.next((prepasValues.length > 0)
                                     ? sqlPrepas
@@ -272,7 +268,7 @@ export class SqliteProvider {
                     let comment = manut.commentaire === null ? '' : this.escapeQuotes(manut.commentaire);
                     let date = manut.date_attendue ? manut.date_attendue.date : null;
                     manutValues.push("(" + manut.id + ", '" + date + "', '" + manut.demandeur + "', '" + comment + "', '" + this.escapeQuotes(manut.source) + "', '" + this.escapeQuotes(manut.destination) + "')");
-        }
+                }
                 if (manutentions.indexOf(manut) === manutentions.length - 1) {
                     this.findAll('`manutention`').subscribe((manutentionsDB) => {
                         let manutValuesStr = manutValues.join(', ');
@@ -314,15 +310,14 @@ export class SqliteProvider {
                         "'" + article.location + "', " +
                         "'" + article.type_quantite + "', " +
                         "'" + article.barCode + "'" +
-                    ")");
+                        ")");
                 }
                 if (articlesPrepa.indexOf(article) === articlesPrepa.length - 1) {
                     if (articlesPrepaValues.length > 0) {
                         let articlesPrepaValuesStr = articlesPrepaValues.join(', ');
                         let sqlArticlesPrepa = 'INSERT INTO `article_prepa` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_prepa`, `has_moved`, `emplacement`, `type_quantite`, `barcode`) VALUES ' + articlesPrepaValuesStr + ';';
                         ret$.next(sqlArticlesPrepa);
-                    }
-                    else {
+                    } else {
                         ret$.next(undefined);
                     }
                 }
@@ -358,8 +353,7 @@ export class SqliteProvider {
                         if (livraisonsDB.length === 0) {
                             ret$.next((livraisonsValues.length > 0) ? sqlLivraisons : undefined);
 
-                        }
-                        else {
+                        } else {
                             this.deleteLivraisons(livraisonsDB.filter(l => livraisons.find(livr => livr.id === l.id) === undefined)).then(() => {
                                 ret$.next((livraisonsValues.length > 0) ? sqlLivraisons : undefined);
                             });
@@ -399,8 +393,7 @@ export class SqliteProvider {
                         let articlesLivraisonValuesStr = articlesLivraisonValues.join(', ');
                         let sqlArticlesLivraison = 'INSERT INTO `article_livraison` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_livraison`, `has_moved`, `emplacement`, `barcode`) VALUES ' + articlesLivraisonValuesStr + ';';
                         ret$.next(sqlArticlesLivraison);
-                    }
-                    else {
+                    } else {
                         ret$.next(undefined);
                     }
                 }
@@ -487,7 +480,9 @@ export class SqliteProvider {
 
         let articlesInventaireValues = [];
         if (articlesInventaire.length === 0) {
-            importExecuted.next(false);
+            this.cleanTable('`article_inventaire`').subscribe(_ => {
+                importExecuted.next(false);
+            });
         }
 
         for (let article of articlesInventaire) {
@@ -530,26 +525,29 @@ export class SqliteProvider {
         return ret;
     }
 
-    public importAnomaliesInventaire(data): string {
-
+    public importAnomaliesInventaire(data): Observable<string> {
+        let ret$: ReplaySubject<string> = new ReplaySubject(1);
         let anomalies = data.anomalies;
-
+        console.log(anomalies);
         let anomaliesValues = [];
         if (anomalies.length === 0) {
-            return undefined;
-        }
-        else {
+            this.cleanTable('`anomalie_inventaire`').subscribe(_ => {
+                ret$.next(undefined);
+            });
+        } else {
             for (let anomaly of anomalies) {
                 anomaliesValues.push("(" + anomaly.id + ", '" + anomaly.reference + "', '" + anomaly.is_ref + "', '" + anomaly.quantity + "', '" + (anomaly.location ? anomaly.location : 'N/A') + "', '" + anomaly.barCode + "')");
             }
             let anomaliesValuesStr = anomaliesValues.join(', ');
             let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `location`) VALUES ' + anomaliesValuesStr + ';';
             if (anomaliesValues.length > 0) {
-                return sqlAnomaliesInventaire;
+                ret$.next(sqlAnomaliesInventaire);
+                ;
             } else {
-                return undefined;
+                ret$.next(undefined);
             }
         }
+        return ret$;
     }
 
     private executeAllImports(imports: Array<string>): Observable<any> {
@@ -580,21 +578,10 @@ export class SqliteProvider {
             flatMap((imports) => this.importArticlesCollecte(data).pipe(createMapSqlImportObs(imports))),
             flatMap((imports) => (
                 from(this.getInventoryManagerRight()).pipe(
-                    map((res) => {
-                        console.log(res);
-                        if (res) {
-                            console.log(this.importAnomaliesInventaire(data));
-                            console.log(imports);
-                            console.log(concatSqlImports(imports, this.importAnomaliesInventaire(data)));
-                            console.log('tgtre');
-                            return concatSqlImports(imports, this.importAnomaliesInventaire(data))
-                        } else {
-                            console.log(imports);
-                            return imports;
-                        }
-                    })
-                )
-            )),
+                    flatMap((res) => (res
+                        ? this.importAnomaliesInventaire(data).pipe(createMapSqlImportObs(imports))
+                        : of(imports))),
+                ))),
             map((imports: Array<string>) => imports.filter((importSql) => importSql)),
             flatMap((imports) => this.executeAllImports(imports))
         );
@@ -753,9 +740,9 @@ export class SqliteProvider {
         const valuesMap = objectKeys
             .map((key) => (((typeof object[key] === 'number') || object[key] === null)
                 ? `${object[key]}`
-                    : (object[key] === undefined)
-                        ? 'null'
-                        : `'${object[key]}'`))
+                : (object[key] === undefined)
+                    ? 'null'
+                    : `'${object[key]}'`))
             .join(', ');
         let query = "INSERT INTO " + name +
             ' (' + objectKeys.join(', ') + ') ' +

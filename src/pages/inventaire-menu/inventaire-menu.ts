@@ -118,6 +118,7 @@ export class InventaireMenuPage {
         this.isLoaded = false;
         this.sqlLiteProvider.findAll('`article_inventaire`').subscribe(articles => {
             this.articles = articles;
+            console.log(articles);
             let locations = [];
             articles.forEach(article => {
                 if (locations.indexOf(article.location) < 0 && article.location) {
