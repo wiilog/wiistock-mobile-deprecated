@@ -64,7 +64,7 @@ export class MenuPage {
         ];
     }
 
-    private ionViewWillEnter(): void {
+    public ionViewWillEnter(): void {
         this.backButtonSubscription = this.platform.backButton
             .pipe(filter(() => (MenuPage.SUB_MENUS.some(p => p === this.navCtrl.getActive().name))))
             .subscribe(() => {
@@ -93,7 +93,7 @@ export class MenuPage {
                 this.nbPrepT = preps;
                 this.sqliteProvider.count('`article_inventaire`', []).subscribe((nbArticlesInventaire: number) => {
                     this.nbArtInvent = nbArticlesInventaire;
-                    this.sqliteProvider.getOperateur().then((username) => {
+                    this.sqliteProvider.getOperateur().then(() => {
                         this.content.resize();
                     })
                 });
@@ -140,5 +140,4 @@ export class MenuPage {
             this.refreshCounters();
         }
     }
-
 }

@@ -1,16 +1,10 @@
 import {Component, ViewChild} from '@angular/core';
-import {Content, IonicPage, Navbar, NavController, Platform} from 'ionic-angular';
+import {Content, IonicPage, Navbar, NavController} from 'ionic-angular';
 import {Manutention} from '@app/entities/manutention';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {MenuPage} from '@pages/menu/menu';
 import {ManutentionValidatePage} from '@pages/manutention/manutention-validate/manutention-validate';
 
-/**
- * Generated class for the ManutentionMenuPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
 
 @IonicPage()
 @Component({
@@ -25,7 +19,7 @@ export class ManutentionMenuPage {
     user: string;
 
     public constructor(private navCtrl: NavController,
-                       private sqliteProvider: SqliteProvider, private platform : Platform) {
+                       private sqliteProvider: SqliteProvider) {
     }
 
     goHome() {

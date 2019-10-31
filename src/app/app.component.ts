@@ -1,13 +1,11 @@
 import {Component, ViewChild, Injectable} from '@angular/core';
-import {Platform, MenuController, Nav, Events, ToastController} from 'ionic-angular';
+import {Platform, MenuController, Nav, Events} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {ConnectPage} from '@pages/connect/connect';
 import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
 import {NetworkProvider} from '@providers/network/network';
 import {Network} from '@ionic-native/network';
-import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {HttpClient} from '@angular/common/http';
 import {TracaMenuPage} from '@pages/traca/traca-menu/traca-menu';
 import {PreparationMenuPage} from '@pages/preparation/preparation-menu/preparation-menu';
 import {LivraisonMenuPage} from '@pages/livraison/livraison-menu/livraison-menu';
@@ -33,10 +31,7 @@ export class AppComponent {
                        public splashScreen: SplashScreen,
                        public networkProvider: NetworkProvider,
                        public events: Events,
-                       public http: HttpClient,
-                       public network: Network,
-                       public sqlProvider: SqliteProvider,
-                       public toastController: ToastController) {
+                       public network: Network) {
         this.initializeApp();
 
         // set our app's pages
@@ -75,22 +70,18 @@ export class AppComponent {
         // close the menu when clicking a link from the menu
         this.menu.close();
         // navigate to the new page if it is not the current page
-        this.nav.setRoot(page.component);
+
+        if (this.nav.getActive().name === this.homePage.name) {
+            this.nav.push(page.component);
+        }
+        else {
+            this.nav.setRoot(this.homePage).then(() => {
+                this.nav.push(page.component);
+            })
+        }
     }
 
     public goHome() {
         this.nav.setRoot(this.homePage);
     }
-
-    public async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
-    }
-
-
 }

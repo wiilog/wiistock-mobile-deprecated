@@ -1,18 +1,8 @@
 import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
-import {
-    Content,
-    IonicPage,
-    ModalController,
-    Navbar,
-    NavController,
-    NavParams,
-    Platform,
-    ToastController
-} from 'ionic-angular';
+import {Content,IonicPage,ModalController,Navbar,NavParams,ToastController} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
 import {Anomalie} from '@app/entities/anomalie';
-import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {ArticleInventaire} from '@app/entities/article-inventaire';
 import {ModalQuantityPage} from '../inventaire-menu/modal-quantity';
 import {Article} from '@app/entities/article';

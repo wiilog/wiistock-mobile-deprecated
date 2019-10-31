@@ -1,18 +1,10 @@
 import {Component, ViewChild} from '@angular/core';
-import {Content, IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
-import {MenuPage} from "../../menu/menu";
-import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import {HttpClient} from "@angular/common/http";
-import {LivraisonArticlesPage} from "../livraison-articles/livraison-articles";
-import {Livraison} from "../../../app/entities/livraison";
-import {Network} from "@ionic-native/network";
+import {Content, IonicPage, Navbar, NavController} from 'ionic-angular';
+import {MenuPage} from '@pages/menu/menu';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {LivraisonArticlesPage} from '@pages/livraison/livraison-articles/livraison-articles';
+import {Livraison} from '@app/entities/livraison';
 
-/**
- * Generated class for the LivraisonMenuPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
 
 @IonicPage()
 @Component({
@@ -47,7 +39,7 @@ export class LivraisonMenuPage {
     }
 
     goToArticles(livraison) {
-        this.navCtrl.push(LivraisonArticlesPage, {livraison: livraison});
+        this.navCtrl.push(LivraisonArticlesPage, {livraison});
     }
 
 }
