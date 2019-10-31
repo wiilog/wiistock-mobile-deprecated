@@ -7,7 +7,6 @@ import {ConnectPage} from '@pages/connect/connect';
 import {MenuPage} from '@pages/menu/menu';
 import {ParamsPage} from '@pages/params/params'
 import {DeposePage} from '@pages/stockage/depose/depose';
-import {DeposePageTraca} from '@pages/traca/depose/depose-traca'
 import {IonicStorageModule} from '@ionic/storage';
 import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
@@ -78,7 +77,6 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
         DeposeArticlesPageTraca,
         ManutentionValidatePage,
         DeposePage,
-        DeposePageTraca,
         InventaireMenuPage,
         ModalQuantityPage,
         InventaireAnomaliePage,
@@ -128,7 +126,6 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
         DeposeEmplacementPageTraca,
         DeposeArticlesPageTraca,
         DeposePage,
-        DeposePageTraca,
         InventaireMenuPage,
         ModalQuantityPage,
         InventaireAnomaliePage,

@@ -65,13 +65,13 @@ export class SqliteProvider {
                 db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255))', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []),
                 db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []),
-                db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER, `destination` INTEGER)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER, `destination` INTEGER, `type` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `type_quantite` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa_by_ref_article` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `reference` TEXT, `label` TEXT, `location` TEXT, `quantity` INTEGER, `reference_article` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `collecte` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_livraison` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_livraison` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)', []),
-                db.executeSql('CREATE TABLE IF NOT EXISTS `article_inventaire` (`id` INTEGER PRIMARY KEY, `id_mission` INTEGER, `reference` TEXT, `is_ref` TEXT, `location` TEXT, `code_barre` TEXT)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `article_inventaire` (`id` INTEGER PRIMARY KEY, `id_mission` INTEGER, `reference` TEXT, `is_ref` TEXT, `location` TEXT, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_collecte` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_collecte` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `saisie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_mission` INTEGER, `date` TEXT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `anomalie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT, `comment` TEXT, `treated` TEXT, `barcode` TEXT)', []),
@@ -173,8 +173,7 @@ export class SqliteProvider {
             this.storageService.setApiKey(data['apiKey']);
             this.storageService.setInventoryManagerRight(data['isInventoryManager']);
             ret$ = from(this.storageService.setPreps());
-        }
-        else {
+        } else {
             ret$ = of(undefined);
         }
 
@@ -194,8 +193,7 @@ export class SqliteProvider {
             ));
             let articleValuesStr = articleValues.join(', ');
             return 'INSERT INTO `article` (`id`, `reference`, `quantite`, `barcode`) VALUES ' + articleValuesStr + ';';
-        }
-        else {
+        } else {
             return undefined;
         }
     }
@@ -208,8 +206,7 @@ export class SqliteProvider {
             ));
             let emplacementValuesStr = emplacementValues.join(', ');
             return 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';';
-        }
-        else {
+        } else {
             return undefined;
         }
     }
@@ -227,20 +224,20 @@ export class SqliteProvider {
             });
         }
         for (let prepa of prepas) {
+            console.log(prepa);
             this.findOneById('preparation', prepa.id).subscribe((prepaInserted) => {
                 if (prepaInserted === null) {
-                    prepasValues.push(`(${prepa.id}, '${prepa.number}', NULL, NULL, 0, '${prepa.destination}')`);
+                    prepasValues.push(`(${prepa.id}, '${prepa.number}', NULL, NULL, 0, '${prepa.destination}', '${prepa.type}')`);
                 }
                 if (prepas.indexOf(prepa) === prepas.length - 1) {
                     this.findAll('`preparation`').subscribe((preparations) => {
                         let prepasValuesStr = prepasValues.join(', ');
-                        let sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`, `destination`) VALUES ' + prepasValuesStr + ';';
+                        let sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`, `destination`, `type`) VALUES ' + prepasValuesStr + ';';
                         if (preparations.length === 0) {
                             ret$.next((prepasValues.length > 0)
                                 ? sqlPrepas
                                 : undefined);
-                        }
-                        else {
+                        } else {
                             this.deletePreparations(preparations.filter(p => prepas.find(prep => prep.id === p.id) === undefined)).then(() => {
                                 ret$.next((prepasValues.length > 0)
                                     ? sqlPrepas
@@ -270,7 +267,8 @@ export class SqliteProvider {
             this.findOneById('manutention', manut.id).subscribe((manutInserted) => {
                 if (manutInserted === null) {
                     let comment = manut.commentaire === null ? '' : this.escapeQuotes(manut.commentaire);
-                    manutValues.push("(" + manut.id + ", '" + manut.date_attendue.date + "', '" + manut.demandeur + "', '" + comment + "', '" + this.escapeQuotes(manut.source) + "', '" + this.escapeQuotes(manut.destination) + "')");
+                    let date = manut.date_attendue ? manut.date_attendue.date : null;
+                    manutValues.push("(" + manut.id + ", '" + date + "', '" + manut.demandeur + "', '" + comment + "', '" + this.escapeQuotes(manut.source) + "', '" + this.escapeQuotes(manut.destination) + "')");
                 }
                 if (manutentions.indexOf(manut) === manutentions.length - 1) {
                     this.findAll('`manutention`').subscribe((manutentionsDB) => {
@@ -313,15 +311,14 @@ export class SqliteProvider {
                         "'" + article.location + "', " +
                         "'" + article.type_quantite + "', " +
                         "'" + article.barCode + "'" +
-                    ")");
+                        ")");
                 }
                 if (articlesPrepa.indexOf(article) === articlesPrepa.length - 1) {
                     if (articlesPrepaValues.length > 0) {
                         let articlesPrepaValuesStr = articlesPrepaValues.join(', ');
                         let sqlArticlesPrepa = 'INSERT INTO `article_prepa` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_prepa`, `has_moved`, `emplacement`, `type_quantite`, `barcode`) VALUES ' + articlesPrepaValuesStr + ';';
                         ret$.next(sqlArticlesPrepa);
-                    }
-                    else {
+                    } else {
                         ret$.next(undefined);
                     }
                 }
@@ -357,8 +354,7 @@ export class SqliteProvider {
                         if (livraisonsDB.length === 0) {
                             ret$.next((livraisonsValues.length > 0) ? sqlLivraisons : undefined);
 
-                        }
-                        else {
+                        } else {
                             this.deleteLivraisons(livraisonsDB.filter(l => livraisons.find(livr => livr.id === l.id) === undefined)).then(() => {
                                 ret$.next((livraisonsValues.length > 0) ? sqlLivraisons : undefined);
                             });
@@ -398,8 +394,7 @@ export class SqliteProvider {
                         let articlesLivraisonValuesStr = articlesLivraisonValues.join(', ');
                         let sqlArticlesLivraison = 'INSERT INTO `article_livraison` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_livraison`, `has_moved`, `emplacement`, `barcode`) VALUES ' + articlesLivraisonValuesStr + ';';
                         ret$.next(sqlArticlesLivraison);
-                    }
-                    else {
+                    } else {
                         ret$.next(undefined);
                     }
                 }
@@ -486,7 +481,9 @@ export class SqliteProvider {
 
         let articlesInventaireValues = [];
         if (articlesInventaire.length === 0) {
-            importExecuted.next(false);
+            this.cleanTable('`article_inventaire`').subscribe(_ => {
+                importExecuted.next(false);
+            });
         }
 
         for (let article of articlesInventaire) {
@@ -494,7 +491,7 @@ export class SqliteProvider {
 
             if (articlesInventaire.indexOf(article) === articlesInventaire.length - 1) {
                 let articlesInventaireValuesStr = articlesInventaireValues.join(', ');
-                let sqlArticlesInventaire = 'INSERT INTO `article_inventaire` (`id`, `id_mission`, `reference`, `is_ref`, `location`, `code_barre`) VALUES ' + articlesInventaireValuesStr + ';';
+                let sqlArticlesInventaire = 'INSERT INTO `article_inventaire` (`id`, `id_mission`, `reference`, `is_ref`, `location`, `barcode`) VALUES ' + articlesInventaireValuesStr + ';';
                 importExecuted.next((articlesInventaireValues.length > 0)
                     ? sqlArticlesInventaire
                     : undefined);
@@ -529,26 +526,29 @@ export class SqliteProvider {
         return ret;
     }
 
-    public importAnomaliesInventaire(data): string {
-
+    public importAnomaliesInventaire(data): Observable<string> {
+        let ret$: ReplaySubject<string> = new ReplaySubject(1);
         let anomalies = data.anomalies;
-
+        console.log(anomalies);
         let anomaliesValues = [];
         if (anomalies.length === 0) {
-            return undefined;
-        }
-        else {
+            this.cleanTable('`anomalie_inventaire`').subscribe(_ => {
+                ret$.next(undefined);
+            });
+        } else {
             for (let anomaly of anomalies) {
-                anomaliesValues.push("(" + null + ", '" + anomaly.reference + "', '" + anomaly.is_ref + "', '" + anomaly.quantity + "', '" + (anomaly.location ? anomaly.location : 'N/A') + "', '" + anomaly.barCode + "')");
+                anomaliesValues.push("(" + anomaly.id + ", '" + anomaly.reference + "', '" + anomaly.is_ref + "', '" + anomaly.quantity + "', '" + (anomaly.location ? anomaly.location : 'N/A') + "', '" + anomaly.barCode + "')");
             }
             let anomaliesValuesStr = anomaliesValues.join(', ');
-            let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `location`) VALUES ' + anomaliesValuesStr + ';';
+            let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `location`, `barcode`) VALUES ' + anomaliesValuesStr + ';';
             if (anomaliesValues.length > 0) {
-                return sqlAnomaliesInventaire;
+                ret$.next(sqlAnomaliesInventaire);
+                ;
             } else {
-                return undefined;
+                ret$.next(undefined);
             }
         }
+        return ret$;
     }
 
     private executeAllImports(imports: Array<string>): Observable<any> {
@@ -579,21 +579,10 @@ export class SqliteProvider {
             flatMap((imports) => this.importArticlesCollecte(data).pipe(createMapSqlImportObs(imports))),
             flatMap((imports) => (
                 from(this.getInventoryManagerRight()).pipe(
-                    map((res) => {
-                        console.log(res);
-                        if (res) {
-                            console.log(this.importAnomaliesInventaire(data));
-                            console.log(imports);
-                            console.log(concatSqlImports(imports, this.importAnomaliesInventaire(data)));
-                            console.log('tgtre');
-                            return concatSqlImports(imports, this.importAnomaliesInventaire(data))
-                        } else {
-                            console.log(imports);
-                            return imports;
-                        }
-                    })
-                )
-            )),
+                    flatMap((res) => (res
+                        ? this.importAnomaliesInventaire(data).pipe(createMapSqlImportObs(imports))
+                        : of(imports))),
+                ))),
             map((imports: Array<string>) => imports.filter((importSql) => importSql)),
             flatMap((imports) => this.executeAllImports(imports))
         );
@@ -752,9 +741,9 @@ export class SqliteProvider {
         const valuesMap = objectKeys
             .map((key) => (((typeof object[key] === 'number') || object[key] === null)
                 ? `${object[key]}`
-                    : (object[key] === undefined)
-                        ? 'null'
-                        : `'${object[key]}'`))
+                : (object[key] === undefined)
+                    ? 'null'
+                    : `'${object[key]}'`))
             .join(', ');
         let query = "INSERT INTO " + name +
             ' (' + objectKeys.join(', ') + ') ' +
@@ -1121,6 +1110,5 @@ export class SqliteProvider {
             map(() => undefined)
         );
     }
-
 
 }

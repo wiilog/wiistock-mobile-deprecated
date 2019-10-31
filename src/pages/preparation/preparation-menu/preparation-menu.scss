@@ -1,6 +1,10 @@
 page-preparation-menu {
-  .flex-margin {
-    position: absolute;
-    right: var(--padding-start);
-  }
+    .flex-margin {
+        position: absolute;
+        right: var(--padding-start);
+    }
+
+    .title-tmp {
+        font-size: 16px;
+    }
 }

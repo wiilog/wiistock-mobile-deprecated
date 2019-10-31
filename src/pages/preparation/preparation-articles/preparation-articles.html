@@ -19,6 +19,7 @@
     <div class="page-title" *ngIf="preparation">
         <h4>Préparation {{preparation.numero}}</h4>
         <p>Emplacement de destination<br/>{{preparation.destination}}</p>
+        <p>Type de flux<br/>{{preparation.type}}</p>
     </div>
     <div *ngIf="articlesNT && articlesNT.length > 0">
         <div class="d-flex" >
