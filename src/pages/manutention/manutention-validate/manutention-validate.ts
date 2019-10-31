@@ -5,6 +5,8 @@ import {SqliteProvider} from "@providers/sqlite/sqlite";
 import {HttpClient} from "@angular/common/http";
 import {ManutentionMenuPage} from "@pages/manutention/manutention-menu/manutention-menu";
 import {MenuPage} from "@pages/menu/menu";
+import {Network} from "@ionic-native/network";
+import {ToastService} from "@app/services/toast.service";
 
 /**
  * Generated class for the ManutentionValidatePage page.
@@ -22,49 +24,50 @@ export class ManutentionValidatePage {
     @ViewChild(Content) content: Content;
     manutention: Manutention;
     validateManutApi = '/api/validateManut';
-    dataApi: string = '/api/getData';
-    commentaire : string;
-    hasLoaded : boolean;
-    user : string;
-    showCom : boolean = false;
+    dataApi: string = '/api/getManut';
+    commentaire: string;
+    hasLoaded: boolean;
+    user: string;
+    showCom: boolean = false;
 
-    constructor(public alertController : AlertController, public navCtrl: NavController, public navParams: NavParams, public sqLiteProvider: SqliteProvider, public client : HttpClient, public toastController : ToastController) {
-        if (navParams.get('manutention') !== undefined) {
-            this.manutention = navParams.get('manutention');
-        }
+    constructor(public alertController: AlertController,
+                public navCtrl: NavController,
+                public navParams: NavParams,
+                public sqLiteProvider: SqliteProvider,
+                public client: HttpClient,
+                public toastController: ToastController,
+                private toastService: ToastService,
+                private network: Network) {
     }
 
-    ionViewDidLoad() {
+    public ionViewWillEnter(): void {
+        if (this.navParams.get('manutention') !== undefined) {
+            this.manutention = this.navParams.get('manutention');
+        }
         this.synchronise(true);
     }
 
     validateManut() {
-        this.alertController.create({
-            title:'Commentez la validation',
-            inputs:[{
-                name:'commentaire',
-                placeholder: 'Commentaire',
-                type: 'text'
-            }],
-            buttons:[{
-                text: 'Valider',
-                handler: commentaire =>{
-                    this.commentaire = commentaire.commentaire;
-                    this.notifyApi();
-                },
-                cssClass : 'alertAlert'
-            }]
-        }).present();
-    }
-
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
+        if (this.network.type !== 'none') {
+            this.alertController.create({
+                title: 'Commentez la validation',
+                inputs: [{
+                    name: 'commentaire',
+                    placeholder: 'Commentaire',
+                    type: 'text'
+                }],
+                buttons: [{
+                    text: 'Valider',
+                    handler: commentaire => {
+                        this.commentaire = commentaire.commentaire;
+                        this.notifyApi();
+                    },
+                    cssClass: 'alertAlert'
+                }]
+            }).present();
+        } else {
+            this.toastService.showToast('Vous devez être connecté à internet pour valider la demande');
+        }
     }
 
     notifyApi() {
@@ -72,16 +75,17 @@ export class ManutentionValidatePage {
             this.sqLiteProvider.getApiKey().then((key) => {
                 let url: string = result + this.validateManutApi;
                 let params = {
-                    id : this.manutention.id,
-                    apiKey : key,
-                    commentaire : this.commentaire
+                    id: this.manutention.id,
+                    apiKey: key,
+                    commentaire: this.commentaire
                 };
-                console.log(this.commentaire);
-                this.client.post<any>(url, params).subscribe((response) =>{
+                this.client.post<any>(url, params).subscribe((response) => {
                     if (response.success) {
-                        this.navCtrl.setRoot(ManutentionMenuPage);
+                        this.sqLiteProvider.deleteById('`manutention`', this.manutention.id).subscribe(() => {
+                            this.navCtrl.setRoot(ManutentionMenuPage);
+                        })
                     } else {
-                        this.showToast(response.msg);
+                        this.toastService.showToast(response.msg);
                     }
                 });
             });
@@ -90,50 +94,21 @@ export class ManutentionValidatePage {
 
     synchronise(fromStart: boolean) {
         this.hasLoaded = false;
-        this.sqLiteProvider.getAPI_URL().subscribe(
-            (result) => {
-                if (result !== null) {
-                    let url: string = result + this.dataApi;
-                    this.sqLiteProvider.getApiKey().then((key) => {
-                        this.client.post<any>(url, {apiKey: key}).subscribe(resp => {
-                            if (resp.success) {
-                                this.sqLiteProvider.cleanDataBase(fromStart).subscribe(() => {
-                                    this.sqLiteProvider.importData(resp.data, true)
-                                        .then(() => {
-                                            this.sqLiteProvider.getOperateur().then((username) => {
-                                                this.user = username;
-                                                this.sqLiteProvider.findOne('`manutention`', this.manutention.id).subscribe(manutention => {
-                                                    this.manutention = manutention;
-                                                    setTimeout(() => {
-                                                        this.hasLoaded = true;
-                                                        this.content.resize();
-                                                    }, 1000);
-                                                });
-                                            });
-                                        });
-                                });
-                            } else {
-                                this.hasLoaded = true;
-                                this.showToast('Erreur');
-                            }
-                        }, error => {
-                            this.hasLoaded = true;
-                            this.showToast('Erreur réseau');
-                        });
-                    });
-                } else {
-                    this.showToast('Veuillez configurer votre URL dans les paramètres.')
-                }
-            },
-            err => console.log(err)
-        );
+        this.sqLiteProvider.findOneById('`manutention`', this.manutention.id).subscribe(manutention => {
+            this.manutention = manutention;
+            this.sqLiteProvider.getOperateur().then((userName) => {
+                this.user = userName;
+                this.hasLoaded = true;
+                this.content.resize();
+            });
+        })
     }
 
     goHome() {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    toDate(manutention : Manutention) {
+    toDate(manutention: Manutention) {
         return new Date(manutention.date_attendue);
     }
 

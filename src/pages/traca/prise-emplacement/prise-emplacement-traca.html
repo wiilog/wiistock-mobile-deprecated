@@ -23,14 +23,17 @@
                     <ion-item>
                         <ion-label *ngIf="!emplacement">sélectionner un emplacement</ion-label>
                         <ionic-selectable
+                                #locationComponent
                                 item-content
                                 [(ngModel)]="emplacement"
-                                [items]="db_locations"
+                                [items]="db_locations_for_list"
                                 itemValueField="id"
                                 itemTextField="label"
                                 [canSearch]="true"
+                                [hasInfiniteScroll]="true"
                                 (onSearch)="searchEmplacement($event)"
-                                (onChange)="emplacementChange($event)">
+                                (onChange)="emplacementChange($event)"
+                                (onInfiniteScroll)="getMoreLocations($event)">
                             <ng-template ionicSelectableSearchFailTemplate>
                             </ng-template>
                         </ionic-selectable>

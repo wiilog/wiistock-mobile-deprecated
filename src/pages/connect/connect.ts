@@ -1,10 +1,14 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
-import {NavController, NavParams, ToastController} from 'ionic-angular';
-import {UsersApiProvider} from "../../providers/users-api/users-api";
-import {MenuPage} from "../menu/menu";
-import {ParamsPage} from "../params/params"
-import {SqliteProvider} from "../../providers/sqlite/sqlite";
+import {IonicPage, NavController, NavParams} from 'ionic-angular';
+import {UsersApiProvider} from '@providers/users-api/users-api';
+import {MenuPage} from '@pages/menu/menu';
+import {ParamsPage} from '@pages/params/params'
+import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {ToastService} from '@app/services/toast.service';
+import {Network} from "@ionic-native/network";
 
+
+@IonicPage()
 @Component({
     selector: 'page-connect',
     templateUrl: 'connect.html',
@@ -23,57 +27,80 @@ export class ConnectPage {
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
                        public usersApiProvider: UsersApiProvider,
-                       private toastController: ToastController,
+                       private toastService: ToastService,
                        public sqliteProvider: SqliteProvider,
-                       private changeDetector: ChangeDetectorRef) {
+                       private changeDetector: ChangeDetectorRef,
+                       private network: Network) {
         this.isLoaded = false;
+        (<any>window).plugins.intentShim.unregisterBroadcastReceiver();
+
     }
 
     public logForm(): void {
-        this.sqliteProvider.getAPI_URL().subscribe((result) => {
-            this.isLoaded = true;
-            if (result !== null) {
-                let url: string = result + this.connectURL;
-                this.usersApiProvider.setProvider(this.form, url).subscribe(resp => {
-                    if (resp.success) {
-                        this.sqliteProvider.cleanDataBase().subscribe(() => {
-                            this.sqliteProvider.clearStorage().then(() => {
-                                this.sqliteProvider.setOperateur(this.form.login).then(() => {
-                                    this.sqliteProvider.importData(resp.data)
-                                        .then(() => {
-                                            this.isLoaded = false;
-                                            this.navCtrl.setRoot(MenuPage);
+        if (!this.isLoaded) {
+            if (this.network.type !== 'none') {
+                this.isLoaded = true;
+                this.sqliteProvider.getAPI_URL().subscribe((result) => {
+                    if (result !== null) {
+                        let url: string = result + this.connectURL;
+                        this.usersApiProvider.setProvider(this.form, url).subscribe(
+                            resp => {
+                                if (resp.success) {
+                                    this.sqliteProvider.setOperateur(this.form.login);
+                                    this.sqliteProvider.resetDataBase().subscribe(
+                                        () => {
+                                            this.sqliteProvider.clearStorage().then(() => {
+                                                this.sqliteProvider.setOperateur(this.form.login)
+                                                    .then(() => {
+                                                        this.sqliteProvider.importData(resp.data)
+                                                            .subscribe(
+                                                                () => {
+                                                                    this.isLoaded = false;
+                                                                    this.navCtrl.setRoot(MenuPage, {needReload : false});
+                                                                },
+                                                                () => {
+                                                                    this.finishLoading();
+                                                                }
+                                                            );
+                                                    })
+                                                    .catch(err => {
+                                                        this.finishLoading();
+                                                        console.log(err)
+                                                    });
+                                            });
+                                        },
+                                        () => {
+                                            this.finishLoading();
                                         });
-                                }).catch(err => console.log(err));
+                                } else {
+                                    this.finishLoading();
+                                    this.toastService.showToast('Identifiants incorrects.');
+                                }
+                            },
+                            () => {
+                                this.finishLoading();
+                                this.toastService.showToast('Un problème est survenu, veuillez vérifier vos identifiants ainsi que l\'URL saisie sans les paramètres.');
                             });
-                        });
                     } else {
-                        this.isLoaded = false;
-                        this.showToast('Identifiants incorrects.');
+                        this.finishLoading();
+                        this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.');
                     }
                 });
             } else {
-                this.isLoaded = false;
-                this.changeDetector.detectChanges();
-                this.showToast('Veuillez configurer votre URL dans les paramètres.');
+                this.toastService.showToast('Vous devez être connecté à internet pour vous authentifier');
             }
-        });
-    }
-
-    public async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
+        }
     }
 
     public goToParams(): void {
         if (!this.isLoaded) {
+            this.isLoaded = false;
             this.navCtrl.push(ParamsPage);
         }
     }
 
+    private finishLoading() {
+        this.isLoaded = false;
+        this.changeDetector.detectChanges();
+    }
 }

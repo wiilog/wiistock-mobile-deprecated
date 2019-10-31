@@ -1,13 +1,15 @@
-import {Component} from '@angular/core';
-import {App, IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
-import {PriseArticlesPageTraca} from "../prise-articles/prise-articles-traca";
-import {MenuPage} from "../../menu/menu";
-import {Emplacement} from "../../../app/entities/emplacement";
-import {Article} from "../../../app/entities/article";
-import {SqliteProvider} from "../../../providers/sqlite/sqlite";
+import {Component, ViewChild} from '@angular/core';
+import {App, IonicPage, NavController, NavParams} from 'ionic-angular';
+import {PriseArticlesPageTraca} from '@pages/traca/prise-articles/prise-articles-traca';
+import {MenuPage} from '@pages/menu/menu';
+import {Emplacement} from '@app/entities/emplacement';
+import {Article} from '@app/entities/article';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ChangeDetectorRef} from '@angular/core';
 import {IonicSelectableComponent} from 'ionic-selectable';
-import {BarcodeScannerManagerService} from "../../../app/services/barcode-scanner-manager.service";
+import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
+import {ToastService} from '@app/services/toast.service';
+
 
 @IonicPage()
 @Component({
@@ -16,27 +18,24 @@ import {BarcodeScannerManagerService} from "../../../app/services/barcode-scanne
 })
 export class PriseEmplacementPageTraca {
 
+    private static readonly INIT_END_INDEX: number = 20;
+
+    @ViewChild('locationComponent') locationComponent: IonicSelectableComponent;
     emplacement: Emplacement;
     // locationLabel = '';
     db_locations: Array<Emplacement>;
+    db_locations_for_list: Array<Emplacement>;
     db_articles: Array<Article>;
+    endIndex: number;
 
-    constructor(public navCtrl: NavController,
-                public navParams: NavParams,
-                public app: App,
-                public sqliteProvider: SqliteProvider,
-                public barcodeScannerManager: BarcodeScannerManagerService,
-                private changeDetectorRef: ChangeDetectorRef,
-                public toastController: ToastController) {
-        if (navParams.get('selectedEmplacement') !== undefined) {
-            this.emplacement = navParams.get('selectedEmplacement');
-        }
-        this.sqliteProvider.findAll('emplacement').subscribe((value) => {
-            this.db_locations = value;
-            this.sqliteProvider.findAll('article').subscribe((value) => {
-                this.db_articles = value;
-            })
-        });
+    public constructor(public navCtrl: NavController,
+                       public navParams: NavParams,
+                       public app: App,
+                       public sqliteProvider: SqliteProvider,
+                       public barcodeScannerManager: BarcodeScannerManagerService,
+                       private changeDetectorRef: ChangeDetectorRef,
+                       private toastService: ToastService) {
+        this.resetEndIndex();
         let instance = this;
         (<any>window).plugins.intentShim.registerBroadcastReceiver({
                 filterActions: [
@@ -51,7 +50,17 @@ export class PriseEmplacementPageTraca {
             });
     }
 
-    ionViewCanLeave() {
+    public ionViewWillEnter(): void {
+        if (this.navParams.get('selectedEmplacement') !== undefined) {
+            this.emplacement = this.navParams.get('selectedEmplacement');
+        }
+        this.sqliteProvider.findAll('emplacement').subscribe((value) => {
+            this.db_locations = value;
+            this.db_locations_for_list = value;
+        });
+    }
+
+    public ionViewCanLeave(): boolean {
         return this.barcodeScannerManager.canGoBack;
     }
 
@@ -63,14 +72,15 @@ export class PriseEmplacementPageTraca {
         this.emplacement = event.value;
     }
 
-    searchEmplacement(event: { component: IonicSelectableComponent, text: string }) {
-        let text = event.text.trim();
-        event.component.startSearch();
-        this.sqliteProvider.findByElement('emplacement', 'label', text).subscribe((items) => {
-            event.component.items = items;
-            event.component.endSearch();
-        });
-        event.component.endSearch();
+    searchEmplacement({text}: { component: IonicSelectableComponent, text: string }) {
+        this.locationComponent.showLoading();
+        this.changeDetectorRef.detectChanges();
+
+        this.resetEndIndex();
+        this.updateLocationForList(text, true);
+
+        this.locationComponent.hideLoading();
+        this.changeDetectorRef.detectChanges();
     }
 
     goHome() {
@@ -83,26 +93,55 @@ export class PriseEmplacementPageTraca {
 
     testIfBarcodeEquals(barcode) {
         if (barcode.length > 0) {
-            let emplacement: Emplacement;
-            emplacement = {
+            let emplacement: Emplacement = {
                 id: new Date().getUTCMilliseconds(),
                 label: barcode
             };
             this.navCtrl.push(PriseEmplacementPageTraca, {selectedEmplacement: emplacement});
             this.changeDetectorRef.detectChanges();
         } else {
-            this.showToast('Veuillez flasher ou sélectionner un emplacement.');
+            this.toastService.showToast('Veuillez flasher ou sélectionner un emplacement.');
         }
     }
 
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
+    getMoreLocations({text, component}: { component: IonicSelectableComponent, text: string }) {
+        this.locationComponent.showLoading();
+
+        if (this.endIndex >= this.db_locations.length) {
+            component.disableInfiniteScroll();
+        }
+        else {
+            if (this.endIndex + PriseEmplacementPageTraca.INIT_END_INDEX >= this.db_locations.length) {
+                this.endIndex = this.db_locations.length;
+            }
+            else {
+                this.endIndex += PriseEmplacementPageTraca.INIT_END_INDEX;
+            }
+
+            this.updateLocationForList(text);
+        }
+        component.endInfiniteScroll();
+        this.locationComponent.hideLoading();
+    }
+
+
+    private updateLocationForList(text?: string, isSearch: boolean = false): void {
+        const trimmedText = text.trim();
+
+        if (trimmedText) {
+            if (!isSearch || text.length > 2) {
+                this.db_locations_for_list = this.db_locations
+                    .filter(emplacement => emplacement.label.toLowerCase().includes(trimmedText.toLowerCase()))
+                    .slice(0, this.endIndex);
+            }
+        }
+        else {
+            this.db_locations_for_list = this.db_locations.slice(0, this.endIndex);
+        }
+    }
+
+    private resetEndIndex(): void {
+        this.endIndex = PriseEmplacementPageTraca.INIT_END_INDEX;
     }
 
 }

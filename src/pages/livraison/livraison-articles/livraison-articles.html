@@ -16,8 +16,9 @@
 </ion-header>
 
 <ion-content padding>
-    <div class="d-flex">
-        <h4>Livraison n°{{livraison.numero}}</h4>
+    <div class="page-title">
+        <h4>Livraison {{livraison.numero}}</h4>
+        <p>Emplacement de destination<br/>{{livraison.emplacement}}</p>
     </div>
     <div class="d-flex" [hidden]="articlesNT && articlesNT.length === 0">
         <p>Liste des articles à traiter</p>

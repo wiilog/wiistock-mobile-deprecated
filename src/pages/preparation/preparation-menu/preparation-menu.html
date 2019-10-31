@@ -5,32 +5,27 @@
   Ionic pages and navigation.
 -->
 <ion-header>
-  <ion-navbar>
-    <ion-buttons start>
-      <button ion-button icon-only (click)="goHome()">
-        <ion-icon name="home"></ion-icon>
-      </button>
-    </ion-buttons>
-    <ion-title>Préparations</ion-title>
-  </ion-navbar>
+    <ion-navbar>
+        <ion-buttons start>
+            <button ion-button icon-only (click)="goHome()">
+                <ion-icon name="home"></ion-icon>
+            </button>
+        </ion-buttons>
+        <ion-title>Préparations</ion-title>
+    </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-  <ion-title *ngIf="preparations && preparations.length === 0">Aucune préparation<br>à traiter.</ion-title>
-  <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
-  <ion-list *ngIf="hasLoaded">
-    <ion-grid>
-      <button (click)="goToArticles(preparation)" class="list" ion-item *ngFor="let preparation of preparations">
-        <ion-row>
-          <ion-col col-6>{{ preparation.numero }}</ion-col>
-        </ion-row>
-      </button>
-    </ion-grid>
-  </ion-list>
-
+    <ion-title *ngIf="preparations && preparations.length === 0">Aucune préparation<br>à traiter.</ion-title>
+    <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
+    <ion-list *ngIf="hasLoaded">
+        <ion-grid>
+            <button (click)="goToArticles(preparation)" class="list" ion-item *ngFor="let preparation of preparations">
+                <ion-row>
+                    <ion-col col-6>{{ preparation.numero }}</ion-col>
+                    <ion-col class="text-right" col-6>{{ preparation.destination }}</ion-col>
+                </ion-row>
+            </button>
+        </ion-grid>
+    </ion-list>
 </ion-content>
-<ion-footer padding *ngIf="hasLoaded">
-  <div class="d-flex">
-    <ion-icon class="big-icon" name="refresh" item-right (click)="synchronise(false)"></ion-icon>
-  </div>
-</ion-footer>

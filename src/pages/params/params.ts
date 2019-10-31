@@ -1,14 +1,9 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
-import {SqliteProvider} from "../../providers/sqlite/sqlite";
+import {IonicPage, NavController, NavParams} from 'ionic-angular';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
+import {ToastService} from '@app/services/toast.service';
 
-/**
- * Generated class for the ParamsPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
 
 @IonicPage()
 @Component({
@@ -17,54 +12,49 @@ import {HttpClient} from '@angular/common/http';
 })
 export class ParamsPage {
 
-    private URL: string;
+    public URL: string;
 
-    constructor(public navCtrl: NavController, public navParams: NavParams, public toastController: ToastController, public sqLiteProvider: SqliteProvider, public http: HttpClient) {
+    private isLoading: boolean;
+
+    public constructor(public navCtrl: NavController,
+                       public navParams: NavParams,
+                       public sqLiteProvider: SqliteProvider,
+                       public http: HttpClient,
+                       private toastService: ToastService) {
+        this.URL = '';
+        this.isLoading = true;
+    }
+
+    public ionViewWillEnter(): void {
         this.sqLiteProvider.getAPI_URL().subscribe((result) => {
-            if (result !== null) {
-                this.URL = result;
-            } else {
-                this.URL = '';
-            }
+            this.URL = !result ? '' : result;
+            this.isLoading = false;
         });
     }
 
-
-
-    registerURL() {
-        this.sqLiteProvider.setAPI_URL(this.URL).subscribe((result) => {
-            if (result === true) {
-                this.showToast('URL enregistrée!');
-            } else {
-                console.log(result);
-            }
-        });
+    public registerURL(): void {
+        if (!this.isLoading) {
+            this.sqLiteProvider.setAPI_URL(this.URL).subscribe((result) => {
+                if (result === true) {
+                    this.toastService.showToast('URL enregistrée!');
+                }
+                else {
+                    console.log(result);
+                }
+            });
+        }
     }
 
-    testURL() {
+    public testURL(): void {
         let url: string = this.URL + '/api/ping';
         this.http.post<any>(url, {}).subscribe(
-            res => {
+            _ => {
                 this.registerURL();
-                this.showToast('URL valide.').then(() => {
+                this.toastService.showToast('URL valide.').subscribe(() => {
                     this.navCtrl.pop();
                 });
             },
-            error => this.showToast('URL non valide.')
+            _ => this.toastService.showToast('URL non valide.')
         );
-    }
-
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
-    }
-
-    goToConnect() {
-        this.navCtrl.pop();
     }
 }

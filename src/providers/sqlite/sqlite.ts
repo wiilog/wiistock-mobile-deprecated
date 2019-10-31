@@ -11,8 +11,8 @@ import {flatMap, map, take} from 'rxjs/operators';
 import {from} from 'rxjs/observable/from';
 import {of} from 'rxjs/observable/of';
 import {Platform} from 'ionic-angular';
-import {Collecte} from "@app/entities/collecte";
-import {Manutention} from "@app/entities/manutention";
+import {Collecte} from '@app/entities/collecte';
+import {Manutention} from '@app/entities/manutention';
 
 
 @Injectable()
@@ -30,7 +30,7 @@ export class SqliteProvider {
         this.dbCreated$ = new ReplaySubject<boolean>(1);
 
         this.createDB();
-        this.createTables();
+        this.createTablesAndNotity();
     }
 
     private get db$(): Observable<SQLiteObject> {
@@ -56,42 +56,48 @@ export class SqliteProvider {
             );
     }
 
-    private createTables(): void {
-        this.db$.pipe(
+    private createTables(): Observable<undefined> {
+        return this.db$.pipe(
             flatMap((db) => from(Promise.all([
-                db.executeSql('DROP TABLE IF EXISTS `article_collecte`', []),
-                db.executeSql('DROP TABLE IF EXISTS `article`', []),
-                db.executeSql('DROP TABLE IF EXISTS `article_livraison`', []),
-                db.executeSql('DROP TABLE IF EXISTS `article_prepa`', []),
-                db.executeSql('DROP TABLE IF EXISTS `article_inventaire`', []),
-                db.executeSql('DROP TABLE IF EXISTS `anomalie_inventaire`', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article` (`id` INTEGER PRIMARY KEY, `reference` VARCHAR(255), `quantite` INTEGER, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))', []),
-                db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location` TEXT, `type` VARCHAR(255), `is_ref` TEXT, `id_article_prepa` INTEGER, `id_prepa` INTEGER, `id_article_livraison` INTEGER, `id_livraison` INTEGER, `id_article_collecte` INTEGER, `id_collecte` INTEGER)', []),
-                db.executeSql('DROP TABLE IF EXISTS `mouvement_traca`', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location` TEXT, `type` VARCHAR(255), `is_ref` TEXT, `id_article_prepa` INTEGER, `id_prepa` INTEGER, `id_article_livraison` INTEGER, `id_livraison` INTEGER, `id_article_collecte` INTEGER, `id_collecte` INTEGER, `selected_by_article` INTEGER)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255))', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []),
                 db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []),
-                db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER)', []),
-                db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER, `destination` INTEGER)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `type_quantite` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa_by_ref_article` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `reference` TEXT, `label` TEXT, `location` TEXT, `quantity` INTEGER, `reference_article` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `collecte` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_livraison` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_livraison` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)', []),
-                db.executeSql('CREATE TABLE IF NOT EXISTS `article_collecte` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_collecte` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_inventaire` (`id` INTEGER PRIMARY KEY, `id_mission` INTEGER, `reference` TEXT, `is_ref` TEXT, `location` TEXT, `barcode` TEXT)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `article_collecte` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_collecte` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `saisie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_mission` INTEGER, `date` TEXT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `anomalie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` TEXT, `is_ref` TEXT, `quantity` INTEGER, `location` TEXT, `comment` TEXT, `treated` TEXT, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `manutention` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `demandeur` TEXT, `date_attendue` TEXT, `commentaire` TEXT, `destination` TEXT, `source` TEXT)', [])
-            ])))
-        )
-            .subscribe(() => {
-                this.dbCreated$.next(true);
-            });
+            ]))),
+            map(() => undefined)
+        );
+    }
+
+    private createTablesAndNotity(): void {
+        this.createTables().subscribe(() => {
+            this.dbCreated$.next(true);
+        });
+    }
+
+    public resetDataBase() {
+        return this.dropTables()
+            .pipe(
+                flatMap(() => this.createTables()),
+                map(() => undefined),
+                take(1)
+            );
     }
 
     public cleanDataBase(fromAfter = false): Observable<any> {
-        const databaseCleaned = new ReplaySubject<SQLiteObject>(1);
-        this.isDBCreated$
+        return this.isDBCreated$
             .pipe(
                 flatMap(() => this.db$),
                 flatMap((db) => from(Promise.all([
@@ -103,9 +109,10 @@ export class SqliteProvider {
                             ? [
                                 db.executeSql('DELETE FROM `preparation`;', []),
                                 db.executeSql('DELETE FROM `article_prepa`;', []),
+                                db.executeSql('DELETE FROM `article_prepa_by_ref_article`;', []),
                                 db.executeSql('DELETE FROM `mouvement`;', []),
-                                db.executeSql('DELETE FROM `livraison`;', []),
                                 db.executeSql('DELETE FROM `collecte`;', []),
+                                db.executeSql('DELETE FROM `livraison`;', []),
                                 db.executeSql('DELETE FROM `article_livraison`;', []),
                                 db.executeSql('DELETE FROM `article_collecte`;', []),
                                 db.executeSql('DELETE FROM `article_inventaire`;', []),
@@ -115,21 +122,41 @@ export class SqliteProvider {
                             ]
                             : []
                     )
-                ])))
-            )
-            .subscribe(() => {
-                databaseCleaned.next(undefined);
-            });
+                ]))),
+                flatMap(() => this.createTables()),
+                map(() => undefined),
+                take(1)
+            );
+    }
 
-        return databaseCleaned.pipe(take(1));
+    private dropTables(): Observable<any> {
+        return this.isDBCreated$
+            .pipe(
+                flatMap(() => this.db$),
+                flatMap((db) => from(Promise.all([
+                    db.executeSql('DROP TABLE IF EXISTS `article`;', []),
+                    db.executeSql('DROP TABLE IF EXISTS `emplacement`;', []),
+                    db.executeSql('DROP TABLE IF EXISTS `mouvement_traca`;', []),
+                    db.executeSql('DROP TABLE IF EXISTS `preparation`;', []),
+                    db.executeSql('DROP TABLE IF EXISTS `article_prepa`;', []),
+                    db.executeSql('DROP TABLE IF EXISTS `article_prepa_by_ref_article`;', []),
+                    db.executeSql('DROP TABLE IF EXISTS `mouvement`;', []),
+                    db.executeSql('DROP TABLE IF EXISTS `collecte`;', []),
+                    db.executeSql('DROP TABLE IF EXISTS `livraison`;', []),
+                    db.executeSql('DROP TABLE IF EXISTS `article_livraison`;', []),
+                    db.executeSql('DROP TABLE IF EXISTS `article_collecte`;', []),
+                    db.executeSql('DROP TABLE IF EXISTS `article_inventaire`;', []),
+                    db.executeSql('DROP TABLE IF EXISTS `saisie_inventaire`;', []),
+                    db.executeSql('DROP TABLE IF EXISTS `anomalie_inventaire`;', []),
+                    db.executeSql('DROP TABLE IF EXISTS `manutention`;', [])
+                ]))),
+                map(() => undefined),
+                take(1)
+            );
     }
 
     public setOperateur(operateur) {
-        return new Promise<any>(resolve => {
-            this.storageService.setOperateur(operateur).then(() => {
-                resolve();
-            });
-        });
+        return this.storageService.setOperateur(operateur);
     }
 
     public getOperateur() {
@@ -140,257 +167,320 @@ export class SqliteProvider {
         });
     }
 
-    initPrepsCount(data, refresh) {
-        return new Promise<any>((resolve) => {
-            if (!refresh) {
-                this.storageService.setApiKey(data['apiKey']);
-                this.storageService.setInventoryManagerRight(data['isInventoryManager']);
-                this.storageService.setPreps().then(() => {
-                    resolve();
-                })
-            } else {
-                resolve();
-            }
-        });
+    private initPrepsCount(data, refresh): Observable<undefined> {
+        let ret$: Observable<undefined>;
+        if (!refresh) {
+            this.storageService.setApiKey(data['apiKey']);
+            this.storageService.setInventoryManagerRight(data['isInventoryManager']);
+            ret$ = from(this.storageService.setPreps());
+        }
+        else {
+            ret$ = of(undefined);
+        }
+
+        return ret$;
     }
 
-    importArticles(data) {
-        return new Promise<any>((resolve) => {
-            let articles = data['articles'];
-            let articleValues = [];
-            articles.forEach((article) => {
-                articleValues.push("(" + null + ", '" + article.reference + "', " + (article.quantiteStock || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ", '" + article.barCode + "')");
-            });
+    private importArticles(data): string {
+        let articles = data['articles'];
+        if (articles.length > 0) {
+            let articleValues = articles.map((article) => (
+                "(" +
+                "NULL, " +
+                `'${article.reference}',` +
+                (article.quantiteStock || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ', ' +
+                (article.barCode ? `'${article.barCode}'` : 'null') +
+                ")"
+            ));
             let articleValuesStr = articleValues.join(', ');
-            let sqlArticles = 'INSERT INTO `article` (`id`, `reference`, `quantite`, `barcode`) VALUES ' + articleValuesStr + ';';
-            resolve(sqlArticles);
-        });
+            return 'INSERT INTO `article` (`id`, `reference`, `quantite`, `barcode`) VALUES ' + articleValuesStr + ';';
+        }
+        else {
+            return undefined;
+        }
     }
 
-    importEmplacements(data) {
-        return new Promise<any>((resolve) => {
-            let emplacements = data['emplacements'];
-            let emplacementValues = [];
-            emplacements.forEach((emplacement) => {
-                emplacementValues.push("(" + emplacement.id + ", '" + emplacement.label.replace(/(\"|\')/g, "\'$1") + "')");
-            });
+    private importEmplacements(data): string {
+        let emplacements = data['emplacements'];
+        if (emplacements && emplacements.length) {
+            let emplacementValues = emplacements.map((emplacement) => (
+                "(" + emplacement.id + ", '" + emplacement.label.replace(/(\"|\')/g, "\'$1") + "')"
+            ));
             let emplacementValuesStr = emplacementValues.join(', ');
-            let sqlEmplacements = 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';';
-            resolve(sqlEmplacements);
-        });
+            return 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';';
+        }
+        else {
+            return undefined;
+        }
     }
 
-    importPreparations(data) {
-        return new Promise<any>((resolve) => {
-            let prepas = data['preparations'];
-            let prepasValues = [];
-            if (prepas.length === 0) {
-                this.findAll('`preparation`').subscribe((preparationsDB) => {
-                    this.deletePreparations(preparationsDB).then(() => {
-                        resolve(false);
+    public importPreparations(data): Observable<string> {
+        const ret$ = new ReplaySubject<string>(1);
+
+        let prepas = data['preparations'];
+        let prepasValues = [];
+        if (prepas.length === 0) {
+            this.findAll('`preparation`').subscribe((preparationsDB) => {
+                this.deletePreparations(preparationsDB).then(() => {
+                    ret$.next(undefined);
+                });
+            });
+        }
+        for (let prepa of prepas) {
+            this.findOneById('preparation', prepa.id).subscribe((prepaInserted) => {
+                if (prepaInserted === null) {
+                    prepasValues.push(`(${prepa.id}, '${prepa.number}', NULL, NULL, 0, '${prepa.destination}')`);
+                }
+                if (prepas.indexOf(prepa) === prepas.length - 1) {
+                    this.findAll('`preparation`').subscribe((preparations) => {
+                        let prepasValuesStr = prepasValues.join(', ');
+                        let sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`, `destination`) VALUES ' + prepasValuesStr + ';';
+                        if (preparations.length === 0) {
+                            ret$.next((prepasValues.length > 0)
+                                ? sqlPrepas
+                                : undefined);
+                        }
+                        else {
+                            this.deletePreparations(preparations.filter(p => prepas.find(prep => prep.id === p.id) === undefined)).then(() => {
+                                ret$.next((prepasValues.length > 0)
+                                    ? sqlPrepas
+                                    : undefined);
+                            });
+                        }
                     });
-                });
-            }
-            for (let prepa of prepas) {
-                this.findOne('preparation', prepa.id).subscribe((prepaInserted) => {
-                    if (prepaInserted === null) {
-                        prepasValues.push("(" + prepa.id + ", '" + prepa.number + "', " + null + ", " + null + ", 0)");
-                    }
-                    if (prepas.indexOf(prepa) === prepas.length - 1) {
-                        this.findAll('`preparation`').subscribe((preparations) => {
-                            let prepasValuesStr = prepasValues.join(', ');
-                            let sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`) VALUES ' + prepasValuesStr + ';';
-                            if (preparations.length === 0) {
-                                resolve(sqlPrepas);
-                            } else {
-                                this.deletePreparations(preparations.filter(p => prepas.find(prep => prep.id === p.id) === undefined)).then(() => {
-                                    resolve(sqlPrepas);
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        });
+                }
+            });
+        }
+        return ret$;
     }
 
-    importManutentions(data) {
-        return new Promise<any>(resolve => {
-            let manutentions = data['manutentions'];
-            let manutValues = [];
-            if (manutentions.length === 0) {
-                this.findAll('`manutention`').subscribe((manutentionsDB) => {
-                    this.deleteManutentions(manutentionsDB).then(() => {
-                        resolve(false);
+    public importManutentions(data): Observable<string> {
+        const ret$ = new ReplaySubject<string>(1);
+
+        let manutentions = data['manutentions'];
+        let manutValues = [];
+        if (manutentions.length === 0) {
+            this.findAll('`manutention`').subscribe((manutentionsDB) => {
+                this.deleteManutentions(manutentionsDB).then(() => {
+                    ret$.next(undefined);
+                });
+            });
+        }
+        for (let manut of manutentions) {
+            this.findOneById('manutention', manut.id).subscribe((manutInserted) => {
+                if (manutInserted === null) {
+                    let comment = manut.commentaire === null ? '' : this.escapeQuotes(manut.commentaire);
+                    let date = manut.date_attendue ? manut.date_attendue.date : null;
+                    manutValues.push("(" + manut.id + ", '" + date + "', '" + manut.demandeur + "', '" + comment + "', '" + this.escapeQuotes(manut.source) + "', '" + this.escapeQuotes(manut.destination) + "')");
+        }
+                if (manutentions.indexOf(manut) === manutentions.length - 1) {
+                    this.findAll('`manutention`').subscribe((manutentionsDB) => {
+                        let manutValuesStr = manutValues.join(', ');
+                        let sqlManut = 'INSERT INTO `manutention` (`id`, `date_attendue`, `demandeur`, `commentaire`, `source`, `destination`) VALUES ' + manutValuesStr + ';';
+
+                        if (manutentionsDB.length === 0) {
+                            ret$.next(sqlManut);
+                        } else {
+                            this.deleteManutentions(manutentionsDB.filter(m => manutentions.find(manut => manut.id === m.id) === undefined)).then(() => {
+                                ret$.next(sqlManut);
+                            });
+                        }
                     });
-                });
-            }
-            for (let manut of manutentions) {
-                this.findOne('manutention', manut.id).subscribe((manutInserted) => {
-                    if (manutInserted === null) {
-                        let comment = manut.commentaire === null ? '' : this.escapeQuotes(manut.commentaire);
-                        let date = manut.date_attendue ? manut.date_attendue.date : null;
-                        manutValues.push("(" + manut.id + ", '" + date + "', '" + manut.demandeur + "', '" + comment + "', '" + this.escapeQuotes(manut.source) + "', '" + this.escapeQuotes(manut.destination) + "')");
-                    }
-                    if (manutentions.indexOf(manut) === manutentions.length - 1) {
-                        this.findAll('`manutention`').subscribe((manutentionsDB) => {
-                            let manutValuesStr = manutValues.join(', ');
-                            let sqlManut = 'INSERT INTO `manutention` (`id`, `date_attendue`, `demandeur`, `commentaire`, `source`, `destination`) VALUES ' + manutValuesStr + ';';
+                }
+            });
+        }
+        return ret$;
+    }
 
-                            if (manutentionsDB.length === 0) {
-                                resolve(sqlManut);
-                            } else {
-                                this.deleteManutentions(manutentionsDB.filter(m => manutentions.find(manut => manut.id === m.id) === undefined)).then(() => {
-                                    resolve(sqlManut);
-                                });
-                            }
-                        });
+    public importArticlesPrepas(data): Observable<string> {
+        const ret$ = new ReplaySubject<string>(1);
+        let articlesPrepa = data['articlesPrepa'];
+        let articlesPrepaValues = [];
+        if (articlesPrepa.length === 0) {
+            ret$.next(undefined);
+        }
+        for (let article of articlesPrepa) {
+            this.findArticlesByPrepa(article.id_prepa).subscribe((articles) => {
+                const isArticleAlreadySaved = Boolean(articles.find(articlePrepa => articlePrepa.reference === article.reference && articlePrepa.is_ref === article.is_ref));
+                if (!isArticleAlreadySaved) {
+                    articlesPrepaValues.push("(" +
+                        null + ", " +
+                        "'" + article.label + "', " +
+                        "'" + article.reference + "', " +
+                        article.quantity + ", " +
+                        "'" + article.is_ref + "', " +
+                        article.id_prepa + ", " +
+                        0 + ", " +
+                        "'" + article.location + "', " +
+                        "'" + article.type_quantite + "', " +
+                        "'" + article.barCode + "'" +
+                    ")");
+                }
+                if (articlesPrepa.indexOf(article) === articlesPrepa.length - 1) {
+                    if (articlesPrepaValues.length > 0) {
+                        let articlesPrepaValuesStr = articlesPrepaValues.join(', ');
+                        let sqlArticlesPrepa = 'INSERT INTO `article_prepa` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_prepa`, `has_moved`, `emplacement`, `type_quantite`, `barcode`) VALUES ' + articlesPrepaValuesStr + ';';
+                        ret$.next(sqlArticlesPrepa);
                     }
-                });
-            }
-
-        });
+                    else {
+                        ret$.next(undefined);
+                    }
+                }
+            });
+        }
+        return ret$;
     }
 
     escapeQuotes(string) {
         return string.replace(/'/g, "\''");
     }
 
-    importArticlesPrepas(data) {
-        return new Promise<any>((resolve) => {
-            let articlesPrepa = data['articlesPrepa'];
-            let articlesPrepaValues = [];
-            if (articlesPrepa.length === 0) {
-                resolve(false);
-            }
-            for (let article of articlesPrepa) {
-                this.findArticlesByPrepa(article.id_prepa).subscribe((articles) => {
-                    if (articles.find(articlePrepa => articlePrepa.reference === article.reference && articlePrepa.is_ref === article.is_ref) === undefined) {
-                        articlesPrepaValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_prepa + ", " + 0 + ", '" + article.location + "', '" + article.barCode + "')");
-                    }
-                    if (articlesPrepa.indexOf(article) === articlesPrepa.length - 1) {
-                        let articlesPrepaValuesStr = articlesPrepaValues.join(', ');
-                        let sqlArticlesPrepa = 'INSERT INTO `article_prepa` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_prepa`, `has_moved`, `emplacement`, `barcode`) VALUES ' + articlesPrepaValuesStr + ';';
-                        resolve(sqlArticlesPrepa);
-                    }
+    public importLivraisons(data): Observable<string> {
+        const ret$ = new ReplaySubject<string>(1);
+        let livraisons = data['livraisons'];
+        let livraisonsValues = [];
+        if (livraisons.length === 0) {
+            this.findAll('`livraison`').subscribe((livraisonsDB) => {
+                this.deleteLivraisons(livraisonsDB).then(() => {
+                    ret$.next(undefined);
                 });
-            }
-        });
-    }
+            });
+        }
+        for (let livraison of livraisons) {
+            this.findOneById('livraison', livraison.id).subscribe((livraisonInserted) => {
+                if (livraisonInserted === null) {
+                    livraisonsValues.push("(" + livraison.id + ", '" + livraison.number + "', '" + livraison.location + "', " + null + ")");
+                }
+                if (livraisons.indexOf(livraison) === livraisons.length - 1) {
+                    this.findAll('`livraison`').subscribe((livraisonsDB) => {
+                        let livraisonsValuesStr = livraisonsValues.join(', ');
+                        let sqlLivraisons = 'INSERT INTO `livraison` (`id`, `numero`, `emplacement`, `date_end`) VALUES ' + livraisonsValuesStr + ';';
+                        if (livraisonsDB.length === 0) {
+                            ret$.next((livraisonsValues.length > 0) ? sqlLivraisons : undefined);
 
-    importLivraisons(data) {
-        return new Promise<any>((resolve) => {
-            let livraisons = data['livraisons'];
-            let livraisonsValues = [];
-            if (livraisons.length === 0) {
-                this.findAll('`livraison`').subscribe((livraisonsDB) => {
-                    this.deleteLivraisons(livraisonsDB).then(() => {
-                        resolve(false);
+                        }
+                        else {
+                            this.deleteLivraisons(livraisonsDB.filter(l => livraisons.find(livr => livr.id === l.id) === undefined)).then(() => {
+                                ret$.next((livraisonsValues.length > 0) ? sqlLivraisons : undefined);
+                            });
+                        }
                     });
-                });
-            }
-            for (let livraison of livraisons) {
-                this.findOne('livraison', livraison.id).subscribe((livraisonInserted) => {
-                    if (livraisonInserted === null) {
-                        livraisonsValues.push("(" + livraison.id + ", '" + livraison.number + "', '" + livraison.location + "', " + null + ")");
-                    }
-                    if (livraisons.indexOf(livraison) === livraisons.length - 1) {
-                        this.findAll('`livraison`').subscribe((livraisonsDB) => {
-                            let livraisonsValuesStr = livraisonsValues.join(', ');
-                            let sqlLivraisons = 'INSERT INTO `livraison` (`id`, `numero`, `emplacement`, `date_end`) VALUES ' + livraisonsValuesStr + ';';
-                            if (livraisonsDB.length === 0) {
-                                resolve(sqlLivraisons);
-                            } else {
-                                this.deleteLivraisons(livraisonsDB.filter(l => livraisons.find(livr => livr.id === l.id) === undefined)).then(() => {
-                                    resolve(sqlLivraisons);
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        });
+                }
+            });
+        }
+        return ret$;
     }
 
-    importArticlesLivraison(data) {
-        return new Promise<any>((resolve) => {
-            let articlesLivrs = data['articlesLivraison'];
-            let articlesLivraisonValues = [];
-            if (articlesLivrs.length === 0) {
-                resolve(false);
-            }
-            for (let article of articlesLivrs) {
-                this.findArticlesByLivraison(article.id_livraison).subscribe((articles) => {
-                    if (articles.find(articleLivr => articleLivr.reference === article.reference && articleLivr.is_ref === article.is_ref) === undefined) {
-                        articlesLivraisonValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_livraison + ", " + 0 + ", '" + article.location + "', '" + article.barCode + "')");
-                    }
-                    if (articlesLivrs.indexOf(article) === articlesLivrs.length - 1) {
+    public importArticlesLivraison(data): Observable<string> {
+        const ret$ = new ReplaySubject<string>(1);
+        let articlesLivrs = data['articlesLivraison'];
+        let articlesLivraisonValues = [];
+        if (articlesLivrs.length === 0) {
+            ret$.next(undefined);
+        }
+        for (let article of articlesLivrs) {
+            this.findArticlesByLivraison(article.id_livraison).subscribe((articles) => {
+                if (articles.find(articleLivr => articleLivr.reference === article.reference && articleLivr.is_ref === article.is_ref) === undefined) {
+                    articlesLivraisonValues.push(
+                        "(" +
+                        "NULL, " +
+                        "'" + article.label + "', " +
+                        "'" + article.reference + "'," +
+                        article.quantity + ", " +
+                        "'" + article.is_ref + "', " +
+                        "" + article.id_livraison + ", " +
+                        "0, " +
+                        "'" + article.location + "'," +
+                        "'" + article.barCode + "'" +
+                        ")");
+                }
+                if (articlesLivrs.indexOf(article) === articlesLivrs.length - 1) {
+                    if (articlesLivraisonValues.length) {
                         let articlesLivraisonValuesStr = articlesLivraisonValues.join(', ');
                         let sqlArticlesLivraison = 'INSERT INTO `article_livraison` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_livraison`, `has_moved`, `emplacement`, `barcode`) VALUES ' + articlesLivraisonValuesStr + ';';
-                        resolve(sqlArticlesLivraison)
+                        ret$.next(sqlArticlesLivraison);
                     }
-                });
-            }
-        });
+                    else {
+                        ret$.next(undefined);
+                    }
+                }
+            });
+        }
+        return ret$;
     }
 
-    importCollectes(data) {
-        return new Promise<any>((resolve) => {
-            let collectes = data['collectes'];
-            let collectesValues = [];
-            if (collectes.length === 0) {
-                this.findAll('`collecte`').subscribe((collecteDB) => {
-                    this.deleteCollectes(collecteDB).then(() => {
-                        resolve(false);
+    importCollectes(data): Observable<string> {
+        const ret$ = new ReplaySubject<string>(1);
+        let collectes = data['collectes'];
+        let collectesValues = [];
+        if (collectes.length === 0) {
+            this.findAll('`collecte`').subscribe((collecteDB) => {
+                this.deleteCollectes(collecteDB).then(() => {
+                    ret$.next(undefined);
+                });
+            });
+        }
+        for (let collecte of collectes) {
+            this.findOneById('collecte', collecte.id).subscribe((collecteInserted) => {
+                if (collecteInserted === null) {
+                    collectesValues.push("(" + collecte.id + ", '" + collecte.number + "', '" + collecte.location + "', " + null + ")");
+                }
+                if (collectes.indexOf(collecte) === collectes.length - 1) {
+                    this.findAll('`collecte`').subscribe((collectesDB) => {
+                        let collectesValuesStr = collectesValues.join(', ');
+                        let sqlCollectes = 'INSERT INTO `collecte` (`id`, `numero`, `emplacement`, `date_end`) VALUES ' + collectesValuesStr + ';';
+                        if (collectesDB.length === 0) {
+                            ret$.next(sqlCollectes);
+                        } else {
+                            this.deleteCollectes(collectesDB.filter(c => collectes.find(col => col.id === c.id) === undefined)).then(() => {
+                                ret$.next(sqlCollectes);
+                            });
+                        }
                     });
-                });
-            }
-            for (let collecte of collectes) {
-                this.findOne('collecte', collecte.id).subscribe((collecteInserted) => {
-                    if (collecteInserted === null) {
-                        collectesValues.push("(" + collecte.id + ", '" + collecte.number + "', '" + collecte.location + "', " + null + ")");
-                    }
-                    if (collectes.indexOf(collecte) === collectes.length - 1) {
-                        this.findAll('`collecte`').subscribe((collectesDB) => {
-                            let collectesValuesStr = collectesValues.join(', ');
-                            let sqlCollectes = 'INSERT INTO `collecte` (`id`, `numero`, `emplacement`, `date_end`) VALUES ' + collectesValuesStr + ';';
-                            if (collectesDB.length === 0) {
-                                resolve(sqlCollectes);
-                            } else {
-                                this.deleteCollectes(collectesDB.filter(c => collectes.find(col => col.id === c.id) === undefined)).then(() => {
-                                    resolve(sqlCollectes);
-                                });
-                            }
-                        });
-                    }
-                });
-            }
-        });
+                }
+            });
+        }
+        return ret$;
     }
 
-    importArticlesCollecte(data) {
-        return new Promise<any>((resolve) => {
-            let articlesCols = data['articlesCollecte'];
-            let articlesCollecteValues = [];
-            if (articlesCols.length === 0) {
-                resolve(false);
-            }
-            for (let article of articlesCols) {
-                this.findArticlesByCollecte(article.id_collecte).subscribe((articles) => {
-                    if (articles.find(articleCol => articleCol.reference === article.reference && articleCol.is_ref === article.is_ref) === undefined) {
-                        articlesCollecteValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_collecte + ", " + 0 + ", '" + article.location + "', '" + article.barCode + "')");
+    public findArticlesByCollecte(id_col: number): Observable<Array<any>> {
+        return this.db$.pipe(
+            flatMap((db: SQLiteObject) => from(db.executeSql('SELECT * FROM `article_collecte` WHERE `id_collecte` = ' + id_col, []))),
+            map((articles) => {
+                const list = [];
+                if (articles && articles.rows) {
+                    for (let i = 0; i < articles.rows.length; i++) {
+                        list.push(articles.rows.item(i));
                     }
-                    if (articlesCols.indexOf(article) === articlesCols.length - 1) {
-                        let articlesCollectesValuesStr = articlesCollecteValues.join(', ');
-                        let sqlArticlesCollecte = 'INSERT INTO `article_collecte` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_collecte`, `has_moved`, `emplacement`, `barcode`) VALUES ' + articlesCollectesValuesStr + ';';
-                        resolve(sqlArticlesCollecte)
-                    }
-                });
-            }
-        });
+                }
+                return list;
+            })
+        );
     }
 
-    importArticlesInventaire(data): Observable<any> {
+    importArticlesCollecte(data): Observable<string> {
+        const ret$ = new ReplaySubject<string>(1);
+        let articlesCols = data['articlesCollecte'];
+        let articlesCollecteValues = [];
+        if (articlesCols.length === 0) {
+            ret$.next(undefined);
+        }
+        for (let article of articlesCols) {
+            this.findArticlesByCollecte(article.id_collecte).subscribe((articles) => {
+                if (articles.find(articleCol => articleCol.reference === article.reference && articleCol.is_ref === article.is_ref) === undefined) {
+                    articlesCollecteValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", '" + article.is_ref + "', " + article.id_collecte + ", " + 0 + ", '" + article.location + "', '" + article.barCode + "')");
+                }
+                if (articlesCols.indexOf(article) === articlesCols.length - 1) {
+                    let articlesCollectesValuesStr = articlesCollecteValues.join(', ');
+                    let sqlArticlesCollecte = 'INSERT INTO `article_collecte` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_collecte`, `has_moved`, `emplacement`, `barcode`) VALUES ' + articlesCollectesValuesStr + ';';
+                    ret$.next(sqlArticlesCollecte)
+                }
+            });
+        }
+        return ret$;
+    }
+
+    public importArticlesInventaire(data): Observable<any> {
 
         const importExecuted = new ReplaySubject<any>(1);
         let articlesInventaire = data['inventoryMission'];
@@ -405,108 +495,133 @@ export class SqliteProvider {
 
             if (articlesInventaire.indexOf(article) === articlesInventaire.length - 1) {
                 let articlesInventaireValuesStr = articlesInventaireValues.join(', ');
-                let sqlArticlesInventaire = 'INSERT INTO `article_inventaire` (`id`, `id_mission`, `reference`, `is_ref`, `location`, `barcode`) VALUES ' + articlesInventaireValuesStr + ';';
-                importExecuted.next(sqlArticlesInventaire);
+                let sqlArticlesInventaire = 'INSERT INTO `article_inventaire` (`id`, `id_mission`, `reference`, `is_ref`, `location`, `code_barre`) VALUES ' + articlesInventaireValuesStr + ';';
+                importExecuted.next((articlesInventaireValues.length > 0)
+                    ? sqlArticlesInventaire
+                    : undefined);
             }
         }
         return importExecuted;
     }
 
-    public importAnomaliesInventaire(data): Observable<any> {
+    private importArticlesPrepaByRefArticle(data): string {
+        const articlesPrepaByRefArticle = data['articlesPrepaByRefArticle'];
+        let ret;
 
-        const importExecuted = new ReplaySubject<any>(1);
+        if ((articlesPrepaByRefArticle && articlesPrepaByRefArticle.length > 0)) {
+            const articleKeys = [
+                ...Object.keys(articlesPrepaByRefArticle[0]),
+                'isSelectableByUser'
+            ];
 
-        let anomalies = data.data;
+            const articleValues = articlesPrepaByRefArticle.map((article) => {
+                const articleTmp = {
+                    ...article,
+                    isSelectableByUser: 1
+                };
+                return '(' + (articleKeys.map((key) => ("'" + articleTmp[key] + "'")).join(', ') + ')')
+            });
+
+            ret = 'INSERT INTO `article_prepa_by_ref_article` (' +
+                articleKeys.map((key) => `\`${key}\``).join(', ') + ') VALUES ' +
+                articleValues + ';';
+        }
+
+        return ret;
+    }
+
+    public importAnomaliesInventaire(data): string {
+
+        let anomalies = data.anomalies;
 
         let anomaliesValues = [];
         if (anomalies.length === 0) {
-            importExecuted.next(false);
-        } else {
+            return undefined;
+        }
+        else {
             for (let anomaly of anomalies) {
                 anomaliesValues.push("(" + anomaly.id + ", '" + anomaly.reference + "', '" + anomaly.is_ref + "', '" + anomaly.quantity + "', '" + (anomaly.location ? anomaly.location : 'N/A') + "', '" + anomaly.barCode + "')");
-
-                if (anomalies.indexOf(anomaly) === anomalies.length - 1) {
-                    let anomaliesValuesStr = anomaliesValues.join(', ');
-                    let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `location`, `barcode`) VALUES ' + anomaliesValuesStr + ';';
-                    importExecuted.next(sqlAnomaliesInventaire);
-                }
+            }
+            let anomaliesValuesStr = anomaliesValues.join(', ');
+            let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `location`) VALUES ' + anomaliesValuesStr + ';';
+            if (anomaliesValues.length > 0) {
+                return sqlAnomaliesInventaire;
+            } else {
+                return undefined;
             }
         }
-        return importExecuted;
     }
 
-    public executeAllImports(imports: Array<string>): Observable<any> {
-        const allImportExecuted = new ReplaySubject<undefined>(1);
-
-        this.db$.subscribe((db) => {
-            imports.forEach(function (importSql, index) {
-                db.executeSql(importSql, []).then().catch(err => console.log(importSql, err)).then(() => {
-                    if (index === imports.length - 1) {
-                        allImportExecuted.next(undefined);
-                    }
+    private executeAllImports(imports: Array<string>): Observable<any> {
+        return this.db$.pipe(
+            flatMap((db) => from(Promise.all(imports.map((importSql) => (
+                db.executeSql(importSql, []).catch((err) => {
+                    console.log(importSql, err);
                 })
-            })
-        });
-        return allImportExecuted;
+            ))))),
+            map(() => undefined)
+        );
     }
 
-    public async importData(data, refresh = false) {
-        return new Promise<any>((resolve) => {
-            let imports = [];
-            this.initPrepsCount(data, refresh).then(() => {
-                this.importArticles(data).then((sqlArticles) => {
-                    if (sqlArticles !== false) imports.push(sqlArticles);
-                    this.importEmplacements(data).then((sqlEmplacements) => {
-                        if (sqlEmplacements !== false) imports.push(sqlEmplacements);
-                        this.importPreparations(data).then((sqlPrepas) => {
-                            if (sqlPrepas !== false) imports.push(sqlPrepas);
-                            this.importArticlesPrepas(data).then((sqlArticlesPrepa) => {
-                                if (sqlArticlesPrepa !== false) imports.push(sqlArticlesPrepa);
-                                this.importLivraisons(data).then((sqlLivraisons) => {
-                                    if (sqlLivraisons !== false) imports.push(sqlLivraisons);
-                                    this.importArticlesLivraison(data).then((sqlArticlesLivraison) => {
-                                        if (sqlArticlesLivraison !== false) imports.push(sqlArticlesLivraison);
-                                        this.importArticlesInventaire(data).subscribe((sqlArticlesInventaire) => {
-                                            if (sqlArticlesInventaire !== false) imports.push(sqlArticlesInventaire);
-                                            this.importManutentions(data).then((sqlManutentions) => {
-                                                if (sqlManutentions !== false) imports.push(sqlManutentions);
-                                                this.importCollectes(data).then((sqlCollectes) => {
-                                                    if (sqlCollectes !== false) imports.push(sqlCollectes);
-                                                    this.importArticlesCollecte(data).then((sqlArticlesCollecte) => {
-                                                        if (sqlArticlesCollecte !== false) imports.push(sqlArticlesCollecte);
-                                                        this.executeAllImports(imports).subscribe(() => {
-                                                            resolve();
-                                                        })
-                                                    });
-                                                });
-                                            });
+    public importData(data, refresh = false): Observable<undefined> {
+        const concatSqlImports = (imports: Array<string>, sql: string) => ([...imports, sql]);
+        const createMapSqlImportObs = (imports: Array<string>) => map((sql: string) => concatSqlImports(imports, sql));
+        return this.initPrepsCount(data, refresh).pipe(
+            map(() => concatSqlImports([], this.importEmplacements(data))),
+            map((imports) => concatSqlImports(imports, this.importArticlesPrepaByRefArticle(data))),
+            map((imports) => concatSqlImports(imports, this.importArticles(data))),
+            flatMap((imports) => this.importPreparations(data).pipe(createMapSqlImportObs(imports))),
+            flatMap((imports) => this.importArticlesPrepas(data).pipe(createMapSqlImportObs(imports))),
+            flatMap((imports) => this.importLivraisons(data).pipe(createMapSqlImportObs(imports))),
+            flatMap((imports) => this.importArticlesLivraison(data).pipe(createMapSqlImportObs(imports))),
+            flatMap((imports) => this.importArticlesInventaire(data).pipe(createMapSqlImportObs(imports))),
+            flatMap((imports) => this.importManutentions(data).pipe(createMapSqlImportObs(imports))),
+            flatMap((imports) => this.importCollectes(data).pipe(createMapSqlImportObs(imports))),
+            flatMap((imports) => this.importArticlesCollecte(data).pipe(createMapSqlImportObs(imports))),
+            flatMap((imports) => (
+                from(this.getInventoryManagerRight()).pipe(
+                    map((res) => {
+                        console.log(res);
+                        if (res) {
+                            console.log(this.importAnomaliesInventaire(data));
+                            console.log(imports);
+                            console.log(concatSqlImports(imports, this.importAnomaliesInventaire(data)));
+                            console.log('tgtre');
+                            return concatSqlImports(imports, this.importAnomaliesInventaire(data))
+                        } else {
+                            console.log(imports);
+                            return imports;
+                        }
+                    })
+                )
+            )),
+            map((imports: Array<string>) => imports.filter((importSql) => importSql)),
+            flatMap((imports) => this.executeAllImports(imports))
+        );
+    }
 
-                                        });
-                                    });
-                                });
-                            });
-                        });
-                    });
-                });
-            });
-        });
-    };
-
-    public findOne(table: string, id: number): Observable<any> {
+    public findOneById(table: string, id: number): Observable<any> {
         let query: string = "SELECT * FROM " + table + " WHERE id = ? ";
 
-        const findOneExecuted = new ReplaySubject<any>(1);
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql(query, [id]))),
+            map((data) => (
+                (data.rows.length > 0)
+                    ? data.rows.item(0)
+                    : null
+            ))
+        );
+    }
 
-        this.db$.subscribe((db) => {
-            db.executeSql(query, [id]).then((data) => {
-                let object = null;
-                if (data.rows.length > 0) {
-                    object = data.rows.item(0);
-                }
-                findOneExecuted.next(object);
-            });
-        });
-        return findOneExecuted;
+    public findOneBy(table: string, name: string, value: string): Observable<any> {
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql(`SELECT * FROM ${table} WHERE ${name} LIKE '${value}'`, []))),
+            map((data) => (
+                (data.rows.length > 0)
+                    ? data.rows.item(0)
+                    : null
+            ))
+        );
     }
 
     public count(table: string, where?: any[]): Observable<number> {
@@ -535,36 +650,42 @@ export class SqliteProvider {
         return countExecuted;
     }
 
-    public findAll(table: string): Observable<any> {
-        const findAllExecuted = new ReplaySubject<any>(1);
-        this.db$.subscribe((db) => {
-            db.executeSql('SELECT * FROM ' + table, [])
-                .then((data) => {
-                    if (data == null) {
-                        findAllExecuted.next(undefined);
-                    } else {
-                        const list = [];
-                        if (data.rows) {
-                            if (data.rows.length > 0) {
-                                for (let i = 0; i < data.rows.length; i++) {
-                                    list.push(data.rows.item(i));
-                                }
-                            }
+    /**
+     * find all elements in the given table which correspond to the given where clauses.
+     * @param {string} table name of the table to do the search
+     * @param {string[]} where boolean clauses to apply with AND separator
+     */
+    public findBy(table: string, where: Array<string> = []): Observable<any> {
+        const sqlWhereClauses = where.length > 0
+            ? (' WHERE (' + where.join(' AND ') + ')')
+            : undefined;
+
+        const sqlQuery = 'SELECT * FROM ' + table + (sqlWhereClauses ? sqlWhereClauses : '');
+
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql(sqlQuery, []))),
+            map((data) => {
+                let ret;
+                if (data) {
+                    ret = [];
+                    if (data.rows && data.rows.length > 0) {
+                        for (let i = 0; i < data.rows.length; i++) {
+                            ret.push(data.rows.item(i));
                         }
-                        findAllExecuted.next(list);
                     }
-                });
-        });
-        return findAllExecuted;
+                }
+                return ret;
+            }),
+            take(1)
+        );
+    }
+
+    public findAll(table: string): Observable<any> {
+        return this.findBy(table)
     }
 
     public async priseAreUnfinished() {
-        return new Promise<any>((resolve, reject) => {
-            this.storageService.prisesAreUnfinished().then((value) => {
-                console.log(value);
-                resolve(value);
-            });
-        });
+        return this.storageService.prisesAreUnfinished();
     }
 
     public async clearStorage() {
@@ -626,23 +747,28 @@ export class SqliteProvider {
             : of(undefined);
     }
 
-    public insert(name: string, object: any): Observable<number> {
-        let values = [];
-        let query = "INSERT INTO " + name + " VALUES (";
-        Object.keys(object).forEach((key) => {
-            values.push(object[key]);
-            query += '?, '
-        });
-        query = query.slice(0, -2) + ");";
-        const insertExecuted = new ReplaySubject<any>(1);
-        this.db$.subscribe((db) => {
-            db.executeSql(query, values).then((id) => {
-                insertExecuted.next(id.insertId);
-            }).catch(err => console.log(err));
 
-        });
-        return insertExecuted;
+    public insert(name: string, object: any): Observable<number> {
+        const objectKeys = Object.keys(object);
+        const valuesMap = objectKeys
+            .map((key) => (((typeof object[key] === 'number') || object[key] === null)
+                ? `${object[key]}`
+                    : (object[key] === undefined)
+                        ? 'null'
+                        : `'${object[key]}'`))
+            .join(', ');
+        let query = "INSERT INTO " + name +
+            ' (' + objectKeys.join(', ') + ') ' +
+            "VALUES " +
+            "(" + valuesMap + ");";
+
+        return this.db$
+            .pipe(
+                flatMap((db) => from(db.executeSql(query, []))),
+                map(({insertId}) => insertId)
+            );
     }
+
 
     public executeQuery(query: string): Observable<any> {
         return this.db$.pipe(flatMap((db) => from(db.executeSql(query, []))));
@@ -651,7 +777,7 @@ export class SqliteProvider {
 
     private buildQueryWhereClause(selections: any[]) {
         let query = "";
-        let values = []
+        let values = [];
         let i = 0;
         for (let whereValue of selections) {
             if (i == 0) {
@@ -694,8 +820,7 @@ export class SqliteProvider {
                 } else {
                     apiUrl$.next(null);
                 }
-            }).catch((err) => {
-                console.log(err);
+            }).catch(() => {
                 apiUrl$.next(false);
             });
         });
@@ -711,11 +836,7 @@ export class SqliteProvider {
     }
 
     public getInventoryManagerRight() {
-        return new Promise<any>((resolve, reject) => {
-            this.storageService.getInventoryManagerRight().then((value) => {
-                resolve(value);
-            });
-        });
+        return this.storageService.getInventoryManagerRight();
     }
 
     public finishPrepaStorage() {
@@ -756,21 +877,6 @@ export class SqliteProvider {
     public findArticlesByLivraison(id_livr: number): Observable<Array<any>> {
         return this.db$.pipe(
             flatMap((db: SQLiteObject) => from(db.executeSql('SELECT * FROM `article_livraison` WHERE `id_livraison` = ' + id_livr, []))),
-            map((articles) => {
-                const list = [];
-                if (articles && articles.rows) {
-                    for (let i = 0; i < articles.rows.length; i++) {
-                        list.push(articles.rows.item(i));
-                    }
-                }
-                return list;
-            })
-        );
-    }
-
-    public findArticlesByCollecte(id_col: number): Observable<Array<any>> {
-        return this.db$.pipe(
-            flatMap((db: SQLiteObject) => from(db.executeSql('SELECT * FROM `article_collecte` WHERE `id_collecte` = ' + id_col, []))),
             map((articles) => {
                 const list = [];
                 if (articles && articles.rows) {
@@ -872,7 +978,7 @@ export class SqliteProvider {
         );
     }
 
-    public updateArticleQuantity(id_article: number, quantite: number): Observable<undefined> {
+    public updateArticlePrepaQuantity(id_article: number, quantite: number): Observable<undefined> {
         return this.db$.pipe(
             flatMap((db) => from(db.executeSql('UPDATE `article_prepa` SET quantite = ' + quantite + ' WHERE id = ' + id_article, []))),
             map(() => undefined)
@@ -1005,7 +1111,7 @@ export class SqliteProvider {
 
     public deleteById(table, id): Observable<undefined> {
         return this.db$.pipe(
-            flatMap((db) => from(db.executeSql('DELETE FROM ' + table + 'WHERE id = ' + id, []))),
+            flatMap((db) => from(db.executeSql(`DELETE FROM ${table} WHERE id = ${id}`, []))),
             map(() => undefined)
         );
     }
@@ -1016,4 +1122,5 @@ export class SqliteProvider {
             map(() => undefined)
         );
     }
+
 }

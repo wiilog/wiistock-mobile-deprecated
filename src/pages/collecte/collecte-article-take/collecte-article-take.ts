@@ -19,7 +19,7 @@ export class CollecteArticleTakePage {
         public navCtrl: NavController,
         public navParams: NavParams,
         public toastController: ToastController) {
-        if (typeof(navParams.get('article') !== undefined)) {
+        if (navParams.get('article') !== undefined) {
             this.article = navParams.get('article');
             this.quantite = this.article.quantite;
             this.collecte = navParams.get('collecte');

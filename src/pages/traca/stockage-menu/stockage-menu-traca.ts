@@ -18,8 +18,8 @@ export class StockageMenuPageTraca {
     mvts: MouvementTraca[];
     unfinishedMvts: boolean;
     type: string;
-    sqlProvider : SqliteProvider;
-    addMvtURL : string = '/api/addMouvementTraca';
+    sqlProvider: SqliteProvider;
+    addMvtURL: string = '/api/addMouvementTraca';
 
     constructor(public navCtrl: NavController,
                 public navParams: NavParams,
@@ -36,7 +36,7 @@ export class StockageMenuPageTraca {
         this.sqlProvider.priseAreUnfinished().then((value) => {
             this.unfinishedMvts = value;
             this.type = this.network.type;
-            if(this.type !== "unknown" && this.type !== "none" && this.type !== undefined){
+            if (this.type !== "unknown" && this.type !== "none" && this.type !== undefined) {
                 this.synchronise();
             }
         });
@@ -63,10 +63,12 @@ export class StockageMenuPageTraca {
                         let toInsert = {
                             mouvements: data,
                             apiKey: result
-                    };
+                        };
                         this.http.post<any>(url, toInsert).subscribe((resp) => {
                             if (resp.success) {
-                                this.showToast(resp.data.status);
+                                this.sqlProvider.cleanTable('`mouvement_traca`').subscribe(() => {
+                                    this.showToast(resp.data.status);
+                                });
                             }
                         });
                     });
