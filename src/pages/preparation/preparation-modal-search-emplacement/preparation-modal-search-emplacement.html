@@ -18,7 +18,7 @@
 <ion-content padding>
     <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
     <ion-list class="list-emplacement">
-        <ion-item *ngFor="let emplacement of emplacements" (click)="selectEmplacement(emplacement)">
+        <ion-item *ngFor="let emplacement of emplacements" (click)="onEmplacementSelected(emplacement)">
             {{emplacement.label}}
         </ion-item>
     </ion-list>

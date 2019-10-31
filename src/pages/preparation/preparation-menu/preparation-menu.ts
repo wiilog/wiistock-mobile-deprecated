@@ -1,18 +1,10 @@
 import {Component, ViewChild} from '@angular/core';
-import {Content, IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
+import {Content, IonicPage, Navbar, NavController} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {Preparation} from '@app/entities/preparation';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {HttpClient} from '@angular/common/http';
 import {PreparationArticlesPage} from '@pages/preparation/preparation-articles/preparation-articles';
-import {Network} from '@ionic-native/network';
 
-/**
- * Generated class for the PreparationMenuPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
 
 @IonicPage()
 @Component({
@@ -23,16 +15,10 @@ export class PreparationMenuPage {
     @ViewChild(Navbar) navBar: Navbar;
     @ViewChild(Content) content: Content;
     preparations: Array<Preparation>;
-    dataApi: string = '/api/getPreparations';
     hasLoaded: boolean;
 
-    constructor(
-        public navCtrl: NavController,
-        public navParams: NavParams,
-        public sqlLiteProvider: SqliteProvider,
-        public toastController: ToastController,
-        public http: HttpClient,
-        public network: Network) {
+    public constructor(private navCtrl: NavController,
+                       private sqlLiteProvider: SqliteProvider) {
     }
 
     goHome() {
@@ -41,14 +27,6 @@ export class PreparationMenuPage {
 
     ionViewDidEnter() {
         this.synchronise(true);
-        this.setBackButtonAction();
-    }
-
-    setBackButtonAction() {
-        this.navBar.backButtonClick = () => {
-            //Write here wherever you wanna do
-            this.navCtrl.setRoot(MenuPage);
-        }
     }
 
     synchronise(fromStart: boolean) {
@@ -62,18 +40,7 @@ export class PreparationMenuPage {
         })
     }
 
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
-    }
-
     goToArticles(preparation) {
         this.navCtrl.push(PreparationArticlesPage, {preparation: preparation});
     }
-
 }

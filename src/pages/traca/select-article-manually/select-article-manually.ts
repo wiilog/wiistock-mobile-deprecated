@@ -50,5 +50,4 @@ export class SelectArticleManuallyPage {
             event.component.endSearch();
         });
     }
-
 }

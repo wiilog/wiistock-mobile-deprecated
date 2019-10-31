@@ -42,7 +42,6 @@ export class PreparationRefArticlesPage {
                        public toastService: ToastService,
                        public sqliteProvider: SqliteProvider,
                        public http: HttpClient,
-                       private barcodeScanner: BarcodeScannerManagerService,
                        private barcodeScannerManager: BarcodeScannerManagerService) {
         this.articles = [];
         this.articlesToShow = [];
@@ -72,7 +71,7 @@ export class PreparationRefArticlesPage {
     }
 
     public scan(): void {
-        this.barcodeScanner.scan().subscribe(barcode => {
+        this.barcodeScannerManager.scan().subscribe(barcode => {
             this.testIfBarcodeEquals(barcode);
         });
     }
@@ -91,13 +90,15 @@ export class PreparationRefArticlesPage {
     public onArticleSearch(event: { component: IonicSelectableComponent, text: string }) {
         let text = event.text.trim();
         event.component.startSearch();
-        this.sqliteProvider.findBy('article_prepa_by_ref_article', [
-            ...PreparationRefArticlesPage.LIST_WHERE_CLAUSE(this.refArticle.reference),
-            `reference LIKE '%${text}%'`
-        ]).subscribe((items) => {
-            this.articlesToShow = items;
-            event.component.endSearch();
-        });
+        this.sqliteProvider
+            .findBy('article_prepa_by_ref_article', [
+                ...PreparationRefArticlesPage.LIST_WHERE_CLAUSE(this.refArticle.reference),
+                `reference LIKE '%${text}%'`
+            ])
+            .subscribe((items) => {
+                this.articlesToShow = items;
+                event.component.endSearch();
+            });
     }
 
     public selectArticle(selectedArticle: ArticlePrepaByRefArticle): void {
@@ -109,7 +110,6 @@ export class PreparationRefArticlesPage {
             started: this.navParams.get('started'),
             valid: this.navParams.get('valid'),
             selectArticle: (selectedQuantity: number) => {
-                console.log('REF ARTICLE ---> ', selectedArticle);
                 const selectArticle = this.navParams.get('selectArticle');
                 selectArticle(selectedQuantity, selectedArticle);
                 this.navCtrl.pop();
@@ -124,8 +124,6 @@ export class PreparationRefArticlesPage {
     refresh() {
         this.toastService.showToast('Quantité bien prélevée.')
     }
-
-
 
     goHome() {
         this.navCtrl.setRoot(MenuPage);

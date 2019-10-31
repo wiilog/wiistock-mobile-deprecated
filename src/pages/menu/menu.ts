@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {App, NavController, Content, NavParams, Slides} from 'ionic-angular';
+import {App, NavController, Content, NavParams, Slides, IonicPage} from 'ionic-angular';
 import {TracaMenuPage} from "../traca/traca-menu/traca-menu"
 import {Page} from "ionic-angular/navigation/nav-util";
 import {PreparationMenuPage} from "../preparation/preparation-menu/preparation-menu";
@@ -15,6 +15,7 @@ import {Network} from "@ionic-native/network";
 import {ToastService} from "@app/services/toast.service";
 import {HttpClient} from "@angular/common/http";
 
+@IonicPage()
 @Component({
     selector: 'page-menu',
     templateUrl: 'menu.html'
@@ -48,7 +49,10 @@ export class MenuPage {
         ];
     }
 
-    ionViewWillEnter() {
+    ionViewDidEnter() {
+        console.log('APP did enter')
+    }
+    ionViewWillEnter() {console.log('APP will enter');
         if (this.navParams.get('needReload') === undefined) {
             this.synchronise();
         } else {

@@ -3,11 +3,11 @@ import {IonicPage, ModalController, Navbar, NavController, NavParams} from 'ioni
 import {MenuPage} from '@pages/menu/menu';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {Preparation} from '@app/entities/preparation';
-import {PreparationMenuPage} from '@pages/preparation/preparation-menu/preparation-menu';
 import {HttpClient} from '@angular/common/http';
 import {ToastService} from '@app/services/toast.service';
+import {Subscription} from 'rxjs';
+import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 
 
 @IonicPage()
@@ -25,37 +25,39 @@ export class PreparationEmplacementPage {
 
     private isLoaded: boolean;
 
+    private zebraScannerSubscription: Subscription;
+    private validatePrepa: () => void;
+
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
                        public sqliteProvider: SqliteProvider,
-                       public barcodeScanner: BarcodeScanner,
+                       public barcodeScannerManager: BarcodeScannerManagerService,
                        public http: HttpClient,
                        public modal: ModalController,
                        private toastService: ToastService) {
-
         this.isLoaded = false;
+    }
 
+    public ionViewWillEnter(): void {
+        this.preparation = this.navParams.get('preparation');
+        this.validatePrepa = this.navParams.get('validatePrepa');
         this.sqliteProvider.findAll('emplacement').subscribe((value) => {
             this.db_locations = value;
-            if (typeof (navParams.get('preparation')) !== undefined) {
-                this.preparation = navParams.get('preparation');
-            }
-            if (typeof (navParams.get('emplacement')) !== undefined) {
-                this.emplacement = navParams.get('emplacement');
-            }
         });
-        let instance = this;
-        (<any>window).plugins.intentShim.registerBroadcastReceiver({
-                filterActions: [
-                    'io.ionic.starter.ACTION'
-                ],
-                filterCategories: [
-                    'android.intent.category.DEFAULT'
-                ]
-            },
-            function (intent) {
-                instance.testIfBarcodeEquals(intent.extras['com.symbol.datawedge.data_string']);
-            });
+        this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
+            this.testIfBarcodeEquals(barcode);
+        });
+    }
+
+    public ionViewWillLeave(): void {
+        if (this.zebraScannerSubscription) {
+            this.zebraScannerSubscription.unsubscribe();
+            this.zebraScannerSubscription = undefined;
+        }
+    }
+
+    public ionViewCanLeave(): boolean {
+        return this.barcodeScannerManager.canGoBack;
     }
 
     goHome() {
@@ -63,18 +65,20 @@ export class PreparationEmplacementPage {
     }
 
     searchEmplacementModal() {
-        const myModal = this.modal.create('PreparationModalSearchEmplacementPage', {
-            preparation : this.preparation
-        });
-        myModal.present();
-    }
-
-    ionViewDidEnter() {
+        if (!this.isLoaded) {
+            const myModal = this.modal.create('PreparationModalSearchEmplacementPage', {
+                preparation: this.preparation,
+                selectEmplacement: (emplacement) => {
+                    this.emplacement = emplacement;
+                }
+            });
+            myModal.present();
+        }
     }
 
     scan() {
-        this.barcodeScanner.scan().then(res => {
-            this.testIfBarcodeEquals(res.text);
+        this.barcodeScannerManager.scan().subscribe(barcode => {
+            this.testIfBarcodeEquals(barcode);
         });
     }
 
@@ -84,10 +88,6 @@ export class PreparationEmplacementPage {
 
             if (foundEmplacement) {
                 this.emplacement = foundEmplacement;
-                this.navCtrl.push(PreparationEmplacementPage, {
-                    preparation: this.preparation,
-                    emplacement: foundEmplacement
-                })
             }
             else {
                 this.toastService.showToast('Veuillez flasher ou sélectionner un emplacement connu.');
@@ -130,7 +130,7 @@ export class PreparationEmplacementPage {
                                                             this.sqliteProvider.deletePreparations(params.preparations).then(() => {
                                                                 this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
                                                                     this.isLoaded = false;
-                                                                    this.navCtrl.setRoot(PreparationMenuPage);
+                                                                    this.validatePrepa();
                                                                 });
                                                             });
                                                         }
@@ -141,7 +141,7 @@ export class PreparationEmplacementPage {
                                                     },
                                                     error => {
                                                         this.isLoaded = false;
-                                                        this.navCtrl.setRoot(PreparationMenuPage);
+                                                        this.validatePrepa();
                                                     }
                                                 );
                                             });
@@ -161,5 +161,4 @@ export class PreparationEmplacementPage {
             }
         }
     }
-
 }

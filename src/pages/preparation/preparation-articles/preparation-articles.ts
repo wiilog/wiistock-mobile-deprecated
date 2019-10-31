@@ -10,7 +10,7 @@ import {HttpClient} from '@angular/common/http';
 import {PreparationEmplacementPage} from '@pages/preparation/preparation-emplacement/preparation-emplacement';
 import moment from 'moment';
 import {PreparationRefArticlesPage} from '@pages/preparation/preparation-ref-articles/preparation-ref-articles';
-import {Observable} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {flatMap, map} from 'rxjs/operators';
 import {ArticlePrepaByRefArticle} from '@app/entities/article-prepa-by-ref-article';
 import {of} from 'rxjs/observable/of';
@@ -35,33 +35,37 @@ export class PreparationArticlesPage {
     public apiStartPrepa = '/api/beginPrepa';
     public isValid: boolean = true;
 
+    private zebraScannerSubscription: Subscription;
+
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
                        public sqliteProvider: SqliteProvider,
                        public http: HttpClient,
-                       private barcodeScanner: BarcodeScannerManagerService,
+                       private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService) {
-
-        let instance = this;
-        (<any>window).plugins.intentShim.registerBroadcastReceiver({
-                filterActions: [
-                    'io.ionic.starter.ACTION'
-                ],
-                filterCategories: [
-                    'android.intent.category.DEFAULT'
-                ]
-            },
-            function (intent) {
-                instance.testIfBarcodeEquals(intent.extras['com.symbol.datawedge.data_string']);
-            });
     }
 
-    public ionViewDidEnter(): void {
+    public ionViewWillEnter(): void {
         this.initializeScreen();
+
+        this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
+            this.testIfBarcodeEquals(barcode);
+        });
+    }
+
+    public ionViewWillLeave(): void {
+        if (this.zebraScannerSubscription) {
+            this.zebraScannerSubscription.unsubscribe();
+            this.zebraScannerSubscription = undefined;
+        }
+    }
+
+    public ionViewCanLeave(): boolean {
+        return this.barcodeScannerManager.canGoBack;
     }
 
     public scan(): void {
-        this.barcodeScanner.scan().subscribe(barcode => {
+        this.barcodeScannerManager.scan().subscribe(barcode => {
             this.testIfBarcodeEquals(barcode);
         });
     }
@@ -178,7 +182,6 @@ export class PreparationArticlesPage {
         if (preparation) {
             this.preparation = preparation;
             this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
-                console.log(articles);
                 this.articlesNT = articles.filter(article => article.has_moved === 0);
                 this.articlesT = articles.filter(article => article.has_moved === 1);
                 if (this.articlesT.length > 0) {
@@ -227,7 +230,12 @@ export class PreparationArticlesPage {
         if (this.articlesNT.length > 0) {
             this.toastService.showToast('Veuillez traiter tous les articles concernés');
         } else {
-            this.navCtrl.push(PreparationEmplacementPage, {preparation: this.preparation})
+            this.navCtrl.push(PreparationEmplacementPage, {
+                preparation: this.preparation,
+                validatePrepa: () => {
+                    this.navCtrl.pop();
+                }
+            })
         }
     }
 

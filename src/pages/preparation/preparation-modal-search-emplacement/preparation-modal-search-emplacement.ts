@@ -1,16 +1,8 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams, ViewController} from 'ionic-angular';
-import {Emplacement} from "../../../app/entities/emplacement";
-import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import {PreparationEmplacementPage} from "../preparation-emplacement/preparation-emplacement";
-import {Preparation} from "../../../app/entities/preparation";
+import {IonicPage, ViewController} from 'ionic-angular';
+import {Emplacement} from '@app/entities/emplacement';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
 
-/**
- * Generated class for the PreparationModalSearchEmplacementPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
 
 @IonicPage()
 @Component({
@@ -19,35 +11,30 @@ import {Preparation} from "../../../app/entities/preparation";
 })
 export class PreparationModalSearchEmplacementPage {
 
-    emplacements: Array<Emplacement>;
-    emplacement: Emplacement;
-    filterString = "";
-    preparation: Preparation;
-    hasLoaded: boolean;
+    public emplacements: Array<Emplacement>;
+    public emplacement: Emplacement;
+    public filterString = "";
+    public hasLoaded: boolean;
+    public selectEmplacement: (emplacement) => void;
 
-    constructor(public navCtrl: NavController,
-                public navParams: NavParams,
-                public sqliteProvider: SqliteProvider,
-                public view: ViewController) {
+    public constructor(private sqliteProvider: SqliteProvider,
+                       private view: ViewController) {
         this.hasLoaded = false;
+    }
+
+    public ionViewWillEnter(): void {
         this.sqliteProvider.findAll('`emplacement`').subscribe((emplacements) => {
             this.emplacements = emplacements;
-            if (typeof (navParams.get('preparation')) !== undefined) {
-                this.preparation = navParams.get('preparation');
-                this.hasLoaded = true;
-            }
+            this.hasLoaded = true;
         })
     }
 
-    selectEmplacement(emplacement: Emplacement) {
-        this.emplacement = emplacement;
-        this.navCtrl.setRoot(PreparationEmplacementPage, {
-            preparation: this.preparation,
-            emplacement: this.emplacement
-        })
+    public onEmplacementSelected(emplacement: Emplacement): void {
+        this.selectEmplacement(emplacement);
+        this.closeModal();
     }
 
-    searchEmplacement() {
+    public searchEmplacement(): void {
         this.hasLoaded = false;
         this.sqliteProvider.findAll('`emplacement`').subscribe((emplacements) => {
             this.emplacements = emplacements.filter(emp =>
@@ -59,7 +46,7 @@ export class PreparationModalSearchEmplacementPage {
         })
     }
 
-    clearSearch() {
+    public clearSearch(): void {
         this.filterString = "";
         this.hasLoaded = false;
         this.sqliteProvider.findAll('`emplacement`').subscribe((emplacements) => {
@@ -68,7 +55,7 @@ export class PreparationModalSearchEmplacementPage {
         })
     }
 
-    closeModal() {
+    public closeModal(): void {
         this.view.dismiss();
     }
 
