@@ -1,5 +1,14 @@
 import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
-import {Content, IonicPage, ModalController, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
+import {
+    Content,
+    IonicPage,
+    ModalController,
+    Navbar,
+    NavController,
+    NavParams,
+    Platform,
+    ToastController
+} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
 import {Anomalie} from '@app/entities/anomalie';
@@ -10,6 +19,7 @@ import {Article} from '@app/entities/article';
 import {Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
+import {ToastService} from "@app/services/toast.service";
 
 
 @IonicPage()
@@ -33,20 +43,18 @@ export class InventaireAnomaliePage {
 
     private zebraScannerSubscription: Subscription;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
+    public constructor(public navParams: NavParams,
                        public sqlLiteProvider: SqliteProvider,
                        public http: HttpClient,
                        public toastController: ToastController,
-                       public barcodeScanner: BarcodeScanner,
                        private changeDetector: ChangeDetectorRef,
                        private modalController: ModalController,
-                       private barcodeScannerManager: BarcodeScannerManagerService) {}
+                       private barcodeScannerManager: BarcodeScannerManagerService,
+                       private toast: ToastService) {}
 
 
     public ionViewWillEnter(): void {
         this.synchronize();
-
         this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$
             .pipe(filter(() => this.isLoaded && this.anomalies && this.anomalies.length > 0 ))
             .subscribe((barcode: string) => {
@@ -57,6 +65,10 @@ export class InventaireAnomaliePage {
                     this.checkBarcodeIsLocation(barcode);
                 }
             });
+    }
+
+    public ionViewCanLeave(): boolean {
+        return this.barcodeScannerManager.canGoBack;
     }
 
     public ionViewDidLeave(): void {
@@ -91,10 +103,10 @@ export class InventaireAnomaliePage {
                                     if (resp.success) {
                                         // supprime les anomalies traitée de la base
                                         this.sqlLiteProvider.deleteAnomalies(anomalies);
-                                        this.showToast(resp.data.status);
+                                        this.toast.showToast(resp.data.status);
                                     } else {
                                         this.isLoaded = true;
-                                        this.showToast('Une erreur est survenue lors de la mise à jour des anomalies.');
+                                        this.toast.showToast('Une erreur est survenue lors de la mise à jour des anomalies.');
                                     }
                                     this.locations = locations;
                                     this.isLoaded = true;
@@ -104,31 +116,21 @@ export class InventaireAnomaliePage {
                         });
                     });
                 } else {
-                    this.showToast('Veuillez configurer votre URL dans les paramètres.')
+                    this.toast.showToast('Veuillez configurer votre URL dans les paramètres.')
                 }
             }
         );
     }
 
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
-    }
-
     scanLocation() {
-        this.barcodeScanner.scan().then(res => {
-            this.checkBarcodeIsLocation(res.text);
+        this.barcodeScannerManager.scan().subscribe(res => {
+            this.checkBarcodeIsLocation(res);
         });
     }
 
     scanRef() {
-        this.barcodeScanner.scan().then(res => {
-            this.checkBarcodeIsRef(res.text);
+        this.barcodeScannerManager.scan().subscribe(res => {
+            this.checkBarcodeIsRef(res);
         });
     }
 
@@ -138,7 +140,7 @@ export class InventaireAnomaliePage {
             this.anomaliesByLocation = this.anomalies.filter(anomaly => (anomaly.location === this.location));
             this.changeDetector.detectChanges();
         } else {
-            this.showToast('Ce code-barre ne correspond à aucun emplacement.');
+            this.toast.showToast('Ce code-barre ne correspond à aucun emplacement.');
         }
     }
 
@@ -150,7 +152,7 @@ export class InventaireAnomaliePage {
             this.changeDetector.detectChanges();
             this.openModalQuantity(this.article);
         } else {
-            this.showToast('Ce code-barre ne correspond à aucune référence ou article.');
+            this.toast.showToast('Ce code-barre ne correspond à aucune référence ou article.');
         }
     }
 
@@ -173,7 +175,7 @@ export class InventaireAnomaliePage {
                             if (resp.success) {
                                 // supprime l'anomalie traitée de la base
                                 this.sqlLiteProvider.deleteById(`anomalie_inventaire`, this.anomaly.id);
-                                this.showToast(resp.data.status);
+                                this.toast.showToast(resp.data.status);
                                 // supprime l'anomalie de la liste
                                 this.anomaliesByLocation = this.anomaliesByLocation.filter(anomaly => parseInt(anomaly.treated) !== 1);
                                 // si liste vide retour aux emplacements
@@ -184,7 +186,7 @@ export class InventaireAnomaliePage {
                         });
                     });
                 } else {
-                    this.showToast('Veuillez configurer votre URL dans les paramètres.')
+                    this.toast.showToast('Veuillez configurer votre URL dans les paramètres.')
                 }
             });
         });

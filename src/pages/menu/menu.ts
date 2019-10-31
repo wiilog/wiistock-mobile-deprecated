@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {App, NavController, Content, NavParams, Slides} from 'ionic-angular';
+import {App, NavController, Content, NavParams, Slides, Platform, ViewController} from 'ionic-angular';
 import {TracaMenuPage} from "../traca/traca-menu/traca-menu"
 import {Page} from "ionic-angular/navigation/nav-util";
 import {PreparationMenuPage} from "../preparation/preparation-menu/preparation-menu";
@@ -28,14 +28,23 @@ export class MenuPage {
     nbArtInvent: number;
     loading: boolean;
     apiUrl : string = '/api/getData' ;
-
+    private static readonly SUB_MENUS: Array<string> = [
+        InventaireMenuPage.name,
+        ManutentionMenuPage.name,
+        TracaMenuPage.name,
+        LivraisonMenuPage.name,
+        PreparationMenuPage.name,
+        CollecteMenuPage.name,
+    ];
     constructor(public app: App,
                 public navCtrl: NavController,
                 public navParams: NavParams,
                 public sqliteProvider: SqliteProvider,
                 public network: Network,
                 public toastService: ToastService,
-                public http: HttpClient) {
+                public http: HttpClient,
+                public platform: Platform,
+                public viewController: ViewController) {
 
         this.items = [
             {title: 'Traça', icon: 'cube', page: TracaMenuPage, img: null},
@@ -49,6 +58,12 @@ export class MenuPage {
     }
 
     ionViewWillEnter() {
+        console.log(MenuPage.SUB_MENUS);
+        this.platform.backButton.subscribe(_ => {
+            if (MenuPage.SUB_MENUS.some(p => p === this.navCtrl.getActive().name)) {
+                this.synchronise();
+            }
+        });
         if (this.navParams.get('needReload') === undefined) {
             this.synchronise();
         } else {

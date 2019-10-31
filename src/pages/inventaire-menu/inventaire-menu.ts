@@ -1,5 +1,5 @@
 import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
-import {Content, IonicPage, Navbar, NavController, NavParams, ToastController, ModalController} from 'ionic-angular';
+import {Content, IonicPage, Navbar, NavController, NavParams, ModalController} from 'ionic-angular';
 import {ModalQuantityPage} from '@pages/inventaire-menu/modal-quantity';
 import {MenuPage} from '@pages/menu/menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
@@ -8,10 +8,10 @@ import {ArticleInventaire} from '@app/entities/article-inventaire';
 import {SaisieInventaire} from '@app/entities/saisie-inventaire';
 import {InventaireAnomaliePage} from '@pages/inventaire-anomalie/inventaire-anomalie';
 import moment from 'moment';
-import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {filter} from 'rxjs/operators';
 import {Observable, ReplaySubject, Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
+import {ToastService} from "@app/services/toast.service";
 
 
 @IonicPage()
@@ -38,11 +38,10 @@ export class InventaireMenuPage {
                        public navParams: NavParams,
                        public sqlLiteProvider: SqliteProvider,
                        public http: HttpClient,
-                       public toastController: ToastController,
-                       private barcodeScanner: BarcodeScanner,
                        private modalController: ModalController,
                        private changeDetector: ChangeDetectorRef,
-                       private barcodeScannerManager: BarcodeScannerManagerService) {
+                       private barcodeScannerManager: BarcodeScannerManagerService,
+                       private toast : ToastService) {
         this.sqlLiteProvider.getInventoryManagerRight().then(isInventoryManager => {
             this.isInventoryManager = isInventoryManager;
         });
@@ -54,8 +53,6 @@ export class InventaireMenuPage {
 
     public ionViewWillEnter(): void {
         this.synchronize();
-        this.setBackButtonAction();
-
         this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$
             .pipe(filter(() => (this.isLoaded && this.articles && this.articles.length > 0)))
             .subscribe((barcode: string) => {
@@ -74,12 +71,6 @@ export class InventaireMenuPage {
         }
     }
 
-    setBackButtonAction() {
-        this.navBar.backButtonClick = () => {
-            this.navCtrl.setRoot(MenuPage);
-        }
-    }
-
     addInventoryEntries() : Observable<any> {
         let ret$: ReplaySubject<any> = new ReplaySubject(1);
         this.sqlLiteProvider.getAPI_URL().subscribe(baseUrl => {
@@ -95,7 +86,7 @@ export class InventaireMenuPage {
                             this.http.post<any>(url, params).subscribe(resp => {
                                 if (resp.success) {
                                     this.sqlLiteProvider.cleanTable('`saisie_inventaire`');
-                                    this.showToast(resp.data.status);
+                                    this.toast.showToast(resp.data.status);
                                     ret$.next(undefined);
                                 } else {
                                     ret$.next(undefined);
@@ -108,7 +99,7 @@ export class InventaireMenuPage {
                 })
             } else {
                 ret$.next(undefined);
-                this.showToast('Veuillez configurer votre URL dans les paramètres.')
+                this.toast.showToast('Veuillez configurer votre URL dans les paramètres.')
             }
         });
         return ret$;
@@ -132,15 +123,6 @@ export class InventaireMenuPage {
         });
     }
 
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
-    }
 
     async openModalQuantity(article) {
         let modal = this.modalController.create(ModalQuantityPage, {article: article});
@@ -178,9 +160,14 @@ export class InventaireMenuPage {
     }
 
     scanLocation() {
-        this.barcodeScanner.scan().then(res => {
-            this.checkBarcodeIsLocation(res.text);
+        this.barcodeScannerManager.scan().subscribe(res => {
+            this.checkBarcodeIsLocation(res);
         });
+    }
+
+
+    public ionViewCanLeave(): boolean {
+        return this.barcodeScannerManager.canGoBack;
     }
 
     public checkBarcodeIsLocation(barcode: string): void {
@@ -189,13 +176,13 @@ export class InventaireMenuPage {
             this.articlesByLocation = this.articles.filter(article => (article.location === this.location));
             this.changeDetector.detectChanges();
         } else {
-            this.showToast('Ce code-barre ne correspond à aucun emplacement.');
+            this.toast.showToast('Ce code-barre ne correspond à aucun emplacement.');
         }
     }
 
     scanRef() {
-        this.barcodeScanner.scan().then(res => {
-            this.checkBarcodeIsRef(res.text);
+        this.barcodeScannerManager.scan().subscribe(res => {
+            this.checkBarcodeIsRef(res);
         });
     }
 
@@ -205,7 +192,7 @@ export class InventaireMenuPage {
             this.changeDetector.detectChanges();
             this.openModalQuantity(this.article);
         } else {
-            this.showToast('Ce code-barre ne correspond à aucune référence ou article sur cet emplacement.');
+            this.toast.showToast('Ce code-barre ne correspond à aucune référence ou article sur cet emplacement.');
         }
     }
 
