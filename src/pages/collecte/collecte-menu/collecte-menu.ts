@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {Content, IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
+import {Content, IonicPage, Navbar, NavController, NavParams, Platform} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {CollecteArticlesPage} from '@pages/collecte/collecte-articles/collecte-articles';
@@ -20,7 +20,8 @@ export class CollecteMenuPage {
     constructor(
         public navCtrl: NavController,
         public navParams: NavParams,
-        public sqlLiteProvider: SqliteProvider) {
+        public sqlLiteProvider: SqliteProvider,
+        public platform : Platform) {
     }
 
     goHome() {
@@ -29,6 +30,7 @@ export class CollecteMenuPage {
 
     ionViewWillEnter() {
         this.synchronise(true);
+        this.platform.registerBackButtonAction(_ => this.navCtrl.setRoot(MenuPage));
     }
 
     synchronise(fromStart: boolean) {

@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams} from 'ionic-angular';
+import {IonicPage, NavController, NavParams, Platform} from 'ionic-angular';
 import {PriseEmplacementPageTraca} from '@pages/traca/prise-emplacement/prise-emplacement-traca';
 import {DeposeEmplacementPageTraca} from '@pages/traca/depose-emplacement/depose-emplacement-traca';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
@@ -26,14 +26,15 @@ export class TracaMenuPage {
                 private sqlProvider: SqliteProvider,
                 private http: HttpClient,
                 private toastService: ToastService,
-                public network: Network) {
+                public network: Network,
+                public platform : Platform) {
     }
 
     public ionViewWillEnter(): void {
         this.sqlProvider.findAll('`mouvement_traca`').subscribe((value) => {
             this.mvts = value;
         });
-
+        this.platform.registerBackButtonAction(_ => this.navCtrl.setRoot(MenuPage));
         this.sqlProvider.priseAreUnfinished().then((value) => {
             this.unfinishedMvts = value;
             this.type = this.network.type;

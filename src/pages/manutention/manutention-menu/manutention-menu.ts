@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {Content, IonicPage, Navbar, NavController} from 'ionic-angular';
+import {Content, IonicPage, Navbar, NavController, Platform} from 'ionic-angular';
 import {Manutention} from '@app/entities/manutention';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {MenuPage} from '@pages/menu/menu';
@@ -25,7 +25,7 @@ export class ManutentionMenuPage {
     user: string;
 
     public constructor(private navCtrl: NavController,
-                       private sqliteProvider: SqliteProvider) {
+                       private sqliteProvider: SqliteProvider, private platform : Platform) {
     }
 
     goHome() {
@@ -34,6 +34,7 @@ export class ManutentionMenuPage {
 
     ionViewWillEnter() {
         this.synchronise(true);
+        this.platform.registerBackButtonAction(_ => this.navCtrl.setRoot(MenuPage));
     }
 
     synchronise(fromStart: boolean) {

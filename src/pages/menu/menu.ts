@@ -56,6 +56,7 @@ export class MenuPage {
         }
         this.refreshCounters();
     }
+
     refreshCounters() {
         this.sqliteProvider.findAll('`preparation`').subscribe((preparations: Array<Preparation>) => {
             this.nbPrep = preparations.filter(p => p.date_end === null).length;

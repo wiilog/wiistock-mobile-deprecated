@@ -1,8 +1,9 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams} from 'ionic-angular';
+import {IonicPage, NavController, NavParams, Platform} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
 import {ToastService} from '@app/services/toast.service';
+import {MenuPage} from "@pages/menu/menu";
 
 
 @IonicPage()
@@ -20,7 +21,8 @@ export class ParamsPage {
                        public navParams: NavParams,
                        public sqLiteProvider: SqliteProvider,
                        public http: HttpClient,
-                       private toastService: ToastService) {
+                       private toastService: ToastService,
+                       private platform : Platform) {
         this.URL = '';
         this.isLoading = true;
     }
@@ -29,6 +31,7 @@ export class ParamsPage {
         this.sqLiteProvider.getAPI_URL().subscribe((result) => {
             this.URL = !result ? '' : result;
             this.isLoading = false;
+            this.platform.registerBackButtonAction(_ => this.navCtrl.setRoot(MenuPage));
         });
     }
 
