@@ -15,6 +15,7 @@ import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
 import {HttpClient} from '@angular/common/http';
 import {Subscription} from 'rxjs';
+import {filter} from 'rxjs/operators';
 
 
 @Component({
@@ -64,11 +65,11 @@ export class MenuPage {
     }
 
     private ionViewWillEnter(): void {
-        this.backButtonSubscription = this.platform.backButton.subscribe(() => {
-            if (MenuPage.SUB_MENUS.some(p => p === this.navCtrl.getActive().name)) {
+        this.backButtonSubscription = this.platform.backButton
+            .pipe(filter(() => (MenuPage.SUB_MENUS.some(p => p === this.navCtrl.getActive().name))))
+            .subscribe(() => {
                 this.synchronise();
-            }
-        });
+            });
 
         if (this.navParams.get('needReload') === undefined) {
             this.synchronise();
