@@ -1,11 +1,11 @@
 import {Component, ViewChild} from '@angular/core';
 import {Content, IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
-import {MenuPage} from "../../menu/menu";
-import {Preparation} from "../../../app/entities/preparation";
-import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import {HttpClient} from "@angular/common/http";
-import {PreparationArticlesPage} from "../preparation-articles/preparation-articles";
-import {Network} from "@ionic-native/network";
+import {MenuPage} from '@pages/menu/menu';
+import {Preparation} from '@app/entities/preparation';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {HttpClient} from '@angular/common/http';
+import {PreparationArticlesPage} from '@pages/preparation/preparation-articles/preparation-articles';
+import {Network} from '@ionic-native/network';
 
 /**
  * Generated class for the PreparationMenuPage page.
@@ -54,7 +54,9 @@ export class PreparationMenuPage {
     synchronise(fromStart: boolean) {
         this.hasLoaded = false;
         this.sqlLiteProvider.findAll('`preparation`').subscribe((preparations) => {
-            this.preparations = preparations.filter(p => p.date_end === null);
+            this.preparations = preparations
+                .filter(p => (p.date_end === null))
+                .sort(({type : type1}, {type : type2}) => (type1 > type2) ? 1 : ((type2 > type1) ? -1 : 0));
             this.hasLoaded = true;
             this.content.resize();
         })

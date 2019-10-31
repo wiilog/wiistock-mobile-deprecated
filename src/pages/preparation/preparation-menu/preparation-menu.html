@@ -22,8 +22,13 @@
         <ion-grid>
             <button (click)="goToArticles(preparation)" class="list" ion-item *ngFor="let preparation of preparations">
                 <ion-row>
-                    <ion-col col-6>{{ preparation.numero }}</ion-col>
-                    <ion-col class="text-right" col-6>{{ preparation.destination }}</ion-col>
+                    <ion-col>
+                        <p class="title-tmp">Préparation {{ preparation.numero }}</p>
+                        <div class="sub">
+                            <p>Emplacement : {{ preparation.destination }}</p>
+                            <p>Flux : {{ preparation.type }}</p>
+                        </div>
+                    </ion-col>
                 </ion-row>
             </button>
         </ion-grid>

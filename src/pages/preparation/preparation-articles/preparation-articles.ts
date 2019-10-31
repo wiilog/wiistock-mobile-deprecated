@@ -66,7 +66,7 @@ export class PreparationArticlesPage {
         });
     }
 
-    public saveSelectedArticle(selectedArticle: ArticlePrepa|ArticlePrepaByRefArticle, selectedQuantity: number): void {
+    public saveSelectedArticle(selectedArticle: ArticlePrepa | ArticlePrepaByRefArticle, selectedQuantity: number): void {
         // if preparation is valid
         if (this.isValid) {
             // check if article is managed by 'article'
@@ -93,40 +93,21 @@ export class PreparationArticlesPage {
                             flatMap(() => this.sqliteProvider.updateArticlePrepaQuantity((selectedArticle as ArticlePrepa).id, (selectedArticle as ArticlePrepa).quantite - selectedQuantity)),
                         )
                         .subscribe(() => {
-                            this.updateLists();
+                            this.updateViewLists();
                         });
-                }
-                else {
+                } else {
                     if (isSelectableByUser) {
                         this.moveArticle(selectedArticle, selectedQuantity)
                             .subscribe(() => {
                                 this.updateViewLists();
                             });
-                    }
-                    else {
-                        let mouvement: Mouvement = {
-                            id: null,
-                            reference: selectedArticle.reference,
-                            quantity: selectedQuantity,
-                            date_pickup: moment().format(),
-                            location_from: (selectedArticle as ArticlePrepa).emplacement,
-                            date_drop: null,
-                            location: null,
-                            type: 'prise-dépose',
-                            is_ref: (selectedArticle as ArticlePrepa).is_ref,
-                            id_article_prepa: selectedArticle.id,
-                            id_prepa: (selectedArticle as ArticlePrepa).id_prepa,
-                            id_article_livraison: null,
-                            id_livraison: null,
-                            id_article_collecte: null,
-                            id_collecte: null,
-                        };
+                    } else {
                         // we update value quantity of selected article
                         this.sqliteProvider
                             .updateArticlePrepaQuantity((selectedArticle as ArticlePrepa).id, (selectedArticle as ArticlePrepa).quantite - selectedQuantity)
-                            .pipe(flatMap(() => this.sqliteProvider.insert('`mouvement`', mouvement)))
+                            .pipe(flatMap(() => this.moveArticle(selectedArticle, selectedQuantity)))
                             .subscribe(() => {
-                                this.updateLists();
+                                this.updateViewLists();
                             })
                     }
                 }
@@ -174,8 +155,7 @@ export class PreparationArticlesPage {
                         .updateArticlePrepaQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite)
                         .pipe(flatMap(() => this.sqliteProvider.deleteById('`article_prepa`', (selectedArticle as ArticlePrepa).id)))
                         .subscribe(() => this.updateViewLists());
-                }
-                else {
+                } else {
                     this.moveArticle(selectedArticle)
                         .subscribe(() => {
                             this.updateViewLists();
@@ -198,6 +178,7 @@ export class PreparationArticlesPage {
         if (preparation) {
             this.preparation = preparation;
             this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
+                console.log(articles);
                 this.articlesNT = articles.filter(article => article.has_moved === 0);
                 this.articlesT = articles.filter(article => article.has_moved === 1);
                 if (this.articlesT.length > 0) {
@@ -208,10 +189,8 @@ export class PreparationArticlesPage {
     }
 
 
-    private selectArticle(selectedArticle: ArticlePrepa|ArticlePrepaByRefArticle, selectedQuantity: number): void {
+    private selectArticle(selectedArticle: ArticlePrepa | ArticlePrepaByRefArticle, selectedQuantity: number): void {
         if (selectedArticle && selectedQuantity) {
-            this.isValid = this.navParams.get('valid');
-            this.started = this.navParams.get('started');
             // we start preparation
             if (!this.started) {
                 this.sqliteProvider.getAPI_URL().subscribe((result) => {
@@ -226,8 +205,7 @@ export class PreparationArticlesPage {
                                         this.toastService.showToast('Préparation commencée.');
                                         this.saveSelectedArticle(selectedArticle, selectedQuantity);
                                     });
-                                }
-                                else {
+                                } else {
                                     this.isValid = false;
                                     this.toastService.showToast(resp.msg);
                                 }
@@ -235,8 +213,7 @@ export class PreparationArticlesPage {
                         }
                     });
                 });
-            }
-            else {
+            } else {
                 this.saveSelectedArticle(selectedArticle, selectedQuantity);
             }
         }
@@ -249,13 +226,12 @@ export class PreparationArticlesPage {
     public validate(): void {
         if (this.articlesNT.length > 0) {
             this.toastService.showToast('Veuillez traiter tous les articles concernés');
-        }
-        else {
+        } else {
             this.navCtrl.push(PreparationEmplacementPage, {preparation: this.preparation})
         }
     }
 
-    public testIfBarcodeEquals(selectedArticleGiven: ArticlePrepa|string, fromClick = false): void {
+    public testIfBarcodeEquals(selectedArticleGiven: ArticlePrepa | string, fromClick = false): void {
         let selectedArticle: ArticlePrepa = (
             !fromClick // selectedArticleGiven is a barcode
                 ? this.articlesNT.find(article => ((article.barcode === selectedArticleGiven)))
@@ -269,8 +245,7 @@ export class PreparationArticlesPage {
                 // result = {selectedArticle, refArticle}
                 this.navigateToPreparationTake(result);
             });
-        }
-        else if (selectedArticle && (selectedArticle as ArticlePrepa).type_quantite === 'article') {
+        } else if (selectedArticle && (selectedArticle as ArticlePrepa).type_quantite === 'article') {
             this.navCtrl.push(PreparationRefArticlesPage, {
                 article: selectedArticle,
                 preparation: this.preparation,
@@ -279,14 +254,13 @@ export class PreparationArticlesPage {
                 getArticleByBarcode: (barcode: string) => this.getArticleByBarcode(barcode),
                 selectArticle: (selectedQuantity: number, selectedArticleByRef: ArticlePrepaByRefArticle) => this.selectArticle(selectedArticleByRef, selectedQuantity)
             });
-        }
-        else {
+        } else {
             this.navigateToPreparationTake({selectedArticle: (selectedArticle as ArticlePrepa)});
         }
 
     }
 
-    private getArticleByBarcode(barcode: string): Observable<{selectedArticle?: ArticlePrepaByRefArticle, refArticle?: ArticlePrepa}> {
+    private getArticleByBarcode(barcode: string): Observable<{ selectedArticle?: ArticlePrepaByRefArticle, refArticle?: ArticlePrepa }> {
         return this.sqliteProvider.findBy('article_prepa_by_ref_article', [`barcode LIKE '${barcode}'`]).pipe(
             // we get the article
             map((result) => (
@@ -301,18 +275,17 @@ export class PreparationArticlesPage {
                         this.sqliteProvider
                             .findOneBy('article_prepa', 'reference', selectedArticle.reference_article)
                             .pipe(map((refArticle) => (
-                                refArticle
-                                    ? ({ selectedArticle, refArticle })
-                                    : {selectedArticle: undefined}
-                            ))
+                                    refArticle
+                                        ? ({selectedArticle, refArticle})
+                                        : {selectedArticle: undefined}
+                                ))
+                            )
 
-                    )
-
-            )))
+                    )))
         );
     }
 
-    private navigateToPreparationTake({selectedArticle, refArticle}: {selectedArticle?: ArticlePrepaByRefArticle|ArticlePrepa, refArticle?: ArticlePrepa}): void {
+    private navigateToPreparationTake({selectedArticle, refArticle}: { selectedArticle?: ArticlePrepaByRefArticle | ArticlePrepa, refArticle?: ArticlePrepa }): void {
         if (selectedArticle) {
             this.navCtrl.push(PreparationArticleTakePage, {
                 article: selectedArticle,
@@ -322,8 +295,7 @@ export class PreparationArticlesPage {
                 valid: this.isValid,
                 selectArticle: (selectedQuantity: number) => this.selectArticle(selectedArticle, selectedQuantity)
             });
-        }
-        else {
+        } else {
             this.toastService.showToast('L\'article scanné n\'est pas dans la liste.');
         }
     }
@@ -341,8 +313,7 @@ export class PreparationArticlesPage {
         this.updateLists().subscribe(() => {
             if (this.articlesNT.length === 0) {
                 this.refreshOver();
-            }
-            else {
+            } else {
                 this.refresh();
             }
         });
@@ -350,22 +321,23 @@ export class PreparationArticlesPage {
 
     private moveArticle(selectedArticle, selectedQuantity?: number): Observable<any> {
         const selectedQuantityValid = selectedQuantity ? selectedQuantity : (selectedArticle as ArticlePrepaByRefArticle).quantity;
+        let articleToInsert = {
+            label: (selectedArticle as ArticlePrepaByRefArticle).label,
+            reference: (selectedArticle as ArticlePrepaByRefArticle).reference,
+            is_ref: 1,
+            has_moved: 1,
+            id_prepa: this.preparation.id,
+            isSelectableByUser: true,
+            emplacement: (selectedArticle as ArticlePrepaByRefArticle).location,
+            quantite: selectedQuantityValid
+        };
         return ((selectedArticle as ArticlePrepaByRefArticle).isSelectableByUser)
             ? this.sqliteProvider
-                .insert('article_prepa', {
-                    label: (selectedArticle as ArticlePrepaByRefArticle).label,
-                    reference: (selectedArticle as ArticlePrepaByRefArticle).reference,
-                    is_ref: 1,
-                    has_moved: 1,
-                    id_prepa: this.preparation.id,
-                    isSelectableByUser: true,
-                    emplacement: (selectedArticle as ArticlePrepaByRefArticle).location,
-                    quantite: selectedQuantityValid
-                })
+                .insert('article_prepa', articleToInsert)
                 .pipe(
                     flatMap((insertId) => (
                         this.insertMouvement(
-                            selectedArticle as ArticlePrepaByRefArticle&ArticlePrepa,
+                            selectedArticle as ArticlePrepaByRefArticle & ArticlePrepa,
                             selectedQuantityValid,
                             insertId
                         )
@@ -390,32 +362,46 @@ export class PreparationArticlesPage {
                             : this.sqliteProvider.updateArticlePrepaQuantity(referenceArticle.id, referenceArticle.quantite - selectedQuantityValid)
                     })
                 )
-            : this.insertMouvement(selectedArticle as ArticlePrepaByRefArticle&ArticlePrepa, selectedQuantityValid)
-                .pipe(
-                    flatMap(() => this.sqliteProvider.moveArticle((selectedArticle as ArticlePrepa).id))
-                )
+            : (selectedQuantity
+                    ? this.sqliteProvider.insert('article_prepa', articleToInsert)
+                        .pipe(
+                            flatMap((insertId) => (
+                                    this.insertMouvement(selectedArticle as ArticlePrepaByRefArticle & ArticlePrepa, selectedQuantityValid, insertId).pipe(
+                                        flatMap(() => this.sqliteProvider.moveArticle(insertId))
+                                    )
+                                )
+                            ))
+                    : this.insertMouvement(selectedArticle as ArticlePrepaByRefArticle & ArticlePrepa, selectedQuantityValid)
+                        .pipe(
+                            flatMap(() => this.sqliteProvider.moveArticle((selectedArticle as ArticlePrepa).id))
+                        )
+            )
     }
 
-    private insertMouvement(selectedArticle: ArticlePrepaByRefArticle&ArticlePrepa, quantity: number, insertId?: number): Observable<number> {
-        let mouvement: Mouvement = {
-            id: null,
-            reference: selectedArticle.reference,
-            quantity: quantity ? quantity : selectedArticle.quantite,
-            date_pickup: moment().format(),
-            location_from: selectedArticle.location ? selectedArticle.location : selectedArticle.emplacement,
-            date_drop: null,
-            location: null,
-            type: 'prise-dépose',
-            is_ref: selectedArticle.isSelectableByUser ? '0' : selectedArticle.is_ref,
-            selected_by_article: selectedArticle.isSelectableByUser ? 1 : 0,
-            id_article_prepa: insertId ? insertId : selectedArticle.id,
-            id_prepa: this.preparation.id,
-            id_article_livraison: null,
-            id_article_collecte: null,
-            id_collecte: null,
-            id_livraison: null
-        };
-        return this.sqliteProvider.insert('`mouvement`', mouvement);
+    private insertMouvement(selectedArticle: ArticlePrepaByRefArticle & ArticlePrepa, quantity: number, insertId?: number): Observable<number> {
+        if (!this.articlesT.some(art => art.reference === selectedArticle.reference)) {
+            let mouvement: Mouvement = {
+                id: null,
+                reference: selectedArticle.reference,
+                quantity: quantity ? quantity : selectedArticle.quantite,
+                date_pickup: moment().format(),
+                location_from: selectedArticle.location ? selectedArticle.location : selectedArticle.emplacement,
+                date_drop: null,
+                location: null,
+                type: 'prise-dépose',
+                is_ref: selectedArticle.isSelectableByUser ? '0' : selectedArticle.is_ref,
+                selected_by_article: selectedArticle.isSelectableByUser ? 1 : 0,
+                id_article_prepa: insertId ? insertId : selectedArticle.id,
+                id_prepa: this.preparation.id,
+                id_article_livraison: null,
+                id_article_collecte: null,
+                id_collecte: null,
+                id_livraison: null
+            };
+            return this.sqliteProvider.insert('`mouvement`', mouvement);
+        } else {
+            return of(undefined);
+        }
     }
 
 }
