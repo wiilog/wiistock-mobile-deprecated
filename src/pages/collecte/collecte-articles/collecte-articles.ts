@@ -219,6 +219,7 @@ export class CollecteArticlesPage {
             this.navCtrl.push(CollecteEmplacementPage, {
                 collecte: this.collecte,
                 validateCollecte: () => {
+                    console.log('POP Article');
                     this.navCtrl.pop();
                 }
             })

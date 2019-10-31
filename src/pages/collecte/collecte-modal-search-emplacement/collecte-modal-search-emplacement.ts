@@ -1,9 +1,7 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams, ViewController} from 'ionic-angular';
-import {Emplacement} from "../../../app/entities/emplacement";
-import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import { CollecteEmplacementPage } from "../collecte-emplacement/collecte-emplacement";
-import { Collecte } from "../../../app/entities/collecte";
+import {IonicPage, NavParams, ViewController} from 'ionic-angular';
+import {Emplacement} from '@app/entities/emplacement';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
 
 @IonicPage()
 @Component({
@@ -12,57 +10,62 @@ import { Collecte } from "../../../app/entities/collecte";
 })
 export class CollecteModalSearchEmplacementPage {
 
-    emplacements: Array<Emplacement>;
-    emplacement: Emplacement;
-    filterString = "";
-    collecte: Collecte;
-    hasLoaded: boolean;
+    public emplacements: Array<Emplacement>;
+    public filterString = "";
+    public hasLoaded: boolean;
 
-    constructor(public navCtrl: NavController,
-                public navParams: NavParams,
-                public sqliteProvider: SqliteProvider,
-                public view: ViewController) {
-        this.hasLoaded = false;
+    private selectEmplacement: (emplacement: Emplacement) => void;
+
+    public constructor(private navParams: NavParams,
+                       private sqliteProvider: SqliteProvider,
+                       private view: ViewController) {
+        this.showLoading();
+    }
+
+    public ionViewWillEnter(): void {
+        this.selectEmplacement = this.navParams.get('selectEmplacement');
         this.sqliteProvider.findAll('`emplacement`').subscribe((emplacements) => {
             this.emplacements = emplacements;
-            if (typeof (navParams.get('collecte')) !== undefined) {
-                this.collecte = navParams.get('collecte');
-                this.hasLoaded = true;
-            }
+            this.hideLoading();
         })
     }
 
-    selectEmplacement(emplacement: Emplacement) {
-        this.emplacement = emplacement;
-        this.navCtrl.setRoot(CollecteEmplacementPage, {
-            collecte : this.collecte,
-            emplacement: this.emplacement
-        })
+    public onEmplacementSelected(emplacement: Emplacement): void {
+        this.selectEmplacement(emplacement);
+        this.closeModal();
     }
 
-    searchEmplacement() {
-        this.hasLoaded = false;
+    public searchEmplacement(): void {
+        this.showLoading();
         this.sqliteProvider.findAll('`emplacement`').subscribe((emplacements) => {
             this.emplacements = emplacements.filter(emp =>
                 emp.label.toLocaleLowerCase() === this.filterString.toLocaleLowerCase() ||
                 emp.label.toLocaleLowerCase().includes(this.filterString.toLocaleLowerCase()) ||
                 this.filterString.toLocaleLowerCase().includes(emp.label.toLocaleLowerCase())
             );
-            this.hasLoaded = true;
+            this.hideLoading();
         })
     }
 
-    clearSearch() {
+    public clearSearch(): void {
         this.filterString = "";
-        this.hasLoaded = false;
+        this.showLoading();
         this.sqliteProvider.findAll('`emplacement`').subscribe((emplacements) => {
             this.emplacements = emplacements;
-            this.hasLoaded = true;
+            this.hideLoading();
         })
     }
 
-    closeModal() {
+    public closeModal(): void {
         this.view.dismiss();
+    }
+
+    private showLoading(): void {
+        this.hasLoaded = false;
+    }
+
+    private hideLoading(): void {
+        this.hasLoaded = true;
     }
 
 }

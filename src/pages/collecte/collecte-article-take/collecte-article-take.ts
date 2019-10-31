@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {ChangeDetectorRef, Component} from '@angular/core';
 import {IonicPage, NavController, NavParams} from 'ionic-angular';
 import {ArticleCollecte} from '@app/entities/article-collecte';
 import {ToastService} from "@app/services/toast.service";
@@ -17,13 +17,16 @@ export class CollecteArticleTakePage {
 
     public constructor(private navCtrl: NavController,
                        private navParams: NavParams,
+                       private changeDetector: ChangeDetectorRef,
                        private toastService: ToastService) {
     }
 
     public ionViewWillEnter(): void {
         this.article = this.navParams.get('article');
-        this.quantity = this.article.quantite;
         this.selectArticle = this.navParams.get('selectArticle');
+        this.quantity = this.article.quantite;
+        this.changeDetector.detectChanges();
+
     }
 
     public addArticle(): void {

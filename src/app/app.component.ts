@@ -26,7 +26,6 @@ export class AppComponent {
     public rootPage = ConnectPage;
     public pages: Array<{ title: string, component: any }>;
     public homePage = MenuPage;
-    public addMvtURL: string = '/api/addMouvementTraca';
 
     public constructor(public platform: Platform,
                        public menu: MenuController,
@@ -57,6 +56,8 @@ export class AppComponent {
             this.statusBar.styleDefault();
             this.splashScreen.hide();
             this.networkProvider.initializeNetworkEvents();
+
+            (<any>window).plugins.intentShim.unregisterBroadcastReceiver();
 
             // Offline event
             this.events.subscribe('network:offline', () => {

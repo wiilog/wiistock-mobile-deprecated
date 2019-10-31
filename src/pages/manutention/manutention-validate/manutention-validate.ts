@@ -1,12 +1,12 @@
 import {Component, ViewChild} from '@angular/core';
 import {AlertController, Content, IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
-import {Manutention} from "@app/entities/manutention";
-import {SqliteProvider} from "@providers/sqlite/sqlite";
-import {HttpClient} from "@angular/common/http";
-import {ManutentionMenuPage} from "@pages/manutention/manutention-menu/manutention-menu";
-import {MenuPage} from "@pages/menu/menu";
-import {Network} from "@ionic-native/network";
-import {ToastService} from "@app/services/toast.service";
+import {Manutention} from '@app/entities/manutention';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {HttpClient} from '@angular/common/http';
+import {MenuPage} from '@pages/menu/menu';
+import {Network} from '@ionic-native/network';
+import {ToastService} from '@app/services/toast.service';
+
 
 /**
  * Generated class for the ManutentionValidatePage page.
