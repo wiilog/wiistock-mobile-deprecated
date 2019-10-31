@@ -40,11 +40,9 @@ export class StorageService {
     public setPriseValue(value: string, number: number) {
         return this.storage.get(value).then(data => {
             if (!data) {
-                console.log('set prise value ' + value + ' ' + number);
                 this.storage.set(value, number);
             }
-            if (data) {
-                console.log('set prise value ' + value + ' ' + (data + number));
+            else {
                 this.storage.set(value, data + number);
             }
         });
@@ -83,7 +81,6 @@ export class StorageService {
             });
             this.storage.forEach((value: any, key: string, iterationNumber: Number) => {
                 if (value >= 1 && key !== API_KEY && key !== OPERATEUR && key !== INVENTORY_MANAGER && key !== NB_PREPS) {
-                    console.log(true);
                     resolve(true);
                 }
                 if (iterationNumber === length) {
@@ -115,5 +112,4 @@ export class StorageService {
             })
         });
     }
-
 }

@@ -1,15 +1,16 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams, ToastController} from 'ionic-angular';
-import {PriseConfirmPageTraca} from '@pages/traca/prise-confirm/prise-confirm-traca';
+import {AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
+import {SelectArticleManuallyPage} from '@pages/traca/select-article-manually/select-article-manually';
 import {MenuPage} from '@pages/menu/menu';
 import {Article} from '@app/entities/article';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {StockageMenuPageTraca} from '@pages/traca/stockage-menu/stockage-menu-traca';
-import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {ChangeDetectorRef} from '@angular/core';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import moment from 'moment';
+import {Subscription} from 'rxjs';
+import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
+import {ToastService} from '@app/services/toast.service';
 
 
 @IonicPage()
@@ -19,114 +20,119 @@ import moment from 'moment';
 })
 export class PriseArticlesPageTraca {
 
-    emplacement: Emplacement;
-    articles: Array<Article>;
-    db_articles: Array<Article>;
+    public emplacement: Emplacement;
+    public articles: Array<Article>;
+    public db_articles: Array<Article>;
 
-    constructor(
-        public navCtrl: NavController,
-        public navParams: NavParams,
-        private toastController: ToastController,
-        private sqliteProvider: SqliteProvider,
-        private barcodeScanner: BarcodeScanner,
-        private changeDetectorRef: ChangeDetectorRef) {
+    private zebraScanSubscription: Subscription;
+    private finishPrise: () => void;
+
+    public constructor(public navCtrl: NavController,
+                       public navParams: NavParams,
+                       private alertController: AlertController,
+                       private toastService: ToastService,
+                       private sqliteProvider: SqliteProvider,
+                       private barcodeScannerManager: BarcodeScannerManagerService,
+                       private changeDetectorRef: ChangeDetectorRef) {}
+
+    public ionViewWillEnter(): void {
         this.sqliteProvider.findAll('article').subscribe((value) => {
             this.db_articles = value;
         });
-        if (typeof (navParams.get('emplacement')) !== undefined) {
-            this.emplacement = navParams.get('emplacement');
-        }
 
-        if (typeof (navParams.get('articles')) !== undefined) {
-            this.articles = navParams.get('articles');
+        this.finishPrise = this.navParams.get('finishPrise');
+        this.emplacement = this.navParams.get('emplacement');
+        this.articles = this.navParams.get('articles') || [];
+
+        this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
+            this.testIfBarcodeEquals(barcode);
+        })
+    }
+
+    public ionViewWillLeave(): void {
+        if (this.zebraScanSubscription) {
+            this.zebraScanSubscription.unsubscribe();
+            this.zebraScanSubscription = undefined;
         }
-        let instance = this;
-        (<any>window).plugins.intentShim.registerBroadcastReceiver({
-                filterActions: [
-                    'io.ionic.starter.ACTION'
-                ],
-                filterCategories: [
-                    'android.intent.category.DEFAULT'
-                ]
-            },
-            function (intent) {
-                instance.testIfBarcodeEquals(intent.extras['com.symbol.datawedge.data_string']);
-            });
+    }
+
+    public ionViewCanLeave(): boolean {
+        return this.barcodeScannerManager.canGoBack;
     }
 
     addArticleManually() {
-        this.navCtrl.push(PriseConfirmPageTraca, {
-            articles: this.articles, emplacement: this.emplacement
+        this.navCtrl.push(SelectArticleManuallyPage, {
+            articles: this.articles,
+            selectArticle: (article) => {
+                this.articles.push(article);
+            }
         });
     }
 
     finishTaking() {
-        for (let article of this.articles) {
-            let numberOfArticles = 0;
-            this.articles.forEach((articleToCmp) => {
-                if (articleToCmp.reference === article.reference) {
-                    numberOfArticles++;
-                }
-            });
-            const date = moment().format();
-            this.sqliteProvider.getOperateur().then((value) => {
-                const mouvement: MouvementTraca = {
-                    id: null,
-                    ref_article: article.reference,
-                    date: date + '_' + Math.random().toString(36).substr(2, 9),
-                    ref_emplacement: this.emplacement.label,
-                    type: 'prise',
-                    operateur: value
-                };
-                this.sqliteProvider.setPriseValue(article.barcode, numberOfArticles).then(() => {
-                    if (this.articles.indexOf(article) === this.articles.length - 1) {
-                        this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(
-                            () => {
-                                this.redirectAfterTake();
-                            },
-                            err => console.log(err)
-                        );
-                    } else {
-                        this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(() => {}, (err) => console.log(err));
+        if (this.articles && this.articles.length > 0) {
+            for (let article of this.articles) {
+                let numberOfArticles = 0;
+                this.articles.forEach((articleToCmp) => {
+                    if (articleToCmp.reference === article.reference) {
+                        numberOfArticles++;
                     }
                 });
-            });
+                const date = moment().format();
+                this.sqliteProvider.getOperateur().then((value) => {
+                    const mouvement: MouvementTraca = {
+                        id: null,
+                        ref_article: article.reference,
+                        date: date + '_' + Math.random().toString(36).substr(2, 9),
+                        ref_emplacement: this.emplacement.label,
+                        type: 'prise',
+                        operateur: value
+                    };
+                    this.sqliteProvider.setPriseValue(article.barcode, numberOfArticles).then(() => {
+                        if (this.articles.indexOf(article) === this.articles.length - 1) {
+                            this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(
+                                () => {
+                                    this.redirectAfterTake();
+                                },
+                                err => console.log(err)
+                            );
+                        }
+                        else {
+                            this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(() => {
+                            }, (err) => console.log(err));
+                        }
+                    });
+                });
+            }
         }
-
-        //   });
+        else {
+            this.toastService.showToast('Vous devez sélectionner au moins un article')
+        }
     }
 
     redirectAfterTake() {
-        this.navCtrl.setRoot(StockageMenuPageTraca)
+        this.navCtrl.pop()
             .then(() => {
-                this.showToast('Prise enregistrée.')
+                this.finishPrise();
+                this.toastService.showToast('Prise enregistrée.')
             });
-    }
-
-    // Helper
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center'
-        });
-        toast.present();
     }
 
     goHome() {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    scan() {
-        this.barcodeScanner.scan().then(res => {
-            this.testIfBarcodeEquals(res.text);
+    public scan(): void {
+        this.barcodeScannerManager.scan().subscribe((barcode: string) => {
+            this.testIfBarcodeEquals(barcode);
         });
     }
 
     testIfBarcodeEquals(text) {
         if (this.articles && this.articles.some(article => (article.barcode === text))) {
-            this.showToast('Cet article a déjà été ajouté à la prise.');
-        } else {
+            this.toastService.showToast('Cet article a déjà été ajouté à la prise.');
+        }
+        else {
             let a: Article;
             a = {
                 id: new Date().getUTCMilliseconds(),
@@ -135,10 +141,25 @@ export class PriseArticlesPageTraca {
                 quantite: null,
                 barcode: text
             };
-            this.navCtrl.push(PriseConfirmPageTraca, {
-                articles: this.articles, emplacement: this.emplacement, selectedArticle: a
-            });
-            this.changeDetectorRef.detectChanges();
+
+            this.alertController
+                .create({
+                    title: `Vous avez sélectionné l'article ${text}`,
+                    buttons: [
+                        {
+                            text: 'Annuler'
+                        },
+                        {
+                            text: 'Confirmer',
+                            handler: () => {
+                                this.articles.push(a);
+                                this.changeDetectorRef.detectChanges();
+                            },
+                            cssClass : 'alertAlert'
+                        }
+                    ]
+                })
+                .present();
         }
     }
 

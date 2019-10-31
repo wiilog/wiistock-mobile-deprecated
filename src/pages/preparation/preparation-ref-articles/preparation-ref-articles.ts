@@ -4,13 +4,12 @@ import {MenuPage} from '@pages/menu/menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ArticlePrepa} from '@app/entities/article-prepa';
 import {HttpClient} from '@angular/common/http';
-import {ToastService} from "@app/services/toast.service";
-import {ArticlePrepaByRefArticle} from "@app/entities/article-prepa-by-ref-article";
-import {ZebraBarcodeScannerService} from "@app/services/zebra-barcode-scanner.service";
-import {Observable, Subscription} from "rxjs";
-import {PreparationArticleTakePage} from "@pages/preparation/preparation-article-take/preparation-article-take";
-import {IonicSelectableComponent} from "ionic-selectable";
-import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
+import {ToastService} from '@app/services/toast.service';
+import {ArticlePrepaByRefArticle} from '@app/entities/article-prepa-by-ref-article';
+import {Observable, Subscription} from 'rxjs';
+import {PreparationArticleTakePage} from '@pages/preparation/preparation-article-take/preparation-article-take';
+import {IonicSelectableComponent} from 'ionic-selectable';
+import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 
 
 @IonicPage()
@@ -44,7 +43,7 @@ export class PreparationRefArticlesPage {
                        public sqliteProvider: SqliteProvider,
                        public http: HttpClient,
                        private barcodeScanner: BarcodeScannerManagerService,
-                       private zebraBarcodeScannerService: ZebraBarcodeScannerService) {
+                       private barcodeScannerManager: BarcodeScannerManagerService) {
         this.articles = [];
         this.articlesToShow = [];
     }
@@ -60,7 +59,7 @@ export class PreparationRefArticlesPage {
                 this.articlesToShow = articles;
             });
 
-        this.zebraBarcodeSubscription = this.zebraBarcodeScannerService.zebraScan$.subscribe((barcode: string) => {
+        this.zebraBarcodeSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
             this.testIfBarcodeEquals(barcode);
         });
     }

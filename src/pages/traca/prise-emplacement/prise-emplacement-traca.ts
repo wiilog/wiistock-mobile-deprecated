@@ -9,6 +9,7 @@ import {ChangeDetectorRef} from '@angular/core';
 import {IonicSelectableComponent} from 'ionic-selectable';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
+import {Subscription} from 'rxjs';
 
 
 @IonicPage()
@@ -20,52 +21,61 @@ export class PriseEmplacementPageTraca {
 
     private static readonly INIT_END_INDEX: number = 20;
 
-    @ViewChild('locationComponent') locationComponent: IonicSelectableComponent;
-    emplacement: Emplacement;
-    // locationLabel = '';
-    db_locations: Array<Emplacement>;
-    db_locations_for_list: Array<Emplacement>;
-    db_articles: Array<Article>;
-    endIndex: number;
+    @ViewChild('locationComponent')
+    public locationComponent: IonicSelectableComponent;
+
+    public emplacement: Emplacement;
+    public db_locations: Array<Emplacement>;
+    public db_locations_for_list: Array<Emplacement>;
+    public db_articles: Array<Article>;
+
+    private endIndex: number;
+
+    private zebraScanSubscription: Subscription;
 
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
                        public app: App,
                        public sqliteProvider: SqliteProvider,
-                       public barcodeScannerManager: BarcodeScannerManagerService,
+                       private barcodeScannerManager: BarcodeScannerManagerService,
                        private changeDetectorRef: ChangeDetectorRef,
                        private toastService: ToastService) {
         this.resetEndIndex();
-        let instance = this;
-        (<any>window).plugins.intentShim.registerBroadcastReceiver({
-                filterActions: [
-                    'io.ionic.starter.ACTION'
-                ],
-                filterCategories: [
-                    'android.intent.category.DEFAULT'
-                ]
-            },
-            function (intent) {
-                instance.testIfBarcodeEquals(intent.extras['com.symbol.datawedge.data_string'])
-            });
     }
 
     public ionViewWillEnter(): void {
-        if (this.navParams.get('selectedEmplacement') !== undefined) {
-            this.emplacement = this.navParams.get('selectedEmplacement');
-        }
         this.sqliteProvider.findAll('emplacement').subscribe((value) => {
             this.db_locations = value;
             this.db_locations_for_list = value;
         });
+
+        this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
+            this.testIfBarcodeEquals(barcode);
+        })
+    }
+
+    public ionViewWillLeave(): void {
+        if (this.zebraScanSubscription) {
+            this.zebraScanSubscription.unsubscribe();
+            this.zebraScanSubscription = undefined;
+        }
     }
 
     public ionViewCanLeave(): boolean {
         return this.barcodeScannerManager.canGoBack;
     }
 
-    goToArticles() {
-        this.navCtrl.push(PriseArticlesPageTraca, {emplacement: this.emplacement});
+    public goToArticles(): void {
+        if (this.emplacement) {
+            this.navCtrl.push(PriseArticlesPageTraca, {
+                emplacement: this.emplacement,
+                finishPrise: () => {
+                    this.navCtrl.pop();
+                }
+            });
+        } else {
+            this.toastService.showToast('Veuillez sélectionner un emplacement')
+        }
     }
 
     emplacementChange(event: { component: IonicSelectableComponent, value: any }) {
@@ -88,20 +98,22 @@ export class PriseEmplacementPageTraca {
     }
 
     scanLocation() {
-        this.barcodeScannerManager.scan().subscribe((barcode) => this.testIfBarcodeEquals(barcode));
+        this.barcodeScannerManager.scan().subscribe((barcode) => {
+            this.testIfBarcodeEquals(barcode)
+        });
     }
 
     testIfBarcodeEquals(barcode) {
-        if (barcode.length > 0) {
-            let emplacement: Emplacement = {
-                id: new Date().getUTCMilliseconds(),
-                label: barcode
-            };
-            this.navCtrl.push(PriseEmplacementPageTraca, {selectedEmplacement: emplacement});
-            this.changeDetectorRef.detectChanges();
-        } else {
-            this.toastService.showToast('Veuillez flasher ou sélectionner un emplacement.');
-        }
+        this.barcodeScannerManager.wrapZebraUpdate(() => {
+            if (barcode.length > 0) {
+                this.emplacement = {
+                    id: new Date().getUTCMilliseconds(),
+                    label: barcode
+                };
+            } else {
+                this.toastService.showToast('Veuillez flasher ou sélectionner un emplacement.');
+            }
+        });
     }
 
     getMoreLocations({text, component}: { component: IonicSelectableComponent, text: string }) {
@@ -109,12 +121,10 @@ export class PriseEmplacementPageTraca {
 
         if (this.endIndex >= this.db_locations.length) {
             component.disableInfiniteScroll();
-        }
-        else {
+        } else {
             if (this.endIndex + PriseEmplacementPageTraca.INIT_END_INDEX >= this.db_locations.length) {
                 this.endIndex = this.db_locations.length;
-            }
-            else {
+            } else {
                 this.endIndex += PriseEmplacementPageTraca.INIT_END_INDEX;
             }
 
@@ -134,8 +144,7 @@ export class PriseEmplacementPageTraca {
                     .filter(emplacement => emplacement.label.toLowerCase().includes(trimmedText.toLowerCase()))
                     .slice(0, this.endIndex);
             }
-        }
-        else {
+        } else {
             this.db_locations_for_list = this.db_locations.slice(0, this.endIndex);
         }
     }

@@ -10,7 +10,10 @@
 </ion-header>
 
 <ion-content padding>
-    <ion-title><ion-icon class="small-icon" name="pin"></ion-icon>   {{ emplacement.label }}</ion-title>
+    <ion-title>
+        <ion-icon class="small-icon" name="pin"></ion-icon>
+        {{ emplacement?.label }}
+    </ion-title>
     <ion-title>
         <ion-icon class="big-icon" name="barcode" (click)="scan()"></ion-icon>
         <br>

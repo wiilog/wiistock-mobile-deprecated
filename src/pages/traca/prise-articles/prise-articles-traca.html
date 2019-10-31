@@ -10,27 +10,30 @@
 </ion-header>
 
 <ion-content padding>
-    <ion-title><ion-icon class="small-icon" name="pin"></ion-icon>   {{ emplacement.label }}</ion-title>
+    <ion-title>
+        <ion-icon class="small-icon" name="pin"></ion-icon>
+        {{ emplacement?.label }}
+    </ion-title>
     <ion-title>
         <ion-icon class="big-icon" name="barcode" (click)="scan()"></ion-icon>
         <br>
         Flashez un article
     </ion-title>
 
-  <ion-list>
-    <ion-grid>
-      <button class="list" ion-item *ngFor="let article of articles">
-        <ion-row>
-          <ion-col col-6>{{ article?.reference }}</ion-col>
-        </ion-row>
-      </button>
-    </ion-grid>
-  </ion-list>
+    <ion-list>
+        <ion-grid>
+            <button class="list" ion-item *ngFor="let article of articles">
+                <ion-row>
+                    <ion-col col-6>{{ article?.reference }}</ion-col>
+                </ion-row>
+            </button>
+        </ion-grid>
+    </ion-list>
 </ion-content>
 
 <ion-footer padding>
-  <div class="d-flex">
-      <ion-icon class="big-icon" (click)="addArticleManually()" name="search"></ion-icon>
-      <ion-icon class="big-icon" name="checkmark-circle" (click)="finishTaking()"></ion-icon>
-  </div>
+    <div class="d-flex">
+        <ion-icon class="big-icon" (click)="addArticleManually()" name="search"></ion-icon>
+        <ion-icon class="big-icon" name="checkmark-circle" (click)="finishTaking()"></ion-icon>
+    </div>
 </ion-footer>

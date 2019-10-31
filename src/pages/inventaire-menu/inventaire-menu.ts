@@ -11,7 +11,7 @@ import moment from 'moment';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {filter} from 'rxjs/operators';
 import {Observable, ReplaySubject, Subscription} from 'rxjs';
-import {ZebraBarcodeScannerService} from '@app/services/zebra-barcode-scanner.service';
+import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
 
 
 @IonicPage()
@@ -42,7 +42,7 @@ export class InventaireMenuPage {
                        private barcodeScanner: BarcodeScanner,
                        private modalController: ModalController,
                        private changeDetector: ChangeDetectorRef,
-                       private zebraBarcodeScannerService: ZebraBarcodeScannerService) {
+                       private barcodeScannerManager: BarcodeScannerManagerService) {
         this.sqlLiteProvider.getInventoryManagerRight().then(isInventoryManager => {
             this.isInventoryManager = isInventoryManager;
         });
@@ -52,11 +52,11 @@ export class InventaireMenuPage {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    public ionViewDidEnter(): void {
+    public ionViewWillEnter(): void {
         this.synchronize();
         this.setBackButtonAction();
 
-        this.zebraScannerSubscription = this.zebraBarcodeScannerService.zebraScan$
+        this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$
             .pipe(filter(() => (this.isLoaded && this.articles && this.articles.length > 0)))
             .subscribe((barcode: string) => {
                 if (!this.location) {
