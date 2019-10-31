@@ -34,7 +34,6 @@ export class ManutentionMenuPage {
 
     ionViewWillEnter() {
         this.synchronise(true);
-        this.platform.registerBackButtonAction(_ => this.navCtrl.setRoot(MenuPage));
     }
 
     synchronise(fromStart: boolean) {

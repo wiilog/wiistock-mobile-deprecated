@@ -19,7 +19,7 @@ export class TracaMenuPage {
     mvts: MouvementTraca[];
     unfinishedMvts: boolean;
     type: string;
-    addMvtURL : string = '/api/addMouvementTraca';
+    addMvtURL: string = '/api/addMouvementTraca';
 
     constructor(public navCtrl: NavController,
                 public navParams: NavParams,
@@ -34,7 +34,6 @@ export class TracaMenuPage {
         this.sqlProvider.findAll('`mouvement_traca`').subscribe((value) => {
             this.mvts = value;
         });
-        this.platform.registerBackButtonAction(_ => this.navCtrl.setRoot(MenuPage));
         this.sqlProvider.priseAreUnfinished().then((value) => {
             this.unfinishedMvts = value;
             this.type = this.network.type;

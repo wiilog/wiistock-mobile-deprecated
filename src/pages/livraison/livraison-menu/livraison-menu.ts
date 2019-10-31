@@ -23,16 +23,10 @@ export class LivraisonMenuPage {
     @ViewChild(Navbar) navBar: Navbar;
     @ViewChild(Content) content: Content;
     livraisons: Array<Livraison>;
-    dataApi: string = '/api/getLivraisons';
     hasLoaded: boolean;
 
-    constructor(
-        public navCtrl: NavController,
-        public navParams: NavParams,
-        public sqlLiteProvider: SqliteProvider,
-        public toastController: ToastController,
-        public http: HttpClient,
-        public network: Network) {
+    public constructor(private navCtrl: NavController,
+                       private sqliteProvider: SqliteProvider) {
     }
 
     goHome() {
@@ -41,33 +35,15 @@ export class LivraisonMenuPage {
 
     ionViewDidEnter() {
         this.synchronise(true);
-        this.setBackButtonAction();
-    }
-
-    setBackButtonAction() {
-        this.navBar.backButtonClick = () => {
-            //Write here wherever you wanna do
-            this.navCtrl.setRoot(MenuPage);
-        }
     }
 
     synchronise(fromStart: boolean) {
         this.hasLoaded = false;
-        this.sqlLiteProvider.findAll('`livraison`').subscribe((livraisons) => {
+        this.sqliteProvider.findAll('`livraison`').subscribe((livraisons) => {
             this.livraisons = livraisons.filter(l => l.date_end === null);
             this.hasLoaded = true;
             this.content.resize();
         })
-    }
-
-    async showToast(msg) {
-        const toast = await this.toastController.create({
-            message: msg,
-            duration: 2000,
-            position: 'center',
-            cssClass: 'toast-error'
-        });
-        toast.present();
     }
 
     goToArticles(livraison) {
