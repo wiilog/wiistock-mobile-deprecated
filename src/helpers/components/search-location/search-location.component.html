@@ -1,0 +1,22 @@
+<ion-card>
+    <ion-card-content>
+        <ion-item class="without-label ionic-selectable-container">
+            <ionic-selectable
+                #locationComponent
+                item-content
+                [(ngModel)]="_location"
+                [items]="dbLocationsForList"
+                itemValueField="id"
+                itemTextField="label"
+                placeholder="Sélectionner un emplacement"
+                [canSearch]="true"
+                [hasInfiniteScroll]="true"
+                (onSearch)="onLocationSearch($event)"
+                (onChange)="onLocationChange($event)"
+                (onInfiniteScroll)="onInfiniteScroll()">
+                <ng-template ionicSelectableSearchFailTemplate>
+                </ng-template>
+            </ionic-selectable>
+        </ion-item>
+    </ion-card-content>
+</ion-card>

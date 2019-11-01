@@ -37,6 +37,24 @@ ion-grid {
     justify-content: space-between;
 }
 
+.barcode-container {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    margin-top: 3rem;
+    margin-bottom: 3rem;
+
+    .barcode {
+        font-size: 7em;
+    }
+
+    .barcode-label {
+        font-size: 16pt;
+        font-weight: 300;
+        margin-top: 2rem;
+    }
+}
+
 .small-icon {
     font-size: 1.4em;
 }
@@ -69,8 +87,19 @@ ion-grid {
     color: $darkGrey;
 }
 
-.ionic-selectable {
-    max-width: 100% !important;
+ion-item {
+    &.ionic-selectable-container {
+        padding: 0;
+    }
+    &.without-label {
+        ion-label {
+            display: none;
+        }
+    }
+    .ionic-selectable {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
 }
 
 .alertAlert {

@@ -20,7 +20,8 @@
             "@pages/*": [ "pages/*" ],
             "@services/*": [ "services/*" ],
             "@providers/*": [ "providers/*" ],
-            "@theme/*": [ "theme/*" ]
+            "@theme/*": [ "theme/*" ],
+            "@helpers/*": [ "helpers/*" ]
         }
     },
     "include": [

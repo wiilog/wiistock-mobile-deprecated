@@ -12,39 +12,14 @@
 <ion-content padding>
     <div>
         <div>
-            <ion-title>
-                <ion-icon class="big-icon" name="barcode" (click)="scanLocation()"></ion-icon>
-                <br/>
-                <span *ngIf="!emplacement" >Flashez un emplacement</span>
-                <span *ngIf="emplacement">
-                    Emplacement sélectionné
-                    <br/>
-                    <span>{{emplacement.label}}</span>
-                </span>
-            </ion-title>
+            <div class="barcode-container">
+                <ion-icon class="barcode" name="barcode" (click)="scanLocation()"></ion-icon>
+                <span *ngIf="!emplacement" class="barcode-label">Flashez un emplacement</span>
+                <span *ngIf="emplacement" class="barcode-label">Emplacement sélectionné</span>
+            </div>
 
-            <ion-card>
-                <ion-card-content>
-                    <ion-item>
-                        <ion-label *ngIf="!emplacement">sélectionnez un emplacement</ion-label>
-                        <ionic-selectable
-                                #locationComponent
-                                item-content
-                                [(ngModel)]="emplacement"
-                                [items]="db_locations_for_list"
-                                itemValueField="id"
-                                itemTextField="label"
-                                [canSearch]="true"
-                                [hasInfiniteScroll]="true"
-                                (onSearch)="searchEmplacement($event)"
-                                (onChange)="emplacementChange($event)"
-                                (onInfiniteScroll)="getMoreLocations($event)">
-                            <ng-template ionicSelectableSearchFailTemplate>
-                            </ng-template>
-                        </ionic-selectable>
-                    </ion-item>
-                </ion-card-content>
-            </ion-card>
+            <wii-search-location [(location)]="emplacement">
+            </wii-search-location>
         </div>
     </div>
 

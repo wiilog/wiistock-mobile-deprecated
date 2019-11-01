@@ -21,6 +21,31 @@
             <ion-icon name="barcode" (click)="scan()"></ion-icon>
         </ion-col>
     </ion-row>
+
+    <ion-row>
+        <ion-card>
+            <ion-card-content>
+                <ion-item>
+                    <ion-label *ngIf="!emplacement">sélectionnez un emplacement</ion-label>
+                    <ionic-selectable
+                        #locationComponent
+                        item-content
+                        [(ngModel)]="emplacement"
+                        [items]="db_locations_for_list"
+                        itemValueField="id"
+                        itemTextField="label"
+                        [canSearch]="true"
+                        [hasInfiniteScroll]="true"
+                        (onSearch)="searchLocation($event)"
+                        (onChange)="onLocationChange($event)"
+                        (onInfiniteScroll)="getMoreLocations($event)">
+                        <ng-template ionicSelectableSearchFailTemplate>
+                        </ng-template>
+                    </ionic-selectable>
+                </ion-item>
+            </ion-card-content>
+        </ion-card>
+    </ion-row>
 </ion-content>
 
 <ion-footer padding>

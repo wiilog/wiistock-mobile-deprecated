@@ -1,8 +1,7 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
+import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {LivraisonMenuPage} from '@pages/livraison/livraison-menu/livraison-menu';
 import {Mouvement} from '@app/entities/mouvement';
 import {LivraisonArticleTakePage} from '@pages/livraison/livraison-article-take/livraison-article-take';
 import {HttpClient} from '@angular/common/http';
@@ -12,8 +11,8 @@ import {ArticleLivraison} from '@app/entities/article-livraison';
 import {Livraison} from '@app/entities/livraison';
 import {flatMap} from 'rxjs/operators';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
-import {Subscription} from "rxjs";
-import {ToastService} from "@app/services/toast.service";
+import {Subscription} from 'rxjs';
+import {ToastService} from '@app/services/toast.service';
 
 
 @IonicPage()

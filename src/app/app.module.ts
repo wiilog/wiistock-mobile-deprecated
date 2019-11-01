@@ -6,22 +6,17 @@ import {SQLite} from '@ionic-native/sqlite';
 import {ConnectPage} from '@pages/connect/connect';
 import {MenuPage} from '@pages/menu/menu';
 import {ParamsPage} from '@pages/params/params'
-import {DeposePage} from '@pages/stockage/depose/depose';
 import {IonicStorageModule} from '@ionic/storage';
 import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
 import {HttpClientModule} from '@angular/common/http';
 import {UsersApiProvider} from '@providers/users-api/users-api';
-import {PriseArticlesPage} from '@pages/stockage/prise-articles/prise-articles';
-import {PriseConfirmPage} from '@pages/stockage/prise-confirm/prise-confirm';
-import {PriseEmplacementPage} from '@pages/stockage/prise-emplacement/prise-emplacement';
 import {PriseArticlesPageTraca} from '@pages/traca/prise-articles/prise-articles-traca';
 import {SelectArticleManuallyPage} from '@pages/traca/select-article-manually/select-article-manually';
 import {PriseEmplacementPageTraca} from '@pages/traca/prise-emplacement/prise-emplacement-traca';
 import {DeposeArticlesPageTraca} from '@pages/traca/depose-articles/depose-articles-traca';
 import {DeposeEmplacementPageTraca} from '@pages/traca/depose-emplacement/depose-emplacement-traca';
 import {StorageService} from './services/storage.service';
-import {StockageMenuPage} from '@pages/stockage/stockage-menu/stockage-menu';
 import {TracaMenuPage} from '@pages/traca/traca-menu/traca-menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
@@ -48,6 +43,7 @@ import {CollecteArticlesPage} from '@pages/collecte/collecte-articles/collecte-a
 import {CollecteEmplacementPage} from '@pages/collecte/collecte-emplacement/collecte-emplacement';
 import {ManutentionValidatePage} from '@pages/manutention/manutention-validate/manutention-validate';
 import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutention-menu';
+import {HelpersModule} from "@helpers/helpers.module";
 
 
 @NgModule({
@@ -56,13 +52,9 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
         ConnectPage,
         MenuPage,
         ParamsPage,
-        StockageMenuPage,
         PreparationMenuPage,
         PreparationArticlesPage,
         TracaMenuPage,
-        PriseEmplacementPage,
-        PriseArticlesPage,
-        PriseConfirmPage,
         PriseEmplacementPageTraca,
         PriseArticlesPageTraca,
         PreparationArticleTakePage,
@@ -76,7 +68,6 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
         DeposeEmplacementPageTraca,
         DeposeArticlesPageTraca,
         ManutentionValidatePage,
-        DeposePage,
         InventaireMenuPage,
         ModalQuantityPage,
         InventaireAnomaliePage,
@@ -94,10 +85,8 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
             backButtonIcon: 'ios-arrow-dropleft'
         }),
         HttpClientModule,
+        HelpersModule,
         IonicStorageModule.forRoot({name: 'follow_gt', driverOrder: ['sqlite', 'websql', 'indexeddb']})
-    ],
-    exports: [
-        InventaireMenuPage,
     ],
     bootstrap: [IonicApp],
     entryComponents: [
@@ -105,11 +94,7 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
         ConnectPage,
         MenuPage,
         ParamsPage,
-        StockageMenuPage,
         TracaMenuPage,
-        PriseEmplacementPage,
-        PriseArticlesPage,
-        PriseConfirmPage,
         PriseEmplacementPageTraca,
         PreparationMenuPage,
         PreparationArticleTakePage,
@@ -125,7 +110,6 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
         ManutentionValidatePage,
         DeposeEmplacementPageTraca,
         DeposeArticlesPageTraca,
-        DeposePage,
         InventaireMenuPage,
         ModalQuantityPage,
         InventaireAnomaliePage,

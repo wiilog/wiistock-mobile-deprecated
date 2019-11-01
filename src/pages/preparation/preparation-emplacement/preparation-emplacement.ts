@@ -20,6 +20,7 @@ export class PreparationEmplacementPage {
 
     emplacement: Emplacement;
     db_locations: Array<Emplacement>;
+    db_locations_for_list: Array<Emplacement>;
     preparation: Preparation;
     apiFinish: string = '/api/finishPrepa';
 

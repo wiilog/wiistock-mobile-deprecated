@@ -1,23 +1,14 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, ModalController, Navbar, NavController, NavParams, ToastController} from 'ionic-angular';
-import {MenuPage} from "../../menu/menu";
-import {Emplacement} from "../../../app/entities/emplacement";
-import {SqliteProvider} from "../../../providers/sqlite/sqlite";
-import {BarcodeScanner} from "@ionic-native/barcode-scanner";
-import {LivraisonMenuPage} from "../livraison-menu/livraison-menu";
-import {HttpClient} from "@angular/common/http";
-import {LivraisonArticlesPage} from "../livraison-articles/livraison-articles";
-import {Livraison} from "../../../app/entities/livraison";
-import {ToastService} from "@app/services/toast.service";
-import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
-import {Subscription} from "rxjs";
+import {IonicPage, ModalController, Navbar, NavController, NavParams} from 'ionic-angular';
+import {MenuPage} from '@pages/menu/menu';
+import {Emplacement} from '@app/entities/emplacement';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {HttpClient} from '@angular/common/http';
+import {Livraison} from '@app/entities/livraison';
+import {ToastService} from '@app/services/toast.service';
+import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
+import {Subscription} from 'rxjs';
 
-/**
- * Generated class for the LivraisonEmplacementPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
 
 @IonicPage()
 @Component({
@@ -78,7 +69,7 @@ export class LivraisonEmplacementPage {
         if (!this.validateIsLoading) {
             const myModal = this.modal.create('LivraisonModalSearchEmplacementPage', {
                 livraison: this.livraison,
-                selectLocation(location) {
+                selectLocation: (location) => {
                     this.testLocation(location, false);
                 }
             });

@@ -15,7 +15,8 @@ useDefaultConfig[env].resolve.alias = {
     "@pages": path.resolve('./src/pages/'),
     "@services": path.resolve('./src/services/'),
     "@providers": path.resolve('./src/providers/'),
-    "@theme": path.resolve('./src/theme/')
+    "@theme": path.resolve('./src/theme/'),
+    "@helpers": path.resolve('./src/helpers/')
 };
 
 module.exports = () => useDefaultConfig;
