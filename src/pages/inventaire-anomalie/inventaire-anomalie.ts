@@ -1,15 +1,15 @@
 import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
-import {Content,IonicPage,ModalController,Navbar,NavParams,ToastController} from 'ionic-angular';
+import {Content, IonicPage, ModalController, Navbar} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
 import {Anomalie} from '@app/entities/anomalie';
 import {ArticleInventaire} from '@app/entities/article-inventaire';
-import {ModalQuantityPage} from '../inventaire-menu/modal-quantity';
+import {ModalQuantityPage} from '@pages/inventaire-menu/modal-quantity';
 import {Article} from '@app/entities/article';
 import {Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
-import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
-import {ToastService} from "@app/services/toast.service";
+import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
+import {ToastService} from '@app/services/toast.service';
 
 
 @IonicPage()
@@ -33,14 +33,12 @@ export class InventaireAnomaliePage {
 
     private zebraScannerSubscription: Subscription;
 
-    public constructor(public navParams: NavParams,
-                       public sqlLiteProvider: SqliteProvider,
+    public constructor(public sqliteProvider: SqliteProvider,
                        public http: HttpClient,
-                       public toastController: ToastController,
                        private changeDetector: ChangeDetectorRef,
                        private modalController: ModalController,
                        private barcodeScannerManager: BarcodeScannerManagerService,
-                       private toast: ToastService) {}
+                       private toastService: ToastService) {}
 
 
     public ionViewWillEnter(): void {
@@ -70,11 +68,11 @@ export class InventaireAnomaliePage {
 
     synchronize() {
         this.isLoaded = false;
-        this.sqlLiteProvider.getAPI_URL().subscribe(
+        this.sqliteProvider.getAPI_URL().subscribe(
             (baseUrl) => {
                 if (baseUrl !== null) {
-                    this.sqlLiteProvider.getApiKey().then((key) => {
-                        this.sqlLiteProvider.findAll('`anomalie_inventaire`').subscribe(anomalies => {
+                    this.sqliteProvider.getApiKey().then((key) => {
+                        this.sqliteProvider.findAll('`anomalie_inventaire`').subscribe(anomalies => {
                             this.anomalies = anomalies;
                             let locations = [];
                             anomalies.forEach(anomaly => {
@@ -83,7 +81,7 @@ export class InventaireAnomaliePage {
                                 }
                             });
                             // envoi des anomalies traitées
-                            this.sqlLiteProvider.findByElement(`anomalie_inventaire`, 'treated', '1').subscribe((anomalies) => {
+                            this.sqliteProvider.findByElement(`anomalie_inventaire`, 'treated', '1').subscribe((anomalies) => {
                                 let params = {
                                     anomalies: anomalies,
                                     apiKey: key
@@ -92,11 +90,11 @@ export class InventaireAnomaliePage {
                                 this.http.post<any>(urlAnomalies, params).subscribe(resp => {
                                     if (resp.success) {
                                         // supprime les anomalies traitée de la base
-                                        this.sqlLiteProvider.deleteAnomalies(anomalies);
-                                        this.toast.showToast(resp.data.status);
+                                        this.sqliteProvider.deleteAnomalies(anomalies);
+                                        this.toastService.showToast(resp.data.status);
                                     } else {
                                         this.isLoaded = true;
-                                        this.toast.showToast('Une erreur est survenue lors de la mise à jour des anomalies.');
+                                        this.toastService.showToast('Une erreur est survenue lors de la mise à jour des anomalies.');
                                     }
                                     this.locations = locations;
                                     this.isLoaded = true;
@@ -106,7 +104,7 @@ export class InventaireAnomaliePage {
                         });
                     });
                 } else {
-                    this.toast.showToast('Veuillez configurer votre URL dans les paramètres.')
+                    this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.')
                 }
             }
         );
@@ -130,7 +128,7 @@ export class InventaireAnomaliePage {
             this.anomaliesByLocation = this.anomalies.filter(anomaly => (anomaly.location === this.location));
             this.changeDetector.detectChanges();
         } else {
-            this.toast.showToast('Ce code-barre ne correspond à aucun emplacement.');
+            this.toastService.showToast('Ce code-barre ne correspond à aucun emplacement.');
         }
     }
 
@@ -142,7 +140,7 @@ export class InventaireAnomaliePage {
             this.changeDetector.detectChanges();
             this.openModalQuantity(this.article);
         } else {
-            this.toast.showToast('Ce code-barre ne correspond à aucune référence ou article.');
+            this.toastService.showToast('Ce code-barre ne correspond à aucune référence ou article.');
         }
     }
 
@@ -153,10 +151,10 @@ export class InventaireAnomaliePage {
             this.anomaly.treated = "1";
 
             // envoi de l'anomalie modifiée à l'API
-            this.sqlLiteProvider.getAPI_URL().subscribe(baseUrl => {
+            this.sqliteProvider.getAPI_URL().subscribe(baseUrl => {
                 if (baseUrl !== null) {
                     let url: string = baseUrl + this.updateAnomaliesURL;
-                    this.sqlLiteProvider.getApiKey().then(apiKey => {
+                    this.sqliteProvider.getApiKey().then(apiKey => {
                         let params = {
                             anomalies: [this.anomaly],
                             apiKey: apiKey
@@ -164,8 +162,8 @@ export class InventaireAnomaliePage {
                         this.http.post<any>(url, params).subscribe(resp => {
                             if (resp.success) {
                                 // supprime l'anomalie traitée de la base
-                                this.sqlLiteProvider.deleteById(`anomalie_inventaire`, this.anomaly.id);
-                                this.toast.showToast(resp.data.status);
+                                this.sqliteProvider.deleteById(`anomalie_inventaire`, this.anomaly.id);
+                                this.toastService.showToast(resp.data.status);
                                 // supprime l'anomalie de la liste
                                 this.anomaliesByLocation = this.anomaliesByLocation.filter(anomaly => parseInt(anomaly.treated) !== 1);
                                 // si liste vide retour aux emplacements
@@ -176,7 +174,7 @@ export class InventaireAnomaliePage {
                         });
                     });
                 } else {
-                    this.toast.showToast('Veuillez configurer votre URL dans les paramètres.')
+                    this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.')
                 }
             });
         });

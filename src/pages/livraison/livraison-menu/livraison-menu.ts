@@ -12,10 +12,15 @@ import {Livraison} from '@app/entities/livraison';
     templateUrl: 'livraison-menu.html',
 })
 export class LivraisonMenuPage {
-    @ViewChild(Navbar) navBar: Navbar;
-    @ViewChild(Content) content: Content;
-    livraisons: Array<Livraison>;
-    hasLoaded: boolean;
+    @ViewChild(Navbar)
+    public navBar: Navbar;
+
+    @ViewChild(Content)
+    public content: Content;
+
+    public livraisons: Array<Livraison>;
+
+    public hasLoaded: boolean;
 
     public constructor(private navCtrl: NavController,
                        private sqliteProvider: SqliteProvider) {
@@ -25,7 +30,7 @@ export class LivraisonMenuPage {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    public ionViewDidEnter(): void {
+    public ionViewWillEnter(): void {
         this.synchronise(true);
     }
 
@@ -41,5 +46,4 @@ export class LivraisonMenuPage {
     public goToLivraison(livraison): void {
         this.navCtrl.push(LivraisonArticlesPage, {livraison});
     }
-
 }

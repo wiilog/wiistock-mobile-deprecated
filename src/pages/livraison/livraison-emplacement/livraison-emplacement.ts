@@ -8,6 +8,7 @@ import {Livraison} from '@app/entities/livraison';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
+import {SearchLocationComponent} from "@helpers/components/search-location/search-location.component";
 
 
 @IonicPage()
@@ -16,25 +17,27 @@ import {Subscription} from 'rxjs';
     templateUrl: 'livraison-emplacement.html',
 })
 export class LivraisonEmplacementPage {
-    @ViewChild(Navbar) navBar: Navbar;
+    @ViewChild(Navbar)
+    public navBar: Navbar;
 
-    emplacement: Emplacement;
-    db_locations: Array<Emplacement>;
-    livraison: Livraison;
-    apiFinish: string = '/api/finishLivraison';
+    @ViewChild('searchComponent')
+    public searchComponent: SearchLocationComponent;
+
+    public emplacement: Emplacement;
+    public livraison: Livraison;
+    public apiFinish: string = '/api/finishLivraison';
 
     private validateIsLoading: boolean;
     private validateLivraison: () => void;
     private zebraScannerSubscription: Subscription;
 
-    constructor(public navCtrl: NavController,
-                public navParams: NavParams,
-                public sqliteProvider: SqliteProvider,
-                public toastService: ToastService,
-                public barcodeScannerManager: BarcodeScannerManagerService,
-
-                public http: HttpClient,
-                public modal: ModalController) {
+    public constructor(public navCtrl: NavController,
+                       public navParams: NavParams,
+                       public sqliteProvider: SqliteProvider,
+                       public toastService: ToastService,
+                       public barcodeScannerManager: BarcodeScannerManagerService,
+                       public http: HttpClient,
+                       public modal: ModalController) {
         this.validateIsLoading = false;
     }
 
@@ -44,9 +47,6 @@ export class LivraisonEmplacementPage {
 
         this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
             this.testLocation(barcode);
-        });
-        this.sqliteProvider.findAll('emplacement').subscribe((value) => {
-            this.db_locations = value;
         });
     }
 
@@ -65,33 +65,16 @@ export class LivraisonEmplacementPage {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    searchEmplacementModal() {
-        if (!this.validateIsLoading) {
-            const myModal = this.modal.create('LivraisonModalSearchEmplacementPage', {
-                livraison: this.livraison,
-                selectLocation: (location) => {
-                    this.testLocation(location, false);
-                }
-            });
-            myModal.present();
-        }
-    }
-
     scan() {
         this.barcodeScannerManager.scan().subscribe((barcode) => {
             this.testLocation(barcode);
         });
     }
 
-    testLocation(locationToTest, fromBarcode: boolean = true) {
-        const location = fromBarcode
-            ? this.db_locations.find(({label}) => (label === locationToTest))
-            : locationToTest;
-        const locationLabel = fromBarcode
-            ? locationToTest
-            : location.text;
+    testLocation(locationToTest: string) {
+        const location = this.searchComponent.isKnownLocation(locationToTest);
         if (location) {
-            if (this.livraison.emplacement === locationLabel) {
+            if (this.livraison.emplacement === locationToTest) {
                 this.emplacement = location;
             }
             else {

@@ -30,23 +30,26 @@ export class LivraisonArticlesPage {
     apiStartLivraison = '/api/beginLivraison';
     isValid: boolean = true;
 
+    public loadingStartLivraison: boolean;
+
     private zebraScannerSubscription: Subscription;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public toastService: ToastService,
-                       public sqliteProvider: SqliteProvider,
-                       public http: HttpClient,
-                       public barcodeScannerManager: BarcodeScannerManagerService) {
-
+    public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private toastService: ToastService,
+                       private sqliteProvider: SqliteProvider,
+                       private http: HttpClient,
+                       private barcodeScannerManager: BarcodeScannerManagerService) {
+        this.loadingStartLivraison = false;
     }
 
     public ionViewWillEnter(): void {
+        this.livraison = this.navParams.get('livraison');
+
         this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
             this.testIfBarcodeEquals(barcode, true);
         });
 
-        this.livraison = this.navParams.get('livraison');
         this.sqliteProvider.findArticlesByLivraison(this.livraison.id).subscribe((articles) => {
             this.articlesNT = articles.filter(article => article.has_moved === 0);
             this.articlesT = articles.filter(article => article.has_moved === 1);
@@ -75,6 +78,7 @@ export class LivraisonArticlesPage {
 
     public selectArticle(article, quantity) {
         if (!this.started) {
+            this.loadingStartLivraison = true;
             this.sqliteProvider.getAPI_URL().subscribe((result) => {
                 this.sqliteProvider.getApiKey().then((key) => {
                     if (result !== null) {
@@ -84,6 +88,7 @@ export class LivraisonArticlesPage {
                                 this.started = true;
                                 this.isValid = true;
                                 this.toastService.showToast('Livraison commencée.');
+
                                 this.registerMvt(article, quantity);
                             } else {
                                 this.isValid = false;
@@ -132,6 +137,7 @@ export class LivraisonArticlesPage {
                                 }
                                 this.articlesNT = articles.filter(article => article.has_moved === 0);
                                 this.articlesT = articles.filter(article => article.has_moved === 1);
+                                this.loadingStartLivraison = false;
                             })
                         });
                     });
@@ -166,6 +172,7 @@ export class LivraisonArticlesPage {
                                 }
                                 this.articlesNT = articles.filter(article => article.has_moved === 0);
                                 this.articlesT = articles.filter(article => article.has_moved === 1);
+                                this.loadingStartLivraison = false;
                             });
                     });
                 }
@@ -199,6 +206,7 @@ export class LivraisonArticlesPage {
                                 }
                                 this.articlesNT = articles.filter(article => article.has_moved === 0);
                                 this.articlesT = articles.filter(article => article.has_moved === 1);
+                                this.loadingStartLivraison = false;
                             })
                         });
                     });
@@ -217,6 +225,7 @@ export class LivraisonArticlesPage {
                             }
                             this.articlesNT = articles.filter(article => article.has_moved === 0);
                             this.articlesT = articles.filter(article => article.has_moved === 1);
+                            this.loadingStartLivraison = false;
                         });
                 }
             }

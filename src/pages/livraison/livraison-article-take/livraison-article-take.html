@@ -22,9 +22,8 @@
                 <ion-label>Quantité souhaitée</ion-label>
                 <ion-input name="quantite"
                            type="number"
-                           value="{{quantite}}"
                            [(ngModel)]="quantite"
-                           max="{{quantite}}"></ion-input>
+                           [max]="maxQuantity"></ion-input>
             </ion-item>
             <br>
         </ion-col>

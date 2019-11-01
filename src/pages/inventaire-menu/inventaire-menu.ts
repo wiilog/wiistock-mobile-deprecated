@@ -1,5 +1,5 @@
 import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
-import {Content, IonicPage, Navbar, NavController, NavParams, ModalController} from 'ionic-angular';
+import {Content, IonicPage, Navbar, NavController, ModalController} from 'ionic-angular';
 import {ModalQuantityPage} from '@pages/inventaire-menu/modal-quantity';
 import {MenuPage} from '@pages/menu/menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
@@ -35,16 +35,12 @@ export class InventaireMenuPage {
     private zebraScannerSubscription: Subscription;
 
     public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public sqlLiteProvider: SqliteProvider,
+                       public sqliteProvider: SqliteProvider,
                        public http: HttpClient,
                        private modalController: ModalController,
                        private changeDetector: ChangeDetectorRef,
                        private barcodeScannerManager: BarcodeScannerManagerService,
-                       private toast : ToastService) {
-        this.sqlLiteProvider.getInventoryManagerRight().then(isInventoryManager => {
-            this.isInventoryManager = isInventoryManager;
-        });
+                       private toastService: ToastService) {
     }
 
     goHome() {
@@ -53,6 +49,11 @@ export class InventaireMenuPage {
 
     public ionViewWillEnter(): void {
         this.synchronize();
+
+        this.sqliteProvider.getInventoryManagerRight().then(isInventoryManager => {
+            this.isInventoryManager = isInventoryManager;
+        });
+
         this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$
             .pipe(filter(() => (this.isLoaded && this.articles && this.articles.length > 0)))
             .subscribe((barcode: string) => {
@@ -73,20 +74,20 @@ export class InventaireMenuPage {
 
     addInventoryEntries() : Observable<any> {
         let ret$: ReplaySubject<any> = new ReplaySubject(1);
-        this.sqlLiteProvider.getAPI_URL().subscribe(baseUrl => {
+        this.sqliteProvider.getAPI_URL().subscribe(baseUrl => {
             if (baseUrl !== null) {
                 let url: string = baseUrl + this.addEntryURL;
-                this.sqlLiteProvider.findAll('`saisie_inventaire`').subscribe(data => {
+                this.sqliteProvider.findAll('`saisie_inventaire`').subscribe(data => {
                     if (data.length > 0) {
-                        this.sqlLiteProvider.getApiKey().then(apiKey => {
+                        this.sqliteProvider.getApiKey().then(apiKey => {
                             let params = {
                                 entries: data,
                                 apiKey: apiKey
                             };
                             this.http.post<any>(url, params).subscribe(resp => {
                                 if (resp.success) {
-                                    this.sqlLiteProvider.cleanTable('`saisie_inventaire`');
-                                    this.toast.showToast(resp.data.status);
+                                    this.sqliteProvider.cleanTable('`saisie_inventaire`');
+                                    this.toastService.showToast(resp.data.status);
                                     ret$.next(undefined);
                                 } else {
                                     ret$.next(undefined);
@@ -99,7 +100,7 @@ export class InventaireMenuPage {
                 })
             } else {
                 ret$.next(undefined);
-                this.toast.showToast('Veuillez configurer votre URL dans les paramètres.')
+                this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.')
             }
         });
         return ret$;
@@ -107,7 +108,7 @@ export class InventaireMenuPage {
 
     synchronize() {
         this.isLoaded = false;
-        this.sqlLiteProvider.findAll('`article_inventaire`').subscribe(articles => {
+        this.sqliteProvider.findAll('`article_inventaire`').subscribe(articles => {
             this.articles = articles;
             let locations = [];
             articles.forEach(article => {
@@ -137,9 +138,9 @@ export class InventaireMenuPage {
                 quantity: data.quantity,
                 location: article.location,
             };
-            this.sqlLiteProvider.insert('`saisie_inventaire`', saisieInventaire).subscribe(() => {
+            this.sqliteProvider.insert('`saisie_inventaire`', saisieInventaire).subscribe(() => {
                 // supprime l'article de la base
-                this.sqlLiteProvider.deleteById('`article_livraison`', article.id);
+                this.sqliteProvider.deleteById('`article_livraison`', article.id);
                 // supprime la ligne des tableaux
                 let index1 = this.articles.indexOf(article);
                 if (index1 > -1) this.articles.splice(index1, 1);
@@ -176,7 +177,7 @@ export class InventaireMenuPage {
             this.articlesByLocation = this.articles.filter(article => (article.location === this.location));
             this.changeDetector.detectChanges();
         } else {
-            this.toast.showToast('Ce code-barre ne correspond à aucun emplacement.');
+            this.toastService.showToast('Ce code-barre ne correspond à aucun emplacement.');
         }
     }
 
@@ -192,7 +193,7 @@ export class InventaireMenuPage {
             this.changeDetector.detectChanges();
             this.openModalQuantity(this.article);
         } else {
-            this.toast.showToast('Ce code-barre ne correspond à aucune référence ou article sur cet emplacement.');
+            this.toastService.showToast('Ce code-barre ne correspond à aucune référence ou article sur cet emplacement.');
         }
     }
 

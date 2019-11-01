@@ -132,7 +132,6 @@ export class CollecteEmplacementPage {
                                                     if (resp.success) {
                                                         this.sqliteProvider.deleteCollectes(params.collectes).then(() => {
                                                             this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
-                                                                console.log('nav pop EMPLACEMENT SUCCESS');
                                                                 this.isLoading = false;
                                                                 this.navCtrl.pop().then(() => {
                                                                     this.validateCollecte();

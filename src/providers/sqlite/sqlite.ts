@@ -224,7 +224,6 @@ export class SqliteProvider {
             });
         }
         for (let prepa of prepas) {
-            console.log(prepa);
             this.findOneById('preparation', prepa.id).subscribe((prepaInserted) => {
                 if (prepaInserted === null) {
                     prepasValues.push(`(${prepa.id}, '${prepa.number}', NULL, NULL, 0, '${prepa.destination}', '${prepa.type}')`);
@@ -529,7 +528,7 @@ export class SqliteProvider {
     public importAnomaliesInventaire(data): Observable<string> {
         let ret$: ReplaySubject<string> = new ReplaySubject(1);
         let anomalies = data.anomalies;
-        console.log(anomalies);
+
         let anomaliesValues = [];
         if (anomalies.length === 0) {
             this.cleanTable('`anomalie_inventaire`').subscribe(_ => {
@@ -543,7 +542,6 @@ export class SqliteProvider {
             let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `location`, `barcode`) VALUES ' + anomaliesValuesStr + ';';
             if (anomaliesValues.length > 0) {
                 ret$.next(sqlAnomaliesInventaire);
-                ;
             } else {
                 ret$.next(undefined);
             }

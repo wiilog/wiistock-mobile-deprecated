@@ -13,6 +13,7 @@ export class LivraisonArticleTakePage {
 
     public article: ArticleLivraison;
     public quantite: number;
+    public maxQuantity: number;
     private selectArticle: (quantity) => void;
 
     public constructor(private navCtrl: NavController,
@@ -22,16 +23,18 @@ export class LivraisonArticleTakePage {
 
     public ionViewWillEnter(): void {
         this.article = this.navParams.get('article');
+        this.selectArticle = this.navParams.get('selectArticle');
         this.quantite = this.article.quantite;
+        this.maxQuantity = this.article.quantite;
     }
 
-    addArticle() {
-        if (this.quantite > this.article.quantite || this.quantite <= 0) {
-            this.toastService.showToast('Veuillez selectionner une quantité valide.');
-        } else {
+    public addArticle(): void {
+        if (this.quantite <= this.article.quantite && this.quantite > 0) {
             this.selectArticle(this.quantite);
             this.navCtrl.pop();
         }
+        else {
+            this.toastService.showToast('Veuillez selectionner une quantité valide.');
+        }
     }
-
 }
