@@ -1,5 +1,10 @@
 <ion-header>
     <ion-navbar>
+        <ion-buttons start>
+            <button ion-button icon-only (click)="goHome()">
+                <ion-icon name="home"></ion-icon>
+            </button>
+        </ion-buttons>
         <ion-title>Finaliser une préparation</ion-title>
     </ion-navbar>
 </ion-header>
@@ -17,7 +22,7 @@
                                  [(location)]="emplacement">
             </wii-search-location>
 
-            <div class="spinner" *ngIf="isLoaded">
+            <div class="spinner" *ngIf="isLoading">
                 <ion-spinner></ion-spinner>
             </div>
         </div>

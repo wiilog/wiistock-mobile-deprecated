@@ -16,7 +16,11 @@
             <p>Point de collecte<br/>{{collecte.emplacement}}</p>
         </div>
 
-        <div *ngIf="articlesNT && articlesNT.length > 0">
+        <div class="spinner" *ngIf="loadingStartCollecte">
+            <ion-spinner></ion-spinner>
+        </div>
+
+        <div *ngIf="!loadingStartCollecte && articlesNT && articlesNT.length > 0">
             <div class="d-flex">
                 <p>Liste des articles à traiter</p>
             </div>
@@ -33,7 +37,7 @@
             </ion-list>
         </div>
 
-        <div *ngIf="articlesT && articlesT.length > 0">
+        <div *ngIf="!loadingStartCollecte && articlesT && articlesT.length > 0">
             <div class="d-flex">
                 <p>Liste des articles traités</p>
             </div>

@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, ModalController, Navbar, NavController, NavParams} from 'ionic-angular';
+import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
@@ -8,7 +8,7 @@ import {Livraison} from '@app/entities/livraison';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
-import {SearchLocationComponent} from "@helpers/components/search-location/search-location.component";
+import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
 
 
 @IonicPage()
@@ -36,8 +36,7 @@ export class LivraisonEmplacementPage {
                        public sqliteProvider: SqliteProvider,
                        public toastService: ToastService,
                        public barcodeScannerManager: BarcodeScannerManagerService,
-                       public http: HttpClient,
-                       public modal: ModalController) {
+                       public http: HttpClient) {
         this.validateIsLoading = false;
     }
 
@@ -61,17 +60,17 @@ export class LivraisonEmplacementPage {
         return this.barcodeScannerManager.canGoBack;
     }
 
-    goHome() {
+    public goHome(): void {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    scan() {
+    public scan(): void {
         this.barcodeScannerManager.scan().subscribe((barcode) => {
             this.testLocation(barcode);
         });
     }
 
-    testLocation(locationToTest: string) {
+    public testLocation(locationToTest: string): void {
         const location = this.searchComponent.isKnownLocation(locationToTest);
         if (location) {
             if (this.livraison.emplacement === locationToTest) {
@@ -86,7 +85,7 @@ export class LivraisonEmplacementPage {
         }
     }
 
-    validate() {
+    public validate(): void {
         if (!this.validateIsLoading) {
             if (this.emplacement && this.emplacement.label !== '') {
                 this.validateIsLoading = true;
@@ -153,5 +152,4 @@ export class LivraisonEmplacementPage {
             }
         }
     }
-
 }

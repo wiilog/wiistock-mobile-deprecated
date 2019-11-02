@@ -1,8 +1,8 @@
 <ion-header>
     <ion-navbar>
         <ion-buttons start>
-            <button ion-button icon-only (click)="searchEmplacementModal()">
-                <ion-icon name="search"></ion-icon>
+            <button ion-button icon-only (click)="goHome()">
+                <ion-icon name="home"></ion-icon>
             </button>
         </ion-buttons>
         <ion-title>Finaliser une collecte</ion-title>
@@ -10,17 +10,23 @@
 </ion-header>
 
 <ion-content padding>
-    <ion-row class="row-menu-stats">
-        <ion-col class="col-menu-stats" *ngIf="emplacement">
-            <p class="smaller">Emplacement sélectionné :</p>
-            <p class="smaller">{{emplacement.label}}</p>
-        </ion-col>
+    <div>
+        <div>
+            <div class="barcode-container">
+                <ion-icon class="barcode" name="barcode" (click)="scan()"></ion-icon>
+                <span *ngIf="!emplacement" class="barcode-label">Flashez un emplacement</span>
+                <span *ngIf="emplacement" class="barcode-label">Emplacement sélectionné</span>
+            </div>
 
-        <ion-col *ngIf="!emplacement" class="col-menu-stats">
-            <p><span class="big">SCANNER</span><br>EMPLACEMENT</p>
-            <ion-icon name="barcode" (click)="scan()"></ion-icon>
-        </ion-col>
-    </ion-row>
+            <wii-search-location #searchComponent
+                                 [(location)]="emplacement">
+            </wii-search-location>
+
+            <div class="spinner" *ngIf="isLoading">
+                <ion-spinner></ion-spinner>
+            </div>
+        </div>
+    </div>
 </ion-content>
 
 <ion-footer padding [hidden]="!emplacement">

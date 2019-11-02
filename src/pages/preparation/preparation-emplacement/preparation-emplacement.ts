@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, ModalController, Navbar, NavController, NavParams} from 'ionic-angular';
+import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
@@ -8,7 +8,7 @@ import {HttpClient} from '@angular/common/http';
 import {ToastService} from '@app/services/toast.service';
 import {Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
-import {SearchLocationComponent} from "@helpers/components/search-location/search-location.component";
+import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
 
 
 @IonicPage()
@@ -18,16 +18,16 @@ import {SearchLocationComponent} from "@helpers/components/search-location/searc
 })
 export class PreparationEmplacementPage {
     @ViewChild(Navbar)
-    navBar: Navbar;
+    public navBar: Navbar;
 
     @ViewChild('searchComponent')
     public searchComponent: SearchLocationComponent;
 
-    emplacement: Emplacement;
-    preparation: Preparation;
-    apiFinish: string = '/api/finishPrepa';
+    public emplacement: Emplacement;
+    public preparation: Preparation;
+    public apiFinish: string = '/api/finishPrepa';
 
-    private isLoaded: boolean;
+    private isLoading: boolean;
 
     private zebraScannerSubscription: Subscription;
     private validatePrepa: () => void;
@@ -38,7 +38,7 @@ export class PreparationEmplacementPage {
                        public barcodeScannerManager: BarcodeScannerManagerService,
                        public http: HttpClient,
                        private toastService: ToastService) {
-        this.isLoaded = false;
+        this.isLoading = false;
     }
 
     public ionViewWillEnter(): void {
@@ -60,17 +60,17 @@ export class PreparationEmplacementPage {
         return this.barcodeScannerManager.canGoBack;
     }
 
-    goHome() {
+    public goHome(): void {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    scan() {
+    public scan(): void {
         this.barcodeScannerManager.scan().subscribe(barcode => {
             this.testIfBarcodeEquals(barcode);
         });
     }
 
-    testIfBarcodeEquals(text) {
+    public testIfBarcodeEquals(text): void {
         const foundEmplacement = this.searchComponent.isKnownLocation(text);
 
         if (foundEmplacement) {
@@ -81,10 +81,10 @@ export class PreparationEmplacementPage {
         }
     }
 
-    validate() {
-        if (!this.isLoaded) {
+    public validate(): void {
+        if (!this.isLoading) {
             if (this.emplacement.label !== '') {
-                this.isLoaded = true;
+                this.isLoading = true;
                 let instance = this;
                 let promise = new Promise<any>((resolve) => {
                     this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
@@ -115,7 +115,7 @@ export class PreparationEmplacementPage {
                                                         if (resp.success) {
                                                             this.sqliteProvider.deletePreparations(params.preparations).then(() => {
                                                                 this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
-                                                                    this.isLoaded = false;
+                                                                    this.isLoading = false;
                                                                     this.navCtrl.pop().then(() => {
                                                                         this.validatePrepa();
                                                                     });
@@ -123,12 +123,12 @@ export class PreparationEmplacementPage {
                                                             });
                                                         }
                                                         else {
-                                                            this.isLoaded = false;
+                                                            this.isLoading = false;
                                                             this.toastService.showToast(resp.msg);
                                                         }
                                                     },
                                                     () => {
-                                                        this.isLoaded = false;
+                                                        this.isLoading = false;
                                                         this.navCtrl.pop().then(() => {
                                                             this.validatePrepa();
                                                         });
@@ -138,7 +138,7 @@ export class PreparationEmplacementPage {
                                         });
                                     }
                                     else {
-                                        this.isLoaded = false;
+                                        this.isLoading = false;
                                     }
                                 });
                             });

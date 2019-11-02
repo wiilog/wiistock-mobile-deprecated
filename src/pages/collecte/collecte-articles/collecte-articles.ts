@@ -10,9 +10,9 @@ import moment from 'moment';
 import {ArticleCollecte} from '@app/entities/article-collecte';
 import {Collecte} from '@app/entities/collecte';
 import {flatMap} from 'rxjs/operators';
-import {ToastService} from "@app/services/toast.service";
-import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
-import {Subscription} from "rxjs";
+import {ToastService} from '@app/services/toast.service';
+import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
+import {Subscription} from 'rxjs';
 
 
 @IonicPage()
@@ -23,12 +23,14 @@ import {Subscription} from "rxjs";
 export class CollecteArticlesPage {
 
     @ViewChild(Navbar) navBar: Navbar;
-    collecte: Collecte;
-    articlesNT: Array<ArticleCollecte>;
-    articlesT: Array<ArticleCollecte>;
-    started: boolean = false;
-    apiStartCollecte = '/api/beginCollecte';
-    isValid: boolean = true;
+    public collecte: Collecte;
+
+    public articlesNT: Array<ArticleCollecte>;
+    public articlesT: Array<ArticleCollecte>;
+    public started: boolean = false;
+    public apiStartCollecte = '/api/beginCollecte';
+    public isValid: boolean = true;
+    public loadingStartCollecte: boolean;
 
     private zebraScannerSubscription: Subscription;
 
@@ -38,6 +40,7 @@ export class CollecteArticlesPage {
                        public sqliteProvider: SqliteProvider,
                        public http: HttpClient,
                        public barcodeScannerManager: BarcodeScannerManagerService) {
+        this.loadingStartCollecte = false;
     }
 
     public ionViewWillEnter(): void {
@@ -73,15 +76,15 @@ export class CollecteArticlesPage {
         });
     }
 
-    refreshOver() {
+    public refreshOver(): void {
         this.toastService.showToast('Collecte prête à être finalisée.')
     }
 
-    refresh() {
+    public refresh(): void {
         this.toastService.showToast('Quantité bien prélevée.')
     }
 
-    registerMvt(article, quantite) {
+    public registerMvt(article, quantite): void {
         if (this.isValid) {
             if (article.quantite !== Number(quantite)) {
                 let newArticle: ArticleCollecte = {
@@ -101,19 +104,15 @@ export class CollecteArticlesPage {
                     (art.reference === newArticle.reference)
                 ));
                 if (articleAlready !== undefined) {
-                    this.sqliteProvider.updateArticleCollecteQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite).subscribe(() => {
-                        this.sqliteProvider.updateArticleCollecteQuantity(article.id, article.quantite - newArticle.quantite).subscribe(() => {
-                            this.sqliteProvider.findArticlesByCollecte(this.collecte.id).subscribe((articles) => {
-                                if (articles.filter(article => article.has_moved === 0).length === 0) {
-                                    this.refreshOver();
-                                } else {
-                                    this.refresh();
-                                }
-                                this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                this.articlesT = articles.filter(article => article.has_moved === 1);
-                            })
+                    this.sqliteProvider
+                        .updateArticleCollecteQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite)
+                        .pipe(
+                            flatMap(() => this.sqliteProvider.updateArticleCollecteQuantity(article.id, article.quantite - newArticle.quantite)),
+                            flatMap(() => this.sqliteProvider.findArticlesByCollecte(this.collecte.id))
+                        )
+                        .subscribe((articles) => {
+                            this.updateList(articles);
                         });
-                    });
                 } else {
                     this.sqliteProvider.insert('`article_collecte`', newArticle).subscribe((insertId) => {
                         let mouvement: Mouvement = {
@@ -138,13 +137,7 @@ export class CollecteArticlesPage {
                                 flatMap(() => this.sqliteProvider.insert('`mouvement`', mouvement)),
                                 flatMap(() => this.sqliteProvider.findArticlesByCollecte(this.collecte.id)))
                             .subscribe((articles) => {
-                                if (articles.filter(article => article.has_moved === 0).length === 0) {
-                                    this.refreshOver();
-                                } else {
-                                    this.refresh();
-                                }
-                                this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                this.articlesT = articles.filter(article => article.has_moved === 1);
+                                this.updateList(articles);
                             });
                     });
                 }
@@ -172,19 +165,15 @@ export class CollecteArticlesPage {
                     (art.reference === mouvement.reference)
                 ));
                 if (articleAlready !== undefined) {
-                    this.sqliteProvider.updateArticleCollecteQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite).subscribe(() => {
-                        this.sqliteProvider.deleteById('`article_collecte`', mouvement.id_article_collecte).subscribe(() => {
-                            this.sqliteProvider.findArticlesByCollecte(this.collecte.id).subscribe((articles) => {
-                                if (articles.filter(article => article.has_moved === 0).length === 0) {
-                                    this.refreshOver();
-                                } else {
-                                    this.refresh();
-                                }
-                                this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                this.articlesT = articles.filter(article => article.has_moved === 1);
-                            })
+                    this.sqliteProvider
+                        .updateArticleCollecteQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite)
+                        .pipe(
+                            flatMap(() => this.sqliteProvider.deleteById('`article_collecte`', mouvement.id_article_collecte)),
+                            flatMap(() => this.sqliteProvider.findArticlesByCollecte(this.collecte.id))
+                        )
+                        .subscribe((articles) => {
+                            this.updateList(articles);
                         });
-                    });
                 } else {
                     this.sqliteProvider
                         .insert('`mouvement`', mouvement)
@@ -193,25 +182,18 @@ export class CollecteArticlesPage {
                             flatMap(() => this.sqliteProvider.findArticlesByCollecte(this.collecte.id))
                         )
                         .subscribe((articles) => {
-                            if (articles.filter(article => article.has_moved === 0).length === 0) {
-                                this.refreshOver();
-                            } else {
-                                this.refresh();
-                            }
-                            this.articlesNT = articles.filter(article => article.has_moved === 0);
-                            this.articlesT = articles.filter(article => article.has_moved === 1);
+                            this.updateList(articles);
                         });
                 }
             }
         }
     }
 
-
-    goHome() {
+    public goHome(): void {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    validate() {
+    public validate(): void {
         if (this.articlesNT.length > 0) {
             this.toastService.showToast('Veuillez traiter tous les articles concernés');
         }
@@ -226,7 +208,7 @@ export class CollecteArticlesPage {
         }
     }
 
-    testIfBarcodeEquals(text, fromText) {
+    public testIfBarcodeEquals(text, fromText): void {
         const article = fromText
             ? this.articlesNT.find(article => (article.barcode === text))
             : text;
@@ -245,6 +227,7 @@ export class CollecteArticlesPage {
 
     private selectArticle(article, quantity): void {
         if (!this.started) {
+            this.loadingStartCollecte = true;
             this.sqliteProvider.getAPI_URL().subscribe((result) => {
                 this.sqliteProvider.getApiKey().then((key) => {
                     if (result !== null) {
@@ -257,6 +240,7 @@ export class CollecteArticlesPage {
                                 this.registerMvt(article, quantity);
                             } else {
                                 this.isValid = false;
+                                this.loadingStartCollecte = false;
                                 this.toastService.showToast(resp.msg);
                             }
                         });
@@ -268,4 +252,14 @@ export class CollecteArticlesPage {
         }
     }
 
+    private updateList(articles: Array<ArticleCollecte>): void {
+        if (articles.filter(article => article.has_moved === 0).length === 0) {
+            this.refreshOver();
+        } else {
+            this.refresh();
+        }
+        this.articlesNT = articles.filter(article => article.has_moved === 0);
+        this.articlesT = articles.filter(article => article.has_moved === 1);
+        this.loadingStartCollecte = false;
+    }
 }

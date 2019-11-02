@@ -1,13 +1,14 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, ModalController, Navbar, NavController, NavParams} from 'ionic-angular';
+import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
 import {Collecte} from '@app/entities/collecte';
 import {ToastService} from '@app/services/toast.service';
-import {Subscription} from "rxjs";
-import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
+import {Subscription} from 'rxjs';
+import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
+import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
 
 
 @IonicPage()
@@ -16,10 +17,13 @@ import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manage
     templateUrl: 'collecte-emplacement.html',
 })
 export class CollecteEmplacementPage {
-    @ViewChild(Navbar) navBar: Navbar;
+    @ViewChild(Navbar)
+    public navBar: Navbar;
+
+    @ViewChild('searchComponent')
+    public searchComponent: SearchLocationComponent;
 
     emplacement: Emplacement;
-    db_locations: Array<Emplacement>;
     collecte: Collecte;
     apiFinish: string = '/api/finishCollecte';
 
@@ -34,24 +38,18 @@ export class CollecteEmplacementPage {
                        public sqliteProvider: SqliteProvider,
                        public toastService: ToastService,
                        public barcodeScannerManager: BarcodeScannerManagerService,
-                       public http: HttpClient,
-                       public modal: ModalController) {
+                       public http: HttpClient) {
         this.isLoading = true;
     }
 
     public ionViewWillEnter(): void {
         this.collecte = this.navParams.get('collecte');
         this.validateCollecte = this.navParams.get('validateCollecte');
+        this.isLoading = false;
 
         this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
             this.testIfBarcodeEquals(barcode);
         });
-
-        this.sqliteProvider.findAll('emplacement').subscribe((value) => {
-            this.db_locations = value;
-            this.isLoading = false;
-        });
-
     }
 
     public ionViewWillLeave(): void {
@@ -65,29 +63,18 @@ export class CollecteEmplacementPage {
         return this.barcodeScannerManager.canGoBack;
     }
 
-    goHome() {
+    public goHome(): void {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    searchEmplacementModal() {
-        if (!this.isLoading) {
-            const myModal = this.modal.create('CollecteModalSearchEmplacementPage', {
-                selectEmplacement: (emplacement) => {
-                    this.emplacement = emplacement;
-                }
-            });
-            myModal.present();
-        }
-    }
-
-    scan() {
+    public scan(): void {
         this.barcodeScannerManager.scan().subscribe((barcode) => {
             this.testIfBarcodeEquals(barcode);
         });
     }
 
-    testIfBarcodeEquals(text) {
-        const emplacement = this.db_locations.find((dbLocation) => (dbLocation.label === text));
+    public testIfBarcodeEquals(text: string): void {
+        const emplacement = this.searchComponent.isKnownLocation(text);
         if (emplacement) {
             this.emplacement = emplacement;
         }
@@ -96,7 +83,7 @@ export class CollecteEmplacementPage {
         }
     }
 
-    validate() {
+    public validate(): void {
         if (this.emplacement && this.emplacement.label) {
             if (!this.isLoading) {
                 this.isLoading = true;
@@ -167,5 +154,4 @@ export class CollecteEmplacementPage {
             this.toastService.showToast('Veuillez sélectionner ou scanner un emplacement.');
         }
     }
-
 }

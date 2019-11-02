@@ -12,25 +12,29 @@ import {ManutentionValidatePage} from '@pages/manutention/manutention-validate/m
     templateUrl: 'manutention-menu.html',
 })
 export class ManutentionMenuPage {
-    @ViewChild(Navbar) navBar: Navbar;
-    @ViewChild(Content) content: Content;
-    manutentions: Array<Manutention>;
-    hasLoaded: boolean;
-    user: string;
+    @ViewChild(Navbar)
+    public navBar: Navbar;
+
+    @ViewChild(Content)
+    public content: Content;
+
+    public manutentions: Array<Manutention>;
+    public hasLoaded: boolean;
+    public user: string;
 
     public constructor(private navCtrl: NavController,
                        private sqliteProvider: SqliteProvider) {
     }
 
-    goHome() {
+    public goHome(): void {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    ionViewWillEnter() {
-        this.synchronise(true);
+    public ionViewWillEnter(): void {
+        this.synchronise();
     }
 
-    synchronise(fromStart: boolean) {
+    public synchronise(): void {
         this.hasLoaded = false;
         this.sqliteProvider.findAll('`manutention`').subscribe((manutentions) => {
             this.manutentions = manutentions;
@@ -42,16 +46,11 @@ export class ManutentionMenuPage {
         });
     }
 
-    goToManut(manutention: Manutention) {
-        this.navCtrl.push(ManutentionValidatePage, {manutention: manutention});
+    public goToManut(manutention: Manutention): void {
+        this.navCtrl.push(ManutentionValidatePage, {manutention});
     }
 
-    toDate(manutention: Manutention) {
+    public toDate(manutention: Manutention): Date {
         return new Date(manutention.date_attendue);
     }
-
-    escapeQuotes(string) {
-        return string.replace(/'/g, "\''");
-    }
-
 }
