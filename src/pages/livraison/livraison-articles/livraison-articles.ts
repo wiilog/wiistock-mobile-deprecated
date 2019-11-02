@@ -88,7 +88,6 @@ export class LivraisonArticlesPage {
                                 this.started = true;
                                 this.isValid = true;
                                 this.toastService.showToast('Livraison commencée.');
-
                                 this.registerMvt(article, quantity);
                             } else {
                                 this.isValid = false;
@@ -128,20 +127,15 @@ export class LivraisonArticlesPage {
                 };
                 let articleAlready = this.articlesT.find(art => art.id_livraison === newArticle.id_livraison && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
                 if (articleAlready !== undefined) {
-                    this.sqliteProvider.updateArticleLivraisonQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite).subscribe(() => {
-                        this.sqliteProvider.updateArticleLivraisonQuantity(article.id, article.quantite - newArticle.quantite).subscribe(() => {
-                            this.sqliteProvider.findArticlesByLivraison(this.livraison.id).subscribe((articles) => {
-                                if (articles.filter(article => article.has_moved === 0).length === 0) {
-                                    this.refreshOver();
-                                } else {
-                                    this.refresh();
-                                }
-                                this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                this.articlesT = articles.filter(article => article.has_moved === 1);
-                                this.loadingStartLivraison = false;
-                            })
+                    this.sqliteProvider
+                        .updateArticleLivraisonQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite)
+                        .pipe(
+                            flatMap(() => this.sqliteProvider.updateArticleLivraisonQuantity(article.id, article.quantite - newArticle.quantite)),
+                            flatMap(() => this.sqliteProvider.findArticlesByLivraison(this.livraison.id))
+                        )
+                        .subscribe((articles) => {
+                            this.updateList(articles);
                         });
-                    });
                 } else {
                     this.sqliteProvider.insert('`article_livraison`', newArticle).subscribe((insertId) => {
                         let mouvement: Mouvement = {
@@ -161,19 +155,13 @@ export class LivraisonArticlesPage {
                             id_article_collecte: null,
                             id_collecte: null,
                         };
-                        this.sqliteProvider.updateArticleLivraisonQuantity(article.id, article.quantite - Number(quantity))
+                        this.sqliteProvider
+                            .updateArticleLivraisonQuantity(article.id, article.quantite - Number(quantity))
                             .pipe(
                                 flatMap(() => this.sqliteProvider.insert('`mouvement`', mouvement)),
                                 flatMap(() => this.sqliteProvider.findArticlesByLivraison(this.livraison.id)))
                             .subscribe((articles) => {
-                                if (articles.filter(article => article.has_moved === 0).length === 0) {
-                                    this.refreshOver();
-                                } else {
-                                    this.refresh();
-                                }
-                                this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                this.articlesT = articles.filter(article => article.has_moved === 1);
-                                this.loadingStartLivraison = false;
+                                this.updateList(articles);
                             });
                     });
                 }
@@ -197,20 +185,15 @@ export class LivraisonArticlesPage {
                 };
                 let articleAlready = this.articlesT.find(art => art.id_livraison === mouvement.id_livraison && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
                 if (articleAlready !== undefined) {
-                    this.sqliteProvider.updateArticleLivraisonQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite).subscribe(() => {
-                        this.sqliteProvider.deleteById('`article_livraison`', mouvement.id_article_livraison).subscribe(() => {
-                            this.sqliteProvider.findArticlesByLivraison(this.livraison.id).subscribe((articles) => {
-                                if (articles.filter(article => article.has_moved === 0).length === 0) {
-                                    this.refreshOver();
-                                } else {
-                                    this.refresh();
-                                }
-                                this.articlesNT = articles.filter(article => article.has_moved === 0);
-                                this.articlesT = articles.filter(article => article.has_moved === 1);
-                                this.loadingStartLivraison = false;
-                            })
+                    this.sqliteProvider
+                        .updateArticleLivraisonQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite)
+                        .pipe(
+                            flatMap(() => this.sqliteProvider.deleteById('`article_livraison`', mouvement.id_article_livraison)),
+                            flatMap(() => this.sqliteProvider.findArticlesByLivraison(this.livraison.id))
+                        )
+                        .subscribe((articles) => {
+                            this.updateList(articles);
                         });
-                    });
                 } else {
                     this.sqliteProvider
                         .insert('`mouvement`', mouvement)
@@ -219,14 +202,7 @@ export class LivraisonArticlesPage {
                             flatMap(() => this.sqliteProvider.findArticlesByLivraison(this.livraison.id))
                         )
                         .subscribe((articles) => {
-                            if (articles.filter(article => article.has_moved === 0).length === 0) {
-                                this.refreshOver();
-                            } else {
-                                this.refresh();
-                            }
-                            this.articlesNT = articles.filter(article => article.has_moved === 0);
-                            this.articlesT = articles.filter(article => article.has_moved === 1);
-                            this.loadingStartLivraison = false;
+                            this.updateList(articles);
                         });
                 }
             }
@@ -268,6 +244,17 @@ export class LivraisonArticlesPage {
         else {
             this.toastService.showToast('L\'article scanné n\'est pas dans la liste.');
         }
+    }
+
+    private updateList(articles: Array<ArticleLivraison>): void {
+        this.articlesNT = articles.filter(article => article.has_moved === 0);
+        this.articlesT = articles.filter(article => article.has_moved === 1);
+        if (this.articlesNT.length === 0) {
+            this.refreshOver();
+        } else {
+            this.refresh();
+        }
+        this.loadingStartLivraison = false;
     }
 
 }

@@ -201,7 +201,6 @@ export class CollecteArticlesPage {
             this.navCtrl.push(CollecteEmplacementPage, {
                 collecte: this.collecte,
                 validateCollecte: () => {
-                    console.log('POP Article');
                     this.navCtrl.pop();
                 }
             })
@@ -253,13 +252,13 @@ export class CollecteArticlesPage {
     }
 
     private updateList(articles: Array<ArticleCollecte>): void {
-        if (articles.filter(article => article.has_moved === 0).length === 0) {
+        this.articlesNT = articles.filter((article) => (article.has_moved === 0));
+        this.articlesT = articles.filter((article) => (article.has_moved === 1));
+        if (this.articlesNT.length === 0) {
             this.refreshOver();
         } else {
             this.refresh();
         }
-        this.articlesNT = articles.filter(article => article.has_moved === 0);
-        this.articlesT = articles.filter(article => article.has_moved === 1);
         this.loadingStartCollecte = false;
     }
 }

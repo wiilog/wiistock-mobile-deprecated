@@ -88,64 +88,69 @@ export class LivraisonEmplacementPage {
     public validate(): void {
         if (!this.validateIsLoading) {
             if (this.emplacement && this.emplacement.label !== '') {
-                this.validateIsLoading = true;
-                let instance = this;
-                let promise = new Promise<any>((resolve) => {
-                    this.sqliteProvider.findArticlesByLivraison(this.livraison.id).subscribe((articles) => {
-                        articles.forEach(function (article) {
-                            instance.sqliteProvider.findMvtByArticleLivraison(article.id).subscribe((mvt) => {
-                                instance.sqliteProvider.finishMvt(mvt.id, instance.emplacement.label).subscribe(() => {
-                                    if (articles.indexOf(article) === articles.length - 1) resolve();
+                if (this.livraison.emplacement !== this.emplacement.label) {
+                    this.toastService.showToast("Vous n'avez pas scanné le bon emplacement (destination demandée : " + this.livraison.emplacement + ")");
+                }
+                else {
+                    this.validateIsLoading = true;
+                    let instance = this;
+                    let promise = new Promise<any>((resolve) => {
+                        this.sqliteProvider.findArticlesByLivraison(this.livraison.id).subscribe((articles) => {
+                            articles.forEach(function (article) {
+                                instance.sqliteProvider.findMvtByArticleLivraison(article.id).subscribe((mvt) => {
+                                    instance.sqliteProvider.finishMvt(mvt.id, instance.emplacement.label).subscribe(() => {
+                                        if (articles.indexOf(article) === articles.length - 1) resolve();
+                                    });
                                 });
                             });
                         });
                     });
-                });
-                promise.then(() => {
-                    this.sqliteProvider.finishLivraison(this.livraison.id, this.emplacement.label).subscribe(() => {
-                        this.sqliteProvider.getAPI_URL().subscribe((result) => {
-                            this.sqliteProvider.getApiKey().then((key) => {
-                                if (result !== null) {
-                                    this.sqliteProvider.findAll('`livraison`').subscribe(livraisonsToSend => {
-                                        this.sqliteProvider.findAll('`mouvement`').subscribe((mvts) => {
-                                            let url: string = result + this.apiFinish;
-                                            let params = {
-                                                livraisons: livraisonsToSend.filter(p => p.date_end !== null),
-                                                mouvements: mvts.filter(m => m.id_prepa === null),
-                                                apiKey: key
-                                            };
-                                            this.http.post<any>(url, params).subscribe(resp => {
-                                                    if (resp.success) {
-                                                        this.sqliteProvider.deleteLivraisons(params.livraisons).then(() => {
-                                                            this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
-                                                                this.navCtrl.pop().then(() => {
-                                                                    this.validateLivraison();
-                                                                })
+                    promise.then(() => {
+                        this.sqliteProvider.finishLivraison(this.livraison.id, this.emplacement.label).subscribe(() => {
+                            this.sqliteProvider.getAPI_URL().subscribe((result) => {
+                                this.sqliteProvider.getApiKey().then((key) => {
+                                    if (result !== null) {
+                                        this.sqliteProvider.findAll('`livraison`').subscribe(livraisonsToSend => {
+                                            this.sqliteProvider.findAll('`mouvement`').subscribe((mvts) => {
+                                                let url: string = result + this.apiFinish;
+                                                let params = {
+                                                    livraisons: livraisonsToSend.filter(p => p.date_end !== null),
+                                                    mouvements: mvts.filter(m => m.id_prepa === null),
+                                                    apiKey: key
+                                                };
+                                                this.http.post<any>(url, params).subscribe(resp => {
+                                                        if (resp.success) {
+                                                            this.sqliteProvider.deleteLivraisons(params.livraisons).then(() => {
+                                                                this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
+                                                                    this.navCtrl.pop().then(() => {
+                                                                        this.validateLivraison();
+                                                                    })
+                                                                });
                                                             });
-                                                        });
+                                                        }
+                                                        else {
+                                                            this.toastService.showToast(resp.msg);
+                                                        }
+                                                        this.validateIsLoading = false;
+                                                    },
+                                                    () => {
+                                                        this.validateIsLoading = false;
+                                                        this.navCtrl.pop().then(() => {
+                                                            this.validateLivraison();
+                                                        })
                                                     }
-                                                    else {
-                                                        this.toastService.showToast(resp.msg);
-                                                    }
-                                                    this.validateIsLoading = false;
-                                                },
-                                                () => {
-                                                    this.validateIsLoading = false;
-                                                    this.navCtrl.pop().then(() => {
-                                                        this.validateLivraison();
-                                                    })
-                                                }
-                                            );
+                                                );
+                                            });
                                         });
-                                    });
-                                }
-                                else {
-                                    this.validateIsLoading = false;
-                                }
+                                    }
+                                    else {
+                                        this.validateIsLoading = false;
+                                    }
+                                });
                             });
-                        })
-                    })
-                })
+                        });
+                    });
+                }
             }
             else {
                 this.toastService.showToast('Veuillez sélectionner ou scanner un emplacement.');
