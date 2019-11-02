@@ -21,7 +21,12 @@
         <p>Emplacement de destination<br/>{{preparation.destination}}</p>
         <p>Type de flux<br/>{{preparation.type}}</p>
     </div>
-    <div *ngIf="articlesNT && articlesNT.length > 0">
+
+    <div class="spinner" *ngIf="loadingStartPreparation">
+        <ion-spinner></ion-spinner>
+    </div>
+
+    <div *ngIf="!loadingStartPreparation && articlesNT && articlesNT.length > 0">
         <div class="d-flex" >
             <p>Flashez les articles</p>
             <ion-icon item-right name="barcode"> </ion-icon>
@@ -39,7 +44,7 @@
         </ion-list>
     </div>
 
-    <div *ngIf="articlesT && articlesT.length > 0">
+    <div *ngIf="!loadingStartPreparation && articlesT && articlesT.length > 0">
         <p>Liste des articles traités</p>
         <ion-list>
             <ion-grid>

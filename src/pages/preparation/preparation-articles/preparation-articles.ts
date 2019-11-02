@@ -35,6 +35,8 @@ export class PreparationArticlesPage {
     public apiStartPrepa = '/api/beginPrepa';
     public isValid: boolean = true;
 
+    public loadingStartPreparation: boolean;
+
     private zebraScannerSubscription: Subscription;
 
     public constructor(public navCtrl: NavController,
@@ -43,6 +45,7 @@ export class PreparationArticlesPage {
                        public http: HttpClient,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService) {
+        this.loadingStartPreparation = false;
     }
 
     public ionViewWillEnter(): void {
@@ -170,10 +173,12 @@ export class PreparationArticlesPage {
     }
 
     private refreshOver(): void {
+        this.loadingStartPreparation = false;
         this.toastService.showToast('Préparation prête à être finalisée.')
     }
 
     private refresh(): void {
+        this.loadingStartPreparation = false;
         this.toastService.showToast('Quantité bien prélevée.')
     }
 
@@ -196,6 +201,7 @@ export class PreparationArticlesPage {
         if (selectedArticle && selectedQuantity) {
             // we start preparation
             if (!this.started) {
+                this.loadingStartPreparation = true;
                 this.sqliteProvider.getAPI_URL().subscribe((result) => {
                     this.sqliteProvider.getApiKey().then((key) => {
                         if (result !== null) {
@@ -210,6 +216,7 @@ export class PreparationArticlesPage {
                                     });
                                 } else {
                                     this.isValid = false;
+                                    this.loadingStartPreparation = false;
                                     this.toastService.showToast(resp.msg);
                                 }
                             });

@@ -244,8 +244,6 @@ export class CollecteArticlesPage {
     }
 
     private selectArticle(article, quantity): void {
-        this.isValid = this.navParams.get('valid');
-        this.started = this.navParams.get('started');
         if (!this.started) {
             this.sqliteProvider.getAPI_URL().subscribe((result) => {
                 this.sqliteProvider.getApiKey().then((key) => {

@@ -92,6 +92,7 @@ export class LivraisonArticlesPage {
                                 this.registerMvt(article, quantity);
                             } else {
                                 this.isValid = false;
+                                this.loadingStartLivraison = false;
                                 this.toastService.showToast(resp.msg);
                             }
                         });

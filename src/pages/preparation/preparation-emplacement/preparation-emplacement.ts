@@ -8,6 +8,7 @@ import {HttpClient} from '@angular/common/http';
 import {ToastService} from '@app/services/toast.service';
 import {Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
+import {SearchLocationComponent} from "@helpers/components/search-location/search-location.component";
 
 
 @IonicPage()
@@ -16,11 +17,13 @@ import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manage
     templateUrl: 'preparation-emplacement.html',
 })
 export class PreparationEmplacementPage {
-    @ViewChild(Navbar) navBar: Navbar;
+    @ViewChild(Navbar)
+    navBar: Navbar;
+
+    @ViewChild('searchComponent')
+    public searchComponent: SearchLocationComponent;
 
     emplacement: Emplacement;
-    db_locations: Array<Emplacement>;
-    db_locations_for_list: Array<Emplacement>;
     preparation: Preparation;
     apiFinish: string = '/api/finishPrepa';
 
@@ -34,7 +37,6 @@ export class PreparationEmplacementPage {
                        public sqliteProvider: SqliteProvider,
                        public barcodeScannerManager: BarcodeScannerManagerService,
                        public http: HttpClient,
-                       public modal: ModalController,
                        private toastService: ToastService) {
         this.isLoaded = false;
     }
@@ -42,9 +44,6 @@ export class PreparationEmplacementPage {
     public ionViewWillEnter(): void {
         this.preparation = this.navParams.get('preparation');
         this.validatePrepa = this.navParams.get('validatePrepa');
-        this.sqliteProvider.findAll('emplacement').subscribe((value) => {
-            this.db_locations = value;
-        });
         this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
             this.testIfBarcodeEquals(barcode);
         });
@@ -65,18 +64,6 @@ export class PreparationEmplacementPage {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    searchEmplacementModal() {
-        if (!this.isLoaded) {
-            const myModal = this.modal.create('PreparationModalSearchEmplacementPage', {
-                preparation: this.preparation,
-                selectEmplacement: (emplacement) => {
-                    this.emplacement = emplacement;
-                }
-            });
-            myModal.present();
-        }
-    }
-
     scan() {
         this.barcodeScannerManager.scan().subscribe(barcode => {
             this.testIfBarcodeEquals(barcode);
@@ -84,16 +71,14 @@ export class PreparationEmplacementPage {
     }
 
     testIfBarcodeEquals(text) {
-        this.sqliteProvider.findAll('`emplacement`').subscribe((resp: Array<Emplacement>) => {
-            const foundEmplacement = resp.find((emplacement: Emplacement) => (emplacement.label === text));
+        const foundEmplacement = this.searchComponent.isKnownLocation(text);
 
-            if (foundEmplacement) {
-                this.emplacement = foundEmplacement;
-            }
-            else {
-                this.toastService.showToast('Veuillez flasher ou sélectionner un emplacement connu.');
-            }
-        });
+        if (foundEmplacement) {
+            this.emplacement = foundEmplacement;
+        }
+        else {
+            this.toastService.showToast('Veuillez flasher ou sélectionner un emplacement connu.');
+        }
     }
 
     validate() {
@@ -131,7 +116,9 @@ export class PreparationEmplacementPage {
                                                             this.sqliteProvider.deletePreparations(params.preparations).then(() => {
                                                                 this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
                                                                     this.isLoaded = false;
-                                                                    this.validatePrepa();
+                                                                    this.navCtrl.pop().then(() => {
+                                                                        this.validatePrepa();
+                                                                    });
                                                                 });
                                                             });
                                                         }
@@ -140,9 +127,11 @@ export class PreparationEmplacementPage {
                                                             this.toastService.showToast(resp.msg);
                                                         }
                                                     },
-                                                    error => {
+                                                    () => {
                                                         this.isLoaded = false;
-                                                        this.validatePrepa();
+                                                        this.navCtrl.pop().then(() => {
+                                                            this.validatePrepa();
+                                                        });
                                                     }
                                                 );
                                             });
