@@ -22,15 +22,6 @@ import {HttpClient} from '@angular/common/http';
 })
 export class MenuPage {
 
-    private static readonly SUB_MENUS: Array<string> = [
-        InventaireMenuPage.name,
-        ManutentionMenuPage.name,
-        TracaMenuPage.name,
-        LivraisonMenuPage.name,
-        PreparationMenuPage.name,
-        CollecteMenuPage.name,
-    ];
-
     @ViewChild(Slides) slides: Slides;
     @ViewChild(Content) content: Content;
     items: Array<{ title: string, icon: string, page: Page, img: string }>;
