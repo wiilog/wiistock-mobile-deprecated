@@ -12,7 +12,6 @@ import {SplashScreen} from '@ionic-native/splash-screen';
 import {HttpClientModule} from '@angular/common/http';
 import {UsersApiProvider} from '@providers/users-api/users-api';
 import {PriseArticlesPageTraca} from '@pages/traca/prise-articles/prise-articles-traca';
-import {SelectArticleManuallyPage} from '@pages/traca/select-article-manually/select-article-manually';
 import {PriseEmplacementPageTraca} from '@pages/traca/prise-emplacement/prise-emplacement-traca';
 import {DeposeArticlesPageTraca} from '@pages/traca/depose-articles/depose-articles-traca';
 import {DeposeEmplacementPageTraca} from '@pages/traca/depose-emplacement/depose-emplacement-traca';
@@ -43,7 +42,9 @@ import {CollecteArticlesPage} from '@pages/collecte/collecte-articles/collecte-a
 import {CollecteEmplacementPage} from '@pages/collecte/collecte-emplacement/collecte-emplacement';
 import {ManutentionValidatePage} from '@pages/manutention/manutention-validate/manutention-validate';
 import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutention-menu';
-import {HelpersModule} from "@helpers/helpers.module";
+import {HelpersModule} from '@helpers/helpers.module';
+import {EntityFactoryService} from '@app/services/entity-factory.service';
+import {AlertManagerService} from '@app/services/alert-manager.service';
 
 
 @NgModule({
@@ -64,7 +65,6 @@ import {HelpersModule} from "@helpers/helpers.module";
         LivraisonArticlesPage,
         LivraisonEmplacementPage,
         PreparationEmplacementPage,
-        SelectArticleManuallyPage,
         DeposeEmplacementPageTraca,
         DeposeArticlesPageTraca,
         ManutentionValidatePage,
@@ -105,7 +105,6 @@ import {HelpersModule} from "@helpers/helpers.module";
         LivraisonArticlesPage,
         LivraisonEmplacementPage,
         PriseArticlesPageTraca,
-        SelectArticleManuallyPage,
         ManutentionMenuPage,
         ManutentionValidatePage,
         DeposeEmplacementPageTraca,
@@ -132,7 +131,9 @@ import {HelpersModule} from "@helpers/helpers.module";
         BarcodeScanner,
         NetworkProvider,
         Network,
-        ToastService
+        ToastService,
+        AlertManagerService,
+        EntityFactoryService
     ]
 })
 export class AppModule {

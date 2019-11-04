@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
+import {Alert, AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {Article} from '@app/entities/article';
 import {Emplacement} from '@app/entities/emplacement';
@@ -10,7 +10,8 @@ import moment from 'moment';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
-import {SelectArticleManuallyPage} from "@pages/traca/select-article-manually/select-article-manually";
+import {EntityFactoryService} from '@app/services/entity-factory.service';
+import {AlertManagerService} from '@app/services/alert-manager.service';
 
 
 @IonicPage()
@@ -27,13 +28,19 @@ export class DeposeArticlesPageTraca {
     private zebraScanSubscription: Subscription;
     private finishDepose: () => void;
 
+    private manualEntryAlertWillEnterSubscription: Subscription;
+
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
                        private alertController: AlertController,
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
                        private barcodeScannerManager: BarcodeScannerManagerService,
-                       private changeDetectorRef: ChangeDetectorRef) {}
+                       private changeDetectorRef: ChangeDetectorRef,
+                       private entityFactory: EntityFactoryService,
+                       private alertManager: AlertManagerService) {
+
+    }
 
     public ionViewWillEnter(): void {
         this.sqliteProvider.findAll('article').subscribe((value) => {
@@ -45,11 +52,12 @@ export class DeposeArticlesPageTraca {
         this.articles = this.navParams.get('articles') || [];
 
         this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
-            this.testIfBarcodeEquals(barcode);
-        })
+            this.testSelectedArticle(barcode);
+        });
     }
 
     public ionViewWillLeave(): void {
+        this.removeAlertSubscription();
         if (this.zebraScanSubscription) {
             this.zebraScanSubscription.unsubscribe();
             this.zebraScanSubscription = undefined;
@@ -60,32 +68,11 @@ export class DeposeArticlesPageTraca {
         return this.barcodeScannerManager.canGoBack;
     }
 
-    addArticleManually() {
-        this.navCtrl.push(SelectArticleManuallyPage, {
-            articles: this.articles,
-            selectArticle: (article) => {
-                const nbDroppedArticle = this.articles
-                    .filter((articlePrise) => (articlePrise.reference === article.reference))
-                    .length;
-                this.sqliteProvider.keyExists(article.reference).then((value) => {
-                    if (value !== false) {
-                        if (value > nbDroppedArticle) {
-                            this.articles.push(article);
-                            this.changeDetectorRef.detectChanges();
-                        }
-                        else {
-                            this.toastService.showToast('Cet article est déjà enregistré assez de fois dans le panier.');
-                        }
-                    }
-                    else {
-                        this.toastService.showToast('Cet article ne correspond à aucune prise.');
-                    }
-                });
-            }
-        });
+    public addArticleManually(): void {
+        this.createManualEntryAlert().present();
     }
 
-    finishTaking() {
+    public finishTaking(): void {
         if (this.articles && this.articles.length > 0) {
             for (let article of this.articles) {
                 let numberOfArticles = 0;
@@ -130,49 +117,46 @@ export class DeposeArticlesPageTraca {
             });
     }
 
-    goHome() {
+    public goHome(): void {
         this.navCtrl.setRoot(MenuPage);
     }
 
     public scan(): void {
         this.barcodeScannerManager.scan().subscribe((barcode: string) => {
-            this.testIfBarcodeEquals(barcode);
+            this.testSelectedArticle(barcode);
         });
     }
 
-    public testIfBarcodeEquals(text): void {
+    public testSelectedArticle(barCode: string, isManualInput: boolean = false): void {
         let numberOfArticles = this.articles
-            .filter(article => (article.reference === text))
+            .filter(article => (article.reference === barCode))
             .length;
 
-        let a: Article = {
-            id: new Date().getUTCMilliseconds(),
-            label: null,
-            reference: text,
-            quantite: null,
-            barcode: text,
-        };
-        this.sqliteProvider.keyExists(text).then((value) => {
+        this.sqliteProvider.keyExists(barCode).then((value) => {
             if (value !== false) {
                 if (value > numberOfArticles) {
-                    this.alertController
-                        .create({
-                            title: `Vous avez sélectionné l'article ${text}`,
-                            buttons: [
-                                {
-                                    text: 'Annuler'
-                                },
-                                {
-                                    text: 'Confirmer',
-                                    handler: () => {
-                                        this.articles.push(a);
-                                        this.changeDetectorRef.detectChanges();
+                    if (isManualInput) {
+                        this.saveArticle(barCode);
+                    }
+                    else {
+                        this.alertController
+                            .create({
+                                title: `Vous avez sélectionné l'article ${barCode}`,
+                                buttons: [
+                                    {
+                                        text: 'Annuler'
                                     },
-                                    cssClass : 'alertAlert'
-                                }
-                            ]
-                        })
-                        .present();
+                                    {
+                                        text: 'Confirmer',
+                                        handler: () => {
+                                            this.saveArticle(barCode);
+                                        },
+                                        cssClass: 'alertAlert'
+                                    }
+                                ]
+                            })
+                            .present();
+                    }
                 }
                 else {
                     this.toastService.showToast('Cet article est déjà enregistré assez de fois dans le panier.');
@@ -182,5 +166,44 @@ export class DeposeArticlesPageTraca {
                 this.toastService.showToast('Ce colis ne correspond à aucune prise.');
             }
         });
+    }
+
+    private createManualEntryAlert(): Alert {
+        const manualEntryAlert = this.alertController.create({
+            title: 'Saisie manuelle',
+            cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
+            inputs: [{
+                name: 'barCode',
+                placeholder: 'Saisir le code barre',
+                type: 'text'
+            }],
+            buttons: [{
+                text: 'Valider',
+                handler: ({barCode}) => {
+                    this.testSelectedArticle(barCode);
+                },
+                cssClass: 'alertAlert'
+            }]
+        });
+
+        this.removeAlertSubscription();
+        this.manualEntryAlertWillEnterSubscription = manualEntryAlert.willEnter.subscribe(() => {
+            this.alertManager.disableAutocapitalizeOnAlert();
+        });
+
+        return manualEntryAlert;
+    }
+
+    private removeAlertSubscription(): void {
+        if (this.manualEntryAlertWillEnterSubscription) {
+            this.manualEntryAlertWillEnterSubscription.unsubscribe();
+            this.manualEntryAlertWillEnterSubscription = undefined;
+        }
+    }
+
+    private saveArticle(barcode: string): void {
+        const article = this.entityFactory.createArticleBarcode(barcode);
+        this.articles.push(article);
+        this.changeDetectorRef.detectChanges();
     }
 }
