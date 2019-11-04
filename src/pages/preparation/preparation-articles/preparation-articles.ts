@@ -15,7 +15,8 @@ import {flatMap, map} from 'rxjs/operators';
 import {ArticlePrepaByRefArticle} from '@app/entities/article-prepa-by-ref-article';
 import {of} from 'rxjs/observable/of';
 import {ToastService} from '@app/services/toast.service';
-import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
+import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
+import {Network} from '@ionic-native/network';
 
 
 @IonicPage()
@@ -44,7 +45,8 @@ export class PreparationArticlesPage {
                        public sqliteProvider: SqliteProvider,
                        public http: HttpClient,
                        private barcodeScannerManager: BarcodeScannerManagerService,
-                       private toastService: ToastService) {
+                       private toastService: ToastService,
+                       private network: Network) {
         this.loadingStartPreparation = false;
     }
 
@@ -201,28 +203,34 @@ export class PreparationArticlesPage {
         if (selectedArticle && selectedQuantity) {
             // we start preparation
             if (!this.started) {
-                this.loadingStartPreparation = true;
-                this.sqliteProvider.getAPI_URL().subscribe((result) => {
-                    this.sqliteProvider.getApiKey().then((key) => {
-                        if (result !== null) {
-                            let url: string = result + this.apiStartPrepa;
-                            this.http.post<any>(url, {id: this.preparation.id, apiKey: key}).subscribe(resp => {
-                                if (resp.success) {
-                                    this.started = true;
-                                    this.isValid = true;
-                                    this.sqliteProvider.startPrepa(this.preparation.id).subscribe(() => {
-                                        this.toastService.showToast('Préparation commencée.');
-                                        this.saveSelectedArticle(selectedArticle, selectedQuantity);
-                                    });
-                                } else {
-                                    this.isValid = false;
-                                    this.loadingStartPreparation = false;
-                                    this.toastService.showToast(resp.msg);
-                                }
-                            });
-                        }
+                if (this.network.type !== 'none') {
+                    this.loadingStartPreparation = true;
+                    this.sqliteProvider.getAPI_URL().subscribe((result) => {
+                        this.sqliteProvider.getApiKey().then((key) => {
+                            if (result !== null) {
+                                let url: string = result + this.apiStartPrepa;
+                                this.http.post<any>(url, {id: this.preparation.id, apiKey: key}).subscribe(resp => {
+                                    if (resp.success) {
+                                        this.started = true;
+                                        this.isValid = true;
+                                        this.sqliteProvider.startPrepa(this.preparation.id).subscribe(() => {
+                                            this.toastService.showToast('Préparation commencée.');
+                                            this.saveSelectedArticle(selectedArticle, selectedQuantity);
+                                        });
+                                    }
+                                    else {
+                                        this.isValid = false;
+                                        this.loadingStartPreparation = false;
+                                        this.toastService.showToast(resp.msg);
+                                    }
+                                });
+                            }
+                        });
                     });
-                });
+                }
+                else {
+                    this.toastService.showToast('Vous devez être connecté à internet pour commencer la préparation');
+                }
             } else {
                 this.saveSelectedArticle(selectedArticle, selectedQuantity);
             }
