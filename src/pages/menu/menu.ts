@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {App, NavController, Content, NavParams, Slides, Platform} from 'ionic-angular';
+import {App, NavController, Content, NavParams, Slides} from 'ionic-angular';
 import {TracaMenuPage} from '@pages/traca/traca-menu/traca-menu'
 import {Page} from "ionic-angular/navigation/nav-util";
 import {PreparationMenuPage} from '@pages/preparation/preparation-menu/preparation-menu';
@@ -14,8 +14,6 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
 import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
 import {HttpClient} from '@angular/common/http';
-import {Subscription} from 'rxjs';
-import {filter} from 'rxjs/operators';
 
 
 @Component({
@@ -42,16 +40,13 @@ export class MenuPage {
     loading: boolean;
     apiUrl: string = '/api/getData';
 
-    private backButtonSubscription: Subscription;
-
     public constructor(public app: App,
                        public navCtrl: NavController,
                        public navParams: NavParams,
                        public sqliteProvider: SqliteProvider,
                        public network: Network,
                        public toastService: ToastService,
-                       public http: HttpClient,
-                       public platform: Platform) {
+                       public http: HttpClient) {
 
         this.items = [
             {title: 'Traça', icon: 'cube', page: TracaMenuPage, img: null},
@@ -65,25 +60,8 @@ export class MenuPage {
     }
 
     public ionViewWillEnter(): void {
-        this.backButtonSubscription = this.platform.backButton
-            .pipe(filter(() => (MenuPage.SUB_MENUS.some(p => p === this.navCtrl.getActive().name))))
-            .subscribe(() => {
-                this.synchronise();
-            });
-
-        if (this.navParams.get('needReload') === undefined) {
-            this.synchronise();
-        } else {
-            this.loading = false;
-        }
+        this.synchronise();
         this.refreshCounters();
-    }
-
-    public ionViewWillLeave(): void {
-        if (this.backButtonSubscription) {
-            this.backButtonSubscription.unsubscribe();
-            this.backButtonSubscription = undefined;
-        }
     }
 
     refreshCounters() {
@@ -136,7 +114,7 @@ export class MenuPage {
             });
         } else {
             this.loading = false;
-            this.toastService.showToast('Veuillez vous connecter a internet afin de synchroniser vos données');
+            this.toastService.showToast('Veuillez vous connecter à internet afin de synchroniser vos données');
             this.refreshCounters();
         }
     }
