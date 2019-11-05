@@ -6,6 +6,7 @@ import {HttpClient} from '@angular/common/http';
 import {MenuPage} from '@pages/menu/menu';
 import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
+import {ApiServices} from "@app/config/api-services";
 
 
 @IonicPage()
@@ -18,7 +19,6 @@ export class ManutentionValidatePage {
     public content: Content;
 
     public manutention: Manutention;
-    public validateManutApi = '/api/validateManut';
     public commentaire: string;
     public hasLoaded: boolean;
     public user: string;
@@ -64,15 +64,14 @@ export class ManutentionValidatePage {
     }
 
     public notifyApi(): void {
-        this.sqLiteProvider.getAPI_URL().subscribe((result) => {
+        this.sqLiteProvider.getApiUrl(ApiServices.VALIDATE_MANUT).subscribe((validateManutUrl) => {
             this.sqLiteProvider.getApiKey().then((key) => {
-                let url: string = result + this.validateManutApi;
                 let params = {
                     id: this.manutention.id,
                     apiKey: key,
                     commentaire: this.commentaire
                 };
-                this.client.post<any>(url, params).subscribe((response) => {
+                this.client.post<any>(validateManutUrl, params).subscribe((response) => {
                     if (response.success) {
                         this.sqLiteProvider.deleteById('`manutention`', this.manutention.id).subscribe(() => {
                             this.navCtrl.pop();

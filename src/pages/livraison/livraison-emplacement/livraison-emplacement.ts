@@ -9,6 +9,7 @@ import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
 import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
+import {ApiServices} from "@app/config/api-services";
 
 
 @IonicPage()
@@ -25,7 +26,6 @@ export class LivraisonEmplacementPage {
 
     public emplacement: Emplacement;
     public livraison: Livraison;
-    public apiFinish: string = '/api/finishLivraison';
 
     private validateIsLoading: boolean;
     private validateLivraison: () => void;
@@ -107,45 +107,39 @@ export class LivraisonEmplacementPage {
                     });
                     promise.then(() => {
                         this.sqliteProvider.finishLivraison(this.livraison.id, this.emplacement.label).subscribe(() => {
-                            this.sqliteProvider.getAPI_URL().subscribe((result) => {
+                            this.sqliteProvider.getApiUrl(ApiServices.FINISH_LIVRAISON).subscribe((finishLivraisonUrl) => {
                                 this.sqliteProvider.getApiKey().then((key) => {
-                                    if (result !== null) {
-                                        this.sqliteProvider.findAll('`livraison`').subscribe(livraisonsToSend => {
-                                            this.sqliteProvider.findAll('`mouvement`').subscribe((mvts) => {
-                                                let url: string = result + this.apiFinish;
-                                                let params = {
-                                                    livraisons: livraisonsToSend.filter(p => p.date_end !== null),
-                                                    mouvements: mvts.filter(m => m.id_prepa === null),
-                                                    apiKey: key
-                                                };
-                                                this.http.post<any>(url, params).subscribe(resp => {
-                                                        if (resp.success) {
-                                                            this.sqliteProvider.deleteLivraisons(params.livraisons).then(() => {
-                                                                this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
-                                                                    this.navCtrl.pop().then(() => {
-                                                                        this.validateLivraison();
-                                                                    })
-                                                                });
+                                    this.sqliteProvider.findAll('`livraison`').subscribe(livraisonsToSend => {
+                                        this.sqliteProvider.findAll('`mouvement`').subscribe((mvts) => {
+                                            let params = {
+                                                livraisons: livraisonsToSend.filter(p => p.date_end !== null),
+                                                mouvements: mvts.filter(m => m.id_prepa === null),
+                                                apiKey: key
+                                            };
+                                            this.http.post<any>(finishLivraisonUrl, params).subscribe(resp => {
+                                                    if (resp.success) {
+                                                        this.sqliteProvider.deleteLivraisons(params.livraisons).then(() => {
+                                                            this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
+                                                                this.navCtrl.pop().then(() => {
+                                                                    this.validateLivraison();
+                                                                })
                                                             });
-                                                        }
-                                                        else {
-                                                            this.toastService.showToast(resp.msg);
-                                                        }
-                                                        this.validateIsLoading = false;
-                                                    },
-                                                    () => {
-                                                        this.validateIsLoading = false;
-                                                        this.navCtrl.pop().then(() => {
-                                                            this.validateLivraison();
-                                                        })
+                                                        });
                                                     }
-                                                );
-                                            });
+                                                    else {
+                                                        this.toastService.showToast(resp.msg);
+                                                    }
+                                                    this.validateIsLoading = false;
+                                                },
+                                                () => {
+                                                    this.validateIsLoading = false;
+                                                    this.navCtrl.pop().then(() => {
+                                                        this.validateLivraison();
+                                                    })
+                                                }
+                                            );
                                         });
-                                    }
-                                    else {
-                                        this.validateIsLoading = false;
-                                    }
+                                    });
                                 });
                             });
                         });

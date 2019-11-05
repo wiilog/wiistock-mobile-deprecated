@@ -3,13 +3,13 @@ import {Content, IonicPage, ModalController, Navbar} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
 import {Anomalie} from '@app/entities/anomalie';
-import {ArticleInventaire} from '@app/entities/article-inventaire';
 import {ModalQuantityPage} from '@pages/inventaire-menu/modal-quantity';
 import {Article} from '@app/entities/article';
 import {Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
+import {ApiServices} from "@app/config/api-services";
 
 
 @IonicPage()
@@ -24,11 +24,8 @@ export class InventaireAnomaliePage {
     anomaliesByLocation: Array<Anomalie>;
     anomaly: Anomalie;
     article: Article;
-    articleInventaire: ArticleInventaire;
     locations: Array<string>;
     location: string;
-    dataApi: string = '/api/getAnomalies';
-    updateAnomaliesURL: string = '/api/treatAnomalies';
     isLoaded: boolean;
 
     private zebraScannerSubscription: Subscription;
@@ -68,46 +65,39 @@ export class InventaireAnomaliePage {
 
     synchronize() {
         this.isLoaded = false;
-        this.sqliteProvider.getAPI_URL().subscribe(
-            (baseUrl) => {
-                if (baseUrl !== null) {
-                    this.sqliteProvider.getApiKey().then((key) => {
-                        this.sqliteProvider.findAll('`anomalie_inventaire`').subscribe(anomalies => {
-                            this.anomalies = anomalies;
-                            let locations = [];
-                            anomalies.forEach(anomaly => {
-                                if (locations.indexOf(anomaly.location) < 0 && anomaly.location) {
-                                    locations.push(anomaly.location);
-                                }
-                            });
-                            // envoi des anomalies traitées
-                            this.sqliteProvider.findByElement(`anomalie_inventaire`, 'treated', '1').subscribe((anomalies) => {
-                                let params = {
-                                    anomalies: anomalies,
-                                    apiKey: key
-                                };
-                                let urlAnomalies: string = baseUrl + this.updateAnomaliesURL;
-                                this.http.post<any>(urlAnomalies, params).subscribe(resp => {
-                                    if (resp.success) {
-                                        // supprime les anomalies traitée de la base
-                                        this.sqliteProvider.deleteAnomalies(anomalies);
-                                        this.toastService.showToast(resp.data.status);
-                                    } else {
-                                        this.isLoaded = true;
-                                        this.toastService.showToast('Une erreur est survenue lors de la mise à jour des anomalies.');
-                                    }
-                                    this.locations = locations;
-                                    this.isLoaded = true;
-                                    this.content.resize();
-                                });
-                            });
+        this.sqliteProvider.getApiUrl(ApiServices.TREAT_ANOMALIES).subscribe((treatAnomaliesUrl) => {
+            this.sqliteProvider.getApiKey().then((key) => {
+                this.sqliteProvider.findAll('`anomalie_inventaire`').subscribe(anomalies => {
+                    this.anomalies = anomalies;
+                    let locations = [];
+                    anomalies.forEach(anomaly => {
+                        if (locations.indexOf(anomaly.location) < 0 && anomaly.location) {
+                            locations.push(anomaly.location);
+                        }
+                    });
+                    // envoi des anomalies traitées
+                    this.sqliteProvider.findByElement(`anomalie_inventaire`, 'treated', '1').subscribe((anomalies) => {
+                        let params = {
+                            anomalies: anomalies,
+                            apiKey: key
+                        };
+                        this.http.post<any>(treatAnomaliesUrl, params).subscribe(resp => {
+                            if (resp.success) {
+                                // supprime les anomalies traitée de la base
+                                this.sqliteProvider.deleteAnomalies(anomalies);
+                                this.toastService.showToast(resp.data.status);
+                            } else {
+                                this.isLoaded = true;
+                                this.toastService.showToast('Une erreur est survenue lors de la mise à jour des anomalies.');
+                            }
+                            this.locations = locations;
+                            this.isLoaded = true;
+                            this.content.resize();
                         });
                     });
-                } else {
-                    this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.')
-                }
-            }
-        );
+                });
+            });
+        });
     }
 
     scanLocation() {
@@ -151,31 +141,26 @@ export class InventaireAnomaliePage {
             this.anomaly.treated = "1";
 
             // envoi de l'anomalie modifiée à l'API
-            this.sqliteProvider.getAPI_URL().subscribe(baseUrl => {
-                if (baseUrl !== null) {
-                    let url: string = baseUrl + this.updateAnomaliesURL;
-                    this.sqliteProvider.getApiKey().then(apiKey => {
-                        let params = {
-                            anomalies: [this.anomaly],
-                            apiKey: apiKey
-                        };
-                        this.http.post<any>(url, params).subscribe(resp => {
-                            if (resp.success) {
-                                // supprime l'anomalie traitée de la base
-                                this.sqliteProvider.deleteById(`anomalie_inventaire`, this.anomaly.id);
-                                this.toastService.showToast(resp.data.status);
-                                // supprime l'anomalie de la liste
-                                this.anomaliesByLocation = this.anomaliesByLocation.filter(anomaly => parseInt(anomaly.treated) !== 1);
-                                // si liste vide retour aux emplacements
-                                if (this.anomaliesByLocation.length === 0) {
-                                    this.backToLocations();
-                                }
+            this.sqliteProvider.getApiUrl(ApiServices.TREAT_ANOMALIES).subscribe((treatAnomaliesUrl) => {
+                this.sqliteProvider.getApiKey().then(apiKey => {
+                    let params = {
+                        anomalies: [this.anomaly],
+                        apiKey: apiKey
+                    };
+                    this.http.post<any>(treatAnomaliesUrl, params).subscribe(resp => {
+                        if (resp.success) {
+                            // supprime l'anomalie traitée de la base
+                            this.sqliteProvider.deleteById(`anomalie_inventaire`, this.anomaly.id);
+                            this.toastService.showToast(resp.data.status);
+                            // supprime l'anomalie de la liste
+                            this.anomaliesByLocation = this.anomaliesByLocation.filter(anomaly => parseInt(anomaly.treated) !== 1);
+                            // si liste vide retour aux emplacements
+                            if (this.anomaliesByLocation.length === 0) {
+                                this.backToLocations();
                             }
-                        });
+                        }
                     });
-                } else {
-                    this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.')
-                }
+                });
             });
         });
         modal.present();

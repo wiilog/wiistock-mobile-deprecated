@@ -45,6 +45,8 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
 import {HelpersModule} from '@helpers/helpers.module';
 import {EntityFactoryService} from '@app/services/entity-factory.service';
 import {AlertManagerService} from '@app/services/alert-manager.service';
+import {VersionCheckerService} from "@app/services/version-checker.service";
+import {AppVersion} from "@ionic-native/app-version";
 
 
 @NgModule({
@@ -126,11 +128,13 @@ import {AlertManagerService} from '@app/services/alert-manager.service';
         UsersApiProvider,
         AppComponent,
         SQLite,
+        VersionCheckerService,
         SqliteProvider,
         StorageService,
         BarcodeScanner,
         NetworkProvider,
         Network,
+        AppVersion,
         ToastService,
         AlertManagerService,
         EntityFactoryService

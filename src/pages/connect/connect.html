@@ -5,19 +5,26 @@
 </ion-header>
 
 <ion-content padding>
-    <form (ngSubmit)="logForm()">
+    <div class="spinner" *ngIf="loading">
+        <ion-spinner class="main_spinner"></ion-spinner>
+        <p class="spinner_text">Chargement...</p>
+    </div>
+<!--    TODO AB change class-->
+    <div class="version-not-valid-container" *ngIf="!loading && appVersionInvalid">
+        <button ion-button class="version-not-valid" block>Veuillez mettre à jour l'application</button>
+    </div>
+    <form (ngSubmit)="logForm()" *ngIf="!loading && !appVersionInvalid">
         <ion-item>
             <ion-label>Login</ion-label>
-            <ion-input [disabled]="isLoaded" type="text" [(ngModel)]="form.login" name="login"></ion-input>
+            <ion-input type="text" [(ngModel)]="form.login" name="login"></ion-input>
         </ion-item>
         <ion-item>
             <ion-label>Mot de passe</ion-label>
-            <ion-input [disabled]="isLoaded" type="password" [(ngModel)]="form.password" name="passsword"></ion-input>
+            <ion-input type="password" [(ngModel)]="form.password" name="passsword"></ion-input>
         </ion-item>
-        <button ion-button type="submit" [disabled]="isLoaded" block>Connexion</button>
+        <button ion-button type="submit" block>Connexion</button>
     </form>
-    <ion-spinner *ngIf="isLoaded"></ion-spinner>
-    <img *ngIf="!isLoaded" src="assets/icon/followgt.png">
+    <img src="assets/icon/followgt.png" *ngIf="!loading">
 
 </ion-content>
 

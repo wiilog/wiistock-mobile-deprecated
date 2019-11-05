@@ -12,6 +12,7 @@ import {filter} from 'rxjs/operators';
 import {Observable, ReplaySubject, Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from "@app/services/toast.service";
+import {ApiServices} from "@app/config/api-services";
 
 
 @IonicPage()
@@ -27,8 +28,6 @@ export class InventaireMenuPage {
     article: ArticleInventaire;
     locations: Array<string>;
     location: string;
-    dataApi: string = '/api/getData';
-    addEntryURL: string = '/api/addInventoryEntries';
     isInventoryManager: boolean;
     isLoaded: boolean;
 
@@ -74,34 +73,28 @@ export class InventaireMenuPage {
 
     addInventoryEntries() : Observable<any> {
         let ret$: ReplaySubject<any> = new ReplaySubject(1);
-        this.sqliteProvider.getAPI_URL().subscribe(baseUrl => {
-            if (baseUrl !== null) {
-                let url: string = baseUrl + this.addEntryURL;
-                this.sqliteProvider.findAll('`saisie_inventaire`').subscribe(data => {
-                    if (data.length > 0) {
-                        this.sqliteProvider.getApiKey().then(apiKey => {
-                            let params = {
-                                entries: data,
-                                apiKey: apiKey
-                            };
-                            this.http.post<any>(url, params).subscribe(resp => {
-                                if (resp.success) {
-                                    this.sqliteProvider.cleanTable('`saisie_inventaire`');
-                                    this.toastService.showToast(resp.data.status);
-                                    ret$.next(undefined);
-                                } else {
-                                    ret$.next(undefined);
-                                }
-                            }, err => ret$.next(undefined));
-                        });
-                    } else {
-                        ret$.next(undefined);
-                    }
-                })
-            } else {
-                ret$.next(undefined);
-                this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.')
-            }
+        this.sqliteProvider.getApiUrl(ApiServices.ADD_INVENTORY_ENTRIES).subscribe((addInventoryEntriesUrl) => {
+            this.sqliteProvider.findAll('`saisie_inventaire`').subscribe(data => {
+                if (data.length > 0) {
+                    this.sqliteProvider.getApiKey().then(apiKey => {
+                        let params = {
+                            entries: data,
+                            apiKey: apiKey
+                        };
+                        this.http.post<any>(addInventoryEntriesUrl, params).subscribe(resp => {
+                            if (resp.success) {
+                                this.sqliteProvider.cleanTable('`saisie_inventaire`');
+                                this.toastService.showToast(resp.data.status);
+                                ret$.next(undefined);
+                            } else {
+                                ret$.next(undefined);
+                            }
+                        }, err => ret$.next(undefined));
+                    });
+                } else {
+                    ret$.next(undefined);
+                }
+            })
         });
         return ret$;
     }

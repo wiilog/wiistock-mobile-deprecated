@@ -8,6 +8,7 @@ import {HttpClient} from '@angular/common/http';
 import {Network} from '@ionic-native/network';
 import {ToastService} from "@app/services/toast.service";
 import {MenuPage} from "@pages/menu/menu";
+import {ApiServices} from "@app/config/api-services";
 
 
 @IonicPage()
@@ -19,7 +20,6 @@ export class TracaMenuPage {
     mvts: MouvementTraca[];
     unfinishedMvts: boolean;
     type: string;
-    addMvtURL: string = '/api/addMouvementTraca';
 
     constructor(public navCtrl: NavController,
                 public navParams: NavParams,
@@ -60,27 +60,22 @@ export class TracaMenuPage {
     }
 
     synchronise() {
-        this.sqlProvider.getAPI_URL().subscribe((resultUrl) => {
-            if (resultUrl !== null) {
-                let url: string = resultUrl + this.addMvtURL;
-                this.sqlProvider.findAll('`mouvement_traca`').subscribe((data) => {
-                    this.sqlProvider.getApiKey().then(result => {
-                        let toInsert = {
-                            mouvements: data,
-                            apiKey: result
-                        };
-                        this.http.post<any>(url, toInsert).subscribe((resp) => {
-                            if (resp.success) {
-                                this.sqlProvider.cleanTable('`mouvement_traca`').subscribe(() => {
-                                    this.toastService.showToast(resp.data.status);
-                                });
-                            }
-                        });
+        this.sqlProvider.getApiUrl(ApiServices.ADD_MOUVEMENT_TRACA).subscribe((addMouvementTracaUrl) => {
+            this.sqlProvider.findAll('`mouvement_traca`').subscribe((data) => {
+                this.sqlProvider.getApiKey().then(result => {
+                    let toInsert = {
+                        mouvements: data,
+                        apiKey: result
+                    };
+                    this.http.post<any>(addMouvementTracaUrl, toInsert).subscribe((resp) => {
+                        if (resp.success) {
+                            this.sqlProvider.cleanTable('`mouvement_traca`').subscribe(() => {
+                                this.toastService.showToast(resp.data.status);
+                            });
+                        }
                     });
                 });
-            } else {
-                this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.')
-            }
+            });
         });
     }
 }

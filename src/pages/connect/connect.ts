@@ -7,6 +7,9 @@ import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ToastService} from '@app/services/toast.service';
 import {Network} from '@ionic-native/network';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
+import {ApiServices} from '@app/config/api-services';
+import {VersionCheckerService} from '@app/services/version-checker.service';
+import {Subscription} from "rxjs";
 
 
 @IonicPage()
@@ -22,70 +25,82 @@ export class ConnectPage {
         login: '',
         password: ''
     };
-    public connectURL: string = '/api/connect';
-    public isLoaded: boolean;
+    public loading: boolean;
+    public appVersionInvalid: boolean;
+    private appVersionSubscription: Subscription;
 
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
                        public usersApiProvider: UsersApiProvider,
                        private toastService: ToastService,
-                       public sqliteProvider: SqliteProvider,
+                       private sqliteProvider: SqliteProvider,
+                       private versionChecker: VersionCheckerService,
                        private changeDetector: ChangeDetectorRef,
                        private network: Network,
                        private barcodeScannerManager: BarcodeScannerManagerService) {
-        this.isLoaded = false;
+        this.loading = true;
+        this.appVersionInvalid = false;
+    }
+
+    public ionViewWillEnter(): void {
+        this.loading = true;
+        this.appVersionSubscription = this.versionChecker.isAvailableVersion().subscribe((isValid) => {
+            this.appVersionInvalid = !isValid;
+            this.finishLoading();
+        });
+    }
+
+    public ionViewWillLeave(): void {
+        if (this.appVersionSubscription) {
+            this.appVersionSubscription.unsubscribe();
+            this.appVersionSubscription = undefined;
+        }
     }
 
     public logForm(): void {
-        if (!this.isLoaded) {
+        if (!this.loading) {
             if (this.network.type !== 'none') {
-                this.isLoaded = true;
-                this.sqliteProvider.getAPI_URL().subscribe((result) => {
-                    if (result !== null) {
-                        let url: string = result + this.connectURL;
-                        this.usersApiProvider.setProvider(this.form, url).subscribe(
-                            resp => {
-                                if (resp.success) {
-                                    this.sqliteProvider.setOperateur(this.form.login);
-                                    this.sqliteProvider.resetDataBase().subscribe(
-                                        () => {
-                                            this.sqliteProvider.clearStorage().then(() => {
-                                                this.sqliteProvider.setOperateur(this.form.login)
-                                                    .then(() => {
-                                                        this.sqliteProvider.importData(resp.data)
-                                                            .subscribe(
-                                                                () => {
-                                                                    this.isLoaded = false;
-                                                                    this.barcodeScannerManager.registerZebraBroadcastReceiver();
-                                                                    this.navCtrl.setRoot(MenuPage, {needReload : false});
-                                                                },
-                                                                () => {
-                                                                    this.finishLoading();
-                                                                }
-                                                            );
-                                                    })
-                                                    .catch(err => {
-                                                        this.finishLoading();
-                                                        console.log(err)
-                                                    });
-                                            });
-                                        },
-                                        () => {
-                                            this.finishLoading();
+                this.loading = true;
+                this.sqliteProvider.getApiUrl(ApiServices.CONNECT).subscribe((connectUrl) => {
+                    this.usersApiProvider.setProvider(this.form, connectUrl).subscribe(
+                        resp => {
+                            if (resp.success) {
+                                this.sqliteProvider.setOperateur(this.form.login);
+                                this.sqliteProvider.resetDataBase().subscribe(
+                                    () => {
+                                        this.sqliteProvider.clearStorage().then(() => {
+                                            this.sqliteProvider.setOperateur(this.form.login)
+                                                .then(() => {
+                                                    this.sqliteProvider.importData(resp.data)
+                                                        .subscribe(
+                                                            () => {
+                                                                this.loading = false;
+                                                                this.barcodeScannerManager.registerZebraBroadcastReceiver();
+                                                                this.navCtrl.setRoot(MenuPage, {needReload : false});
+                                                            },
+                                                            () => {
+                                                                this.finishLoading();
+                                                            }
+                                                        );
+                                                })
+                                                .catch(err => {
+                                                    this.finishLoading();
+                                                    console.log(err)
+                                                });
                                         });
-                                } else {
-                                    this.finishLoading();
-                                    this.toastService.showToast('Identifiants incorrects.');
-                                }
-                            },
-                            () => {
+                                    },
+                                    () => {
+                                        this.finishLoading();
+                                    });
+                            } else {
                                 this.finishLoading();
-                                this.toastService.showToast('Un problème est survenu, veuillez vérifier vos identifiants ainsi que l\'URL saisie sans les paramètres.');
-                            });
-                    } else {
-                        this.finishLoading();
-                        this.toastService.showToast('Veuillez configurer votre URL dans les paramètres.');
-                    }
+                                this.toastService.showToast('Identifiants incorrects.');
+                            }
+                        },
+                        () => {
+                            this.finishLoading();
+                            this.toastService.showToast('Un problème est survenu, veuillez vérifier vos identifiants ainsi que l\'URL saisie sans les paramètres.');
+                        });
                 });
             } else {
                 this.toastService.showToast('Vous devez être connecté à internet pour vous authentifier');
@@ -94,14 +109,14 @@ export class ConnectPage {
     }
 
     public goToParams(): void {
-        if (!this.isLoaded) {
-            this.isLoaded = false;
+        if (!this.loading) {
+            this.loading = false;
             this.navCtrl.push(ParamsPage);
         }
     }
 
     private finishLoading() {
-        this.isLoaded = false;
+        this.loading = false;
         this.changeDetector.detectChanges();
     }
 }

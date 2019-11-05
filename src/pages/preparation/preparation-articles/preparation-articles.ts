@@ -17,6 +17,7 @@ import {of} from 'rxjs/observable/of';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Network} from '@ionic-native/network';
+import {ApiServices} from "@app/config/api-services";
 
 
 @IonicPage()
@@ -33,7 +34,6 @@ export class PreparationArticlesPage {
     public articlesNT: Array<ArticlePrepa>;
     public articlesT: Array<ArticlePrepa>;
     public started: boolean = false;
-    public apiStartPrepa = '/api/beginPrepa';
     public isValid: boolean = true;
 
     public loadingStartPreparation: boolean;
@@ -205,26 +205,23 @@ export class PreparationArticlesPage {
             if (!this.started) {
                 if (this.network.type !== 'none') {
                     this.loadingStartPreparation = true;
-                    this.sqliteProvider.getAPI_URL().subscribe((result) => {
+                    this.sqliteProvider.getApiUrl(ApiServices.BEGIN_PREPA).subscribe((beginPrepaUrl) => {
                         this.sqliteProvider.getApiKey().then((key) => {
-                            if (result !== null) {
-                                let url: string = result + this.apiStartPrepa;
-                                this.http.post<any>(url, {id: this.preparation.id, apiKey: key}).subscribe(resp => {
-                                    if (resp.success) {
-                                        this.started = true;
-                                        this.isValid = true;
-                                        this.sqliteProvider.startPrepa(this.preparation.id).subscribe(() => {
-                                            this.toastService.showToast('Préparation commencée.');
-                                            this.saveSelectedArticle(selectedArticle, selectedQuantity);
-                                        });
-                                    }
-                                    else {
-                                        this.isValid = false;
-                                        this.loadingStartPreparation = false;
-                                        this.toastService.showToast(resp.msg);
-                                    }
-                                });
-                            }
+                            this.http.post<any>(beginPrepaUrl, {id: this.preparation.id, apiKey: key}).subscribe(resp => {
+                                if (resp.success) {
+                                    this.started = true;
+                                    this.isValid = true;
+                                    this.sqliteProvider.startPrepa(this.preparation.id).subscribe(() => {
+                                        this.toastService.showToast('Préparation commencée.');
+                                        this.saveSelectedArticle(selectedArticle, selectedQuantity);
+                                    });
+                                }
+                                else {
+                                    this.isValid = false;
+                                    this.loadingStartPreparation = false;
+                                    this.toastService.showToast(resp.msg);
+                                }
+                            });
                         });
                     });
                 }

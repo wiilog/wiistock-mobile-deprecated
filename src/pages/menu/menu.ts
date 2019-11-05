@@ -14,6 +14,7 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
 import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
 import {HttpClient} from '@angular/common/http';
+import {ApiServices} from "@app/config/api-services";
 
 
 @Component({
@@ -29,7 +30,6 @@ export class MenuPage {
     nbPrepT: number;
     nbArtInvent: number;
     loading: boolean;
-    apiUrl: string = '/api/getData';
 
     private exitAlert: Alert;
 
@@ -103,10 +103,9 @@ export class MenuPage {
     public synchronise(): void {
         if (this.network.type !== 'none') {
             this.loading = true;
-            this.sqliteProvider.getAPI_URL().subscribe((result) => {
-                let apiURL = result + this.apiUrl;
+            this.sqliteProvider.getApiUrl(ApiServices.GET_DATA).subscribe((getDataUrl) => {
                 this.sqliteProvider.getApiKey().then((key) => {
-                    this.http.post<any>(apiURL, {apiKey : key}).subscribe((resp) => {
+                    this.http.post<any>(getDataUrl, {apiKey: key}).subscribe((resp) => {
                         if (resp.success) {
                             this.sqliteProvider.importData(resp.data, true).subscribe(() => {
                                 this.loading = false;

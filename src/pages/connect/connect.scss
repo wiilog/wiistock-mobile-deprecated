@@ -1,7 +1,17 @@
 page-connect {
-}
-img {
-  width: auto;
-  margin: auto;
-  display: block;
+    img {
+        width: auto;
+        margin: auto;
+        display: block;
+    }
+
+    .version-not-valid-container {
+        text-align: center;
+        margin-top: 6rem;
+    }
+
+    .version-not-valid {
+        padding: 10px;
+        margin-bottom: 3rem;
+    }
 }

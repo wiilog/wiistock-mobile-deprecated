@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {AlertController, Events} from 'ionic-angular';
+import {Events} from 'ionic-angular';
 import {Network} from '@ionic-native/network';
 
 export enum ConnectionStatusEnum {
@@ -13,12 +13,8 @@ export class NetworkProvider {
 
     previousStatus;
 
-    constructor(public alertCtrl: AlertController,
-                public network: Network,
+    constructor(public network: Network,
                 public eventCtrl: Events) {
-
-        console.log('Hello NetworkProvider Provider');
-
         this.previousStatus = ConnectionStatusEnum.Online;
 
     }

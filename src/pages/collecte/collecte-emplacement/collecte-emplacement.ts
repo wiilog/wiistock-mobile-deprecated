@@ -9,6 +9,7 @@ import {ToastService} from '@app/services/toast.service';
 import {Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
+import {ApiServices} from "@app/config/api-services";
 
 
 @IonicPage()
@@ -25,7 +26,6 @@ export class CollecteEmplacementPage {
 
     emplacement: Emplacement;
     collecte: Collecte;
-    apiFinish: string = '/api/finishCollecte';
 
     public validateCollecte: () => void;
 
@@ -103,44 +103,41 @@ export class CollecteEmplacementPage {
                 });
                 promise.then(() => {
                     this.sqliteProvider.finishCollecte(this.collecte.id, this.emplacement.label).subscribe(() => {
-                        this.sqliteProvider.getAPI_URL().subscribe((result) => {
+                        this.sqliteProvider.getApiUrl(ApiServices.FINISH_COLLECTE).subscribe((finishCollecteUrl) => {
                             this.sqliteProvider.getApiKey().then((key) => {
-                                if (result !== null) {
-                                    this.sqliteProvider.findAll('`collecte`').subscribe(collectesToSend => {
-                                        this.sqliteProvider.findAll('`mouvement`').subscribe((mvts) => {
-                                            let url: string = result + this.apiFinish;
-                                            let params = {
-                                                collectes: collectesToSend.filter(c => c.date_end !== null),
-                                                mouvements: mvts.filter(m => m.id_prepa === null),
-                                                apiKey: key
-                                            };
-                                            this.http.post<any>(url, params).subscribe(
-                                                resp => {
-                                                    if (resp.success) {
-                                                        this.sqliteProvider.deleteCollectes(params.collectes).then(() => {
-                                                            this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
-                                                                this.isLoading = false;
-                                                                this.navCtrl.pop().then(() => {
-                                                                    this.validateCollecte();
-                                                                });
+                                this.sqliteProvider.findAll('`collecte`').subscribe(collectesToSend => {
+                                    this.sqliteProvider.findAll('`mouvement`').subscribe((mvts) => {
+                                        let params = {
+                                            collectes: collectesToSend.filter(c => c.date_end !== null),
+                                            mouvements: mvts.filter(m => m.id_prepa === null),
+                                            apiKey: key
+                                        };
+                                        this.http.post<any>(finishCollecteUrl, params).subscribe(
+                                            resp => {
+                                                if (resp.success) {
+                                                    this.sqliteProvider.deleteCollectes(params.collectes).then(() => {
+                                                        this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
+                                                            this.isLoading = false;
+                                                            this.navCtrl.pop().then(() => {
+                                                                this.validateCollecte();
                                                             });
                                                         });
-                                                    }
-                                                    else {
-                                                        this.isLoading = false;
-                                                        this.toastService.showToast(resp.msg);
-                                                    }
-                                                },
-                                                () => {
-                                                    this.isLoading = false;
-                                                    this.navCtrl.pop().then(() => {
-                                                        this.validateCollecte();
                                                     });
                                                 }
-                                            );
-                                        });
+                                                else {
+                                                    this.isLoading = false;
+                                                    this.toastService.showToast(resp.msg);
+                                                }
+                                            },
+                                            () => {
+                                                this.isLoading = false;
+                                                this.navCtrl.pop().then(() => {
+                                                    this.validateCollecte();
+                                                });
+                                            }
+                                        );
                                     });
-                                }
+                                });
                             });
                         })
                     })

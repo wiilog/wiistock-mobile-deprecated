@@ -115,3 +115,23 @@ ion-item {
 .text-right {
     text-align: center;
 }
+
+
+// TODO Remove spinner
+.spinner {
+    position: fixed;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+}
+
+.main_spinner {
+    height: 100px !important;
+    width: 100px !important;
+    margin-top: 50%;
+    left: 35%;
+}
+
+.spinner_text {
+    margin-top: 90%;
+}

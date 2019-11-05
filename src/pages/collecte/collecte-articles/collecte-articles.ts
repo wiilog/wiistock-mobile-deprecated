@@ -14,6 +14,7 @@ import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
 import {Network} from "@ionic-native/network";
+import {ApiServices} from "@app/config/api-services";
 
 
 @IonicPage()
@@ -30,7 +31,6 @@ export class CollecteArticlesPage {
     public articlesNT: Array<ArticleCollecte>;
     public articlesT: Array<ArticleCollecte>;
     public started: boolean = false;
-    public apiStartCollecte = '/api/beginCollecte';
     public isValid: boolean = true;
     public loadingStartCollecte: boolean;
 
@@ -231,24 +231,21 @@ export class CollecteArticlesPage {
         if (!this.started) {
             if (this.network.type !== 'none') {
                 this.loadingStartCollecte = true;
-                this.sqliteProvider.getAPI_URL().subscribe((result) => {
+                this.sqliteProvider.getApiUrl(ApiServices.BEGIN_COLLECTE).subscribe((url) => {
                     this.sqliteProvider.getApiKey().then((key) => {
-                        if (result !== null) {
-                            let url: string = result + this.apiStartCollecte;
-                            this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
-                                if (resp.success) {
-                                    this.started = true;
-                                    this.isValid = true;
-                                    this.toastService.showToast('Collecte commencée.');
-                                    this.registerMvt(article, quantity);
-                                }
-                                else {
-                                    this.isValid = false;
-                                    this.loadingStartCollecte = false;
-                                    this.toastService.showToast(resp.msg);
-                                }
-                            });
-                        }
+                        this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
+                            if (resp.success) {
+                                this.started = true;
+                                this.isValid = true;
+                                this.toastService.showToast('Collecte commencée.');
+                                this.registerMvt(article, quantity);
+                            }
+                            else {
+                                this.isValid = false;
+                                this.loadingStartCollecte = false;
+                                this.toastService.showToast(resp.msg);
+                            }
+                        });
                     });
                 });
             }

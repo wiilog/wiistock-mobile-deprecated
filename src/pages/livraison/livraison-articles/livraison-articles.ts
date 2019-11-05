@@ -14,6 +14,7 @@ import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manage
 import {Subscription} from 'rxjs';
 import {ToastService} from '@app/services/toast.service';
 import {Network} from "@ionic-native/network";
+import {ApiServices} from "@app/config/api-services";
 
 
 @IonicPage()
@@ -28,7 +29,6 @@ export class LivraisonArticlesPage {
     articlesNT: Array<ArticleLivraison>;
     articlesT: Array<ArticleLivraison>;
     started: boolean = false;
-    apiStartLivraison = '/api/beginLivraison';
     isValid: boolean = true;
 
     public loadingStartLivraison: boolean;
@@ -82,26 +82,23 @@ export class LivraisonArticlesPage {
         if (!this.started) {
             if (this.network.type !== 'none') {
                 this.loadingStartLivraison = true;
-                this.sqliteProvider.getAPI_URL().subscribe((result) => {
+                this.sqliteProvider.getApiUrl(ApiServices.BEGIN_LIVRAISON).subscribe((beginLivraisonUrl) => {
                     this.sqliteProvider.getApiKey().then((key) => {
-                        if (result !== null) {
-                            let url: string = result + this.apiStartLivraison;
-                            this.http.post<any>(url, {id: this.livraison.id, apiKey: key}).subscribe(resp => {
-                                if (resp.success) {
-                                    this.started = true;
-                                    this.isValid = true;
-                                    this.toastService.showToast('Livraison commencée.');
-                                    this.registerMvt(article, quantity);
-                                }
-                                else {
-                                    this.isValid = false;
-                                    this.loadingStartLivraison = false;
-                                    this.toastService.showToast(resp.msg);
-                                }
-                            }, () => {
+                        this.http.post<any>(beginLivraisonUrl, {id: this.livraison.id, apiKey: key}).subscribe(resp => {
+                            if (resp.success) {
+                                this.started = true;
+                                this.isValid = true;
+                                this.toastService.showToast('Livraison commencée.');
+                                this.registerMvt(article, quantity);
+                            }
+                            else {
+                                this.isValid = false;
+                                this.loadingStartLivraison = false;
+                                this.toastService.showToast(resp.msg);
+                            }
+                        }, () => {
 
-                            });
-                        }
+                        });
                     });
                 });
             }

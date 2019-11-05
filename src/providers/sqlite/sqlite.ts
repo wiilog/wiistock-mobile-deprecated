@@ -797,20 +797,20 @@ export class SqliteProvider {
         return apiUrlSet;
     }
 
-    public getAPI_URL(): Observable<any> {
-        const apiUrl$ = new ReplaySubject<any>(1);
-        this.db$.subscribe((db) => {
-            db.executeSql('SELECT * FROM `API_PARAMS` LIMIT 1', []).then((data) => {
-                if (data && data.rows && data.rows.length > 0 && data.rows.item(0).url !== '') {
-                    apiUrl$.next(data.rows.item(0).url);
-                } else {
-                    apiUrl$.next(null);
-                }
-            }).catch(() => {
-                apiUrl$.next(false);
-            });
-        });
-        return apiUrl$;
+    public getApiBaseUrl(): Observable<any> {
+        return this.db$
+            .pipe(
+                flatMap((db) => from(db.executeSql('SELECT * FROM `API_PARAMS` LIMIT 1', []))),
+                map((data) => (
+                    (data && data.rows && data.rows.length > 0 && data.rows.item(0).url !== '')
+                        ? `${data.rows.item(0).url}/api`
+                        : null
+                ))
+            );
+    }
+
+    public getApiUrl(service: string): Observable<any> {
+        return this.getApiBaseUrl().pipe(map((baseUrl) => (baseUrl ? `${baseUrl}${service}` : null)));
     }
 
     public getApiKey() {
