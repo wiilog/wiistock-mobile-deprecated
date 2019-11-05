@@ -5,7 +5,8 @@ import {MenuPage} from '@pages/menu/menu';
 import {ParamsPage} from '@pages/params/params'
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ToastService} from '@app/services/toast.service';
-import {Network} from "@ionic-native/network";
+import {Network} from '@ionic-native/network';
+import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 
 
 @IonicPage()
@@ -30,7 +31,8 @@ export class ConnectPage {
                        private toastService: ToastService,
                        public sqliteProvider: SqliteProvider,
                        private changeDetector: ChangeDetectorRef,
-                       private network: Network) {
+                       private network: Network,
+                       private barcodeScannerManager: BarcodeScannerManagerService) {
         this.isLoaded = false;
     }
 
@@ -54,6 +56,7 @@ export class ConnectPage {
                                                             .subscribe(
                                                                 () => {
                                                                     this.isLoaded = false;
+                                                                    this.barcodeScannerManager.registerZebraBroadcastReceiver();
                                                                     this.navCtrl.setRoot(MenuPage, {needReload : false});
                                                                 },
                                                                 () => {

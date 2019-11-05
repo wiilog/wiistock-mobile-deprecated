@@ -15,7 +15,9 @@ export class BarcodeScannerManagerService {
     public constructor(private barcodeScanner: BarcodeScanner) {
         this._canGoBack = true;
         this._zebraScan$ = new Subject<string>();
+    }
 
+    public registerZebraBroadcastReceiver(): void {
         (<any>window).plugins.intentShim.registerBroadcastReceiver({
                 filterActions: ['io.ionic.starter.ACTION'],
                 filterCategories: ['android.intent.category.DEFAULT']

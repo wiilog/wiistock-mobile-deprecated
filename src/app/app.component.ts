@@ -52,8 +52,6 @@ export class AppComponent {
             this.splashScreen.hide();
             this.networkProvider.initializeNetworkEvents();
 
-            (<any>window).plugins.intentShim.unregisterBroadcastReceiver();
-
             // Offline event
             this.events.subscribe('network:offline', () => {
                 console.log('network:offline ==> ' + this.network.type);

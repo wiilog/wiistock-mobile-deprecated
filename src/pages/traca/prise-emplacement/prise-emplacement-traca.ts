@@ -21,8 +21,7 @@ export class PriseEmplacementPageTraca {
 
     public constructor(private navCtrl: NavController,
                        private barcodeScannerManager: BarcodeScannerManagerService,
-                       private toastService: ToastService) {
-    }
+                       private toastService: ToastService) {}
 
     public ionViewWillEnter(): void {
         this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
