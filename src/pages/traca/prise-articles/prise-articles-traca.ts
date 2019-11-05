@@ -1,6 +1,5 @@
 import {Component} from '@angular/core';
-import {AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
-import {SelectArticleManuallyPage} from '@pages/traca/select-article-manually/select-article-manually';
+import {Alert, AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {Article} from '@app/entities/article';
 import {Emplacement} from '@app/entities/emplacement';
@@ -11,6 +10,8 @@ import moment from 'moment';
 import {Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
+import {EntityFactoryService} from '@app/services/entity-factory.service';
+import {AlertManagerService} from '@app/services/alert-manager.service';
 import {StorageService} from '@app/services/storage.service';
 
 
@@ -28,6 +29,8 @@ export class PriseArticlesPageTraca {
     private zebraScanSubscription: Subscription;
     private finishPrise: () => void;
 
+    private manualEntryAlertWillEnterSubscription: Subscription;
+
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
                        private alertController: AlertController,
@@ -35,7 +38,10 @@ export class PriseArticlesPageTraca {
                        private sqliteProvider: SqliteProvider,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private changeDetectorRef: ChangeDetectorRef,
-                       private storageService: StorageService) {}
+                       private entityFactory: EntityFactoryService,
+                       private alertManager: AlertManagerService,
+                       private storageService: StorageService) {
+    }
 
     public ionViewWillEnter(): void {
         this.sqliteProvider.findAll('article').subscribe((value) => {
@@ -48,10 +54,11 @@ export class PriseArticlesPageTraca {
 
         this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
             this.testIfBarcodeEquals(barcode);
-        })
+        });
     }
 
     public ionViewWillLeave(): void {
+        this.removeAlertSubscription();
         if (this.zebraScanSubscription) {
             this.zebraScanSubscription.unsubscribe();
             this.zebraScanSubscription = undefined;
@@ -62,16 +69,11 @@ export class PriseArticlesPageTraca {
         return this.barcodeScannerManager.canGoBack;
     }
 
-    addArticleManually() {
-        this.navCtrl.push(SelectArticleManuallyPage, {
-            articles: this.articles,
-            selectArticle: (article) => {
-                this.articles.push(article);
-            }
-        });
+    public addArticleManually(): void {
+        this.createManualEntryAlert().present();
     }
 
-    finishTaking() {
+    public finishTaking(): void {
         if (this.articles && this.articles.length > 0) {
             for (let article of this.articles) {
                 let numberOfArticles = 0;
@@ -130,23 +132,14 @@ export class PriseArticlesPageTraca {
         });
     }
 
-    testIfBarcodeEquals(text) {
-        if (this.articles && this.articles.some(article => (article.barcode === text))) {
+    public testIfBarcodeEquals(barCode: string): void {
+        if (this.articles && this.articles.some(article => (article.barcode === barCode))) {
             this.toastService.showToast('Cet article a déjà été ajouté à la prise.');
         }
         else {
-            let a: Article;
-            a = {
-                id: new Date().getUTCMilliseconds(),
-                label: null,
-                reference: text,
-                quantite: null,
-                barcode: text
-            };
-
             this.alertController
                 .create({
-                    title: `Vous avez sélectionné l'article ${text}`,
+                    title: `Vous avez sélectionné l'article ${barCode}`,
                     buttons: [
                         {
                             text: 'Annuler'
@@ -154,8 +147,7 @@ export class PriseArticlesPageTraca {
                         {
                             text: 'Confirmer',
                             handler: () => {
-                                this.articles.push(a);
-                                this.changeDetectorRef.detectChanges();
+                                this.saveArticle(barCode);
                             },
                             cssClass : 'alertAlert'
                         }
@@ -165,4 +157,42 @@ export class PriseArticlesPageTraca {
         }
     }
 
+    private createManualEntryAlert(): Alert {
+        const manualEntryAlert = this.alertController.create({
+            title: 'Saisie manuelle',
+            cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
+            inputs: [{
+                name: 'barCode',
+                placeholder: 'Saisir le code barre',
+                type: 'text'
+            }],
+            buttons: [{
+                text: 'Valider',
+                handler: ({barCode}) => {
+                    this.saveArticle(barCode);
+                },
+                cssClass: 'alertAlert'
+            }]
+        });
+
+        this.removeAlertSubscription();
+        this.manualEntryAlertWillEnterSubscription = manualEntryAlert.willEnter.subscribe(() => {
+            this.alertManager.disableAutocapitalizeOnAlert();
+        });
+
+        return manualEntryAlert;
+    }
+
+    private removeAlertSubscription(): void {
+        if (this.manualEntryAlertWillEnterSubscription) {
+            this.manualEntryAlertWillEnterSubscription.unsubscribe();
+            this.manualEntryAlertWillEnterSubscription = undefined;
+        }
+    }
+
+    private saveArticle(barCode: string): void {
+        const article = this.entityFactory.createArticleBarcode(barCode);
+        this.articles.push(article);
+        this.changeDetectorRef.detectChanges();
+    }
 }
