@@ -3,7 +3,7 @@ import {Storage} from '@ionic/storage';
 import {Observable} from 'rxjs';
 import {from} from 'rxjs/observable/from';
 import {flatMap, map} from 'rxjs/operators';
-import {of} from "rxjs/observable/of";
+import {of} from 'rxjs/observable/of';
 
 
 @Injectable()
@@ -87,13 +87,10 @@ export class StorageService {
         return from(this.storage.get(StorageService.INVENTORY_MANAGER)).pipe(map((value) => Boolean(value)));
     }
 
-    addPrep() {
-        return new Promise<any>((resolve) => {
-            this.storage.get(StorageService.NB_PREPS).then((nb_preps) => {
-                this.storage.set(StorageService.NB_PREPS, nb_preps + 1).then(() => {
-                    resolve();
-                });
-            })
-        });
+    public addPrepa(): Observable<any> {
+        return from(this.storage.get(StorageService.NB_PREPS)).pipe(
+            flatMap((nbPrepas) => from(this.storage.set(StorageService.NB_PREPS, nbPrepas + 1))),
+            map(() => undefined)
+        );
     }
 }

@@ -10,8 +10,8 @@ import moment from 'moment';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
-import {SelectArticleManuallyPage} from "@pages/traca/select-article-manually/select-article-manually";
-import {StorageService} from "@app/services/storage.service";
+import {SelectArticleManuallyPage} from '@pages/traca/select-article-manually/select-article-manually';
+import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()

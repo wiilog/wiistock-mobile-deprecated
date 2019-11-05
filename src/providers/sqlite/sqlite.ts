@@ -725,14 +725,6 @@ export class SqliteProvider {
         return apiUrl$;
     }
 
-    public finishPrepaStorage() {
-        return new Promise<any>((resolve) => {
-            this.storageService.addPrep().then(() => {
-                resolve();
-            });
-        })
-    }
-
     public findArticlesByPrepa(id_prepa: number): Observable<Array<any>> {
         return this.db$.pipe(
             flatMap((db: SQLiteObject) => from(db.executeSql('SELECT * FROM `article_prepa` WHERE `id_prepa` = ' + id_prepa, []))),

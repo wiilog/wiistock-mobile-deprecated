@@ -100,7 +100,7 @@ export class PreparationEmplacementPage {
                     });
                 });
                 promise.then(() => {
-                    this.sqliteProvider.finishPrepaStorage().then(() => {
+                    this.storageService.addPrepa().subscribe(() => {
                         this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label).subscribe(() => {
                             this.sqliteProvider.getAPI_URL().subscribe((result) => {
                                 this.storageService.getApiKey().subscribe((key) => {
