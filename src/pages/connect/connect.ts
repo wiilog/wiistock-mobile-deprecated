@@ -10,6 +10,8 @@ import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manage
 import {ApiServices} from '@app/config/api-services';
 import {VersionCheckerService} from '@app/services/version-checker.service';
 import {Subscription} from "rxjs";
+import {flatMap} from 'rxjs/operators';
+import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()
@@ -36,7 +38,8 @@ export class ConnectPage {
                        private sqliteProvider: SqliteProvider,
                        private versionChecker: VersionCheckerService,
                        private changeDetector: ChangeDetectorRef,
-                       private network: Network,
+                       private network: Network,,
+                       private storageService: StorageService,
                        private barcodeScannerManager: BarcodeScannerManagerService) {
         this.loading = true;
         this.appVersionInvalid = false;
@@ -63,35 +66,21 @@ export class ConnectPage {
                 this.loading = true;
                 this.sqliteProvider.getApiUrl(ApiServices.CONNECT).subscribe((connectUrl) => {
                     this.usersApiProvider.setProvider(this.form, connectUrl).subscribe(
-                        resp => {
-                            if (resp.success) {
-                                this.sqliteProvider.setOperateur(this.form.login);
-                                this.sqliteProvider.resetDataBase().subscribe(
-                                    () => {
-                                        this.sqliteProvider.clearStorage().then(() => {
-                                            this.sqliteProvider.setOperateur(this.form.login)
-                                                .then(() => {
-                                                    this.sqliteProvider.importData(resp.data)
-                                                        .subscribe(
-                                                            () => {
-                                                                this.loading = false;
-                                                                this.barcodeScannerManager.registerZebraBroadcastReceiver();
-                                                                this.navCtrl.setRoot(MenuPage, {needReload : false});
-                                                            },
-                                                            () => {
-                                                                this.finishLoading();
-                                                            }
-                                                        );
-                                                })
-                                                .catch(err => {
-                                                    this.finishLoading();
-                                                    console.log(err)
-                                                });
+                        ({data, success}) => {
+                            if (success) {
+                                const {apiKey, isInventoryManager} = data;
+                                this.sqliteProvider
+                                    .resetDataBase()
+                                    .pipe(flatMap(() => this.storageService.initStorage(apiKey, this.form.login, isInventoryManager)))
+                                    .subscribe(
+                                        () => {
+                                            this.loading = false;
+                                            this.navCtrl.setRoot(MenuPage, {needReload : false});
+                                        },
+                                        (err) => {
+                                            this.finishLoading();
+                                            console.log(err)
                                         });
-                                    },
-                                    () => {
-                                        this.finishLoading();
-                                    });
                             } else {
                                 this.finishLoading();
                                 this.toastService.showToast('Identifiants incorrects.');

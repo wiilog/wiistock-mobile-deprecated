@@ -7,6 +7,7 @@ import {MenuPage} from '@pages/menu/menu';
 import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
 import {ApiServices} from "@app/config/api-services";
+import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()
@@ -25,12 +26,13 @@ export class ManutentionValidatePage {
     public showCom: boolean = false;
 
     public constructor(public alertController: AlertController,
-                public navCtrl: NavController,
-                public navParams: NavParams,
-                public sqLiteProvider: SqliteProvider,
-                public client: HttpClient,
-                private toastService: ToastService,
-                private network: Network) {
+                       public navCtrl: NavController,
+                       public navParams: NavParams,
+                       public sqliteProvider: SqliteProvider,
+                       public client: HttpClient,
+                       private toastService: ToastService,
+                       private network: Network,
+                       private storageService: StorageService) {
     }
 
     public ionViewWillEnter(): void {
@@ -64,8 +66,8 @@ export class ManutentionValidatePage {
     }
 
     public notifyApi(): void {
-        this.sqLiteProvider.getApiUrl(ApiServices.VALIDATE_MANUT).subscribe((validateManutUrl) => {
-            this.sqLiteProvider.getApiKey().then((key) => {
+        this.sqliteProvider.getApiUrl(ApiServices.VALIDATE_MANUT).subscribe((validateManutUrl) => {
+            this.storageService.getApiKey().subscribe((key) => {
                 let params = {
                     id: this.manutention.id,
                     apiKey: key,
@@ -73,7 +75,7 @@ export class ManutentionValidatePage {
                 };
                 this.client.post<any>(validateManutUrl, params).subscribe((response) => {
                     if (response.success) {
-                        this.sqLiteProvider.deleteById('`manutention`', this.manutention.id).subscribe(() => {
+                        this.sqliteProvider.deleteById('`manutention`', this.manutention.id).subscribe(() => {
                             this.navCtrl.pop();
                         })
                     } else {
@@ -86,9 +88,9 @@ export class ManutentionValidatePage {
 
     public synchronise(): void {
         this.hasLoaded = false;
-        this.sqLiteProvider.findOneById('`manutention`', this.manutention.id).subscribe(manutention => {
+        this.sqliteProvider.findOneById('`manutention`', this.manutention.id).subscribe(manutention => {
             this.manutention = manutention;
-            this.sqLiteProvider.getOperateur().then((userName) => {
+            this.storageService.getOperateur().subscribe((userName) => {
                 this.user = userName;
                 this.hasLoaded = true;
                 this.content.resize();

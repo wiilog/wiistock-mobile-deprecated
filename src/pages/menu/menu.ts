@@ -14,6 +14,7 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
 import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
 import {HttpClient} from '@angular/common/http';
+import {StorageService} from "@app/services/storage.service";
 import {ApiServices} from "@app/config/api-services";
 
 
@@ -35,10 +36,6 @@ export class MenuPage {
 
     private unregisterBackButtonAction: Function;
 
-    private exitAlert: Alert;
-
-    private unregisterBackButtonAction: Function;
-
     public constructor(public app: App,
                        public navCtrl: NavController,
                        public navParams: NavParams,
@@ -47,7 +44,8 @@ export class MenuPage {
                        public toastService: ToastService,
                        public http: HttpClient,
                        private alertController: AlertController,
-                       private platform: Platform) {
+                       private platform: Platform,
+                       private storageService: StorageService) {
 
         this.items = [
             {title: 'Traça', icon: 'cube', page: TracaMenuPage, img: null},
@@ -79,11 +77,11 @@ export class MenuPage {
     public refreshCounters(): void {
         this.sqliteProvider.findAll('`preparation`').subscribe((preparations: Array<Preparation>) => {
             this.nbPrep = preparations.filter(p => p.date_end === null).length;
-            this.sqliteProvider.getFinishedPreps().then((preps) => {
+            this.storageService.getFinishedPreps().subscribe((preps) => {
                 this.nbPrepT = preps;
                 this.sqliteProvider.count('`article_inventaire`', []).subscribe((nbArticlesInventaire: number) => {
                     this.nbArtInvent = nbArticlesInventaire;
-                    this.sqliteProvider.getOperateur().then(() => {
+                    this.storageService.getOperateur().subscribe(() => {
                         this.content.resize();
                     })
                 });
@@ -108,10 +106,10 @@ export class MenuPage {
         if (this.network.type !== 'none') {
             this.loading = true;
             this.sqliteProvider.getApiUrl(ApiServices.GET_DATA).subscribe((getDataUrl) => {
-                this.sqliteProvider.getApiKey().then((key) => {
+                this.storageService.getApiKey().subscribe((key) => {
                     this.http.post<any>(getDataUrl, {apiKey: key}).subscribe((resp) => {
                         if (resp.success) {
-                            this.sqliteProvider.importData(resp.data, true).subscribe(() => {
+                            this.sqliteProvider.importData(resp.data).subscribe(() => {
                                 this.loading = false;
                                 this.refreshCounters();
                             })

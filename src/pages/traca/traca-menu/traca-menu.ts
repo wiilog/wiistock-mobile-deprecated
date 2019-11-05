@@ -9,6 +9,7 @@ import {Network} from '@ionic-native/network';
 import {ToastService} from "@app/services/toast.service";
 import {MenuPage} from "@pages/menu/menu";
 import {ApiServices} from "@app/config/api-services";
+import {StorageService} from "@app/services/storage.service";
 
 
 @IonicPage()
@@ -21,19 +22,20 @@ export class TracaMenuPage {
     unfinishedMvts: boolean;
     type: string;
 
-    constructor(public navCtrl: NavController,
-                public navParams: NavParams,
-                private sqlProvider: SqliteProvider,
-                private http: HttpClient,
-                private toastService: ToastService,
-                public network: Network) {
+    public constructor(public navCtrl: NavController,
+                       public navParams: NavParams,
+                       private sqlProvider: SqliteProvider,
+                       private http: HttpClient,
+                       private toastService: ToastService,
+                       public network: Network,
+                       private storageService: StorageService) {
     }
 
     public ionViewWillEnter(): void {
         this.sqlProvider.findAll('`mouvement_traca`').subscribe((value) => {
             this.mvts = value;
         });
-        this.sqlProvider.priseAreUnfinished().then((value) => {
+        this.storageService.prisesAreUnfinished().subscribe((value) => {
             this.unfinishedMvts = value;
             this.type = this.network.type;
             if (this.type !== "unknown" && this.type !== "none" && this.type !== undefined) {
@@ -62,7 +64,7 @@ export class TracaMenuPage {
     synchronise() {
         this.sqlProvider.getApiUrl(ApiServices.ADD_MOUVEMENT_TRACA).subscribe((addMouvementTracaUrl) => {
             this.sqlProvider.findAll('`mouvement_traca`').subscribe((data) => {
-                this.sqlProvider.getApiKey().then(result => {
+                this.storageService.getApiKey().subscribe(result => {
                     let toInsert = {
                         mouvements: data,
                         apiKey: result

@@ -12,6 +12,7 @@ import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manage
 import {Subscription} from 'rxjs';
 import {EntityFactoryService} from '@app/services/entity-factory.service';
 import {AlertManagerService} from '@app/services/alert-manager.service';
+import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()
@@ -38,7 +39,8 @@ export class DeposeArticlesPageTraca {
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private changeDetectorRef: ChangeDetectorRef,
                        private entityFactory: EntityFactoryService,
-                       private alertManager: AlertManagerService) {
+                       private alertManager: AlertManagerService,
+                       private storageService: StorageService) {
 
     }
 
@@ -82,7 +84,7 @@ export class DeposeArticlesPageTraca {
                     }
                 });
                 const date = moment().format();
-                this.sqliteProvider.getOperateur().then((value) => {
+                this.storageService.getOperateur().subscribe((value) => {
                     const mouvement: MouvementTraca = {
                         id: null,
                         ref_article: article.reference,
@@ -91,7 +93,7 @@ export class DeposeArticlesPageTraca {
                         type: 'depose',
                         operateur: value
                     };
-                    this.sqliteProvider.setDeposeValue(article.barcode, numberOfArticles).then(() => {
+                    this.storageService.setDeposeValue(article.barcode, numberOfArticles).subscribe(() => {
                         if (this.articles.indexOf(article) === this.articles.length - 1) {
                             this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(() => {
                                 this.redirectAfterTake();
@@ -132,7 +134,7 @@ export class DeposeArticlesPageTraca {
             .filter(article => (article.reference === barCode))
             .length;
 
-        this.sqliteProvider.keyExists(barCode).then((value) => {
+        this.storageService.keyExists(barCode).subscribe((value) => {
             if (value !== false) {
                 if (value > numberOfArticles) {
                     if (isManualInput) {

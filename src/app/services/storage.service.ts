@@ -1,40 +1,36 @@
 import {Injectable} from '@angular/core';
 import {Storage} from '@ionic/storage';
+import {Observable} from 'rxjs';
+import {from} from 'rxjs/observable/from';
+import {flatMap, map} from 'rxjs/operators';
+import {of} from 'rxjs/observable/of';
 
-
-const API_KEY = 'api-key';
-const INVENTORY_MANAGER = 'inventory-manager';
-const OPERATEUR = 'operateur';
-const NB_PREPS = 'prep';
 
 @Injectable()
 export class StorageService {
 
-    constructor(private storage: Storage) {
+    private static readonly API_KEY = 'api-key';
+    private static readonly INVENTORY_MANAGER = 'inventory-manager';
+    private static readonly OPERATEUR = 'operateur';
+    private static readonly NB_PREPS = 'prep';
+
+    public constructor(private storage: Storage) {}
+
+    public initStorage(apiKey: string, operator: string, isInventoryManager: boolean): Observable<any> {
+        return from(this.storage.clear())
+            .pipe(flatMap(() => from(Promise.all([
+                this.storage.set(StorageService.API_KEY, apiKey),
+                this.storage.set(StorageService.INVENTORY_MANAGER, (isInventoryManager ? 1 : 0)),
+                this.storage.set(StorageService.NB_PREPS, 0)
+            ]))));
     }
 
-    setApiKey(apiKey: string) {
-        this.storage.set(API_KEY, apiKey);
+    public getOperateur(): Observable<string> {
+        return from(this.storage.get(StorageService.OPERATEUR));
     }
 
-    setInventoryManagerRight(right: number) {
-        this.storage.set(INVENTORY_MANAGER, right);
-    }
-
-    setPreps() {
-        return this.storage.set(NB_PREPS, 0);
-    }
-
-    setOperateur(operateur) {
-        return this.storage.set(OPERATEUR, operateur);
-    }
-
-    getOperateur() {
-        return this.storage.get(OPERATEUR);
-    }
-
-    getPreps() {
-        return this.storage.get(NB_PREPS);
+    public getFinishedPreps(): Observable<number> {
+        return from(this.storage.get(StorageService.NB_PREPS));
     }
 
     public setPriseValue(value: string, number: number) {
@@ -49,67 +45,52 @@ export class StorageService {
     }
 
     public keyExists(key) {
-        return new Promise<boolean>((resolve, reject) => {
-            this.storage.get(key).then(data => {
-                console.log('data ' + data + ' for key ' + key);
-                if (data && data > 0) resolve(data);
-                if (!data || data === 0) resolve(false);
-            });
-        });
+        return from(this.storage.get(key)).pipe(
+            map((data) => (
+                (data && data > 0)
+                    ? data
+                    : false
+            ))
+        );
     }
 
     public setDeposeValue(value: string, number: number) {
-        return this.storage.get(value).then(data => {
-            console.log(data);
-            if (data) {
-                if (data - number >= 0) {
-                    console.log('set depose value ' + value + ' ' + (data-number));
-                    this.storage.set(value, data - number);
-                } else if (data - number < 0) {
-                    console.log('set depose value ' + value + ' 0');
-                    this.storage.set(value, 0);
-                }
+        return from(this.storage.get(value)).pipe(flatMap((data) => {
+            const res = (data - number);
+            return (
+                data
+                    ? from(this.storage.set(value, (res >= 0 ? res : 0)))
+                    : of(undefined)
+            )
+        }));
+    }
+
+    public prisesAreUnfinished(): Observable<boolean> {
+        let isUnfinished: boolean = false;
+        return from(this.storage.forEach((value: any, key: string) => {
+            if (!isUnfinished &&
+                (value >= 1) &&
+                (key !== StorageService.API_KEY) &&
+                (key !== StorageService.OPERATEUR) &&
+                (key !== StorageService.INVENTORY_MANAGER) &&
+                (key !== StorageService.NB_PREPS)) {
+                isUnfinished = true;
             }
-        });
+        })).pipe(map(() => isUnfinished));
     }
 
-    public async prisesAreUnfinished() {
-        return new Promise<boolean>((resolve, reject) => {
-            let length : number;
-            this.storage.length().then((value) => {
-                length = value;
-            });
-            this.storage.forEach((value: any, key: string, iterationNumber: Number) => {
-                if (value >= 1 && key !== API_KEY && key !== OPERATEUR && key !== INVENTORY_MANAGER && key !== NB_PREPS) {
-                    resolve(true);
-                }
-                if (iterationNumber === length) {
-                    console.log(false);
-                    resolve(false);
-                }
-            });
-        });
+    public getApiKey(): Observable<string> {
+        return from(this.storage.get(StorageService.API_KEY));
     }
 
-    getApiKey() {
-        return this.storage.get(API_KEY);
+    public getInventoryManagerRight(): Observable<boolean> {
+        return from(this.storage.get(StorageService.INVENTORY_MANAGER)).pipe(map((value) => Boolean(value)));
     }
 
-    getInventoryManagerRight() {
-        return this.storage.get(INVENTORY_MANAGER);
-    }
-
-    clear() {
-        return this.storage.clear();
-    }
-
-    addPrep() {
-        return new Promise<any>((resolve) => {
-            this.storage.get(NB_PREPS).then((nb_preps) => {
-                this.storage.set(NB_PREPS, nb_preps + 1).then(() => {
-                    resolve();
-                });
-            })
-        });
+    public addPrepa(): Observable<any> {
+        return from(this.storage.get(StorageService.NB_PREPS)).pipe(
+            flatMap((nbPrepas) => from(this.storage.set(StorageService.NB_PREPS, nbPrepas + 1))),
+            map(() => undefined)
+        );
     }
 }
