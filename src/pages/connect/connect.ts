@@ -5,7 +5,9 @@ import {MenuPage} from '@pages/menu/menu';
 import {ParamsPage} from '@pages/params/params'
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ToastService} from '@app/services/toast.service';
-import {Network} from "@ionic-native/network";
+import {Network} from '@ionic-native/network';
+import {flatMap} from 'rxjs/operators';
+import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()
@@ -30,7 +32,8 @@ export class ConnectPage {
                        private toastService: ToastService,
                        public sqliteProvider: SqliteProvider,
                        private changeDetector: ChangeDetectorRef,
-                       private network: Network) {
+                       private network: Network,
+                       private storageService: StorageService) {
         this.isLoaded = false;
     }
 
@@ -42,34 +45,21 @@ export class ConnectPage {
                     if (result !== null) {
                         let url: string = result + this.connectURL;
                         this.usersApiProvider.setProvider(this.form, url).subscribe(
-                            resp => {
-                                if (resp.success) {
-                                    this.sqliteProvider.setOperateur(this.form.login);
-                                    this.sqliteProvider.resetDataBase().subscribe(
-                                        () => {
-                                            this.sqliteProvider.clearStorage().then(() => {
-                                                this.sqliteProvider.setOperateur(this.form.login)
-                                                    .then(() => {
-                                                        this.sqliteProvider.importData(resp.data)
-                                                            .subscribe(
-                                                                () => {
-                                                                    this.isLoaded = false;
-                                                                    this.navCtrl.setRoot(MenuPage, {needReload : false});
-                                                                },
-                                                                () => {
-                                                                    this.finishLoading();
-                                                                }
-                                                            );
-                                                    })
-                                                    .catch(err => {
-                                                        this.finishLoading();
-                                                        console.log(err)
-                                                    });
+                            ({data, success}) => {
+                                if (success) {
+                                    const {apiKey, isInventoryManager} = data;
+                                    this.sqliteProvider
+                                        .resetDataBase()
+                                        .pipe(flatMap(() => this.storageService.initStorage(apiKey, this.form.login, isInventoryManager)))
+                                        .subscribe(
+                                            () => {
+                                                this.isLoaded = false;
+                                                this.navCtrl.setRoot(MenuPage, {needReload : false});
+                                            },
+                                            (err) => {
+                                                this.finishLoading();
+                                                console.log(err)
                                             });
-                                        },
-                                        () => {
-                                            this.finishLoading();
-                                        });
                                 } else {
                                     this.finishLoading();
                                     this.toastService.showToast('Identifiants incorrects.');

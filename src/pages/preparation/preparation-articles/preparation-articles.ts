@@ -16,6 +16,7 @@ import {ArticlePrepaByRefArticle} from '@app/entities/article-prepa-by-ref-artic
 import {of} from 'rxjs/observable/of';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
+import {StorageService} from "@app/services/storage.service";
 
 
 @IonicPage()
@@ -44,7 +45,8 @@ export class PreparationArticlesPage {
                        public sqliteProvider: SqliteProvider,
                        public http: HttpClient,
                        private barcodeScannerManager: BarcodeScannerManagerService,
-                       private toastService: ToastService) {
+                       private toastService: ToastService,
+                       private storageService: StorageService) {
         this.loadingStartPreparation = false;
     }
 
@@ -203,7 +205,7 @@ export class PreparationArticlesPage {
             if (!this.started) {
                 this.loadingStartPreparation = true;
                 this.sqliteProvider.getAPI_URL().subscribe((result) => {
-                    this.sqliteProvider.getApiKey().then((key) => {
+                    this.storageService.getApiKey().subscribe((key) => {
                         if (result !== null) {
                             let url: string = result + this.apiStartPrepa;
                             this.http.post<any>(url, {id: this.preparation.id, apiKey: key}).subscribe(resp => {

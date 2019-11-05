@@ -13,6 +13,7 @@ import {flatMap} from 'rxjs/operators';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
+import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()
@@ -39,7 +40,8 @@ export class CollecteArticlesPage {
                        public toastService: ToastService,
                        public sqliteProvider: SqliteProvider,
                        public http: HttpClient,
-                       public barcodeScannerManager: BarcodeScannerManagerService) {
+                       public barcodeScannerManager: BarcodeScannerManagerService,
+                       private storageService: StorageService) {
         this.loadingStartCollecte = false;
     }
 
@@ -228,7 +230,7 @@ export class CollecteArticlesPage {
         if (!this.started) {
             this.loadingStartCollecte = true;
             this.sqliteProvider.getAPI_URL().subscribe((result) => {
-                this.sqliteProvider.getApiKey().then((key) => {
+                this.storageService.getApiKey().subscribe((key) => {
                     if (result !== null) {
                         let url: string = result + this.apiStartCollecte;
                         this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {

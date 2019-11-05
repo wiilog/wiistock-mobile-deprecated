@@ -12,6 +12,7 @@ import {filter} from 'rxjs/operators';
 import {Observable, ReplaySubject, Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from "@app/services/toast.service";
+import {StorageService} from "@app/services/storage.service";
 
 
 @IonicPage()
@@ -27,7 +28,6 @@ export class InventaireMenuPage {
     article: ArticleInventaire;
     locations: Array<string>;
     location: string;
-    dataApi: string = '/api/getData';
     addEntryURL: string = '/api/addInventoryEntries';
     isInventoryManager: boolean;
     isLoaded: boolean;
@@ -40,7 +40,8 @@ export class InventaireMenuPage {
                        private modalController: ModalController,
                        private changeDetector: ChangeDetectorRef,
                        private barcodeScannerManager: BarcodeScannerManagerService,
-                       private toastService: ToastService) {
+                       private toastService: ToastService,
+                       private storageService: StorageService) {
     }
 
     goHome() {
@@ -50,7 +51,7 @@ export class InventaireMenuPage {
     public ionViewWillEnter(): void {
         this.synchronize();
 
-        this.sqliteProvider.getInventoryManagerRight().then(isInventoryManager => {
+        this.storageService.getInventoryManagerRight().subscribe((isInventoryManager) => {
             this.isInventoryManager = isInventoryManager;
         });
 
@@ -79,10 +80,10 @@ export class InventaireMenuPage {
                 let url: string = baseUrl + this.addEntryURL;
                 this.sqliteProvider.findAll('`saisie_inventaire`').subscribe(data => {
                     if (data.length > 0) {
-                        this.sqliteProvider.getApiKey().then(apiKey => {
+                        this.storageService.getApiKey().subscribe((apiKey) => {
                             let params = {
                                 entries: data,
-                                apiKey: apiKey
+                                apiKey
                             };
                             this.http.post<any>(url, params).subscribe(resp => {
                                 if (resp.success) {

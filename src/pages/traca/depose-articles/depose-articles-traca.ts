@@ -11,6 +11,7 @@ import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
 import {SelectArticleManuallyPage} from "@pages/traca/select-article-manually/select-article-manually";
+import {StorageService} from "@app/services/storage.service";
 
 
 @IonicPage()
@@ -33,7 +34,8 @@ export class DeposeArticlesPageTraca {
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
                        private barcodeScannerManager: BarcodeScannerManagerService,
-                       private changeDetectorRef: ChangeDetectorRef) {}
+                       private changeDetectorRef: ChangeDetectorRef,
+                       private storageService: StorageService) {}
 
     public ionViewWillEnter(): void {
         this.sqliteProvider.findAll('article').subscribe((value) => {
@@ -67,7 +69,7 @@ export class DeposeArticlesPageTraca {
                 const nbDroppedArticle = this.articles
                     .filter((articlePrise) => (articlePrise.reference === article.reference))
                     .length;
-                this.sqliteProvider.keyExists(article.reference).then((value) => {
+                this.storageService.keyExists(article.reference).subscribe((value) => {
                     if (value !== false) {
                         if (value > nbDroppedArticle) {
                             this.articles.push(article);
@@ -95,7 +97,7 @@ export class DeposeArticlesPageTraca {
                     }
                 });
                 const date = moment().format();
-                this.sqliteProvider.getOperateur().then((value) => {
+                this.storageService.getOperateur().subscribe((value) => {
                     const mouvement: MouvementTraca = {
                         id: null,
                         ref_article: article.reference,
@@ -104,7 +106,7 @@ export class DeposeArticlesPageTraca {
                         type: 'depose',
                         operateur: value
                     };
-                    this.sqliteProvider.setDeposeValue(article.barcode, numberOfArticles).then(() => {
+                    this.storageService.setDeposeValue(article.barcode, numberOfArticles).subscribe(() => {
                         if (this.articles.indexOf(article) === this.articles.length - 1) {
                             this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(() => {
                                 this.redirectAfterTake();
@@ -152,7 +154,7 @@ export class DeposeArticlesPageTraca {
             quantite: null,
             barcode: text,
         };
-        this.sqliteProvider.keyExists(text).then((value) => {
+        this.storageService.keyExists(text).subscribe((value) => {
             if (value !== false) {
                 if (value > numberOfArticles) {
                     this.alertController

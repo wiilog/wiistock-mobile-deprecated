@@ -14,6 +14,7 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
 import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
 import {HttpClient} from '@angular/common/http';
+import {StorageService} from "@app/services/storage.service";
 
 
 @Component({
@@ -37,7 +38,8 @@ export class MenuPage {
                        public sqliteProvider: SqliteProvider,
                        public network: Network,
                        public toastService: ToastService,
-                       public http: HttpClient) {
+                       public http: HttpClient,
+                       private storageService: StorageService) {
 
         this.items = [
             {title: 'Traça', icon: 'cube', page: TracaMenuPage, img: null},
@@ -58,11 +60,11 @@ export class MenuPage {
     refreshCounters() {
         this.sqliteProvider.findAll('`preparation`').subscribe((preparations: Array<Preparation>) => {
             this.nbPrep = preparations.filter(p => p.date_end === null).length;
-            this.sqliteProvider.getFinishedPreps().then((preps) => {
+            this.storageService.getFinishedPreps().subscribe((preps) => {
                 this.nbPrepT = preps;
                 this.sqliteProvider.count('`article_inventaire`', []).subscribe((nbArticlesInventaire: number) => {
                     this.nbArtInvent = nbArticlesInventaire;
-                    this.sqliteProvider.getOperateur().then(() => {
+                    this.storageService.getOperateur().subscribe(() => {
                         this.content.resize();
                     })
                 });
@@ -88,10 +90,10 @@ export class MenuPage {
             this.loading = true;
             this.sqliteProvider.getAPI_URL().subscribe((result) => {
                 let apiURL = result + this.apiUrl;
-                this.sqliteProvider.getApiKey().then((key) => {
+                this.storageService.getApiKey().subscribe((key) => {
                     this.http.post<any>(apiURL, {apiKey : key}).subscribe((resp) => {
                         if (resp.success) {
-                            this.sqliteProvider.importData(resp.data, true).subscribe(() => {
+                            this.sqliteProvider.importData(resp.data).subscribe(() => {
                                 this.loading = false;
                                 this.refreshCounters();
                             })

@@ -11,6 +11,7 @@ import moment from 'moment';
 import {Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
+import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()
@@ -33,7 +34,8 @@ export class PriseArticlesPageTraca {
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
                        private barcodeScannerManager: BarcodeScannerManagerService,
-                       private changeDetectorRef: ChangeDetectorRef) {}
+                       private changeDetectorRef: ChangeDetectorRef,
+                       private storageService: StorageService) {}
 
     public ionViewWillEnter(): void {
         this.sqliteProvider.findAll('article').subscribe((value) => {
@@ -79,16 +81,16 @@ export class PriseArticlesPageTraca {
                     }
                 });
                 const date = moment().format();
-                this.sqliteProvider.getOperateur().then((value) => {
+                this.storageService.getOperateur().subscribe((operateur) => {
                     const mouvement: MouvementTraca = {
                         id: null,
                         ref_article: article.reference,
                         date: date + '_' + Math.random().toString(36).substr(2, 9),
                         ref_emplacement: this.emplacement.label,
                         type: 'prise',
-                        operateur: value
+                        operateur
                     };
-                    this.sqliteProvider.setPriseValue(article.barcode, numberOfArticles).then(() => {
+                    this.storageService.setPriseValue(article.barcode, numberOfArticles).then(() => {
                         if (this.articles.indexOf(article) === this.articles.length - 1) {
                             this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(
                                 () => {

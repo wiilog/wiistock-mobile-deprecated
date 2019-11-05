@@ -10,6 +10,7 @@ import {Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
+import {StorageService} from "@app/services/storage.service";
 
 
 @IonicPage()
@@ -38,7 +39,8 @@ export class InventaireAnomaliePage {
                        private changeDetector: ChangeDetectorRef,
                        private modalController: ModalController,
                        private barcodeScannerManager: BarcodeScannerManagerService,
-                       private toastService: ToastService) {}
+                       private toastService: ToastService,
+                       private storageService: StorageService) {}
 
 
     public ionViewWillEnter(): void {
@@ -71,7 +73,7 @@ export class InventaireAnomaliePage {
         this.sqliteProvider.getAPI_URL().subscribe(
             (baseUrl) => {
                 if (baseUrl !== null) {
-                    this.sqliteProvider.getApiKey().then((key) => {
+                    this.storageService.getApiKey().subscribe((key) => {
                         this.sqliteProvider.findAll('`anomalie_inventaire`').subscribe(anomalies => {
                             this.anomalies = anomalies;
                             let locations = [];
@@ -154,10 +156,10 @@ export class InventaireAnomaliePage {
             this.sqliteProvider.getAPI_URL().subscribe(baseUrl => {
                 if (baseUrl !== null) {
                     let url: string = baseUrl + this.updateAnomaliesURL;
-                    this.sqliteProvider.getApiKey().then(apiKey => {
+                    this.storageService.getApiKey().subscribe(apiKey => {
                         let params = {
                             anomalies: [this.anomaly],
-                            apiKey: apiKey
+                            apiKey
                         };
                         this.http.post<any>(url, params).subscribe(resp => {
                             if (resp.success) {

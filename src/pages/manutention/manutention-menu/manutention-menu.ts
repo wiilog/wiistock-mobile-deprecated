@@ -4,6 +4,7 @@ import {Manutention} from '@app/entities/manutention';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {MenuPage} from '@pages/menu/menu';
 import {ManutentionValidatePage} from '@pages/manutention/manutention-validate/manutention-validate';
+import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()
@@ -23,7 +24,8 @@ export class ManutentionMenuPage {
     public user: string;
 
     public constructor(private navCtrl: NavController,
-                       private sqliteProvider: SqliteProvider) {
+                       private sqliteProvider: SqliteProvider,
+                       private storageService: StorageService) {
     }
 
     public goHome(): void {
@@ -38,7 +40,7 @@ export class ManutentionMenuPage {
         this.hasLoaded = false;
         this.sqliteProvider.findAll('`manutention`').subscribe((manutentions) => {
             this.manutentions = manutentions;
-            this.sqliteProvider.getOperateur().then((userName) => {
+            this.storageService.getOperateur().subscribe((userName) => {
                 this.user = userName;
                 this.hasLoaded = true;
                 this.content.resize();
