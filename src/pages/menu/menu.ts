@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {App, NavController, Content, NavParams, Slides} from 'ionic-angular';
+import {App, NavController, Content, NavParams, Slides, Platform, AlertController, Alert} from 'ionic-angular';
 import {TracaMenuPage} from '@pages/traca/traca-menu/traca-menu'
 import {Page} from "ionic-angular/navigation/nav-util";
 import {PreparationMenuPage} from '@pages/preparation/preparation-menu/preparation-menu';
@@ -31,13 +31,19 @@ export class MenuPage {
     loading: boolean;
     apiUrl: string = '/api/getData';
 
+    private exitAlert: Alert;
+
+    private unregisterBackButtonAction: Function;
+
     public constructor(public app: App,
                        public navCtrl: NavController,
                        public navParams: NavParams,
                        public sqliteProvider: SqliteProvider,
                        public network: Network,
                        public toastService: ToastService,
-                       public http: HttpClient) {
+                       public http: HttpClient,
+                       private alertController: AlertController,
+                       private platform: Platform) {
 
         this.items = [
             {title: 'Traça', icon: 'cube', page: TracaMenuPage, img: null},
@@ -53,9 +59,20 @@ export class MenuPage {
     public ionViewWillEnter(): void {
         this.synchronise();
         this.refreshCounters();
+
+        this.unregisterBackButtonAction = this.platform.registerBackButtonAction(() => {
+            this.onBackButton();
+        });
     }
 
-    refreshCounters() {
+    public ionViewWillLeave(): void {
+        if (this.unregisterBackButtonAction) {
+            this.unregisterBackButtonAction();
+            this.unregisterBackButtonAction = undefined;
+        }
+    }
+
+    public refreshCounters(): void {
         this.sqliteProvider.findAll('`preparation`').subscribe((preparations: Array<Preparation>) => {
             this.nbPrep = preparations.filter(p => p.date_end === null).length;
             this.sqliteProvider.getFinishedPreps().then((preps) => {
@@ -70,7 +87,7 @@ export class MenuPage {
         });
     }
 
-    itemTapped(event, item) {
+    public itemTapped(event, item): void {
         if (item.page === null) {
             (<any>window).plugins.intentShim.unregisterBroadcastReceiver();
             this.navCtrl.setRoot(ConnectPage);
@@ -79,11 +96,11 @@ export class MenuPage {
         }
     }
 
-    goToParams() {
+    public goToParams(): void {
         this.navCtrl.push(ParamsPage);
     }
 
-    synchronise() {
+    public synchronise(): void {
         if (this.network.type !== 'none') {
             this.loading = true;
             this.sqliteProvider.getAPI_URL().subscribe((result) => {
@@ -107,6 +124,38 @@ export class MenuPage {
             this.loading = false;
             this.toastService.showToast('Veuillez vous connecter à internet afin de synchroniser vos données');
             this.refreshCounters();
+        }
+    }
+
+    private onBackButton(): void {
+        if (this.exitAlert) {
+            this.exitAlert.dismiss();
+            this.exitAlert = undefined;
+        }
+        else {
+            this.exitAlert = this.alertController
+                .create({
+                    title: `Êtes-vous sûr de vouloir quitter l'application ?`,
+                    // TODO backdropDismiss: false for ionic 4
+                    enableBackdropDismiss: false,
+                    buttons: [
+                        {
+                            text: 'Annuler',
+                            handler: () => {
+                                this.exitAlert = undefined;
+                            }
+                        },
+                        {
+                            text: 'Confirmer',
+                            handler: () => {
+                                this.platform.exitApp();
+                            },
+                            cssClass: 'alertAlert'
+                        }
+                    ]
+                });
+
+            this.exitAlert.present();
         }
     }
 }
