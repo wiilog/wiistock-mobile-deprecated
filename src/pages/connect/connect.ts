@@ -6,7 +6,6 @@ import {ParamsPage} from '@pages/params/params'
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ToastService} from '@app/services/toast.service';
 import {Network} from '@ionic-native/network';
-import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ApiServices} from '@app/config/api-services';
 import {VersionCheckerService} from '@app/services/version-checker.service';
 import {Subscription} from "rxjs";
@@ -38,9 +37,8 @@ export class ConnectPage {
                        private sqliteProvider: SqliteProvider,
                        private versionChecker: VersionCheckerService,
                        private changeDetector: ChangeDetectorRef,
-                       private network: Network,,
-                       private storageService: StorageService,
-                       private barcodeScannerManager: BarcodeScannerManagerService) {
+                       private network: Network,
+                       private storageService: StorageService) {
         this.loading = true;
         this.appVersionInvalid = false;
     }
