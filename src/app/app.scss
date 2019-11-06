@@ -118,20 +118,20 @@ ion-item {
 
 
 // TODO Remove spinner
-.spinner {
+.spinner-container {
     position: fixed;
     text-align: center;
     width: 100%;
     height: 100%;
-}
 
-.main_spinner {
-    height: 100px !important;
-    width: 100px !important;
-    margin-top: 50%;
-    left: 35%;
-}
+    .main-spinner {
+        height: 100px !important;
+        width: 100px !important;
+        margin-top: 40%;
+    }
 
-.spinner_text {
-    margin-top: 90%;
+    .spinner-text {
+        font-weight: 300;
+        font-size: 14pt;
+    }
 }

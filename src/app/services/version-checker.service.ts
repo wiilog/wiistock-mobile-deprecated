@@ -5,8 +5,8 @@ import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {AppVersion} from '@ionic-native/app-version';
 import {Observable} from 'rxjs';
 import semver from 'semver';
-import {HttpClient} from "@angular/common/http";
-import {from} from "rxjs/observable/from";
+import {HttpClient} from '@angular/common/http';
+import {from} from 'rxjs/observable/from';
 
 
 @Injectable()
@@ -23,14 +23,8 @@ export class VersionCheckerService {
             .pipe(
                 filter((url) => url),
                 flatMap((nomadeVersionUrl) => this.httpClient.get(nomadeVersionUrl)),
-                flatMap((condition) => from(this.appVersion.getVersionNumber()).pipe(map((versionNumber) => {
-                    console.log('version number', versionNumber);
-                    return ([versionNumber, condition])
-                }))),
-                map((params) => {
-                    console.log(...params);
-                    return semver.satisfies(...params)
-                })
+                flatMap((condition) => from(this.appVersion.getVersionNumber()).pipe(map((versionNumber) => ([versionNumber, condition])))),
+                map((params) => semver.satisfies(...params))
             );
     }
 }

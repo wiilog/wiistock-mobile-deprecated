@@ -5,9 +5,9 @@
 </ion-header>
 
 <ion-content padding>
-    <div class="spinner" *ngIf="loading">
-        <ion-spinner class="main_spinner"></ion-spinner>
-        <p class="spinner_text">Chargement...</p>
+    <div class="spinner-container" *ngIf="loading">
+        <ion-spinner class="main-spinner"></ion-spinner>
+        <p class="spinner-text">Chargement...</p>
     </div>
 <!--    TODO AB change class-->
     <div class="version-not-valid-container" *ngIf="!loading && appVersionInvalid">
