@@ -47,7 +47,7 @@ export class ParamsPage {
     }
 
     public testURL(): void {
-        let url: string = `${this.URL}/api/${ApiServices.GET_PING}`;
+        let url: string = `${this.URL}${ApiServices.GET_PING}`;
         this.http.post<any>(url, {}).subscribe(
             _ => {
                 this.registerURL();

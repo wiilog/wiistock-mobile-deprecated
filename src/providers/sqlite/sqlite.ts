@@ -66,7 +66,7 @@ export class SqliteProvider {
                 db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []),
                 db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER, `destination` INTEGER, `type` TEXT)', []),
-                db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `type_quantite` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` TEXT, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `type_quantite` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT, `deleted` INTEGER DEFAULT 0)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa_by_ref_article` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `reference` TEXT, `label` TEXT, `location` TEXT, `quantity` INTEGER, `reference_article` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `collecte` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []),
@@ -715,7 +715,7 @@ export class SqliteProvider {
                 flatMap((db) => from(db.executeSql('SELECT * FROM `API_PARAMS` LIMIT 1', []))),
                 map((data) => (
                     (data && data.rows && data.rows.length > 0 && data.rows.item(0).url !== '')
-                        ? `${data.rows.item(0).url}/api`
+                        ? data.rows.item(0).url
                         : null
                 ))
             );
@@ -727,7 +727,7 @@ export class SqliteProvider {
 
     public findArticlesByPrepa(id_prepa: number): Observable<Array<any>> {
         return this.db$.pipe(
-            flatMap((db: SQLiteObject) => from(db.executeSql('SELECT * FROM `article_prepa` WHERE `id_prepa` = ' + id_prepa, []))),
+            flatMap((db: SQLiteObject) => from(db.executeSql(`SELECT * FROM \`article_prepa\` WHERE \`id_prepa\` = ${id_prepa} AND deleted <> 1`, []))),
             map((articles) => {
                 const list = [];
                 if (articles && articles.rows) {
@@ -791,6 +791,14 @@ export class SqliteProvider {
     public finishPrepa(id_prepa: number, emplacement): Observable<undefined> {
         return this.db$.pipe(
             flatMap((db) => from(db.executeSql('UPDATE `preparation` SET date_end = \'' + moment().format() + '\', emplacement = \'' + emplacement + '\' WHERE id = ' + id_prepa, []))),
+            map(() => undefined)
+        );
+    }
+
+    public resetFinishedPrepas(id_prepas: Array<number>): Observable<undefined> {
+        const idPrepasJoined = id_prepas.join(',');
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql(`UPDATE \`preparation\` SET date_end = NULL, emplacement = NULL WHERE id IN (${idPrepasJoined})`, []))),
             map(() => undefined)
         );
     }
@@ -962,22 +970,32 @@ export class SqliteProvider {
         return resp;
     }
 
-    public deleteMvts(mvts: Array<Mouvement>) {
-        let resp = new Promise<any>((resolve) => {
-            this.db$.subscribe((db) => {
-                mvts.forEach(mouvement => {
-                    db.executeSql('DELETE FROM `mouvement` WHERE id = ' + mouvement.id, []).then(() => {
-                        if (mvts.indexOf(mouvement) === mvts.length - 1) resolve();
-                    }).catch(err => console.log(err));
-                });
-            });
-        });
-        return resp;
+    public deleteMouvements(mouvements: Array<Mouvement>): Observable<any> {
+        return this.db$.pipe(
+            flatMap((db) => from(Promise.all(
+                mouvements.map(({id}) => db.executeSql(`DELETE FROM \`mouvement\` WHERE id = ${id}`, []))
+            )))
+        );
     }
 
     public deleteById(table, id): Observable<undefined> {
         return this.db$.pipe(
             flatMap((db) => from(db.executeSql(`DELETE FROM ${table} WHERE id = ${id}`, []))),
+            map(() => undefined)
+        );
+    }
+
+    public resetArticlePrepaById(ids: Array<number>): Observable<undefined> {
+        const idsJoined = ids.join(',');
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql(`UPDATE \`article_prepa\` SET deleted = 0, has_moved = 0 WHERE id IN (${idsJoined}) ; DELETE FROM \`article_prepa\` WHERE id IN (${idsJoined}) AND isSelectableByUser = 1`, []))),
+            map(() => undefined)
+        );
+    }
+
+    public deleteArticlePrepaById(id): Observable<undefined> {
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql(`UPDATE \`article_prepa\` SET deleted = 1 WHERE id = ${id}`, []))),
             map(() => undefined)
         );
     }

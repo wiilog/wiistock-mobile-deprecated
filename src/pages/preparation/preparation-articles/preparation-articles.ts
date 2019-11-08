@@ -380,7 +380,7 @@ export class PreparationArticlesPage {
                         ), selectedQuantityValid);
 
                         return (referenceArticle.quantite === quantityPicked)
-                            ? this.sqliteProvider.deleteById('article_prepa', referenceArticle.id)
+                            ? this.sqliteProvider.deleteArticlePrepaById(referenceArticle.id)
                             : this.sqliteProvider.updateArticlePrepaQuantity(referenceArticle.id, referenceArticle.quantite - selectedQuantityValid)
                     })
                 )

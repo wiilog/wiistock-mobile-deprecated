@@ -9,8 +9,9 @@ import {ToastService} from '@app/services/toast.service';
 import {Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
-import {ApiServices} from "@app/config/api-services";
 import {StorageService} from "@app/services/storage.service";
+import {LocalDataManagerService} from "@app/services/local-data-manager.service";
+import {flatMap} from "rxjs/operators";
 
 
 @IonicPage()
@@ -39,7 +40,8 @@ export class PreparationEmplacementPage {
                        public barcodeScannerManager: BarcodeScannerManagerService,
                        public http: HttpClient,
                        private toastService: ToastService,
-                       private storageService: StorageService) {
+                       private storageService: StorageService,
+                       private localDataManager: LocalDataManagerService) {
         this.isLoading = false;
     }
 
@@ -100,51 +102,44 @@ export class PreparationEmplacementPage {
                     });
                 });
                 promise.then(() => {
-                    this.storageService.addPrepa().subscribe(() => {
-                        this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label).subscribe(() => {
-                            this.sqliteProvider.getApiUrl(ApiServices.FINISH_PREPA).subscribe((finishPrepaUrl) => {
-                                this.storageService.getApiKey().subscribe((key) => {
-                                    this.sqliteProvider.findAll('`preparation`').subscribe(preparationsToSend => {
-                                        this.sqliteProvider.findAll('`mouvement`').subscribe((mvts) => {
-                                            let params = {
-                                                preparations: preparationsToSend.filter(p => p.date_end !== null),
-                                                mouvements: mvts.filter(m => m.id_livraison === null),
-                                                apiKey: key
-                                            };
-                                            this.http.post<any>(finishPrepaUrl, params).subscribe(resp => {
-                                                    if (resp.success) {
-                                                        this.sqliteProvider.deletePreparations(params.preparations).then(() => {
-                                                            this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
-                                                                this.isLoading = false;
-                                                                this.navCtrl.pop().then(() => {
-                                                                    this.validatePrepa();
-                                                                });
-                                                            });
-                                                        });
-                                                    }
-                                                    else {
-                                                        this.isLoading = false;
-                                                        this.toastService.showToast(resp.msg);
-                                                    }
-                                                },
-                                                () => {
-                                                    this.isLoading = false;
-                                                    this.navCtrl.pop().then(() => {
-                                                        this.validatePrepa();
-                                                    });
-                                                }
-                                            );
-                                        });
-                                    });
-                                });
+                    this.storageService.addPrepa()
+                        .pipe(
+                            flatMap(() => this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label)),
+                            flatMap(() => this.localDataManager.saveFinishedPrepas()),
+                        )
+                        .subscribe(
+                            ({success}) => {
+                                this.handlePreparationSuccess(success.length);
+                            },
+                            (error) => {
+                                this.handlePreparationError(error);
                             });
-                        })
-                    })
-                })
+                });
             }
             else {
                 this.toastService.showToast('Veuillez sélectionner ou scanner un emplacement.');
             }
         }
+    }
+
+    private handlePreparationSuccess(nbPreparationsSucceed: number, nbPreparationsFailed: number): void {
+        if (nbPreparationsSucceed > 0) {
+            this.toastService.showToast(
+                nbPreparationsFailed > 0
+                    ? `${nbPreparationsSucceed} préparation${nbPreparationsSucceed > 1 ? 's ont bien été enregistrées' : ' a bien été entegistrée'}`
+                    : (nbPreparationsSucceed === 1
+                        ? 'Votre préparation a bien été enregistrée'
+                        : `Votre préparation et ${nbPreparationsSucceed - 1} préparation${nbPreparationsSucceed - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
+            );
+        }
+        this.isLoading = false;
+        this.navCtrl.pop().then(() => {
+            this.validatePrepa();
+        });
+    }
+
+    private handlePreparationError(resp): void {
+        this.isLoading = false;
+        this.toastService.showToast((resp && resp.message) ? resp.message : 'Une erreur s\'est produite');
     }
 }

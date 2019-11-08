@@ -118,7 +118,7 @@ export class CollecteEmplacementPage {
                                             resp => {
                                                 if (resp.success) {
                                                     this.sqliteProvider.deleteCollectes(params.collectes).then(() => {
-                                                        this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
+                                                        this.sqliteProvider.deleteMouvements(params.mouvements).subscribe(() => {
                                                             this.isLoading = false;
                                                             this.navCtrl.pop().then(() => {
                                                                 this.validateCollecte();

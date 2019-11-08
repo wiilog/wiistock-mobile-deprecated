@@ -45,10 +45,16 @@ export class ConnectPage {
 
     public ionViewWillEnter(): void {
         this.loading = true;
-        this.appVersionSubscription = this.versionChecker.isAvailableVersion().subscribe((isValid) => {
-            this.appVersionInvalid = !isValid;
-            this.finishLoading();
-        });
+        this.appVersionSubscription = this.versionChecker.isAvailableVersion().subscribe(
+            (isValid) => {
+                this.appVersionInvalid = !isValid;
+                this.finishLoading();
+            },
+            () => {
+                // Si on passe ici aucun service ne fonctionne : soit api down soit api introuvable
+                this.appVersionInvalid = false;
+                this.finishLoading();
+            });
     }
 
     public ionViewWillLeave(): void {

@@ -121,7 +121,7 @@ export class LivraisonEmplacementPage {
                                             this.http.post<any>(finishLivraisonUrl, params).subscribe(resp => {
                                                     if (resp.success) {
                                                         this.sqliteProvider.deleteLivraisons(params.livraisons).then(() => {
-                                                            this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
+                                                            this.sqliteProvider.deleteMouvements(params.mouvements).subscribe(() => {
                                                                 this.navCtrl.pop().then(() => {
                                                                     this.validateLivraison();
                                                                 })
