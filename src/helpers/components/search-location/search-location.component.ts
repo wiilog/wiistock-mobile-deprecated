@@ -2,7 +2,6 @@ import {ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ViewC
 import {Emplacement} from '@app/entities/emplacement';
 import {IonicSelectableComponent} from 'ionic-selectable';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {ToastService} from "@app/services/toast.service";
 
 @Component({
     selector: 'wii-search-location',
@@ -26,8 +25,7 @@ export class SearchLocationComponent implements OnInit {
     private lastSearch: string;
 
     public constructor(private sqliteProvider: SqliteProvider,
-                       private changeDetector: ChangeDetectorRef,
-                       private toastService: ToastService) {
+                       private changeDetector: ChangeDetectorRef) {
         this.locationChange = new EventEmitter<Emplacement>();
         this.dbLocationsForList = [];
         this.dbLocations = [];

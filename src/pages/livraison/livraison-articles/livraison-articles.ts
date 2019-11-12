@@ -15,6 +15,7 @@ import {Subscription} from 'rxjs';
 import {ToastService} from '@app/services/toast.service';
 import {Network} from "@ionic-native/network";
 import {ApiServices} from "@app/config/api-services";
+import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()
@@ -41,7 +42,8 @@ export class LivraisonArticlesPage {
                        private sqliteProvider: SqliteProvider,
                        private network: Network,
                        private http: HttpClient,
-                       private barcodeScannerManager: BarcodeScannerManagerService) {
+                       private barcodeScannerManager: BarcodeScannerManagerService,
+                       private storageService: StorageService) {
         this.loadingStartLivraison = false;
     }
 
@@ -83,7 +85,7 @@ export class LivraisonArticlesPage {
             if (this.network.type !== 'none') {
                 this.loadingStartLivraison = true;
                 this.sqliteProvider.getApiUrl(ApiServices.BEGIN_LIVRAISON).subscribe((beginLivraisonUrl) => {
-                    this.sqliteProvider.getApiKey().then((key) => {
+                    this.storageService.getApiKey().subscribe((key) => {
                         this.http.post<any>(beginLivraisonUrl, {id: this.livraison.id, apiKey: key}).subscribe(resp => {
                             if (resp.success) {
                                 this.started = true;

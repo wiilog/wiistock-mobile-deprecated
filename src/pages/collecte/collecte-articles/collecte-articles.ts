@@ -13,6 +13,7 @@ import {flatMap} from 'rxjs/operators';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
+import {StorageService} from '@app/services/storage.service';
 import {Network} from "@ionic-native/network";
 import {ApiServices} from "@app/config/api-services";
 
@@ -42,6 +43,7 @@ export class CollecteArticlesPage {
                        public sqliteProvider: SqliteProvider,
                        public http: HttpClient,
                        public barcodeScannerManager: BarcodeScannerManagerService,
+                       private storageService: StorageService,
                        private network: Network) {
         this.loadingStartCollecte = false;
     }
@@ -232,7 +234,7 @@ export class CollecteArticlesPage {
             if (this.network.type !== 'none') {
                 this.loadingStartCollecte = true;
                 this.sqliteProvider.getApiUrl(ApiServices.BEGIN_COLLECTE).subscribe((url) => {
-                    this.sqliteProvider.getApiKey().then((key) => {
+                    this.storageService.getApiKey().subscribe((key) => {
                         this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
                             if (resp.success) {
                                 this.started = true;

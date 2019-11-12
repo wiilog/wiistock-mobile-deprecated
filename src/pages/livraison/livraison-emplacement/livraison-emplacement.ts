@@ -10,6 +10,7 @@ import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manage
 import {Subscription} from 'rxjs';
 import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
 import {ApiServices} from "@app/config/api-services";
+import {StorageService} from "@app/services/storage.service";
 
 
 @IonicPage()
@@ -36,7 +37,8 @@ export class LivraisonEmplacementPage {
                        public sqliteProvider: SqliteProvider,
                        public toastService: ToastService,
                        public barcodeScannerManager: BarcodeScannerManagerService,
-                       public http: HttpClient) {
+                       public http: HttpClient,
+                       private storageService: StorageService) {
         this.validateIsLoading = false;
     }
 
@@ -108,7 +110,7 @@ export class LivraisonEmplacementPage {
                     promise.then(() => {
                         this.sqliteProvider.finishLivraison(this.livraison.id, this.emplacement.label).subscribe(() => {
                             this.sqliteProvider.getApiUrl(ApiServices.FINISH_LIVRAISON).subscribe((finishLivraisonUrl) => {
-                                this.sqliteProvider.getApiKey().then((key) => {
+                                this.storageService.getApiKey().subscribe((key) => {
                                     this.sqliteProvider.findAll('`livraison`').subscribe(livraisonsToSend => {
                                         this.sqliteProvider.findAll('`mouvement`').subscribe((mvts) => {
                                             let params = {

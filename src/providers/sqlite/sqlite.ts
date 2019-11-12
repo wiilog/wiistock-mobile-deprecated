@@ -96,39 +96,6 @@ export class SqliteProvider {
             );
     }
 
-    public cleanDataBase(fromAfter = false): Observable<any> {
-        return this.isDBCreated$
-            .pipe(
-                flatMap(() => this.db$),
-                flatMap((db) => from(Promise.all([
-                    db.executeSql('DELETE FROM `article`;', []),
-                    db.executeSql('DELETE FROM `emplacement`;', []),
-                    db.executeSql('DELETE FROM `mouvement_traca`;', []),
-                    ...(
-                        !fromAfter
-                            ? [
-                                db.executeSql('DELETE FROM `preparation`;', []),
-                                db.executeSql('DELETE FROM `article_prepa`;', []),
-                                db.executeSql('DELETE FROM `article_prepa_by_ref_article`;', []),
-                                db.executeSql('DELETE FROM `mouvement`;', []),
-                                db.executeSql('DELETE FROM `collecte`;', []),
-                                db.executeSql('DELETE FROM `livraison`;', []),
-                                db.executeSql('DELETE FROM `article_livraison`;', []),
-                                db.executeSql('DELETE FROM `article_collecte`;', []),
-                                db.executeSql('DELETE FROM `article_inventaire`;', []),
-                                db.executeSql('DELETE FROM `saisie_inventaire`;', []),
-                                db.executeSql('DELETE FROM `anomalie_inventaire`;', []),
-                                db.executeSql('DELETE FROM `manutention`;', []),
-                            ]
-                            : []
-                    )
-                ]))),
-                flatMap(() => this.createTables()),
-                map(() => undefined),
-                take(1)
-            );
-    }
-
     private dropTables(): Observable<any> {
         return this.isDBCreated$
             .pipe(
@@ -153,31 +120,6 @@ export class SqliteProvider {
                 map(() => undefined),
                 take(1)
             );
-    }
-
-    public setOperateur(operateur) {
-        return this.storageService.setOperateur(operateur);
-    }
-
-    public getOperateur() {
-        return new Promise<any>((resolve, reject) => {
-            this.storageService.getOperateur().then((value) => {
-                resolve(value);
-            });
-        });
-    }
-
-    private initPrepsCount(data, refresh): Observable<undefined> {
-        let ret$: Observable<undefined>;
-        if (!refresh) {
-            this.storageService.setApiKey(data['apiKey']);
-            this.storageService.setInventoryManagerRight(data['isInventoryManager']);
-            ret$ = from(this.storageService.setPreps());
-        } else {
-            ret$ = of(undefined);
-        }
-
-        return ret$;
     }
 
     private importArticles(data): string {
@@ -560,10 +502,10 @@ export class SqliteProvider {
         );
     }
 
-    public importData(data, refresh = false): Observable<undefined> {
+    public importData(data: any): Observable<undefined> {
         const concatSqlImports = (imports: Array<string>, sql: string) => ([...imports, sql]);
         const createMapSqlImportObs = (imports: Array<string>) => map((sql: string) => concatSqlImports(imports, sql));
-        return this.initPrepsCount(data, refresh).pipe(
+        return of(undefined).pipe(
             map(() => concatSqlImports([], this.importEmplacements(data))),
             map((imports) => concatSqlImports(imports, this.importArticlesPrepaByRefArticle(data))),
             map((imports) => concatSqlImports(imports, this.importArticles(data))),
@@ -576,7 +518,7 @@ export class SqliteProvider {
             flatMap((imports) => this.importCollectes(data).pipe(createMapSqlImportObs(imports))),
             flatMap((imports) => this.importArticlesCollecte(data).pipe(createMapSqlImportObs(imports))),
             flatMap((imports) => (
-                from(this.getInventoryManagerRight()).pipe(
+                from(this.storageService.getInventoryManagerRight()).pipe(
                     flatMap((res) => (res
                         ? this.importAnomaliesInventaire(data).pipe(createMapSqlImportObs(imports))
                         : of(imports))),
@@ -669,36 +611,6 @@ export class SqliteProvider {
     public findAll(table: string): Observable<any> {
         return this.findBy(table)
     }
-
-    public async priseAreUnfinished() {
-        return this.storageService.prisesAreUnfinished();
-    }
-
-    public async clearStorage() {
-        return new Promise((resolve, reject) => {
-            resolve(this.storageService.clear());
-        });
-    }
-
-    public async setPriseValue(value, number) {
-        return new Promise((resolve, reject) => {
-            resolve(this.storageService.setPriseValue(value, number));
-        });
-    }
-
-    public async keyExists(key) {
-        return new Promise<any>((resolve, reject) => {
-            this.storageService.keyExists(key).then((value) => {
-                resolve(value);
-            });
-        });
-    }
-
-    public async setDeposeValue(value, number) {
-        return new Promise((resolve, reject) => {
-            resolve(this.storageService.setDeposeValue(value, number));
-        });
-    };
 
     public findByElementNull(table: string, element: string): Observable<Array<any>> {
         return this.db$.pipe(
@@ -811,38 +723,6 @@ export class SqliteProvider {
 
     public getApiUrl(service: string): Observable<any> {
         return this.getApiBaseUrl().pipe(map((baseUrl) => (baseUrl ? `${baseUrl}${service}` : null)));
-    }
-
-    public getApiKey() {
-        return new Promise<any>((resolve, reject) => {
-            this.storageService.getApiKey().then((value) => {
-                resolve(value);
-            });
-        });
-    }
-
-    public getInventoryManagerRight() {
-        return this.storageService.getInventoryManagerRight();
-    }
-
-    public finishPrepaStorage() {
-        return new Promise<any>((resolve) => {
-            this.storageService.addPrep().then(() => {
-                resolve();
-            });
-        })
-    }
-
-    public getFinishedPreps() {
-        return new Promise<any>((resolve) => {
-            this.storageService.getPreps().then((preps) => {
-                resolve(preps);
-            })
-        });
-    }
-
-    public initPreps() {
-        return this.storageService.setPreps();
     }
 
     public findArticlesByPrepa(id_prepa: number): Observable<Array<any>> {

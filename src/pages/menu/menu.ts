@@ -6,7 +6,6 @@ import {PreparationMenuPage} from '@pages/preparation/preparation-menu/preparati
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Preparation} from '@app/entities/preparation';
 import {LivraisonMenuPage} from '@pages/livraison/livraison-menu/livraison-menu';
-import {ParamsPage} from '@pages/params/params';
 import {ConnectPage} from '@pages/connect/connect';
 import {InventaireMenuPage} from '@pages/inventaire-menu/inventaire-menu';
 import {CollecteMenuPage} from '@pages/collecte/collecte-menu/collecte-menu';
@@ -14,6 +13,7 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
 import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
 import {HttpClient} from '@angular/common/http';
+import {StorageService} from "@app/services/storage.service";
 import {ApiServices} from "@app/config/api-services";
 
 
@@ -42,6 +42,7 @@ export class MenuPage {
                        public network: Network,
                        public toastService: ToastService,
                        public http: HttpClient,
+                       private storageService: StorageService,
                        private alertController: AlertController,
                        private platform: Platform) {
 
@@ -75,11 +76,11 @@ export class MenuPage {
     public refreshCounters(): void {
         this.sqliteProvider.findAll('`preparation`').subscribe((preparations: Array<Preparation>) => {
             this.nbPrep = preparations.filter(p => p.date_end === null).length;
-            this.sqliteProvider.getFinishedPreps().then((preps) => {
+            this.storageService.getFinishedPreps().subscribe((preps) => {
                 this.nbPrepT = preps;
                 this.sqliteProvider.count('`article_inventaire`', []).subscribe((nbArticlesInventaire: number) => {
                     this.nbArtInvent = nbArticlesInventaire;
-                    this.sqliteProvider.getOperateur().then(() => {
+                    this.storageService.getOperateur().subscribe(() => {
                         this.content.resize();
                     })
                 });
@@ -96,18 +97,14 @@ export class MenuPage {
         }
     }
 
-    // public goToParams(): void {
-    //     this.navCtrl.push(ParamsPage);
-    // }
-
     public synchronise(): void {
         if (this.network.type !== 'none') {
             this.loading = true;
             this.sqliteProvider.getApiUrl(ApiServices.GET_DATA).subscribe((getDataUrl) => {
-                this.sqliteProvider.getApiKey().then((key) => {
+                this.storageService.getApiKey().subscribe((key) => {
                     this.http.post<any>(getDataUrl, {apiKey: key}).subscribe((resp) => {
                         if (resp.success) {
-                            this.sqliteProvider.importData(resp.data, true).subscribe(() => {
+                            this.sqliteProvider.importData(resp.data).subscribe(() => {
                                 this.loading = false;
                                 this.refreshCounters();
                             })

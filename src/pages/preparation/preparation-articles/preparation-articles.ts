@@ -18,6 +18,7 @@ import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Network} from '@ionic-native/network';
 import {ApiServices} from "@app/config/api-services";
+import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()
@@ -46,7 +47,8 @@ export class PreparationArticlesPage {
                        public http: HttpClient,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService,
-                       private network: Network) {
+                       private network: Network,
+                       private storageService: StorageService) {
         this.loadingStartPreparation = false;
     }
 
@@ -206,7 +208,7 @@ export class PreparationArticlesPage {
                 if (this.network.type !== 'none') {
                     this.loadingStartPreparation = true;
                     this.sqliteProvider.getApiUrl(ApiServices.BEGIN_PREPA).subscribe((beginPrepaUrl) => {
-                        this.sqliteProvider.getApiKey().then((key) => {
+                        this.storageService.getApiKey().subscribe((key) => {
                             this.http.post<any>(beginPrepaUrl, {id: this.preparation.id, apiKey: key}).subscribe(resp => {
                                 if (resp.success) {
                                     this.started = true;
