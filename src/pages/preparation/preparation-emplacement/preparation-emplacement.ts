@@ -108,8 +108,8 @@ export class PreparationEmplacementPage {
                             flatMap(() => this.localDataManager.saveFinishedPrepas()),
                         )
                         .subscribe(
-                            ({success}) => {
-                                this.handlePreparationSuccess(success.length);
+                            ({success, errors}) => {
+                                this.handlePreparationSuccess(success.length, errors.length);
                             },
                             (error) => {
                                 this.handlePreparationError(error);
