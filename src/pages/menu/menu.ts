@@ -35,10 +35,6 @@ export class MenuPage {
 
     private unregisterBackButtonAction: Function;
 
-    private exitAlert: Alert;
-
-    private unregisterBackButtonAction: Function;
-
     public constructor(public app: App,
                        public navCtrl: NavController,
                        public navParams: NavParams,
