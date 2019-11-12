@@ -1,7 +1,8 @@
-import {ChangeDetectorRef, Component, EventEmitter, Input, NgZone, OnInit, Output, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {Emplacement} from '@app/entities/emplacement';
 import {IonicSelectableComponent} from 'ionic-selectable';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {ToastService} from "@app/services/toast.service";
 
 @Component({
     selector: 'wii-search-location',
@@ -24,16 +25,13 @@ export class SearchLocationComponent implements OnInit {
 
     private lastSearch: string;
 
-    private ngZone: NgZone;
-
     public constructor(private sqliteProvider: SqliteProvider,
-                       private changeDetector: ChangeDetectorRef) {
+                       private changeDetector: ChangeDetectorRef,
+                       private toastService: ToastService) {
         this.locationChange = new EventEmitter<Emplacement>();
         this.dbLocationsForList = [];
         this.dbLocations = [];
         this.lastSearch = '';
-
-        this.ngZone = new NgZone({enableLongStackTrace : false});
     }
 
     @Input('location')
@@ -42,9 +40,7 @@ export class SearchLocationComponent implements OnInit {
                 !this._location ||
                 !location ||
                 location.label !== this._location.label)) {
-            this.ngZone.run(() => {
-                this._location = location;
-            });
+            this._location = location;
         }
     }
 

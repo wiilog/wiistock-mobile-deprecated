@@ -1,4 +1,4 @@
-import {Injectable} from "@angular/core";
+import {Injectable, NgZone} from "@angular/core";
 import {Observable, Subject} from "rxjs";
 import {BarcodeScanner} from "@ionic-native/barcode-scanner";
 
@@ -12,16 +12,24 @@ export class BarcodeScannerManagerService {
 
     private _canGoBack = true;
 
+    private ngZone: NgZone;
+
     public constructor(private barcodeScanner: BarcodeScanner) {
         this._canGoBack = true;
         this._zebraScan$ = new Subject<string>();
 
+        this.ngZone = new NgZone({enableLongStackTrace : false});
+    }
+
+    public registerZebraBroadcastReceiver(): void {
         (<any>window).plugins.intentShim.registerBroadcastReceiver({
                 filterActions: ['io.ionic.starter.ACTION'],
                 filterCategories: ['android.intent.category.DEFAULT']
             },
             (intent) => {
-                this._zebraScan$.next(intent.extras[BarcodeScannerManagerService.ZEBRA_VALUE_ATTRIBUTE]);
+                this.ngZone.run(() => {
+                    this._zebraScan$.next(intent.extras[BarcodeScannerManagerService.ZEBRA_VALUE_ATTRIBUTE]);
+                });
             });
     }
 
