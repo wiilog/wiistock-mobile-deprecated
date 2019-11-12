@@ -63,23 +63,19 @@ export class LocalDataManagerService {
                             mouvements: mouvements.filter((mouvement) => mouvement.id_prepa === preparation.id)
                         }))
                 )),
-                flatMap((preparations) => (
-                    this.requestApi('post', ApiServices.FINISH_PREPA, {preparations})
-                        .pipe(
-                            flatMap((res) => {
-                                const {success, errors} = res;
-                                if (errors && errors.length > 0) {
-                                    this.presentAlertError(errors);
-                                }
-                                return Observable
-                                    .zip(
-                                        this.deleteSucceedPreparations(success, preparations),
-                                        this.resetFailedPreparations(errors, preparations)
-                                    )
-                                    .pipe(map(() => res));
-                            })
+                flatMap((preparations) => this.requestApi('post', ApiServices.FINISH_PREPA, {preparations})),
+                flatMap((res) => {
+                    const {success, errors} = res;
+                    if (errors && errors.length > 0) {
+                        this.presentAlertError(errors);
+                    }
+                    return Observable
+                        .zip(
+                            this.deleteSucceedPreparations(success),
+                            this.resetFailedPreparations(errors)
                         )
-                ))
+                        .pipe(map(() => res));
+                })
             );
     }
 
@@ -96,30 +92,22 @@ export class LocalDataManagerService {
             .present();
     }
 
-    private deleteSucceedPreparations(resSuccess, preparations): Observable<any> {
+    private deleteSucceedPreparations(resSuccess): Observable<any> {
         const idsToDelete = resSuccess.map(({id_prepa}) => id_prepa);
-        const prepasToDelete = preparations.filter(({id}) => idsToDelete.some((idToDelete) => (idToDelete === id)));
 
         return Observable.zip(
-            this.sqliteProvider.deletePreparations(prepasToDelete),
-            this.deleteMouvements(prepasToDelete)
+            this.sqliteProvider.deletePreparationsById(idsToDelete),
+            this.sqliteProvider.deleteMouvementsByPrepa(idsToDelete)
         );
     }
 
-    private resetFailedPreparations(resError, preparations): Observable<any> {
+    private resetFailedPreparations(resError): Observable<any> {
         const idsToDelete = resError.map(({id_prepa}) => id_prepa);
-        const prepasToReset = preparations.filter(({id}) => idsToDelete.some((idToDelete) => (idToDelete === id)));
-        const idsArticlePrepaToReset = prepasToReset.flatMap(({mouvements}) => mouvements.map(({id_article_prepa}) => id_article_prepa));
 
         return Observable.zip(
             this.sqliteProvider.resetFinishedPrepas(idsToDelete),
-            this.sqliteProvider.resetArticlePrepaById(idsArticlePrepaToReset),
-            this.deleteMouvements(prepasToReset)
+            this.sqliteProvider.resetArticlePrepaByPrepa(idsToDelete),
+            this.sqliteProvider.deleteMouvementsByPrepa(idsToDelete)
         );
-    }
-
-    private deleteMouvements(preparations): Observable<any> {
-        const mouvementsToDelete = preparations.flatMap(({mouvements}) => mouvements);
-        return this.sqliteProvider.deleteMouvements(mouvementsToDelete);
     }
 }

@@ -53,7 +53,21 @@ export class PreparationArticlesPage {
     }
 
     public ionViewWillEnter(): void {
-        this.initializeScreen();
+        this.preparation = this.navParams.get('preparation');
+        this.sqliteProvider.executeQuery(`SELECT * FROM \`article_prepa\``).subscribe((res) => {
+            const list=  [];
+            for(let i = 0; i < res.rows.length; i++) {
+                list.push(res.rows.item(i));
+            }
+            console.log(list);
+        });
+        this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
+            this.articlesNT = articles.filter((article) => (article.has_moved === 0));
+            this.articlesT = articles.filter((article) => (article.has_moved === 1));
+            if (this.articlesT.length > 0) {
+                this.started = true;
+            }
+        });
 
         this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
             this.testIfBarcodeEquals(barcode);
@@ -140,7 +154,7 @@ export class PreparationArticlesPage {
                     location: null,
                     type: 'prise-dépose',
                     is_ref: isSelectableByUser
-                        ? '0'
+                        ? false
                         : (selectedArticle as ArticlePrepa).is_ref,
                     id_article_prepa: isSelectableByUser
                         ? null
@@ -185,21 +199,6 @@ export class PreparationArticlesPage {
         this.loadingStartPreparation = false;
         this.toastService.showToast('Quantité bien prélevée.')
     }
-
-    private initializeScreen(): void {
-        const preparation = this.navParams.get('preparation');
-        if (preparation) {
-            this.preparation = preparation;
-            this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
-                this.articlesNT = articles.filter(article => article.has_moved === 0);
-                this.articlesT = articles.filter(article => article.has_moved === 1);
-                if (this.articlesT.length > 0) {
-                    this.started = true;
-                }
-            });
-        }
-    }
-
 
     private selectArticle(selectedArticle: ArticlePrepa | ArticlePrepaByRefArticle, selectedQuantity: number): void {
         if (selectedArticle && selectedQuantity) {
@@ -343,10 +342,10 @@ export class PreparationArticlesPage {
 
     private moveArticle(selectedArticle, selectedQuantity?: number): Observable<any> {
         const selectedQuantityValid = selectedQuantity ? selectedQuantity : (selectedArticle as ArticlePrepaByRefArticle).quantity;
-        let articleToInsert = {
+        let articleToInsert: ArticlePrepa = {
             label: (selectedArticle as ArticlePrepaByRefArticle).label,
             reference: (selectedArticle as ArticlePrepaByRefArticle).reference,
-            is_ref: 1,
+            is_ref: true,
             has_moved: 1,
             id_prepa: this.preparation.id,
             isSelectableByUser: true,
@@ -411,7 +410,7 @@ export class PreparationArticlesPage {
                 date_drop: null,
                 location: null,
                 type: 'prise-dépose',
-                is_ref: selectedArticle.isSelectableByUser ? '0' : selectedArticle.is_ref,
+                is_ref: selectedArticle.isSelectableByUser ? false : selectedArticle.is_ref,
                 selected_by_article: selectedArticle.isSelectableByUser ? 1 : 0,
                 id_article_prepa: insertId ? insertId : selectedArticle.id,
                 id_prepa: this.preparation.id,

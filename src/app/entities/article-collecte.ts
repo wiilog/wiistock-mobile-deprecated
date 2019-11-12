@@ -3,9 +3,9 @@ export interface ArticleCollecte {
     label: string;
     reference: string;
     quantite: number;
-    is_ref : string;
-    id_collecte : number;
-    has_moved : number;
-    emplacement : string;
+    is_ref: boolean;
+    id_collecte: number;
+    has_moved: number;
+    emplacement: string;
     barcode?: string;
 }

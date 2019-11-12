@@ -3,7 +3,7 @@ export interface SaisieInventaire {
     id_mission: number;
     date: string;
     reference: string;
-    is_ref: string;
+    is_ref: boolean;
     quantity: number;
     location: string;
 }
