@@ -33,6 +33,6 @@
 <ion-footer padding>
     <div class="d-flex">
         <ion-icon class="big-icon" name="settings" (click)="goToParams()"></ion-icon>
-        <div>version {{ currentVersion }}</div>
+        <div *ngIf="currentVersion">version {{ currentVersion }}</div>
     </div>
 </ion-footer>
