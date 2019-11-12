@@ -11,7 +11,7 @@
     </div>
 <!--    TODO AB change class-->
     <div class="version-not-valid-container" *ngIf="!loading && appVersionInvalid">
-        <a href="http://wiilog.fr/dl/wiistock/app-{{ appVersionNeeded }}.apk">
+        <a [href]="apkUrl">
             <button ion-button class="version-not-valid" block>Veuillez mettre à jour l'application</button>
         </a>
     </div>
@@ -33,6 +33,6 @@
 <ion-footer padding>
     <div class="d-flex">
         <ion-icon class="big-icon" name="settings" (click)="goToParams()"></ion-icon>
-        <div>version {{ currentVersion }}</div>
+        <div *ngIf="currentVersion">version {{ currentVersion }}</div>
     </div>
 </ion-footer>

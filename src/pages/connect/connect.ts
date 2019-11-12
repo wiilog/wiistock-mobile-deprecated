@@ -9,7 +9,8 @@ import {Network} from '@ionic-native/network';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ApiServices} from '@app/config/api-services';
 import {VersionCheckerService} from '@app/services/version-checker.service';
-import {Subscription} from "rxjs";
+import {Subscription} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 
 @IonicPage()
@@ -21,15 +22,19 @@ import {Subscription} from "rxjs";
 })
 export class ConnectPage {
 
+    private static readonly PATH_DOWNLOAD_APK: string = 'telecharger/nomade.apk';
+
     public form = {
         login: '',
         password: ''
     };
     public loading: boolean;
     public appVersionInvalid: boolean;
-    public appVersionNeeded: string;
     public currentVersion: string;
+    public apkUrl: string;
+
     private appVersionSubscription: Subscription;
+    private urlServerSubscription: Subscription;
 
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
@@ -40,17 +45,32 @@ export class ConnectPage {
                        private changeDetector: ChangeDetectorRef,
                        private network: Network,
                        private barcodeScannerManager: BarcodeScannerManagerService) {
-        this.loading = true;
+        this.loading = false;
         this.appVersionInvalid = false;
     }
 
     public ionViewWillEnter(): void {
         this.loading = true;
-        this.appVersionSubscription = this.versionChecker.isAvailableVersion().subscribe((resp) => {
-            this.appVersionInvalid = !resp.isValid;
-            this.appVersionNeeded = resp.versionNeeded.replace(/\./g, '-');
-            this.currentVersion = resp.currentVersion;
-            this.finishLoading();
+        this.urlServerSubscription = this.sqliteProvider.getServerUrl().subscribe((url) => {
+            if (url) {
+                this.appVersionSubscription = this.versionChecker.isAvailableVersion()
+                    .pipe(
+                        map((availableVersion) => ({
+                            ...availableVersion,
+                            apkUrl: `${url}/${ConnectPage.PATH_DOWNLOAD_APK}`
+                        }))
+                    )
+                    .subscribe(({isValid, currentVersion, apkUrl}) => {
+                        this.appVersionInvalid = !isValid;
+                        this.currentVersion = currentVersion;
+                        this.apkUrl = apkUrl;
+                        this.finishLoading();
+                    });
+            }
+            else {
+                this.loading = false;
+                this.goToParams();
+            }
         });
     }
 
@@ -58,6 +78,10 @@ export class ConnectPage {
         if (this.appVersionSubscription) {
             this.appVersionSubscription.unsubscribe();
             this.appVersionSubscription = undefined;
+        }
+        if (this.urlServerSubscription) {
+            this.urlServerSubscription.unsubscribe();
+            this.urlServerSubscription = undefined;
         }
     }
 
@@ -114,7 +138,6 @@ export class ConnectPage {
 
     public goToParams(): void {
         if (!this.loading) {
-            this.loading = false;
             this.navCtrl.push(ParamsPage);
         }
     }

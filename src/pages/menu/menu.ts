@@ -6,7 +6,6 @@ import {PreparationMenuPage} from '@pages/preparation/preparation-menu/preparati
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Preparation} from '@app/entities/preparation';
 import {LivraisonMenuPage} from '@pages/livraison/livraison-menu/livraison-menu';
-import {ParamsPage} from '@pages/params/params';
 import {ConnectPage} from '@pages/connect/connect';
 import {InventaireMenuPage} from '@pages/inventaire-menu/inventaire-menu';
 import {CollecteMenuPage} from '@pages/collecte/collecte-menu/collecte-menu';

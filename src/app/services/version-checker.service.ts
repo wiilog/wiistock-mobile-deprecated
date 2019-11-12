@@ -23,13 +23,13 @@ export class VersionCheckerService {
             .pipe(
                 filter((url) => url),
                 flatMap((nomadeVersionUrl) => this.httpClient.get(nomadeVersionUrl)),
-                flatMap((condition) => from(this.appVersion.getVersionNumber()).pipe(map((versionNumber) => {
-                    console.log('version number', versionNumber);
-                    return ([versionNumber, condition])
-                }))),
-                map((params) => {
-                    return {isValid: semver.satisfies(...params), currentVersion: params[0], versionNeeded: params[1]};
-                })
+                flatMap((condition) => from(
+                    this.appVersion.getVersionNumber()).pipe(map((versionNumber) => ([versionNumber, condition])))
+                ),
+                map(([versionNumber, condition]) => ({
+                    isValid: semver.satisfies(versionNumber, condition),
+                    currentVersion: versionNumber
+                }))
             );
     }
 }
