@@ -18,7 +18,7 @@ export class VersionCheckerService {
     }
 
 
-    public isAvailableVersion(): Observable<boolean> {
+    public isAvailableVersion(): Observable<any> {
         return this.sqliteProvider.getApiUrl(ApiServices.GET_NOMADE_VERSIONS)
             .pipe(
                 filter((url) => url),
@@ -28,8 +28,7 @@ export class VersionCheckerService {
                     return ([versionNumber, condition])
                 }))),
                 map((params) => {
-                    console.log(...params);
-                    return semver.satisfies(...params)
+                    return {isValid: semver.satisfies(...params), currentVersion: params[0], versionNeeded: params[1]};
                 })
             );
     }

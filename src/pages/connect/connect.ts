@@ -27,6 +27,8 @@ export class ConnectPage {
     };
     public loading: boolean;
     public appVersionInvalid: boolean;
+    public appVersionNeeded: string;
+    public currentVersion: string;
     private appVersionSubscription: Subscription;
 
     public constructor(public navCtrl: NavController,
@@ -44,8 +46,10 @@ export class ConnectPage {
 
     public ionViewWillEnter(): void {
         this.loading = true;
-        this.appVersionSubscription = this.versionChecker.isAvailableVersion().subscribe((isValid) => {
-            this.appVersionInvalid = !isValid;
+        this.appVersionSubscription = this.versionChecker.isAvailableVersion().subscribe((resp) => {
+            this.appVersionInvalid = !resp.isValid;
+            this.appVersionNeeded = resp.versionNeeded.replace(/\./g, '-');
+            this.currentVersion = resp.currentVersion;
             this.finishLoading();
         });
     }

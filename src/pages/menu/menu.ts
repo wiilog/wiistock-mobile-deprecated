@@ -96,9 +96,9 @@ export class MenuPage {
         }
     }
 
-    public goToParams(): void {
-        this.navCtrl.push(ParamsPage);
-    }
+    // public goToParams(): void {
+    //     this.navCtrl.push(ParamsPage);
+    // }
 
     public synchronise(): void {
         if (this.network.type !== 'none') {
