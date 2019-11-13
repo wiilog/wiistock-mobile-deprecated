@@ -6,7 +6,6 @@ import {PreparationMenuPage} from '@pages/preparation/preparation-menu/preparati
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Preparation} from '@app/entities/preparation';
 import {LivraisonMenuPage} from '@pages/livraison/livraison-menu/livraison-menu';
-import {ParamsPage} from '@pages/params/params';
 import {ConnectPage} from '@pages/connect/connect';
 import {InventaireMenuPage} from '@pages/inventaire-menu/inventaire-menu';
 import {CollecteMenuPage} from '@pages/collecte/collecte-menu/collecte-menu';
@@ -14,8 +13,8 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
 import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
 import {HttpClient} from '@angular/common/http';
-import {StorageService} from "@app/services/storage.service";
-import {ApiServices} from "@app/config/api-services";
+import {StorageService} from '@app/services/storage.service';
+import {ApiServices} from '@app/config/api-services';
 
 
 @Component({
@@ -43,9 +42,9 @@ export class MenuPage {
                        public network: Network,
                        public toastService: ToastService,
                        public http: HttpClient,
+                       private storageService: StorageService,
                        private alertController: AlertController,
-                       private platform: Platform,
-                       private storageService: StorageService) {
+                       private platform: Platform) {
 
         this.items = [
             {title: 'Traça', icon: 'cube', page: TracaMenuPage, img: null},
@@ -96,10 +95,6 @@ export class MenuPage {
         } else {
             this.navCtrl.push(item.page);
         }
-    }
-
-    public goToParams(): void {
-        this.navCtrl.push(ParamsPage);
     }
 
     public synchronise(): void {

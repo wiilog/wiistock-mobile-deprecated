@@ -9,8 +9,8 @@ import {Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
-import {ApiServices} from "@app/config/api-services";
-import {StorageService} from "@app/services/storage.service";
+import {ApiServices} from '@app/config/api-services';
+import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()
@@ -144,10 +144,10 @@ export class InventaireAnomaliePage {
 
             // envoi de l'anomalie modifiée à l'API
             this.sqliteProvider.getApiUrl(ApiServices.TREAT_ANOMALIES).subscribe((treatAnomaliesUrl) => {
-                this.storageService.getApiKey().subscribe(apiKey => {
+                this.storageService.getApiKey().subscribe((apiKey) => {
                     let params = {
                         anomalies: [this.anomaly],
-                        apiKey: apiKey
+                        apiKey
                     };
                     this.http.post<any>(treatAnomaliesUrl, params).subscribe(resp => {
                         if (resp.success) {

@@ -10,60 +10,64 @@
 </ion-header>
 
 <ion-content padding>
+    <div class="spinner" *ngIf="!isLoaded" >
+        <ion-spinner class="main_spinner"></ion-spinner>
+        <p class="spinner_text">Chargement...</p>
+    </div>
 
-    <button ion-button block color="danger" outline (click)="goToAnomalies()" *ngIf="isInventoryManager">Anomalies à traiter</button>
+    <ng-container *ngIf="isLoaded">
+        <button ion-button block color="danger" outline (click)="goToAnomalies()" *ngIf="isInventoryManager">Anomalies à traiter</button>
 
-    <ion-grid>
-        <ion-row>
-            <ion-title *ngIf="articles && articles.length === 0 && !location">Tous les inventaires sont à jour</ion-title>
-        </ion-row>
-        <ion-row>
-            <ion-col col-1 offset-11>
-                <ion-icon *ngIf="location" name="backspace" (click)="backToLocations()" class="ion-float-right"></ion-icon>
-            </ion-col>
-        </ion-row>
-    </ion-grid>
+        <ion-grid>
+            <ion-row>
+                <ion-title *ngIf="articles && articles.length === 0 && !location">Tous les inventaires sont à jour</ion-title>
+            </ion-row>
+            <ion-row>
+                <ion-col col-1 offset-11>
+                    <ion-icon *ngIf="location" name="backspace" (click)="backToLocations()" class="ion-float-right"></ion-icon>
+                </ion-col>
+            </ion-row>
+        </ion-grid>
 
 
-    <ion-title *ngIf="location"><ion-icon class="small-icon" name="pin"></ion-icon>   {{ location }}</ion-title>
-    <ion-title *ngIf="location && articles && articles.length !== 0">
-        <ion-icon class="big-icon" name="barcode" (click)="scanRef()"></ion-icon>
-        <br>
-        Flashez un article
-    </ion-title>
+        <ion-title *ngIf="location"><ion-icon class="small-icon" name="pin"></ion-icon>   {{ location }}</ion-title>
+        <ion-title *ngIf="location && articles && articles.length !== 0">
+            <ion-icon class="big-icon" name="barcode" (click)="scanRef()"></ion-icon>
+            <br>
+            Flashez un article
+        </ion-title>
 
-    <ion-title *ngIf="articles && articles.length !== 0 && !location"><ion-icon class="big-icon" name="barcode" (click)="scanLocation()"></ion-icon>
-        <br>
-        Flashez un emplacement
-    </ion-title>
+        <ion-title *ngIf="articles && articles.length !== 0 && !location"><ion-icon class="big-icon" name="barcode" (click)="scanLocation()"></ion-icon>
+            <br>
+            Flashez un emplacement
+        </ion-title>
 
-    <ion-badge *ngIf="articlesByLocation && articlesByLocation.length !== 0 && location">{{ articlesByLocation.length }}</ion-badge>
-    <ion-badge *ngIf="locations && locations.length !== 0 && !location">{{ locations.length }}</ion-badge>
+        <ion-badge *ngIf="articlesByLocation && articlesByLocation.length !== 0 && location">{{ articlesByLocation.length }}</ion-badge>
+        <ion-badge *ngIf="locations && locations.length !== 0 && !location">{{ locations.length }}</ion-badge>
 
-    <ion-spinner *ngIf="!isLoaded"></ion-spinner>
+        <ion-list>
+            <div *ngIf="location">
+                <ion-grid>
+                    <button class="list" ion-item *ngFor="let article of articlesByLocation" id="{{ article.id }}">
+                        <ion-row>
+                            <ion-col>{{ article.reference }}</ion-col>
+                        </ion-row>
+                    </button>
+                </ion-grid>
+            </div>
 
-    <ion-list *ngIf="isLoaded">
-        <div *ngIf="location">
-            <ion-grid>
-                <button class="list" ion-item *ngFor="let article of articlesByLocation" id="{{ article.id }}">
-                    <ion-row>
-                        <ion-col>{{ article.reference }}</ion-col>
-                    </ion-row>
-                </button>
-            </ion-grid>
-        </div>
+            <div *ngIf="!location">
+                <ion-grid>
+                    <button class="list" ion-item *ngFor="let location of locations">
+                        <ion-row>
+                            <ion-col>{{ location }}</ion-col>
+                        </ion-row>
+                    </button>
+                </ion-grid>
+            </div>
 
-        <div *ngIf="!location">
-            <ion-grid>
-                <button class="list" ion-item *ngFor="let location of locations">
-                    <ion-row>
-                        <ion-col>{{ location }}</ion-col>
-                    </ion-row>
-                </button>
-            </ion-grid>
-        </div>
-
-    </ion-list>
+        </ion-list>
+    </ng-container>
 
 </ion-content>
 <ion-footer padding *ngIf="isLoaded && !location">

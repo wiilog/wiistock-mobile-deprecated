@@ -9,8 +9,8 @@ import {ToastService} from '@app/services/toast.service';
 import {Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
-import {StorageService} from "@app/services/storage.service";
-import {ApiServices} from "@app/config/api-services";
+import {ApiServices} from '@app/config/api-services';
+import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()

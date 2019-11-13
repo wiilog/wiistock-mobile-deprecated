@@ -715,7 +715,7 @@ export class SqliteProvider {
         return apiUrlSet;
     }
 
-    public getApiBaseUrl(): Observable<any> {
+    public getServerUrl(): Observable<any> {
         return this.db$
             .pipe(
                 flatMap((db) => from(db.executeSql('SELECT * FROM `API_PARAMS` LIMIT 1', []))),
@@ -725,6 +725,10 @@ export class SqliteProvider {
                         : null
                 ))
             );
+    }
+
+    public getApiBaseUrl(): Observable<any> {
+        return this.getServerUrl().pipe(map((url) => (url ? `${url}/api` : null)));
     }
 
     public getApiUrl(service: string): Observable<any> {

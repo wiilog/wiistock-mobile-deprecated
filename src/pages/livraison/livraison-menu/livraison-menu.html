@@ -16,9 +16,12 @@
 </ion-header>
 
 <ion-content padding>
-  <ion-title *ngIf="livraisons && livraisons.length === 0">Aucune livraison<br>à traiter.</ion-title>
-  <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
-  <ion-list *ngIf="hasLoaded">
+    <div class="spinner" *ngIf="!hasLoaded" >
+        <ion-spinner class="main_spinner"></ion-spinner>
+        <p class="spinner_text">Chargement...</p>
+    </div>
+  <ion-title *ngIf="hasLoaded && livraisons && livraisons.length === 0">Aucune livraison<br>à traiter.</ion-title>
+  <ion-list *ngIf="hasLoaded && livraisons && livraisons.length > 0">
     <ion-grid>
       <button (click)="goToLivraison(livraison)" class="list" ion-item *ngFor="let livraison of livraisons">
         <ion-row>

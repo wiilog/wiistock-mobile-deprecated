@@ -10,8 +10,13 @@
 </ion-header>
 
 <ion-content padding>
-    <ion-title *ngIf="collectes && collectes.length === 0">Aucune collecte<br>à traiter.</ion-title>
-    <ion-spinner *ngIf="!hasLoaded"></ion-spinner>
+    <div class="spinner" *ngIf="!hasLoaded" >
+        <ion-spinner class="main_spinner"></ion-spinner>
+        <p class="spinner_text">Chargement...</p>
+    </div>
+
+    <ion-title *ngIf="hasLoaded && collectes && collectes.length === 0">Aucune collecte<br>à traiter.</ion-title>
+
     <ion-list *ngIf="hasLoaded">
         <ion-grid>
             <button (click)="goToArticles(collecte)" class="list" ion-item *ngFor="let collecte of collectes">

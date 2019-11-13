@@ -8,8 +8,9 @@ import {Observable} from "rxjs";
 @Injectable()
 export class ToastService {
 
+    private static readonly DEFAULT_DURATION: number = 2000;
+
     private static readonly TOAST_OPTIONS: ToastOptions = {
-        duration: 2000,
         position: 'center',
         cssClass: 'toast-error'
     };
@@ -17,11 +18,14 @@ export class ToastService {
     public constructor(private toastController: ToastController) {}
 
     /**
-     * @param {string} message
-     * @return {Observable<*>} Returns an observable which is resolved when the Toast transition has completed.
+     * @return Returns an observable which is resolved when the Toast transition has completed.
      */
-    public showToast(message: string): Observable<any> {
-        const toast = this.toastController.create({message, ...(ToastService.TOAST_OPTIONS)});
+    public showToast(message: string, duration: number = ToastService.DEFAULT_DURATION): Observable<any> {
+        const toast = this.toastController.create({
+            ...(ToastService.TOAST_OPTIONS),
+            message,
+            duration
+        });
         return from(toast.present()).pipe(take(1));
     }
 }

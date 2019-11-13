@@ -53,7 +53,7 @@ export class ManutentionValidatePage {
                 }],
                 buttons: [{
                     text: 'Valider',
-                    handler: commentaire => {
+                    handler: (commentaire) => {
                         this.commentaire = commentaire.commentaire;
                         this.notifyApi();
                     },

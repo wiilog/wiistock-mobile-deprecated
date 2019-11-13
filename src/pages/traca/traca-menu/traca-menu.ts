@@ -6,10 +6,10 @@ import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import {HttpClient} from '@angular/common/http';
 import {Network} from '@ionic-native/network';
-import {ToastService} from "@app/services/toast.service";
-import {MenuPage} from "@pages/menu/menu";
-import {ApiServices} from "@app/config/api-services";
-import {StorageService} from "@app/services/storage.service";
+import {ToastService} from '@app/services/toast.service';
+import {MenuPage} from '@pages/menu/menu';
+import {ApiServices} from '@app/config/api-services';
+import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()
@@ -64,7 +64,7 @@ export class TracaMenuPage {
     synchronise() {
         this.sqlProvider.getApiUrl(ApiServices.ADD_MOUVEMENT_TRACA).subscribe((addMouvementTracaUrl) => {
             this.sqlProvider.findAll('`mouvement_traca`').subscribe((data) => {
-                this.storageService.getApiKey().subscribe(result => {
+                this.storageService.getApiKey().subscribe((result) => {
                     let toInsert = {
                         mouvements: data,
                         apiKey: result
