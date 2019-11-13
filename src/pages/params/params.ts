@@ -27,7 +27,7 @@ export class ParamsPage {
     }
 
     public ionViewWillEnter(): void {
-        this.sqLiteProvider.getApiBaseUrl().subscribe((baseUrl) => {
+        this.sqLiteProvider.getServerUrl().subscribe((baseUrl) => {
             this.URL = !baseUrl ? '' : baseUrl;
             this.isLoading = false;
         });
@@ -47,7 +47,7 @@ export class ParamsPage {
     }
 
     public testURL(): void {
-        let url: string = `${this.URL}/api/${ApiServices.GET_PING}`;
+        let url: string = `${this.URL}/api${ApiServices.GET_PING}`;
         this.http.post<any>(url, {}).subscribe(
             _ => {
                 this.registerURL();

@@ -9,9 +9,9 @@ import {Network} from '@ionic-native/network';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ApiServices} from '@app/config/api-services';
 import {VersionCheckerService} from '@app/services/version-checker.service';
-import {Subscription} from "rxjs";
-import {flatMap} from 'rxjs/operators';
+import {flatMap, map} from 'rxjs/operators';
 import {StorageService} from '@app/services/storage.service';
+import {Subscription} from 'rxjs';
 
 
 @IonicPage()
@@ -23,16 +23,20 @@ import {StorageService} from '@app/services/storage.service';
 })
 export class ConnectPage {
 
+    private static readonly PATH_DOWNLOAD_APK: string = 'telecharger/nomade.apk';
+
     public form = {
         login: '',
         password: ''
     };
     public loading: boolean;
     public appVersionInvalid: boolean;
-    public appVersionNeeded: string;
     public currentVersion: string;
 
+    public apkUrl: string;
+
     private appVersionSubscription: Subscription;
+    private urlServerSubscription: Subscription;
 
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
@@ -50,22 +54,42 @@ export class ConnectPage {
 
     public ionViewWillEnter(): void {
         this.loading = true;
-        this.appVersionSubscription = this.versionChecker.isAvailableVersion().subscribe(
-            (resp) => {
-                this.appVersionInvalid = !resp.isValid;
-                this.appVersionNeeded = resp.versionNeeded.replace(/\./g, '-');
-                this.currentVersion = resp.currentVersion;
-                this.finishLoading();
-            },
-            () => {
-                this.toastService.showToast('Erreur : la liaison avec le serveur est impossible', 5000);
-            });
+        this.urlServerSubscription = this.sqliteProvider.getServerUrl().subscribe((url) => {
+            if (url) {
+                this.appVersionSubscription = this.versionChecker.isAvailableVersion()
+                    .pipe(
+                        map((availableVersion) => ({
+                            ...availableVersion,
+                            apkUrl: `${url}/${ConnectPage.PATH_DOWNLOAD_APK}`
+                        }))
+                    )
+                    .subscribe(
+                        ({isValid, currentVersion, apkUrl}) => {
+                            this.appVersionInvalid = !isValid;
+                            this.currentVersion = currentVersion;
+                            this.apkUrl = apkUrl;
+                            this.finishLoading();
+                        },
+                        () => {
+                            this.toastService.showToast('Erreur : la liaison avec le serveur est impossible', 5000);
+                        });
+            }
+            else {
+                this.toastService.showToast('Veuillez mettre à jour l\'url', 5000);
+                this.loading = false;
+                this.goToParams();
+            }
+        });
     }
 
     public ionViewWillLeave(): void {
         if (this.appVersionSubscription) {
             this.appVersionSubscription.unsubscribe();
             this.appVersionSubscription = undefined;
+        }
+        if (this.urlServerSubscription) {
+            this.urlServerSubscription.unsubscribe();
+            this.urlServerSubscription = undefined;
         }
     }
 

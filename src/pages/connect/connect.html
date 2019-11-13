@@ -11,7 +11,7 @@
     </div>
 <!--    TODO AB change class-->
     <div class="version-not-valid-container" *ngIf="!loading && appVersionInvalid">
-        <a href="http://wiilog.fr/dl/wiistock/app-{{ appVersionNeeded }}.apk">
+        <a [href]="apkUrl">
             <button ion-button class="version-not-valid" block>Veuillez mettre à jour l'application</button>
         </a>
     </div>
