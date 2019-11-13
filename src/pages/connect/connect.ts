@@ -64,8 +64,8 @@ export class ConnectPage {
                         }))
                     )
                     .subscribe(
-                        ({isValid, currentVersion, apkUrl}) => {
-                            this.appVersionInvalid = !isValid;
+                        ({available, currentVersion, apkUrl}) => {
+                            this.appVersionInvalid = !available;
                             this.currentVersion = currentVersion;
                             this.apkUrl = apkUrl;
                             this.finishLoading();

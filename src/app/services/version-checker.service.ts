@@ -18,16 +18,16 @@ export class VersionCheckerService {
     }
 
 
-    public isAvailableVersion(): Observable<{ isValid: boolean, currentVersion: string }> {
+    public isAvailableVersion(): Observable<{ available: boolean, currentVersion: string }> {
         return this.sqliteProvider.getApiUrl(ApiServices.GET_NOMADE_VERSIONS)
             .pipe(
-                filter((url) => url),
-                flatMap((nomadeVersionUrl) => this.httpClient.get(nomadeVersionUrl)),
-                flatMap((condition) => from(
-                    this.appVersion.getVersionNumber()).pipe(map((versionNumber) => ([versionNumber, condition])))
+                filter((url: string) => Boolean(url)),
+                flatMap((nomadeVersionUrl: string) => this.httpClient.get(nomadeVersionUrl)),
+                flatMap((condition: string) => from(
+                    this.appVersion.getVersionNumber()).pipe(map((versionNumber: string) => ([versionNumber, condition])))
                 ),
                 map(([versionNumber, condition]) => ({
-                    isValid: semver.satisfies(versionNumber, condition),
+                    available: semver.satisfies(versionNumber, condition) as boolean,
                     currentVersion: versionNumber
                 }))
             );

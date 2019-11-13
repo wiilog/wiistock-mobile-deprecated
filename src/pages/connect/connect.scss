@@ -14,4 +14,12 @@ page-connect {
         padding: 10px;
         margin-bottom: 3rem;
     }
+
+    ion-footer div {
+        align-items: flex-end;
+        .version-container {
+            font-size: 12px;
+            color: gray;
+        }
+    }
 }

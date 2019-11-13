@@ -13,6 +13,7 @@ import {of} from 'rxjs/observable/of';
 import {Platform} from 'ionic-angular';
 import {Collecte} from '@app/entities/collecte';
 import {Manutention} from '@app/entities/manutention';
+import 'rxjs/add/observable/zip';
 
 
 @Injectable()
@@ -674,8 +675,11 @@ export class SqliteProvider {
     }
 
 
-    public executeQuery(query: string): Observable<any> {
-        return this.db$.pipe(flatMap((db) => from(db.executeSql(query, []))));
+    public executeQuery(query: string, getRes: boolean = true, params: Array<any> = []): Observable<any> {
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql(query, params))),
+            map((res) => getRes ? res : undefined)
+        );
     }
 
 
@@ -890,13 +894,9 @@ export class SqliteProvider {
     public deletePreparationsById(preparations: Array<number>): Observable<any> {
         const joinedPreparations = preparations.join(',');
         return preparations.length
-            ? this.db$.pipe(
-                flatMap((db) => from(db.executeSql(
-                    `DELETE FROM \`preparation\` WHERE id IN (${joinedPreparations});` +
-                    `DELETE FROM \`article_prepa\` WHERE id_prepa IN (${joinedPreparations})`,
-                    []
-                ))),
-                map(() => undefined)
+            ? Observable.zip(
+                this.executeQuery(`DELETE FROM \`preparation\` WHERE id IN (${joinedPreparations});`, false),
+                this.executeQuery(`DELETE FROM \`article_prepa\` WHERE id_prepa IN (${joinedPreparations})`, false)
             )
             : of(undefined);
     }
@@ -987,50 +987,30 @@ export class SqliteProvider {
     public deleteMouvementsByPrepa(ids: Array<number>): Observable<any> {
         const idsJoined = ids.join(',');
         return ids.length > 0
-            ? this.db$.pipe(
-                flatMap((db) => from(db.executeSql(`DELETE FROM \`mouvement\` WHERE id_prepa = (${idsJoined})`, [])))
-            )
+            ? this.executeQuery(`DELETE FROM \`mouvement\` WHERE id_prepa = (${idsJoined})`, false)
             : of(undefined);
     }
 
     public deleteById(table, id): Observable<undefined> {
-        return this.db$.pipe(
-            flatMap((db) => from(db.executeSql(`DELETE FROM ${table} WHERE id = ${id}`, []))),
-            map(() => undefined)
-        );
+        return this.executeQuery(`DELETE FROM ${table} WHERE id = ${id}`, false);
     }
 
-    public resetArticlePrepaByPrepa(ids: Array<number>): Observable<undefined> {
+    public resetArticlePrepaByPrepa(ids: Array<number>): Observable<any> {
         const idsJoined = ids.join(',');
-        console.log('resetArticlePrepaByPrepa', idsJoined)
         return ids.length > 0
-            ? this.db$.pipe(
-                flatMap((db) => from(db.executeSql(
-                    `DELETE FROM \`article_prepa\` WHERE id_prepa IN (${idsJoined}) AND isSelectableByUser = 1;`+
-                    `UPDATE \`article_prepa\` SET deleted = 0, has_moved = 0 WHERE id_prepa IN (${idsJoined}) ;`
-                    ,
-                    []
-                ))),
-                map((res) => {
-                    console.log(res);
-                    return undefined;
-                })
+            ? Observable.zip(
+                this.executeQuery(`DELETE FROM \`article_prepa\` WHERE id_prepa IN (${idsJoined}) AND isSelectableByUser = 1;`, false),
+                this.executeQuery(`DELETE FROM \`article_prepa\` WHERE id_prepa IN (${idsJoined}) AND isSelectableByUser = 1;`, false)
             )
             : of(undefined);
     }
 
-    public deleteArticlePrepaById(id): Observable<undefined> {
-        return this.db$.pipe(
-            flatMap((db) => from(db.executeSql(`UPDATE \`article_prepa\` SET deleted = 1 WHERE id = ${id}`, []))),
-            map(() => undefined)
-        );
+    public deleteArticlePrepaById(id): Observable<any> {
+        return this.executeQuery(`UPDATE \`article_prepa\` SET deleted = 1 WHERE id = ${id}`, false);
     }
 
-    public cleanTable(table): Observable<undefined> {
-        return this.db$.pipe(
-            flatMap((db) => from(db.executeSql('DELETE FROM ' + table + ';', []))),
-            map(() => undefined)
-        );
+    public cleanTable(table): Observable<any> {
+        return this.executeQuery('DELETE FROM ' + table + ';', false);
     }
 
 }

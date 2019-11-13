@@ -1,12 +1,12 @@
-import {Injectable} from "@angular/core";
-import {SqliteProvider} from "@providers/sqlite/sqlite";
-import {ApiServices} from "@app/config/api-services";
-import {Observable} from "rxjs/Observable";
-import {flatMap, map} from "rxjs/operators";
-import {HttpClient} from "@angular/common/http";
-import {StorageService} from "@app/services/storage.service";
-import {AlertController} from "ionic-angular";
-import "rxjs/add/observable/zip";
+import {Injectable} from '@angular/core';
+import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {ApiServices} from '@app/config/api-services';
+import {Observable} from 'rxjs/Observable';
+import {flatMap, map} from 'rxjs/operators';
+import {HttpClient} from '@angular/common/http';
+import {StorageService} from '@app/services/storage.service';
+import {AlertController} from 'ionic-angular';
+import 'rxjs/add/observable/zip';
 
 
 @Injectable()
