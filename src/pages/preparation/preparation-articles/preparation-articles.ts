@@ -54,13 +54,6 @@ export class PreparationArticlesPage {
 
     public ionViewWillEnter(): void {
         this.preparation = this.navParams.get('preparation');
-        this.sqliteProvider.executeQuery(`SELECT * FROM \`article_prepa\``).subscribe((res) => {
-            const list=  [];
-            for(let i = 0; i < res.rows.length; i++) {
-                list.push(res.rows.item(i));
-            }
-            console.log(list);
-        });
         this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
             this.articlesNT = articles.filter((article) => (article.has_moved === 0));
             this.articlesT = articles.filter((article) => (article.has_moved === 1));

@@ -11,6 +11,8 @@ import {SearchLocationComponent} from '@helpers/components/search-location/searc
 import {StorageService} from '@app/services/storage.service';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {flatMap} from 'rxjs/operators';
+import {Network} from "@ionic-native/network";
+import {of} from "rxjs/observable/of";
 
 
 @IonicPage()
@@ -39,6 +41,7 @@ export class PreparationEmplacementPage {
                        public barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService,
                        private storageService: StorageService,
+                       private network: Network,
                        private localDataManager: LocalDataManagerService) {
         this.isLoading = false;
     }
@@ -103,11 +106,20 @@ export class PreparationEmplacementPage {
                     this.storageService.addPrepa()
                         .pipe(
                             flatMap(() => this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label)),
-                            flatMap(() => this.localDataManager.saveFinishedPrepas()),
+                            flatMap(() => (
+                                this.network.type !== 'none'
+                                    ? this.localDataManager.saveFinishedPrepas()
+                                    : of({offline: true})
+                            ))
                         )
                         .subscribe(
-                            ({success, errors}) => {
-                                this.handlePreparationSuccess(success.length, errors.length);
+                            ({offline, success, errors}) => {
+                                if (offline) {
+                                    this.toastService.showToast('Préparation sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé')
+                                }
+                                else {
+                                    this.handlePreparationSuccess(success.length, errors.length);
+                                }
                             },
                             (error) => {
                                 this.handlePreparationError(error);
