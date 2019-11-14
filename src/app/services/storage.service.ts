@@ -33,15 +33,8 @@ export class StorageService {
         return from(this.storage.get(StorageService.NB_PREPS));
     }
 
-    public setPriseValue(value: string, number: number) {
-        return this.storage.get(value).then(data => {
-            if (!data) {
-                this.storage.set(value, number);
-            }
-            else {
-                this.storage.set(value, data + number);
-            }
-        });
+    public setPriseValue(value: string, number: number): Observable<any> {
+        return from(this.storage.get(value)).pipe(flatMap((data) => from(this.storage.set(value, ((data ? data : 0) + number)))));
     }
 
     public keyExists(key) {
@@ -54,7 +47,7 @@ export class StorageService {
         );
     }
 
-    public setDeposeValue(value: string, number: number) {
+    public setDeposeValue(value: string, number: number): Observable<any> {
         return from(this.storage.get(value)).pipe(flatMap((data) => {
             const res = (data - number);
             return (
