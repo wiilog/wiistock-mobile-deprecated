@@ -529,21 +529,17 @@ export class SqliteProvider {
     }
 
     public findOneById(table: string, id: number): Observable<any> {
-        let query: string = "SELECT * FROM " + table + " WHERE id = ? ";
-
-        return this.db$.pipe(
-            flatMap((db) => from(db.executeSql(query, [id]))),
-            map((data) => (
-                (data.rows.length > 0)
-                    ? data.rows.item(0)
-                    : null
-            ))
-        );
+        return this.findOneBy(table, {id});
     }
 
-    public findOneBy(table: string, name: string, value: string): Observable<any> {
+    public findOneBy(table: string, conditions: {[name: string]: any}, glue: string = 'OR'): Observable<any> {
+        const condition = Object
+            .keys(conditions)
+            .map((name) => `${name} ${this.getComparatorForQuery(conditions[name])} ${this.getValueForQuery(conditions[name])}`)
+            .join(` ${glue} `);
+
         return this.db$.pipe(
-            flatMap((db) => from(db.executeSql(`SELECT * FROM ${table} WHERE ${name} LIKE '${value}'`, []))),
+            flatMap((db) => from(db.executeSql(`SELECT * FROM ${table} WHERE ${condition}`, []))),
             map((data) => (
                 (data.rows.length > 0)
                     ? data.rows.item(0)
@@ -850,7 +846,7 @@ export class SqliteProvider {
 
     public updateArticlePrepaQuantity(reference: string, idPrepa: number, is_ref: number, quantite: number): Observable<undefined> {
         return this.db$.pipe(
-            flatMap((db) => from(db.executeSql(`UPDATE \`article_prepa\` SET quantite = ${quantite} WHERE reference = '${reference}' AND id_prepa = ${idPrepa} AND is_ref = ${is_ref}`, []))),
+            flatMap((db) => from(db.executeSql(`UPDATE \`article_prepa\` SET quantite = ${quantite} WHERE reference LIKE '${reference}' AND id_prepa = ${idPrepa} AND is_ref LIKE '${is_ref}'`, []))),
             map(() => undefined)
         );
     }
@@ -998,6 +994,18 @@ export class SqliteProvider {
             flatMap((db) => from(db.executeSql('DELETE FROM ' + table + ';', []))),
             map(() => undefined)
         );
+    }
+
+    private getValueForQuery(value: any): string {
+        return (
+            (typeof value === 'string') ? `'${value}'` :
+            (typeof value === 'boolean') ? Number(value) :
+            value // number
+        );
+    }
+
+    private getComparatorForQuery(value: any): string {
+        return (typeof value === 'string') ? 'LIKE' : '=';
     }
 
 }

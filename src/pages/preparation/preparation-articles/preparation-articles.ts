@@ -293,7 +293,7 @@ export class PreparationArticlesPage {
                     ? of({selectedArticle})
                     : (
                         this.sqliteProvider
-                            .findOneBy('article_prepa', 'reference', selectedArticle.reference_article)
+                            .findOneBy('article_prepa', {reference: selectedArticle.reference_article, is_ref: 1, id_prepa: this.preparation.id}, 'AND')
                             .pipe(map((refArticle) => (
                                     refArticle
                                         ? ({selectedArticle, refArticle})
@@ -366,7 +366,13 @@ export class PreparationArticlesPage {
                     flatMap(() => this.updateLists()),
 
                     // delete articlePrepa if all quantity has been selected
-                    flatMap(() => this.sqliteProvider.findOneBy('article_prepa', 'reference', (selectedArticle as ArticlePrepaByRefArticle).reference_article)),
+                    flatMap(() => (
+                        this.sqliteProvider.findOneBy('article_prepa', {
+                            reference: (selectedArticle as ArticlePrepaByRefArticle).reference_article,
+                            is_ref: 1,
+                            id_prepa: this.preparation.id
+                        }, 'AND')
+                    )),
                     flatMap((referenceArticle) => {
 
                         // we get all quantity picked for this refArticle plus the current quantity which is selected
