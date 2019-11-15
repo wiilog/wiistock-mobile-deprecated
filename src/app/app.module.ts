@@ -45,9 +45,10 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
 import {HelpersModule} from '@helpers/helpers.module';
 import {EntityFactoryService} from '@app/services/entity-factory.service';
 import {AlertManagerService} from '@app/services/alert-manager.service';
-import {VersionCheckerService} from "@app/services/version-checker.service";
-import {AppVersion} from "@ionic-native/app-version";
-import {LocalDataManagerService} from "@app/services/local-data-manager.service";
+import {VersionCheckerService} from '@app/services/version-checker.service';
+import {AppVersion} from '@ionic-native/app-version';
+import {LocalDataManagerService} from '@app/services/local-data-manager.service';
+import {ApiService} from '@app/services/api.service';
 
 
 @NgModule({
@@ -139,7 +140,8 @@ import {LocalDataManagerService} from "@app/services/local-data-manager.service"
         AppVersion,
         ToastService,
         AlertManagerService,
-        EntityFactoryService
+        EntityFactoryService,
+        ApiService
     ]
 })
 export class AppModule {

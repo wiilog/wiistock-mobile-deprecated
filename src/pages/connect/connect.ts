@@ -7,7 +7,7 @@ import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ToastService} from '@app/services/toast.service';
 import {Network} from '@ionic-native/network';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
-import {ApiServices} from '@app/config/api-services';
+import {ApiService} from '@app/services/api.service';
 import {VersionCheckerService} from '@app/services/version-checker.service';
 import {flatMap, map} from 'rxjs/operators';
 import {StorageService} from '@app/services/storage.service';
@@ -97,7 +97,7 @@ export class ConnectPage {
         if (!this.loading) {
             if (this.network.type !== 'none') {
                 this.loading = true;
-                this.sqliteProvider.getApiUrl(ApiServices.CONNECT).subscribe((connectUrl) => {
+                this.sqliteProvider.getApiUrl(ApiService.CONNECT).subscribe((connectUrl) => {
                     this.usersApiProvider.setProvider(this.form, connectUrl).subscribe(
                         ({data, success}) => {
                             if (success) {

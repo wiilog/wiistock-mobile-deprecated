@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {App, NavController, Content, NavParams, Slides, Platform, AlertController, Alert} from 'ionic-angular';
+import {NavController, Content, Slides, Platform, AlertController, Alert} from 'ionic-angular';
 import {TracaMenuPage} from '@pages/traca/traca-menu/traca-menu'
 import {Page} from "ionic-angular/navigation/nav-util";
 import {PreparationMenuPage} from '@pages/preparation/preparation-menu/preparation-menu';
@@ -12,9 +12,9 @@ import {CollecteMenuPage} from '@pages/collecte/collecte-menu/collecte-menu';
 import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutention-menu';
 import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
-import {HttpClient} from '@angular/common/http';
 import {StorageService} from '@app/services/storage.service';
-import {ApiServices} from '@app/config/api-services';
+import {LocalDataManagerService} from '@app/services/local-data-manager.service';
+import {Subscription} from 'rxjs';
 
 
 @Component({
@@ -31,19 +31,21 @@ export class MenuPage {
     nbArtInvent: number;
     loading: boolean;
 
+    public messageLoading?: string;
+
     private exitAlert: Alert;
 
     private unregisterBackButtonAction: Function;
 
-    public constructor(public app: App,
-                       public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public sqliteProvider: SqliteProvider,
-                       public network: Network,
-                       public toastService: ToastService,
-                       public http: HttpClient,
+    private synchronisationSubscription: Subscription;
+
+    public constructor(private navCtrl: NavController,
+                       private sqliteProvider: SqliteProvider,
+                       private network: Network,
+                       private toastService: ToastService,
                        private storageService: StorageService,
                        private alertController: AlertController,
+                       private localDataManager: LocalDataManagerService,
                        private platform: Platform) {
 
         this.items = [
@@ -70,6 +72,10 @@ export class MenuPage {
         if (this.unregisterBackButtonAction) {
             this.unregisterBackButtonAction();
             this.unregisterBackButtonAction = undefined;
+        }
+        if (this.synchronisationSubscription) {
+            this.synchronisationSubscription.unsubscribe();
+            this.synchronisationSubscription = undefined;
         }
     }
 
@@ -100,22 +106,22 @@ export class MenuPage {
     public synchronise(): void {
         if (this.network.type !== 'none') {
             this.loading = true;
-            this.sqliteProvider.getApiUrl(ApiServices.GET_DATA).subscribe((getDataUrl) => {
-                this.storageService.getApiKey().subscribe((key) => {
-                    this.http.post<any>(getDataUrl, {apiKey: key}).subscribe((resp) => {
-                        if (resp.success) {
-                            this.sqliteProvider.importData(resp.data).subscribe(() => {
-                                this.loading = false;
-                                this.refreshCounters();
-                            })
-                        } else {
-                            this.loading = false;
-                            this.toastService.showToast(resp.msg);
-                            this.refreshCounters();
-                        }
-                    })
+
+            this.synchronisationSubscription = this.localDataManager.synchroniseData().subscribe(
+                ({finished, message}) => {
+                    this.messageLoading = message;
+                    this.loading = !finished;
+                    if (finished) {
+                        this.refreshCounters();
+                    }
+                },
+                ({message}) => {
+                    this.loading = false;
+                    if (message) {
+                        this.toastService.showToast(message);
+                    }
+                    this.refreshCounters();
                 });
-            });
         } else {
             this.loading = false;
             this.toastService.showToast('Veuillez vous connecter à internet afin de synchroniser vos données');

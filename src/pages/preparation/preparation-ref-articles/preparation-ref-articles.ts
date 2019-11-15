@@ -31,7 +31,6 @@ export class PreparationRefArticlesPage {
     public articlesToShow: Array<ArticlePrepaByRefArticle>;
 
     public searchArticle: string;
-    public readonly MAX_DISPLAY_ITEM: number = 30;
 
     private zebraBarcodeSubscription: Subscription;
 
@@ -102,6 +101,7 @@ export class PreparationRefArticlesPage {
     }
 
     public selectArticle(selectedArticle: ArticlePrepaByRefArticle): void {
+        console.log(selectedArticle);
         this.navCtrl.push(PreparationArticleTakePage, {
             article: selectedArticle,
             refArticle: this.refArticle,

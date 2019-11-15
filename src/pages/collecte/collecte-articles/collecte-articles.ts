@@ -15,7 +15,7 @@ import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manage
 import {Subscription} from 'rxjs';
 import {StorageService} from '@app/services/storage.service';
 import {Network} from "@ionic-native/network";
-import {ApiServices} from "@app/config/api-services";
+import {ApiService} from "@app/services/api.service";
 
 
 @IonicPage()
@@ -233,7 +233,7 @@ export class CollecteArticlesPage {
         if (!this.started) {
             if (this.network.type !== 'none') {
                 this.loadingStartCollecte = true;
-                this.sqliteProvider.getApiUrl(ApiServices.BEGIN_COLLECTE).subscribe((url) => {
+                this.sqliteProvider.getApiUrl(ApiService.BEGIN_COLLECTE).subscribe((url) => {
                     this.storageService.getApiKey().subscribe((key) => {
                         this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
                             if (resp.success) {

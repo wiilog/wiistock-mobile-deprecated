@@ -3,7 +3,7 @@ import {IonicPage, NavController, NavParams} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
 import {ToastService} from '@app/services/toast.service';
-import {ApiServices} from "@app/config/api-services";
+import {ApiService} from "@app/services/api.service";
 
 
 @IonicPage()
@@ -47,7 +47,7 @@ export class ParamsPage {
     }
 
     public testURL(): void {
-        let url: string = `${this.URL}/api${ApiServices.GET_PING}`;
+        let url: string = `${this.URL}/api${ApiService.GET_PING}`;
         this.http.post<any>(url, {}).subscribe(
             _ => {
                 this.registerURL();

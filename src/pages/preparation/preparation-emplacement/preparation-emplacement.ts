@@ -115,7 +115,8 @@ export class PreparationEmplacementPage {
                         .subscribe(
                             ({offline, success, errors}) => {
                                 if (offline) {
-                                    this.toastService.showToast('Préparation sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé')
+                                    this.toastService.showToast('Préparation sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+                                    this.closeScreen();
                                 }
                                 else {
                                     this.handlePreparationSuccess(success.length, errors.length);
@@ -142,6 +143,10 @@ export class PreparationEmplacementPage {
                         : `Votre préparation et ${nbPreparationsSucceed - 1} préparation${nbPreparationsSucceed - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
             );
         }
+        this.closeScreen();
+    }
+
+    private closeScreen(): void {
         this.isLoading = false;
         this.navCtrl.pop().then(() => {
             this.validatePrepa();

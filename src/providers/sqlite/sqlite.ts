@@ -812,7 +812,6 @@ export class SqliteProvider {
 
     public resetFinishedPrepas(id_prepas: Array<number>): Observable<undefined> {
         const idPrepasJoined = id_prepas.join(',');
-        console.log('resetFinishedPrepa', idPrepasJoined);
         return this.executeQuery(`UPDATE \`preparation\` SET date_end = NULL, emplacement = NULL WHERE id IN (${idPrepasJoined})`, false);
     }
 

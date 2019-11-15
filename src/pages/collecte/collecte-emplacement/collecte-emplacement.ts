@@ -9,7 +9,7 @@ import {ToastService} from '@app/services/toast.service';
 import {Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
-import {ApiServices} from '@app/config/api-services';
+import {ApiService} from '@app/services/api.service';
 import {StorageService} from '@app/services/storage.service';
 
 
@@ -105,7 +105,7 @@ export class CollecteEmplacementPage {
                 });
                 promise.then(() => {
                     this.sqliteProvider.finishCollecte(this.collecte.id, this.emplacement.label).subscribe(() => {
-                        this.sqliteProvider.getApiUrl(ApiServices.FINISH_COLLECTE).subscribe((finishCollecteUrl) => {
+                        this.sqliteProvider.getApiUrl(ApiService.FINISH_COLLECTE).subscribe((finishCollecteUrl) => {
                             this.storageService.getApiKey().subscribe((key) => {
                                 this.sqliteProvider.findAll('`collecte`').subscribe(collectesToSend => {
                                     this.sqliteProvider.findAll('`mouvement`').subscribe((mvts) => {

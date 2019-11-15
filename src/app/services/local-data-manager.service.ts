@@ -1,45 +1,47 @@
 import {Injectable} from '@angular/core';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {ApiServices} from '@app/config/api-services';
+import {ApiService} from '@app/services/api.service';
 import {Observable} from 'rxjs/Observable';
 import {flatMap, map} from 'rxjs/operators';
-import {HttpClient} from '@angular/common/http';
-import {StorageService} from '@app/services/storage.service';
 import {AlertController} from 'ionic-angular';
 import 'rxjs/add/observable/zip';
+import {ReplaySubject} from 'rxjs';
+import {of} from "rxjs/observable/of";
 
 
 @Injectable()
 export class LocalDataManagerService {
 
     public constructor(private sqliteProvider: SqliteProvider,
-                       private storageService: StorageService,
-                       private httpClient: HttpClient,
+                       private apiService: ApiService,
                        private alertController: AlertController) {
     }
 
+    public synchroniseData(): Observable<{finished: boolean, message?: string}> {
+        const synchronise$ = new ReplaySubject<{finished: boolean, message?: string}>(1);
 
-    public requestApi(method: string, service: string, params: {[x: string]: string}): Observable<any> {
-        return Observable.zip(
-            this.sqliteProvider.getApiUrl(service),
-            this.storageService.getApiKey()
-        )
+        synchronise$.next({finished: false, message: 'Synchronisation des données en cours...'});
+        this.apiService
+            .requestApi('post', ApiService.GET_DATA)
             .pipe(
-                flatMap(([url, apiKey]) => {
-                    const keyParam = (method === 'get' || method === 'delete')
-                        ? 'param'
-                        : 'body';
-                    const options = {
-                        [keyParam]: {
-                            apiKey,
-                            ...params
-                        },
-                        responseType: 'json' as 'json'
-                    };
-
-                    return this.httpClient.request(method, url, options);
+                flatMap(({data}) =>  this.sqliteProvider.importData(data)),
+                flatMap(() => {
+                    synchronise$.next({finished: false, message: 'Envoi des préparations non synchronisées'});
+                    return this.saveFinishedPrepas();
                 })
+            )
+            .subscribe(
+                () => {
+                    synchronise$.next({finished: true});
+                    synchronise$.complete();
+                },
+                (error) => {
+                    synchronise$.error(error);
+                    synchronise$.complete();
+                }
             );
+
+        return synchronise$;
     }
 
     /**
@@ -63,19 +65,24 @@ export class LocalDataManagerService {
                             mouvements: mouvements.filter((mouvement) => mouvement.id_prepa === preparation.id)
                         }))
                 )),
-                flatMap((preparations) => this.requestApi('post', ApiServices.FINISH_PREPA, {preparations})),
-                flatMap((res) => {
-                    const {success, errors} = res;
-                    if (errors && errors.length > 0) {
-                        this.presentAlertError(errors);
-                    }
-                    return Observable
-                        .zip(
-                            this.deleteSucceedPreparations(success),
-                            this.resetFailedPreparations(errors)
+                flatMap((preparations) => (
+                    (preparations && preparations.length > 0)
+                        ? this.apiService.requestApi('post', ApiService.FINISH_PREPA, {preparations}).pipe(
+                            flatMap((res) => {
+                                const {success, errors} = res;
+                                if (errors && errors.length > 0) {
+                                    this.presentAlertError(errors);
+                                }
+                                return Observable
+                                    .zip(
+                                        this.deleteSucceedPreparations(success),
+                                        this.resetFailedPreparations(errors)
+                                    )
+                                    .pipe(map(() => res));
+                            })
                         )
-                        .pipe(map(() => res));
-                })
+                        : of(false)
+                ))
             );
     }
 

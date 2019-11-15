@@ -14,7 +14,7 @@ import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manage
 import {Subscription} from 'rxjs';
 import {ToastService} from '@app/services/toast.service';
 import {Network} from "@ionic-native/network";
-import {ApiServices} from "@app/config/api-services";
+import {ApiService} from "@app/services/api.service";
 import {StorageService} from '@app/services/storage.service';
 
 
@@ -84,7 +84,7 @@ export class LivraisonArticlesPage {
         if (!this.started) {
             if (this.network.type !== 'none') {
                 this.loadingStartLivraison = true;
-                this.sqliteProvider.getApiUrl(ApiServices.BEGIN_LIVRAISON).subscribe((beginLivraisonUrl) => {
+                this.sqliteProvider.getApiUrl(ApiService.BEGIN_LIVRAISON).subscribe((beginLivraisonUrl) => {
                     this.storageService.getApiKey().subscribe((key) => {
                         this.http.post<any>(beginLivraisonUrl, {id: this.livraison.id, apiKey: key}).subscribe(resp => {
                             if (resp.success) {

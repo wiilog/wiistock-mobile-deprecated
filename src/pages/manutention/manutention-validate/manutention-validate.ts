@@ -6,7 +6,7 @@ import {HttpClient} from '@angular/common/http';
 import {MenuPage} from '@pages/menu/menu';
 import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
-import {ApiServices} from "@app/config/api-services";
+import {ApiService} from "@app/services/api.service";
 import {StorageService} from '@app/services/storage.service';
 
 
@@ -66,7 +66,7 @@ export class ManutentionValidatePage {
     }
 
     public notifyApi(): void {
-        this.sqliteProvider.getApiUrl(ApiServices.VALIDATE_MANUT).subscribe((validateManutUrl) => {
+        this.sqliteProvider.getApiUrl(ApiService.VALIDATE_MANUT).subscribe((validateManutUrl) => {
             this.storageService.getApiKey().subscribe((key) => {
                 let params = {
                     id: this.manutention.id,

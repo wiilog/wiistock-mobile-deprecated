@@ -8,7 +8,7 @@ import {HttpClient} from '@angular/common/http';
 import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
 import {MenuPage} from '@pages/menu/menu';
-import {ApiServices} from '@app/config/api-services';
+import {ApiService} from '@app/services/api.service';
 import {StorageService} from '@app/services/storage.service';
 
 
@@ -62,7 +62,7 @@ export class TracaMenuPage {
     }
 
     synchronise() {
-        this.sqlProvider.getApiUrl(ApiServices.ADD_MOUVEMENT_TRACA).subscribe((addMouvementTracaUrl) => {
+        this.sqlProvider.getApiUrl(ApiService.ADD_MOUVEMENT_TRACA).subscribe((addMouvementTracaUrl) => {
             this.sqlProvider.findAll('`mouvement_traca`').subscribe((data) => {
                 this.storageService.getApiKey().subscribe((result) => {
                     let toInsert = {

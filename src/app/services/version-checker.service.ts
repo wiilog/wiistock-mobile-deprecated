@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {ApiServices} from '@app/config/api-services';
+import {ApiService} from '@app/services/api.service';
 import {filter, flatMap, map} from 'rxjs/operators';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {AppVersion} from '@ionic-native/app-version';
@@ -19,7 +19,7 @@ export class VersionCheckerService {
 
 
     public isAvailableVersion(): Observable<{ available: boolean, currentVersion: string }> {
-        return this.sqliteProvider.getApiUrl(ApiServices.GET_NOMADE_VERSIONS)
+        return this.sqliteProvider.getApiUrl(ApiService.GET_NOMADE_VERSIONS)
             .pipe(
                 filter((url: string) => Boolean(url)),
                 flatMap((nomadeVersionUrl: string) => this.httpClient.get(nomadeVersionUrl)),
