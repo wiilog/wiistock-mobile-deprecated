@@ -848,9 +848,9 @@ export class SqliteProvider {
         );
     }
 
-    public updateArticlePrepaQuantity(id_article: number, quantite: number): Observable<undefined> {
+    public updateArticlePrepaQuantity(reference: string, idPrepa: number, is_ref: number, quantite: number): Observable<undefined> {
         return this.db$.pipe(
-            flatMap((db) => from(db.executeSql('UPDATE `article_prepa` SET quantite = ' + quantite + ' WHERE id = ' + id_article, []))),
+            flatMap((db) => from(db.executeSql(`UPDATE \`article_prepa\` SET quantite = ${quantite} WHERE reference = '${reference}' AND id_prepa = ${idPrepa} AND is_ref = ${is_ref}`, []))),
             map(() => undefined)
         );
     }
@@ -982,6 +982,13 @@ export class SqliteProvider {
     public deleteById(table, id): Observable<undefined> {
         return this.db$.pipe(
             flatMap((db) => from(db.executeSql(`DELETE FROM ${table} WHERE id = ${id}`, []))),
+            map(() => undefined)
+        );
+    }
+
+    public deleteArticlePrepa(reference: string, id_prepa: string, is_ref: number): Observable<undefined> {
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql(`DELETE FROM \`article_prepa\` WHERE reference = '${reference}' AND id_prepa = ${id_prepa} AND is_ref = ${is_ref}`, []))),
             map(() => undefined)
         );
     }
