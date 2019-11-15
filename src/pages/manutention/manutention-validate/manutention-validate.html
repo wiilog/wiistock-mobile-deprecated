@@ -19,8 +19,8 @@
         <ion-title *ngIf="manutention">Menu | <b class="important">Manutentions</b></ion-title>
         <p *ngIf="manutention" class="subtitle">Détails</p>
     </div>
-    <div class="spinner" *ngIf="!hasLoaded">
-        <ion-spinner class="main_spinner"></ion-spinner>
+    <div class="spinner-container" *ngIf="!hasLoaded">
+        <ion-spinner class="main-spinner"></ion-spinner>
     </div>
     <ion-scroll scrollY="true" *ngIf="hasLoaded" class="body">
         <br>

@@ -1,17 +1,14 @@
 <ion-header>
     <ion-toolbar>
-        <button ion-button menuToggle>
-            <ion-icon name="menu"></ion-icon>
-        </button>
         <ion-title>Follow GT</ion-title>
     </ion-toolbar>
 </ion-header>
 <!-- TODO pas possible mutualiser header ?? -->
 
 <ion-content>
-    <div class="spinner" *ngIf="loading" >
-        <ion-spinner class="main_spinner"></ion-spinner>
-        <p class="spinner_text">Synchronisation des données en cours...</p>
+    <div class="spinner-container" *ngIf="loading" >
+        <ion-spinner class="main-spinner"></ion-spinner>
+        <p class="spinner-text">Synchronisation des données en cours...</p>
     </div>
     <ng-container *ngIf="!loading">
         <ion-grid>

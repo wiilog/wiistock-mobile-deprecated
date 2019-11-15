@@ -1,6 +1,6 @@
 <ion-header>
     <ion-navbar *ngIf="hasLoaded">
-        <ion-buttons left></ion-buttons>
+        <ion-buttons left class="placeholder-buttons"></ion-buttons>
         <ion-title class="user-title">
             {{ user }}
         </ion-title>
@@ -19,12 +19,14 @@
         <ion-title *ngIf="manutentions && manutentions.length > 0">Menu | <b class="important">Manutentions</b></ion-title>
         <p *ngIf="manutentions && manutentions.length > 0" class="subtitle">{{ manutentions.length }} manutention{{ manutentions.length > 1 ? 's' : ''}}</p>
     </div>
-    <div class="spinner" *ngIf="!hasLoaded" >
-        <ion-spinner class="main_spinner"></ion-spinner>
+    <div class="spinner-container" *ngIf="!hasLoaded" >
+        <ion-spinner class="main-spinner"></ion-spinner>
     </div>
     <ion-scroll scrollY="true" *ngIf="hasLoaded" class="body">
         <br>
-        <img src="assets/icon/manut_icon.svg" height="50px" width="50px">
+        <div class="icon-manutention-container">
+            <img src="assets/icon/manut_icon.svg" height="50px" width="50px">
+        </div>
         <br>
         <ng-container *ngIf="manutentions && manutentions.length > 0 && hasLoaded">
             <ion-card *ngFor="let manutention of manutentions" (click)="goToManut(manutention)">

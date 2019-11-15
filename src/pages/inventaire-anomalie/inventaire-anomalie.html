@@ -5,21 +5,21 @@
 </ion-header>
 
 <ion-content padding>
-    <div class="spinner" *ngIf="!isLoaded" >
-        <ion-spinner class="main_spinner"></ion-spinner>
-        <p class="spinner_text">Chargement...</p>
+    <div class="spinner-container" *ngIf="!isLoaded" >
+        <ion-spinner class="main-spinner"></ion-spinner>
+        <p class="spinner-text">Chargement...</p>
     </div>
 
     <ng-container *ngIf="isLoaded">
         <ion-grid>
-        <ion-row>
-            <ion-title *ngIf="anomalies && anomalies.length === 0 && !location">Aucune anomalie à traiter</ion-title>
-        </ion-row>
-        <ion-row>
-            <ion-col col-1 offset-11>
-                <ion-icon *ngIf="location" name="backspace" (click)="backToLocations()" class="ion-float-right"></ion-icon>
-            </ion-col>
-        </ion-row>
+            <ion-row>
+                <ion-title *ngIf="anomalies && anomalies.length === 0 && !location">Aucune anomalie à traiter</ion-title>
+            </ion-row>
+            <ion-row>
+                <ion-col col-1 offset-11>
+                    <ion-icon *ngIf="location" name="backspace" (click)="backToLocations()" class="ion-float-right"></ion-icon>
+                </ion-col>
+            </ion-row>
         </ion-grid>
 
         <ion-title *ngIf="location"><ion-icon class="small-icon" name="pin"></ion-icon>   {{ location }}</ion-title>

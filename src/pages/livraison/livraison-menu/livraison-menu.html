@@ -5,31 +5,31 @@
   Ionic pages and navigation.
 -->
 <ion-header>
-  <ion-navbar>
-    <ion-buttons start>
-      <button ion-button icon-only (click)="goHome()">
-        <ion-icon name="home"></ion-icon>
-      </button>
-    </ion-buttons>
-    <ion-title>Livraisons</ion-title>
-  </ion-navbar>
+    <ion-navbar>
+        <ion-buttons start>
+            <button ion-button icon-only (click)="goHome()">
+                <ion-icon name="home"></ion-icon>
+            </button>
+        </ion-buttons>
+        <ion-title>Livraisons</ion-title>
+    </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-    <div class="spinner" *ngIf="!hasLoaded" >
-        <ion-spinner class="main_spinner"></ion-spinner>
-        <p class="spinner_text">Chargement...</p>
+    <div class="spinner-container" *ngIf="!hasLoaded">
+        <ion-spinner class="main-spinner"></ion-spinner>
+        <p class="spinner-text">Chargement...</p>
     </div>
-  <ion-title *ngIf="hasLoaded && livraisons && livraisons.length === 0">Aucune livraison<br>à traiter.</ion-title>
-  <ion-list *ngIf="hasLoaded && livraisons && livraisons.length > 0">
-    <ion-grid>
-      <button (click)="goToLivraison(livraison)" class="list" ion-item *ngFor="let livraison of livraisons">
-        <ion-row>
-          <ion-col col-6>{{ livraison.numero }}</ion-col>
-          <ion-col class="text-right" col-6>{{ livraison.emplacement }}</ion-col>
-        </ion-row>
-      </button>
-    </ion-grid>
-  </ion-list>
+    <ion-title *ngIf="hasLoaded && livraisons && livraisons.length === 0">Aucune livraison<br>à traiter.</ion-title>
+    <ion-list *ngIf="hasLoaded && livraisons && livraisons.length > 0">
+        <ion-grid>
+            <button (click)="goToLivraison(livraison)" class="list" ion-item *ngFor="let livraison of livraisons">
+                <ion-row>
+                    <ion-col col-6>{{ livraison.numero }}</ion-col>
+                    <ion-col class="text-right" col-6>{{ livraison.emplacement }}</ion-col>
+                </ion-row>
+            </button>
+        </ion-grid>
+    </ion-list>
 
 </ion-content>

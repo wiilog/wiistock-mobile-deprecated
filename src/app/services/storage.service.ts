@@ -20,6 +20,7 @@ export class StorageService {
         return from(this.storage.clear())
             .pipe(flatMap(() => from(Promise.all([
                 this.storage.set(StorageService.API_KEY, apiKey),
+                this.storage.set(StorageService.OPERATEUR, operator),
                 this.storage.set(StorageService.INVENTORY_MANAGER, (isInventoryManager ? 1 : 0)),
                 this.storage.set(StorageService.NB_PREPS, 0)
             ]))));

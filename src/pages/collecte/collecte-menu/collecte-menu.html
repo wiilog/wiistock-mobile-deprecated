@@ -10,9 +10,10 @@
 </ion-header>
 
 <ion-content padding>
-    <div class="spinner" *ngIf="!hasLoaded" >
-        <ion-spinner class="main_spinner"></ion-spinner>
-        <p class="spinner_text">Chargement...</p>
+
+    <div class="spinner-container" *ngIf="!hasLoaded" >
+        <ion-spinner class="main-spinner"></ion-spinner>
+        <p class="spinner-text">Chargement...</p>
     </div>
 
     <ion-title *ngIf="hasLoaded && collectes && collectes.length === 0">Aucune collecte<br>à traiter.</ion-title>
