@@ -762,7 +762,7 @@ export class SqliteProvider {
         );
     }
 
-    public findMvtByArticle(id_art: number): Observable<any> {
+    public findMvtByArticlePrepa(id_art: number): Observable<any> {
         return this.db$.pipe(
             flatMap((db: SQLiteObject) => from(db.executeSql('SELECT * FROM `mouvement` WHERE `id_article_prepa` = ' + id_art + ' LIMIT 1', []))),
             map((mvt) => (
@@ -883,7 +883,7 @@ export class SqliteProvider {
 
     public deletePreparationsById(preparations: Array<number>): Observable<any> {
         const joinedPreparations = preparations.join(',');
-        return preparations.length
+        return preparations.length > 0
             ? Observable.zip(
                 this.executeQuery(`DELETE FROM \`preparation\` WHERE id IN (${joinedPreparations});`, false),
                 this.executeQuery(`DELETE FROM \`article_prepa\` WHERE id_prepa IN (${joinedPreparations})`, false)
@@ -974,13 +974,6 @@ export class SqliteProvider {
         );
     }
 
-    public deleteMouvementsByPrepa(ids: Array<number>): Observable<any> {
-        const idsJoined = ids.join(',');
-        return ids.length > 0
-            ? this.executeQuery(`DELETE FROM \`mouvement\` WHERE id_prepa = (${idsJoined})`, false)
-            : of(undefined);
-    }
-
     public deleteById(table, id): Observable<undefined> {
         return this.executeQuery(`DELETE FROM ${table} WHERE id = ${id}`, false);
     }
@@ -1001,6 +994,33 @@ export class SqliteProvider {
 
     public cleanTable(table): Observable<any> {
         return this.executeQuery('DELETE FROM ' + table + ';', false);
+    }
+
+    public deleteLivraionsById(livraisons: Array<number>): Observable<any> {
+        const joinedLivraisons = livraisons.join(',');
+        return livraisons.length > 0
+            ? Observable.zip(
+                this.executeQuery(`DELETE FROM \`livraison\` WHERE id IN (${joinedLivraisons});`, false),
+                this.executeQuery(`DELETE FROM \`article_livraison\` WHERE id_livraison IN (${joinedLivraisons})`, false)
+            )
+            : of(undefined);
+    }
+
+    public deleteMouvementsBy(columnName: 'id_prepa'|'id_livraison'|'id_collecte', ids: Array<number>): Observable<any> {
+        const idsJoined = ids.join(',');
+        return ids.length > 0
+            ? this.executeQuery(`DELETE FROM \`mouvement\` WHERE ${columnName} IN (${idsJoined})`, false)
+            : of(undefined);
+    }
+
+    public deleteCollecteById(collected: Array<number>): Observable<any> {
+        const joinedCollecte = collected.join(',');
+        return collected.length > 0
+            ? Observable.zip(
+                this.executeQuery(`DELETE FROM \`collecte\` WHERE id IN (${joinedCollecte});`, false),
+                this.executeQuery(`DELETE FROM \`article_collecte\` WHERE id_collecte IN (${joinedCollecte})`, false)
+            )
+            : of(undefined);
     }
 
 }

@@ -12,8 +12,8 @@ import {SearchLocationComponent} from '@helpers/components/search-location/searc
 import {StorageService} from '@app/services/storage.service';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {flatMap} from 'rxjs/operators';
-import {Network} from "@ionic-native/network";
-import {of} from "rxjs/observable/of";
+import {Network} from '@ionic-native/network';
+import {of} from 'rxjs/observable/of';
 
 
 @IonicPage()
@@ -36,10 +36,10 @@ export class PreparationEmplacementPage {
     private zebraScannerSubscription: Subscription;
     private validatePrepa: () => void;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public sqliteProvider: SqliteProvider,
-                       public barcodeScannerManager: BarcodeScannerManagerService,
+    public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private sqliteProvider: SqliteProvider,
+                       private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService,
                        private storageService: StorageService,
                        private network: Network,
@@ -97,32 +97,31 @@ export class PreparationEmplacementPage {
                             flatMap((articles) => Observable.zip(
                                 ...articles.map((article) => (
                                     this.sqliteProvider
-                                        .findMvtByArticle(article.id)
+                                        .findMvtByArticlePrepa(article.id)
                                         .pipe(flatMap((mvt) => this.sqliteProvider.finishMvt(mvt.id, this.emplacement.label)))
                                 )
                             ))),
 
                             flatMap(() => this.storageService.addPrepa()),
                             flatMap(() => this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label)),
-                            flatMap(() => (
+                            flatMap((): any => (
                                 this.network.type !== 'none'
-                                    ? this.localDataManager.saveFinishedPrepas()
+                                    ? this.localDataManager.saveFinishedProcess('preparation')
                                     : of({offline: true})
                             ))
                         )
-
                         .subscribe(
-                            ({offline, success, errors}) => {
+                            ({offline, success}: any) => {
                                 if (offline) {
                                     this.toastService.showToast('Préparation sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
                                     this.closeScreen();
                                 }
                                 else {
-                                    this.handlePreparationSuccess(success.length, errors.length);
+                                    this.handlePreparationsSuccess(success.length);
                                 }
                             },
                             (error) => {
-                                this.handlePreparationError(error);
+                                this.handlePreparationsError(error);
                             });
             }
             else {
@@ -131,17 +130,20 @@ export class PreparationEmplacementPage {
         }
     }
 
-    private handlePreparationSuccess(nbPreparationsSucceed: number, nbPreparationsFailed: number): void {
+    private handlePreparationsSuccess(nbPreparationsSucceed: number): void {
         if (nbPreparationsSucceed > 0) {
             this.toastService.showToast(
-                nbPreparationsFailed > 0
-                    ? `${nbPreparationsSucceed} préparation${nbPreparationsSucceed > 1 ? 's ont bien été enregistrées' : ' a bien été entegistrée'}`
-                    : (nbPreparationsSucceed === 1
-                        ? 'Votre préparation a bien été enregistrée'
-                        : `Votre préparation et ${nbPreparationsSucceed - 1} préparation${nbPreparationsSucceed - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
+                (nbPreparationsSucceed === 1
+                    ? 'Votre préparation a bien été enregistrée'
+                    : `Votre préparation et ${nbPreparationsSucceed - 1} préparation${nbPreparationsSucceed - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
             );
         }
         this.closeScreen();
+    }
+
+    private handlePreparationsError(resp): void {
+        this.isLoading = false;
+        this.toastService.showToast((resp && resp.message) ? resp.message : 'Une erreur s\'est produite');
     }
 
     private closeScreen(): void {
@@ -149,10 +151,5 @@ export class PreparationEmplacementPage {
         this.navCtrl.pop().then(() => {
             this.validatePrepa();
         });
-    }
-
-    private handlePreparationError(resp): void {
-        this.isLoading = false;
-        this.toastService.showToast((resp && resp.message) ? resp.message : 'Une erreur s\'est produite');
     }
 }
