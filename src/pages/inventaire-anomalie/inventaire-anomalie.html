@@ -5,10 +5,8 @@
 </ion-header>
 
 <ion-content padding>
-    <div class="spinner" *ngIf="!isLoaded" >
-        <ion-spinner class="main_spinner"></ion-spinner>
-        <p class="spinner_text">Chargement...</p>
-    </div>
+
+    <wii-main-loader [loading]="isLoaded"></wii-main-loader>
 
     <ng-container *ngIf="isLoaded">
         <ion-grid>

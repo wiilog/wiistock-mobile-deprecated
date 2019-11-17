@@ -5,11 +5,8 @@
 </ion-header>
 
 <ion-content padding>
-    <div class="spinner-container" *ngIf="loading">
-        <ion-spinner class="main-spinner"></ion-spinner>
-        <p class="spinner-text">Chargement...</p>
-    </div>
-<!--    TODO AB change class-->
+    {{loading ? 'true' : 'false'}}
+    <wii-main-loader [loading]="loading"></wii-main-loader>
     <div class="version-not-valid-container" *ngIf="!loading && appVersionInvalid">
         <a [href]="apkUrl">
             <button ion-button class="version-not-valid" block>Veuillez mettre à jour l'application</button>

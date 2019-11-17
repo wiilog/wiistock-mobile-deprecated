@@ -25,12 +25,13 @@ export class ManutentionValidatePage {
     public user: string;
     public showCom: boolean = false;
 
-    public constructor(public alertController: AlertController,
-                       public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public sqliteProvider: SqliteProvider,
-                       public client: HttpClient,
+    public constructor(private alertController: AlertController,
+                       private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private sqliteProvider: SqliteProvider,
+                       private client: HttpClient,
                        private toastService: ToastService,
+                       private apiService: ApiService,
                        private network: Network,
                        private storageService: StorageService) {
     }
@@ -66,7 +67,7 @@ export class ManutentionValidatePage {
     }
 
     public notifyApi(): void {
-        this.sqliteProvider.getApiUrl(ApiService.VALIDATE_MANUT).subscribe((validateManutUrl) => {
+        this.apiService.getApiUrl(ApiService.VALIDATE_MANUT).subscribe((validateManutUrl) => {
             this.storageService.getApiKey().subscribe((key) => {
                 let params = {
                     id: this.manutention.id,

@@ -1,9 +1,10 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {flatMap} from 'rxjs/operators';
+import {flatMap, map} from 'rxjs/operators';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {StorageService} from '@app/services/storage.service';
 import {HttpClient} from '@angular/common/http';
+import {of} from "rxjs/observable/of";
 
 @Injectable()
 export class ApiService {
@@ -31,7 +32,7 @@ export class ApiService {
 
     public requestApi(method: string, service: string, params: {[x: string]: string} = {}, secured: boolean = true): Observable<any> {
         const storageDataArray$ = [
-            this.sqliteProvider.getApiUrl(service),
+            this.getApiUrl(service),
             ...(secured ? [this.storageService.getApiKey()] : [])
         ];
 
@@ -52,5 +53,16 @@ export class ApiService {
                     return this.httpClient.request(method, url, options);
                 })
             );
+    }
+
+
+    public getApiBaseUrl(newUrl?: string): Observable<any> {
+        return newUrl
+            ? of(`${newUrl}/api`)
+            : this.sqliteProvider.getServerUrl().pipe(map((url) => (url ? `${url}/api` : null)));
+    }
+
+    public getApiUrl(service: string, newUrl?: string): Observable<any> {
+        return this.getApiBaseUrl(newUrl).pipe(map((baseUrl) => (baseUrl ? `${baseUrl}${service}` : null)));
     }
 }

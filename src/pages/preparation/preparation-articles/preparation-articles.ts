@@ -41,13 +41,14 @@ export class PreparationArticlesPage {
 
     private zebraScannerSubscription: Subscription;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public sqliteProvider: SqliteProvider,
-                       public http: HttpClient,
+    public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private sqliteProvider: SqliteProvider,
+                       private http: HttpClient,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService,
                        private network: Network,
+                       private apiService: ApiService,
                        private storageService: StorageService) {
         this.loadingStartPreparation = false;
     }
@@ -199,7 +200,7 @@ export class PreparationArticlesPage {
             if (!this.started) {
                 if (this.network.type !== 'none') {
                     this.loadingStartPreparation = true;
-                    this.sqliteProvider.getApiUrl(ApiService.BEGIN_PREPA).subscribe((beginPrepaUrl) => {
+                    this.apiService.getApiUrl(ApiService.BEGIN_PREPA).subscribe((beginPrepaUrl) => {
                         this.storageService.getApiKey().subscribe((key) => {
                             this.http.post<any>(beginPrepaUrl, {id: this.preparation.id, apiKey: key}).subscribe(resp => {
                                 if (resp.success) {

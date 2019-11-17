@@ -9,8 +9,8 @@ import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
 import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
-import {ApiService} from "@app/services/api.service";
-import {StorageService} from "@app/services/storage.service";
+import {ApiService} from '@app/services/api.service';
+import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()
@@ -32,12 +32,13 @@ export class LivraisonEmplacementPage {
     private validateLivraison: () => void;
     private zebraScannerSubscription: Subscription;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public sqliteProvider: SqliteProvider,
-                       public toastService: ToastService,
-                       public barcodeScannerManager: BarcodeScannerManagerService,
-                       public http: HttpClient,
+    public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private sqliteProvider: SqliteProvider,
+                       private toastService: ToastService,
+                       private barcodeScannerManager: BarcodeScannerManagerService,
+                       private http: HttpClient,
+                       private apiService: ApiService,
                        private storageService: StorageService) {
         this.validateIsLoading = false;
     }
@@ -109,7 +110,7 @@ export class LivraisonEmplacementPage {
                     });
                     promise.then(() => {
                         this.sqliteProvider.finishLivraison(this.livraison.id, this.emplacement.label).subscribe(() => {
-                            this.sqliteProvider.getApiUrl(ApiService.FINISH_LIVRAISON).subscribe((finishLivraisonUrl) => {
+                            this.apiService.getApiUrl(ApiService.FINISH_LIVRAISON).subscribe((finishLivraisonUrl) => {
                                 this.storageService.getApiKey().subscribe((key) => {
                                     this.sqliteProvider.findAll('`livraison`').subscribe(livraisonsToSend => {
                                         this.sqliteProvider.findAll('`mouvement`').subscribe((mvts) => {

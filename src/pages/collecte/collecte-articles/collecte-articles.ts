@@ -43,6 +43,7 @@ export class CollecteArticlesPage {
                        public sqliteProvider: SqliteProvider,
                        public http: HttpClient,
                        public barcodeScannerManager: BarcodeScannerManagerService,
+                       private apiService: ApiService,
                        private storageService: StorageService,
                        private network: Network) {
         this.loadingStartCollecte = false;
@@ -233,7 +234,7 @@ export class CollecteArticlesPage {
         if (!this.started) {
             if (this.network.type !== 'none') {
                 this.loadingStartCollecte = true;
-                this.sqliteProvider.getApiUrl(ApiService.BEGIN_COLLECTE).subscribe((url) => {
+                this.apiService.getApiUrl(ApiService.BEGIN_COLLECTE).subscribe((url) => {
                     this.storageService.getApiKey().subscribe((key) => {
                         this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
                             if (resp.success) {

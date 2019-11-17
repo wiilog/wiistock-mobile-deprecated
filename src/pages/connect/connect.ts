@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
-import {IonicPage, NavController, NavParams} from 'ionic-angular';
+import {IonicPage, NavController} from 'ionic-angular';
 import {UsersApiProvider} from '@providers/users-api/users-api';
 import {MenuPage} from '@pages/menu/menu';
 import {ParamsPage} from '@pages/params/params'
@@ -38,14 +38,14 @@ export class ConnectPage {
     private appVersionSubscription: Subscription;
     private urlServerSubscription: Subscription;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public usersApiProvider: UsersApiProvider,
+    public constructor(private navCtrl: NavController,
+                       private usersApiProvider: UsersApiProvider,
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
                        private versionChecker: VersionCheckerService,
                        private changeDetector: ChangeDetectorRef,
                        private network: Network,
+                       private apiService: ApiService,
                        private storageService: StorageService,
                        private barcodeScannerManager: BarcodeScannerManagerService) {
         this.loading = true;
@@ -71,13 +71,13 @@ export class ConnectPage {
                             this.finishLoading();
                         },
                         () => {
-                            this.loading = false;
+                            this.finishLoading();
                             this.toastService.showToast('Erreur : la liaison avec le serveur est impossible', 5000);
                         });
             }
             else {
                 this.toastService.showToast('Veuillez mettre à jour l\'url', 5000);
-                this.loading = false;
+                this.finishLoading();
                 this.goToParams();
             }
         });
@@ -98,7 +98,7 @@ export class ConnectPage {
         if (!this.loading) {
             if (this.network.type !== 'none') {
                 this.loading = true;
-                this.sqliteProvider.getApiUrl(ApiService.CONNECT).subscribe((connectUrl) => {
+                this.apiService.getApiUrl(ApiService.CONNECT).subscribe((connectUrl) => {
                     this.usersApiProvider.setProvider(this.form, connectUrl).subscribe(
                         ({data, success}) => {
                             if (success) {

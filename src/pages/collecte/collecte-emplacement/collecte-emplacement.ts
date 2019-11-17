@@ -34,12 +34,13 @@ export class CollecteEmplacementPage {
 
     private zebraScannerSubscription: Subscription;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public sqliteProvider: SqliteProvider,
-                       public toastService: ToastService,
-                       public barcodeScannerManager: BarcodeScannerManagerService,
-                       public http: HttpClient,
+    public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private sqliteProvider: SqliteProvider,
+                       private toastService: ToastService,
+                       private barcodeScannerManager: BarcodeScannerManagerService,
+                       private http: HttpClient,
+                       private apiService: ApiService,
                        private storageService: StorageService) {
         this.isLoading = true;
     }
@@ -105,7 +106,7 @@ export class CollecteEmplacementPage {
                 });
                 promise.then(() => {
                     this.sqliteProvider.finishCollecte(this.collecte.id, this.emplacement.label).subscribe(() => {
-                        this.sqliteProvider.getApiUrl(ApiService.FINISH_COLLECTE).subscribe((finishCollecteUrl) => {
+                        this.apiService.getApiUrl(ApiService.FINISH_COLLECTE).subscribe((finishCollecteUrl) => {
                             this.storageService.getApiKey().subscribe((key) => {
                                 this.sqliteProvider.findAll('`collecte`').subscribe(collectesToSend => {
                                     this.sqliteProvider.findAll('`mouvement`').subscribe((mvts) => {

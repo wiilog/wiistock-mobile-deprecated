@@ -34,9 +34,10 @@ export class InventaireMenuPage {
 
     private zebraScannerSubscription: Subscription;
 
-    public constructor(public navCtrl: NavController,
-                       public sqliteProvider: SqliteProvider,
-                       public http: HttpClient,
+    public constructor(private navCtrl: NavController,
+                       private sqliteProvider: SqliteProvider,
+                       private http: HttpClient,
+                       private apiService: ApiService,
                        private modalController: ModalController,
                        private changeDetector: ChangeDetectorRef,
                        private barcodeScannerManager: BarcodeScannerManagerService,
@@ -75,7 +76,7 @@ export class InventaireMenuPage {
 
     addInventoryEntries() : Observable<any> {
         let ret$: ReplaySubject<any> = new ReplaySubject(1);
-        this.sqliteProvider.getApiUrl(ApiService.ADD_INVENTORY_ENTRIES).subscribe((addInventoryEntriesUrl) => {
+        this.apiService.getApiUrl(ApiService.ADD_INVENTORY_ENTRIES).subscribe((addInventoryEntriesUrl) => {
             this.sqliteProvider.findAll('`saisie_inventaire`').subscribe(data => {
                 if (data.length > 0) {
                     this.storageService.getApiKey().subscribe((apiKey) => {

@@ -19,9 +19,7 @@
         <ion-title *ngIf="manutention">Menu | <b class="important">Manutentions</b></ion-title>
         <p *ngIf="manutention" class="subtitle">Détails</p>
     </div>
-    <div class="spinner" *ngIf="!hasLoaded">
-        <ion-spinner class="main_spinner"></ion-spinner>
-    </div>
+    <wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
     <ion-scroll scrollY="true" *ngIf="hasLoaded" class="body">
         <br>
         <ion-item class="readonly" text-wrap>

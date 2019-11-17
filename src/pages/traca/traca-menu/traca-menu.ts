@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams} from 'ionic-angular';
+import {IonicPage, NavController} from 'ionic-angular';
 import {PriseEmplacementPageTraca} from '@pages/traca/prise-emplacement/prise-emplacement-traca';
 import {DeposeEmplacementPageTraca} from '@pages/traca/depose-emplacement/depose-emplacement-traca';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
@@ -22,17 +22,17 @@ export class TracaMenuPage {
     unfinishedMvts: boolean;
     type: string;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       private sqlProvider: SqliteProvider,
+    public constructor(private navCtrl: NavController,
+                       private sqliteProvider: SqliteProvider,
                        private http: HttpClient,
                        private toastService: ToastService,
-                       public network: Network,
+                       private apiService: ApiService,
+                       private network: Network,
                        private storageService: StorageService) {
     }
 
     public ionViewWillEnter(): void {
-        this.sqlProvider.findAll('`mouvement_traca`').subscribe((value) => {
+        this.sqliteProvider.findAll('`mouvement_traca`').subscribe((value) => {
             this.mvts = value;
         });
         this.storageService.prisesAreUnfinished().subscribe((value) => {
@@ -62,8 +62,8 @@ export class TracaMenuPage {
     }
 
     synchronise() {
-        this.sqlProvider.getApiUrl(ApiService.ADD_MOUVEMENT_TRACA).subscribe((addMouvementTracaUrl) => {
-            this.sqlProvider.findAll('`mouvement_traca`').subscribe((data) => {
+        this.apiService.getApiUrl(ApiService.ADD_MOUVEMENT_TRACA).subscribe((addMouvementTracaUrl) => {
+            this.sqliteProvider.findAll('`mouvement_traca`').subscribe((data) => {
                 this.storageService.getApiKey().subscribe((result) => {
                     let toInsert = {
                         mouvements: data,
@@ -71,7 +71,7 @@ export class TracaMenuPage {
                     };
                     this.http.post<any>(addMouvementTracaUrl, toInsert).subscribe((resp) => {
                         if (resp.success) {
-                            this.sqlProvider.cleanTable('`mouvement_traca`').subscribe(() => {
+                            this.sqliteProvider.cleanTable('`mouvement_traca`').subscribe(() => {
                                 this.toastService.showToast(resp.data.status);
                             });
                         }

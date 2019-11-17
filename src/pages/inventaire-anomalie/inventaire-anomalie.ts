@@ -31,12 +31,13 @@ export class InventaireAnomaliePage {
 
     private zebraScannerSubscription: Subscription;
 
-    public constructor(public sqliteProvider: SqliteProvider,
-                       public http: HttpClient,
+    public constructor(private sqliteProvider: SqliteProvider,
+                       private http: HttpClient,
                        private changeDetector: ChangeDetectorRef,
                        private modalController: ModalController,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService,
+                       private apiService: ApiService,
                        private storageService: StorageService) {}
 
 
@@ -67,7 +68,7 @@ export class InventaireAnomaliePage {
 
     synchronize() {
         this.isLoaded = false;
-        this.sqliteProvider.getApiUrl(ApiService.TREAT_ANOMALIES).subscribe((treatAnomaliesUrl) => {
+        this.apiService.getApiUrl(ApiService.TREAT_ANOMALIES).subscribe((treatAnomaliesUrl) => {
             this.storageService.getApiKey().subscribe((key) => {
                 this.sqliteProvider.findAll('`anomalie_inventaire`').subscribe(anomalies => {
                     this.anomalies = anomalies;
@@ -143,7 +144,7 @@ export class InventaireAnomaliePage {
             this.anomaly.treated = "1";
 
             // envoi de l'anomalie modifiée à l'API
-            this.sqliteProvider.getApiUrl(ApiService.TREAT_ANOMALIES).subscribe((treatAnomaliesUrl) => {
+            this.apiService.getApiUrl(ApiService.TREAT_ANOMALIES).subscribe((treatAnomaliesUrl) => {
                 this.storageService.getApiKey().subscribe((apiKey) => {
                     let params = {
                         anomalies: [this.anomaly],

@@ -732,14 +732,6 @@ export class SqliteProvider {
             );
     }
 
-    public getApiBaseUrl(): Observable<any> {
-        return this.getServerUrl().pipe(map((url) => (url ? `${url}/api` : null)));
-    }
-
-    public getApiUrl(service: string): Observable<any> {
-        return this.getApiBaseUrl().pipe(map((baseUrl) => (baseUrl ? `${baseUrl}${service}` : null)));
-    }
-
     public findArticlesByPrepa(id_prepa: number): Observable<Array<any>> {
         return this.db$.pipe(
             flatMap((db: SQLiteObject) => from(db.executeSql(`SELECT * FROM \`article_prepa\` WHERE \`id_prepa\` = ${id_prepa} AND deleted <> 1`, []))),

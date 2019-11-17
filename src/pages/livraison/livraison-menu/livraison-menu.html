@@ -16,10 +16,7 @@
 </ion-header>
 
 <ion-content padding>
-    <div class="spinner" *ngIf="!hasLoaded" >
-        <ion-spinner class="main_spinner"></ion-spinner>
-        <p class="spinner_text">Chargement...</p>
-    </div>
+    <wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
   <ion-title *ngIf="hasLoaded && livraisons && livraisons.length === 0">Aucune livraison<br>à traiter.</ion-title>
   <ion-list *ngIf="hasLoaded && livraisons && livraisons.length > 0">
     <ion-grid>

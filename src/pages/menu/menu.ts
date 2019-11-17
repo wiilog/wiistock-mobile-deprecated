@@ -48,6 +48,8 @@ export class MenuPage {
                        private localDataManager: LocalDataManagerService,
                        private platform: Platform) {
 
+        this.loading = true;
+
         this.items = [
             {title: 'Traça', icon: 'cube', page: TracaMenuPage, img: null},
             {title: 'Préparation', icon: 'cart', page: PreparationMenuPage, img: null},

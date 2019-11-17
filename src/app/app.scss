@@ -115,29 +115,3 @@ ion-item {
 .text-right {
     text-align: center;
 }
-
-
-// TODO Remove spinner
-.spinner-container {
-    position: fixed;
-    text-align: center;
-    background-color: white;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
-
-    .main-spinner {
-        height: 90px !important;
-        width: 90px !important;
-    }
-
-    .spinner-text {
-        font-weight: 300;
-        font-size: 14pt;
-    }
-}
