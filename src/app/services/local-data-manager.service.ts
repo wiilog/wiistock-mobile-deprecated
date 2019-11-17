@@ -7,6 +7,7 @@ import {AlertController} from 'ionic-angular';
 import 'rxjs/add/observable/zip';
 import {ReplaySubject} from 'rxjs';
 import {of} from "rxjs/observable/of";
+import {AlertManagerService} from "@app/services/alert-manager.service";
 
 
 @Injectable()
@@ -14,6 +15,7 @@ export class LocalDataManagerService {
 
     public constructor(private sqliteProvider: SqliteProvider,
                        private apiService: ApiService,
+                       private alertManager: AlertManagerService,
                        private alertController: AlertController) {
     }
 
@@ -90,13 +92,17 @@ export class LocalDataManagerService {
         this.alertController
             .create({
                 title: `Des préparations n'ont pas pu être synchronisées`,
+                cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
                 message: errors.map(({numero_prepa, message}) => `${numero_prepa} : ${message}`).join(`\n`),
                 buttons: [{
                     text: 'Valider',
                     cssClass: 'alertAlert'
                 }]
             })
-            .present();
+            .present()
+            .then(() => {
+                this.alertManager.breakMessageLines();
+            });
     }
 
     private deleteSucceedPreparations(resSuccess): Observable<any> {

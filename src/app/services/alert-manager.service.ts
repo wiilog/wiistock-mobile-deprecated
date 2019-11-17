@@ -15,4 +15,14 @@ export class AlertManagerService {
             input.setAttribute('autocapitalize', 'off');
         });
     }
+
+    /**
+     * Replace "\n" by <br/> in message
+     */
+    public breakMessageLines(): void {
+        const inputs = document.querySelectorAll(`ion-alert.${AlertManagerService.CSS_CLASS_MANAGED_ALERT} .alert-message`);
+        inputs.forEach((element: Element) => {
+            element.innerHTML = element.innerHTML.replace(/\n/g, "<br/>");
+        });
+    }
 }

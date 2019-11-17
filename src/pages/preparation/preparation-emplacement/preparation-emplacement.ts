@@ -5,7 +5,8 @@ import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Preparation} from '@app/entities/preparation';
 import {ToastService} from '@app/services/toast.service';
-import {Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
+import 'rxjs/add/observable/zip';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
 import {StorageService} from '@app/services/storage.service';
@@ -90,21 +91,18 @@ export class PreparationEmplacementPage {
         if (!this.isLoading) {
             if (this.emplacement.label !== '') {
                 this.isLoading = true;
-                let instance = this;
-                let promise = new Promise<any>((resolve) => {
-                    this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
-                        articles.forEach(function (article) {
-                            instance.sqliteProvider.findMvtByArticle(article.id).subscribe((mvt) => {
-                                instance.sqliteProvider.finishMvt(mvt.id, instance.emplacement.label).subscribe(() => {
-                                    if (articles.indexOf(article) === articles.length - 1) resolve();
-                                });
-                            });
-                        });
-                    });
-                });
-                promise.then(() => {
-                    this.storageService.addPrepa()
+                    this.sqliteProvider
+                        .findArticlesByPrepa(this.preparation.id)
                         .pipe(
+                            flatMap((articles) => Observable.zip(
+                                ...articles.map((article) => (
+                                    this.sqliteProvider
+                                        .findMvtByArticle(article.id)
+                                        .pipe(flatMap((mvt) => this.sqliteProvider.finishMvt(mvt.id, this.emplacement.label)))
+                                )
+                            ))),
+
+                            flatMap(() => this.storageService.addPrepa()),
                             flatMap(() => this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label)),
                             flatMap(() => (
                                 this.network.type !== 'none'
@@ -112,6 +110,7 @@ export class PreparationEmplacementPage {
                                     : of({offline: true})
                             ))
                         )
+
                         .subscribe(
                             ({offline, success, errors}) => {
                                 if (offline) {
@@ -125,7 +124,6 @@ export class PreparationEmplacementPage {
                             (error) => {
                                 this.handlePreparationError(error);
                             });
-                });
             }
             else {
                 this.toastService.showToast('Veuillez sélectionner ou scanner un emplacement.');

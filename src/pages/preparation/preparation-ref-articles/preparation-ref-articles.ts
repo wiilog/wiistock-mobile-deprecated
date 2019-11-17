@@ -101,7 +101,6 @@ export class PreparationRefArticlesPage {
     }
 
     public selectArticle(selectedArticle: ArticlePrepaByRefArticle): void {
-        console.log(selectedArticle);
         this.navCtrl.push(PreparationArticleTakePage, {
             article: selectedArticle,
             refArticle: this.refArticle,
