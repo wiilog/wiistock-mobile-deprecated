@@ -5,7 +5,6 @@
 </ion-header>
 
 <ion-content padding>
-    {{loading ? 'true' : 'false'}}
     <wii-main-loader [loading]="loading"></wii-main-loader>
     <div class="version-not-valid-container" *ngIf="!loading && appVersionInvalid">
         <a [href]="apkUrl">
