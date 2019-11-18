@@ -13,6 +13,8 @@ import {of} from 'rxjs/observable/of';
 import {Platform} from 'ionic-angular';
 import {Collecte} from '@app/entities/collecte';
 import {Manutention} from '@app/entities/manutention';
+import {Article} from '@app/entities/article';
+import {Emplacement} from '@app/entities/emplacement';
 import 'rxjs/add/observable/zip';
 
 
@@ -538,21 +540,17 @@ export class SqliteProvider {
     }
 
     public findOneById(table: string, id: number): Observable<any> {
-        let query: string = "SELECT * FROM " + table + " WHERE id = ? ";
-
-        return this.db$.pipe(
-            flatMap((db) => from(db.executeSql(query, [id]))),
-            map((data) => (
-                (data.rows.length > 0)
-                    ? data.rows.item(0)
-                    : null
-            ))
-        );
+        return this.findOneBy(table, {id});
     }
 
-    public findOneBy(table: string, name: string, value: string): Observable<any> {
+    public findOneBy(table: string, conditions: {[name: string]: any}, glue: string = 'OR'): Observable<any> {
+        const condition = Object
+            .keys(conditions)
+            .map((name) => `${name} ${this.getComparatorForQuery(conditions[name])} ${this.getValueForQuery(conditions[name])}`)
+            .join(` ${glue} `);
+
         return this.db$.pipe(
-            flatMap((db) => from(db.executeSql(`SELECT * FROM ${table} WHERE ${name} LIKE '${value}'`, []))),
+            flatMap((db) => from(db.executeSql(`SELECT * FROM ${table} WHERE ${condition}`, []))),
             map((data) => (
                 (data.rows.length > 0)
                     ? data.rows.item(0)
@@ -856,9 +854,9 @@ export class SqliteProvider {
         );
     }
 
-    public updateArticlePrepaQuantity(id_article: number, quantite: number): Observable<undefined> {
+    public updateArticlePrepaQuantity(reference: string, idPrepa: number, is_ref: number, quantite: number): Observable<undefined> {
         return this.db$.pipe(
-            flatMap((db) => from(db.executeSql('UPDATE `article_prepa` SET quantite = ' + quantite + ' WHERE id = ' + id_article, []))),
+            flatMap((db) => from(db.executeSql(`UPDATE \`article_prepa\` SET quantite = ${quantite} WHERE reference LIKE '${reference}' AND id_prepa = ${idPrepa} AND is_ref LIKE '${is_ref}'`, []))),
             map(() => undefined)
         );
     }
@@ -988,12 +986,27 @@ export class SqliteProvider {
             : of(undefined);
     }
 
-    public deleteArticlePrepaById(id): Observable<any> {
-        return this.executeQuery(`UPDATE \`article_prepa\` SET deleted = 1 WHERE id = ${id}`, false);
+    public deleteArticlePrepa(reference: string, id_prepa: string, is_ref: number): Observable<undefined> {
+        return this.db$.pipe(
+            flatMap((db) => from(db.executeSql(`UPDATE \`article_prepa\` SET deleted = 1 WHERE reference = '${reference}' AND id_prepa = ${id_prepa} AND is_ref = ${is_ref}`, []))),
+            map(() => undefined)
+        );
     }
 
-    public cleanTable(table): Observable<any> {
+    public cleanTable(table): Observable<undefined> {
         return this.executeQuery('DELETE FROM ' + table + ';', false);
+    }
+
+    private getValueForQuery(value: any): string {
+        return (
+            (typeof value === 'string') ? `'${value}'` :
+            (typeof value === 'boolean') ? Number(value) :
+            value // number
+        );
+    }
+
+    private getComparatorForQuery(value: any): string {
+        return (typeof value === 'string') ? 'LIKE' : '=';
     }
 
     public deleteLivraionsById(livraisons: Array<number>): Observable<any> {

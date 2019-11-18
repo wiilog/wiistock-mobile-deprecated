@@ -6,7 +6,8 @@
 <!-- TODO pas possible mutualiser header ?? -->
 
 <ion-content>
-    <wii-main-loader [loading]="loading" [message]="messageLoading"></wii-main-loader>
+    <wii-main-loader [loading]="loading"
+                     [message]="messageLoading"></wii-main-loader>
     <ng-container *ngIf="!loading">
         <ion-grid>
             <ion-row class="row-menu-stats">

@@ -17,7 +17,7 @@ import {of} from 'rxjs/observable/of';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Network} from '@ionic-native/network';
-import {ApiService} from "@app/services/api.service";
+import {ApiService} from '@app/services/api.service';
 import {StorageService} from '@app/services/storage.service';
 
 
@@ -55,9 +55,7 @@ export class PreparationArticlesPage {
 
     public ionViewWillEnter(): void {
         this.preparation = this.navParams.get('preparation');
-        this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
-            this.articlesNT = articles.filter((article) => (article.has_moved === 0));
-            this.articlesT = articles.filter((article) => (article.has_moved === 1));
+        this.updateLists().subscribe(() => {
             if (this.articlesT.length > 0) {
                 this.started = true;
             }
@@ -106,10 +104,10 @@ export class PreparationArticlesPage {
                 ));
                 if (articleAlready !== undefined) {
                     // we update the quantity in the list of treated article
-                    this.sqliteProvider.updateArticlePrepaQuantity(articleAlready.id, Number(selectedQuantity) + Number(articleAlready.quantite))
+                    this.sqliteProvider.updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), Number(selectedQuantity) + Number(articleAlready.quantite))
                         .pipe(
                             // we update quantity in the list of untreated articles
-                            flatMap(() => this.sqliteProvider.updateArticlePrepaQuantity((selectedArticle as ArticlePrepa).id, (selectedArticle as ArticlePrepa).quantite - selectedQuantity)),
+                            flatMap(() => this.sqliteProvider.updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), (selectedArticle as ArticlePrepa).quantite - selectedQuantity)),
                         )
                         .subscribe(() => {
                             this.updateViewLists();
@@ -123,7 +121,7 @@ export class PreparationArticlesPage {
                     } else {
                         // we update value quantity of selected article
                         this.sqliteProvider
-                            .updateArticlePrepaQuantity((selectedArticle as ArticlePrepa).id, (selectedArticle as ArticlePrepa).quantite - selectedQuantity)
+                            .updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), (selectedArticle as ArticlePrepa).quantite - selectedQuantity)
                             .pipe(flatMap(() => this.moveArticle(selectedArticle, selectedQuantity)))
                             .subscribe(() => {
                                 this.updateViewLists();
@@ -171,8 +169,8 @@ export class PreparationArticlesPage {
                 if (articleAlready) {
                     // we don't enter here if it's an article selected by the user in the liste of article_prepa_by_ref_article
                     this.sqliteProvider
-                        .updateArticlePrepaQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite)
-                        .pipe(flatMap(() => this.sqliteProvider.deleteById('`article_prepa`', (selectedArticle as ArticlePrepa).id)))
+                        .updateArticlePrepaQuantity(articleAlready.reference, articleAlready.id_prepa, Number(articleAlready.is_ref), mouvement.quantity + articleAlready.quantite)
+                        .pipe(flatMap(() => this.sqliteProvider.deleteArticlePrepa(articleAlready.reference, articleAlready.id_prepa, Number(articleAlready.is_ref))))
                         .subscribe(() => this.updateViewLists());
                 } else {
                     this.moveArticle(selectedArticle)
@@ -288,7 +286,7 @@ export class PreparationArticlesPage {
                     ? of({selectedArticle})
                     : (
                         this.sqliteProvider
-                            .findOneBy('article_prepa', 'reference', selectedArticle.reference_article)
+                            .findOneBy('article_prepa', {reference: selectedArticle.reference_article, is_ref: 1, id_prepa: this.preparation.id}, 'AND')
                             .pipe(map((refArticle) => (
                                     refArticle
                                         ? ({selectedArticle, refArticle})
@@ -361,7 +359,13 @@ export class PreparationArticlesPage {
                     flatMap(() => this.updateLists()),
 
                     // delete articlePrepa if all quantity has been selected
-                    flatMap(() => this.sqliteProvider.findOneBy('article_prepa', 'reference', (selectedArticle as ArticlePrepaByRefArticle).reference_article)),
+                    flatMap(() => (
+                        this.sqliteProvider.findOneBy('article_prepa', {
+                            reference: (selectedArticle as ArticlePrepaByRefArticle).reference_article,
+                            is_ref: 1,
+                            id_prepa: this.preparation.id
+                        }, 'AND')
+                    )),
                     flatMap((referenceArticle) => {
 
                         // we get all quantity picked for this refArticle plus the current quantity which is selected
@@ -373,8 +377,8 @@ export class PreparationArticlesPage {
                         ), selectedQuantityValid);
 
                         return (referenceArticle.quantite === quantityPicked)
-                            ? this.sqliteProvider.deleteArticlePrepaById(referenceArticle.id)
-                            : this.sqliteProvider.updateArticlePrepaQuantity(referenceArticle.id, referenceArticle.quantite - selectedQuantityValid)
+                            ? this.sqliteProvider.deleteArticlePrepa(referenceArticle.reference, referenceArticle.id_prepa, 1)
+                            : this.sqliteProvider.updateArticlePrepaQuantity(referenceArticle.reference, referenceArticle.id_prepa, 1, referenceArticle.quantite - selectedQuantityValid)
                     })
                 )
             : (selectedQuantity

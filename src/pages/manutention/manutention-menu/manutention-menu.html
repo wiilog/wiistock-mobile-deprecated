@@ -1,6 +1,6 @@
 <ion-header>
     <ion-navbar *ngIf="hasLoaded">
-        <ion-buttons left></ion-buttons>
+        <ion-buttons left class="placeholder-buttons"></ion-buttons>
         <ion-title class="user-title">
             {{ user }}
         </ion-title>
@@ -22,7 +22,9 @@
     <wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
     <ion-scroll scrollY="true" *ngIf="hasLoaded" class="body">
         <br>
-        <img src="assets/icon/manut_icon.svg" height="50px" width="50px">
+        <div class="icon-manutention-container">
+            <img src="assets/icon/manut_icon.svg" height="50px" width="50px">
+        </div>
         <br>
         <ng-container *ngIf="manutentions && manutentions.length > 0 && hasLoaded">
             <ion-card *ngFor="let manutention of manutentions" (click)="goToManut(manutention)">

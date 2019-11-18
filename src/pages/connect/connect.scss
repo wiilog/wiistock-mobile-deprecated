@@ -15,11 +15,15 @@ page-connect {
         margin-bottom: 3rem;
     }
 
-    ion-footer div {
-        align-items: flex-end;
-        .version-container {
-            font-size: 12px;
-            color: gray;
+    ion-footer {
+        background-color: white;
+        div {
+            align-items: flex-end;
+
+            .version-container {
+                font-size: 12px;
+                color: gray;
+            }
         }
     }
 }

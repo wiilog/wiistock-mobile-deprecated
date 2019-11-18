@@ -41,6 +41,7 @@ export class ManutentionMenuPage {
         this.sqliteProvider.findAll('`manutention`').subscribe((manutentions) => {
             this.manutentions = manutentions;
             this.storageService.getOperateur().subscribe((userName) => {
+                console.log(this.user);
                 this.user = userName;
                 this.hasLoaded = true;
                 this.content.resize();
