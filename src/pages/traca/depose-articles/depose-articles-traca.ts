@@ -5,14 +5,13 @@ import {Article} from '@app/entities/article';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ChangeDetectorRef} from '@angular/core';
-import {MouvementTraca} from '@app/entities/mouvement-traca';
-import moment from 'moment';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
 import {EntityFactoryService} from '@app/services/entity-factory.service';
 import {AlertManagerService} from '@app/services/alert-manager.service';
 import {StorageService} from '@app/services/storage.service';
+import {LocalDataManagerService} from "@app/services/local-data-manager.service";
 
 
 @IonicPage()
@@ -40,6 +39,7 @@ export class DeposeArticlesPageTraca {
                        private changeDetectorRef: ChangeDetectorRef,
                        private entityFactory: EntityFactoryService,
                        private alertManager: AlertManagerService,
+                       private localDataManager: LocalDataManagerService,
                        private storageService: StorageService) {
 
     }
@@ -76,35 +76,11 @@ export class DeposeArticlesPageTraca {
 
     public finishTaking(): void {
         if (this.articles && this.articles.length > 0) {
-            for (let article of this.articles) {
-                let numberOfArticles = 0;
-                this.articles.forEach((articleToCmp) => {
-                    if (articleToCmp.reference === article.reference) {
-                        numberOfArticles++;
-                    }
+            this.localDataManager
+                .saveMouvementsTraca(this.articles, this.emplacement, 'depose')
+                .subscribe(() => {
+                    this.redirectAfterTake();
                 });
-                const date = moment().format();
-                this.storageService.getOperateur().subscribe((value) => {
-                    const mouvement: MouvementTraca = {
-                        id: null,
-                        ref_article: article.reference,
-                        date: date + '_' + Math.random().toString(36).substr(2, 9),
-                        ref_emplacement: this.emplacement.label,
-                        type: 'depose',
-                        operateur: value
-                    };
-                    this.storageService.setDeposeValue(article.barcode, numberOfArticles).subscribe(() => {
-                        if (this.articles.indexOf(article) === this.articles.length - 1) {
-                            this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(() => {
-                                this.redirectAfterTake();
-                            });
-                        }
-                        else {
-                            this.sqliteProvider.insert('`mouvement_traca`', mouvement);
-                        }
-                    });
-                });
-            }
         }
         else {
             this.toastService.showToast('Vous devez sélectionner au moins un article')

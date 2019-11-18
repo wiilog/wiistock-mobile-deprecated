@@ -47,6 +47,7 @@ import {EntityFactoryService} from '@app/services/entity-factory.service';
 import {AlertManagerService} from '@app/services/alert-manager.service';
 import {VersionCheckerService} from "@app/services/version-checker.service";
 import {AppVersion} from "@ionic-native/app-version";
+import {LocalDataManagerService} from "@app/services/local-data-manager.service";
 
 
 @NgModule({
@@ -137,7 +138,8 @@ import {AppVersion} from "@ionic-native/app-version";
         AppVersion,
         ToastService,
         AlertManagerService,
-        EntityFactoryService
+        EntityFactoryService,
+        LocalDataManagerService
     ]
 })
 export class AppModule {

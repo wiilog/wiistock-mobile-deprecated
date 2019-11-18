@@ -5,14 +5,12 @@ import {Article} from '@app/entities/article';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ChangeDetectorRef} from '@angular/core';
-import {MouvementTraca} from '@app/entities/mouvement-traca';
-import moment from 'moment';
 import {Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
 import {EntityFactoryService} from '@app/services/entity-factory.service';
 import {AlertManagerService} from '@app/services/alert-manager.service';
-import {StorageService} from '@app/services/storage.service';
+import {LocalDataManagerService} from "@app/services/local-data-manager.service";
 
 
 @IonicPage()
@@ -39,8 +37,8 @@ export class PriseArticlesPageTraca {
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private changeDetectorRef: ChangeDetectorRef,
                        private entityFactory: EntityFactoryService,
-                       private alertManager: AlertManagerService,
-                       private storageService: StorageService) {
+                       private localDataManager: LocalDataManagerService,
+                       private alertManager: AlertManagerService) {
     }
 
     public ionViewWillEnter(): void {
@@ -75,39 +73,11 @@ export class PriseArticlesPageTraca {
 
     public finishTaking(): void {
         if (this.articles && this.articles.length > 0) {
-            for (let article of this.articles) {
-                let numberOfArticles = 0;
-                this.articles.forEach((articleToCmp) => {
-                    if (articleToCmp.reference === article.reference) {
-                        numberOfArticles++;
-                    }
+            this.localDataManager
+                .saveMouvementsTraca(this.articles, this.emplacement, 'prise')
+                .subscribe(() => {
+                    this.redirectAfterTake();
                 });
-                const date = moment().format();
-                this.storageService.getOperateur().subscribe((operateur) => {
-                    const mouvement: MouvementTraca = {
-                        id: null,
-                        ref_article: article.reference,
-                        date: date + '_' + Math.random().toString(36).substr(2, 9),
-                        ref_emplacement: this.emplacement.label,
-                        type: 'prise',
-                        operateur
-                    };
-                    this.storageService.setPriseValue(article.barcode, numberOfArticles).then(() => {
-                        if (this.articles.indexOf(article) === this.articles.length - 1) {
-                            this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(
-                                () => {
-                                    this.redirectAfterTake();
-                                },
-                                err => console.log(err)
-                            );
-                        }
-                        else {
-                            this.sqliteProvider.insert('`mouvement_traca`', mouvement).subscribe(() => {
-                            }, (err) => console.log(err));
-                        }
-                    });
-                });
-            }
         }
         else {
             this.toastService.showToast('Vous devez sélectionner au moins un article')
