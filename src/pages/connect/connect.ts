@@ -71,6 +71,7 @@ export class ConnectPage {
                             this.finishLoading();
                         },
                         () => {
+                            this.finishLoading();
                             this.toastService.showToast('Erreur : la liaison avec le serveur est impossible', 5000);
                         });
             }
