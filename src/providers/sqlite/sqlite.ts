@@ -13,8 +13,6 @@ import {of} from 'rxjs/observable/of';
 import {Platform} from 'ionic-angular';
 import {Collecte} from '@app/entities/collecte';
 import {Manutention} from '@app/entities/manutention';
-import {Article} from '@app/entities/article';
-import {Emplacement} from '@app/entities/emplacement';
 import 'rxjs/add/observable/zip';
 
 
