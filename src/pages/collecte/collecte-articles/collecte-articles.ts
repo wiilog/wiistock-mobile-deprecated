@@ -14,8 +14,7 @@ import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
 import {StorageService} from '@app/services/storage.service';
-import {Network} from "@ionic-native/network";
-import {ApiService} from "@app/services/api.service";
+import {ApiService} from '@app/services/api.service';
 
 
 @IonicPage()
@@ -44,8 +43,7 @@ export class CollecteArticlesPage {
                        public http: HttpClient,
                        public barcodeScannerManager: BarcodeScannerManagerService,
                        private apiService: ApiService,
-                       private storageService: StorageService,
-                       private network: Network) {
+                       private storageService: StorageService) {
         this.loadingStartCollecte = false;
     }
 
@@ -232,30 +230,26 @@ export class CollecteArticlesPage {
 
     private selectArticle(article, quantity): void {
         if (!this.started) {
-            if (this.network.type !== 'none') {
-                this.loadingStartCollecte = true;
-                this.apiService.getApiUrl(ApiService.BEGIN_COLLECTE).subscribe((url) => {
-                    this.storageService.getApiKey().subscribe((key) => {
-                        this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
-                            if (resp.success) {
-                                this.started = true;
-                                this.isValid = true;
-                                this.toastService.showToast('Collecte commencée.');
-                                this.registerMvt(article, quantity);
-                            }
-                            else {
-                                this.isValid = false;
-                                this.loadingStartCollecte = false;
-                                this.toastService.showToast(resp.msg);
-                            }
-                        });
+            this.loadingStartCollecte = true;
+            this.apiService.getApiUrl(ApiService.BEGIN_COLLECTE).subscribe((url) => {
+                this.storageService.getApiKey().subscribe((key) => {
+                    this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
+                        if (resp.success) {
+                            this.started = true;
+                            this.isValid = true;
+                            this.toastService.showToast('Collecte commencée.');
+                            this.registerMvt(article, quantity);
+                        }
+                        else {
+                            this.isValid = false;
+                            this.loadingStartCollecte = false;
+                            this.toastService.showToast(resp.msg);
+                        }
                     });
                 });
-            }
-            else {
-                this.toastService.showToast('Vous devez être connecté à internet pour commencer la collecte')
-            }
-        } else {
+            });
+        }
+        else {
             this.registerMvt(article, quantity);
         }
     }

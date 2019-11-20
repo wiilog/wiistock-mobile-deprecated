@@ -17,6 +17,7 @@ import {Article} from '@app/entities/article';
 import {Emplacement} from '@app/entities/emplacement';
 import moment from 'moment';
 import 'rxjs/add/observable/zip';
+import {EntityFactoryService} from "@app/services/entity-factory.service";
 
 
 type Process = 'preparation' | 'livraison' | 'collecte';
@@ -39,6 +40,7 @@ export class LocalDataManagerService {
     public constructor(private sqliteProvider: SqliteProvider,
                        private apiService: ApiService,
                        private storageService: StorageService,
+                       private entityFactory: EntityFactoryService,
                        private alertManager: AlertManagerService,
                        private alertController: AlertController) {
         this.apiProccessConfigs = {
@@ -177,6 +179,14 @@ export class LocalDataManagerService {
                 flatMap(() => {
                     synchronise$.next({finished: false, message: 'Envoi des préparations non synchronisées'});
                     return this.saveFinishedProcess('preparation');
+                }),
+                flatMap(() => {
+                    synchronise$.next({finished: false, message: 'Envoi des livraisons non synchronisées'});
+                    return this.saveFinishedProcess('livraison');
+                }),
+                flatMap(() => {
+                    synchronise$.next({finished: false, message: 'Envoi des collectes non synchronisées'});
+                    return this.saveFinishedProcess('collecte');
                 })
             )
             .subscribe(

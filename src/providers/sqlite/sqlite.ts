@@ -168,9 +168,10 @@ export class SqliteProvider {
         }
         for (let prepa of prepas) {
             this.findOneById('preparation', prepa.id).subscribe((prepaInserted) => {
-                if (prepaInserted === null) {
+                if (!prepaInserted) {
                     prepasValues.push(`(${prepa.id}, '${prepa.number}', NULL, NULL, 0, '${prepa.destination}', '${prepa.type}')`);
                 }
+
                 if (prepas.indexOf(prepa) === prepas.length - 1) {
                     this.findAll('`preparation`').subscribe((preparations) => {
                         let prepasValuesStr = prepasValues.join(', ');
@@ -240,9 +241,10 @@ export class SqliteProvider {
         }
         for (let article of articlesPrepa) {
             this.findArticlesByPrepa(article.id_prepa).subscribe((articles) => {
+                // TODO remove '=='
                 const isArticleAlreadySaved = articles.some((articlePrepa) => (
                     (articlePrepa.reference === article.reference) &&
-                    (articlePrepa.is_ref === article.is_ref))
+                    (articlePrepa.is_ref == article.is_ref))
                 );
                 if (!isArticleAlreadySaved) {
                     articlesPrepaValues.push("(" +
@@ -321,9 +323,10 @@ export class SqliteProvider {
         }
         for (let article of articlesLivrs) {
             this.findArticlesByLivraison(article.id_livraison).subscribe((articles) => {
+                // TODO '=='
                 const found = articles.some((articleLivr) => (
                     (articleLivr.reference === article.reference) &&
-                    (articleLivr.is_ref === article.is_ref))
+                    (articleLivr.is_ref == article.is_ref))
                 );
                 if (!found) {
                     articlesLivraisonValues.push(
@@ -411,7 +414,12 @@ export class SqliteProvider {
         }
         for (let article of articlesCols) {
             this.findArticlesByCollecte(article.id_collecte).subscribe((articles) => {
-                if (articles.find(articleCol => articleCol.reference === article.reference && articleCol.is_ref === article.is_ref) === undefined) {
+                // TODO remove '=='
+                const found = articles.some((articleCol) => (
+                    (articleCol.reference === article.reference) &&
+                    (articleCol.is_ref == article.is_ref)
+                ));
+                if (!found) {
                     articlesCollecteValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", " + article.is_ref + ", " + article.id_collecte + ", " + 0 + ", '" + article.location + "', '" + article.barCode + "')");
                 }
                 if (articlesCols.indexOf(article) === articlesCols.length - 1) {
@@ -651,26 +659,28 @@ export class SqliteProvider {
     }
 
 
-    public insert(name: string, object: any): Observable<number> {
-        const objectKeys = Object.keys(object);
-        const valuesMap = objectKeys
-            .map((key) => (
-                (typeof object[key] === 'string') ? `'${object[key]}'` :
-                (typeof object[key] === 'boolean') ? Number(object[key]) :
-                (object[key] === undefined) ? 'null' :
-                `${object[key]}`));
-        let query = "INSERT INTO " + name +
+    private createInsertQuery(name: string, objects: any|Array<any>): string {
+        const isMultiple = Array.isArray(objects);
+        const objectKeys = Object.keys(isMultiple ? objects[0] : objects);
+
+        if (!isMultiple) {
+            objects = [objects];
+        }
+        const valuesMap = objects.map((values) =>
+            '(' +
+            objectKeys.map((key) => this.getValueForQuery(values[key])).join((', ')) +
+            ')'
+        );
+        return "INSERT INTO " + name +
             ' (' + objectKeys.join(', ') + ') ' +
             "VALUES " +
-            "(" + valuesMap.join(', ') + ");";
-
-        return this.db$
-            .pipe(
-                flatMap((db) => from(db.executeSql(query, []))),
-                map(({insertId}) => insertId)
-            );
+            valuesMap.join(', ');
     }
 
+    public insert(name: string, objects: any|Array<any>): Observable<number> {
+        let query = this.createInsertQuery(name, objects);
+        return this.executeQuery(query).pipe(map(({insertId}) => insertId));
+    }
 
     public executeQuery(query: string, getRes: boolean = true, params: Array<any> = []): Observable<any> {
         return this.db$.pipe(
@@ -998,8 +1008,9 @@ export class SqliteProvider {
     private getValueForQuery(value: any): string {
         return (
             (typeof value === 'string') ? `'${value}'` :
-            (typeof value === 'boolean') ? Number(value) :
-            value // number
+            (typeof value === 'boolean') ? `${Number(value)}` :
+            ((value === null) || (value === undefined)) ? 'null' :
+            `${value}`
         );
     }
 
