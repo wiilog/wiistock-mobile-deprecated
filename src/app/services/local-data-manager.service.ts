@@ -5,7 +5,7 @@ import {Observable} from 'rxjs/Observable';
 import {flatMap, map} from 'rxjs/operators';
 import {AlertController} from 'ionic-angular';
 import 'rxjs/add/observable/zip';
-import {ReplaySubject} from 'rxjs';
+import {ReplaySubject, Subject} from 'rxjs';
 import {of} from 'rxjs/observable/of';
 import {AlertManagerService} from '@app/services/alert-manager.service';
 import {Preparation} from '@app/entities/preparation';
@@ -253,10 +253,13 @@ export class LocalDataManagerService {
         const apiProccessConfig = this.apiProccessConfigs[process];
         return apiProccessConfig.createApiParams()
             .pipe(
-                flatMap(({paramName, ...params}) => (
-                    (params[paramName] && params[paramName].length > 0)
-                        ? this.apiService.requestApi('post', apiProccessConfig.service, params).pipe(
-                            flatMap((res) => {
+                flatMap(({paramName, ...params}) => {
+                    let res$;
+                    if (params[paramName] && params[paramName].length > 0) {
+                        res$ = new Subject();
+                        this.apiService
+                            .requestApi('post', apiProccessConfig.service, params)
+                            .pipe(flatMap((res) => {
                                 const {success, errors} = res;
                                 if (errors && errors.length > 0) {
                                     this.presentAlertError(
@@ -271,10 +274,25 @@ export class LocalDataManagerService {
                                         apiProccessConfig.resetFailed(errors)
                                     )
                                     .pipe(map(() => res));
-                            })
-                        )
-                        : of(false)
-                ))
+                            }))
+                            .subscribe(
+                                (res) => {
+                                    res$.next(res);
+                                },
+                                (err) => {
+                                    res$.error({
+                                        ...err,
+                                        api: true
+                                    })
+                                }
+                            )
+                    }
+                    else {
+                        res$ = of(false);
+                    }
+
+                    return res$;
+                })
             );
     }
 

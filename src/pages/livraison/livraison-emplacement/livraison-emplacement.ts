@@ -105,13 +105,13 @@ export class LivraisonEmplacementPage {
                                     this.sqliteProvider
                                         .findMvtByArticleLivraison(article.id)
                                         .pipe(flatMap((mvt) => this.sqliteProvider.finishMvt(mvt.id, this.emplacement.label)))
-                                )),
-                                flatMap(() => this.sqliteProvider.finishLivraison(this.livraison.id, this.emplacement.label)),
-                                flatMap((): any => (
-                                    (this.network.type !== 'none')
-                                        ? this.localDataManager.saveFinishedProcess('livraison')
-                                        : of({offline: true})
                                 ))
+                            )),
+                            flatMap(() => this.sqliteProvider.finishLivraison(this.livraison.id, this.emplacement.label)),
+                            flatMap((): any => (
+                                (this.network.type !== 'none')
+                                    ? this.localDataManager.saveFinishedProcess('livraison')
+                                    : of({offline: true})
                             ))
                         )
                         .subscribe(
@@ -148,7 +148,10 @@ export class LivraisonEmplacementPage {
 
     private handleLivraisonError(resp): void {
         this.validateIsLoading = false;
-        this.toastService.showToast((resp && resp.message) ? resp.message : 'Une erreur s\'est produite');
+        this.toastService.showToast((resp && resp.api && resp.message) ? resp.message : 'Une erreur s\'est produite');
+        if (resp.api) {
+            throw resp;
+        }
     }
 
     private closeScreen(): void {

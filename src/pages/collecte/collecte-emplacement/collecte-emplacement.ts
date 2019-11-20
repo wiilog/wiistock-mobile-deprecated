@@ -96,11 +96,11 @@ export class CollecteEmplacementPage {
                     .pipe(
                         flatMap((articles) => Observable.zip(
                             ...articles.map((article) => (
-                                    this.sqliteProvider
-                                        .findMvtByArticleCollecte(article.id)
-                                        .pipe(flatMap((mvt) => this.sqliteProvider.finishMvt(mvt.id, this.emplacement.label)))
-                                )
-                            ))),
+                                this.sqliteProvider
+                                    .findMvtByArticleCollecte(article.id)
+                                    .pipe(flatMap((mvt) => this.sqliteProvider.finishMvt(mvt.id, this.emplacement.label)))
+                            ))
+                        )),
                         flatMap(() => this.sqliteProvider.finishCollecte(this.collecte.id, this.emplacement.label)),
                         flatMap((): any => (
                             this.network.type !== 'none'
@@ -144,7 +144,7 @@ export class CollecteEmplacementPage {
 
     private handlePreparationError(resp): void {
         this.isLoading = false;
-        this.toastService.showToast((resp && resp.message) ? resp.message : 'Une erreur s\'est produite');
+        this.toastService.showToast((resp && resp.api && resp.message) ? resp.message : 'Une erreur s\'est produite');
     }
 
     private closeScreen(): void {
