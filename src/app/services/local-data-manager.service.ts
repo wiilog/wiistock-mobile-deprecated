@@ -17,7 +17,6 @@ import {Article} from '@app/entities/article';
 import {Emplacement} from '@app/entities/emplacement';
 import moment from 'moment';
 import 'rxjs/add/observable/zip';
-import {EntityFactoryService} from "@app/services/entity-factory.service";
 
 
 type Process = 'preparation' | 'livraison' | 'collecte';
@@ -40,7 +39,6 @@ export class LocalDataManagerService {
     public constructor(private sqliteProvider: SqliteProvider,
                        private apiService: ApiService,
                        private storageService: StorageService,
-                       private entityFactory: EntityFactoryService,
                        private alertManager: AlertManagerService,
                        private alertController: AlertController) {
         this.apiProccessConfigs = {
@@ -110,7 +108,7 @@ export class LocalDataManagerService {
                 titleErrorAlert: `Des livraisons n'ont pas pu être synchronisées`,
                 numeroProccessFailed: 'numero_livraison',
                 deleteSucceed: (resSuccess) => {
-                    const idsToDelete = resSuccess.map(({id_prepa}) => id_prepa);
+                    const idsToDelete = resSuccess.map(({id_livraison}) => id_livraison);
 
                     return Observable.zip(
                         this.sqliteProvider.deleteLivraionsById(idsToDelete),
@@ -120,7 +118,7 @@ export class LocalDataManagerService {
                 resetFailed: (resError) => {
                     const idsToDelete = resError.map(({id_livraison}) => id_livraison);
                     return Observable.zip(
-                        this.sqliteProvider.deleteLivraionsById(idsToDelete),
+                        this.sqliteProvider.resetFinishedLivraisons(idsToDelete),
                         this.sqliteProvider.deleteMouvementsBy('id_livraison', idsToDelete)
                     );
                 }
@@ -150,17 +148,17 @@ export class LocalDataManagerService {
                 titleErrorAlert: `Des livraisons n'ont pas pu être synchronisées`,
                 numeroProccessFailed: 'numero_collecte',
                 deleteSucceed: (resSuccess) => {
-                    const idsToDelete = resSuccess.map(({id_prepa}) => id_prepa);
+                    const idsToDelete = resSuccess.map(({id_collecte}) => id_collecte);
 
                     return Observable.zip(
-                        this.sqliteProvider.deleteLivraionsById(idsToDelete),
+                        this.sqliteProvider.deleteCollecteById(idsToDelete),
                         this.sqliteProvider.deleteMouvementsBy('id_collecte', idsToDelete)
                     );
                 },
                 resetFailed: (resError) => {
                     const idsToDelete = resError.map(({id_collecte}) => id_collecte);
                     return Observable.zip(
-                        this.sqliteProvider.deleteCollecteById(idsToDelete),
+                        this.sqliteProvider.resetFinishedCollectes(idsToDelete),
                         this.sqliteProvider.deleteMouvementsBy('id_collecte', idsToDelete)
                     );
                 }
@@ -168,25 +166,35 @@ export class LocalDataManagerService {
         }
     }
 
+    private static ShowSyncMessage(res$: Subject<any>) {
+        res$.next({finished: false, message: 'Synchronisation des données en cours...'});
+    }
+
     public synchroniseData(): Observable<{finished: boolean, message?: string}> {
         const synchronise$ = new ReplaySubject<{finished: boolean, message?: string}>(1);
 
-        synchronise$.next({finished: false, message: 'Synchronisation des données en cours...'});
-        this.apiService
-            .requestApi('post', ApiService.GET_DATA)
+        LocalDataManagerService.ShowSyncMessage(synchronise$);
+        this.importData()
             .pipe(
-                flatMap(({data}) =>  this.sqliteProvider.importData(data)),
                 flatMap(() => {
                     synchronise$.next({finished: false, message: 'Envoi des préparations non synchronisées'});
                     return this.saveFinishedProcess('preparation');
                 }),
-                flatMap(() => {
+                map(Boolean),
+                flatMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des livraisons non synchronisées'});
-                    return this.saveFinishedProcess('livraison');
+                    return this.saveFinishedProcess('livraison').pipe(map((needAnotherSynchroniseLivraison) => needAnotherSynchronise || Boolean(needAnotherSynchroniseLivraison)));
                 }),
-                flatMap(() => {
+                flatMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des collectes non synchronisées'});
-                    return this.saveFinishedProcess('collecte');
+                    return this.saveFinishedProcess('collecte').pipe(map((needAnotherSynchroniseCollecte) => needAnotherSynchronise || Boolean(needAnotherSynchroniseCollecte)));
+                }),
+                // we reload data from API if we have save data in previous requests
+                flatMap((needAnotherSynchronise) => {
+                    if (needAnotherSynchronise) {
+                        LocalDataManagerService.ShowSyncMessage(synchronise$);
+                    }
+                    return needAnotherSynchronise ? this.importData() : of(false);
                 })
             )
             .subscribe(
@@ -201,6 +209,12 @@ export class LocalDataManagerService {
             );
 
         return synchronise$;
+    }
+
+    public importData(): Observable<any> {
+        return this.apiService
+            .requestApi('post', ApiService.GET_DATA)
+            .pipe(flatMap(({data}) =>  this.sqliteProvider.importData(data)));
     }
 
     public saveMouvementsTraca(articles: Array<Article>,
@@ -257,9 +271,10 @@ export class LocalDataManagerService {
     }
 
     /**
-     * Send all preparations in local database to the api
+     * Send all "preparations", "livraisons" ou "collectes" finished in local database to the api
+     * @return false if no request has been done, or api response
      */
-    public saveFinishedProcess(process: Process): Observable<{success: any, error: any}> {
+    public saveFinishedProcess(process: Process): Observable<{success: any, error: any}|false> {
         const apiProccessConfig = this.apiProccessConfigs[process];
         return apiProccessConfig.createApiParams()
             .pipe(
@@ -290,10 +305,7 @@ export class LocalDataManagerService {
                                     res$.next(res);
                                 },
                                 (err) => {
-                                    res$.error({
-                                        ...err,
-                                        api: true
-                                    })
+                                    res$.error({...err, api: true})
                                 }
                             )
                     }

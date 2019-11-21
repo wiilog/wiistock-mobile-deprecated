@@ -146,7 +146,7 @@ export class PreparationArticlesPage {
                     location: null,
                     type: 'prise-dépose',
                     is_ref: isSelectableByUser
-                        ? false
+                        ? 0
                         : (selectedArticle as ArticlePrepa).is_ref,
                     id_article_prepa: isSelectableByUser
                         ? null
@@ -337,10 +337,10 @@ export class PreparationArticlesPage {
         let articleToInsert: ArticlePrepa = {
             label: (selectedArticle as ArticlePrepaByRefArticle).label,
             reference: (selectedArticle as ArticlePrepaByRefArticle).reference,
-            is_ref: true,
+            is_ref: 1,
             has_moved: 1,
             id_prepa: this.preparation.id,
-            isSelectableByUser: true,
+            isSelectableByUser: 1,
             emplacement: (selectedArticle as ArticlePrepaByRefArticle).location,
             quantite: selectedQuantityValid
         };
@@ -408,7 +408,7 @@ export class PreparationArticlesPage {
                 date_drop: null,
                 location: null,
                 type: 'prise-dépose',
-                is_ref: selectedArticle.isSelectableByUser ? false : selectedArticle.is_ref,
+                is_ref: selectedArticle.isSelectableByUser ? 0 : selectedArticle.is_ref,
                 selected_by_article: selectedArticle.isSelectableByUser ? 1 : 0,
                 id_article_prepa: insertId ? insertId : selectedArticle.id,
                 id_prepa: this.preparation.id,

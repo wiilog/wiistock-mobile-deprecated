@@ -15,6 +15,7 @@ import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manage
 import {Subscription} from 'rxjs';
 import {StorageService} from '@app/services/storage.service';
 import {ApiService} from '@app/services/api.service';
+import {Network} from "@ionic-native/network";
 
 
 @IonicPage()
@@ -36,12 +37,13 @@ export class CollecteArticlesPage {
 
     private zebraScannerSubscription: Subscription;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public toastService: ToastService,
-                       public sqliteProvider: SqliteProvider,
-                       public http: HttpClient,
-                       public barcodeScannerManager: BarcodeScannerManagerService,
+    public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private toastService: ToastService,
+                       private sqliteProvider: SqliteProvider,
+                       private http: HttpClient,
+                       private network: Network,
+                       private barcodeScannerManager: BarcodeScannerManagerService,
                        private apiService: ApiService,
                        private storageService: StorageService) {
         this.loadingStartCollecte = false;
@@ -229,7 +231,7 @@ export class CollecteArticlesPage {
     }
 
     private selectArticle(article, quantity): void {
-        if (!this.started) {
+        if (!this.started && this.network.type !== 'none') {
             this.loadingStartCollecte = true;
             this.apiService.getApiUrl(ApiService.BEGIN_COLLECTE).subscribe((url) => {
                 this.storageService.getApiKey().subscribe((key) => {
@@ -250,6 +252,10 @@ export class CollecteArticlesPage {
             });
         }
         else {
+            if (this.network.type === 'none') {
+                this.toastService.showToast('Collecte commencée en mode hors ligne');
+            }
+
             this.registerMvt(article, quantity);
         }
     }

@@ -458,30 +458,30 @@ export class SqliteProvider {
         return importExecuted;
     }
 
-    private importArticlesPrepaByRefArticle(data): string {
+    private importArticlesPrepaByRefArticle(data): Observable<string> {
         const articlesPrepaByRefArticle = data['articlesPrepaByRefArticle'];
-        let ret;
 
-        if ((articlesPrepaByRefArticle && articlesPrepaByRefArticle.length > 0)) {
-            const articleKeys = [
-                ...Object.keys(articlesPrepaByRefArticle[0]),
-                'isSelectableByUser'
-            ];
+        return this.cleanTable('`article_prepa_by_ref_article`').pipe(map(() => {
+            if ((articlesPrepaByRefArticle && articlesPrepaByRefArticle.length > 0)) {
+                const articleKeys = [
+                    ...Object.keys(articlesPrepaByRefArticle[0]),
+                    'isSelectableByUser'
+                ];
 
-            const articleValues = articlesPrepaByRefArticle.map((article) => {
-                const articleTmp = {
-                    ...article,
-                    isSelectableByUser: 1
-                };
-                return '(' + (articleKeys.map((key) => ("'" + articleTmp[key] + "'")).join(', ') + ')')
-            });
+                const articleValues = articlesPrepaByRefArticle.map((article) => {
+                    const articleTmp = {
+                        ...article,
+                        isSelectableByUser: 1
+                    };
+                    return '(' + (articleKeys.map((key) => ("'" + articleTmp[key] + "'")).join(', ') + ')')
+                });
 
-            ret = 'INSERT INTO `article_prepa_by_ref_article` (' +
-                articleKeys.map((key) => `\`${key}\``).join(', ') + ') VALUES ' +
-                articleValues + ';';
-        }
-
-        return ret;
+                return 'INSERT INTO `article_prepa_by_ref_article` (' +
+                    articleKeys.map((key) => `\`${key}\``).join(', ') + ') VALUES ' +
+                    articleValues + ';';
+            }
+            return undefined;
+        }));
     }
 
     public importAnomaliesInventaire(data): Observable<string> {
@@ -519,14 +519,14 @@ export class SqliteProvider {
         );
     }
 
-    public importData(data: any): Observable<undefined> {
+    public importData(data: any): Observable<any> {
         const concatSqlImports = (imports: Array<string>, sql: string) => ([...imports, sql]);
         const createMapSqlImportObs = (imports: Array<string>) => map((sql: string) => concatSqlImports(imports, sql));
         return of(undefined).pipe(
             map(() => concatSqlImports([], this.importEmplacements(data))),
-            map((imports) => concatSqlImports(imports, this.importArticlesPrepaByRefArticle(data))),
             map((imports) => concatSqlImports(imports, this.importArticles(data))),
             flatMap((imports) => this.importPreparations(data).pipe(createMapSqlImportObs(imports))),
+            flatMap((imports) => this.importArticlesPrepaByRefArticle(data).pipe(createMapSqlImportObs(imports))),
             flatMap((imports) => this.importArticlesPrepas(data).pipe(createMapSqlImportObs(imports))),
             flatMap((imports) => this.importLivraisons(data).pipe(createMapSqlImportObs(imports))),
             flatMap((imports) => this.importArticlesLivraison(data).pipe(createMapSqlImportObs(imports))),
@@ -811,6 +811,16 @@ export class SqliteProvider {
     public resetFinishedPrepas(id_prepas: Array<number>): Observable<undefined> {
         const idPrepasJoined = id_prepas.join(',');
         return this.executeQuery(`UPDATE \`preparation\` SET date_end = NULL, emplacement = NULL WHERE id IN (${idPrepasJoined})`, false);
+    }
+
+    public resetFinishedLivraisons(id_livraisons: Array<number>): Observable<undefined> {
+        const idLivraisonsJoined = id_livraisons.join(',');
+        return this.executeQuery(`UPDATE \`livraison\` SET date_end = NULL, emplacement = NULL WHERE id IN (${idLivraisonsJoined})`, false);
+    }
+
+    public resetFinishedCollectes(id_collectes: Array<number>): Observable<undefined> {
+        const idCollectesJoined = id_collectes.join(',');
+        return this.executeQuery(`UPDATE \`livraison\` SET date_end = NULL, emplacement = NULL WHERE id IN (${idCollectesJoined})`, false);
     }
 
     public startPrepa(id_prepa: number): Observable<undefined> {

@@ -117,9 +117,9 @@ export class MenuPage {
                         this.refreshCounters();
                     }
                 },
-                ({message}) => {
+                ({api, message}) => {
                     this.loading = false;
-                    if (message) {
+                    if (api && message) {
                         this.toastService.showToast(message);
                     }
                     this.refreshCounters();

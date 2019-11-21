@@ -15,6 +15,7 @@ import {Subscription} from 'rxjs';
 import {ToastService} from '@app/services/toast.service';
 import {ApiService} from "@app/services/api.service";
 import {StorageService} from '@app/services/storage.service';
+import {Network} from "@ionic-native/network";
 
 
 @IonicPage()
@@ -40,6 +41,7 @@ export class LivraisonArticlesPage {
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
                        private http: HttpClient,
+                       private network: Network,
                        private apiService: ApiService,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private storageService: StorageService) {
@@ -80,7 +82,7 @@ export class LivraisonArticlesPage {
     }
 
     public selectArticle(article, quantity) {
-        if (!this.started) {
+        if (!this.started && this.network.type !== 'none') {
             this.loadingStartLivraison = true;
             this.apiService.getApiUrl(ApiService.BEGIN_LIVRAISON).subscribe((beginLivraisonUrl) => {
                 this.storageService.getApiKey().subscribe((key) => {
@@ -96,12 +98,15 @@ export class LivraisonArticlesPage {
                             this.loadingStartLivraison = false;
                             this.toastService.showToast(resp.msg);
                         }
-                    }, () => {
-
                     });
                 });
             });
-        } else {
+        }
+        else {
+            if (this.network.type === 'none') {
+                this.toastService.showToast('Livraison commencée en mode hors ligne');
+            }
+
             this.registerMvt(article, quantity);
         }
     }
