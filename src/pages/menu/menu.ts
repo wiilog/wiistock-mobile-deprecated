@@ -13,8 +13,8 @@ import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutenti
 import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
 import {HttpClient} from '@angular/common/http';
-import {StorageService} from "@app/services/storage.service";
-import {ApiServices} from "@app/config/api-services";
+import {StorageService} from '@app/services/storage.service';
+import {ApiServices} from '@app/config/api-services';
 
 
 @Component({

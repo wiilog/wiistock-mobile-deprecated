@@ -1,38 +1,35 @@
-<ion-header>
-    <ion-toolbar>
-        <ion-title>Follow GT</ion-title>
-    </ion-toolbar>
-</ion-header>
-
-<ion-content padding>
+<div class="page-content">
     <div class="spinner-container" *ngIf="loading">
         <ion-spinner class="main-spinner"></ion-spinner>
         <p class="spinner-text">Chargement...</p>
     </div>
-<!--    TODO AB change class-->
+
+    <div class="logo-container" *ngIf="!loading">
+        <img alt="FollowGT" src="assets/icon/followgt.svg" class="logo"/>
+    </div>
+
     <div class="version-not-valid-container" *ngIf="!loading && appVersionInvalid">
         <a [href]="apkUrl">
             <button ion-button class="version-not-valid" block>Veuillez mettre à jour l'application</button>
         </a>
     </div>
     <form (ngSubmit)="logForm()" *ngIf="!loading && !appVersionInvalid">
-        <ion-item>
-            <ion-label>Login</ion-label>
-            <ion-input type="text" [(ngModel)]="form.login" name="login"></ion-input>
-        </ion-item>
-        <ion-item>
-            <ion-label>Mot de passe</ion-label>
-            <ion-input type="password" [(ngModel)]="form.password" name="passsword"></ion-input>
-        </ion-item>
+        <div class="form-content">
+            <ion-item>
+                <ion-label>Login</ion-label>
+                <ion-input type="text" [(ngModel)]="form.login" name="login"></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-label>Mot de passe</ion-label>
+                <ion-input type="password" [(ngModel)]="form.password" name="passsword"></ion-input>
+            </ion-item>
+        </div>
         <button ion-button type="submit" block>Connexion</button>
     </form>
-    <img src="assets/icon/followgt.png" *ngIf="!loading">
-
-</ion-content>
-
-<ion-footer padding>
-    <div class="d-flex">
-        <ion-icon class="big-icon" name="settings" (click)="goToParams()"></ion-icon>
-        <div *ngIf="currentVersion">version {{ currentVersion }}</div>
-    </div>
-</ion-footer>
+</div>
+<div class="page-footer">
+    <button class="parameters" (click)="goToParams()">
+        <img alt="Parametres" src="assets/icon/parameter.svg"/>
+    </button>
+    <div class="version-container" *ngIf="currentVersion">V {{ currentVersion }}</div>
+</div>

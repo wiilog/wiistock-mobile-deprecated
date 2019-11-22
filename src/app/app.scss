@@ -14,6 +14,7 @@
 // automatically applied to the <body> element in the app.
 @import "../theme/fonts";
 @import "../theme/icons";
+@import "../theme/variables";
 
 // surcharges classes ionic
 ion-title {
@@ -88,6 +89,14 @@ ion-grid {
 }
 
 ion-item {
+
+    &.item-md.item-input.ng-valid.item-input-has-value:not(.input-has-focus):not(.item-input-has-focus) .item-inner,
+    .item-md.item-input.ng-valid.input-has-value:not(.input-has-focus):not(.item-input-has-focus) .item-inner {
+        border-bottom-color: $primary;
+        -webkit-box-shadow: inset 0 -1px 0 0 $primary;
+        box-shadow: inset 0 -1px 0 0 $primary;
+    }
+
     &.ionic-selectable-container {
         padding: 0;
     }
@@ -100,6 +109,11 @@ ion-item {
         width: 100% !important;
         max-width: 100% !important;
     }
+}
+
+button[ion-button] {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
 }
 
 .spinner {
@@ -141,4 +155,27 @@ ion-item {
         font-weight: 300;
         font-size: 13pt;
     }
+}
+
+.ion-page {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+ion-content.with-header {
+    .ion-page {
+        height: calc(100% - 82px);
+    }
+}
+
+ion-title {
+    .icon {
+        width: 40px
+    }
+}
+
+button[ion-button][color="success"] {
+    background-color: $green;
 }

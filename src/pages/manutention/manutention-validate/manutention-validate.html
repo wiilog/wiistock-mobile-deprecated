@@ -1,17 +1,3 @@
-<ion-header>
-    <ion-navbar *ngIf="hasLoaded">
-        <ion-buttons left></ion-buttons>
-        <ion-title class="user-title">
-            {{ user }}
-        </ion-title>
-        <ion-buttons right>
-            <button ion-button icon-only (click)="goHome()" class="custom-button">
-                <ion-icon name="custom-home-icon"></ion-icon>
-            </button>
-        </ion-buttons>
-    </ion-navbar>
-</ion-header>
-
 <ion-content>
     <br>
     <div class="titles" *ngIf="hasLoaded">

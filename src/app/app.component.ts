@@ -14,6 +14,7 @@ import {InventaireMenuPage} from '@pages/inventaire-menu/inventaire-menu';
 
 @Injectable()
 @Component({
+    selector: 'wii-main',
     templateUrl: 'app.component.html'
 })
 export class AppComponent {
@@ -23,6 +24,8 @@ export class AppComponent {
     // make ConnectPage the root (or first) page
     public rootPage = ConnectPage;
     public pages: Array<{ title: string, component: any }>;
+
+    public pageWithHeader: boolean;
 
 
     public constructor(public platform: Platform,

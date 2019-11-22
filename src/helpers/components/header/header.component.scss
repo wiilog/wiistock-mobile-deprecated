@@ -1,0 +1,39 @@
+@import "../../../theme/variables";
+
+
+wii-header {
+
+    ion-toolbar {
+        .icon-placeholder {
+            width: 29px;
+        }
+
+        .toolbar-content {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .toolbar-background {
+            background-color: $primary;
+        }
+
+        .header-title {
+            .logo {
+                width: 80px;
+                padding: 3px
+            }
+            .user {
+                font-size: 13px;
+                text-align: center;
+                color: $white;
+            }
+        }
+
+        button {
+            background-color: transparent;
+            ion-icon {
+                color: $white;
+            }
+        }
+    }
+}
