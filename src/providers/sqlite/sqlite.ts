@@ -13,8 +13,6 @@ import {of} from 'rxjs/observable/of';
 import {Platform} from 'ionic-angular';
 import {Collecte} from '@app/entities/collecte';
 import {Manutention} from '@app/entities/manutention';
-import {Article} from "@app/entities/article";
-import {Emplacement} from "@app/entities/emplacement";
 
 
 @Injectable()
@@ -137,7 +135,8 @@ export class SqliteProvider {
             ));
             let articleValuesStr = articleValues.join(', ');
             return 'INSERT INTO `article` (`id`, `reference`, `quantite`, `barcode`) VALUES ' + articleValuesStr + ';';
-        } else {
+        }
+        else {
             return undefined;
         }
     }
@@ -150,7 +149,8 @@ export class SqliteProvider {
             ));
             let emplacementValuesStr = emplacementValues.join(', ');
             return 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';';
-        } else {
+        }
+        else {
             return undefined;
         }
     }
@@ -180,7 +180,8 @@ export class SqliteProvider {
                             ret$.next((prepasValues.length > 0)
                                 ? sqlPrepas
                                 : undefined);
-                        } else {
+                        }
+                        else {
                             this.deletePreparations(preparations.filter(p => prepas.find(prep => prep.id === p.id) === undefined)).then(() => {
                                 ret$.next((prepasValues.length > 0)
                                     ? sqlPrepas
@@ -220,7 +221,8 @@ export class SqliteProvider {
 
                         if (manutentionsDB.length === 0) {
                             ret$.next(sqlManut);
-                        } else {
+                        }
+                        else {
                             this.deleteManutentions(manutentionsDB.filter(m => manutentions.find(manut => manut.id === m.id) === undefined)).then(() => {
                                 ret$.next(sqlManut);
                             });
@@ -261,7 +263,8 @@ export class SqliteProvider {
                         let articlesPrepaValuesStr = articlesPrepaValues.join(', ');
                         let sqlArticlesPrepa = 'INSERT INTO `article_prepa` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_prepa`, `has_moved`, `emplacement`, `type_quantite`, `barcode`) VALUES ' + articlesPrepaValuesStr + ';';
                         ret$.next(sqlArticlesPrepa);
-                    } else {
+                    }
+                    else {
                         ret$.next(undefined);
                     }
                 }
@@ -297,7 +300,8 @@ export class SqliteProvider {
                         if (livraisonsDB.length === 0) {
                             ret$.next((livraisonsValues.length > 0) ? sqlLivraisons : undefined);
 
-                        } else {
+                        }
+                        else {
                             this.deleteLivraisons(livraisonsDB.filter(l => livraisons.find(livr => livr.id === l.id) === undefined)).then(() => {
                                 ret$.next((livraisonsValues.length > 0) ? sqlLivraisons : undefined);
                             });
@@ -337,7 +341,8 @@ export class SqliteProvider {
                         let articlesLivraisonValuesStr = articlesLivraisonValues.join(', ');
                         let sqlArticlesLivraison = 'INSERT INTO `article_livraison` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_livraison`, `has_moved`, `emplacement`, `barcode`) VALUES ' + articlesLivraisonValuesStr + ';';
                         ret$.next(sqlArticlesLivraison);
-                    } else {
+                    }
+                    else {
                         ret$.next(undefined);
                     }
                 }
@@ -368,7 +373,8 @@ export class SqliteProvider {
                         let sqlCollectes = 'INSERT INTO `collecte` (`id`, `numero`, `emplacement`, `date_end`) VALUES ' + collectesValuesStr + ';';
                         if (collectesDB.length === 0) {
                             ret$.next(sqlCollectes);
-                        } else {
+                        }
+                        else {
                             this.deleteCollectes(collectesDB.filter(c => collectes.find(col => col.id === c.id) === undefined)).then(() => {
                                 ret$.next(sqlCollectes);
                             });
@@ -478,7 +484,8 @@ export class SqliteProvider {
             this.cleanTable('`anomalie_inventaire`').subscribe(_ => {
                 ret$.next(undefined);
             });
-        } else {
+        }
+        else {
             for (let anomaly of anomalies) {
                 anomaliesValues.push("(" + anomaly.id + ", '" + anomaly.reference + "', '" + anomaly.is_ref + "', '" + anomaly.quantity + "', '" + (anomaly.location ? anomaly.location : 'N/A') + "', '" + anomaly.barCode + "')");
             }
@@ -486,7 +493,8 @@ export class SqliteProvider {
             let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `location`, `barcode`) VALUES ' + anomaliesValuesStr + ';';
             if (anomaliesValues.length > 0) {
                 ret$.next(sqlAnomaliesInventaire);
-            } else {
+            }
+            else {
                 ret$.next(undefined);
             }
         }
@@ -534,7 +542,7 @@ export class SqliteProvider {
         return this.findOneBy(table, {id});
     }
 
-    public findOneBy(table: string, conditions: {[name: string]: any}, glue: string = 'OR'): Observable<any> {
+    public findOneBy(table: string, conditions: { [name: string]: any }, glue: string = 'OR'): Observable<any> {
         const condition = Object
             .keys(conditions)
             .map((name) => `${name} ${this.getComparatorForQuery(conditions[name])} ${this.getValueForQuery(conditions[name])}`)
@@ -679,7 +687,8 @@ export class SqliteProvider {
             if (i == 0) {
                 query += " WHERE ";
 
-            } else {
+            }
+            else {
                 query += " AND ";
             }
             let operator = "=";
@@ -872,7 +881,8 @@ export class SqliteProvider {
         let resp = new Promise<any>((resolve) => {
             if (preparations.length === 0) {
                 resolve();
-            } else {
+            }
+            else {
                 this.db$.subscribe((db) => {
                     preparations.forEach(preparation => {
                         db.executeSql('DELETE FROM `preparation` WHERE id = ' + preparation.id, []).then(() => {
@@ -893,7 +903,8 @@ export class SqliteProvider {
         let resp = new Promise<any>((resolve) => {
             if (manutentions.length === 0) {
                 resolve();
-            } else {
+            }
+            else {
                 this.db$.subscribe((db) => {
                     manutentions.forEach(manutention => {
                         db.executeSql('DELETE FROM `manutention` WHERE id = ' + manutention.id, []).then(() => {
@@ -910,7 +921,8 @@ export class SqliteProvider {
         let resp = new Promise<any>((resolve) => {
             if (livraisons.length === 0) {
                 resolve();
-            } else {
+            }
+            else {
                 this.db$.subscribe((db) => {
                     livraisons.forEach(livraison => {
                         db.executeSql('DELETE FROM `livraison` WHERE id = ' + livraison.id, []).then(() => {
@@ -931,7 +943,8 @@ export class SqliteProvider {
         let resp = new Promise<any>((resolve) => {
             if (collectes.length === 0) {
                 resolve();
-            } else {
+            }
+            else {
                 this.db$.subscribe((db) => {
                     collectes.forEach(collecte => {
                         db.executeSql('DELETE FROM `collecte` WHERE id = ' + collecte.id, []).then(() => {
@@ -952,7 +965,8 @@ export class SqliteProvider {
         let resp = new Promise<any>((resolve) => {
             if (anomalies.length === 0) {
                 resolve();
-            } else {
+            }
+            else {
                 this.db$.subscribe((db) => {
                     anomalies.forEach(anomaly => {
                         db.executeSql('DELETE FROM `anomalie_inventaire` WHERE id = ' + anomaly.id, []).then(() => {
@@ -1001,8 +1015,8 @@ export class SqliteProvider {
     private getValueForQuery(value: any): string {
         return (
             (typeof value === 'string') ? `'${value}'` :
-            (typeof value === 'boolean') ? Number(value) :
-            value // number
+                (typeof value === 'boolean') ? Number(value) :
+                    value // number
         );
     }
 

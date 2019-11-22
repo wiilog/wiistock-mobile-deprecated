@@ -1,7 +1,7 @@
 {
-  "name": "FollowGT-Nomade",
-  "integrations": {
-    "cordova": {}
-  },
-  "type": "ionic-angular"
+    "name": "FollowGT-Nomade",
+    "integrations": {
+        "cordova": {}
+    },
+    "type": "ionic-angular"
 }
