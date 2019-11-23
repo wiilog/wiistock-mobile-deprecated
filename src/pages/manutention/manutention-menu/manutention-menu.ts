@@ -1,10 +1,9 @@
 import {Component, ViewChild} from '@angular/core';
-import {Content, IonicPage, Navbar, NavController} from 'ionic-angular';
+import {IonicPage, Navbar, NavController} from 'ionic-angular';
 import {Manutention} from '@app/entities/manutention';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {MenuPage} from '@pages/menu/menu';
 import {ManutentionValidatePage} from '@pages/manutention/manutention-validate/manutention-validate';
-import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()
@@ -16,16 +15,11 @@ export class ManutentionMenuPage {
     @ViewChild(Navbar)
     public navBar: Navbar;
 
-    @ViewChild(Content)
-    public content: Content;
-
     public manutentions: Array<Manutention>;
     public hasLoaded: boolean;
-    public user: string;
 
     public constructor(private navCtrl: NavController,
-                       private sqliteProvider: SqliteProvider,
-                       private storageService: StorageService) {
+                       private sqliteProvider: SqliteProvider) {
     }
 
     public goHome(): void {
@@ -33,19 +27,10 @@ export class ManutentionMenuPage {
     }
 
     public ionViewWillEnter(): void {
-        this.synchronise();
-    }
-
-    public synchronise(): void {
         this.hasLoaded = false;
         this.sqliteProvider.findAll('`manutention`').subscribe((manutentions) => {
             this.manutentions = manutentions;
-            this.storageService.getOperateur().subscribe((userName) => {
-                console.log(this.user);
-                this.user = userName;
-                this.hasLoaded = true;
-                this.content.resize();
-            });
+            this.hasLoaded = true;
         });
     }
 

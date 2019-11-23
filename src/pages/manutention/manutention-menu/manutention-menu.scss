@@ -1,9 +1,5 @@
 page-manutention-menu {
 
-    .toolbar-background {
-        background-color: #030F4C !important;
-    }
-
     .toolbar-title {
         font-family: "Myriad Pro" !important;
     }
@@ -15,19 +11,6 @@ page-manutention-menu {
     span {
         font-family: 'Myriad Pro' !important;
         margin-right: 15px;
-    }
-
-    .user-title {
-        .toolbar-title {
-            color: white;
-        }
-
-        text-align: center !important;
-    }
-
-    .subtitle {
-        font-size: 20px;
-        color: #030F4C;
     }
 
     .custom-button,
@@ -63,6 +46,14 @@ page-manutention-menu {
         background-color: #FFFFFF !important;
         text-align: center !important;
         align-content: center !important;
+        .title {
+            margin-top: 16px;
+        }
+        .title, .subtitle {
+            font-size: 20px;
+            color: #030F4C;
+            margin-bottom: 16px;
+        }
     }
 
     .body {
@@ -87,6 +78,8 @@ page-manutention-menu {
 
     .icon-manutention-container {
         text-align: center;
+        margin-top: 16px;
+        margin-bottom: 16px;
     }
 
     .placeholder-buttons {

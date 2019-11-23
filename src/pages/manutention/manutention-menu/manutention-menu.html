@@ -1,31 +1,24 @@
-<ion-content>
-    <br>
-    <div class="titles" *ngIf="hasLoaded">
-        <ion-title *ngIf="manutentions && manutentions.length === 0">Aucune manutention<br>à traiter.</ion-title>
-        <ion-title *ngIf="manutentions && manutentions.length > 0">Menu | <b class="important">Manutentions</b></ion-title>
-        <p *ngIf="manutentions && manutentions.length > 0" class="subtitle">{{ manutentions.length }} manutention{{ manutentions.length > 1 ? 's' : ''}}</p>
+<div class="titles" *ngIf="hasLoaded">
+    <div class="title" *ngIf="manutentions && manutentions.length === 0">Aucune manutention<br>à traiter.</div>
+    <div class="title" *ngIf="manutentions && manutentions.length > 0">Menu | <b class="important">Manutentions</b></div>
+    <div class="subtitle" *ngIf="manutentions && manutentions.length > 0">{{ manutentions.length }} manutention{{ manutentions.length > 1 ? 's' : ''}}</div>
+</div>
+<div class="spinner-container" *ngIf="!hasLoaded" >
+    <ion-spinner class="main-spinner"></ion-spinner>
+</div>
+<ion-scroll scrollY="true" *ngIf="hasLoaded" class="body">
+    <div class="icon-manutention-container">
+        <img src="assets/icon/manut_icon.svg" height="50px" width="50px">
     </div>
-    <div class="spinner-container" *ngIf="!hasLoaded" >
-        <ion-spinner class="main-spinner"></ion-spinner>
-    </div>
-    <ion-scroll scrollY="true" *ngIf="hasLoaded" class="body">
-        <br>
-        <div class="icon-manutention-container">
-            <img src="assets/icon/manut_icon.svg" height="50px" width="50px">
-        </div>
-        <br>
-        <ng-container *ngIf="manutentions && manutentions.length > 0 && hasLoaded">
-            <ion-card *ngFor="let manutention of manutentions" (click)="goToManut(manutention)">
-                <ion-card-header>
-                    <p>Demandeur <b>{{ manutention.demandeur }} </b></p>
-                </ion-card-header>
-                <ion-card-content>
-                    <span>Date attendue <b>{{ toDate(manutention) | date:'dd/MM/yyyy H:mm' }}</b></span>
-                    <img src="assets/icon/side_arrow.svg" class="arrow">
-                </ion-card-content>
-            </ion-card>
-        </ng-container>
-        <br>
-    </ion-scroll>
-
-</ion-content>
+    <ng-container *ngIf="manutentions && manutentions.length > 0 && hasLoaded">
+        <ion-card *ngFor="let manutention of manutentions" (click)="goToManut(manutention)">
+            <ion-card-header>
+                <p>Demandeur <b>{{ manutention.demandeur }} </b></p>
+            </ion-card-header>
+            <ion-card-content>
+                <span>Date attendue <b>{{ toDate(manutention) | date:'dd/MM/yyyy H:mm' }}</b></span>
+                <img src="assets/icon/side_arrow.svg" class="arrow">
+            </ion-card-content>
+        </ion-card>
+    </ng-container>
+</ion-scroll>

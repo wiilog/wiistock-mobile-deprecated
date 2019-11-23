@@ -1,5 +1,5 @@
-import {Component, ViewChild} from '@angular/core';
-import {AlertController, Content, IonicPage, NavController, NavParams} from 'ionic-angular';
+import {Component} from '@angular/core';
+import {AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
 import {Manutention} from '@app/entities/manutention';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
@@ -16,13 +16,9 @@ import {StorageService} from '@app/services/storage.service';
     templateUrl: 'manutention-validate.html',
 })
 export class ManutentionValidatePage {
-    @ViewChild(Content)
-    public content: Content;
-
     public manutention: Manutention;
     public commentaire: string;
     public hasLoaded: boolean;
-    public user: string;
     public showCom: boolean = false;
 
     public constructor(public alertController: AlertController,
@@ -90,11 +86,7 @@ export class ManutentionValidatePage {
         this.hasLoaded = false;
         this.sqliteProvider.findOneById('`manutention`', this.manutention.id).subscribe(manutention => {
             this.manutention = manutention;
-            this.storageService.getOperateur().subscribe((userName) => {
-                this.user = userName;
-                this.hasLoaded = true;
-                this.content.resize();
-            });
+            this.hasLoaded = true;
         })
     }
 

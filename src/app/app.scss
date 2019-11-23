@@ -162,18 +162,23 @@ button[ion-button] {
 }
 
 .ion-page {
-    padding: 16px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
-ion-content.with-header {
-    .ion-page {
-        height: calc(100% - 82px);
+ion-content {
+    &[padding] .ion-page {
+        padding: 16px;
     }
-}
 
-button[ion-button][color="success"] {
-    background-color: $green;
+    &.with-header {
+        .ion-page {
+            height: calc(100% - 82px);
+        }
+    }
+
+    button[ion-button][color="success"] {
+        background-color: $green;
+    }
 }
