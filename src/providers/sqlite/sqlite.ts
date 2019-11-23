@@ -1,4 +1,4 @@
-import {SQLite, SQLiteObject} from "@ionic-native/sqlite";
+import {SQLite, SQLiteObject} from '@ionic-native/sqlite';
 import {Injectable} from '@angular/core';
 import {StorageService} from '@app/services/storage.service';
 import moment from 'moment';
@@ -13,8 +13,6 @@ import {of} from 'rxjs/observable/of';
 import {Platform} from 'ionic-angular';
 import {Collecte} from '@app/entities/collecte';
 import {Manutention} from '@app/entities/manutention';
-import {Article} from "@app/entities/article";
-import {Emplacement} from "@app/entities/emplacement";
 
 
 @Injectable()
@@ -124,9 +122,12 @@ export class SqliteProvider {
             );
     }
 
-    private importArticles(data): string {
+    private importArticles(data): Observable<any> {
         let articles = data['articles'];
-        if (articles.length > 0) {
+        let articleValuesStr;
+        const filled = (articles && articles.length > 0);
+
+        if (filled) {
             let articleValues = articles.map((article) => (
                 "(" +
                 "NULL, " +
@@ -135,28 +136,35 @@ export class SqliteProvider {
                 (article.barCode ? `'${article.barCode}'` : 'null') +
                 ")"
             ));
-            let articleValuesStr = articleValues.join(', ');
-            return 'INSERT INTO `article` (`id`, `reference`, `quantite`, `barcode`) VALUES ' + articleValuesStr + ';';
-        } else {
-            return undefined;
+            articleValuesStr = articleValues.join(', ');
         }
+
+        return filled
+            ? this.executeQuery('INSERT INTO `article` (`id`, `reference`, `quantite`, `barcode`) VALUES ' + articleValuesStr + ';')
+            : of(undefined);
     }
 
-    private importEmplacements(data): string {
-        let emplacements = data['emplacements'];
-        if (emplacements && emplacements.length) {
-            let emplacementValues = emplacements.map((emplacement) => (
-                "(" + emplacement.id + ", '" + emplacement.label.replace(/(\"|\')/g, "\'$1") + "')"
-            ));
-            let emplacementValuesStr = emplacementValues.join(', ');
-            return 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';';
-        } else {
-            return undefined;
-        }
+    private importEmplacements(data): Observable<any> {
+        let apiEmplacements = data['emplacements'];
+        const filled = (apiEmplacements && apiEmplacements.length > 0);
+
+        return filled
+            ? this.cleanTable('`emplacement`')
+                .pipe(
+                    map(() => {
+                        let emplacementValues = apiEmplacements.map((emplacement) => (
+                            "(" + emplacement.id + ", '" + emplacement.label.replace(/(\"|\')/g, "\'$1") + "')"
+                        ));
+                        let emplacementValuesStr = emplacementValues.join(', ');
+                        return 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';'
+                    }),
+                    flatMap((query) => this.executeQuery(query))
+            )
+            : of(undefined);
     }
 
-    public importPreparations(data): Observable<string> {
-        const ret$ = new ReplaySubject<string>(1);
+    public importPreparations(data): Observable<any> {
+        const ret$ = new ReplaySubject<any>(1);
 
         let prepas = data['preparations'];
         let prepasValues = [];
@@ -177,14 +185,24 @@ export class SqliteProvider {
                         let prepasValuesStr = prepasValues.join(', ');
                         let sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`, `destination`, `type`) VALUES ' + prepasValuesStr + ';';
                         if (preparations.length === 0) {
-                            ret$.next((prepasValues.length > 0)
-                                ? sqlPrepas
-                                : undefined);
+                            if (prepasValues.length > 0) {
+                                this.executeQuery(sqlPrepas).subscribe(() => {
+                                    ret$.next(true);
+                                });
+                            }
+                            else {
+                                ret$.next(undefined);
+                            }
                         } else {
                             this.deletePreparations(preparations.filter(p => prepas.find(prep => prep.id === p.id) === undefined)).then(() => {
-                                ret$.next((prepasValues.length > 0)
-                                    ? sqlPrepas
-                                    : undefined);
+                                if (prepasValues.length > 0) {
+                                    this.executeQuery(sqlPrepas).subscribe(() => {
+                                        ret$.next(true);
+                                    });
+                                }
+                                else {
+                                    ret$.next(undefined);
+                                }
                             });
                         }
                     });
@@ -194,8 +212,8 @@ export class SqliteProvider {
         return ret$;
     }
 
-    public importManutentions(data): Observable<string> {
-        const ret$ = new ReplaySubject<string>(1);
+    public importManutentions(data): Observable<any> {
+        const ret$ = new ReplaySubject<any>(1);
 
         let manutentions = data['manutentions'];
         let manutValues = [];
@@ -219,10 +237,24 @@ export class SqliteProvider {
                         let sqlManut = 'INSERT INTO `manutention` (`id`, `date_attendue`, `demandeur`, `commentaire`, `source`, `destination`) VALUES ' + manutValuesStr + ';';
 
                         if (manutentionsDB.length === 0) {
-                            ret$.next(sqlManut);
+                            if (manutValues.length > 0) {
+                                this.executeQuery(sqlManut).subscribe(() => {
+                                    ret$.next(true);
+                                });
+                            }
+                            else {
+                                ret$.next(undefined);
+                            }
                         } else {
                             this.deleteManutentions(manutentionsDB.filter(m => manutentions.find(manut => manut.id === m.id) === undefined)).then(() => {
-                                ret$.next(sqlManut);
+                                if (manutValues.length > 0) {
+                                    this.executeQuery(sqlManut).subscribe(() => {
+                                        ret$.next(true);
+                                    });
+                                }
+                                else {
+                                    ret$.next(undefined);
+                                }
                             });
                         }
                     });
@@ -232,8 +264,8 @@ export class SqliteProvider {
         return ret$;
     }
 
-    public importArticlesPrepas(data): Observable<string> {
-        const ret$ = new ReplaySubject<string>(1);
+    public importArticlesPrepas(data): Observable<any> {
+        const ret$ = new ReplaySubject<any>(1);
         let articlesPrepa = data['articlesPrepa'];
         let articlesPrepaValues = [];
         if (articlesPrepa.length === 0) {
@@ -260,7 +292,10 @@ export class SqliteProvider {
                     if (articlesPrepaValues.length > 0) {
                         let articlesPrepaValuesStr = articlesPrepaValues.join(', ');
                         let sqlArticlesPrepa = 'INSERT INTO `article_prepa` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_prepa`, `has_moved`, `emplacement`, `type_quantite`, `barcode`) VALUES ' + articlesPrepaValuesStr + ';';
-                        ret$.next(sqlArticlesPrepa);
+
+                        this.executeQuery(sqlArticlesPrepa).subscribe(() => {
+                            ret$.next(true);
+                        });
                     } else {
                         ret$.next(undefined);
                     }
@@ -274,8 +309,8 @@ export class SqliteProvider {
         return string.replace(/'/g, "\''");
     }
 
-    public importLivraisons(data): Observable<string> {
-        const ret$ = new ReplaySubject<string>(1);
+    public importLivraisons(data): Observable<any> {
+        const ret$ = new ReplaySubject<any>(1);
         let livraisons = data['livraisons'];
         let livraisonsValues = [];
         if (livraisons.length === 0) {
@@ -295,11 +330,24 @@ export class SqliteProvider {
                         let livraisonsValuesStr = livraisonsValues.join(', ');
                         let sqlLivraisons = 'INSERT INTO `livraison` (`id`, `numero`, `emplacement`, `date_end`) VALUES ' + livraisonsValuesStr + ';';
                         if (livraisonsDB.length === 0) {
-                            ret$.next((livraisonsValues.length > 0) ? sqlLivraisons : undefined);
-
+                            if(livraisonsValues.length > 0) {
+                                this.executeQuery(sqlLivraisons).subscribe(() => {
+                                    ret$.next(true);
+                                });
+                            }
+                            else {
+                                ret$.next(undefined);
+                            }
                         } else {
                             this.deleteLivraisons(livraisonsDB.filter(l => livraisons.find(livr => livr.id === l.id) === undefined)).then(() => {
-                                ret$.next((livraisonsValues.length > 0) ? sqlLivraisons : undefined);
+                                if(livraisonsValues.length > 0) {
+                                    this.executeQuery(sqlLivraisons).subscribe(() => {
+                                        ret$.next(true);
+                                    });
+                                }
+                                else {
+                                    ret$.next(undefined);
+                                }
                             });
                         }
                     });
@@ -309,8 +357,8 @@ export class SqliteProvider {
         return ret$;
     }
 
-    public importArticlesLivraison(data): Observable<string> {
-        const ret$ = new ReplaySubject<string>(1);
+    public importArticlesLivraison(data): Observable<any> {
+        const ret$ = new ReplaySubject<any>(1);
         let articlesLivrs = data['articlesLivraison'];
         let articlesLivraisonValues = [];
         if (articlesLivrs.length === 0) {
@@ -333,10 +381,12 @@ export class SqliteProvider {
                         ")");
                 }
                 if (articlesLivrs.indexOf(article) === articlesLivrs.length - 1) {
-                    if (articlesLivraisonValues.length) {
+                    if (articlesLivraisonValues.length > 0) {
                         let articlesLivraisonValuesStr = articlesLivraisonValues.join(', ');
                         let sqlArticlesLivraison = 'INSERT INTO `article_livraison` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_livraison`, `has_moved`, `emplacement`, `barcode`) VALUES ' + articlesLivraisonValuesStr + ';';
-                        ret$.next(sqlArticlesLivraison);
+                        this.executeQuery(sqlArticlesLivraison).subscribe(() => {
+                            ret$.next(sqlArticlesLivraison);
+                        });
                     } else {
                         ret$.next(undefined);
                     }
@@ -346,8 +396,8 @@ export class SqliteProvider {
         return ret$;
     }
 
-    importCollectes(data): Observable<string> {
-        const ret$ = new ReplaySubject<string>(1);
+    public importCollectes(data): Observable<any> {
+        const ret$ = new ReplaySubject<any>(1);
         let collectes = data['collectes'];
         let collectesValues = [];
         if (collectes.length === 0) {
@@ -367,10 +417,24 @@ export class SqliteProvider {
                         let collectesValuesStr = collectesValues.join(', ');
                         let sqlCollectes = 'INSERT INTO `collecte` (`id`, `numero`, `emplacement`, `date_end`) VALUES ' + collectesValuesStr + ';';
                         if (collectesDB.length === 0) {
-                            ret$.next(sqlCollectes);
+                            if(collectesValues.length > 0) {
+                                this.executeQuery(sqlCollectes).subscribe(() => {
+                                    ret$.next(true);
+                                });
+                            }
+                            else {
+                                ret$.next(undefined);
+                            }
                         } else {
                             this.deleteCollectes(collectesDB.filter(c => collectes.find(col => col.id === c.id) === undefined)).then(() => {
-                                ret$.next(sqlCollectes);
+                                if(collectesValues.length > 0) {
+                                    this.executeQuery(sqlCollectes).subscribe(() => {
+                                        ret$.next(true);
+                                    });
+                                }
+                                else {
+                                    ret$.next(undefined);
+                                }
                             });
                         }
                     });
@@ -395,8 +459,8 @@ export class SqliteProvider {
         );
     }
 
-    importArticlesCollecte(data): Observable<string> {
-        const ret$ = new ReplaySubject<string>(1);
+    public importArticlesCollecte(data): Observable<any> {
+        const ret$ = new ReplaySubject<any>(1);
         let articlesCols = data['articlesCollecte'];
         let articlesCollecteValues = [];
         if (articlesCols.length === 0) {
@@ -410,7 +474,19 @@ export class SqliteProvider {
                 if (articlesCols.indexOf(article) === articlesCols.length - 1) {
                     let articlesCollectesValuesStr = articlesCollecteValues.join(', ');
                     let sqlArticlesCollecte = 'INSERT INTO `article_collecte` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_collecte`, `has_moved`, `emplacement`, `barcode`) VALUES ' + articlesCollectesValuesStr + ';';
-                    ret$.next(sqlArticlesCollecte)
+                    if(articlesCollecteValues.length > 0) {
+                        if (articlesCollecteValues.length > 0) {
+                            this.executeQuery(sqlArticlesCollecte).subscribe(() => {
+                                ret$.next(true);
+                            });
+                        }
+                        else {
+                            ret$.next(undefined);
+                        }
+                    }
+                    else {
+                        ret$.next(undefined);
+                    }
                 }
             });
         }
@@ -418,7 +494,6 @@ export class SqliteProvider {
     }
 
     public importArticlesInventaire(data): Observable<any> {
-
         const importExecuted = new ReplaySubject<any>(1);
         let articlesInventaire = data['inventoryMission'];
 
@@ -435,15 +510,21 @@ export class SqliteProvider {
             if (articlesInventaire.indexOf(article) === articlesInventaire.length - 1) {
                 let articlesInventaireValuesStr = articlesInventaireValues.join(', ');
                 let sqlArticlesInventaire = 'INSERT INTO `article_inventaire` (`id`, `id_mission`, `reference`, `is_ref`, `location`, `barcode`) VALUES ' + articlesInventaireValuesStr + ';';
-                importExecuted.next((articlesInventaireValues.length > 0)
-                    ? sqlArticlesInventaire
-                    : undefined);
+
+                if (articlesInventaireValues.length > 0) {
+                    this.executeQuery(sqlArticlesInventaire).subscribe(() => {
+                        importExecuted.next(true);
+                    });
+                }
+                else {
+                    importExecuted.next(undefined);
+                }
             }
         }
         return importExecuted;
     }
 
-    private importArticlesPrepaByRefArticle(data): string {
+    private importArticlesPrepaByRefArticle(data): Observable<any> {
         const articlesPrepaByRefArticle = data['articlesPrepaByRefArticle'];
         let ret;
 
@@ -461,72 +542,64 @@ export class SqliteProvider {
                 return '(' + (articleKeys.map((key) => ("'" + articleTmp[key] + "'")).join(', ') + ')')
             });
 
-            ret = 'INSERT INTO `article_prepa_by_ref_article` (' +
+            ret = this.executeQuery('INSERT INTO `article_prepa_by_ref_article` (' +
                 articleKeys.map((key) => `\`${key}\``).join(', ') + ') VALUES ' +
-                articleValues + ';';
+                articleValues + ';');
+        }
+        else {
+            ret = of(undefined);
         }
 
         return ret;
     }
 
-    public importAnomaliesInventaire(data): Observable<string> {
-        let ret$: ReplaySubject<string> = new ReplaySubject(1);
+    public importAnomaliesInventaire(data): Observable<any> {
+        let ret$: ReplaySubject<any> = new ReplaySubject(1);
         let anomalies = data.anomalies;
 
-        let anomaliesValues = [];
         if (anomalies.length === 0) {
             this.cleanTable('`anomalie_inventaire`').subscribe(_ => {
                 ret$.next(undefined);
             });
         } else {
-            for (let anomaly of anomalies) {
-                anomaliesValues.push("(" + anomaly.id + ", '" + anomaly.reference + "', '" + anomaly.is_ref + "', '" + anomaly.quantity + "', '" + (anomaly.location ? anomaly.location : 'N/A') + "', '" + anomaly.barCode + "')");
-            }
-            let anomaliesValuesStr = anomaliesValues.join(', ');
+            const anomaliesValuesStr = anomalies
+                .map((anomaly) => (
+                    "(" +
+                    anomaly.id + ", " +
+                    "'" + anomaly.reference + "', " +
+                    "'" + anomaly.is_ref + "', " +
+                    "'" + anomaly.quantity + "', " +
+                    "'" + (anomaly.location ? anomaly.location : 'N/A') + "', " +
+                    "'" + anomaly.barCode + "')"
+                ))
+                .join(', ');
             let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `location`, `barcode`) VALUES ' + anomaliesValuesStr + ';';
-            if (anomaliesValues.length > 0) {
-                ret$.next(sqlAnomaliesInventaire);
-            } else {
-                ret$.next(undefined);
-            }
+            this.executeQuery(sqlAnomaliesInventaire).subscribe(() => {
+                ret$.next(true);
+            });
         }
         return ret$;
     }
 
-    private executeAllImports(imports: Array<string>): Observable<any> {
-        return this.db$.pipe(
-            flatMap((db) => from(Promise.all(imports.map((importSql) => (
-                db.executeSql(importSql, []).catch((err) => {
-                    console.log(importSql, err);
-                })
-            ))))),
-            map(() => undefined)
-        );
-    }
-
     public importData(data: any): Observable<undefined> {
-        const concatSqlImports = (imports: Array<string>, sql: string) => ([...imports, sql]);
-        const createMapSqlImportObs = (imports: Array<string>) => map((sql: string) => concatSqlImports(imports, sql));
         return of(undefined).pipe(
-            map(() => concatSqlImports([], this.importEmplacements(data))),
-            map((imports) => concatSqlImports(imports, this.importArticlesPrepaByRefArticle(data))),
-            map((imports) => concatSqlImports(imports, this.importArticles(data))),
-            flatMap((imports) => this.importPreparations(data).pipe(createMapSqlImportObs(imports))),
-            flatMap((imports) => this.importArticlesPrepas(data).pipe(createMapSqlImportObs(imports))),
-            flatMap((imports) => this.importLivraisons(data).pipe(createMapSqlImportObs(imports))),
-            flatMap((imports) => this.importArticlesLivraison(data).pipe(createMapSqlImportObs(imports))),
-            flatMap((imports) => this.importArticlesInventaire(data).pipe(createMapSqlImportObs(imports))),
-            flatMap((imports) => this.importManutentions(data).pipe(createMapSqlImportObs(imports))),
-            flatMap((imports) => this.importCollectes(data).pipe(createMapSqlImportObs(imports))),
-            flatMap((imports) => this.importArticlesCollecte(data).pipe(createMapSqlImportObs(imports))),
-            flatMap((imports) => (
+            flatMap(() => this.importEmplacements(data)),
+            flatMap(() => this.importArticlesPrepaByRefArticle(data)),
+            flatMap(() => this.importArticles(data)),
+            flatMap(() => this.importPreparations(data)),
+            flatMap(() => this.importArticlesPrepas(data)),
+            flatMap(() => this.importLivraisons(data)),
+            flatMap(() => this.importArticlesLivraison(data)),
+            flatMap(() => this.importArticlesInventaire(data)),
+            flatMap(() => this.importManutentions(data)),
+            flatMap(() => this.importCollectes(data)),
+            flatMap(() => this.importArticlesCollecte(data)),
+            flatMap(() => (
                 from(this.storageService.getInventoryManagerRight()).pipe(
                     flatMap((res) => (res
-                        ? this.importAnomaliesInventaire(data).pipe(createMapSqlImportObs(imports))
-                        : of(imports))),
-                ))),
-            map((imports: Array<string>) => imports.filter((importSql) => importSql)),
-            flatMap((imports) => this.executeAllImports(imports))
+                        ? this.importAnomaliesInventaire(data)
+                        : of(undefined))),
+                )))
         );
     }
 
@@ -895,11 +968,10 @@ export class SqliteProvider {
                 resolve();
             } else {
                 this.db$.subscribe((db) => {
-                    manutentions.forEach(manutention => {
-                        db.executeSql('DELETE FROM `manutention` WHERE id = ' + manutention.id, []).then(() => {
-                            resolve();
-                        }).catch(err => console.log(err));
-                    });
+                    const manutentionIds = manutentions.map(({id}) => id).join(', ');
+                    db.executeSql(`DELETE FROM \`manutention\` WHERE id IN (${manutentionIds})`, []).then(() => {
+                        resolve();
+                    }).catch(err => console.log(err));
                 });
             }
         });
