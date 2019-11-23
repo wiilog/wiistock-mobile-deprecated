@@ -1,5 +1,5 @@
 import {AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, Output, ViewChild} from '@angular/core';
-import {Nav, NavController} from 'ionic-angular';
+import {Nav} from 'ionic-angular';
 import {StorageService} from '@app/services/storage.service';
 import {Observable, Subscription} from 'rxjs';
 import {MenuPage} from '@pages/menu/menu';

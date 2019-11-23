@@ -1,4 +1,4 @@
-<wii-header [nav]="nav" (withHeader)="pageWithHeader = $event"></wii-header>
+<wii-header [nav]="nav" (withHeader)="onHeaderChange($event)"></wii-header>
 <ion-content padding [class.with-header]="pageWithHeader">
     <ion-nav [root]="rootPage" swipeBackEnabled="false"></ion-nav>
 </ion-content>

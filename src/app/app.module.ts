@@ -48,6 +48,7 @@ import {AlertManagerService} from '@app/services/alert-manager.service';
 import {VersionCheckerService} from "@app/services/version-checker.service";
 import {AppVersion} from "@ionic-native/app-version";
 import {LocalDataManagerService} from "@app/services/local-data-manager.service";
+import {ScssHelperService} from "@app/services/scss-helper.service";
 
 
 @NgModule({
@@ -139,7 +140,8 @@ import {LocalDataManagerService} from "@app/services/local-data-manager.service"
         ToastService,
         AlertManagerService,
         EntityFactoryService,
-        LocalDataManagerService
+        LocalDataManagerService,
+        ScssHelperService
     ]
 })
 export class AppModule {
