@@ -1,8 +1,6 @@
 <ion-content>
-    <div class="spinner-container" *ngIf="loading">
-        <ion-spinner class="main-spinner"></ion-spinner>
-        <p class="spinner-text">Synchronisation des données en cours...</p>
-    </div>
+    <wii-main-loader [loading]="loading"
+                     [message]="messageLoading"></wii-main-loader>
     <ng-container *ngIf="!loading">
         <ion-grid>
             <ion-row class="row-menu-stats">

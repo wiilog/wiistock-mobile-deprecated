@@ -14,8 +14,8 @@ import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
 import {StorageService} from '@app/services/storage.service';
+import {ApiService} from '@app/services/api.service';
 import {Network} from "@ionic-native/network";
-import {ApiServices} from "@app/config/api-services";
 
 
 @IonicPage()
@@ -37,14 +37,15 @@ export class CollecteArticlesPage {
 
     private zebraScannerSubscription: Subscription;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public toastService: ToastService,
-                       public sqliteProvider: SqliteProvider,
-                       public http: HttpClient,
-                       public barcodeScannerManager: BarcodeScannerManagerService,
-                       private storageService: StorageService,
-                       private network: Network) {
+    public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private toastService: ToastService,
+                       private sqliteProvider: SqliteProvider,
+                       private http: HttpClient,
+                       private network: Network,
+                       private barcodeScannerManager: BarcodeScannerManagerService,
+                       private apiService: ApiService,
+                       private storageService: StorageService) {
         this.loadingStartCollecte = false;
     }
 
@@ -230,31 +231,31 @@ export class CollecteArticlesPage {
     }
 
     private selectArticle(article, quantity): void {
-        if (!this.started) {
-            if (this.network.type !== 'none') {
-                this.loadingStartCollecte = true;
-                this.sqliteProvider.getApiUrl(ApiServices.BEGIN_COLLECTE).subscribe((url) => {
-                    this.storageService.getApiKey().subscribe((key) => {
-                        this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
-                            if (resp.success) {
-                                this.started = true;
-                                this.isValid = true;
-                                this.toastService.showToast('Collecte commencée.');
-                                this.registerMvt(article, quantity);
-                            }
-                            else {
-                                this.isValid = false;
-                                this.loadingStartCollecte = false;
-                                this.toastService.showToast(resp.msg);
-                            }
-                        });
+        if (!this.started && this.network.type !== 'none') {
+            this.loadingStartCollecte = true;
+            this.apiService.getApiUrl(ApiService.BEGIN_COLLECTE).subscribe((url) => {
+                this.storageService.getApiKey().subscribe((key) => {
+                    this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
+                        if (resp.success) {
+                            this.started = true;
+                            this.isValid = true;
+                            this.toastService.showToast('Collecte commencée.');
+                            this.registerMvt(article, quantity);
+                        }
+                        else {
+                            this.isValid = false;
+                            this.loadingStartCollecte = false;
+                            this.toastService.showToast(resp.msg);
+                        }
                     });
                 });
+            });
+        }
+        else {
+            if (this.network.type === 'none') {
+                this.toastService.showToast('Collecte commencée en mode hors ligne');
             }
-            else {
-                this.toastService.showToast('Vous devez être connecté à internet pour commencer la collecte')
-            }
-        } else {
+
             this.registerMvt(article, quantity);
         }
     }

@@ -1,9 +1,10 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams} from 'ionic-angular';
+import {IonicPage, NavController} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
 import {ToastService} from '@app/services/toast.service';
-import {ApiServices} from "@app/config/api-services";
+import {ApiService} from '@app/services/api.service';
+import {flatMap} from 'rxjs/operators';
 
 
 @IonicPage()
@@ -17,17 +18,17 @@ export class ParamsPage {
 
     private isLoading: boolean;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public sqLiteProvider: SqliteProvider,
-                       public http: HttpClient,
+    public constructor(private navCtrl: NavController,
+                       private sqliteProvider: SqliteProvider,
+                       private http: HttpClient,
+                       private apiService: ApiService,
                        private toastService: ToastService) {
         this.URL = '';
         this.isLoading = true;
     }
 
     public ionViewWillEnter(): void {
-        this.sqLiteProvider.getServerUrl().subscribe((baseUrl) => {
+        this.sqliteProvider.getServerUrl().subscribe((baseUrl) => {
             this.URL = !baseUrl ? '' : baseUrl;
             this.isLoading = false;
         });
@@ -35,27 +36,24 @@ export class ParamsPage {
 
     public registerURL(): void {
         if (!this.isLoading) {
-            this.sqLiteProvider.setAPI_URL(this.URL).subscribe((result) => {
-                if (result === true) {
-                    this.toastService.showToast('URL enregistrée!');
-                }
-                else {
-                    console.log(result);
-                }
-            });
+            this.isLoading = true;
+            this.apiService
+                .getApiUrl(ApiService.GET_PING, this.URL)
+                .pipe(
+                    flatMap((pingURL: string) => this.http.get(pingURL)),
+                    flatMap(() => this.sqliteProvider.setAPI_URL(this.URL)),
+                    flatMap(() => this.toastService.showToast('URL enregistrée'))
+                )
+                .subscribe(
+                    () => {
+                        this.isLoading = false;
+                        this.navCtrl.pop();
+                    },
+                    () => {
+                        this.isLoading = false;
+                        this.toastService.showToast('URL invalide')
+                    }
+                );
         }
-    }
-
-    public testURL(): void {
-        let url: string = `${this.URL}/api${ApiServices.GET_PING}`;
-        this.http.post<any>(url, {}).subscribe(
-            _ => {
-                this.registerURL();
-                this.toastService.showToast('URL valide.').subscribe(() => {
-                    this.navCtrl.pop();
-                });
-            },
-            _ => this.toastService.showToast('URL non valide.')
-        );
     }
 }

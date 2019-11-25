@@ -6,9 +6,9 @@ import {SplashScreen} from '@ionic-native/splash-screen';
 import {NetworkProvider} from '@providers/network/network';
 import {Network} from '@ionic-native/network';
 import {ScssHelperService} from '@app/services/scss-helper.service';
-import {ManutentionMenuPage} from "@pages/manutention/manutention-menu/manutention-menu";
-import {Subscription} from "rxjs";
-import {ManutentionValidatePage} from "@pages/manutention/manutention-validate/manutention-validate";
+import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutention-menu';
+import {Subscription} from 'rxjs';
+import {ManutentionValidatePage} from '@pages/manutention/manutention-validate/manutention-validate';
 
 
 @Injectable()

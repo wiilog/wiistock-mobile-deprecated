@@ -3,7 +3,7 @@ export interface ArticleLivraison {
     label: string;
     reference: string;
     quantite: number;
-    is_ref: string;
+    is_ref: number;
     id_livraison: number;
     has_moved: number;
     emplacement: string;

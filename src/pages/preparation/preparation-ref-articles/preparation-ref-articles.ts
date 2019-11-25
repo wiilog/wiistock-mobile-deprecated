@@ -31,7 +31,6 @@ export class PreparationRefArticlesPage {
     public articlesToShow: Array<ArticlePrepaByRefArticle>;
 
     public searchArticle: string;
-    public readonly MAX_DISPLAY_ITEM: number = 30;
 
     private zebraBarcodeSubscription: Subscription;
 

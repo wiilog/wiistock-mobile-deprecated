@@ -1,13 +1,11 @@
+<ion-header>
+    <ion-toolbar>
+        <ion-title>Follow GT</ion-title>
+    </ion-toolbar>
+</ion-header>
+
 <div class="page-content">
-    <div class="spinner-container" *ngIf="loading">
-        <ion-spinner class="main-spinner"></ion-spinner>
-        <p class="spinner-text">Chargement...</p>
-    </div>
-
-    <div class="logo-container" *ngIf="!loading">
-        <img alt="FollowGT" src="assets/icon/followgt.svg" class="logo"/>
-    </div>
-
+    <wii-main-loader [loading]="loading"></wii-main-loader>
     <div class="version-not-valid-container" *ngIf="!loading && appVersionInvalid">
         <a [href]="apkUrl">
             <button ion-button class="version-not-valid" block>Veuillez mettre à jour l'application</button>

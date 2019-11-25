@@ -3,6 +3,7 @@ import {Emplacement} from '@app/entities/emplacement';
 import {IonicSelectableComponent} from 'ionic-selectable';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 
+
 @Component({
     selector: 'wii-search-location',
     templateUrl: 'search-location.component.html'

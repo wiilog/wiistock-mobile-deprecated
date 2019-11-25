@@ -3,14 +3,16 @@ import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {HttpClient} from '@angular/common/http';
 import {Livraison} from '@app/entities/livraison';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
-import {Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
-import {ApiServices} from "@app/config/api-services";
-import {StorageService} from "@app/services/storage.service";
+import {flatMap} from 'rxjs/operators';
+import 'rxjs/add/observable/zip';
+import {of} from 'rxjs/observable/of';
+import {Network} from '@ionic-native/network';
+import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 
 
 @IonicPage()
@@ -32,13 +34,13 @@ export class LivraisonEmplacementPage {
     private validateLivraison: () => void;
     private zebraScannerSubscription: Subscription;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public sqliteProvider: SqliteProvider,
-                       public toastService: ToastService,
-                       public barcodeScannerManager: BarcodeScannerManagerService,
-                       public http: HttpClient,
-                       private storageService: StorageService) {
+    public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private sqliteProvider: SqliteProvider,
+                       private toastService: ToastService,
+                       private barcodeScannerManager: BarcodeScannerManagerService,
+                       private network: Network,
+                       private localDataManager: LocalDataManagerService) {
         this.validateIsLoading = false;
     }
 
@@ -95,62 +97,67 @@ export class LivraisonEmplacementPage {
                 }
                 else {
                     this.validateIsLoading = true;
-                    let instance = this;
-                    let promise = new Promise<any>((resolve) => {
-                        this.sqliteProvider.findArticlesByLivraison(this.livraison.id).subscribe((articles) => {
-                            articles.forEach(function (article) {
-                                instance.sqliteProvider.findMvtByArticleLivraison(article.id).subscribe((mvt) => {
-                                    instance.sqliteProvider.finishMvt(mvt.id, instance.emplacement.label).subscribe(() => {
-                                        if (articles.indexOf(article) === articles.length - 1) resolve();
-                                    });
-                                });
+                    this.sqliteProvider
+                        .findArticlesByLivraison(this.livraison.id)
+                        .pipe(
+                            flatMap((articles) => Observable.zip(
+                                ...articles.map((article) => (
+                                    this.sqliteProvider
+                                        .findMvtByArticleLivraison(article.id)
+                                        .pipe(flatMap((mvt) => this.sqliteProvider.finishMvt(mvt.id, this.emplacement.label)))
+                                ))
+                            )),
+                            flatMap(() => this.sqliteProvider.finishLivraison(this.livraison.id, this.emplacement.label)),
+                            flatMap((): any => (
+                                (this.network.type !== 'none')
+                                    ? this.localDataManager.saveFinishedProcess('livraison')
+                                    : of({offline: true})
+                            ))
+                        )
+                        .subscribe(
+                            ({offline, success}: any) => {
+                                if (offline) {
+                                    this.toastService.showToast('Livraison sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+                                    this.closeScreen();
+                                }
+                                else {
+                                    this.handleLivraisonSuccess(success.length);
+                                }
+                            },
+                            (error) => {
+                                this.handleLivraisonError(error);
                             });
-                        });
-                    });
-                    promise.then(() => {
-                        this.sqliteProvider.finishLivraison(this.livraison.id, this.emplacement.label).subscribe(() => {
-                            this.sqliteProvider.getApiUrl(ApiServices.FINISH_LIVRAISON).subscribe((finishLivraisonUrl) => {
-                                this.storageService.getApiKey().subscribe((key) => {
-                                    this.sqliteProvider.findAll('`livraison`').subscribe(livraisonsToSend => {
-                                        this.sqliteProvider.findAll('`mouvement`').subscribe((mvts) => {
-                                            let params = {
-                                                livraisons: livraisonsToSend.filter(p => p.date_end !== null),
-                                                mouvements: mvts.filter(m => m.id_prepa === null),
-                                                apiKey: key
-                                            };
-                                            this.http.post<any>(finishLivraisonUrl, params).subscribe(resp => {
-                                                    if (resp.success) {
-                                                        this.sqliteProvider.deleteLivraisons(params.livraisons).then(() => {
-                                                            this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
-                                                                this.navCtrl.pop().then(() => {
-                                                                    this.validateLivraison();
-                                                                })
-                                                            });
-                                                        });
-                                                    }
-                                                    else {
-                                                        this.toastService.showToast(resp.msg);
-                                                    }
-                                                    this.validateIsLoading = false;
-                                                },
-                                                () => {
-                                                    this.validateIsLoading = false;
-                                                    this.navCtrl.pop().then(() => {
-                                                        this.validateLivraison();
-                                                    })
-                                                }
-                                            );
-                                        });
-                                    });
-                                });
-                            });
-                        });
-                    });
                 }
             }
             else {
                 this.toastService.showToast('Veuillez sélectionner ou scanner un emplacement.');
             }
         }
+    }
+
+    private handleLivraisonSuccess(nbLivraisonsSucceed: number): void {
+        if (nbLivraisonsSucceed > 0) {
+            this.toastService.showToast(
+                (nbLivraisonsSucceed === 1
+                    ? 'Votre livraison a bien été enregistrée'
+                    : `Votre livraison et ${nbLivraisonsSucceed - 1} livraison${nbLivraisonsSucceed - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
+            );
+        }
+        this.closeScreen();
+    }
+
+    private handleLivraisonError(resp): void {
+        this.validateIsLoading = false;
+        this.toastService.showToast((resp && resp.api && resp.message) ? resp.message : 'Une erreur s\'est produite');
+        if (resp.api) {
+            throw resp;
+        }
+    }
+
+    private closeScreen(): void {
+        this.validateIsLoading = false;
+        this.navCtrl.pop().then(() => {
+            this.validateLivraison();
+        });
     }
 }

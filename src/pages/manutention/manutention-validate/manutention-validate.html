@@ -3,10 +3,9 @@
     <div class="title" *ngIf="manutention">Menu | <b class="important">Manutentions</b></div>
     <p *ngIf="manutention" class="subtitle">Détails</p>
 </div>
-<div class="spinner-container" *ngIf="!hasLoaded">
-    <ion-spinner class="main-spinner"></ion-spinner>
-</div>
+<wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
 <ion-scroll scrollY="true" *ngIf="hasLoaded" class="body">
+    <br>
     <ion-item class="readonly" text-wrap>
         <ion-label>Demandeur</ion-label>
         <ion-textarea value="{{ manutention.demandeur }}" [readonly]="true"></ion-textarea>

@@ -1,53 +1,30 @@
 <ion-content padding>
     <div *ngIf="refArticle && articles ">
+        <h4 class="page-title">Référence sélectionnée <br/>{{ refArticle.reference }}</h4>
         <div class="scan-container">
 
             <ion-icon class="big-icon" name="barcode" (click)="scan()"></ion-icon>
             <br>
-            Flashez un article ou
+            Flashez l'article ou
         </div>
-
-        <div *ngIf="articles.length <= MAX_DISPLAY_ITEM">
-            <div class="d-flex">
-                <h4>Sélectionner un article lié à la référence : {{ refArticle.reference }}</h4>
-            </div>
-            <ion-list>
-                <ion-grid>
-                    <button class="list"
-                            ion-item *ngFor="let article of articles"
-                            (click)="testIfBarcodeEquals(article.barcode)">
-                        <ion-row>
-                            <ion-col>
-                                <!--                    TODO Changer class avec le theme-->
-                                <p class="title-tmp">Article {{article.reference}}</p>
-                                <div class="sub">
-                                    <p *ngIf="article.location !== 'null'">Emplacement : {{article.location}}</p>
-                                    <p *ngIf="article.quantity">Quantité restante : {{article.quantity}}</p>
-                                </div>
-                            </ion-col>
-                        </ion-row>
-                    </button>
-                </ion-grid>
-            </ion-list>
-        </div>
-        <div *ngIf="articles.length > MAX_DISPLAY_ITEM">
+        <div>
             <ion-card>
                 <ion-card-content>
-                    <ion-item>
-                        <ion-label>Sélectionner un article</ion-label>
+                    <ion-item class="ionic-selectable-container without-label">
                         <ionic-selectable item-content
                                           [(ngModel)]="searchArticle"
                                           [items]="articlesToShow"
                                           itemValueField="reference"
                                           itemTextField="location"
+                                          placeholder="Sélectionner l'article"
                                           [canSearch]="true"
                                           (onSelect)="selectArticle($event.item)"
                                           (onSearch)="onArticleSearch($event)">
                             <ng-template ionicSelectableSearchFailTemplate>
                             </ng-template>
                             <ng-template ionicSelectableItemTemplate let-article="item">
-                                <p class="title-tmp">Article {{article.reference}}</p>
-                                <div class="sub">
+                                <p class="article-title">Article {{article.reference}}</p>
+                                <div class="article-sub-title">
                                     <p *ngIf="article.location !== 'null'">Emplacement : {{article.location}}</p>
                                     <p *ngIf="article.quantity">Quantité restante : {{article.quantity}}</p>
                                 </div>

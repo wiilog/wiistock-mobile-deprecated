@@ -13,9 +13,9 @@ import {flatMap} from 'rxjs/operators';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
 import {ToastService} from '@app/services/toast.service';
-import {Network} from "@ionic-native/network";
-import {ApiServices} from "@app/config/api-services";
+import {ApiService} from "@app/services/api.service";
 import {StorageService} from '@app/services/storage.service';
+import {Network} from "@ionic-native/network";
 
 
 @IonicPage()
@@ -40,8 +40,9 @@ export class LivraisonArticlesPage {
                        private navParams: NavParams,
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
-                       private network: Network,
                        private http: HttpClient,
+                       private network: Network,
+                       private apiService: ApiService,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private storageService: StorageService) {
         this.loadingStartLivraison = false;
@@ -81,33 +82,31 @@ export class LivraisonArticlesPage {
     }
 
     public selectArticle(article, quantity) {
-        if (!this.started) {
-            if (this.network.type !== 'none') {
-                this.loadingStartLivraison = true;
-                this.sqliteProvider.getApiUrl(ApiServices.BEGIN_LIVRAISON).subscribe((beginLivraisonUrl) => {
-                    this.storageService.getApiKey().subscribe((key) => {
-                        this.http.post<any>(beginLivraisonUrl, {id: this.livraison.id, apiKey: key}).subscribe(resp => {
-                            if (resp.success) {
-                                this.started = true;
-                                this.isValid = true;
-                                this.toastService.showToast('Livraison commencée.');
-                                this.registerMvt(article, quantity);
-                            }
-                            else {
-                                this.isValid = false;
-                                this.loadingStartLivraison = false;
-                                this.toastService.showToast(resp.msg);
-                            }
-                        }, () => {
-
-                        });
+        if (!this.started && this.network.type !== 'none') {
+            this.loadingStartLivraison = true;
+            this.apiService.getApiUrl(ApiService.BEGIN_LIVRAISON).subscribe((beginLivraisonUrl) => {
+                this.storageService.getApiKey().subscribe((key) => {
+                    this.http.post<any>(beginLivraisonUrl, {id: this.livraison.id, apiKey: key}).subscribe(resp => {
+                        if (resp.success) {
+                            this.started = true;
+                            this.isValid = true;
+                            this.toastService.showToast('Livraison commencée.');
+                            this.registerMvt(article, quantity);
+                        }
+                        else {
+                            this.isValid = false;
+                            this.loadingStartLivraison = false;
+                            this.toastService.showToast(resp.msg);
+                        }
                     });
                 });
+            });
+        }
+        else {
+            if (this.network.type === 'none') {
+                this.toastService.showToast('Livraison commencée en mode hors ligne');
             }
-            else {
-                this.toastService.showToast('Vous devez être connecté à internet pour commencer la livraison');
-            }
-        } else {
+
             this.registerMvt(article, quantity);
         }
     }

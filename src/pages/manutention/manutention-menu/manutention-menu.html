@@ -3,9 +3,7 @@
     <div class="title" *ngIf="manutentions && manutentions.length > 0">Menu | <b class="important">Manutentions</b></div>
     <div class="subtitle" *ngIf="manutentions && manutentions.length > 0">{{ manutentions.length }} manutention{{ manutentions.length > 1 ? 's' : ''}}</div>
 </div>
-<div class="spinner-container" *ngIf="!hasLoaded" >
-    <ion-spinner class="main-spinner"></ion-spinner>
-</div>
+<wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
 <ion-scroll scrollY="true" *ngIf="hasLoaded" class="body">
     <div class="icon-manutention-container">
         <img src="assets/icon/manut_icon.svg" height="50px" width="50px">

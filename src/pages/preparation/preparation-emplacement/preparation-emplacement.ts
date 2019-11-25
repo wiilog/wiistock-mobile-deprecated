@@ -4,13 +4,16 @@ import {MenuPage} from '@pages/menu/menu';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Preparation} from '@app/entities/preparation';
-import {HttpClient} from '@angular/common/http';
 import {ToastService} from '@app/services/toast.service';
-import {Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
+import 'rxjs/add/observable/zip';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
-import {ApiServices} from "@app/config/api-services";
-import {StorageService} from "@app/services/storage.service";
+import {StorageService} from '@app/services/storage.service';
+import {LocalDataManagerService} from '@app/services/local-data-manager.service';
+import {flatMap} from 'rxjs/operators';
+import {Network} from '@ionic-native/network';
+import {of} from 'rxjs/observable/of';
 
 
 @IonicPage()
@@ -33,13 +36,14 @@ export class PreparationEmplacementPage {
     private zebraScannerSubscription: Subscription;
     private validatePrepa: () => void;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public sqliteProvider: SqliteProvider,
-                       public barcodeScannerManager: BarcodeScannerManagerService,
-                       public http: HttpClient,
+    public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private sqliteProvider: SqliteProvider,
+                       private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService,
-                       private storageService: StorageService) {
+                       private storageService: StorageService,
+                       private network: Network,
+                       private localDataManager: LocalDataManagerService) {
         this.isLoading = false;
     }
 
@@ -87,64 +91,68 @@ export class PreparationEmplacementPage {
         if (!this.isLoading) {
             if (this.emplacement.label !== '') {
                 this.isLoading = true;
-                let instance = this;
-                let promise = new Promise<any>((resolve) => {
-                    this.sqliteProvider.findArticlesByPrepa(this.preparation.id).subscribe((articles) => {
-                        articles.forEach(function (article) {
-                            instance.sqliteProvider.findMvtByArticle(article.id).subscribe((mvt) => {
-                                instance.sqliteProvider.finishMvt(mvt.id, instance.emplacement.label).subscribe(() => {
-                                    if (articles.indexOf(article) === articles.length - 1) resolve();
-                                });
+                    this.sqliteProvider
+                        .findArticlesByPrepa(this.preparation.id)
+                        .pipe(
+                            flatMap((articles) => Observable.zip(
+                                ...articles.map((article) => (
+                                    this.sqliteProvider
+                                        .findMvtByArticlePrepa(article.id)
+                                        .pipe(flatMap((mvt) => this.sqliteProvider.finishMvt(mvt.id, this.emplacement.label)))
+                                ))
+                            )),
+
+                            flatMap(() => this.storageService.addPrepa()),
+                            flatMap(() => this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label)),
+                            flatMap((): any => (
+                                this.network.type !== 'none'
+                                    ? this.localDataManager.saveFinishedProcess('preparation')
+                                    : of({offline: true})
+                            ))
+                        )
+                        .subscribe(
+                            ({offline, success}: any) => {
+                                if (offline) {
+                                    this.toastService.showToast('Préparation sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+                                    this.closeScreen();
+                                }
+                                else {
+                                    this.handlePreparationsSuccess(success.length);
+                                }
+                            },
+                            (error) => {
+                                this.handlePreparationsError(error);
                             });
-                        });
-                    });
-                });
-                promise.then(() => {
-                    this.storageService.addPrepa().subscribe(() => {
-                        this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label).subscribe(() => {
-                            this.sqliteProvider.getApiUrl(ApiServices.FINISH_PREPA).subscribe((finishPrepaUrl) => {
-                                this.storageService.getApiKey().subscribe((key) => {
-                                    this.sqliteProvider.findAll('`preparation`').subscribe(preparationsToSend => {
-                                        this.sqliteProvider.findAll('`mouvement`').subscribe((mvts) => {
-                                            let params = {
-                                                preparations: preparationsToSend.filter(p => p.date_end !== null),
-                                                mouvements: mvts.filter(m => m.id_livraison === null),
-                                                apiKey: key
-                                            };
-                                            this.http.post<any>(finishPrepaUrl, params).subscribe(resp => {
-                                                    if (resp.success) {
-                                                        this.sqliteProvider.deletePreparations(params.preparations).then(() => {
-                                                            this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
-                                                                this.isLoading = false;
-                                                                this.navCtrl.pop().then(() => {
-                                                                    this.validatePrepa();
-                                                                });
-                                                            });
-                                                        });
-                                                    }
-                                                    else {
-                                                        this.isLoading = false;
-                                                        this.toastService.showToast(resp.msg);
-                                                    }
-                                                },
-                                                () => {
-                                                    this.isLoading = false;
-                                                    this.navCtrl.pop().then(() => {
-                                                        this.validatePrepa();
-                                                    });
-                                                }
-                                            );
-                                        });
-                                    });
-                                });
-                            });
-                        })
-                    })
-                })
             }
             else {
                 this.toastService.showToast('Veuillez sélectionner ou scanner un emplacement.');
             }
         }
+    }
+
+    private handlePreparationsSuccess(nbPreparationsSucceed: number): void {
+        if (nbPreparationsSucceed > 0) {
+            this.toastService.showToast(
+                (nbPreparationsSucceed === 1
+                    ? 'Votre préparation a bien été enregistrée'
+                    : `Votre préparation et ${nbPreparationsSucceed - 1} préparation${nbPreparationsSucceed - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
+            );
+        }
+        this.closeScreen();
+    }
+
+    private handlePreparationsError(resp): void {
+        this.isLoading = false;
+        this.toastService.showToast((resp && resp.api && resp.message) ? resp.message : 'Une erreur s\'est produite');
+        if (resp.api) {
+            throw resp;
+        }
+    }
+
+    private closeScreen(): void {
+        this.isLoading = false;
+        this.navCtrl.pop().then(() => {
+            this.validatePrepa();
+        });
     }
 }

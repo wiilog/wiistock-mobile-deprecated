@@ -12,24 +12,24 @@ import {PreparationArticlesPage} from '@pages/preparation/preparation-articles/p
     templateUrl: 'preparation-menu.html',
 })
 export class PreparationMenuPage {
-    @ViewChild(Navbar) navBar: Navbar;
-    @ViewChild(Content) content: Content;
-    preparations: Array<Preparation>;
-    hasLoaded: boolean;
+    @ViewChild(Navbar)
+    public navBar: Navbar;
+
+    @ViewChild(Content)
+    public content: Content;
+
+    public preparations: Array<Preparation>;
+    public hasLoaded: boolean;
 
     public constructor(private navCtrl: NavController,
                        private sqlLiteProvider: SqliteProvider) {
     }
 
-    goHome() {
+    public goHome(): void {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    ionViewDidEnter() {
-        this.synchronise(true);
-    }
-
-    synchronise(fromStart: boolean) {
+    public ionViewDidEnter(): void {
         this.hasLoaded = false;
         this.sqlLiteProvider.findAll('`preparation`').subscribe((preparations) => {
             this.preparations = preparations
@@ -40,7 +40,7 @@ export class PreparationMenuPage {
         })
     }
 
-    goToArticles(preparation) {
+    public goToArticles(preparation): void {
         this.navCtrl.push(PreparationArticlesPage, {preparation: preparation});
     }
 }
