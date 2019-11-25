@@ -50,6 +50,7 @@ import {VersionCheckerService} from '@app/services/version-checker.service';
 import {AppVersion} from '@ionic-native/app-version';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {ApiService} from '@app/services/api.service';
+import {LoadingService} from '@app/services/loading.service';
 
 
 @NgModule({
@@ -142,6 +143,7 @@ import {ApiService} from '@app/services/api.service';
         AlertManagerService,
         EntityFactoryService,
         ApiService,
+        LoadingService,
         LocalDataManagerService,
         ScssHelperService
     ]

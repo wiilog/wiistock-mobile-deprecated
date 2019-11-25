@@ -83,11 +83,11 @@ export class CollecteArticlesPage {
     }
 
     public refreshOver(): void {
-        this.toastService.showToast('Collecte prête à être finalisée.')
+        this.toastService.presentToast('Collecte prête à être finalisée.')
     }
 
     public refresh(): void {
-        this.toastService.showToast('Quantité bien prélevée.')
+        this.toastService.presentToast('Quantité bien prélevée.')
     }
 
     public registerMvt(article, quantite): void {
@@ -201,7 +201,7 @@ export class CollecteArticlesPage {
 
     public validate(): void {
         if (this.articlesNT.length > 0) {
-            this.toastService.showToast('Veuillez traiter tous les articles concernés');
+            this.toastService.presentToast('Veuillez traiter tous les articles concernés');
         }
         else {
             this.navCtrl.push(CollecteEmplacementPage, {
@@ -226,7 +226,7 @@ export class CollecteArticlesPage {
             });
         }
         else {
-            this.toastService.showToast('L\'article scanné n\'est pas dans la liste.');
+            this.toastService.presentToast('L\'article scanné n\'est pas dans la liste.');
         }
     }
 
@@ -239,13 +239,13 @@ export class CollecteArticlesPage {
                         if (resp.success) {
                             this.started = true;
                             this.isValid = true;
-                            this.toastService.showToast('Collecte commencée.');
+                            this.toastService.presentToast('Collecte commencée.');
                             this.registerMvt(article, quantity);
                         }
                         else {
                             this.isValid = false;
                             this.loadingStartCollecte = false;
-                            this.toastService.showToast(resp.msg);
+                            this.toastService.presentToast(resp.msg);
                         }
                     });
                 });
@@ -253,7 +253,7 @@ export class CollecteArticlesPage {
         }
         else {
             if (this.network.type === 'none') {
-                this.toastService.showToast('Collecte commencée en mode hors ligne');
+                this.toastService.presentToast('Collecte commencée en mode hors ligne');
             }
 
             this.registerMvt(article, quantity);

@@ -82,7 +82,7 @@ export class CollecteEmplacementPage {
             this.emplacement = emplacement;
         }
         else {
-            this.toastService.showToast('Veuillez scanner ou sélectionner un emplacement connu.');
+            this.toastService.presentToast('Veuillez scanner ou sélectionner un emplacement connu.');
         }
     }
 
@@ -111,7 +111,7 @@ export class CollecteEmplacementPage {
                     .subscribe(
                         ({offline, success}: any) => {
                             if (offline) {
-                                this.toastService.showToast('Collecte sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+                                this.toastService.presentToast('Collecte sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
                                 this.closeScreen();
                             }
                             else {
@@ -123,17 +123,17 @@ export class CollecteEmplacementPage {
                         });
             }
             else {
-                this.toastService.showToast('Chargement en cours veuillez patienter.');
+                this.toastService.presentToast('Chargement en cours veuillez patienter.');
             }
         }
         else {
-            this.toastService.showToast('Veuillez sélectionner ou scanner un emplacement.');
+            this.toastService.presentToast('Veuillez sélectionner ou scanner un emplacement.');
         }
     }
 
     private handleCollectesSuccess(nbCollectesSucceed: number): void {
         if (nbCollectesSucceed > 0) {
-            this.toastService.showToast(
+            this.toastService.presentToast(
                 (nbCollectesSucceed === 1
                     ? 'Votre collecte a bien été enregistrée'
                     : `Votre préparation et ${nbCollectesSucceed - 1} collecte${nbCollectesSucceed - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
@@ -144,7 +144,7 @@ export class CollecteEmplacementPage {
 
     private handlePreparationError(resp): void {
         this.isLoading = false;
-        this.toastService.showToast((resp && resp.api && resp.message) ? resp.message : 'Une erreur s\'est produite');
+        this.toastService.presentToast((resp && resp.api && resp.message) ? resp.message : 'Une erreur s\'est produite');
     }
 
     private closeScreen(): void {

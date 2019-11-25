@@ -90,13 +90,13 @@ export class LivraisonArticlesPage {
                         if (resp.success) {
                             this.started = true;
                             this.isValid = true;
-                            this.toastService.showToast('Livraison commencée.');
+                            this.toastService.presentToast('Livraison commencée.');
                             this.registerMvt(article, quantity);
                         }
                         else {
                             this.isValid = false;
                             this.loadingStartLivraison = false;
-                            this.toastService.showToast(resp.msg);
+                            this.toastService.presentToast(resp.msg);
                         }
                     });
                 });
@@ -104,7 +104,7 @@ export class LivraisonArticlesPage {
         }
         else {
             if (this.network.type === 'none') {
-                this.toastService.showToast('Livraison commencée en mode hors ligne');
+                this.toastService.presentToast('Livraison commencée en mode hors ligne');
             }
 
             this.registerMvt(article, quantity);
@@ -112,11 +112,11 @@ export class LivraisonArticlesPage {
     }
 
     refreshOver() {
-        this.toastService.showToast('Livraison prête à être finalisée.')
+        this.toastService.presentToast('Livraison prête à être finalisée.')
     }
 
     refresh() {
-        this.toastService.showToast('Quantité bien prélevée.')
+        this.toastService.presentToast('Quantité bien prélevée.')
     }
 
     registerMvt(article, quantity) {
@@ -224,7 +224,7 @@ export class LivraisonArticlesPage {
 
     validate() {
         if (this.articlesNT.length > 0) {
-            this.toastService.showToast('Veuillez traiter tous les articles concernés');
+            this.toastService.presentToast('Veuillez traiter tous les articles concernés');
         }
         else {
             this.navCtrl.push(LivraisonEmplacementPage, {
@@ -250,7 +250,7 @@ export class LivraisonArticlesPage {
             });
         }
         else {
-            this.toastService.showToast('L\'article scanné n\'est pas dans la liste.');
+            this.toastService.presentToast('L\'article scanné n\'est pas dans la liste.');
         }
     }
 

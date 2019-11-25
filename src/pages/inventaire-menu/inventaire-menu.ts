@@ -87,7 +87,7 @@ export class InventaireMenuPage {
                         this.http.post<any>(addInventoryEntriesUrl, params).subscribe(resp => {
                             if (resp.success) {
                                 this.sqliteProvider.cleanTable('`saisie_inventaire`');
-                                this.toastService.showToast(resp.data.status);
+                                this.toastService.presentToast(resp.data.status);
                                 ret$.next(undefined);
                             } else {
                                 ret$.next(undefined);
@@ -173,7 +173,7 @@ export class InventaireMenuPage {
             this.articlesByLocation = this.articles.filter(article => (article.location === this.location));
             this.changeDetector.detectChanges();
         } else {
-            this.toastService.showToast('Ce code-barre ne correspond à aucun emplacement.');
+            this.toastService.presentToast('Ce code-barre ne correspond à aucun emplacement.');
         }
     }
 
@@ -189,7 +189,7 @@ export class InventaireMenuPage {
             this.changeDetector.detectChanges();
             this.openModalQuantity(this.article);
         } else {
-            this.toastService.showToast('Ce code-barre ne correspond à aucune référence ou article sur cet emplacement.');
+            this.toastService.presentToast('Ce code-barre ne correspond à aucune référence ou article sur cet emplacement.');
         }
     }
 

@@ -81,11 +81,11 @@ export class LivraisonEmplacementPage {
                 this.emplacement = location;
             }
             else {
-                this.toastService.showToast("Vous n'avez pas scanné le bon emplacement (destination demandée : " + this.livraison.emplacement + ")")
+                this.toastService.presentToast("Vous n'avez pas scanné le bon emplacement (destination demandée : " + this.livraison.emplacement + ")")
             }
         }
         else {
-            this.toastService.showToast('Veuillez scanner ou sélectionner un emplacement connu.');
+            this.toastService.presentToast('Veuillez scanner ou sélectionner un emplacement connu.');
         }
     }
 
@@ -93,7 +93,7 @@ export class LivraisonEmplacementPage {
         if (!this.validateIsLoading) {
             if (this.emplacement && this.emplacement.label !== '') {
                 if (this.livraison.emplacement !== this.emplacement.label) {
-                    this.toastService.showToast("Vous n'avez pas scanné le bon emplacement (destination demandée : " + this.livraison.emplacement + ")");
+                    this.toastService.presentToast("Vous n'avez pas scanné le bon emplacement (destination demandée : " + this.livraison.emplacement + ")");
                 }
                 else {
                     this.validateIsLoading = true;
@@ -117,7 +117,7 @@ export class LivraisonEmplacementPage {
                         .subscribe(
                             ({offline, success}: any) => {
                                 if (offline) {
-                                    this.toastService.showToast('Livraison sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+                                    this.toastService.presentToast('Livraison sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
                                     this.closeScreen();
                                 }
                                 else {
@@ -130,14 +130,14 @@ export class LivraisonEmplacementPage {
                 }
             }
             else {
-                this.toastService.showToast('Veuillez sélectionner ou scanner un emplacement.');
+                this.toastService.presentToast('Veuillez sélectionner ou scanner un emplacement.');
             }
         }
     }
 
     private handleLivraisonSuccess(nbLivraisonsSucceed: number): void {
         if (nbLivraisonsSucceed > 0) {
-            this.toastService.showToast(
+            this.toastService.presentToast(
                 (nbLivraisonsSucceed === 1
                     ? 'Votre livraison a bien été enregistrée'
                     : `Votre livraison et ${nbLivraisonsSucceed - 1} livraison${nbLivraisonsSucceed - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
@@ -148,7 +148,7 @@ export class LivraisonEmplacementPage {
 
     private handleLivraisonError(resp): void {
         this.validateIsLoading = false;
-        this.toastService.showToast((resp && resp.api && resp.message) ? resp.message : 'Une erreur s\'est produite');
+        this.toastService.presentToast((resp && resp.api && resp.message) ? resp.message : 'Une erreur s\'est produite');
         if (resp.api) {
             throw resp;
         }

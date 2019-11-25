@@ -83,7 +83,7 @@ export class PreparationEmplacementPage {
             this.emplacement = foundEmplacement;
         }
         else {
-            this.toastService.showToast('Veuillez flasher ou sélectionner un emplacement connu.');
+            this.toastService.presentToast('Veuillez flasher ou sélectionner un emplacement connu.');
         }
     }
 
@@ -113,7 +113,7 @@ export class PreparationEmplacementPage {
                         .subscribe(
                             ({offline, success}: any) => {
                                 if (offline) {
-                                    this.toastService.showToast('Préparation sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+                                    this.toastService.presentToast('Préparation sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
                                     this.closeScreen();
                                 }
                                 else {
@@ -125,14 +125,14 @@ export class PreparationEmplacementPage {
                             });
             }
             else {
-                this.toastService.showToast('Veuillez sélectionner ou scanner un emplacement.');
+                this.toastService.presentToast('Veuillez sélectionner ou scanner un emplacement.');
             }
         }
     }
 
     private handlePreparationsSuccess(nbPreparationsSucceed: number): void {
         if (nbPreparationsSucceed > 0) {
-            this.toastService.showToast(
+            this.toastService.presentToast(
                 (nbPreparationsSucceed === 1
                     ? 'Votre préparation a bien été enregistrée'
                     : `Votre préparation et ${nbPreparationsSucceed - 1} préparation${nbPreparationsSucceed - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
@@ -143,7 +143,7 @@ export class PreparationEmplacementPage {
 
     private handlePreparationsError(resp): void {
         this.isLoading = false;
-        this.toastService.showToast((resp && resp.api && resp.message) ? resp.message : 'Une erreur s\'est produite');
+        this.toastService.presentToast((resp && resp.api && resp.message) ? resp.message : 'Une erreur s\'est produite');
         if (resp.api) {
             throw resp;
         }

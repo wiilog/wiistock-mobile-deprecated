@@ -1,10 +1,12 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController} from 'ionic-angular';
+import {IonicPage, Loading, NavController} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
 import {ToastService} from '@app/services/toast.service';
 import {ApiService} from '@app/services/api.service';
 import {flatMap} from 'rxjs/operators';
+import {LoadingService} from "@app/services/loading.service";
+import {from} from "rxjs/observable/from";
 
 
 @IonicPage()
@@ -22,9 +24,14 @@ export class ParamsPage {
                        private sqliteProvider: SqliteProvider,
                        private http: HttpClient,
                        private apiService: ApiService,
+                       private loadingService: LoadingService,
                        private toastService: ToastService) {
         this.URL = '';
         this.isLoading = true;
+    }
+
+    public ionViewCanLeave(): boolean {
+        return !this.isLoading;
     }
 
     public ionViewWillEnter(): void {
@@ -37,12 +44,19 @@ export class ParamsPage {
     public registerURL(): void {
         if (!this.isLoading) {
             this.isLoading = true;
-            this.apiService
-                .getApiUrl(ApiService.GET_PING, this.URL)
+            let loadingComponent: Loading;
+            this.loadingService
+                .presentLoading('Vérification de l\'URL...')
                 .pipe(
+                    flatMap((loading) =>  {
+                        loadingComponent = loading;
+                        return this.apiService.getApiUrl(ApiService.GET_PING, this.URL);
+                    }),
                     flatMap((pingURL: string) => this.http.get(pingURL)),
                     flatMap(() => this.sqliteProvider.setAPI_URL(this.URL)),
-                    flatMap(() => this.toastService.showToast('URL enregistrée'))
+                    flatMap(() => from(loadingComponent.dismiss())),
+                    flatMap(() => this.toastService.presentToast('URL enregistrée')),
+
                 )
                 .subscribe(
                     () => {
@@ -50,8 +64,10 @@ export class ParamsPage {
                         this.navCtrl.pop();
                     },
                     () => {
-                        this.isLoading = false;
-                        this.toastService.showToast('URL invalide')
+                        from(loadingComponent.dismiss()).subscribe(() => {
+                            this.isLoading = false;
+                            this.toastService.presentToast('URL invalide');
+                        });
                     }
                 );
         }

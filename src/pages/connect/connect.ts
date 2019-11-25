@@ -72,11 +72,11 @@ export class ConnectPage {
                         },
                         () => {
                             this.finishLoading();
-                            this.toastService.showToast('Erreur : la liaison avec le serveur est impossible', 5000);
+                            this.toastService.presentToast('Erreur : la liaison avec le serveur est impossible', 5000);
                         });
             }
             else {
-                this.toastService.showToast('Veuillez mettre à jour l\'url', 5000);
+                this.toastService.presentToast('Veuillez mettre à jour l\'url', 5000);
                 this.finishLoading();
                 this.goToParams();
             }
@@ -118,16 +118,16 @@ export class ConnectPage {
                                         });
                             } else {
                                 this.finishLoading();
-                                this.toastService.showToast('Identifiants incorrects.');
+                                this.toastService.presentToast('Identifiants incorrects.');
                             }
                         },
                         () => {
                             this.finishLoading();
-                            this.toastService.showToast('Un problème est survenu, veuillez vérifier vos identifiants ainsi que l\'URL saisie sans les paramètres.');
+                            this.toastService.presentToast('Un problème est survenu, veuillez vérifier vos identifiants ainsi que l\'URL saisie sans les paramètres.');
                         });
                 });
             } else {
-                this.toastService.showToast('Vous devez être connecté à internet pour vous authentifier');
+                this.toastService.presentToast('Vous devez être connecté à internet pour vous authentifier');
             }
         }
     }

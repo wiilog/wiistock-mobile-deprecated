@@ -53,7 +53,7 @@ export class TracaMenuPage {
             this.navCtrl.push(DeposeEmplacementPageTraca);
         }
         else {
-            this.toastService.showToast('Aucune prise n\'a été enregistrée');
+            this.toastService.presentToast('Aucune prise n\'a été enregistrée');
         }
     }
 
@@ -72,7 +72,7 @@ export class TracaMenuPage {
                     this.http.post<any>(addMouvementTracaUrl, toInsert).subscribe((resp) => {
                         if (resp.success) {
                             this.sqliteProvider.cleanTable('`mouvement_traca`').subscribe(() => {
-                                this.toastService.showToast(resp.data.status);
+                                this.toastService.presentToast(resp.data.status);
                             });
                         }
                     });

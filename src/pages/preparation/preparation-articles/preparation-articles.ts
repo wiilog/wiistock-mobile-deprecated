@@ -184,12 +184,12 @@ export class PreparationArticlesPage {
 
     private refreshOver(): void {
         this.loadingStartPreparation = false;
-        this.toastService.showToast('Préparation prête à être finalisée.')
+        this.toastService.presentToast('Préparation prête à être finalisée.')
     }
 
     private refresh(): void {
         this.loadingStartPreparation = false;
-        this.toastService.showToast('Quantité bien prélevée.')
+        this.toastService.presentToast('Quantité bien prélevée.')
     }
 
     private selectArticle(selectedArticle: ArticlePrepa | ArticlePrepaByRefArticle, selectedQuantity: number): void {
@@ -205,21 +205,21 @@ export class PreparationArticlesPage {
                                     this.started = true;
                                     this.isValid = true;
                                     this.sqliteProvider.startPrepa(this.preparation.id).subscribe(() => {
-                                        this.toastService.showToast('Préparation commencée.');
+                                        this.toastService.presentToast('Préparation commencée.');
                                         this.saveSelectedArticle(selectedArticle, selectedQuantity);
                                     });
                                 }
                                 else {
                                     this.isValid = false;
                                     this.loadingStartPreparation = false;
-                                    this.toastService.showToast(resp.msg);
+                                    this.toastService.presentToast(resp.msg);
                                 }
                             });
                         });
                     });
                 }
                 else {
-                    this.toastService.showToast('Vous devez être connecté à internet pour commencer la préparation');
+                    this.toastService.presentToast('Vous devez être connecté à internet pour commencer la préparation');
                 }
             } else {
                 this.saveSelectedArticle(selectedArticle, selectedQuantity);
@@ -233,7 +233,7 @@ export class PreparationArticlesPage {
 
     public validate(): void {
         if (this.articlesNT.length > 0) {
-            this.toastService.showToast('Veuillez traiter tous les articles concernés');
+            this.toastService.presentToast('Veuillez traiter tous les articles concernés');
         } else {
             this.navCtrl.push(PreparationEmplacementPage, {
                 preparation: this.preparation,
@@ -309,7 +309,7 @@ export class PreparationArticlesPage {
                 selectArticle: (selectedQuantity: number) => this.selectArticle(selectedArticle, selectedQuantity)
             });
         } else {
-            this.toastService.showToast('L\'article scanné n\'est pas dans la liste.');
+            this.toastService.presentToast('L\'article scanné n\'est pas dans la liste.');
         }
     }
 

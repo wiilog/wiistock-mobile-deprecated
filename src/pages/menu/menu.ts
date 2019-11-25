@@ -120,14 +120,14 @@ export class MenuPage {
                 ({api, message}) => {
                     this.loading = false;
                     if (api && message) {
-                        this.toastService.showToast(message);
+                        this.toastService.presentToast(message);
                     }
                     this.refreshCounters();
                 });
         }
         else {
             this.loading = false;
-            this.toastService.showToast('Veuillez vous connecter à internet afin de synchroniser vos données');
+            this.toastService.presentToast('Veuillez vous connecter à internet afin de synchroniser vos données');
             this.refreshCounters();
         }
     }

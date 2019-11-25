@@ -83,7 +83,7 @@ export class DeposeArticlesPageTraca {
                 });
         }
         else {
-            this.toastService.showToast('Vous devez sélectionner au moins un article')
+            this.toastService.presentToast('Vous devez sélectionner au moins un article')
         }
     }
 
@@ -91,7 +91,7 @@ export class DeposeArticlesPageTraca {
         this.navCtrl.pop()
             .then(() => {
                 this.finishDepose();
-                this.toastService.showToast('Dépose enregistrée.')
+                this.toastService.presentToast('Dépose enregistrée.')
             });
     }
 
@@ -137,11 +137,11 @@ export class DeposeArticlesPageTraca {
                     }
                 }
                 else {
-                    this.toastService.showToast('Cet article est déjà enregistré assez de fois dans le panier.');
+                    this.toastService.presentToast('Cet article est déjà enregistré assez de fois dans le panier.');
                 }
             }
             else {
-                this.toastService.showToast('Ce colis ne correspond à aucune prise.');
+                this.toastService.presentToast('Ce colis ne correspond à aucune prise.');
             }
         });
     }

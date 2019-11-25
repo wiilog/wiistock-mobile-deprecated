@@ -38,10 +38,10 @@ export class PreparationArticleTakePage {
     public addArticle(): void {
         const maxQuantityAvailable = this.maxQuantityAvailable;
         if (!this.quantite || (this.quantite > maxQuantityAvailable) || this.quantite <= 0) {
-            this.toastService.showToast('Veuillez sélectionner une quantité valide.');
+            this.toastService.presentToast('Veuillez sélectionner une quantité valide.');
         }
         else if (this.onlyOne && this.quantite !== maxQuantityAvailable) {
-            this.toastService.showToast(`La quantité souhaitée doit obligatoirement être égale à `);
+            this.toastService.presentToast(`La quantité souhaitée doit obligatoirement être égale à `);
         }
         else {
             this.selectArticle(this.quantite);

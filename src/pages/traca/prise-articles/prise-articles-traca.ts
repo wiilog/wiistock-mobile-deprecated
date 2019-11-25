@@ -80,7 +80,7 @@ export class PriseArticlesPageTraca {
                 });
         }
         else {
-            this.toastService.showToast('Vous devez sélectionner au moins un article')
+            this.toastService.presentToast('Vous devez sélectionner au moins un article')
         }
     }
 
@@ -88,7 +88,7 @@ export class PriseArticlesPageTraca {
         this.navCtrl.pop()
             .then(() => {
                 this.finishPrise();
-                this.toastService.showToast('Prise enregistrée.')
+                this.toastService.presentToast('Prise enregistrée.')
             });
     }
 
@@ -104,7 +104,7 @@ export class PriseArticlesPageTraca {
 
     public testIfBarcodeEquals(barCode: string): void {
         if (this.articles && this.articles.some(article => (article.barcode === barCode))) {
-            this.toastService.showToast('Cet article a déjà été ajouté à la prise.');
+            this.toastService.presentToast('Cet article a déjà été ajouté à la prise.');
         }
         else {
             this.alertController

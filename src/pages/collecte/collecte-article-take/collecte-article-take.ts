@@ -31,7 +31,7 @@ export class CollecteArticleTakePage {
 
     public addArticle(): void {
         if (this.quantity > this.article.quantite || this.quantity <= 0) {
-            this.toastService.showToast('Veuillez selectionner une quantité valide.');
+            this.toastService.presentToast('Veuillez selectionner une quantité valide.');
         }
         else {
             this.selectArticle(this.quantity);

@@ -58,7 +58,7 @@ export class ManutentionValidatePage {
                 }]
             }).present();
         } else {
-            this.toastService.showToast('Vous devez être connecté à internet pour valider la demande');
+            this.toastService.presentToast('Vous devez être connecté à internet pour valider la demande');
         }
     }
 
@@ -76,7 +76,7 @@ export class ManutentionValidatePage {
                             this.navCtrl.pop();
                         })
                     } else {
-                        this.toastService.showToast(response.msg);
+                        this.toastService.presentToast(response.msg);
                     }
                 });
             });

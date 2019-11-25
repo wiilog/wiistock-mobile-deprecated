@@ -88,10 +88,10 @@ export class InventaireAnomaliePage {
                             if (resp.success) {
                                 // supprime les anomalies traitée de la base
                                 this.sqliteProvider.deleteAnomalies(anomalies);
-                                this.toastService.showToast(resp.data.status);
+                                this.toastService.presentToast(resp.data.status);
                             } else {
                                 this.isLoaded = true;
-                                this.toastService.showToast('Une erreur est survenue lors de la mise à jour des anomalies.');
+                                this.toastService.presentToast('Une erreur est survenue lors de la mise à jour des anomalies.');
                             }
                             this.locations = locations;
                             this.isLoaded = true;
@@ -121,7 +121,7 @@ export class InventaireAnomaliePage {
             this.anomaliesByLocation = this.anomalies.filter(anomaly => (anomaly.location === this.location));
             this.changeDetector.detectChanges();
         } else {
-            this.toastService.showToast('Ce code-barre ne correspond à aucun emplacement.');
+            this.toastService.presentToast('Ce code-barre ne correspond à aucun emplacement.');
         }
     }
 
@@ -133,7 +133,7 @@ export class InventaireAnomaliePage {
             this.changeDetector.detectChanges();
             this.openModalQuantity(this.article);
         } else {
-            this.toastService.showToast('Ce code-barre ne correspond à aucune référence ou article.');
+            this.toastService.presentToast('Ce code-barre ne correspond à aucune référence ou article.');
         }
     }
 
@@ -154,7 +154,7 @@ export class InventaireAnomaliePage {
                         if (resp.success) {
                             // supprime l'anomalie traitée de la base
                             this.sqliteProvider.deleteById(`anomalie_inventaire`, this.anomaly.id);
-                            this.toastService.showToast(resp.data.status);
+                            this.toastService.presentToast(resp.data.status);
                             // supprime l'anomalie de la liste
                             this.anomaliesByLocation = this.anomaliesByLocation.filter(anomaly => parseInt(anomaly.treated) !== 1);
                             // si liste vide retour aux emplacements
