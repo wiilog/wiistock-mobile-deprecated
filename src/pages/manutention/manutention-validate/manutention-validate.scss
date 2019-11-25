@@ -1,6 +1,6 @@
+@import "../../../theme/variables";
+
 page-manutention-validate {
-
-
     .toolbar-background {
         background-color: #030F4C !important;
     }
@@ -62,13 +62,13 @@ page-manutention-validate {
         align-content: center !important;
 
         .title {
-            margin-top: 16px;
+            margin-top: $spacer;
         }
 
         .title, .subtitle {
             font-size: 20px;
             color: #030F4C;
-            margin-bottom: 16px;
+            margin-bottom: $spacer;
         }
     }
 
@@ -76,7 +76,7 @@ page-manutention-validate {
         color: #030F4C;
     }
 
-    .arrow {
+    .search-icon {
         width: 15px !important;
         height: 15px !important;
         display: inline-block;
@@ -134,7 +134,7 @@ page-manutention-validate {
     }
 
     .page-content {
-        margin: -16px;
+        margin: -$spacer;
         background-color: #F2F2F4 !important;
         height: 80%;
 

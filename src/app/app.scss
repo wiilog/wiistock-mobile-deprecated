@@ -13,7 +13,6 @@
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
 @import "../theme/fonts";
-@import "../theme/icons";
 @import "../theme/variables";
 @import "../theme/style-variables";
 
@@ -135,7 +134,7 @@ button[ion-button] {
 }
 
 .ion-page {
-    padding: 16px;
+    padding: $spacer;
     display: flex;
     flex-direction: column;
     justify-content: space-between;

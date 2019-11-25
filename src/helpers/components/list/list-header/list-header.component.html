@@ -1,0 +1,21 @@
+<div class="list-header-wrapper">
+    <!-- Left icon -->
+    <wii-icon class="list-header-icon"
+              [name]="leftIcon.name"
+              [color]="leftIcon.color"
+              (click)="onLeftIconClick()">
+    </wii-icon>
+
+    <div class="header-body">
+        <div *ngIf="title" class="header-title">{{title}}</div>
+        <div *ngIf="subtitle" class="header-subtitle">{{subtitle}}</div>
+        <div *ngIf="info" class="header-info">{{info}}</div>
+    </div>
+
+    <!-- Right icon -->
+    <wii-icon class="list-header-icon"
+              [name]="leftIcon.name"
+              [color]="leftIcon.color"
+              (click)="onRightIconClick()">
+    </wii-icon>
+</div>

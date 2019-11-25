@@ -39,10 +39,9 @@ page-connect {
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
-        .parameters {
-            background-color: transparent;
-            padding: 0;
+        wii-icon.parameters {
             width: 30px;
+            height: 30px;
         }
         .version-container {
             font-size: 10px;
