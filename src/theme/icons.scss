@@ -8,9 +8,9 @@ ion-icon {
     height: 1em;
   }
   &[class*="custom-refresh-icon"] {
-    mask-image: url("../assets/icon/refresh.svg");
+    mask-image: url("../assets/icons/refresh.svg");
   }
   &[class*="custom-home-icon"] {
-    mask-image: url("../assets/icon/home.svg");
+    mask-image: url("../assets/icons/home.svg");
   }
 }
