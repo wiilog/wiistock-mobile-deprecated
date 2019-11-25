@@ -7,6 +7,7 @@ import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manage
 import {ToastService} from '@app/services/toast.service';
 import {Subscription} from 'rxjs';
 import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
+import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
 
 
 @IonicPage()
@@ -56,6 +57,16 @@ export class DeposeEmplacementPageTraca {
         else {
             this.toastService.presentToast('Veuillez sélectionner un emplacement')
         }
+    }
+
+    goToCreateEmp(): void {
+        this.navCtrl.push(NewEmplacementComponent, {
+            fromDepose: true,
+            menu: 'Dépose',
+            createNewEmp: (emplacement: Emplacement) => {
+                this.emplacement = emplacement;
+            }
+        });
     }
 
     public goHome(): void {

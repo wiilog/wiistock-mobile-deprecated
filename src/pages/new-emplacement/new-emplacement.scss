@@ -1,0 +1,54 @@
+new-emplacement {
+
+  .titles {
+    background-color: #FFFFFF !important;
+    text-align: center !important;
+    align-content: center !important;
+
+    .title {
+      margin-top: 16px;
+    }
+
+    .title, .subtitle {
+      font-size: 20px;
+      color: #030F4C;
+      margin-bottom: 16px;
+    }
+  }
+
+  .emp-title {
+    text-align: center;
+    background-color: #030F4C;
+    height: 10%;
+    width: 100%;
+    h1 {
+      color: white;
+      font-family: "Myriad Pro" !important;
+    }
+  }
+
+  .validate_button {
+    margin: auto;
+    display: block;
+    background-color: #149914;
+    text-align: center;
+    height: 70px;
+    width: 100%;
+  }
+
+  span {
+    font-family: 'Myriad Pro' !important;
+    color: white !important;
+    font-size: 20px;
+  }
+
+  img {
+    max-width: 5%;
+    border: 0;
+  }
+
+  .label-emp {
+    margin-top: 50% !important;
+    margin-bottom: 50% !important;
+  }
+}

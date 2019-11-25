@@ -10,12 +10,12 @@ import {HeaderComponent} from '@helpers/components/header/header.component';
     declarations: [
         SearchLocationComponent,
         MainLoaderComponent,
-        HeaderComponent
+        HeaderComponent,
     ],
     exports: [
         SearchLocationComponent,
         MainLoaderComponent,
-        HeaderComponent
+        HeaderComponent,
     ],
     imports: [
         IonicSelectableModule,
