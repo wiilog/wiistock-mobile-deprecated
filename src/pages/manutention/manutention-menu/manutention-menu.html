@@ -4,7 +4,8 @@
     <div class="subtitle" *ngIf="manutentions && manutentions.length > 0">{{ manutentions.length }} manutention{{ manutentions.length > 1 ? 's' : ''}}</div>
 </div>
 <wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
-<ion-scroll scrollY="true" *ngIf="hasLoaded" class="body">
+
+<ion-scroll *ngIf="hasLoaded" scrollY="true" class="page-content">
     <div class="icon-manutention-container">
         <img src="assets/icon/manut_icon.svg" height="50px" width="50px">
     </div>

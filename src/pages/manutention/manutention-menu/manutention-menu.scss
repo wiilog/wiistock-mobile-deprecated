@@ -13,20 +13,6 @@ page-manutention-menu {
         margin-right: 15px;
     }
 
-    .custom-button,
-    .custom-button.icon:before {
-        font-size: 30px !important;
-        color: white !important;
-    }
-
-    .button-custom {
-        margin: -5px 0 -5px -5px !important;
-    }
-
-    ion-navbar.toolbar {
-        min-height: 60px;
-    }
-
     ion-card-header {
         background-color: #149914;
         height: 30px;
@@ -56,11 +42,6 @@ page-manutention-menu {
         }
     }
 
-    .body {
-        background-color: #F2F2F4 !important;
-        height: 80%;
-    }
-
     .important {
         color: #030F4C;
     }
@@ -84,6 +65,12 @@ page-manutention-menu {
 
     .placeholder-buttons {
         width: 45px;
+    }
+
+    .page-content {
+        background-color: #F2F2F4 !important;
+        height: 80%;
+        margin: -16px;
     }
 
 }

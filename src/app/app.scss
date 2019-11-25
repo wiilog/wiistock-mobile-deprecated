@@ -135,16 +135,13 @@ button[ion-button] {
 }
 
 .ion-page {
+    padding: 16px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
 ion-content {
-    &[padding] .ion-page {
-        padding: 16px;
-    }
-
     &.with-header {
         .ion-page {
             height: calc(100% - 82px);

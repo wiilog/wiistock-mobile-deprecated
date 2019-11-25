@@ -72,14 +72,6 @@ page-manutention-validate {
         }
     }
 
-    .body {
-        background-color: #F2F2F4 !important;
-        height: 80%;
-        .item-inner {
-            padding-left: 8px;
-        }
-    }
-
     .important {
         color: #030F4C;
     }
@@ -141,6 +133,13 @@ page-manutention-validate {
         font-family: 'Myriad Pro';
     }
 
+    .page-content {
+        margin: -16px;
+        background-color: #F2F2F4 !important;
+        height: 80%;
 
-
+        .item-inner {
+            padding-left: 8px;
+        }
+    }
 }

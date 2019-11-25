@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
+import {AlertController, IonicPage, Loading, NavController, NavParams} from 'ionic-angular';
 import {Manutention} from '@app/entities/manutention';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
@@ -8,6 +8,7 @@ import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
 import {ApiService} from "@app/services/api.service";
 import {StorageService} from '@app/services/storage.service';
+import {LoadingService} from "@app/services/loading.service";
 
 
 @IonicPage()
@@ -20,6 +21,7 @@ export class ManutentionValidatePage {
     public commentaire: string;
     public hasLoaded: boolean;
     public showCom: boolean = false;
+    private sendCommentToApiLoading;
 
     public constructor(private alertController: AlertController,
                        private navCtrl: NavController,
@@ -29,7 +31,9 @@ export class ManutentionValidatePage {
                        private toastService: ToastService,
                        private apiService: ApiService,
                        private network: Network,
+                       private loadingService: LoadingService,
                        private storageService: StorageService) {
+        this.sendCommentToApiLoading = false;
     }
 
     public ionViewWillEnter(): void {
@@ -37,6 +41,10 @@ export class ManutentionValidatePage {
             this.manutention = this.navParams.get('manutention');
         }
         this.synchronise();
+    }
+
+    public ionViewCanLeave(): boolean {
+        return !this.sendCommentToApiLoading;
     }
 
     public validateManut(): void {
@@ -63,24 +71,38 @@ export class ManutentionValidatePage {
     }
 
     public notifyApi(): void {
-        this.apiService.getApiUrl(ApiService.VALIDATE_MANUT).subscribe((validateManutUrl) => {
-            this.storageService.getApiKey().subscribe((key) => {
-                let params = {
-                    id: this.manutention.id,
-                    apiKey: key,
-                    commentaire: this.commentaire
-                };
-                this.client.post<any>(validateManutUrl, params).subscribe((response) => {
-                    if (response.success) {
-                        this.sqliteProvider.deleteById('`manutention`', this.manutention.id).subscribe(() => {
-                            this.navCtrl.pop();
-                        })
-                    } else {
-                        this.toastService.presentToast(response.msg);
-                    }
-                });
+        if (!this.sendCommentToApiLoading) {
+            this.sendCommentToApiLoading = true;
+            this.loadingService
+                .presentLoading('Sauvegarde de la manutention...')
+                .subscribe((loading: Loading) => {
+                    this.apiService.getApiUrl(ApiService.VALIDATE_MANUT).subscribe((validateManutUrl) => {
+                        this.storageService.getApiKey().subscribe((key) => {
+                            let params = {
+                                id: this.manutention.id,
+                                apiKey: key,
+                                commentaire: this.commentaire
+                            };
+                            this.client.post<any>(validateManutUrl, params).subscribe(
+                                (response) => {
+                                    this.sendCommentToApiLoading = false;
+                                    loading.dismiss();
+                                    if (response.success) {
+                                        this.sqliteProvider.deleteById('`manutention`', this.manutention.id).subscribe(() => {
+                                            this.navCtrl.pop();
+                                        })
+                                    }
+                                    else {
+                                        this.toastService.presentToast(response.msg);
+                                    }
+                                },
+                                () => {
+                                    loading.dismiss();
+                                });
+                        });
+                    });
             });
-        });
+        }
     }
 
     public synchronise(): void {

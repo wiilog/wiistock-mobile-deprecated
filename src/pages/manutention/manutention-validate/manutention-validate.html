@@ -4,8 +4,7 @@
     <p *ngIf="manutention" class="subtitle">Détails</p>
 </div>
 <wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
-<ion-scroll scrollY="true" *ngIf="hasLoaded" class="body">
-    <br>
+<ion-scroll scrollY="true" *ngIf="hasLoaded" class="page-content">
     <ion-item class="readonly" text-wrap>
         <ion-label>Demandeur</ion-label>
         <ion-textarea value="{{ manutention.demandeur }}" [readonly]="true"></ion-textarea>

@@ -6,9 +6,6 @@ import {SplashScreen} from '@ionic-native/splash-screen';
 import {NetworkProvider} from '@providers/network/network';
 import {Network} from '@ionic-native/network';
 import {ScssHelperService} from '@app/services/scss-helper.service';
-import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutention-menu';
-import {Subscription} from 'rxjs';
-import {ManutentionValidatePage} from '@pages/manutention/manutention-validate/manutention-validate';
 
 
 @Injectable()
@@ -29,13 +26,6 @@ export class AppComponent {
     public pageWithHeader: boolean;
 
     public platformReady: boolean;
-    public currentPageName: string;
-    public readonly pageHasNotPadding: Array<string> = [
-        ManutentionMenuPage.name,
-        ManutentionValidatePage.name
-    ];
-
-    private viewDidEnterSubscription: Subscription;
 
     private readonly primaryColor: string;
 
@@ -62,13 +52,6 @@ export class AppComponent {
             this.setStatusBarColor();
             this.splashScreen.hide();
             this.networkProvider.initializeNetworkEvents();
-
-            if(this.viewDidEnterSubscription) {
-                this.viewDidEnterSubscription.unsubscribe();
-            }
-            this.viewDidEnterSubscription = this.nav.viewDidEnter.subscribe((data) => {
-                this.currentPageName = data.component.name;
-            });
         });
     }
 
