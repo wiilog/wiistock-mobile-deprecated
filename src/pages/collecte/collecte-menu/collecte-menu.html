@@ -1,20 +1,6 @@
-<ion-header>
-    <ion-navbar>
-        <ion-buttons start>
-            <button ion-button icon-only (click)="goHome()">
-                <ion-icon name="home"></ion-icon>
-            </button>
-        </ion-buttons>
-        <ion-title>Collectes</ion-title>
-    </ion-navbar>
-</ion-header>
-
 <ion-content padding>
 
-    <div class="spinner-container" *ngIf="!hasLoaded" >
-        <ion-spinner class="main-spinner"></ion-spinner>
-        <p class="spinner-text">Chargement...</p>
-    </div>
+    <wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
 
     <ion-title *ngIf="hasLoaded && collectes && collectes.length === 0">Aucune collecte<br>à traiter.</ion-title>
 

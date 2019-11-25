@@ -1,9 +1,12 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams} from 'ionic-angular';
+import {IonicPage, Loading, NavController} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
 import {ToastService} from '@app/services/toast.service';
-import {ApiServices} from "@app/config/api-services";
+import {ApiService} from '@app/services/api.service';
+import {flatMap} from 'rxjs/operators';
+import {LoadingService} from "@app/services/loading.service";
+import {from} from "rxjs/observable/from";
 
 
 @IonicPage()
@@ -17,17 +20,22 @@ export class ParamsPage {
 
     private isLoading: boolean;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public sqLiteProvider: SqliteProvider,
-                       public http: HttpClient,
+    public constructor(private navCtrl: NavController,
+                       private sqliteProvider: SqliteProvider,
+                       private http: HttpClient,
+                       private apiService: ApiService,
+                       private loadingService: LoadingService,
                        private toastService: ToastService) {
         this.URL = '';
         this.isLoading = true;
     }
 
+    public ionViewCanLeave(): boolean {
+        return !this.isLoading;
+    }
+
     public ionViewWillEnter(): void {
-        this.sqLiteProvider.getServerUrl().subscribe((baseUrl) => {
+        this.sqliteProvider.getServerUrl().subscribe((baseUrl) => {
             this.URL = !baseUrl ? '' : baseUrl;
             this.isLoading = false;
         });
@@ -35,27 +43,33 @@ export class ParamsPage {
 
     public registerURL(): void {
         if (!this.isLoading) {
-            this.sqLiteProvider.setAPI_URL(this.URL).subscribe((result) => {
-                if (result === true) {
-                    this.toastService.showToast('URL enregistrée!');
-                }
-                else {
-                    console.log(result);
-                }
-            });
-        }
-    }
+            this.isLoading = true;
+            let loadingComponent: Loading;
+            this.loadingService
+                .presentLoading('Vérification de l\'URL...')
+                .pipe(
+                    flatMap((loading) =>  {
+                        loadingComponent = loading;
+                        return this.apiService.getApiUrl(ApiService.GET_PING, this.URL);
+                    }),
+                    flatMap((pingURL: string) => this.http.get(pingURL)),
+                    flatMap(() => this.sqliteProvider.setAPI_URL(this.URL)),
+                    flatMap(() => from(loadingComponent.dismiss())),
+                    flatMap(() => this.toastService.presentToast('URL enregistrée')),
 
-    public testURL(): void {
-        let url: string = `${this.URL}/api${ApiServices.GET_PING}`;
-        this.http.post<any>(url, {}).subscribe(
-            _ => {
-                this.registerURL();
-                this.toastService.showToast('URL valide.').subscribe(() => {
-                    this.navCtrl.pop();
-                });
-            },
-            _ => this.toastService.showToast('URL non valide.')
-        );
+                )
+                .subscribe(
+                    () => {
+                        this.isLoading = false;
+                        this.navCtrl.pop();
+                    },
+                    () => {
+                        from(loadingComponent.dismiss()).subscribe(() => {
+                            this.isLoading = false;
+                            this.toastService.presentToast('URL invalide');
+                        });
+                    }
+                );
+        }
     }
 }

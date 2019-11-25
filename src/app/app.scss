@@ -14,10 +14,17 @@
 // automatically applied to the <body> element in the app.
 @import "../theme/fonts";
 @import "../theme/icons";
+@import "../theme/variables";
+@import "../theme/style-variables";
 
 // surcharges classes ionic
 ion-title {
     text-align: center;
+    margin-bottom: 2rem;
+
+    .icon {
+        width: 50px
+    }
 }
 
 ion-icon {
@@ -88,9 +95,15 @@ ion-grid {
 }
 
 ion-item {
-    &.ionic-selectable-container {
-        padding: 0;
+    padding: 0 !important;
+
+    &.item-md.item-input.ng-valid.item-input-has-value:not(.input-has-focus):not(.item-input-has-focus) .item-inner,
+    .item-md.item-input.ng-valid.input-has-value:not(.input-has-focus):not(.item-input-has-focus) .item-inner {
+        border-bottom-color: $primary;
+        -webkit-box-shadow: inset 0 -1px 0 0 $primary;
+        box-shadow: inset 0 -1px 0 0 $primary;
     }
+
     &.without-label {
         ion-label {
             display: none;
@@ -100,6 +113,11 @@ ion-item {
         width: 100% !important;
         max-width: 100% !important;
     }
+}
+
+button[ion-button] {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
 }
 
 .spinner {
@@ -116,29 +134,21 @@ ion-item {
     text-align: center;
 }
 
-
-// TODO Remove spinner
-
-.spinner-container {
-    position: fixed;
-    text-align: center;
-    background-color: white;
+.ion-page {
+    padding: 16px;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
+    justify-content: space-between;
+}
 
-    .main-spinner {
-        height: 90px !important;
-        width: 90px !important;
+ion-content {
+    &.with-header {
+        .ion-page {
+            height: calc(100% - 82px);
+        }
     }
 
-    .spinner-text {
-        font-weight: 300;
-        font-size: 13pt;
+    button[ion-button][color="success"] {
+        background-color: $green;
     }
 }

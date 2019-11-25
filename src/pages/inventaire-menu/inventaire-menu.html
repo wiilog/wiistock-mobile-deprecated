@@ -1,19 +1,5 @@
-<ion-header>
-  <ion-navbar>
-    <ion-buttons start>
-      <button ion-button icon-only (click)="goHome()">
-        <ion-icon name="home"></ion-icon>
-      </button>
-    </ion-buttons>
-    <ion-title>Inventaire</ion-title>
-  </ion-navbar>
-</ion-header>
-
 <ion-content padding>
-    <div class="spinner-container" *ngIf="!isLoaded">
-        <ion-spinner class="main-spinner"></ion-spinner>
-        <p class="spinner-text">Chargement...</p>
-    </div>
+    <wii-main-loader [loading]="isLoaded"></wii-main-loader>
 
     <ng-container *ngIf="isLoaded">
         <button ion-button block color="danger" outline (click)="goToAnomalies()" *ngIf="isInventoryManager">Anomalies à traiter</button>

@@ -34,7 +34,7 @@ export class LivraisonArticleTakePage {
             this.navCtrl.pop();
         }
         else {
-            this.toastService.showToast('Veuillez selectionner une quantité valide.');
+            this.toastService.presentToast('Veuillez selectionner une quantité valide.');
         }
     }
 }

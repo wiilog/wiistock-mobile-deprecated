@@ -14,8 +14,8 @@ import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
 import {StorageService} from '@app/services/storage.service';
+import {ApiService} from '@app/services/api.service';
 import {Network} from "@ionic-native/network";
-import {ApiServices} from "@app/config/api-services";
 
 
 @IonicPage()
@@ -37,14 +37,15 @@ export class CollecteArticlesPage {
 
     private zebraScannerSubscription: Subscription;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public toastService: ToastService,
-                       public sqliteProvider: SqliteProvider,
-                       public http: HttpClient,
-                       public barcodeScannerManager: BarcodeScannerManagerService,
-                       private storageService: StorageService,
-                       private network: Network) {
+    public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private toastService: ToastService,
+                       private sqliteProvider: SqliteProvider,
+                       private http: HttpClient,
+                       private network: Network,
+                       private barcodeScannerManager: BarcodeScannerManagerService,
+                       private apiService: ApiService,
+                       private storageService: StorageService) {
         this.loadingStartCollecte = false;
     }
 
@@ -82,11 +83,11 @@ export class CollecteArticlesPage {
     }
 
     public refreshOver(): void {
-        this.toastService.showToast('Collecte prête à être finalisée.')
+        this.toastService.presentToast('Collecte prête à être finalisée.')
     }
 
     public refresh(): void {
-        this.toastService.showToast('Quantité bien prélevée.')
+        this.toastService.presentToast('Quantité bien prélevée.')
     }
 
     public registerMvt(article, quantite): void {
@@ -200,7 +201,7 @@ export class CollecteArticlesPage {
 
     public validate(): void {
         if (this.articlesNT.length > 0) {
-            this.toastService.showToast('Veuillez traiter tous les articles concernés');
+            this.toastService.presentToast('Veuillez traiter tous les articles concernés');
         }
         else {
             this.navCtrl.push(CollecteEmplacementPage, {
@@ -225,36 +226,36 @@ export class CollecteArticlesPage {
             });
         }
         else {
-            this.toastService.showToast('L\'article scanné n\'est pas dans la liste.');
+            this.toastService.presentToast('L\'article scanné n\'est pas dans la liste.');
         }
     }
 
     private selectArticle(article, quantity): void {
-        if (!this.started) {
-            if (this.network.type !== 'none') {
-                this.loadingStartCollecte = true;
-                this.sqliteProvider.getApiUrl(ApiServices.BEGIN_COLLECTE).subscribe((url) => {
-                    this.storageService.getApiKey().subscribe((key) => {
-                        this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
-                            if (resp.success) {
-                                this.started = true;
-                                this.isValid = true;
-                                this.toastService.showToast('Collecte commencée.');
-                                this.registerMvt(article, quantity);
-                            }
-                            else {
-                                this.isValid = false;
-                                this.loadingStartCollecte = false;
-                                this.toastService.showToast(resp.msg);
-                            }
-                        });
+        if (!this.started && this.network.type !== 'none') {
+            this.loadingStartCollecte = true;
+            this.apiService.getApiUrl(ApiService.BEGIN_COLLECTE).subscribe((url) => {
+                this.storageService.getApiKey().subscribe((key) => {
+                    this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
+                        if (resp.success) {
+                            this.started = true;
+                            this.isValid = true;
+                            this.toastService.presentToast('Collecte commencée.');
+                            this.registerMvt(article, quantity);
+                        }
+                        else {
+                            this.isValid = false;
+                            this.loadingStartCollecte = false;
+                            this.toastService.presentToast(resp.msg);
+                        }
                     });
                 });
+            });
+        }
+        else {
+            if (this.network.type === 'none') {
+                this.toastService.presentToast('Collecte commencée en mode hors ligne');
             }
-            else {
-                this.toastService.showToast('Vous devez être connecté à internet pour commencer la collecte')
-            }
-        } else {
+
             this.registerMvt(article, quantity);
         }
     }

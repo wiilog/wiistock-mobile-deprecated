@@ -20,7 +20,7 @@ export class ToastService {
     /**
      * @return Returns an observable which is resolved when the Toast transition has completed.
      */
-    public showToast(message: string, duration: number = ToastService.DEFAULT_DURATION): Observable<any> {
+    public presentToast(message: string, duration: number = ToastService.DEFAULT_DURATION): Observable<any> {
         const toast = this.toastController.create({
             ...(ToastService.TOAST_OPTIONS),
             message,

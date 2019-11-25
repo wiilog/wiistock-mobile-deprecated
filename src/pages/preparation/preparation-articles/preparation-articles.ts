@@ -17,7 +17,7 @@ import {of} from 'rxjs/observable/of';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Network} from '@ionic-native/network';
-import {ApiServices} from "@app/config/api-services";
+import {ApiService} from '@app/services/api.service';
 import {StorageService} from '@app/services/storage.service';
 
 
@@ -41,19 +41,25 @@ export class PreparationArticlesPage {
 
     private zebraScannerSubscription: Subscription;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public sqliteProvider: SqliteProvider,
-                       public http: HttpClient,
+    public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private sqliteProvider: SqliteProvider,
+                       private http: HttpClient,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService,
                        private network: Network,
+                       private apiService: ApiService,
                        private storageService: StorageService) {
         this.loadingStartPreparation = false;
     }
 
     public ionViewWillEnter(): void {
-        this.initializeScreen();
+        this.preparation = this.navParams.get('preparation');
+        this.updateLists().subscribe(() => {
+            if (this.articlesT.length > 0) {
+                this.started = true;
+            }
+        });
 
         this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
             this.testIfBarcodeEquals(barcode);
@@ -140,7 +146,7 @@ export class PreparationArticlesPage {
                     location: null,
                     type: 'prise-dépose',
                     is_ref: isSelectableByUser
-                        ? '0'
+                        ? 0
                         : (selectedArticle as ArticlePrepa).is_ref,
                     id_article_prepa: isSelectableByUser
                         ? null
@@ -178,26 +184,13 @@ export class PreparationArticlesPage {
 
     private refreshOver(): void {
         this.loadingStartPreparation = false;
-        this.toastService.showToast('Préparation prête à être finalisée.')
+        this.toastService.presentToast('Préparation prête à être finalisée.')
     }
 
     private refresh(): void {
         this.loadingStartPreparation = false;
-        this.toastService.showToast('Quantité bien prélevée.')
+        this.toastService.presentToast('Quantité bien prélevée.')
     }
-
-    private initializeScreen(): void {
-        const preparation = this.navParams.get('preparation');
-        if (preparation) {
-            this.preparation = preparation;
-            this.updateLists().subscribe(() => {
-                if (this.articlesT.length > 0) {
-                    this.started = true;
-                }
-            });
-        }
-    }
-
 
     private selectArticle(selectedArticle: ArticlePrepa | ArticlePrepaByRefArticle, selectedQuantity: number): void {
         if (selectedArticle && selectedQuantity) {
@@ -205,28 +198,28 @@ export class PreparationArticlesPage {
             if (!this.started) {
                 if (this.network.type !== 'none') {
                     this.loadingStartPreparation = true;
-                    this.sqliteProvider.getApiUrl(ApiServices.BEGIN_PREPA).subscribe((beginPrepaUrl) => {
+                    this.apiService.getApiUrl(ApiService.BEGIN_PREPA).subscribe((beginPrepaUrl) => {
                         this.storageService.getApiKey().subscribe((key) => {
                             this.http.post<any>(beginPrepaUrl, {id: this.preparation.id, apiKey: key}).subscribe(resp => {
                                 if (resp.success) {
                                     this.started = true;
                                     this.isValid = true;
                                     this.sqliteProvider.startPrepa(this.preparation.id).subscribe(() => {
-                                        this.toastService.showToast('Préparation commencée.');
+                                        this.toastService.presentToast('Préparation commencée.');
                                         this.saveSelectedArticle(selectedArticle, selectedQuantity);
                                     });
                                 }
                                 else {
                                     this.isValid = false;
                                     this.loadingStartPreparation = false;
-                                    this.toastService.showToast(resp.msg);
+                                    this.toastService.presentToast(resp.msg);
                                 }
                             });
                         });
                     });
                 }
                 else {
-                    this.toastService.showToast('Vous devez être connecté à internet pour commencer la préparation');
+                    this.toastService.presentToast('Vous devez être connecté à internet pour commencer la préparation');
                 }
             } else {
                 this.saveSelectedArticle(selectedArticle, selectedQuantity);
@@ -240,7 +233,7 @@ export class PreparationArticlesPage {
 
     public validate(): void {
         if (this.articlesNT.length > 0) {
-            this.toastService.showToast('Veuillez traiter tous les articles concernés');
+            this.toastService.presentToast('Veuillez traiter tous les articles concernés');
         } else {
             this.navCtrl.push(PreparationEmplacementPage, {
                 preparation: this.preparation,
@@ -316,7 +309,7 @@ export class PreparationArticlesPage {
                 selectArticle: (selectedQuantity: number) => this.selectArticle(selectedArticle, selectedQuantity)
             });
         } else {
-            this.toastService.showToast('L\'article scanné n\'est pas dans la liste.');
+            this.toastService.presentToast('L\'article scanné n\'est pas dans la liste.');
         }
     }
 
@@ -341,13 +334,13 @@ export class PreparationArticlesPage {
 
     private moveArticle(selectedArticle, selectedQuantity?: number): Observable<any> {
         const selectedQuantityValid = selectedQuantity ? selectedQuantity : (selectedArticle as ArticlePrepaByRefArticle).quantity;
-        let articleToInsert = {
+        let articleToInsert: ArticlePrepa = {
             label: (selectedArticle as ArticlePrepaByRefArticle).label,
             reference: (selectedArticle as ArticlePrepaByRefArticle).reference,
             is_ref: 1,
             has_moved: 1,
             id_prepa: this.preparation.id,
-            isSelectableByUser: true,
+            isSelectableByUser: 1,
             emplacement: (selectedArticle as ArticlePrepaByRefArticle).location,
             quantite: selectedQuantityValid
         };
@@ -415,7 +408,7 @@ export class PreparationArticlesPage {
                 date_drop: null,
                 location: null,
                 type: 'prise-dépose',
-                is_ref: selectedArticle.isSelectableByUser ? '0' : selectedArticle.is_ref,
+                is_ref: selectedArticle.isSelectableByUser ? 0 : selectedArticle.is_ref,
                 selected_by_article: selectedArticle.isSelectableByUser ? 1 : 0,
                 id_article_prepa: insertId ? insertId : selectedArticle.id,
                 id_prepa: this.preparation.id,

@@ -31,7 +31,6 @@ export class PreparationRefArticlesPage {
     public articlesToShow: Array<ArticlePrepaByRefArticle>;
 
     public searchArticle: string;
-    public readonly MAX_DISPLAY_ITEM: number = 30;
 
     private zebraBarcodeSubscription: Subscription;
 
@@ -82,7 +81,7 @@ export class PreparationRefArticlesPage {
                 this.selectArticle(selectedArticle);
             }
             else {
-                this.toastService.showToast('L\'article scanné n\'est pas présent dans la liste.');
+                this.toastService.presentToast('L\'article scanné n\'est pas présent dans la liste.');
             }
         });
     }
@@ -118,11 +117,11 @@ export class PreparationRefArticlesPage {
     }
 
     refreshOver() {
-        this.toastService.showToast('Préparation prête à être finalisée.');
+        this.toastService.presentToast('Préparation prête à être finalisée.');
     }
 
     refresh() {
-        this.toastService.showToast('Quantité bien prélevée.')
+        this.toastService.presentToast('Quantité bien prélevée.')
     }
 
     goHome() {

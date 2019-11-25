@@ -1,55 +1,35 @@
-<ion-header>
-    <ion-navbar *ngIf="hasLoaded">
-        <ion-buttons left></ion-buttons>
-        <ion-title class="user-title">
-            {{ user }}
-        </ion-title>
-        <ion-buttons right>
-            <button ion-button icon-only (click)="goHome()" class="custom-button">
-                <ion-icon name="custom-home-icon"></ion-icon>
-            </button>
-        </ion-buttons>
-    </ion-navbar>
-</ion-header>
-
-<ion-content>
-    <br>
-    <div class="titles" *ngIf="hasLoaded">
-        <ion-title *ngIf="!manutention">Aucune manutention<br>à traiter.</ion-title>
-        <ion-title *ngIf="manutention">Menu | <b class="important">Manutentions</b></ion-title>
-        <p *ngIf="manutention" class="subtitle">Détails</p>
+<div class="titles" *ngIf="hasLoaded">
+    <div class="title" *ngIf="!manutention">Aucune manutention<br>à traiter.</div>
+    <div class="title" *ngIf="manutention">Menu | <b class="important">Manutentions</b></div>
+    <p *ngIf="manutention" class="subtitle">Détails</p>
+</div>
+<wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
+<ion-scroll scrollY="true" *ngIf="hasLoaded" class="page-content">
+    <ion-item class="readonly" text-wrap>
+        <ion-label>Demandeur</ion-label>
+        <ion-textarea value="{{ manutention.demandeur }}" [readonly]="true"></ion-textarea>
+    </ion-item>
+    <ion-item class="readonly" text-wrap>
+        <ion-label>Date attendue</ion-label>
+        <ion-textarea value="{{ toDate(manutention) | date:'dd/MM/yyyy H:mm'  }}"
+                      [readonly]="true"></ion-textarea>
+    </ion-item>
+    <ion-item class="readonly" text-wrap>
+        <ion-label>Source</ion-label>
+        <ion-textarea value="{{ manutention.source  }}" [readonly]="true"></ion-textarea>
+    </ion-item>
+    <ion-item class="readonly" text-wrap>
+        <ion-label>Destination</ion-label>
+        <ion-textarea value="{{ manutention.destination }}" [readonly]="true"></ion-textarea>
+    </ion-item>
+    <button class="commentaire_button" (click)="showCommentaire()">
+        <span><b>Commentaire</b></span>
+        <img src="assets/icon/search.svg" class="arrow">
+    </button>
+    <div class="commentaire" *ngIf="showCom" [innerHTML]="manutention.commentaire">
     </div>
-    <div class="spinner-container" *ngIf="!hasLoaded">
-        <ion-spinner class="main-spinner"></ion-spinner>
-    </div>
-    <ion-scroll scrollY="true" *ngIf="hasLoaded" class="body">
-        <br>
-        <ion-item class="readonly" text-wrap>
-            <ion-label>Demandeur</ion-label>
-            <ion-textarea value="{{ manutention.demandeur }}" [readonly]="true"></ion-textarea>
-        </ion-item>
-        <ion-item class="readonly" text-wrap>
-            <ion-label>Date attendue</ion-label>
-            <ion-textarea value="{{ toDate(manutention) | date:'dd/MM/yyyy H:mm'  }}"
-                          [readonly]="true"></ion-textarea>
-        </ion-item>
-        <ion-item class="readonly" text-wrap>
-            <ion-label>Source</ion-label>
-            <ion-textarea value="{{ manutention.source  }}" [readonly]="true"></ion-textarea>
-        </ion-item>
-        <ion-item class="readonly" text-wrap>
-            <ion-label>Destination</ion-label>
-            <ion-textarea value="{{ manutention.destination }}" [readonly]="true"></ion-textarea>
-        </ion-item>
-        <button class="commentaire_button" (click)="showCommentaire()">
-            <span><b>Commentaire</b></span>
-            <img src="assets/icon/search.svg" class="arrow">
-        </button>
-        <div class="commentaire" *ngIf="showCom" [innerHTML]="manutention.commentaire">
-        </div>
-        <button class="validate_button" (click)="validateManut()">
-            <span><b>VALIDER</b></span>
-            <img src="assets/icon/valider01.svg" class="arrow">
-        </button>
-    </ion-scroll>
-</ion-content>
+    <button class="validate_button" (click)="validateManut()">
+        <span><b>VALIDER</b></span>
+        <img src="assets/icon/valider01.svg" class="arrow">
+    </button>
+</ion-scroll>

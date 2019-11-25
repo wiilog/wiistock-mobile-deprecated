@@ -3,14 +3,15 @@ import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {HttpClient} from '@angular/common/http';
 import {Collecte} from '@app/entities/collecte';
 import {ToastService} from '@app/services/toast.service';
-import {Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
-import {ApiServices} from "@app/config/api-services";
-import {StorageService} from "@app/services/storage.service";
+import {flatMap} from 'rxjs/operators';
+import {of} from 'rxjs/observable/of';
+import {Network} from '@ionic-native/network';
+import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 
 
 @IonicPage()
@@ -34,13 +35,13 @@ export class CollecteEmplacementPage {
 
     private zebraScannerSubscription: Subscription;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public sqliteProvider: SqliteProvider,
-                       public toastService: ToastService,
-                       public barcodeScannerManager: BarcodeScannerManagerService,
-                       public http: HttpClient,
-                       private storageService: StorageService) {
+    public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private sqliteProvider: SqliteProvider,
+                       private toastService: ToastService,
+                       private barcodeScannerManager: BarcodeScannerManagerService,
+                       private network: Network,
+                       private localDataManager: LocalDataManagerService) {
         this.isLoading = true;
     }
 
@@ -81,7 +82,7 @@ export class CollecteEmplacementPage {
             this.emplacement = emplacement;
         }
         else {
-            this.toastService.showToast('Veuillez scanner ou sélectionner un emplacement connu.');
+            this.toastService.presentToast('Veuillez scanner ou sélectionner un emplacement connu.');
         }
     }
 
@@ -89,68 +90,67 @@ export class CollecteEmplacementPage {
         if (this.emplacement && this.emplacement.label) {
             if (!this.isLoading) {
                 this.isLoading = true;
-                let instance = this;
-                let promise = new Promise<any>((resolve) => {
-                    this.sqliteProvider.findArticlesByCollecte(this.collecte.id).subscribe((articles) => {
-                        articles.forEach(function (article) {
-                            instance.sqliteProvider.findAll('`mouvement`').subscribe((mvts) => {
-                                instance.sqliteProvider.findMvtByArticleCollecte(article.id).subscribe((mvt) => {
-                                    instance.sqliteProvider.finishMvt(mvt.id, instance.emplacement.label).subscribe(() => {
-                                        if (articles.indexOf(article) === articles.length - 1) resolve();
-                                    });
-                                });
-                            });
+
+                this.sqliteProvider
+                    .findArticlesByCollecte(this.collecte.id)
+                    .pipe(
+                        flatMap((articles) => Observable.zip(
+                            ...articles.map((article) => (
+                                this.sqliteProvider
+                                    .findMvtByArticleCollecte(article.id)
+                                    .pipe(flatMap((mvt) => this.sqliteProvider.finishMvt(mvt.id, this.emplacement.label)))
+                            ))
+                        )),
+                        flatMap(() => this.sqliteProvider.finishCollecte(this.collecte.id, this.emplacement.label)),
+                        flatMap((): any => (
+                            this.network.type !== 'none'
+                                ? this.localDataManager.saveFinishedProcess('collecte')
+                                : of({offline: true})
+                        ))
+                    )
+                    .subscribe(
+                        ({offline, success}: any) => {
+                            if (offline) {
+                                this.toastService.presentToast('Collecte sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+                                this.closeScreen();
+                            }
+                            else {
+                                this.handleCollectesSuccess(success.length);
+                            }
+                        },
+                        (error) => {
+                            this.handlePreparationError(error);
                         });
-                    });
-                });
-                promise.then(() => {
-                    this.sqliteProvider.finishCollecte(this.collecte.id, this.emplacement.label).subscribe(() => {
-                        this.sqliteProvider.getApiUrl(ApiServices.FINISH_COLLECTE).subscribe((finishCollecteUrl) => {
-                            this.storageService.getApiKey().subscribe((key) => {
-                                this.sqliteProvider.findAll('`collecte`').subscribe(collectesToSend => {
-                                    this.sqliteProvider.findAll('`mouvement`').subscribe((mvts) => {
-                                        let params = {
-                                            collectes: collectesToSend.filter(c => c.date_end !== null),
-                                            mouvements: mvts.filter(m => m.id_prepa === null),
-                                            apiKey: key
-                                        };
-                                        this.http.post<any>(finishCollecteUrl, params).subscribe(
-                                            resp => {
-                                                if (resp.success) {
-                                                    this.sqliteProvider.deleteCollectes(params.collectes).then(() => {
-                                                        this.sqliteProvider.deleteMvts(params.mouvements).then(() => {
-                                                            this.isLoading = false;
-                                                            this.navCtrl.pop().then(() => {
-                                                                this.validateCollecte();
-                                                            });
-                                                        });
-                                                    });
-                                                }
-                                                else {
-                                                    this.isLoading = false;
-                                                    this.toastService.showToast(resp.msg);
-                                                }
-                                            },
-                                            () => {
-                                                this.isLoading = false;
-                                                this.navCtrl.pop().then(() => {
-                                                    this.validateCollecte();
-                                                });
-                                            }
-                                        );
-                                    });
-                                });
-                            });
-                        })
-                    })
-                })
             }
             else {
-                this.toastService.showToast('Chargement en cours veuillez patienter.');
+                this.toastService.presentToast('Chargement en cours veuillez patienter.');
             }
         }
         else {
-            this.toastService.showToast('Veuillez sélectionner ou scanner un emplacement.');
+            this.toastService.presentToast('Veuillez sélectionner ou scanner un emplacement.');
         }
+    }
+
+    private handleCollectesSuccess(nbCollectesSucceed: number): void {
+        if (nbCollectesSucceed > 0) {
+            this.toastService.presentToast(
+                (nbCollectesSucceed === 1
+                    ? 'Votre collecte a bien été enregistrée'
+                    : `Votre préparation et ${nbCollectesSucceed - 1} collecte${nbCollectesSucceed - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
+            );
+        }
+        this.closeScreen();
+    }
+
+    private handlePreparationError(resp): void {
+        this.isLoading = false;
+        this.toastService.presentToast((resp && resp.api && resp.message) ? resp.message : 'Une erreur s\'est produite');
+    }
+
+    private closeScreen(): void {
+        this.isLoading = false;
+        this.navCtrl.pop().then(() => {
+            this.validateCollecte();
+        });
     }
 }

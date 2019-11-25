@@ -9,8 +9,8 @@ import {Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
-import {ApiServices} from "@app/config/api-services";
-import {StorageService} from "@app/services/storage.service";
+import {ApiService} from '@app/services/api.service';
+import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()
@@ -31,12 +31,13 @@ export class InventaireAnomaliePage {
 
     private zebraScannerSubscription: Subscription;
 
-    public constructor(public sqliteProvider: SqliteProvider,
-                       public http: HttpClient,
+    public constructor(private sqliteProvider: SqliteProvider,
+                       private http: HttpClient,
                        private changeDetector: ChangeDetectorRef,
                        private modalController: ModalController,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService,
+                       private apiService: ApiService,
                        private storageService: StorageService) {}
 
 
@@ -67,7 +68,7 @@ export class InventaireAnomaliePage {
 
     synchronize() {
         this.isLoaded = false;
-        this.sqliteProvider.getApiUrl(ApiServices.TREAT_ANOMALIES).subscribe((treatAnomaliesUrl) => {
+        this.apiService.getApiUrl(ApiService.TREAT_ANOMALIES).subscribe((treatAnomaliesUrl) => {
             this.storageService.getApiKey().subscribe((key) => {
                 this.sqliteProvider.findAll('`anomalie_inventaire`').subscribe(anomalies => {
                     this.anomalies = anomalies;
@@ -87,10 +88,10 @@ export class InventaireAnomaliePage {
                             if (resp.success) {
                                 // supprime les anomalies traitée de la base
                                 this.sqliteProvider.deleteAnomalies(anomalies);
-                                this.toastService.showToast(resp.data.status);
+                                this.toastService.presentToast(resp.data.status);
                             } else {
                                 this.isLoaded = true;
-                                this.toastService.showToast('Une erreur est survenue lors de la mise à jour des anomalies.');
+                                this.toastService.presentToast('Une erreur est survenue lors de la mise à jour des anomalies.');
                             }
                             this.locations = locations;
                             this.isLoaded = true;
@@ -120,7 +121,7 @@ export class InventaireAnomaliePage {
             this.anomaliesByLocation = this.anomalies.filter(anomaly => (anomaly.location === this.location));
             this.changeDetector.detectChanges();
         } else {
-            this.toastService.showToast('Ce code-barre ne correspond à aucun emplacement.');
+            this.toastService.presentToast('Ce code-barre ne correspond à aucun emplacement.');
         }
     }
 
@@ -132,7 +133,7 @@ export class InventaireAnomaliePage {
             this.changeDetector.detectChanges();
             this.openModalQuantity(this.article);
         } else {
-            this.toastService.showToast('Ce code-barre ne correspond à aucune référence ou article.');
+            this.toastService.presentToast('Ce code-barre ne correspond à aucune référence ou article.');
         }
     }
 
@@ -143,7 +144,7 @@ export class InventaireAnomaliePage {
             this.anomaly.treated = "1";
 
             // envoi de l'anomalie modifiée à l'API
-            this.sqliteProvider.getApiUrl(ApiServices.TREAT_ANOMALIES).subscribe((treatAnomaliesUrl) => {
+            this.apiService.getApiUrl(ApiService.TREAT_ANOMALIES).subscribe((treatAnomaliesUrl) => {
                 this.storageService.getApiKey().subscribe((apiKey) => {
                     let params = {
                         anomalies: [this.anomaly],
@@ -153,7 +154,7 @@ export class InventaireAnomaliePage {
                         if (resp.success) {
                             // supprime l'anomalie traitée de la base
                             this.sqliteProvider.deleteById(`anomalie_inventaire`, this.anomaly.id);
-                            this.toastService.showToast(resp.data.status);
+                            this.toastService.presentToast(resp.data.status);
                             // supprime l'anomalie de la liste
                             this.anomaliesByLocation = this.anomaliesByLocation.filter(anomaly => parseInt(anomaly.treated) !== 1);
                             // si liste vide retour aux emplacements

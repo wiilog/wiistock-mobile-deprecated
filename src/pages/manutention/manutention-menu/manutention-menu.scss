@@ -1,9 +1,5 @@
 page-manutention-menu {
 
-    .toolbar-background {
-        background-color: #030F4C !important;
-    }
-
     .toolbar-title {
         font-family: "Myriad Pro" !important;
     }
@@ -15,33 +11,6 @@ page-manutention-menu {
     span {
         font-family: 'Myriad Pro' !important;
         margin-right: 15px;
-    }
-
-    .user-title {
-        .toolbar-title {
-            color: white;
-        }
-
-        text-align: center !important;
-    }
-
-    .subtitle {
-        font-size: 20px;
-        color: #030F4C;
-    }
-
-    .custom-button,
-    .custom-button.icon:before {
-        font-size: 30px !important;
-        color: white !important;
-    }
-
-    .button-custom {
-        margin: -5px 0 -5px -5px !important;
-    }
-
-    ion-navbar.toolbar {
-        min-height: 60px;
     }
 
     ion-card-header {
@@ -63,11 +32,14 @@ page-manutention-menu {
         background-color: #FFFFFF !important;
         text-align: center !important;
         align-content: center !important;
-    }
-
-    .body {
-        background-color: #F2F2F4 !important;
-        height: 80%;
+        .title {
+            margin-top: 16px;
+        }
+        .title, .subtitle {
+            font-size: 20px;
+            color: #030F4C;
+            margin-bottom: 16px;
+        }
     }
 
     .important {
@@ -87,10 +59,18 @@ page-manutention-menu {
 
     .icon-manutention-container {
         text-align: center;
+        margin-top: 16px;
+        margin-bottom: 16px;
     }
 
     .placeholder-buttons {
         width: 45px;
+    }
+
+    .page-content {
+        background-color: #F2F2F4 !important;
+        height: 80%;
+        margin: -16px;
     }
 
 }

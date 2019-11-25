@@ -1,14 +1,6 @@
-<ion-header>
-  <ion-navbar>
-    <ion-title>Anomalies d'inventaire</ion-title>
-  </ion-navbar>
-</ion-header>
-
 <ion-content padding>
-    <div class="spinner-container" *ngIf="!isLoaded" >
-        <ion-spinner class="main-spinner"></ion-spinner>
-        <p class="spinner-text">Chargement...</p>
-    </div>
+
+    <wii-main-loader [loading]="isLoaded"></wii-main-loader>
 
     <ng-container *ngIf="isLoaded">
         <ion-grid>

@@ -7,7 +7,7 @@ export interface Mouvement {
     date_drop: string;
     location: string;
     type: string;
-    is_ref: string;
+    is_ref: number;
     id_article_prepa: number;
     id_prepa: number;
     id_article_livraison: number;

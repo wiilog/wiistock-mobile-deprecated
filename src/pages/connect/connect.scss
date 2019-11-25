@@ -1,8 +1,16 @@
+@import "../../theme/variables";
+
 page-connect {
-    img {
-        width: auto;
-        margin: auto;
-        display: block;
+    .logo-container {
+        width: 60%;
+        margin: 3rem auto;
+    }
+
+    .form-content {
+        margin-bottom: 3rem;
+        ion-item {
+            margin-bottom: 1rem;
+        }
     }
 
     .version-not-valid-container {
@@ -14,7 +22,31 @@ page-connect {
         padding: 10px;
         margin-bottom: 3rem;
     }
+
     ion-footer {
         background-color: white;
+        div {
+            align-items: flex-end;
+
+            .version-container {
+                font-size: 12px;
+                color: gray;
+            }
+        }
+    }
+
+    .page-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        .parameters {
+            background-color: transparent;
+            padding: 0;
+            width: 30px;
+        }
+        .version-container {
+            font-size: 10px;
+            color: $grey;
+        }
     }
 }

@@ -1,1 +1,4 @@
-<ion-nav [root]="rootPage" swipeBackEnabled="false"></ion-nav>
+<wii-header [nav]="nav" (withHeader)="onHeaderChange($event)"></wii-header>
+<ion-content [class.with-header]="pageWithHeader">
+    <ion-nav [root]="rootPage" swipeBackEnabled="false"></ion-nav>
+</ion-content>

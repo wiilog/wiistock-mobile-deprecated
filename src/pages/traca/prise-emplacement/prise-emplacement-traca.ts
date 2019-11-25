@@ -50,7 +50,7 @@ export class PriseEmplacementPageTraca {
             });
         }
         else {
-            this.toastService.showToast('Veuillez sélectionner un emplacement')
+            this.toastService.presentToast('Veuillez sélectionner un emplacement')
         }
     }
 
@@ -72,7 +72,7 @@ export class PriseEmplacementPageTraca {
             };
         }
         else {
-            this.toastService.showToast('Veuillez flasher ou sélectionner un emplacement.');
+            this.toastService.presentToast('Veuillez flasher ou sélectionner un emplacement.');
         }
     }
 }

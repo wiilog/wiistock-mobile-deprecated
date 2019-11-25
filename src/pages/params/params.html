@@ -1,26 +1,19 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Follow GT</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content padding>
-
-  <form (ngSubmit)="registerURL()">
-    <ion-item>
-      <ion-label>URL</ion-label>
-      <ion-input type="text"
-                 [(ngModel)]="URL"
-                 name="url"
-                 autocapitalize="off"></ion-input>
-    </ion-item>
-  </form>
-  <img src="assets/icon/followgt.png">
-
-</ion-content>
-<ion-footer padding>
-  <div class="d-flex">
-    <ion-icon class="big-icon" name="return-left" navPop></ion-icon>
-    <ion-icon class="big-icon" name="checkmark-circle" (click)="testURL()"></ion-icon>
-  </div>
-</ion-footer>
+<div class="page-content">
+    <ion-title>
+        <img class="icon" alt="Parametres" src="assets/icon/cogs.svg"/>
+    </ion-title>
+    <form (ngSubmit)="registerURL()">
+        <ion-item>
+            <ion-label>URL</ion-label>
+            <ion-input type="text"
+                       [(ngModel)]="URL"
+                       name="url"
+                       autocapitalize="off"></ion-input>
+        </ion-item>
+    </form>
+</div>
+<div class="page-footer">
+    <div>
+        <button class="submit-button" ion-button color="success" (click)="registerURL()">Valider</button>
+    </div>
+</div>

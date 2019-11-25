@@ -54,7 +54,7 @@ export class DeposeEmplacementPageTraca {
             });
         }
         else {
-            this.toastService.showToast('Veuillez sélectionner un emplacement')
+            this.toastService.presentToast('Veuillez sélectionner un emplacement')
         }
     }
 
@@ -74,7 +74,7 @@ export class DeposeEmplacementPageTraca {
             this.emplacement = location;
         }
         else {
-            this.toastService.showToast('Veuillez flasher ou sélectionner un emplacement connu.');
+            this.toastService.presentToast('Veuillez flasher ou sélectionner un emplacement connu.');
         }
     }
 
