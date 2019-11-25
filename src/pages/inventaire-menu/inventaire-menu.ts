@@ -92,7 +92,7 @@ export class InventaireMenuPage {
                             } else {
                                 ret$.next(undefined);
                             }
-                        }, err => ret$.next(undefined));
+                        }, () => ret$.next(undefined));
                     });
                 } else {
                     ret$.next(undefined);

@@ -25,11 +25,7 @@ export class CollecteMenuPage {
         this.navCtrl.setRoot(MenuPage);
     }
 
-    ionViewWillEnter() {
-        this.synchronise(true);
-    }
-
-    synchronise(fromStart: boolean) {
+    public ionViewWillEnter(): void {
         this.hasLoaded = false;
         this.sqlLiteProvider.findAll('`collecte`').subscribe((collectes) => {
             this.collectes = collectes
@@ -37,7 +33,7 @@ export class CollecteMenuPage {
                 .sort(({emplacement: emplacement1}, {emplacement: emplacement2}) => ((emplacement1 < emplacement2) ? -1 : 1));
             this.hasLoaded = true;
             this.content.resize();
-        })
+        });
     }
 
     goToArticles(collecte) {

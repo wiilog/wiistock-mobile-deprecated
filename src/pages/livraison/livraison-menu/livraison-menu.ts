@@ -31,16 +31,12 @@ export class LivraisonMenuPage {
     }
 
     public ionViewWillEnter(): void {
-        this.synchronise(true);
-    }
-
-    synchronise(fromStart: boolean) {
         this.hasLoaded = false;
         this.sqliteProvider.findAll('`livraison`').subscribe((livraisons) => {
             this.livraisons = livraisons.filter(l => l.date_end === null);
             this.hasLoaded = true;
             this.content.resize();
-        })
+        });
     }
 
     public goToLivraison(livraison): void {
