@@ -1,9 +1,18 @@
-wii-list {
-    .wrapper {
-        display: flex;
+@import "../../../../theme/variables";
 
-        .icon-wrapper {
-            width: 15%;
+wii-list {
+    display: block;
+
+    wii-list-header {
+        margin: .35rem;
+    }
+
+    wii-list-element {
+        margin-right: $spacer * 1.2;
+        margin-left: $spacer * 1.2;
+
+        &:not(:last-child) {
+            margin-bottom: .35rem;
         }
     }
 }

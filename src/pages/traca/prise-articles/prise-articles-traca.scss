@@ -1,3 +1,8 @@
-page-prise-articles {
+@import "../../../theme/variables";
 
+page-prise-articles {
+    .page-content {
+        flex: 1;
+        margin: -$spacer;
+    }
 }

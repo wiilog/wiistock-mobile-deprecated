@@ -96,6 +96,11 @@ ion-grid {
 ion-item {
     padding: 0 !important;
 
+    .input-wrapper {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
     &.item-md.item-input.ng-valid.item-input-has-value:not(.input-has-focus):not(.item-input-has-focus) .item-inner,
     .item-md.item-input.ng-valid.input-has-value:not(.input-has-focus):not(.item-input-has-focus) .item-inner {
         border-bottom-color: $primary;
@@ -141,6 +146,8 @@ button[ion-button] {
 }
 
 ion-content {
+    background-color: $lightGrey !important;
+
     &.with-header {
         .ion-page {
             height: calc(100% - 82px);

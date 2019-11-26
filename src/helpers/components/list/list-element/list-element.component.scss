@@ -1,13 +1,12 @@
-wii-list-header {
-    .wrapper {
-        display: flex;
+@import "../../../../theme/variables";
 
-        .icon-wrapper {
-            width: 15%;
-        }
-    }
+wii-list-element {
+    display: block;
+    background-color: $white;
+    border: 1px solid $lightBlue;
+    padding: 1.5rem;
 
-    .icon-button {
-        background-color: transparent;
+    .element-value-bold {
+        font-weight: bold;
     }
 }

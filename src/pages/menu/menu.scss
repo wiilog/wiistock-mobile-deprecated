@@ -1,3 +1,5 @@
+@import "../../theme/variables";
+
 page-menu {
 
     .menu-icon {
@@ -9,6 +11,10 @@ page-menu {
         width: auto;
         margin: auto;
         display: block;
+
+        button {
+            background-color: $white;
+        }
     }
 
     .col-menu-stats {

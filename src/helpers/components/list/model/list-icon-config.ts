@@ -1,6 +1,7 @@
+import {IconColor} from "@helpers/components/icon/icon-color";
+
 export interface ListIconConfig {
     name: string;
-    alt: string;
-    color: string;
-    action: () => void;
+    color: IconColor;
+    action?: () => void;
 }

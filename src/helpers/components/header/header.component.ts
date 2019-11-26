@@ -1,4 +1,13 @@
-import {AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, Output, ViewChild} from '@angular/core';
+import {
+    Component,
+    ElementRef,
+    EventEmitter,
+    Input,
+    OnDestroy,
+    OnInit,
+    Output,
+    ViewChild
+} from '@angular/core';
 import {Nav} from 'ionic-angular';
 import {StorageService} from '@app/services/storage.service';
 import {Observable, Subscription} from 'rxjs';
@@ -11,7 +20,7 @@ import {ParamsPage} from "@pages/params/params";
     selector: 'wii-header',
     templateUrl: 'header.component.html'
 })
-export class HeaderComponent implements AfterViewInit, OnDestroy {
+export class HeaderComponent implements OnInit, OnDestroy {
 
     @Input()
     public nav: Nav;
@@ -52,7 +61,7 @@ export class HeaderComponent implements AfterViewInit, OnDestroy {
         this.withHeader = new EventEmitter<boolean>();
     }
 
-    public ngAfterViewInit(): void {
+    public ngOnInit(): void {
         this.viewDidEnterSubscription = this.nav.viewDidEnter.subscribe((data) => {
             this.loading = false;
             this.currentPageName = data.component.name;

@@ -11,6 +11,8 @@ import {ToastService} from '@app/services/toast.service';
 import {EntityFactoryService} from '@app/services/entity-factory.service';
 import {AlertManagerService} from '@app/services/alert-manager.service';
 import {LocalDataManagerService} from "@app/services/local-data-manager.service";
+import {ListHeaderConfig} from "@helpers/components/list/model/list-header-config";
+import {ListElementConfig} from "@helpers/components/list/model/list-element-config";
 
 
 @IonicPage()
@@ -29,6 +31,10 @@ export class PriseArticlesPageTraca {
 
     private manualEntryAlertWillEnterSubscription: Subscription;
 
+    public listHeader: ListHeaderConfig;
+    public listBody: Array<ListElementConfig>;
+    public listBoldValues: Array<string>;
+
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
                        private alertController: AlertController,
@@ -39,6 +45,10 @@ export class PriseArticlesPageTraca {
                        private entityFactory: EntityFactoryService,
                        private localDataManager: LocalDataManagerService,
                        private alertManager: AlertManagerService) {
+        this.listBody = [];
+        this.listBoldValues = [
+            'object'
+        ];
     }
 
     public ionViewWillEnter(): void {
@@ -53,6 +63,19 @@ export class PriseArticlesPageTraca {
         this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
             this.testIfBarcodeEquals(barcode);
         });
+
+        const pickedArticlesNumber = this.articles.length;
+        const plural = pickedArticlesNumber > 1 ? 's' : '';;
+
+        this.listHeader = {
+            title: 'PRISE',
+            subtitle: `Emplacement : ${this.emplacement.label}`,
+            info: `${pickedArticlesNumber} produit${plural} scanné${plural}`,
+            leftIcon: {
+                name: 'upload.svg',
+                color: 'primary'
+            }
+        };
     }
 
     public ionViewWillLeave(): void {
@@ -163,6 +186,18 @@ export class PriseArticlesPageTraca {
     private saveArticle(barCode: string): void {
         const article = this.entityFactory.createArticleBarcode(barCode);
         this.articles.push(article);
+        this.listBody.push({
+            infos: {
+                object: {
+                    label: 'Objet',
+                    value: article.barcode
+                },
+                date: {
+                    label: 'Date / Heure',
+                    value: article.date
+                }
+            }
+        });
         this.changeDetectorRef.detectChanges();
     }
 }
