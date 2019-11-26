@@ -64,9 +64,21 @@ export class PriseArticlesPageTraca {
             this.testIfBarcodeEquals(barcode);
         });
 
+        this.refreshListComponent();
+
+    }
+
+    public ionViewWillLeave(): void {
+        this.removeAlertSubscription();
+        if (this.zebraScanSubscription) {
+            this.zebraScanSubscription.unsubscribe();
+            this.zebraScanSubscription = undefined;
+        }
+    }
+
+    private refreshListComponent(): void {
         const pickedArticlesNumber = this.articles.length;
         const plural = pickedArticlesNumber > 1 ? 's' : '';;
-
         this.listHeader = {
             title: 'PRISE',
             subtitle: `Emplacement : ${this.emplacement.label}`,
@@ -76,14 +88,6 @@ export class PriseArticlesPageTraca {
                 color: 'primary'
             }
         };
-    }
-
-    public ionViewWillLeave(): void {
-        this.removeAlertSubscription();
-        if (this.zebraScanSubscription) {
-            this.zebraScanSubscription.unsubscribe();
-            this.zebraScanSubscription = undefined;
-        }
     }
 
     public ionViewCanLeave(): boolean {
@@ -198,6 +202,7 @@ export class PriseArticlesPageTraca {
                 }
             }
         });
+        this.refreshListComponent();
         this.changeDetectorRef.detectChanges();
     }
 }
