@@ -122,6 +122,8 @@ ion-item {
 button[ion-button] {
     padding-top: 3rem;
     padding-bottom: 3rem;
+    font-weight: bold;
+    font-size: 1.6rem;
 }
 
 .spinner {
@@ -131,7 +133,6 @@ button[ion-button] {
 .alertAlert {
     background-color: #149914 !important;
     color: #FFF !important;
-    font-family: 'Myriad Pro' !important;
 }
 
 .text-right {

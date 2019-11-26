@@ -1,0 +1,41 @@
+@import '../../theme/variables';
+
+new-emplacement {
+    .titles {
+        background-color: #FFFFFF !important;
+        text-align: center !important;
+        align-content: center !important;
+
+        .title {
+            margin-top: 16px;
+        }
+
+        .title, .subtitle {
+            font-size: 18px;
+            color: #030F4C;
+            margin-bottom: 16px;
+        }
+    }
+
+    button[ion-button] {
+        width: calc(100% + 2 * 12px);
+        margin-left: -12px;
+        margin-right: -12px;
+    }
+
+    .submit-button {
+        display: block;
+    }
+
+    img {
+        border: 0;
+        margin-left: 5px;
+        width: 20px;
+        height: 20px;
+    }
+
+    .label-emp {
+        margin-top: 1rem !important;
+        margin-bottom: 1rem !important;
+    }
+}
