@@ -1,7 +1,5 @@
 import {Component} from '@angular/core';
 import {IonicPage, NavController} from 'ionic-angular';
-import {PriseEmplacementPageTraca} from '@pages/traca/prise-emplacement/prise-emplacement-traca';
-import {DeposeEmplacementPageTraca} from '@pages/traca/depose-emplacement/depose-emplacement-traca';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import {HttpClient} from '@angular/common/http';
@@ -10,6 +8,10 @@ import {ToastService} from '@app/services/toast.service';
 import {MenuPage} from '@pages/menu/menu';
 import {ApiService} from '@app/services/api.service';
 import {StorageService} from '@app/services/storage.service';
+import {EmplacementScanPage} from "@pages/emplacement-scan/emplacement-scan";
+import {Emplacement} from "@app/entities/emplacement";
+import {PriseArticlesPageTraca} from "@pages/traca/prise-articles/prise-articles-traca";
+import {DeposeArticlesPageTraca} from "@pages/traca/depose-articles/depose-articles-traca";
 
 
 @IonicPage()
@@ -45,12 +47,34 @@ export class TracaMenuPage {
     }
 
     goToPrise() {
-        this.navCtrl.push(PriseEmplacementPageTraca);
+        this.navCtrl.push(EmplacementScanPage, {
+            fromDepose: false,
+            menu: 'Prise',
+            chooseEmp: (emplacement: Emplacement) => {
+                this.navCtrl.push(PriseArticlesPageTraca, {
+                    emplacement: emplacement,
+                    finishPrise: () => {
+                        this.navCtrl.pop();
+                    }
+                });
+            }
+        });
     }
 
     goToDepose() {
         if (this.unfinishedMvts) {
-            this.navCtrl.push(DeposeEmplacementPageTraca);
+            this.navCtrl.push(EmplacementScanPage, {
+                fromDepose: true,
+                menu: 'Dépose',
+                chooseEmp: (emplacement: Emplacement) => {
+                    this.navCtrl.push(DeposeArticlesPageTraca, {
+                        emplacement: emplacement,
+                        finishDepose: () => {
+                            this.navCtrl.pop();
+                        }
+                    });
+                }
+            });
         }
         else {
             this.toastService.presentToast('Aucune prise n\'a été enregistrée');

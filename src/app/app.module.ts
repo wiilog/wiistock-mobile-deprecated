@@ -51,6 +51,7 @@ import {AppVersion} from '@ionic-native/app-version';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {ApiService} from '@app/services/api.service';
 import {LoadingService} from '@app/services/loading.service';
+import {EmplacementScanPage} from "@pages/emplacement-scan/emplacement-scan";
 
 
 @NgModule({
@@ -81,7 +82,8 @@ import {LoadingService} from '@app/services/loading.service';
         CollecteArticleTakePage,
         CollecteArticlesPage,
         CollecteEmplacementPage,
-        PreparationRefArticlesPage
+        PreparationRefArticlesPage,
+        EmplacementScanPage
     ],
     imports: [
         IonicSelectableModule,
@@ -122,7 +124,8 @@ import {LoadingService} from '@app/services/loading.service';
         CollecteArticleTakePage,
         CollecteArticlesPage,
         CollecteEmplacementPage,
-        PreparationRefArticlesPage
+        PreparationRefArticlesPage,
+        EmplacementScanPage
     ],
     providers: [
         BarcodeScannerManagerService,

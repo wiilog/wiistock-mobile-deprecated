@@ -1,0 +1,60 @@
+page-emplacement-scan {
+
+  .titles {
+    background-color: #FFFFFF !important;
+    text-align: center !important;
+    align-content: center !important;
+
+    .title {
+      margin-top: 16px;
+    }
+
+    .title, .subtitle {
+      font-size: 20px;
+      color: #030F4C;
+      margin-bottom: 16px;
+    }
+  }
+
+  .validate_button {
+    margin: 0 auto;
+    display: block;
+    background-color: #030F4C;
+    text-align: center;
+    height: 70px;
+    width: 100%;
+
+    span {
+      margin-right: 5px !important;
+      font-size: 30px !important;
+    }
+  }
+
+  span {
+    font-family: 'Myriad Pro' !important;
+    color: white !important;
+    font-size: 20px;
+  }
+
+  img {
+    max-width: 8%;
+    border: 0;
+  }
+
+  .label-emp {
+    margin-top: 50% !important;
+    margin-bottom: 50% !important;
+  }
+
+  .tools {
+    text-align: center;
+    margin-top: auto;
+    margin-bottom: 20px;
+    img {
+      display: inline-block;
+    }
+    .icon-emp {
+      margin-right: 50px !important;
+    }
+  }
+}
