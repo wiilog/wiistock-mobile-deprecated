@@ -1,8 +1,9 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController, NavParams} from "ionic-angular";
+import {IonicPage, Loading, NavController, NavParams} from "ionic-angular";
 import {Emplacement} from "@app/entities/emplacement";
 import {ApiService} from "@app/services/api.service";
 import {ToastService} from "@app/services/toast.service";
+import {LoadingService} from "@app/services/loading.service";
 
 /**
  * Generated class for the NewEmplacementComponent component.
@@ -21,11 +22,16 @@ export class NewEmplacementComponent {
     private fromDepose: boolean;
     private emplacement: Emplacement;
     public menu: string;
+
+    public loading: boolean;
+
     constructor(
         public navParams: NavParams,
         private apiService: ApiService,
         private toast: ToastService,
+        private loadingService: LoadingService,
         private navCtrl: NavController) {
+        this.loading = false;
     }
 
     ionViewWillEnter() {
@@ -39,15 +45,25 @@ export class NewEmplacementComponent {
     }
 
     createEmp() {
-        this.apiService.requestApi("post", ApiService.NEW_EMP, {label: this.emplacement.label, isDelivery: this.fromDepose ? '1' : '0'}).subscribe(response => {
-            if (response.success) {
-                this.emplacement.id = Number(response.msg);
-                this.createNewEmp(this.emplacement);
-                this.navCtrl.pop();
-            } else {
-                this.toast.presentToast(response.msg);
-            }
-        });
+        if (!this.loading) {
+            this.loadingService.presentLoading('Création de l\'emplacement').subscribe((loader: Loading) => {
+                this.loading = true;
+                this.apiService.requestApi("post", ApiService.NEW_EMP, {
+                    label: this.emplacement.label,
+                    isDelivery: this.fromDepose ? '1' : '0'
+                }).subscribe(response => {
+                    this.loading = false;
+                    loader.dismiss();
+                    this.emplacement.id = Number(response.msg);
+                    this.createNewEmp(this.emplacement);
+                    this.navCtrl.pop();
+                }, (response) => {
+                    this.loading = false;
+                    loader.dismiss();
+                    this.toast.presentToast(response.msg);
+                });
+            });
+        }
     }
 
 }
