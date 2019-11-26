@@ -1,5 +1,7 @@
 <button class="icon-button"
         #button
+        [class.fill]="svgColorAttribute === 'fill'"
+        [class.stroke]="svgColorAttribute === 'stroke'"
         (click)="onButtonClick($event)"
         [innerHTML]="svgObject">
 </button>

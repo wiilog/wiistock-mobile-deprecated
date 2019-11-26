@@ -1,0 +1,14 @@
+<ion-item>
+    <ion-label>{{label}}</ion-label>
+    <ion-input #inputComponent
+
+               [name]="name"
+               [(ngModel)]="value"
+               (ngModelChange)="onValueChange($event)"
+               [type]="inputConfig.type"
+               [required]="inputConfig.required"
+               [maxlength]="inputConfig.maxLength"
+               [min]="inputConfig.min"
+               [max]="inputConfig.max">
+    </ion-input>
+</ion-item>

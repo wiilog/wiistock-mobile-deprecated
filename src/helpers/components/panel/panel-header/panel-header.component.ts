@@ -1,14 +1,14 @@
 import {Component, Input} from '@angular/core';
-import {ListIconConfig} from '@helpers/components/list/model/list-icon-config';
+import {IconConfig} from '@helpers/components/panel/model/icon-config';
 
 @Component({
-    selector: 'wii-list-header',
-    templateUrl: 'list-header.component.html'
+    selector: 'wii-panel-header',
+    templateUrl: 'panel-header.component.html'
 })
-export class ListHeaderComponent {
+export class PanelHeaderComponent {
 
     @Input()
-    public leftIcon: ListIconConfig;
+    public leftIcon: IconConfig;
 
     @Input()
     public title: string;
@@ -20,7 +20,7 @@ export class ListHeaderComponent {
     public info: string;
 
     @Input()
-    public rightIcon: ListIconConfig;
+    public rightIcon: IconConfig;
 
     public onLeftIconClick(): void {
         if (this.leftIcon.action) {

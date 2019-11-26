@@ -9,11 +9,11 @@
         Flashez un article
     </ion-title>
 
-    <wii-list *ngIf="listHeader && listBody"
+    <wii-list-panel *ngIf="listHeader && listBody"
               [header]="listHeader"
               [body]="listBody"
               [boldValues]="listBoldValues">
-    </wii-list>
+    </wii-list-panel>
 </ion-scroll>
 
 <ion-footer padding>

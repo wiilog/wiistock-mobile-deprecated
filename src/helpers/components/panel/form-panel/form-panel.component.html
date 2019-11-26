@@ -1,0 +1,18 @@
+<wii-panel-header *ngIf="header"
+                  [leftIcon]="header.leftIcon"
+                  [title]="header.title"
+                  [subtitle]="header.subtitle"
+                  [info]="header.info"
+                  [rightIcon]="header.rightIcon">
+</wii-panel-header>
+
+<ng-container *ngFor="let element of body">
+    <wii-form-panel-input #formElement
+                          *ngIf="element.type === 'input'"
+                          [inputConfig]="element.inputConfig"
+                          [(value)]="element.value"
+                          [label]="element.label"
+                          [name]="element.name"
+                          [errors]="element.errors">
+    </wii-form-panel-input>
+</ng-container>

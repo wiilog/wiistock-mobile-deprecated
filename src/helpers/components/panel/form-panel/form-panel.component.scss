@@ -1,13 +1,13 @@
 @import "../../../../theme/variables";
 
-wii-list {
+wii-form-panel {
     display: block;
 
-    wii-list-header {
+    wii-panel-header {
         margin: .35rem;
     }
 
-    wii-list-element {
+    wii-form-panel-input {
         margin-right: $spacer * 1.2;
         margin-left: $spacer * 1.2;
 

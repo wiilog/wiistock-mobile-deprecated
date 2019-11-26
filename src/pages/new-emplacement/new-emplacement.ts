@@ -48,20 +48,23 @@ export class NewEmplacementComponent {
         if (!this.loading) {
             this.loadingService.presentLoading('Création de l\'emplacement').subscribe((loader: Loading) => {
                 this.loading = true;
-                this.apiService.requestApi("post", ApiService.NEW_EMP, {
+                const serviceParams = {
                     label: this.emplacement.label,
                     isDelivery: this.fromDepose ? '1' : '0'
-                }).subscribe(response => {
-                    this.loading = false;
-                    loader.dismiss();
-                    this.emplacement.id = Number(response.msg);
-                    this.createNewEmp(this.emplacement);
-                    this.navCtrl.pop();
-                }, (response) => {
-                    this.loading = false;
-                    loader.dismiss();
-                    this.toast.presentToast(response.msg);
-                });
+                };
+                this.apiService.requestApi("post", ApiService.NEW_EMP, serviceParams).subscribe(
+                    (response) => {
+                        this.loading = false;
+                        loader.dismiss();
+                        this.emplacement.id = Number(response.msg);
+                        this.createNewEmp(this.emplacement);
+                        this.navCtrl.pop();
+                    },
+                    (response) => {
+                        this.loading = false;
+                        loader.dismiss();
+                        this.toast.presentToast(response.msg);
+                    });
             });
         }
     }

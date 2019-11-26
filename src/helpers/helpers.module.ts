@@ -5,27 +5,33 @@ import {IonicModule} from 'ionic-angular';
 import {MainLoaderComponent} from '@helpers/components/main-loader/main-loader.component';
 import {HeaderComponent} from '@helpers/components/header/header.component';
 import {IconComponent} from '@helpers/components/icon/icon.component';
-import {ListHeaderComponent} from "@helpers/components/list/list-header/list-header.component";
-import {ListElementComponent} from "@helpers/components/list/list-element/list-element.component";
-import {ListComponent} from "@helpers/components/list/list/list.component";
+import {ListPanelComponent} from "@helpers/components/panel/list-panel/list-panel.component";
+import {ListPanelItemComponent} from "@helpers/components/panel/list-panel/list-panel-item/list-panel-item.component";
+import {PanelHeaderComponent} from "@helpers/components/panel/panel-header/panel-header.component";
+import {FormPanelComponent} from "@helpers/components/panel/form-panel/form-panel.component";
+import {FormPanelInputComponent} from "@helpers/components/panel/form-panel/form-panel-input/form-panel-input.component";
 
 
 @NgModule({
     declarations: [
         SearchLocationComponent,
         MainLoaderComponent,
-        ListHeaderComponent,
-        ListComponent,
-        ListElementComponent,
+        PanelHeaderComponent,
+        ListPanelComponent,
+        ListPanelItemComponent,
+        FormPanelInputComponent,
+        FormPanelComponent,
         IconComponent,
         HeaderComponent
     ],
     exports: [
         SearchLocationComponent,
         MainLoaderComponent,
-        ListHeaderComponent,
-        ListComponent,
-        ListElementComponent,
+        PanelHeaderComponent,
+        ListPanelComponent,
+        ListPanelItemComponent,
+        FormPanelInputComponent,
+        FormPanelComponent,
         IconComponent,
         HeaderComponent
     ],

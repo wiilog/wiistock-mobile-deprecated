@@ -1,11 +1,12 @@
 import {Component, Input} from '@angular/core';
-import {ListIconConfig} from '@helpers/components/list/model/list-icon-config';
+import {IconConfig} from '@helpers/components/panel/model/icon-config';
+
 
 @Component({
-    selector: 'wii-list-element',
-    templateUrl: 'list-element.component.html'
+    selector: 'wii-list-panel-item',
+    templateUrl: 'list-panel-item.component.html'
 })
-export class ListElementComponent {
+export class ListPanelItemComponent {
 
     @Input()
     public infos: {
@@ -19,7 +20,7 @@ export class ListElementComponent {
     public boldValues?: Array<string>;
 
     @Input()
-    public rightIcon?: ListIconConfig;
+    public rightIcon?: IconConfig;
 
     public constructor() {
         this.boldValues = [];

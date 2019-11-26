@@ -11,8 +11,8 @@ import {ToastService} from '@app/services/toast.service';
 import {EntityFactoryService} from '@app/services/entity-factory.service';
 import {AlertManagerService} from '@app/services/alert-manager.service';
 import {LocalDataManagerService} from "@app/services/local-data-manager.service";
-import {ListHeaderConfig} from "@helpers/components/list/model/list-header-config";
-import {ListElementConfig} from "@helpers/components/list/model/list-element-config";
+import {HeaderConfig} from "@helpers/components/panel/model/header-config";
+import {ListPanelItemConfig} from "@helpers/components/panel/model/list-panel/list-panel-item-config";
 
 
 @IonicPage()
@@ -31,8 +31,8 @@ export class PriseArticlesPageTraca {
 
     private manualEntryAlertWillEnterSubscription: Subscription;
 
-    public listHeader: ListHeaderConfig;
-    public listBody: Array<ListElementConfig>;
+    public listHeader: HeaderConfig;
+    public listBody: Array<ListPanelItemConfig>;
     public listBoldValues: Array<string>;
 
     public constructor(public navCtrl: NavController,
