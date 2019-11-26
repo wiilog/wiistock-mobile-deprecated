@@ -5,6 +5,7 @@ import {Subscription} from "rxjs";
 import {SearchLocationComponent} from "@helpers/components/search-location/search-location.component";
 import {ToastService} from "@app/services/toast.service";
 import {Emplacement} from "@app/entities/emplacement";
+import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
 
 /**
  * Generated class for the EmplacementScanPage page.
@@ -91,6 +92,16 @@ export class EmplacementScanPage {
 
     public empChanged(emplacement: Emplacement) {
         this.chooseEmp(emplacement);
+    }
+
+    public createEmp(): void {
+        this.navCtrl.push(NewEmplacementComponent, {
+            fromDepose: this.fromDepose,
+            menu: this.menu,
+            createNewEmp: (emplacement: Emplacement) => {
+                this.chooseEmp(emplacement);
+            }
+        });
     }
 
 }

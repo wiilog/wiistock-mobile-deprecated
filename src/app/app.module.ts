@@ -84,7 +84,7 @@ import {EmplacementScanPage} from "@pages/emplacement-scan/emplacement-scan";
         CollecteArticlesPage,
         CollecteEmplacementPage,
         PreparationRefArticlesPage,
-        NewEmplacementComponent
+        NewEmplacementComponent,
         PreparationRefArticlesPage,
         EmplacementScanPage
     ],
@@ -128,7 +128,7 @@ import {EmplacementScanPage} from "@pages/emplacement-scan/emplacement-scan";
         CollecteArticlesPage,
         CollecteEmplacementPage,
         PreparationRefArticlesPage,
-        NewEmplacementComponent
+        NewEmplacementComponent,
         PreparationRefArticlesPage,
         EmplacementScanPage
     ],
