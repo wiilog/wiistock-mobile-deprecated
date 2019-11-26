@@ -1,0 +1,23 @@
+@import "../../../theme/variables";
+
+wii-icon {
+    display: inline-block;
+
+    .icon-button {
+        background-color: transparent;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+    }
+
+    @each $color, $value in $colors {
+        &[color="#{$color}"] svg {
+            width: 100%;
+            height: 100%;
+            path, polygon {
+                fill: $value !important;
+            }
+        }
+    }
+
+}

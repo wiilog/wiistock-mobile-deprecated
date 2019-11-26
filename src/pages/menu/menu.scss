@@ -1,9 +1,20 @@
+@import "../../theme/variables";
+
 page-menu {
+
+    .menu-icon {
+        width: 60px;
+        height: 60px;
+    }
 
     .gridMenu {
         width: auto;
         margin: auto;
         display: block;
+
+        button {
+            background-color: $white;
+        }
     }
 
     .col-menu-stats {

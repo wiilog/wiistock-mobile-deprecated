@@ -1,0 +1,12 @@
+<wii-list-header *ngIf="header"
+                 [leftIcon]="header.leftIcon"
+                 [title]="header.title"
+                 [subtitle]="header.subtitle"
+                 [info]="header.info"
+                 [rightIcon]="header.rightIcon">
+</wii-list-header>
+
+<wii-list-element *ngFor="let object of body"
+                  [infos]="object.infos"
+                  [boldValues]="boldValues">
+</wii-list-element>

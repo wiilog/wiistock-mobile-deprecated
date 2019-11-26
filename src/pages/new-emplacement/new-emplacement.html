@@ -1,0 +1,20 @@
+<div class="page-content">
+    <div class="titles">
+        <div class="title">Menu | Traçabilité | <b class="important">{{ menu }}</b></div>
+    </div>
+    <button ion-button color="primary" class="emp-title">
+        NOUVEL EMPLACEMENT
+    </button>
+
+    <ion-item class="label-emp">
+        <ion-label>Label</ion-label>
+        <ion-input *ngIf="emplacement" [(ngModel)]="emplacement.label"></ion-input>
+    </ion-item>
+</div>
+
+<div class="page-footer">
+    <button class="submit-button" ion-button color="success" (click)="createEmp()">
+        <span>VALIDER</span>
+        <img src="assets/icons/valider01.svg" alt="V" class="arrow">
+    </button>
+</div>

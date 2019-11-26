@@ -1,5 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Article} from '@app/entities/article';
+import moment from "moment";
 
 
 @Injectable()
@@ -10,7 +11,8 @@ export class EntityFactoryService {
             label: null,
             reference: barCode,
             quantite: null,
-            barcode: barCode
+            barcode: barCode,
+            date: moment().format('DD/MM/YYYY HH:mm:ss')
         };
     }
 }

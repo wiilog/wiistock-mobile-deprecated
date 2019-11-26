@@ -4,4 +4,5 @@ export interface Article {
     reference: string;
     quantite?: number;
     barcode?: string;
+    date?: string;
 }

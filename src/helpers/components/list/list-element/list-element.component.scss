@@ -1,0 +1,12 @@
+@import "../../../../theme/variables";
+
+wii-list-element {
+    display: block;
+    background-color: $white;
+    border: 1px solid $lightBlue;
+    padding: 1.5rem;
+
+    .element-value-bold {
+        font-weight: bold;
+    }
+}

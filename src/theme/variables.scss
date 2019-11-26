@@ -33,9 +33,10 @@ $app-direction: ltr;
 
 $primary: #030f4c;
 $white: #FFF;
+$lightBlue: #e3e9f0;
 $grey: #808080;
 $danger: #f53d3d;
-$lightGrey: #a6a6a6;
+$lightGrey: #f2f2f4;
 $darkGrey: #424242;
 $green: #149914;
 
@@ -93,8 +94,8 @@ $colors: (
 
 // Custom variables
 // --------------------------------------------------
-
-
 $text-input-highlight-color: $primary;
 $text-input-highlight-valid: $primary;
 $text-input-highlight-invalid: $danger;
+
+$spacer: 16px;

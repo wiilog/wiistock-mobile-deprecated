@@ -23,6 +23,7 @@ export class ApiService {
     public static readonly ADD_MOUVEMENT_TRACA: string = '/addMouvementTraca';
     public static readonly VALIDATE_MANUT: string = '/validateManut';
     public static readonly GET_DATA: string = '/getData';
+    public static readonly NEW_EMP: string = '/emplacement';
 
 
     public constructor(private sqliteProvider: SqliteProvider,

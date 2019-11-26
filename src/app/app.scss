@@ -13,7 +13,6 @@
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
 @import "../theme/fonts";
-@import "../theme/icons";
 @import "../theme/variables";
 @import "../theme/style-variables";
 
@@ -97,6 +96,11 @@ ion-grid {
 ion-item {
     padding: 0 !important;
 
+    .input-wrapper {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
     &.item-md.item-input.ng-valid.item-input-has-value:not(.input-has-focus):not(.item-input-has-focus) .item-inner,
     .item-md.item-input.ng-valid.input-has-value:not(.input-has-focus):not(.item-input-has-focus) .item-inner {
         border-bottom-color: $primary;
@@ -118,6 +122,8 @@ ion-item {
 button[ion-button] {
     padding-top: 3rem;
     padding-bottom: 3rem;
+    font-weight: bold;
+    font-size: 1.6rem;
 }
 
 .spinner {
@@ -127,7 +133,6 @@ button[ion-button] {
 .alertAlert {
     background-color: #149914 !important;
     color: #FFF !important;
-    font-family: 'Myriad Pro' !important;
 }
 
 .text-right {
@@ -135,13 +140,15 @@ button[ion-button] {
 }
 
 .ion-page {
-    padding: 16px;
+    padding: $spacer;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 }
 
 ion-content {
+    background-color: $lightGrey !important;
+
     &.with-header {
         .ion-page {
             height: calc(100% - 82px);

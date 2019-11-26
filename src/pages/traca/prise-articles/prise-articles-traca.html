@@ -1,4 +1,4 @@
-<ion-content padding>
+<ion-scroll class="page-content" scrollY="true">
     <ion-title>
         <ion-icon class="small-icon" name="pin"></ion-icon>
         {{ emplacement?.label }}
@@ -9,16 +9,12 @@
         Flashez un article
     </ion-title>
 
-    <ion-list>
-        <ion-grid>
-            <button class="list" ion-item *ngFor="let article of articles">
-                <ion-row>
-                    <ion-col col-6>{{ article?.reference }}</ion-col>
-                </ion-row>
-            </button>
-        </ion-grid>
-    </ion-list>
-</ion-content>
+    <wii-list *ngIf="listHeader && listBody"
+              [header]="listHeader"
+              [body]="listBody"
+              [boldValues]="listBoldValues">
+    </wii-list>
+</ion-scroll>
 
 <ion-footer padding>
     <div class="d-flex">

@@ -1,15 +1,7 @@
+@import '../../../theme/variables.scss';
+
 page-manutention-menu {
-
-    .toolbar-title {
-        font-family: "Myriad Pro" !important;
-    }
-
-    p {
-        font-family: 'Myriad Pro' !important;
-    }
-
     span {
-        font-family: 'Myriad Pro' !important;
         margin-right: 15px;
     }
 
@@ -33,12 +25,12 @@ page-manutention-menu {
         text-align: center !important;
         align-content: center !important;
         .title {
-            margin-top: 16px;
+            margin-top: $spacer;
         }
         .title, .subtitle {
             font-size: 20px;
             color: #030F4C;
-            margin-bottom: 16px;
+            margin-bottom: $spacer;
         }
     }
 
@@ -59,8 +51,13 @@ page-manutention-menu {
 
     .icon-manutention-container {
         text-align: center;
-        margin-top: 16px;
-        margin-bottom: 16px;
+        margin-top: $spacer;
+        margin-bottom: $spacer;
+
+        wii-icon {
+            height: 50px;
+            width: 50px;
+        }
     }
 
     .placeholder-buttons {
@@ -70,7 +67,7 @@ page-manutention-menu {
     .page-content {
         background-color: #F2F2F4 !important;
         height: 80%;
-        margin: -16px;
+        margin: -$spacer;
     }
 
 }

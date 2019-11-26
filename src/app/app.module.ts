@@ -51,6 +51,7 @@ import {AppVersion} from '@ionic-native/app-version';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {ApiService} from '@app/services/api.service';
 import {LoadingService} from '@app/services/loading.service';
+import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
 import {EmplacementScanPage} from "@pages/emplacement-scan/emplacement-scan";
 
 
@@ -82,6 +83,8 @@ import {EmplacementScanPage} from "@pages/emplacement-scan/emplacement-scan";
         CollecteArticleTakePage,
         CollecteArticlesPage,
         CollecteEmplacementPage,
+        PreparationRefArticlesPage,
+        NewEmplacementComponent
         PreparationRefArticlesPage,
         EmplacementScanPage
     ],
@@ -124,6 +127,8 @@ import {EmplacementScanPage} from "@pages/emplacement-scan/emplacement-scan";
         CollecteArticleTakePage,
         CollecteArticlesPage,
         CollecteEmplacementPage,
+        PreparationRefArticlesPage,
+        NewEmplacementComponent
         PreparationRefArticlesPage,
         EmplacementScanPage
     ],
