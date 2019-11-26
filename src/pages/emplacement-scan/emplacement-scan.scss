@@ -17,16 +17,16 @@ page-emplacement-scan {
   }
 
   .validate_button {
-    margin: 0 auto;
+    margin-right: -12px;
+    margin-left: -12px;
     display: block;
     background-color: #030F4C;
     text-align: center;
-    height: 70px;
-    width: 100%;
-
-    span {
+    width: calc(100% + 2*12px);
+    .button-text {
       margin-right: 5px !important;
       font-size: 30px !important;
+      font-weight: bold;
     }
   }
 
@@ -48,7 +48,6 @@ page-emplacement-scan {
 
   .tools {
     text-align: center;
-    margin-top: auto;
     margin-bottom: 20px;
     img {
       display: inline-block;

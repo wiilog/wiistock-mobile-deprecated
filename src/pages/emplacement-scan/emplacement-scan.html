@@ -1,18 +1,21 @@
-<div class="titles">
-    <div class="title">Menu | Traçabilité | <b class="important">{{ menu }}</b></div>
-</div>
+<div class="page-content">
+    <div class="titles">
+        <div class="title">Menu | Traçabilité | <b class="important">{{ menu }}</b></div>
+    </div>
 
-<wii-search-location #searchComponent
-                     [(location)]="emplacement"
-                     (locationChange)="empChanged(emplacement)"
-                     hidden>
-</wii-search-location>
-
-<div class="tools">
-    <img src="assets/icons/search.svg" class="icon-emp" (click)="openSearch()">
-    <img src="assets/icons/editer.svg">
+    <wii-search-location #searchComponent
+                         [(location)]="emplacement"
+                         (locationChange)="empChanged(emplacement)"
+                         hidden>
+    </wii-search-location>
 </div>
-<button class="validate_button" (click)="scanLocation()">
-    <span><b>SCANNER</b></span>
-    <img src="assets/icons/scanicone.svg">
-</button>
+<div class="page-footer">
+    <div class="tools">
+        <img src="assets/icons/search.svg" class="icon-emp" (click)="openSearch()">
+        <img src="assets/icons/editer.svg">
+    </div>
+    <button class="validate_button" ion-button color="primary" (click)="scanLocation()">
+        <span class="button-text">SCANNER</span>
+        <img src="assets/icons/scanicone.svg">
+    </button>
+</div>
