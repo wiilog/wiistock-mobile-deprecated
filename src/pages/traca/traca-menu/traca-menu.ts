@@ -8,7 +8,7 @@ import {ToastService} from '@app/services/toast.service';
 import {MenuPage} from '@pages/menu/menu';
 import {ApiService} from '@app/services/api.service';
 import {StorageService} from '@app/services/storage.service';
-import {EmplacementScanPage} from "@pages/emplacement-scan/emplacement-scan";
+import {EmplacementScanPage} from "@pages/traca/emplacement-scan/emplacement-scan";
 import {Emplacement} from "@app/entities/emplacement";
 import {PriseArticlesPageTraca} from "@pages/traca/prise-articles/prise-articles-traca";
 import {DeposeArticlesPageTraca} from "@pages/traca/depose-articles/depose-articles-traca";

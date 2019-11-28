@@ -7,12 +7,6 @@ import {ToastService} from "@app/services/toast.service";
 import {Emplacement} from "@app/entities/emplacement";
 import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
 
-/**
- * Generated class for the EmplacementScanPage page.
- *
- * See https://ionicframework.com/docs/components/#navigation for more info on
- * Ionic pages and navigation.
- */
 
 @IonicPage()
 @Component({
@@ -27,21 +21,20 @@ export class EmplacementScanPage {
     private chooseEmp: (emplacement: Emplacement) => void;
     private fromDepose: boolean;
     private emplacement: Emplacement;
-    constructor(
-        public navCtrl: NavController,
-        public navParams: NavParams,
-        private barcodeScannerManager: BarcodeScannerManagerService,
-        private toastService: ToastService) {
+
+    public constructor(public navCtrl: NavController,
+                       public navParams: NavParams,
+                       private barcodeScannerManager: BarcodeScannerManagerService,
+                       private toastService: ToastService) {
     }
 
-    ionViewWillEnter() {
+    public ionViewWillEnter(): void {
         this.chooseEmp = this.navParams.get('chooseEmp');
         this.fromDepose = this.navParams.get('fromDepose');
         this.menu = this.navParams.get('menu');
         this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
             this.testIfBarcodeEquals(barcode);
         });
-
     }
 
 
@@ -68,11 +61,13 @@ export class EmplacementScanPage {
             else {
                 this.toastService.presentToast('Veuillez flasher ou sélectionner un emplacement.');
             }
-        } else {
+        }
+        else {
             let location = this.searchComponent.isKnownLocation(barcode);
             if (!location) {
                 this.toastService.presentToast('Veuillez flasher ou sélectionner un emplacement connu.');
-            } else {
+            }
+            else {
                 this.emplacement = location;
                 this.chooseEmp(this.emplacement);
             }
