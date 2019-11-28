@@ -1,6 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
 import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
-import {MenuPage} from '@pages/menu/menu';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Preparation} from '@app/entities/preparation';
@@ -64,10 +63,6 @@ export class PreparationEmplacementPage {
 
     public ionViewCanLeave(): boolean {
         return this.barcodeScannerManager.canGoBack;
-    }
-
-    public goHome(): void {
-        this.navCtrl.setRoot(MenuPage);
     }
 
     public scan(): void {

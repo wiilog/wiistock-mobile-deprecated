@@ -1,18 +1,17 @@
 import {Component} from '@angular/core';
 import {Alert, AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
-import {MenuPage} from '@pages/menu/menu';
-import {Article} from '@app/entities/article';
 import {Emplacement} from '@app/entities/emplacement';
-import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ChangeDetectorRef} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
-import {EntityFactoryService} from '@app/services/entity-factory.service';
 import {AlertManagerService} from '@app/services/alert-manager.service';
 import {LocalDataManagerService} from "@app/services/local-data-manager.service";
 import {HeaderConfig} from "@helpers/components/panel/model/header-config";
 import {ListPanelItemConfig} from "@helpers/components/panel/model/list-panel/list-panel-item-config";
+import {TracaListFactoryService} from "@app/services/traca-list-factory.service";
+import {MouvementTraca} from "@app/entities/mouvement-traca";
+import {StorageService} from "@app/services/storage.service";
 
 
 @IonicPage()
@@ -22,9 +21,10 @@ import {ListPanelItemConfig} from "@helpers/components/panel/model/list-panel/li
 })
 export class PriseArticlesPageTraca {
 
+    private static readonly MOUVEMENT_TRACA_PRISE = 'prise';
+
     public emplacement: Emplacement;
-    public articles: Array<Article>;
-    public db_articles: Array<Article>;
+    public colisPrise: Array<MouvementTraca>;
 
     private zebraScanSubscription: Subscription;
     private finishPrise: () => void;
@@ -35,16 +35,21 @@ export class PriseArticlesPageTraca {
     public listBody: Array<ListPanelItemConfig>;
     public listBoldValues: Array<string>;
 
+    public loading: boolean;
+
+    private operator: string;
+
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
                        private alertController: AlertController,
                        private toastService: ToastService,
-                       private sqliteProvider: SqliteProvider,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private changeDetectorRef: ChangeDetectorRef,
-                       private entityFactory: EntityFactoryService,
                        private localDataManager: LocalDataManagerService,
+                       private tracaListFactory: TracaListFactoryService,
+                       private storageService: StorageService,
                        private alertManager: AlertManagerService) {
+        this.loading = true;
         this.listBody = [];
         this.listBoldValues = [
             'object'
@@ -52,20 +57,19 @@ export class PriseArticlesPageTraca {
     }
 
     public ionViewWillEnter(): void {
-        this.sqliteProvider.findAll('article').subscribe((value) => {
-            this.db_articles = value;
-        });
-
         this.finishPrise = this.navParams.get('finishPrise');
         this.emplacement = this.navParams.get('emplacement');
-        this.articles = this.navParams.get('articles') || [];
 
-        this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
-            this.testIfBarcodeEquals(barcode);
+        this.storageService.getOperateur().subscribe((operator) => {
+            this.operator = operator;
+
+            this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
+                this.testIfBarcodeEquals(barcode);
+            });
+
+            this.refreshListComponent();
+            this.loading = false;
         });
-
-        this.refreshListComponent();
-
     }
 
     public ionViewWillLeave(): void {
@@ -76,38 +80,24 @@ export class PriseArticlesPageTraca {
         }
     }
 
-    private refreshListComponent(): void {
-        const pickedArticlesNumber = this.articles.length;
-        const plural = pickedArticlesNumber > 1 ? 's' : '';;
-        this.listHeader = {
-            title: 'PRISE',
-            subtitle: `Emplacement : ${this.emplacement.label}`,
-            info: `${pickedArticlesNumber} produit${plural} scanné${plural}`,
-            leftIcon: {
-                name: 'upload.svg',
-                color: 'primary'
-            }
-        };
-    }
-
     public ionViewCanLeave(): boolean {
         return this.barcodeScannerManager.canGoBack;
     }
 
-    public addArticleManually(): void {
+    public addColisManually(): void {
         this.createManualEntryAlert().present();
     }
 
     public finishTaking(): void {
-        if (this.articles && this.articles.length > 0) {
+        if (this.colisPrise && this.colisPrise.length > 0) {
             this.localDataManager
-                .saveMouvementsTraca(this.articles, this.emplacement, 'prise')
+                .saveMouvementsTraca(this.colisPrise, PriseArticlesPageTraca.MOUVEMENT_TRACA_PRISE)
                 .subscribe(() => {
                     this.redirectAfterTake();
                 });
         }
         else {
-            this.toastService.presentToast('Vous devez sélectionner au moins un article')
+            this.toastService.presentToast('Vous devez scanner au moins un colis')
         }
     }
 
@@ -119,10 +109,6 @@ export class PriseArticlesPageTraca {
             });
     }
 
-    goHome() {
-        this.navCtrl.setRoot(MenuPage);
-    }
-
     public scan(): void {
         this.barcodeScannerManager.scan().subscribe((barcode: string) => {
             this.testIfBarcodeEquals(barcode);
@@ -130,13 +116,13 @@ export class PriseArticlesPageTraca {
     }
 
     public testIfBarcodeEquals(barCode: string): void {
-        if (this.articles && this.articles.some(article => (article.barcode === barCode))) {
-            this.toastService.presentToast('Cet article a déjà été ajouté à la prise.');
+        if (this.colisPrise && this.colisPrise.some((mouvementTraca) => (mouvementTraca.ref_article === barCode))) {
+            this.toastService.presentToast('Ce colis a déjà été ajouté à la prise.');
         }
         else {
             this.alertController
                 .create({
-                    title: `Vous avez sélectionné l'article ${barCode}`,
+                    title: `Vous avez sélectionné le colis ${barCode}`,
                     buttons: [
                         {
                             text: 'Annuler'
@@ -144,7 +130,7 @@ export class PriseArticlesPageTraca {
                         {
                             text: 'Confirmer',
                             handler: () => {
-                                this.saveArticle(barCode);
+                                this.saveMouvementTraca(barCode);
                             },
                             cssClass : 'alertAlert'
                         }
@@ -166,7 +152,7 @@ export class PriseArticlesPageTraca {
             buttons: [{
                 text: 'Valider',
                 handler: ({barCode}) => {
-                    this.saveArticle(barCode);
+                    this.saveMouvementTraca(barCode);
                 },
                 cssClass: 'alertAlert'
             }]
@@ -187,22 +173,20 @@ export class PriseArticlesPageTraca {
         }
     }
 
-    private saveArticle(barCode: string): void {
-        const article = this.entityFactory.createArticleBarcode(barCode);
-        this.articles.push(article);
-        this.listBody.push({
-            infos: {
-                object: {
-                    label: 'Objet',
-                    value: article.barcode
-                },
-                date: {
-                    label: 'Date / Heure',
-                    value: article.date
-                }
-            }
+    private saveMouvementTraca(barCode: string): void {
+        this.colisPrise.push({
+            ref_article: barCode,
+            type: PriseArticlesPageTraca.MOUVEMENT_TRACA_PRISE,
+            operateur: this.operator,
+            ref_emplacement: this.emplacement.label
         });
         this.refreshListComponent();
         this.changeDetectorRef.detectChanges();
+    }
+
+    private refreshListComponent(): void {
+        const {header, body} = this.tracaListFactory.createListPriseConfig(this.colisPrise, this.emplacement);
+        this.listHeader = header;
+        this.listBody = body;
     }
 }

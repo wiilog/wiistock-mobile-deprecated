@@ -1,6 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
 import {IonicPage, NavController} from 'ionic-angular';
-import {MenuPage} from '@pages/menu/menu';
 import {Emplacement} from '@app/entities/emplacement';
 import {DeposeArticlesPageTraca} from '@pages/traca/depose-articles/depose-articles-traca';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
@@ -67,10 +66,6 @@ export class DeposeEmplacementPageTraca {
                 this.emplacement = emplacement;
             }
         });
-    }
-
-    public goHome(): void {
-        this.navCtrl.setRoot(MenuPage);
     }
 
     public scanLocation(): void {

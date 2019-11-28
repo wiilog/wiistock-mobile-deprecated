@@ -1,7 +1,6 @@
 import {Component} from '@angular/core';
 import {IonicPage, NavController} from 'ionic-angular';
 import {PriseArticlesPageTraca} from '@pages/traca/prise-articles/prise-articles-traca';
-import {MenuPage} from '@pages/menu/menu';
 import {Emplacement} from '@app/entities/emplacement';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
@@ -63,10 +62,6 @@ export class PriseEmplacementPageTraca {
                 this.emplacement = emplacement;
             }
         });
-    }
-
-    public goHome(): void {
-        this.navCtrl.setRoot(MenuPage);
     }
 
     public scanLocation(): void {

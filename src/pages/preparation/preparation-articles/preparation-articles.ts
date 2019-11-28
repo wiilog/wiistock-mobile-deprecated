@@ -1,6 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
 import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
-import {MenuPage} from '@pages/menu/menu';
 import {Preparation} from '@app/entities/preparation';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ArticlePrepa} from '@app/entities/article-prepa';
@@ -225,10 +224,6 @@ export class PreparationArticlesPage {
                 this.saveSelectedArticle(selectedArticle, selectedQuantity);
             }
         }
-    }
-
-    public goHome(): void {
-        this.navCtrl.setRoot(MenuPage);
     }
 
     public validate(): void {

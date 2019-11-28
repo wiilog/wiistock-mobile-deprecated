@@ -43,7 +43,6 @@ import {CollecteEmplacementPage} from '@pages/collecte/collecte-emplacement/coll
 import {ManutentionValidatePage} from '@pages/manutention/manutention-validate/manutention-validate';
 import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutention-menu';
 import {HelpersModule} from '@helpers/helpers.module';
-import {EntityFactoryService} from '@app/services/entity-factory.service';
 import {AlertManagerService} from '@app/services/alert-manager.service';
 import {ScssHelperService} from '@app/services/scss-helper.service';
 import {VersionCheckerService} from '@app/services/version-checker.service';
@@ -51,8 +50,9 @@ import {AppVersion} from '@ionic-native/app-version';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {ApiService} from '@app/services/api.service';
 import {LoadingService} from '@app/services/loading.service';
-import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
-import {DeposeConfirmPageTraca} from "@pages/traca/depose-confirm/depose-confirm-traca";
+import {NewEmplacementComponent} from '@pages/new-emplacement/new-emplacement';
+import {DeposeConfirmPageTraca} from '@pages/traca/depose-confirm/depose-confirm-traca';
+import {TracaListFactoryService} from '@app/services/traca-list-factory.service';
 
 
 @NgModule({
@@ -147,11 +147,11 @@ import {DeposeConfirmPageTraca} from "@pages/traca/depose-confirm/depose-confirm
         AppVersion,
         ToastService,
         AlertManagerService,
-        EntityFactoryService,
         ApiService,
         LoadingService,
         LocalDataManagerService,
-        ScssHelperService
+        ScssHelperService,
+        TracaListFactoryService
     ]
 })
 export class AppModule {

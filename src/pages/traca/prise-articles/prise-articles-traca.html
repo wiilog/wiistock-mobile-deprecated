@@ -1,4 +1,8 @@
-<ion-scroll class="page-content" scrollY="true">
+<wii-main-loader [loading]="loading"></wii-main-loader>
+
+<ion-scroll class="page-content"
+            scrollY="true"
+            *ngIf="!loading">
     <ion-title>
         <ion-icon class="small-icon" name="pin"></ion-icon>
         {{ emplacement?.label }}
@@ -16,9 +20,9 @@
     </wii-list-panel>
 </ion-scroll>
 
-<ion-footer padding>
+<div class="page-footer" *ngIf="!loading">
     <div class="d-flex">
-        <ion-icon class="big-icon" (click)="addArticleManually()" name="search"></ion-icon>
+        <ion-icon class="big-icon" (click)="addColisManually()" name="search"></ion-icon>
         <ion-icon class="big-icon" name="checkmark-circle" (click)="finishTaking()"></ion-icon>
     </div>
-</ion-footer>
+</div>

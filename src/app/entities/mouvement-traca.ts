@@ -1,8 +1,10 @@
 export interface MouvementTraca {
-    id: number;
     ref_article: string;
-    date: string;
-    ref_emplacement: string;
     type: string;
     operateur: string;
+    ref_emplacement: string;
+    comment?: string;
+    signature?: string;
+    date?: string;
+    id?: number;
 }

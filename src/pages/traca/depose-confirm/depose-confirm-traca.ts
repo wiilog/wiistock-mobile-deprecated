@@ -6,6 +6,7 @@ import {FormPanelItemConfig} from '@helpers/components/panel/model/form-panel/fo
 import {FormPanelInputConfig} from '@helpers/components/panel/model/form-panel/form-panel-input-config';
 import {FormPanelComponent} from '@helpers/components/panel/form-panel/form-panel.component';
 import {FormPanelSigningConfig} from '@helpers/components/panel/model/form-panel/form-panel-signing-config';
+import {ToastService} from "@app/services/toast.service";
 
 
 @IonicPage()
@@ -18,15 +19,15 @@ export class DeposeConfirmPageTraca {
     @ViewChild('formPanelComponent')
     public formPanelComponent: FormPanelComponent;
 
-
-
     public headerConfig: HeaderConfig;
     public bodyConfig: Array<FormPanelItemConfig<FormPanelInputConfig|FormPanelSigningConfig>>;
 
     private location: Emplacement;
+    private validateDepose: (comment: string, signature: string) => void;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams) {
+    public constructor(private navCtrl: NavController,
+                       private toastService: ToastService,
+                       private navParams: NavParams) {
         this.bodyConfig = [
             {
                 type: 'input',
@@ -53,8 +54,10 @@ export class DeposeConfirmPageTraca {
 
     public ionViewWillEnter(): void {
         this.location = this.navParams.get('location');
+        const barCode = this.navParams.get('barCode');
+        this.validateDepose = this.navParams.get('validateDepose');
         this.headerConfig = {
-            title: 'DEPOSE',
+            title: `DEPOSE du colis ${barCode}`,
             subtitle: `Emplacement : ${this.location.label}`,
             leftIcon: {
                 name: 'download.svg',
@@ -64,5 +67,14 @@ export class DeposeConfirmPageTraca {
     }
 
     public onFormSubmit(): void {
+        const formError = this.formPanelComponent.firstError;
+        if (formError) {
+            this.toastService.presentToast(formError);
+        }
+        else {
+            const {comment, signature} = this.formPanelComponent.values;
+            this.validateDepose(comment, signature);
+            this.navCtrl.pop();
+        }
     }
 }

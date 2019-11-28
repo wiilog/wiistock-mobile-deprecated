@@ -1,6 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
 import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
-import {MenuPage} from '@pages/menu/menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ArticlePrepa} from '@app/entities/article-prepa';
 import {HttpClient} from '@angular/common/http';
@@ -122,10 +121,6 @@ export class PreparationRefArticlesPage {
 
     refresh() {
         this.toastService.presentToast('Quantité bien prélevée.')
-    }
-
-    goHome() {
-        this.navCtrl.setRoot(MenuPage);
     }
 
 }

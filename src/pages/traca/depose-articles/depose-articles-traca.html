@@ -1,28 +1,35 @@
-<ion-content padding>
+<wii-main-loader [loading]="loading"></wii-main-loader>
+
+<div class="page-footer"
+     *ngIf="!loading">
     <ion-title>
         <ion-icon class="small-icon" name="pin"></ion-icon>
         {{ emplacement?.label }}
     </ion-title>
+
     <ion-title>
         <ion-icon class="big-icon" name="barcode" (click)="scan()"></ion-icon>
         <br>
         Flashez un article
     </ion-title>
 
-    <ion-list>
-        <ion-grid>
-            <button class="list" ion-item *ngFor="let article of articles">
-                <ion-row>
-                    <ion-col col-6>{{ article?.reference }}</ion-col>
-                </ion-row>
-            </button>
-        </ion-grid>
-    </ion-list>
-</ion-content>
+    <wii-list-panel *ngIf="deposeListConfig"
+                    [header]="deposeListConfig.header"
+                    [body]="deposeListConfig.body"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
 
-<ion-footer padding>
+    <wii-list-panel *ngIf="priseListConfig"
+                    [header]="priseListConfig.header"
+                    [body]="priseListConfig.body"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+</div>
+
+<div class="page-footer"
+     *ngIf="!loading">
     <div class="d-flex">
         <ion-icon class="big-icon" (click)="addArticleManually()" name="search"></ion-icon>
         <ion-icon class="big-icon" name="checkmark-circle" (click)="finishTaking()"></ion-icon>
     </div>
-</ion-footer>
+</div>

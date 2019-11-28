@@ -1,17 +1,18 @@
 import {Component} from '@angular/core';
 import {Alert, AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
-import {MenuPage} from '@pages/menu/menu';
-import {Article} from '@app/entities/article';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {ChangeDetectorRef} from '@angular/core';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
-import {Subscription} from 'rxjs';
-import {EntityFactoryService} from '@app/services/entity-factory.service';
+import {Observable, Subscription} from 'rxjs';
 import {AlertManagerService} from '@app/services/alert-manager.service';
 import {StorageService} from '@app/services/storage.service';
-import {LocalDataManagerService} from "@app/services/local-data-manager.service";
+import {LocalDataManagerService} from '@app/services/local-data-manager.service';
+import {HeaderConfig} from '@helpers/components/panel/model/header-config';
+import {ListPanelItemConfig} from '@helpers/components/panel/model/list-panel/list-panel-item-config';
+import {TracaListFactoryService} from '@app/services/traca-list-factory.service';
+import {MouvementTraca} from '@app/entities/mouvement-traca';
+import {DeposeConfirmPageTraca} from "@pages/traca/depose-confirm/depose-confirm-traca";
 
 
 @IonicPage()
@@ -21,14 +22,32 @@ import {LocalDataManagerService} from "@app/services/local-data-manager.service"
 })
 export class DeposeArticlesPageTraca {
 
+    private static readonly MOUVEMENT_TRACA_DEPOSE = 'depose';
+
     public emplacement: Emplacement;
-    public articles: Array<Article>;
-    public db_articles: Array<Article>;
+    public colisPrise: Array<MouvementTraca>;
+    public colisDepose: Array<MouvementTraca>;
 
     private zebraScanSubscription: Subscription;
     private finishDepose: () => void;
 
     private manualEntryAlertWillEnterSubscription: Subscription;
+
+    public priseListConfig: {
+        header: HeaderConfig;
+        body: Array<ListPanelItemConfig>;
+    };
+
+    public deposeListConfig: {
+        header: HeaderConfig;
+        body: Array<ListPanelItemConfig>;
+    };
+
+    public listBoldValues: Array<string>;
+
+    public loading: boolean;
+
+    private operator: string;
 
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
@@ -36,25 +55,34 @@ export class DeposeArticlesPageTraca {
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
                        private barcodeScannerManager: BarcodeScannerManagerService,
-                       private changeDetectorRef: ChangeDetectorRef,
-                       private entityFactory: EntityFactoryService,
                        private alertManager: AlertManagerService,
                        private localDataManager: LocalDataManagerService,
+                       private tracaListFactory: TracaListFactoryService,
                        private storageService: StorageService) {
-
+        this.loading = true;
+        this.listBoldValues = [
+            'object'
+        ];
     }
 
     public ionViewWillEnter(): void {
-        this.sqliteProvider.findAll('article').subscribe((value) => {
-            this.db_articles = value;
-        });
-
         this.emplacement = this.navParams.get('emplacement');
         this.finishDepose = this.navParams.get('finishDepose');
-        this.articles = this.navParams.get('articles') || [];
 
-        this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
-            this.testSelectedArticle(barcode);
+        Observable.zip(
+            this.sqliteProvider.findByElement('`mouvement_traca`', 'type', 'prise'),
+            this.storageService.getOperateur()
+        )
+        .subscribe(([colisPrise, operator]) => {
+            this.colisPrise = colisPrise;
+            this.operator = operator;
+
+            this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
+                this.testColisDepose(barcode);
+            });
+
+            this.refreshPriseListComponent();
+            this.loading = false;
         });
     }
 
@@ -75,9 +103,9 @@ export class DeposeArticlesPageTraca {
     }
 
     public finishTaking(): void {
-        if (this.articles && this.articles.length > 0) {
+        if (this.colisDepose && this.colisDepose.length > 0) {
             this.localDataManager
-                .saveMouvementsTraca(this.articles, this.emplacement, 'depose')
+                .saveMouvementsTraca(this.colisDepose, DeposeArticlesPageTraca.MOUVEMENT_TRACA_DEPOSE)
                 .subscribe(() => {
                     this.redirectAfterTake();
                 });
@@ -95,31 +123,27 @@ export class DeposeArticlesPageTraca {
             });
     }
 
-    public goHome(): void {
-        this.navCtrl.setRoot(MenuPage);
-    }
-
     public scan(): void {
         this.barcodeScannerManager.scan().subscribe((barcode: string) => {
-            this.testSelectedArticle(barcode);
+            this.testColisDepose(barcode);
         });
     }
 
-    public testSelectedArticle(barCode: string, isManualInput: boolean = false): void {
-        let numberOfArticles = this.articles
-            .filter(article => (article.reference === barCode))
+    public testColisDepose(barCode: string, isManualInput: boolean = false): void {
+        let numberOfColis = this.colisDepose
+            .filter(article => (article.ref_article === barCode))
             .length;
 
         this.storageService.keyExists(barCode).subscribe((value) => {
             if (value !== false) {
-                if (value > numberOfArticles) {
+                if (value > numberOfColis) {
                     if (isManualInput) {
-                        this.saveArticle(barCode);
+                        this.openConfirmDeposePage(barCode);
                     }
                     else {
                         this.alertController
                             .create({
-                                title: `Vous avez sélectionné l'article ${barCode}`,
+                                title: `Vous avez sélectionné le colis ${barCode}`,
                                 buttons: [
                                     {
                                         text: 'Annuler'
@@ -127,7 +151,7 @@ export class DeposeArticlesPageTraca {
                                     {
                                         text: 'Confirmer',
                                         handler: () => {
-                                            this.saveArticle(barCode);
+                                            this.openConfirmDeposePage(barCode);
                                         },
                                         cssClass: 'alertAlert'
                                     }
@@ -137,7 +161,7 @@ export class DeposeArticlesPageTraca {
                     }
                 }
                 else {
-                    this.toastService.presentToast('Cet article est déjà enregistré assez de fois dans le panier.');
+                    this.toastService.presentToast('Ce colis est déjà enregistré assez de fois dans le panier.');
                 }
             }
             else {
@@ -158,7 +182,7 @@ export class DeposeArticlesPageTraca {
             buttons: [{
                 text: 'Valider',
                 handler: ({barCode}) => {
-                    this.testSelectedArticle(barCode);
+                    this.testColisDepose(barCode);
                 },
                 cssClass: 'alertAlert'
             }]
@@ -179,9 +203,37 @@ export class DeposeArticlesPageTraca {
         }
     }
 
-    private saveArticle(barcode: string): void {
-        const article = this.entityFactory.createArticleBarcode(barcode);
-        this.articles.push(article);
-        this.changeDetectorRef.detectChanges();
+    private openConfirmDeposePage(barCode: string): void {
+        this.navCtrl.push(DeposeConfirmPageTraca, {
+            location: this.emplacement,
+            barCode,
+            validateDepose: (comment, signature) => {
+                this.saveMouvementTraca(barCode, comment, signature);
+            }
+        });
+    }
+
+    private saveMouvementTraca(barCode: string, comment: string, signature: string): void {
+        this.colisDepose.push({
+            ref_article: barCode,
+            comment,
+            signature,
+            type: DeposeArticlesPageTraca.MOUVEMENT_TRACA_DEPOSE,
+            operateur: this.operator,
+            ref_emplacement: this.emplacement.label
+        });
+
+        this.colisPrise = this.colisPrise.filter(({ref_article}) => (ref_article !== barCode));
+
+        this.refreshPriseListComponent();
+        this.refresDeposeListComponent();
+    }
+
+    private refreshPriseListComponent(): void {
+        this.priseListConfig = this.tracaListFactory.createListPriseConfig(this.colisPrise, this.emplacement);
+    }
+
+    private refresDeposeListComponent(): void {
+        this.deposeListConfig = this.tracaListFactory.createListPriseConfig(this.colisDepose, this.emplacement);
     }
 }

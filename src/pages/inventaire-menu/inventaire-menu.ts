@@ -1,7 +1,6 @@
 import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {Content, IonicPage, Navbar, NavController, ModalController} from 'ionic-angular';
 import {ModalQuantityPage} from '@pages/inventaire-menu/modal-quantity';
-import {MenuPage} from '@pages/menu/menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
 import {ArticleInventaire} from '@app/entities/article-inventaire';
@@ -43,10 +42,6 @@ export class InventaireMenuPage {
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService,
                        private storageService: StorageService) {
-    }
-
-    goHome() {
-        this.navCtrl.setRoot(MenuPage);
     }
 
     public ionViewWillEnter(): void {

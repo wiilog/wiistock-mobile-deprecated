@@ -69,12 +69,6 @@ ion-grid {
     font-size: 4em;
 }
 
-.big-button {
-    height: 12em;
-    width: 90%;
-    //background-color: $lightGrey;
-}
-
 .m-6 {
     margin: 6px;
 }
@@ -120,13 +114,11 @@ ion-item {
 }
 
 button[ion-button] {
-    padding-top: 2.5rem;
-    padding-bottom: 2.5rem;
     font-weight: bold;
     font-size: 1.6rem;
     text-transform: uppercase;
     margin: 0;
-    height: initial;
+    height: 5rem;
 
     wii-icon {
         margin-left: .7rem;
@@ -135,7 +127,12 @@ button[ion-button] {
     }
 
     .page-footer & {
-        width: 100%;
+        width: calc(100% - 2 * #{$spacerMin});
+    }
+
+    &.big-button {
+        height: 12em;
+        width: 90%;
     }
 }
 
@@ -155,12 +152,18 @@ button[ion-button] {
 .ion-page {
     display: flex;
     flex-direction: column;
-}
+    background-color: $lightGrey;
 
-.page-footer {
-    margin: .35rem;
+    .page-content {
+        padding: $spacer;
+    }
 
-    ion-nav.keyboard-shown & {
-        display: none;
+    .page-footer {
+        margin-top: auto;
+        padding: $spacerMin;
+
+        ion-nav.keyboard-shown & {
+            display: none;
+        }
     }
 }

@@ -7,7 +7,6 @@ import {MouvementTraca} from '@app/entities/mouvement-traca';
 import {HttpClient} from '@angular/common/http';
 import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
-import {MenuPage} from '@pages/menu/menu';
 import {ApiService} from '@app/services/api.service';
 import {StorageService} from '@app/services/storage.service';
 
@@ -55,10 +54,6 @@ export class TracaMenuPage {
         else {
             this.toastService.presentToast('Aucune prise n\'a été enregistrée');
         }
-    }
-
-    goHome() {
-        this.navCtrl.setRoot(MenuPage);
     }
 
     synchronise() {
