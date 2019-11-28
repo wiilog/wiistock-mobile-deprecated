@@ -20,4 +20,6 @@
     </ion-list>
 </ion-content>
 
-<footer-prise-depose (addArticle)="testSelectedArticle($event[0], $event[1])"></footer-prise-depose>
+<barcode-scanner #footerScannerComponent
+                 (add)="testSelectedArticle($event[0], $event[1])">
+</barcode-scanner>

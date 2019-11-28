@@ -1,15 +1,17 @@
-import { NgModule } from '@angular/core';
-import { IonicPageModule } from 'ionic-angular';
-import { DeposeArticlesPageTraca } from './depose-articles-traca';
-import {ComponentsModule} from "../../../components/components.module";
+import {NgModule} from '@angular/core';
+import {IonicPageModule} from 'ionic-angular';
+import {DeposeArticlesPageTraca} from './depose-articles-traca';
+import {HelpersModule} from '@helpers/helpers.module';
+
 
 @NgModule({
-  declarations: [
-    DeposeArticlesPageTraca,
-  ],
+    declarations: [
+        DeposeArticlesPageTraca,
+    ],
     imports: [
         IonicPageModule.forChild(DeposeArticlesPageTraca),
-        ComponentsModule,
+        HelpersModule,
     ],
 })
-export class DeposeArticlesPageModule {}
+export class DeposeArticlesPageModule {
+}

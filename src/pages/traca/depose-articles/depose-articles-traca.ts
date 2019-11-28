@@ -1,17 +1,15 @@
-import {Component} from '@angular/core';
-import {Alert, AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
+import {Component, ViewChild} from '@angular/core';
+import {AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {Article} from '@app/entities/article';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ChangeDetectorRef} from '@angular/core';
 import {ToastService} from '@app/services/toast.service';
-import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
-import {Subscription} from 'rxjs';
 import {EntityFactoryService} from '@app/services/entity-factory.service';
-import {AlertManagerService} from '@app/services/alert-manager.service';
 import {StorageService} from '@app/services/storage.service';
-import {LocalDataManagerService} from "@app/services/local-data-manager.service";
+import {LocalDataManagerService} from '@app/services/local-data-manager.service';
+import {BarcodeScannerComponent} from '@helpers/components/barcode-scanner/barcode-scanner.component';
 
 
 @IonicPage()
@@ -21,24 +19,22 @@ import {LocalDataManagerService} from "@app/services/local-data-manager.service"
 })
 export class DeposeArticlesPageTraca {
 
+    @ViewChild('footerScannerComponent')
+    public footerScannerComponent: BarcodeScannerComponent;
+
     public emplacement: Emplacement;
     public articles: Array<Article>;
     public db_articles: Array<Article>;
 
-    private zebraScanSubscription: Subscription;
     private finishDepose: () => void;
-
-    private manualEntryAlertWillEnterSubscription: Subscription;
 
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
                        private alertController: AlertController,
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
-                       private barcodeScannerManager: BarcodeScannerManagerService,
                        private changeDetectorRef: ChangeDetectorRef,
                        private entityFactory: EntityFactoryService,
-                       private alertManager: AlertManagerService,
                        private localDataManager: LocalDataManagerService,
                        private storageService: StorageService) {
 
@@ -52,26 +48,10 @@ export class DeposeArticlesPageTraca {
         this.emplacement = this.navParams.get('emplacement');
         this.finishDepose = this.navParams.get('finishDepose');
         this.articles = this.navParams.get('articles') || [];
-
-        this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
-            this.testSelectedArticle(barcode);
-        });
-    }
-
-    public ionViewWillLeave(): void {
-        this.removeAlertSubscription();
-        if (this.zebraScanSubscription) {
-            this.zebraScanSubscription.unsubscribe();
-            this.zebraScanSubscription = undefined;
-        }
     }
 
     public ionViewCanLeave(): boolean {
-        return this.barcodeScannerManager.canGoBack;
-    }
-
-    public addArticleManually(): void {
-        this.createManualEntryAlert().present();
+        return !this.footerScannerComponent.isScanning;
     }
 
     public finishTaking(): void {
@@ -88,7 +68,8 @@ export class DeposeArticlesPageTraca {
     }
 
     public redirectAfterTake(): void {
-        this.navCtrl.pop()
+        this.navCtrl
+            .pop()
             .then(() => {
                 this.finishDepose();
                 this.toastService.presentToast('Dépose enregistrée.')
@@ -97,12 +78,6 @@ export class DeposeArticlesPageTraca {
 
     public goHome(): void {
         this.navCtrl.setRoot(MenuPage);
-    }
-
-    public scan(): void {
-        this.barcodeScannerManager.scan().subscribe((barcode: string) => {
-            this.testSelectedArticle(barcode);
-        });
     }
 
     public testSelectedArticle(barCode: string, isManualInput: boolean = false): void {
@@ -144,39 +119,6 @@ export class DeposeArticlesPageTraca {
                 this.toastService.presentToast('Ce colis ne correspond à aucune prise.');
             }
         });
-    }
-
-    private createManualEntryAlert(): Alert {
-        const manualEntryAlert = this.alertController.create({
-            title: 'Saisie manuelle',
-            cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
-            inputs: [{
-                name: 'barCode',
-                placeholder: 'Saisir le code barre',
-                type: 'text'
-            }],
-            buttons: [{
-                text: 'Valider',
-                handler: ({barCode}) => {
-                    this.testSelectedArticle(barCode);
-                },
-                cssClass: 'alertAlert'
-            }]
-        });
-
-        this.removeAlertSubscription();
-        this.manualEntryAlertWillEnterSubscription = manualEntryAlert.willEnter.subscribe(() => {
-            this.alertManager.disableAutocapitalizeOnAlert();
-        });
-
-        return manualEntryAlert;
-    }
-
-    private removeAlertSubscription(): void {
-        if (this.manualEntryAlertWillEnterSubscription) {
-            this.manualEntryAlertWillEnterSubscription.unsubscribe();
-            this.manualEntryAlertWillEnterSubscription = undefined;
-        }
     }
 
     private saveArticle(barcode: string): void {

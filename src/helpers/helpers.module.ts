@@ -8,6 +8,7 @@ import {IconComponent} from '@helpers/components/icon/icon.component';
 import {ListHeaderComponent} from "@helpers/components/list/list-header/list-header.component";
 import {ListElementComponent} from "@helpers/components/list/list-element/list-element.component";
 import {ListComponent} from "@helpers/components/list/list/list.component";
+import {BarcodeScannerComponent} from "@helpers/components/barcode-scanner/barcode-scanner.component";
 
 
 @NgModule({
@@ -18,7 +19,8 @@ import {ListComponent} from "@helpers/components/list/list/list.component";
         ListComponent,
         ListElementComponent,
         IconComponent,
-        HeaderComponent
+        HeaderComponent,
+        BarcodeScannerComponent
     ],
     exports: [
         SearchLocationComponent,
@@ -27,7 +29,8 @@ import {ListComponent} from "@helpers/components/list/list/list.component";
         ListComponent,
         ListElementComponent,
         IconComponent,
-        HeaderComponent
+        HeaderComponent,
+        BarcodeScannerComponent
     ],
     imports: [
         IonicSelectableModule,

@@ -15,4 +15,6 @@
               [boldValues]="listBoldValues">
     </wii-list>
 </ion-scroll>
-<footer-prise-depose (addArticle)="testIfBarcodeEquals($event[0], $event[1])"></footer-prise-depose>
+<barcode-scanner #footerScannerComponent
+                 (add)="testIfBarcodeEquals($event[0], $event[1])">
+</barcode-scanner>

@@ -1,18 +1,17 @@
-import {Component} from '@angular/core';
-import {Alert, AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
+import {Component, ViewChild} from '@angular/core';
+import {AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
 import {MenuPage} from '@pages/menu/menu';
 import {Article} from '@app/entities/article';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ChangeDetectorRef} from '@angular/core';
-import {Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
 import {EntityFactoryService} from '@app/services/entity-factory.service';
-import {AlertManagerService} from '@app/services/alert-manager.service';
-import {LocalDataManagerService} from "@app/services/local-data-manager.service";
-import {ListHeaderConfig} from "@helpers/components/list/model/list-header-config";
-import {ListElementConfig} from "@helpers/components/list/model/list-element-config";
+import {LocalDataManagerService} from '@app/services/local-data-manager.service';
+import {ListHeaderConfig} from '@helpers/components/list/model/list-header-config';
+import {ListElementConfig} from '@helpers/components/list/model/list-element-config';
+import {BarcodeScannerComponent} from '@helpers/components/barcode-scanner/barcode-scanner.component';
 
 
 @IonicPage()
@@ -22,14 +21,14 @@ import {ListElementConfig} from "@helpers/components/list/model/list-element-con
 })
 export class PriseArticlesPageTraca {
 
+    @ViewChild('footerScannerComponent')
+    public footerScannerComponent: BarcodeScannerComponent;
+
     public emplacement: Emplacement;
     public articles: Array<Article>;
     public db_articles: Array<Article>;
 
-    private zebraScanSubscription: Subscription;
     private finishPrise: () => void;
-
-    private manualEntryAlertWillEnterSubscription: Subscription;
 
     public listHeader: ListHeaderConfig;
     public listBody: Array<ListElementConfig>;
@@ -43,8 +42,7 @@ export class PriseArticlesPageTraca {
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private changeDetectorRef: ChangeDetectorRef,
                        private entityFactory: EntityFactoryService,
-                       private localDataManager: LocalDataManagerService,
-                       private alertManager: AlertManagerService) {
+                       private localDataManager: LocalDataManagerService) {
         this.listBody = [];
         this.listBoldValues = [
             'object'
@@ -60,20 +58,7 @@ export class PriseArticlesPageTraca {
         this.emplacement = this.navParams.get('emplacement');
         this.articles = this.navParams.get('articles') || [];
 
-        this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
-            this.testIfBarcodeEquals(barcode);
-        });
-
         this.refreshListComponent();
-
-    }
-
-    public ionViewWillLeave(): void {
-        this.removeAlertSubscription();
-        if (this.zebraScanSubscription) {
-            this.zebraScanSubscription.unsubscribe();
-            this.zebraScanSubscription = undefined;
-        }
     }
 
     private refreshListComponent(): void {
@@ -91,11 +76,7 @@ export class PriseArticlesPageTraca {
     }
 
     public ionViewCanLeave(): boolean {
-        return this.barcodeScannerManager.canGoBack;
-    }
-
-    public addArticleManually(): void {
-        this.createManualEntryAlert().present();
+        return !this.footerScannerComponent.isScanning;
     }
 
     public finishTaking(): void {
@@ -135,6 +116,9 @@ export class PriseArticlesPageTraca {
         }
         else {
             if (isManualAdd) {
+                this.saveArticle(barCode);
+            }
+            else {
                 this.alertController
                     .create({
                         title: `Vous avez sélectionné l'article ${barCode}`,
@@ -152,42 +136,7 @@ export class PriseArticlesPageTraca {
                         ]
                     })
                     .present();
-            } else {
-                this.saveArticle(barCode);
             }
-        }
-    }
-
-    private createManualEntryAlert(): Alert {
-        const manualEntryAlert = this.alertController.create({
-            title: 'Saisie manuelle',
-            cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
-            inputs: [{
-                name: 'barCode',
-                placeholder: 'Saisir le code barre',
-                type: 'text'
-            }],
-            buttons: [{
-                text: 'Valider',
-                handler: ({barCode}) => {
-                    this.saveArticle(barCode);
-                },
-                cssClass: 'alertAlert'
-            }]
-        });
-
-        this.removeAlertSubscription();
-        this.manualEntryAlertWillEnterSubscription = manualEntryAlert.willEnter.subscribe(() => {
-            this.alertManager.disableAutocapitalizeOnAlert();
-        });
-
-        return manualEntryAlert;
-    }
-
-    private removeAlertSubscription(): void {
-        if (this.manualEntryAlertWillEnterSubscription) {
-            this.manualEntryAlertWillEnterSubscription.unsubscribe();
-            this.manualEntryAlertWillEnterSubscription = undefined;
         }
     }
 

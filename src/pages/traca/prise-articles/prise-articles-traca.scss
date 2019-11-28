@@ -3,6 +3,8 @@
 page-prise-articles {
     .page-content {
         flex: 1;
+
+        // TODO AB Remove bug avec footer
         margin: -$spacer;
     }
 }
