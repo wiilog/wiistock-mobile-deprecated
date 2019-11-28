@@ -3,9 +3,9 @@
 <svg version="1.1" id="Calque_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 	 viewBox="0 0 49.4 39.6" style="enable-background:new 0 0 49.4 39.6;" xml:space="preserve">
 <style type="text/css">
-	.st0{fill:#FFFFFF;}
+	#svg-home .st0{fill:#FFFFFF;}
 </style>
-<g>
+<g id="svg-home">
 	<g>
 		<path class="st0" d="M24.7,8L7,22.6v0.1v0.1v14.8c0,0.5,0.2,1,0.6,1.4C8,39.4,8.5,39.6,9,39.6h11.8V27.8h7.9v11.8h11.8
 			c0.5,0,1-0.2,1.4-0.6s0.6-0.9,0.6-1.4V22.8c0-0.1,0-0.1,0-0.2L24.7,8z"/>

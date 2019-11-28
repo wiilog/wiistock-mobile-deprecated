@@ -4,7 +4,7 @@
         {{ emplacement?.label }}
     </ion-title>
     <ion-title>
-        <ion-icon class="big-icon" name="barcode" (click)="scan()"></ion-icon>
+        <ion-icon class="big-icon" name="barcode" (click)="finishTaking()"></ion-icon>
         <br>
         Flashez un article
     </ion-title>
@@ -20,9 +20,4 @@
     </ion-list>
 </ion-content>
 
-<ion-footer padding>
-    <div class="d-flex">
-        <ion-icon class="big-icon" (click)="addArticleManually()" name="search"></ion-icon>
-        <ion-icon class="big-icon" name="checkmark-circle" (click)="finishTaking()"></ion-icon>
-    </div>
-</ion-footer>
+<footer-prise-depose (addArticle)="testSelectedArticle($event[0], $event[1])"></footer-prise-depose>

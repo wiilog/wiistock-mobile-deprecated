@@ -129,28 +129,32 @@ export class PriseArticlesPageTraca {
         });
     }
 
-    public testIfBarcodeEquals(barCode: string): void {
+    public testIfBarcodeEquals(barCode: string, isManualAdd: boolean = false): void {
         if (this.articles && this.articles.some(article => (article.barcode === barCode))) {
             this.toastService.presentToast('Cet article a déjà été ajouté à la prise.');
         }
         else {
-            this.alertController
-                .create({
-                    title: `Vous avez sélectionné l'article ${barCode}`,
-                    buttons: [
-                        {
-                            text: 'Annuler'
-                        },
-                        {
-                            text: 'Confirmer',
-                            handler: () => {
-                                this.saveArticle(barCode);
+            if (isManualAdd) {
+                this.alertController
+                    .create({
+                        title: `Vous avez sélectionné l'article ${barCode}`,
+                        buttons: [
+                            {
+                                text: 'Annuler'
                             },
-                            cssClass : 'alertAlert'
-                        }
-                    ]
-                })
-                .present();
+                            {
+                                text: 'Confirmer',
+                                handler: () => {
+                                    this.saveArticle(barCode);
+                                },
+                                cssClass: 'alertAlert'
+                            }
+                        ]
+                    })
+                    .present();
+            } else {
+                this.saveArticle(barCode);
+            }
         }
     }
 

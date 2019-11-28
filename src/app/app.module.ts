@@ -52,6 +52,7 @@ import {LocalDataManagerService} from '@app/services/local-data-manager.service'
 import {ApiService} from '@app/services/api.service';
 import {LoadingService} from '@app/services/loading.service';
 import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
+import {ComponentsModule} from "../components/components.module";
 
 
 @NgModule({
@@ -94,7 +95,8 @@ import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
         }),
         HttpClientModule,
         HelpersModule,
-        IonicStorageModule.forRoot({name: 'follow_gt', driverOrder: ['sqlite', 'websql', 'indexeddb']})
+        IonicStorageModule.forRoot({name: 'follow_gt', driverOrder: ['sqlite', 'websql', 'indexeddb']}),
+        ComponentsModule
     ],
     bootstrap: [IonicApp],
     entryComponents: [
