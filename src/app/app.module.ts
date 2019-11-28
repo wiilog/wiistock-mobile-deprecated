@@ -52,6 +52,7 @@ import {LocalDataManagerService} from '@app/services/local-data-manager.service'
 import {ApiService} from '@app/services/api.service';
 import {LoadingService} from '@app/services/loading.service';
 import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
+import {DeposeConfirmPageTraca} from "@pages/traca/depose-confirm/depose-confirm-traca";
 
 
 @NgModule({
@@ -83,7 +84,8 @@ import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
         CollecteArticlesPage,
         CollecteEmplacementPage,
         PreparationRefArticlesPage,
-        NewEmplacementComponent
+        NewEmplacementComponent,
+        DeposeConfirmPageTraca
     ],
     imports: [
         IonicSelectableModule,
@@ -125,7 +127,8 @@ import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
         CollecteArticlesPage,
         CollecteEmplacementPage,
         PreparationRefArticlesPage,
-        NewEmplacementComponent
+        NewEmplacementComponent,
+        DeposeConfirmPageTraca
     ],
     providers: [
         BarcodeScannerManagerService,

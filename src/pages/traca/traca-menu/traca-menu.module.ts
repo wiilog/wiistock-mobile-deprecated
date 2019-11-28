@@ -11,5 +11,5 @@ import {TracaMenuPage} from '@pages/traca/traca-menu/traca-menu';
         IonicPageModule.forChild(TracaMenuPage)
     ],
 })
-export class PriseConfirmPageModule {
+export class TracaMenuModule {
 }

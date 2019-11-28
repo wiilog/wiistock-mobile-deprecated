@@ -1,7 +1,12 @@
+<ng-template #svgIcon>
+    <div [innerHTML]="svgObject$|async"
+         class="icon-wrapper"
+         [class.fill]="svgColorAttribute === 'fill'"
+         [class.stroke]="svgColorAttribute === 'stroke'"></div>
+</ng-template>
+
 <button class="icon-button"
-        #button
-        [class.fill]="svgColorAttribute === 'fill'"
-        [class.stroke]="svgColorAttribute === 'stroke'"
-        (click)="onButtonClick($event)"
-        [innerHTML]="svgObject">
+        *ngIf="action.observers && action.observers.length > 0 else svgIcon"
+        (click)="onButtonClick($event)">
+    <ng-container [ngTemplateOutlet]="svgIcon"></ng-container>
 </button>

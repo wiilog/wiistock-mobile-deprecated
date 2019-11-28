@@ -1,0 +1,9 @@
+@import "../../../theme/variables";
+
+page-depose-confirm-traca {
+    .page-content,
+    .page-content > wii-form-panel {
+        flex: 1;
+        display: flex;
+    }
+}

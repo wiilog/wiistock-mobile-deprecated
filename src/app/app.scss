@@ -120,10 +120,23 @@ ion-item {
 }
 
 button[ion-button] {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
+    padding-top: 2.5rem;
+    padding-bottom: 2.5rem;
     font-weight: bold;
     font-size: 1.6rem;
+    text-transform: uppercase;
+    margin: 0;
+    height: initial;
+
+    wii-icon {
+        margin-left: .7rem;
+        width: 1.8rem;
+        height: 1.8rem;
+    }
+
+    .page-footer & {
+        width: 100%;
+    }
 }
 
 .spinner {
@@ -140,22 +153,14 @@ button[ion-button] {
 }
 
 .ion-page {
-    padding: $spacer;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
 }
 
-ion-content {
-    background-color: $lightGrey !important;
+.page-footer {
+    margin: .35rem;
 
-    &.with-header {
-        .ion-page {
-            height: calc(100% - 82px);
-        }
-    }
-
-    button[ion-button][color="success"] {
-        background-color: $green;
+    ion-nav.keyboard-shown & {
+        display: none;
     }
 }

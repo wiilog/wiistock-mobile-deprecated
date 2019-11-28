@@ -1,6 +1,8 @@
-import {ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ViewChild} from "@angular/core";
+import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
+import {Observable} from "rxjs";
+import {map} from "rxjs/operators";
 
 
 @Component({
@@ -12,12 +14,6 @@ export class IconComponent implements OnInit {
     private static readonly ICONS_DIRECTORY: string = 'assets/icons';
     private static readonly DEFAULT_SVG_COLOR_ATTRIBUTE = 'fill';
 
-    @ViewChild('button')
-    public button: HTMLButtonElement;
-
-    @Input()
-    public class?: string;
-
     // color declared in variables.scss
     @Input()
     public color?: 'primary'|'secondary'|'danger'|'light'|'dark'|'grey'|'green'|'white';
@@ -26,14 +22,13 @@ export class IconComponent implements OnInit {
     public svgColorAttribute?: 'fill'|'stroke';
 
     @Output()
-    public action;
+    public action: EventEmitter<any>;
 
-    public svgObject: SafeHtml;
+    public svgObject$: Observable<SafeHtml>;
 
     private _name: string;
 
     public constructor(private httpClient: HttpClient,
-                       private changeDetector: ChangeDetectorRef,
                        private sanitizer: DomSanitizer) {
         this.action = new EventEmitter<any>();
         this.svgColorAttribute = 'fill';
@@ -47,10 +42,9 @@ export class IconComponent implements OnInit {
     public set name(name: string) {
         if (this._name !== name) {
             this._name = name;
-            this.httpClient.get(this.src, {responseType: "text"}).subscribe((svg) => {
-                this.svgObject = this.sanitizer.bypassSecurityTrustHtml(svg);
-                this.changeDetector.detectChanges();
-            });
+            this.svgObject$ = this.httpClient
+                .get(this.src, {responseType: "text"})
+                .pipe(map((svg) => this.sanitizer.bypassSecurityTrustHtml(svg)));
         }
     }
 

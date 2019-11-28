@@ -3,11 +3,24 @@
 wii-icon {
     display: inline-block;
 
+    .icon-button,
+    .icon-wrapper{
+        width: 100%;
+        height: 100%;
+    }
+
+    .icon-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        & > svg {
+            flex: 1;
+        }
+    }
+
     .icon-button {
         background-color: transparent;
         padding: 0;
-        width: 100%;
-        height: 100%;
     }
 
     @each $color, $value in $colors {
@@ -17,13 +30,13 @@ wii-icon {
         }
 
         &[color="#{$color}"] .stroke svg {
-            path, polygon {
+            path, polygon, line, rect {
                 stroke: $value !important;
             }
         }
 
         &[color="#{$color}"] .fill svg {
-            path, polygon {
+            path, polygon, rect {
                 fill: $value !important;
             }
         }

@@ -3,6 +3,6 @@ export interface FormPanelItemConfig<T> {
     name: string;
     value?: string|number;
     errors?: {[erroName: string]: string};
-    type?: 'input';
+    type?: 'input'|'signing';
     inputConfig: T;
 }

@@ -1,20 +1,20 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
-import {FormPanelItemComponent} from "@helpers/components/panel/model/form-panel/form-panel-item-component";
-import {FormPanelInputConfig} from "@helpers/components/panel/model/form-panel/form-panel-input-config";
-import {TextInput} from "ionic-angular";
+import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {FormPanelItemComponent} from '@helpers/components/panel/model/form-panel/form-panel-item-component';
+import {TextInput} from 'ionic-angular';
+import {FormPanelItemAvailable} from '@helpers/components/panel/model/form-panel-item-available';
 
 
 @Component({
     selector: 'wii-form-panel-input',
     templateUrl: 'form-panel-input.component.html'
 })
-export class FormPanelInputComponent implements FormPanelItemComponent<FormPanelInputConfig> {
+export class FormPanelInputComponent implements FormPanelItemComponent<FormPanelItemAvailable> {
 
     @ViewChild('inputComponent')
     public inputComponent: TextInput;
 
     @Input()
-    public inputConfig: FormPanelInputConfig;
+    public inputConfig: FormPanelItemAvailable;
 
     @Input()
     public value?: string;

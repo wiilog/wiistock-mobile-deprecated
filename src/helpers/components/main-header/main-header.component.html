@@ -8,7 +8,7 @@
     </ng-template>
     <div class="header-title">
         <img alt="FollowGT" src="assets/images/followgt_bg_transparent.svg" class="logo"/>
-        <div class="user" *ngIf="userHide.indexOf(currentPageName) === -1 && loggedUser|async as userStr">{{ userStr }}</div>
+        <div class="user" *ngIf="userHide.indexOf(currentPageName) === -1 && loggedUser">{{ loggedUser }}</div>
     </div>
     <button *ngIf="iconMenuHide.indexOf(currentPageName) === -1; else rightElement" (click)="goHome()">
         <ion-icon name="home"></ion-icon>

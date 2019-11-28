@@ -1,11 +1,15 @@
-import {Component, ViewChild, Injectable} from '@angular/core';
-import {Platform, MenuController, Nav} from 'ionic-angular';
+import {Component, ViewChild, Injectable, ElementRef} from '@angular/core';
+import {Platform, MenuController} from 'ionic-angular';
 import {ConnectPage} from '@pages/connect/connect';
 import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
 import {NetworkProvider} from '@providers/network/network';
 import {Network} from '@ionic-native/network';
 import {ScssHelperService} from '@app/services/scss-helper.service';
+import 'rxjs/add/observable/merge';
+import 'rxjs/add/observable/fromEvent';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 
 
 @Injectable()
@@ -17,8 +21,11 @@ export class AppComponent {
 
     private static readonly DEFAULT_STATUS_BAR_COLOR = 'black';
 
-    @ViewChild(Nav)
-    public nav: Nav;
+    @ViewChild('ionNavComponent', {read: ElementRef})
+    public ionNavElementRef: ElementRef;
+
+    @ViewChild('mainHeaderComponent', {read: ElementRef})
+    public mainHeaderComponent: ElementRef;
 
     // make ConnectPage the root (or first) page
     public rootPage = ConnectPage;
@@ -27,8 +34,11 @@ export class AppComponent {
 
     public platformReady: boolean;
 
-    private readonly primaryColor: string;
+    public ionNavStyle: { [key: string]: string; };
 
+    public keyboardShown$: Observable<boolean>;
+
+    private readonly primaryColor: string;
 
     public constructor(public platform: Platform,
                        public menu: MenuController,
@@ -38,8 +48,14 @@ export class AppComponent {
                        public network: Network,
                        private scssHelper: ScssHelperService) {
         this.platformReady = false;
+        this.ionNavStyle = {};
         this.primaryColor = this.scssHelper.getVariable('primary');
         this.initializeApp();
+
+        this.keyboardShown$ = Observable.merge(
+            Observable.fromEvent(window, 'keyboardDidShow').pipe(map(() => true)),
+            Observable.fromEvent(window, 'keyboardDidHide').pipe(map(() => false))
+        );
     }
 
     public initializeApp() {
@@ -58,6 +74,13 @@ export class AppComponent {
     public onHeaderChange(withHeader: boolean): void {
         this.pageWithHeader = withHeader;
         this.setStatusBarColor();
+    }
+
+    public onHeaderHeightChange(headerHeight: number): void {
+        this.ionNavStyle = {
+            height: `calc(100% - ${headerHeight}px)`,
+            top: `${headerHeight}px`
+        };
     }
 
     private setStatusBarColor(): void {

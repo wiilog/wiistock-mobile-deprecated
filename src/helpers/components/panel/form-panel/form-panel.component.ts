@@ -1,8 +1,8 @@
-import {Component, Input, QueryList, ViewChildren} from "@angular/core";
-import {FormPanelInputConfig} from '../model/form-panel/form-panel-input-config';
-import {FormPanelItemConfig} from "../model/form-panel/form-panel-item-config";
-import {FormPanelItemComponent} from "../model/form-panel/form-panel-item-component";
-import {HeaderConfig} from "@helpers/components/panel/model/header-config";
+import {Component, Input, QueryList, ViewChildren} from '@angular/core';
+import {FormPanelItemConfig} from '@helpers/components/panel/model/form-panel/form-panel-item-config';
+import {FormPanelItemComponent} from '@helpers/components/panel/model/form-panel/form-panel-item-component';
+import {HeaderConfig} from '@helpers/components/panel/model/header-config';
+import {FormPanelItemAvailable} from '@helpers/components/panel/model/form-panel-item-available';
 
 
 @Component({
@@ -14,14 +14,14 @@ export class FormPanelComponent {
     public header: HeaderConfig;
 
     @Input()
-    public body: Array<FormPanelItemConfig<FormPanelInputConfig>>;
+    public body: Array<FormPanelItemConfig<FormPanelItemAvailable>>;
 
     @ViewChildren('formElement')
-    public formElements: QueryList<FormPanelItemComponent<any>>;
+    public formElements: QueryList<FormPanelItemComponent<FormPanelItemAvailable>>;
 
     public get values(): {[name: string]: any} {
         return this.formElements
-            ? this.formElements.reduce((acc, element: FormPanelItemComponent<any>) => ({
+            ? this.formElements.reduce((acc, element: FormPanelItemComponent<FormPanelItemAvailable>) => ({
                 ...acc,
                 name: element.value
             }), {})

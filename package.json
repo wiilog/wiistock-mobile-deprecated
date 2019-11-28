@@ -37,6 +37,7 @@
         "@ionic-native/status-bar": "~4.18.0",
         "@ionic/pro": "2.0.4",
         "@ionic/storage": "2.2.0",
+        "angular2-signaturepad": "^2.9.0",
         "com-darryncampbell-cordova-plugin-intent": "1.1.7",
         "cordova": "^9.0.0",
         "cordova-android": "^8.1.0",
