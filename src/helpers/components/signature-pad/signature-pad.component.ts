@@ -26,18 +26,20 @@ export class SignaturePadComponent {
         const componentSize = this.signatureWrapper.nativeElement.getBoundingClientRect();
         this.signaturePadOption = {
             canvasWidth: componentSize.width,
-            canvasHeight: componentSize.height - 4
+            canvasHeight: componentSize.height - 4,
+            backgroundColor: 'rgb(255, 255, 255)',
+            minWidth: 1
         };
         setTimeout(() => {
             this.signaturePad.fromDataURL(signature);
-        })
+        });
     }
 
     public onValidate(): void {
         this.viewCtrl.dismiss({
             signature: this.signaturePad.isEmpty()
                 ? false
-                : this.signaturePad.toDataURL('image/png')
+                : this.signaturePad.toDataURL('image/jpeg')
         });
     }
 

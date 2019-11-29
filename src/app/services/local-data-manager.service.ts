@@ -249,14 +249,17 @@ export class LocalDataManagerService {
 
         //we save cpt
         return Observable
-            .zip(...mouvements.map((mouvement) => setValue(mouvement.ref_article, mouvement.cpt).pipe(
-                map(() => mouvement)
-            )))
+            .zip(...mouvements.map((mouvement) => (
+                setValue(mouvement.ref_article, mouvement.cpt).pipe(map(() => mouvement)
+            ))))
             .pipe(
-                flatMap((mouvements) => (
-                    // we save the mouvement
-                    Observable.zip(...mouvements.map(({cpt, ...mouvement}) => this.sqliteProvider.insert('`mouvement_traca`', mouvement)))
-                )),
+                flatMap((mouvements) => {
+                    console.log(mouvements);
+                    return (
+                        // we save the mouvement
+                        Observable.zip(...mouvements.map(({cpt, ...mouvement}) => this.sqliteProvider.insert('`mouvement_traca`', mouvement)))
+                    );
+                }),
                 map(() => undefined)
             );
     }

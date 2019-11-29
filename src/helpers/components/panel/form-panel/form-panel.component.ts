@@ -23,7 +23,7 @@ export class FormPanelComponent {
         return this.formElements
             ? this.formElements.reduce((acc, element: FormPanelItemComponent<FormPanelItemAvailable>) => ({
                 ...acc,
-                name: element.value
+                [element.name]: element.value
             }), {})
             : {};
     }

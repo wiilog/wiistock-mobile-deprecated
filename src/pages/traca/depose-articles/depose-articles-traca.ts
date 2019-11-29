@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component} from '@angular/core';
+import {Component} from '@angular/core';
 import {Alert, AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
@@ -59,8 +59,7 @@ export class DeposeArticlesPageTraca {
                        private alertManager: AlertManagerService,
                        private localDataManager: LocalDataManagerService,
                        private tracaListFactory: TracaListFactoryService,
-                       private storageService: StorageService,
-                       private changeDetectorRef: ChangeDetectorRef) {
+                       private storageService: StorageService) {
         this.init();
         this.listBoldValues = [
             'object'
@@ -230,21 +229,17 @@ export class DeposeArticlesPageTraca {
         });
 
         this.colisPrise = this.colisPrise.filter(({ref_article}) => (ref_article !== barCode));
-        console.log(this.colisPrise, '-------------');
         this.refreshPriseListComponent();
         this.refresDeposeListComponent();
-        console.log('------------- 2 ');
     }
 
     private refreshPriseListComponent(): void {
         this.priseListConfig = this.tracaListFactory.createListConfig(this.colisPrise, this.emplacement, true);
-        this.changeDetectorRef.detectChanges();
 
     }
 
     private refresDeposeListComponent(): void {
         this.deposeListConfig = this.tracaListFactory.createListConfig(this.colisDepose, this.emplacement, false);
-        this.changeDetectorRef.detectChanges();
     }
 
     private init(): void {

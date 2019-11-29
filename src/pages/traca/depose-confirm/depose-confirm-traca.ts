@@ -73,6 +73,7 @@ export class DeposeConfirmPageTraca {
         }
         else {
             const {comment, signature} = this.formPanelComponent.values;
+            console.log(this.formPanelComponent.values);
             this.validateDepose(comment, signature);
             this.navCtrl.pop();
         }
