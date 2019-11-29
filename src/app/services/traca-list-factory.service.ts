@@ -9,7 +9,7 @@ import moment from "moment";
 @Injectable()
 export class TracaListFactoryService {
 
-    public createListConfig(articles: Array<MouvementTraca>, location: Emplacement, fromPrise: boolean): {
+    public createListConfig(articles: Array<MouvementTraca>, location: Emplacement, fromPrise: boolean, validate?: () => void): {
         header: HeaderConfig;
         body: Array<ListPanelItemConfig>;
     } {
@@ -33,9 +33,22 @@ export class TracaListFactoryService {
                 subtitle: `Emplacement : ${location.label}`,
                 info: `${pickedArticlesNumber} produit${plural} scanné${plural}`,
                 leftIcon: {
-                    name:  fromPrise ? 'upload.svg' : 'download.svg',
-                    color: fromPrise ? 'primary' : 'success'
-                }
+                    name: fromPrise ? 'upload.svg' : 'download.svg',
+                    color: fromPrise ? 'primary' : 'success',
+                    svgColorAttribute: 'stroke',
+                },
+                ...(
+                    validate
+                        ? {
+                            rightIcon: {
+                                name: 'check.svg',
+                                color: 'success',
+                                svgColorAttribute: 'stroke',
+                                action: validate
+                            }
+                        }
+                        : {}
+                )
             },
             body: articles.map(({date, ref_article}) => ({
                 infos: {

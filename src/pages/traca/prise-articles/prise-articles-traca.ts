@@ -149,7 +149,7 @@ export class PriseArticlesPageTraca {
     }
 
     private refreshListComponent(): void {
-        const {header, body} = this.tracaListFactory.createListConfig(this.colisPrise, this.emplacement, true);
+        const {header, body} = this.tracaListFactory.createListConfig(this.colisPrise, this.emplacement, true, (() => this.finishTaking()));
         this.listHeader = header;
         this.listBody = body;
     }

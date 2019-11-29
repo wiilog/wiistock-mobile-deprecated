@@ -193,11 +193,10 @@ export class DeposeArticlesPageTraca {
 
     private refreshPriseListComponent(): void {
         this.priseListConfig = this.tracaListFactory.createListConfig(this.colisPrise, this.emplacement, true);
-
     }
 
     private refresDeposeListComponent(): void {
-        this.deposeListConfig = this.tracaListFactory.createListConfig(this.colisDepose, this.emplacement, false);
+        this.deposeListConfig = this.tracaListFactory.createListConfig(this.colisDepose, this.emplacement, false, (() => this.finishTaking()));
     }
 
     private init(): void {

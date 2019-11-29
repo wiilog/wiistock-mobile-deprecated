@@ -24,19 +24,17 @@ wii-icon {
     }
 
     @each $color, $value in $colors {
-        &[color="#{$color}"] svg {
-            width: 100%;
-            height: 100%;
-        }
+        & > .icon-wrapper.#{$color} {
+            svg {
+                width: 100%;
+                height: 100%;
+            }
 
-        &[color="#{$color}"] .stroke svg {
-            path, polygon, line, rect {
+            &.stroke svg * {
                 stroke: $value !important;
             }
-        }
 
-        &[color="#{$color}"] .fill svg {
-            path, polygon, rect {
+            &.fill svg * {
                 fill: $value !important;
             }
         }
