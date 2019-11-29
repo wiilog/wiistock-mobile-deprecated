@@ -12,6 +12,7 @@ import {LocalDataManagerService} from '@app/services/local-data-manager.service'
 import {ListHeaderConfig} from '@helpers/components/list/model/list-header-config';
 import {ListElementConfig} from '@helpers/components/list/model/list-element-config';
 import {BarcodeScannerComponent} from '@helpers/components/barcode-scanner/barcode-scanner.component';
+import {Subscription} from "rxjs";
 
 
 @IonicPage()
@@ -33,6 +34,7 @@ export class PriseArticlesPageTraca {
     public listHeader: ListHeaderConfig;
     public listBody: Array<ListElementConfig>;
     public listBoldValues: Array<string>;
+    private zebraScanSubscription: Subscription;
 
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
@@ -58,7 +60,19 @@ export class PriseArticlesPageTraca {
         this.emplacement = this.navParams.get('emplacement');
         this.articles = this.navParams.get('articles') || [];
 
+        this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
+            this.testIfBarcodeEquals(barcode);
+        });
+
         this.refreshListComponent();
+
+    }
+
+    public ionViewWillLeave(): void {
+        if (this.zebraScanSubscription) {
+            this.zebraScanSubscription.unsubscribe();
+            this.zebraScanSubscription = undefined;
+        }
     }
 
     private refreshListComponent(): void {
@@ -102,12 +116,6 @@ export class PriseArticlesPageTraca {
 
     goHome() {
         this.navCtrl.setRoot(MenuPage);
-    }
-
-    public scan(): void {
-        this.barcodeScannerManager.scan().subscribe((barcode: string) => {
-            this.testIfBarcodeEquals(barcode);
-        });
     }
 
     public testIfBarcodeEquals(barCode: string, isManualAdd: boolean = false): void {

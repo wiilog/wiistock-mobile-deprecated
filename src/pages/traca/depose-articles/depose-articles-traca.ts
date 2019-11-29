@@ -10,6 +10,8 @@ import {EntityFactoryService} from '@app/services/entity-factory.service';
 import {StorageService} from '@app/services/storage.service';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {BarcodeScannerComponent} from '@helpers/components/barcode-scanner/barcode-scanner.component';
+import {Subscription} from "rxjs";
+import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
 
 
 @IonicPage()
@@ -21,7 +23,7 @@ export class DeposeArticlesPageTraca {
 
     @ViewChild('footerScannerComponent')
     public footerScannerComponent: BarcodeScannerComponent;
-
+    private zebraScanSubscription: Subscription;
     public emplacement: Emplacement;
     public articles: Array<Article>;
     public db_articles: Array<Article>;
@@ -36,7 +38,8 @@ export class DeposeArticlesPageTraca {
                        private changeDetectorRef: ChangeDetectorRef,
                        private entityFactory: EntityFactoryService,
                        private localDataManager: LocalDataManagerService,
-                       private storageService: StorageService) {
+                       private storageService: StorageService,
+                       private barcodeScannerManager: BarcodeScannerManagerService) {
 
     }
 
@@ -48,6 +51,16 @@ export class DeposeArticlesPageTraca {
         this.emplacement = this.navParams.get('emplacement');
         this.finishDepose = this.navParams.get('finishDepose');
         this.articles = this.navParams.get('articles') || [];
+        this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
+            this.testSelectedArticle(barcode);
+        });
+    }
+
+    public ionViewWillLeave(): void {
+        if (this.zebraScanSubscription) {
+            this.zebraScanSubscription.unsubscribe();
+            this.zebraScanSubscription = undefined;
+        }
     }
 
     public ionViewCanLeave(): boolean {
