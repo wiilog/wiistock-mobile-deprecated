@@ -1,0 +1,12 @@
+<div class="page-footer">
+    <div class="input-article">
+        <ion-item>
+            <ion-input type="text" placeholder="Entrée manuelle..." [(ngModel)]="input"></ion-input>
+            <wii-icon name="plus.svg" color="green" class="plus-icon" (action)="addManually()" item-content></wii-icon>
+        </ion-item>
+    </div>
+    <button class="validate_button" ion-button color="primary" (click)="scan()">
+        <span class="button-text">SCANNER</span>
+        <wii-icon name="scanicone.svg" color="white" class="scan-icon"></wii-icon>
+    </button>
+</div>

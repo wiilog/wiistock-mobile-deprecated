@@ -3,26 +3,12 @@
 <ion-scroll class="page-content"
             scrollY="true"
             *ngIf="!loading">
-    <ion-title>
-        <ion-icon class="small-icon" name="pin"></ion-icon>
-        {{ emplacement?.label }}
-    </ion-title>
-    <ion-title>
-        <ion-icon class="big-icon" name="barcode" (click)="scan()"></ion-icon>
-        <br>
-        Flashez un article
-    </ion-title>
-
     <wii-list-panel *ngIf="listHeader && listBody"
               [header]="listHeader"
               [body]="listBody"
               [boldValues]="listBoldValues">
     </wii-list-panel>
 </ion-scroll>
-
-<div class="page-footer" *ngIf="!loading">
-    <div class="d-flex">
-        <ion-icon class="big-icon" (click)="addColisManually()" name="search"></ion-icon>
-        <ion-icon class="big-icon" name="checkmark-circle" (click)="finishTaking()"></ion-icon>
-    </div>
-</div>
+<barcode-scanner #footerScannerComponent
+                 (add)="testIfBarcodeEquals($event[0], $event[1])">
+</barcode-scanner>

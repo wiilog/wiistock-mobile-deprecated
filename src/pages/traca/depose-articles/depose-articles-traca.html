@@ -1,18 +1,6 @@
 <wii-main-loader [loading]="loading"></wii-main-loader>
 
-<div class="page-footer"
-     *ngIf="!loading">
-    <ion-title>
-        <ion-icon class="small-icon" name="pin"></ion-icon>
-        {{ emplacement?.label }}
-    </ion-title>
-
-    <ion-title>
-        <ion-icon class="big-icon" name="barcode" (click)="scan()"></ion-icon>
-        <br>
-        Flashez un article
-    </ion-title>
-
+<div class="page-content" *ngIf="!loading">
     <wii-list-panel *ngIf="deposeListConfig"
                     [header]="deposeListConfig.header"
                     [body]="deposeListConfig.body"
@@ -26,10 +14,6 @@
     </wii-list-panel>
 </div>
 
-<div class="page-footer"
-     *ngIf="!loading">
-    <div class="d-flex">
-        <ion-icon class="big-icon" (click)="addArticleManually()" name="search"></ion-icon>
-        <ion-icon class="big-icon" name="checkmark-circle" (click)="finishTaking()"></ion-icon>
-    </div>
-</div>
+<barcode-scanner #footerScannerComponent
+                 (add)="testSelectedArticle($event[0], $event[1])">
+</barcode-scanner>

@@ -33,6 +33,7 @@ $app-direction: ltr;
 
 $primary: #030F4C;
 $white: #FFF;
+$black: #000;
 $lightBlue: #E3E9F0;
 $grey: #808080;
 $danger: #F53D3D;
@@ -49,7 +50,8 @@ $colors: (
     dark: #222,
     grey: $grey,
     green: $green,
-    white: $white
+    white: $white,
+    black: $black
 );
 
 

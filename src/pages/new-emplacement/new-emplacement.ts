@@ -57,13 +57,14 @@ export class NewEmplacementComponent {
                         this.loading = false;
                         loader.dismiss();
                         this.emplacement.id = Number(response.msg);
-                        this.createNewEmp(this.emplacement);
-                        this.navCtrl.pop();
+                        this.navCtrl.pop().then(() => {
+                            this.createNewEmp(this.emplacement);
+                        });
                     },
                     (response) => {
                         this.loading = false;
                         loader.dismiss();
-                        this.toast.presentToast(response.msg);
+                        this.toast.presentToast(response.error.msg);
                     });
             });
         }

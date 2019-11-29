@@ -1,11 +1,10 @@
 import {Component} from '@angular/core';
-import {Alert, AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
+import {AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
 import {Emplacement} from '@app/entities/emplacement';
 import {ChangeDetectorRef} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
-import {AlertManagerService} from '@app/services/alert-manager.service';
 import {LocalDataManagerService} from "@app/services/local-data-manager.service";
 import {HeaderConfig} from "@helpers/components/panel/model/header-config";
 import {ListPanelItemConfig} from "@helpers/components/panel/model/list-panel/list-panel-item-config";
@@ -24,19 +23,20 @@ export class PriseArticlesPageTraca {
 
     private static readonly MOUVEMENT_TRACA_PRISE = 'prise';
 
+    @ViewChild('footerScannerComponent')
+    public footerScannerComponent: BarcodeScannerComponent;
+
     public emplacement: Emplacement;
     public colisPrise: Array<MouvementTraca>;
-
-    private zebraScanSubscription: Subscription;
-    private finishPrise: () => void;
-
-    private manualEntryAlertWillEnterSubscription: Subscription;
 
     public listHeader: HeaderConfig;
     public listBody: Array<ListPanelItemConfig>;
     public listBoldValues: Array<string>;
 
     public loading: boolean;
+
+    private zebraScanSubscription: Subscription;
+    private finishPrise: () => void;
 
     private operator: string;
 
@@ -48,8 +48,7 @@ export class PriseArticlesPageTraca {
                        private changeDetectorRef: ChangeDetectorRef,
                        private localDataManager: LocalDataManagerService,
                        private tracaListFactory: TracaListFactoryService,
-                       private storageService: StorageService,
-                       private alertManager: AlertManagerService) {
+                       private storageService: StorageService) {
         this.init();
         this.listBoldValues = [
             'object'
@@ -74,19 +73,15 @@ export class PriseArticlesPageTraca {
     }
 
     public ionViewWillLeave(): void {
-        this.removeAlertSubscription();
         if (this.zebraScanSubscription) {
             this.zebraScanSubscription.unsubscribe();
             this.zebraScanSubscription = undefined;
         }
     }
 
-    public ionViewCanLeave(): boolean {
-        return this.barcodeScannerManager.canGoBack;
-    }
 
-    public addColisManually(): void {
-        this.createManualEntryAlert().present();
+    public ionViewCanLeave(): boolean {
+        return !this.footerScannerComponent.isScanning;
     }
 
     public finishTaking(): void {
@@ -110,69 +105,33 @@ export class PriseArticlesPageTraca {
             });
     }
 
-    public scan(): void {
-        this.barcodeScannerManager.scan().subscribe((barcode: string) => {
-            this.testIfBarcodeEquals(barcode);
-        });
-    }
-
-    public testIfBarcodeEquals(barCode: string): void {
-        if (this.colisPrise && this.colisPrise.some((mouvementTraca) => (mouvementTraca.ref_article === barCode))) {
-            this.toastService.presentToast('Ce colis a déjà été ajouté à la prise.');
+    public testIfBarcodeEquals(barCode: string, isManualAdd: boolean = false): void {
+        if (this.colisPrise && this.colisPrise.some((colis) => (colis.barcode === barCode))) {
+            this.toastService.presentToast('Cet article a déjà été ajouté à la prise.');
         }
         else {
-            this.alertController
-                .create({
-                    title: `Vous avez sélectionné le colis ${barCode}`,
-                    buttons: [
-                        {
-                            text: 'Annuler'
-                        },
-                        {
-                            text: 'Confirmer',
-                            handler: () => {
-                                this.saveMouvementTraca(barCode);
+            if (isManualAdd) {
+                this.saveMouvementTraca(barCode);
+            }
+            else {
+                this.alertController
+                    .create({
+                        title: `Vous avez sélectionné le colis ${barCode}`,
+                        buttons: [
+                            {
+                                text: 'Annuler'
                             },
-                            cssClass : 'alertAlert'
-                        }
-                    ]
-                })
-                .present();
-        }
-    }
-
-    private createManualEntryAlert(): Alert {
-        const manualEntryAlert = this.alertController.create({
-            title: 'Saisie manuelle',
-            cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
-            inputs: [{
-                name: 'barCode',
-                placeholder: 'Saisir le code barre',
-                type: 'text'
-            }],
-            buttons: [{
-                text: 'Valider',
-                handler: ({barCode}) => {
-                    if (barCode) {
-                        this.saveMouvementTraca(barCode);
-                    }
-                },
-                cssClass: 'alertAlert'
-            }]
-        });
-
-        this.removeAlertSubscription();
-        this.manualEntryAlertWillEnterSubscription = manualEntryAlert.willEnter.subscribe(() => {
-            this.alertManager.disableAutocapitalizeOnAlert();
-        });
-
-        return manualEntryAlert;
-    }
-
-    private removeAlertSubscription(): void {
-        if (this.manualEntryAlertWillEnterSubscription) {
-            this.manualEntryAlertWillEnterSubscription.unsubscribe();
-            this.manualEntryAlertWillEnterSubscription = undefined;
+                            {
+                                text: 'Confirmer',
+                                handler: () => {
+                                    this.saveMouvementTraca(barCode);
+                                },
+                                cssClass: 'alertAlert'
+                            }
+                        ]
+                    })
+                    .present();
+            }
         }
     }
 

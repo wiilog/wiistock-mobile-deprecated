@@ -5,6 +5,7 @@ import {IonicModule} from 'ionic-angular';
 import {MainLoaderComponent} from '@helpers/components/main-loader/main-loader.component';
 import {MainHeaderComponent} from '@helpers/components/main-header/main-header.component';
 import {IconComponent} from '@helpers/components/icon/icon.component';
+import {BarcodeScannerComponent} from "@helpers/components/barcode-scanner/barcode-scanner.component";
 import {ListPanelComponent} from "@helpers/components/panel/list-panel/list-panel.component";
 import {ListPanelItemComponent} from "@helpers/components/panel/list-panel/list-panel-item/list-panel-item.component";
 import {PanelHeaderComponent} from "@helpers/components/panel/panel-header/panel-header.component";
@@ -26,6 +27,7 @@ import {SignaturePadComponent} from "@helpers/components/signature-pad/signature
         FormPanelInputComponent,
         FormPanelComponent,
         IconComponent,
+        BarcodeScannerComponent,
         MainHeaderComponent,
         SignaturePadComponent
     ],

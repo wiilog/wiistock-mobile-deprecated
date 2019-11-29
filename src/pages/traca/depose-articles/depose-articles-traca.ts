@@ -1,19 +1,17 @@
 import {Component} from '@angular/core';
 import {Alert, AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
+import {MenuPage} from '@pages/menu/menu';
+import {Article} from '@app/entities/article';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
+import {ChangeDetectorRef} from '@angular/core';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
-import {Observable, Subscription} from 'rxjs';
+import {Subscription} from 'rxjs';
+import {EntityFactoryService} from '@app/services/entity-factory.service';
 import {AlertManagerService} from '@app/services/alert-manager.service';
 import {StorageService} from '@app/services/storage.service';
-import {LocalDataManagerService} from '@app/services/local-data-manager.service';
-import {HeaderConfig} from '@helpers/components/panel/model/header-config';
-import {ListPanelItemConfig} from '@helpers/components/panel/model/list-panel/list-panel-item-config';
-import {TracaListFactoryService} from '@app/services/traca-list-factory.service';
-import {MouvementTraca} from '@app/entities/mouvement-traca';
-import {DeposeConfirmPageTraca} from '@pages/traca/depose-confirm/depose-confirm-traca';
-import moment from "moment";
+import {LocalDataManagerService} from "@app/services/local-data-manager.service";
 
 
 @IonicPage()
@@ -25,14 +23,16 @@ export class DeposeArticlesPageTraca {
 
     private static readonly MOUVEMENT_TRACA_DEPOSE = 'depose';
 
+    @ViewChild('footerScannerComponent')
+    public footerScannerComponent: BarcodeScannerComponent;
+
     public emplacement: Emplacement;
     public colisPrise: Array<MouvementTraca>;
     public colisDepose: Array<MouvementTraca>;
 
     private zebraScanSubscription: Subscription;
-    private finishDepose: () => void;
 
-    private manualEntryAlertWillEnterSubscription: Subscription;
+    private finishDepose: () => void;
 
     public priseListConfig: {
         header: HeaderConfig;
@@ -91,7 +91,6 @@ export class DeposeArticlesPageTraca {
     }
 
     public ionViewWillLeave(): void {
-        this.removeAlertSubscription();
         if (this.zebraScanSubscription) {
             this.zebraScanSubscription.unsubscribe();
             this.zebraScanSubscription = undefined;
@@ -99,11 +98,7 @@ export class DeposeArticlesPageTraca {
     }
 
     public ionViewCanLeave(): boolean {
-        return this.barcodeScannerManager.canGoBack;
-    }
-
-    public addArticleManually(): void {
-        this.createManualEntryAlert().present();
+        return !this.footerScannerComponent.isScanning;
     }
 
     public finishTaking(): void {
@@ -120,17 +115,12 @@ export class DeposeArticlesPageTraca {
     }
 
     public redirectAfterTake(): void {
-        this.navCtrl.pop()
+        this.navCtrl
+            .pop()
             .then(() => {
                 this.finishDepose();
                 this.toastService.presentToast('Dépose enregistrée.')
             });
-    }
-
-    public scan(): void {
-        this.barcodeScannerManager.scan().subscribe((barcode: string) => {
-            this.testColisDepose(barcode);
-        });
     }
 
     public testColisDepose(barCode: string, isManualInput: boolean = false): void {
@@ -172,39 +162,6 @@ export class DeposeArticlesPageTraca {
                 this.toastService.presentToast('Ce colis ne correspond à aucune prise.');
             }
         });
-    }
-
-    private createManualEntryAlert(): Alert {
-        const manualEntryAlert = this.alertController.create({
-            title: 'Saisie manuelle',
-            cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
-            inputs: [{
-                name: 'barCode',
-                placeholder: 'Saisir le code barre',
-                type: 'text'
-            }],
-            buttons: [{
-                text: 'Valider',
-                handler: ({barCode}) => {
-                    this.testColisDepose(barCode);
-                },
-                cssClass: 'alertAlert'
-            }]
-        });
-
-        this.removeAlertSubscription();
-        this.manualEntryAlertWillEnterSubscription = manualEntryAlert.willEnter.subscribe(() => {
-            this.alertManager.disableAutocapitalizeOnAlert();
-        });
-
-        return manualEntryAlert;
-    }
-
-    private removeAlertSubscription(): void {
-        if (this.manualEntryAlertWillEnterSubscription) {
-            this.manualEntryAlertWillEnterSubscription.unsubscribe();
-            this.manualEntryAlertWillEnterSubscription = undefined;
-        }
     }
 
     private openConfirmDeposePage(barCode: string): void {
