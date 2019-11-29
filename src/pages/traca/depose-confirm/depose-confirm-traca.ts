@@ -6,7 +6,7 @@ import {FormPanelItemConfig} from '@helpers/components/panel/model/form-panel/fo
 import {FormPanelInputConfig} from '@helpers/components/panel/model/form-panel/form-panel-input-config';
 import {FormPanelComponent} from '@helpers/components/panel/form-panel/form-panel.component';
 import {FormPanelSigningConfig} from '@helpers/components/panel/model/form-panel/form-panel-signing-config';
-import {ToastService} from "@app/services/toast.service";
+import {ToastService} from '@app/services/toast.service';
 
 
 @IonicPage()

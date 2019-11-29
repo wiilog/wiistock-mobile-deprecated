@@ -12,7 +12,7 @@ import {HeaderConfig} from '@helpers/components/panel/model/header-config';
 import {ListPanelItemConfig} from '@helpers/components/panel/model/list-panel/list-panel-item-config';
 import {TracaListFactoryService} from '@app/services/traca-list-factory.service';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
-import {DeposeConfirmPageTraca} from "@pages/traca/depose-confirm/depose-confirm-traca";
+import {DeposeConfirmPageTraca} from '@pages/traca/depose-confirm/depose-confirm-traca';
 
 
 @IonicPage()
@@ -59,31 +59,33 @@ export class DeposeArticlesPageTraca {
                        private localDataManager: LocalDataManagerService,
                        private tracaListFactory: TracaListFactoryService,
                        private storageService: StorageService) {
-        this.loading = true;
+        this.init();
         this.listBoldValues = [
             'object'
         ];
     }
 
     public ionViewWillEnter(): void {
+        this.init();
         this.emplacement = this.navParams.get('emplacement');
         this.finishDepose = this.navParams.get('finishDepose');
 
-        Observable.zip(
-            this.sqliteProvider.findByElement('`mouvement_traca`', 'type', 'prise'),
-            this.storageService.getOperateur()
-        )
-        .subscribe(([colisPrise, operator]) => {
-            this.colisPrise = colisPrise;
-            this.operator = operator;
+        Observable
+            .zip(
+                this.sqliteProvider.findByElement('`mouvement_traca`', 'type', 'prise'),
+                this.storageService.getOperateur()
+            )
+            .subscribe(([colisPrise, operator]) => {
+                this.colisPrise = colisPrise;
+                this.operator = operator;
 
-            this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
-                this.testColisDepose(barcode);
+                this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
+                    this.testColisDepose(barcode);
+                });
+
+                this.refreshPriseListComponent();
+                this.loading = false;
             });
-
-            this.refreshPriseListComponent();
-            this.loading = false;
-        });
     }
 
     public ionViewWillLeave(): void {
@@ -235,5 +237,11 @@ export class DeposeArticlesPageTraca {
 
     private refresDeposeListComponent(): void {
         this.deposeListConfig = this.tracaListFactory.createListPriseConfig(this.colisDepose, this.emplacement);
+    }
+
+    private init(): void {
+        this.loading = true;
+        this.colisDepose = [];
+        this.colisPrise = [];
     }
 }

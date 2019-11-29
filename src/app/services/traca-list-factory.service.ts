@@ -1,9 +1,8 @@
 import {Injectable} from '@angular/core';
-import {HeaderConfig} from "@helpers/components/panel/model/header-config";
-import {ListPanelItemConfig} from "@helpers/components/panel/model/list-panel/list-panel-item-config";
-import {Article} from "@app/entities/article";
-import {Emplacement} from "@app/entities/emplacement";
-import {MouvementTraca} from "@app/entities/mouvement-traca";
+import {HeaderConfig} from '@helpers/components/panel/model/header-config';
+import {ListPanelItemConfig} from '@helpers/components/panel/model/list-panel/list-panel-item-config';
+import {Emplacement} from '@app/entities/emplacement';
+import {MouvementTraca} from '@app/entities/mouvement-traca';
 
 
 @Injectable()

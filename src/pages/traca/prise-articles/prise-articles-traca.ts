@@ -49,14 +49,14 @@ export class PriseArticlesPageTraca {
                        private tracaListFactory: TracaListFactoryService,
                        private storageService: StorageService,
                        private alertManager: AlertManagerService) {
-        this.loading = true;
-        this.listBody = [];
+        this.init();
         this.listBoldValues = [
             'object'
         ];
     }
 
     public ionViewWillEnter(): void {
+        this.init();
         this.finishPrise = this.navParams.get('finishPrise');
         this.emplacement = this.navParams.get('emplacement');
 
@@ -188,5 +188,11 @@ export class PriseArticlesPageTraca {
         const {header, body} = this.tracaListFactory.createListPriseConfig(this.colisPrise, this.emplacement);
         this.listHeader = header;
         this.listBody = body;
+    }
+
+    private init(): void {
+        this.loading = true;
+        this.listBody = [];
+        this.colisPrise = [];
     }
 }
