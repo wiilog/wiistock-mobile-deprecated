@@ -770,7 +770,9 @@ export class SqliteProvider {
     }
 
     public insert(name: string, objects: any|Array<any>): Observable<number> {
+        console.log(objects);
         let query = this.createInsertQuery(name, objects);
+        console.log(query);
         return this.executeQuery(query).pipe(map(({insertId}) => insertId));
     }
 

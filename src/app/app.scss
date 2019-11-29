@@ -161,7 +161,6 @@ button[ion-button] {
     .page-footer {
         margin-top: auto;
         padding: $spacerMin;
-
         ion-nav.keyboard-shown & {
             display: none;
         }

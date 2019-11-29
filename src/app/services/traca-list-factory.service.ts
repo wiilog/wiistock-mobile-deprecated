@@ -3,26 +3,38 @@ import {HeaderConfig} from '@helpers/components/panel/model/header-config';
 import {ListPanelItemConfig} from '@helpers/components/panel/model/list-panel/list-panel-item-config';
 import {Emplacement} from '@app/entities/emplacement';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
+import moment from "moment";
 
 
 @Injectable()
 export class TracaListFactoryService {
 
-    public createListPriseConfig(articles: Array<MouvementTraca>, location: Emplacement): {
+    public createListConfig(articles: Array<MouvementTraca>, location: Emplacement, fromPrise: boolean): {
         header: HeaderConfig;
         body: Array<ListPanelItemConfig>;
     } {
         const pickedArticlesNumber = articles.length;
         const plural = pickedArticlesNumber > 1 ? 's' : '';
-
+        console.log(fromPrise, articles, articles.map(({date, ref_article}) => ({
+            infos: {
+                object: {
+                    label: 'Objet',
+                    value: ref_article
+                },
+                date: {
+                    label: 'Date / Heure',
+                    value: moment(date, moment.defaultFormat).format('DD/MM/YYYY HH:mm:ss')
+                }
+            }
+        })));
         return {
             header: {
-                title: 'PRISE',
+                title: fromPrise ? 'PRISE' : 'DEPOSE',
                 subtitle: `Emplacement : ${location.label}`,
                 info: `${pickedArticlesNumber} produit${plural} scanné${plural}`,
                 leftIcon: {
-                    name: 'upload.svg',
-                    color: 'primary'
+                    name:  fromPrise ? 'upload.svg' : 'download.svg',
+                    color: fromPrise ? 'primary' : 'success'
                 }
             },
             body: articles.map(({date, ref_article}) => ({
@@ -33,7 +45,7 @@ export class TracaListFactoryService {
                     },
                     date: {
                         label: 'Date / Heure',
-                        value: date
+                        value: moment(date, moment.defaultFormat).format('DD/MM/YYYY HH:mm:ss')
                     }
                 }
             }))

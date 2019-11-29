@@ -6,4 +6,9 @@ page-depose-confirm-traca {
         flex: 1;
         display: flex;
     }
+    .page-content > wii-form-panel {
+        margin-right: -$spacer;
+        margin-left: -$spacer;
+    }
+
 }

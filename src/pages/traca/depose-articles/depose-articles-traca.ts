@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {ChangeDetectorRef, Component} from '@angular/core';
 import {Alert, AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
@@ -13,6 +13,7 @@ import {ListPanelItemConfig} from '@helpers/components/panel/model/list-panel/li
 import {TracaListFactoryService} from '@app/services/traca-list-factory.service';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import {DeposeConfirmPageTraca} from '@pages/traca/depose-confirm/depose-confirm-traca';
+import moment from "moment";
 
 
 @IonicPage()
@@ -58,7 +59,8 @@ export class DeposeArticlesPageTraca {
                        private alertManager: AlertManagerService,
                        private localDataManager: LocalDataManagerService,
                        private tracaListFactory: TracaListFactoryService,
-                       private storageService: StorageService) {
+                       private storageService: StorageService,
+                       private changeDetectorRef: ChangeDetectorRef) {
         this.init();
         this.listBoldValues = [
             'object'
@@ -66,26 +68,27 @@ export class DeposeArticlesPageTraca {
     }
 
     public ionViewWillEnter(): void {
-        this.init();
-        this.emplacement = this.navParams.get('emplacement');
-        this.finishDepose = this.navParams.get('finishDepose');
+        if (!this.operator) {
+            this.init();
+            this.emplacement = this.navParams.get('emplacement');
+            this.finishDepose = this.navParams.get('finishDepose');
+            Observable
+                .zip(
+                    this.sqliteProvider.findByElement('`mouvement_traca`', 'type', 'prise'),
+                    this.storageService.getOperateur()
+                )
+                .subscribe(([colisPrise, operator]) => {
+                    this.colisPrise = colisPrise;
+                    this.operator = operator;
 
-        Observable
-            .zip(
-                this.sqliteProvider.findByElement('`mouvement_traca`', 'type', 'prise'),
-                this.storageService.getOperateur()
-            )
-            .subscribe(([colisPrise, operator]) => {
-                this.colisPrise = colisPrise;
-                this.operator = operator;
+                    this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
+                        this.testColisDepose(barcode);
+                    });
 
-                this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
-                    this.testColisDepose(barcode);
+                    this.refreshPriseListComponent();
+                    this.loading = false;
                 });
-
-                this.refreshPriseListComponent();
-                this.loading = false;
-            });
+        }
     }
 
     public ionViewWillLeave(): void {
@@ -222,21 +225,26 @@ export class DeposeArticlesPageTraca {
             signature,
             type: DeposeArticlesPageTraca.MOUVEMENT_TRACA_DEPOSE,
             operateur: this.operator,
-            ref_emplacement: this.emplacement.label
+            ref_emplacement: this.emplacement.label,
+            date: moment().format()
         });
 
         this.colisPrise = this.colisPrise.filter(({ref_article}) => (ref_article !== barCode));
-
+        console.log(this.colisPrise, '-------------');
         this.refreshPriseListComponent();
         this.refresDeposeListComponent();
+        console.log('------------- 2 ');
     }
 
     private refreshPriseListComponent(): void {
-        this.priseListConfig = this.tracaListFactory.createListPriseConfig(this.colisPrise, this.emplacement);
+        this.priseListConfig = this.tracaListFactory.createListConfig(this.colisPrise, this.emplacement, true);
+        this.changeDetectorRef.detectChanges();
+
     }
 
     private refresDeposeListComponent(): void {
-        this.deposeListConfig = this.tracaListFactory.createListPriseConfig(this.colisDepose, this.emplacement);
+        this.deposeListConfig = this.tracaListFactory.createListConfig(this.colisDepose, this.emplacement, false);
+        this.changeDetectorRef.detectChanges();
     }
 
     private init(): void {

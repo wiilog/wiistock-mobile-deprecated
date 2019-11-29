@@ -13,7 +13,6 @@ import {Mouvement} from '@app/entities/mouvement';
 import {Livraison} from '@app/entities/livraison';
 import {Collecte} from '@app/entities/collecte';
 import {StorageService} from '@app/services/storage.service';
-import moment from 'moment';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import 'rxjs/add/observable/zip';
 
@@ -218,7 +217,6 @@ export class LocalDataManagerService {
 
     public saveMouvementsTraca(mouvementsTraca: Array<MouvementTraca>,
                                type: 'depose'|'prise'): Observable<any> {
-        const date = moment().format();
 
         // we count articles
         const mouvements: Array<MouvementTraca&{cpt: number}> = mouvementsTraca
@@ -238,7 +236,7 @@ export class LocalDataManagerService {
             .map(({mouvement, cpt}) => ({
                 id: null,
                 ...mouvement,
-                date: date + '_' + Math.random().toString(36).substr(2, 9),
+                date: mouvement.date + '_' + Math.random().toString(36).substr(2, 9),
                 cpt
             }));
 
@@ -251,7 +249,9 @@ export class LocalDataManagerService {
 
         //we save cpt
         return Observable
-            .zip(...mouvements.map((mouvement) => setValue(mouvement.ref_article, mouvement.cpt)))
+            .zip(...mouvements.map((mouvement) => setValue(mouvement.ref_article, mouvement.cpt).pipe(
+                map(() => mouvement)
+            )))
             .pipe(
                 flatMap((mouvements) => (
                     // we save the mouvement

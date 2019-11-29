@@ -12,6 +12,7 @@ import {ListPanelItemConfig} from "@helpers/components/panel/model/list-panel/li
 import {TracaListFactoryService} from "@app/services/traca-list-factory.service";
 import {MouvementTraca} from "@app/entities/mouvement-traca";
 import {StorageService} from "@app/services/storage.service";
+import moment from "moment";
 
 
 @IonicPage()
@@ -152,7 +153,9 @@ export class PriseArticlesPageTraca {
             buttons: [{
                 text: 'Valider',
                 handler: ({barCode}) => {
-                    this.saveMouvementTraca(barCode);
+                    if (barCode) {
+                        this.saveMouvementTraca(barCode);
+                    }
                 },
                 cssClass: 'alertAlert'
             }]
@@ -178,14 +181,15 @@ export class PriseArticlesPageTraca {
             ref_article: barCode,
             type: PriseArticlesPageTraca.MOUVEMENT_TRACA_PRISE,
             operateur: this.operator,
-            ref_emplacement: this.emplacement.label
+            ref_emplacement: this.emplacement.label,
+            date: moment().format()
         });
         this.refreshListComponent();
         this.changeDetectorRef.detectChanges();
     }
 
     private refreshListComponent(): void {
-        const {header, body} = this.tracaListFactory.createListPriseConfig(this.colisPrise, this.emplacement);
+        const {header, body} = this.tracaListFactory.createListConfig(this.colisPrise, this.emplacement, true);
         this.listHeader = header;
         this.listBody = body;
     }
