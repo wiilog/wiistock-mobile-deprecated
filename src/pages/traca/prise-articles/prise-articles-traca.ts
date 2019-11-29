@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
 import {Emplacement} from '@app/entities/emplacement';
 import {ChangeDetectorRef} from '@angular/core';
@@ -12,6 +12,7 @@ import {TracaListFactoryService} from "@app/services/traca-list-factory.service"
 import {MouvementTraca} from "@app/entities/mouvement-traca";
 import {StorageService} from "@app/services/storage.service";
 import moment from "moment";
+import {BarcodeScannerComponent} from "@helpers/components/barcode-scanner/barcode-scanner.component";
 
 
 @IonicPage()
@@ -106,7 +107,7 @@ export class PriseArticlesPageTraca {
     }
 
     public testIfBarcodeEquals(barCode: string, isManualAdd: boolean = false): void {
-        if (this.colisPrise && this.colisPrise.some((colis) => (colis.barcode === barCode))) {
+        if (this.colisPrise && this.colisPrise.some((colis) => (colis.ref_article === barCode))) {
             this.toastService.presentToast('Cet article a déjà été ajouté à la prise.');
         }
         else {

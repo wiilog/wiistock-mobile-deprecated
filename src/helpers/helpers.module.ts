@@ -37,6 +37,7 @@ import {SignaturePadComponent} from "@helpers/components/signature-pad/signature
         ListPanelComponent,
         FormPanelComponent,
         IconComponent,
+        BarcodeScannerComponent,
         MainHeaderComponent
     ],
     entryComponents: [

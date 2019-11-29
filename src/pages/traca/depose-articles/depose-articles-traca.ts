@@ -1,17 +1,19 @@
-import {Component} from '@angular/core';
-import {Alert, AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
-import {MenuPage} from '@pages/menu/menu';
-import {Article} from '@app/entities/article';
+import {Component, ViewChild} from '@angular/core';
+import {AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {ChangeDetectorRef} from '@angular/core';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
-import {Subscription} from 'rxjs';
-import {EntityFactoryService} from '@app/services/entity-factory.service';
-import {AlertManagerService} from '@app/services/alert-manager.service';
+import {Observable, Subscription} from 'rxjs';
 import {StorageService} from '@app/services/storage.service';
 import {LocalDataManagerService} from "@app/services/local-data-manager.service";
+import {BarcodeScannerComponent} from "@helpers/components/barcode-scanner/barcode-scanner.component";
+import {MouvementTraca} from "@app/entities/mouvement-traca";
+import {HeaderConfig} from "@helpers/components/panel/model/header-config";
+import {ListPanelItemConfig} from "@helpers/components/panel/model/list-panel/list-panel-item-config";
+import {TracaListFactoryService} from "@app/services/traca-list-factory.service";
+import moment from 'moment';
+import {DeposeConfirmPageTraca} from "@pages/traca/depose-confirm/depose-confirm-traca";
 
 
 @IonicPage()
@@ -56,7 +58,6 @@ export class DeposeArticlesPageTraca {
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
                        private barcodeScannerManager: BarcodeScannerManagerService,
-                       private alertManager: AlertManagerService,
                        private localDataManager: LocalDataManagerService,
                        private tracaListFactory: TracaListFactoryService,
                        private storageService: StorageService) {
