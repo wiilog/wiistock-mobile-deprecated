@@ -44,7 +44,6 @@ export class IconComponent {
     }
 
     public onButtonClick(event: Event) {
-        console.log('click');
         this.action.emit(event)
     }
 

@@ -12,9 +12,7 @@ import {SplashScreen} from '@ionic-native/splash-screen';
 import {HttpClientModule} from '@angular/common/http';
 import {UsersApiProvider} from '@providers/users-api/users-api';
 import {PriseArticlesPageTraca} from '@pages/traca/prise-articles/prise-articles-traca';
-import {PriseEmplacementPageTraca} from '@pages/traca/prise-emplacement/prise-emplacement-traca';
 import {DeposeArticlesPageTraca} from '@pages/traca/depose-articles/depose-articles-traca';
-import {DeposeEmplacementPageTraca} from '@pages/traca/depose-emplacement/depose-emplacement-traca';
 import {StorageService} from './services/storage.service';
 import {TracaMenuPage} from '@pages/traca/traca-menu/traca-menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
@@ -52,6 +50,7 @@ import {LocalDataManagerService} from '@app/services/local-data-manager.service'
 import {ApiService} from '@app/services/api.service';
 import {LoadingService} from '@app/services/loading.service';
 import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
+import {EmplacementScanPage} from "@pages/traca/emplacement-scan/emplacement-scan";
 
 
 @NgModule({
@@ -63,7 +62,6 @@ import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
         PreparationMenuPage,
         PreparationArticlesPage,
         TracaMenuPage,
-        PriseEmplacementPageTraca,
         PriseArticlesPageTraca,
         PreparationArticleTakePage,
         ManutentionMenuPage,
@@ -72,7 +70,6 @@ import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
         LivraisonArticlesPage,
         LivraisonEmplacementPage,
         PreparationEmplacementPage,
-        DeposeEmplacementPageTraca,
         DeposeArticlesPageTraca,
         ManutentionValidatePage,
         InventaireMenuPage,
@@ -83,7 +80,9 @@ import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
         CollecteArticlesPage,
         CollecteEmplacementPage,
         PreparationRefArticlesPage,
-        NewEmplacementComponent
+        NewEmplacementComponent,
+        PreparationRefArticlesPage,
+        EmplacementScanPage
     ],
     imports: [
         IonicSelectableModule,
@@ -103,7 +102,6 @@ import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
         MenuPage,
         ParamsPage,
         TracaMenuPage,
-        PriseEmplacementPageTraca,
         PreparationMenuPage,
         PreparationArticleTakePage,
         PreparationEmplacementPage,
@@ -115,7 +113,6 @@ import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
         PriseArticlesPageTraca,
         ManutentionMenuPage,
         ManutentionValidatePage,
-        DeposeEmplacementPageTraca,
         DeposeArticlesPageTraca,
         InventaireMenuPage,
         ModalQuantityPage,
@@ -125,7 +122,9 @@ import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
         CollecteArticlesPage,
         CollecteEmplacementPage,
         PreparationRefArticlesPage,
-        NewEmplacementComponent
+        NewEmplacementComponent,
+        PreparationRefArticlesPage,
+        EmplacementScanPage
     ],
     providers: [
         BarcodeScannerManagerService,

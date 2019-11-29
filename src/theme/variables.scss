@@ -33,6 +33,7 @@ $app-direction: ltr;
 
 $primary: #030f4c;
 $white: #FFF;
+$black: #000;
 $lightBlue: #e3e9f0;
 $grey: #808080;
 $danger: #f53d3d;
@@ -41,14 +42,15 @@ $darkGrey: #424242;
 $green: #149914;
 
 $colors: (
-    primary: $primary,
-    secondary: #32db64,
-    danger: $danger,
-    light: #f4f4f4,
-    dark: #222,
-    grey: $grey,
-    green: $green,
-    white: $white
+        primary: $primary,
+        secondary: #32db64,
+        danger: $danger,
+        light: #f4f4f4,
+        dark: #222,
+        grey: $grey,
+        green: $green,
+        white: $white,
+        black: $black
 );
 
 
