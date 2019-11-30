@@ -1,9 +1,7 @@
 <ng-template #svgIcon>
     <div [innerHTML]="svgObject$|async"
          class="icon-wrapper"
-         [ngClass]="color"
-         [class.fill]="svgColorAttribute === 'fill'"
-         [class.stroke]="svgColorAttribute === 'stroke'"></div>
+         [ngClass]="color"></div>
 </ng-template>
 
 <button class="icon-button"

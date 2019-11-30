@@ -34,8 +34,7 @@ export class TracaListFactoryService {
                 info: `${pickedArticlesNumber} produit${plural} scanné${plural}`,
                 leftIcon: {
                     name: fromPrise ? 'upload.svg' : 'download.svg',
-                    color: fromPrise ? 'primary' : 'success',
-                    svgColorAttribute: 'stroke',
+                    color: fromPrise ? 'primary' : 'success'
                 },
                 ...(
                     validate
@@ -43,7 +42,6 @@ export class TracaListFactoryService {
                             rightIcon: {
                                 name: 'check.svg',
                                 color: 'success',
-                                svgColorAttribute: 'stroke',
                                 action: validate
                             }
                         }
