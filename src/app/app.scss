@@ -127,7 +127,7 @@ button[ion-button] {
     }
 
     .page-footer & {
-        width: calc(100% - 2 * #{$spacerMin});
+        width: 100%;
     }
 
     &.big-button {

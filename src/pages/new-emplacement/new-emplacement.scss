@@ -16,20 +16,14 @@ new-emplacement {
         }
     }
 
-    button[ion-button] {
-        width: calc(100% + 2 * 12px);
-        margin-left: -12px;
-        margin-right: -12px;
-    }
-
     .submit-button {
         display: block;
-    }
 
-    .validate-icon {
-        margin-left: 5px;
-        width: 20px;
-        height: 20px;
+        & > .validate-icon {
+            margin-left: 5px;
+            width: 20px;
+            height: 20px;
+        }
     }
 
     .label-emp {

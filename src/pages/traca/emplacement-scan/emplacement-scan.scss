@@ -18,12 +18,9 @@ page-emplacement-scan {
     }
 
     .validate_button {
-        margin-right: -12px;
-        margin-left: -12px;
         display: block;
         background-color: $primary;
         text-align: center;
-        width: calc(100% + 2 * 12px);
 
         .button-text {
             margin-right: 5px !important;
