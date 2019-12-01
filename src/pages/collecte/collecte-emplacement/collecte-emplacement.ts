@@ -99,7 +99,7 @@ export class CollecteEmplacementPage {
                         flatMap(() => this.sqliteProvider.finishCollecte(this.collecte.id, this.emplacement.label)),
                         flatMap((): any => (
                             this.network.type !== 'none'
-                                ? this.localDataManager.saveFinishedProcess('collecte')
+                                ? this.localDataManager.sendFinishedProcess('collecte')
                                 : of({offline: true})
                         ))
                     )

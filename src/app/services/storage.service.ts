@@ -3,7 +3,6 @@ import {Storage} from '@ionic/storage';
 import {Observable} from 'rxjs';
 import {from} from 'rxjs/observable/from';
 import {flatMap, map} from 'rxjs/operators';
-import {of} from 'rxjs/observable/of';
 
 
 @Injectable()
@@ -32,45 +31,6 @@ export class StorageService {
 
     public getFinishedPreps(): Observable<number> {
         return from(this.storage.get(StorageService.NB_PREPS));
-    }
-
-    public setPriseValue(value: string, number: number): Observable<any> {
-        return from(this.storage.get(value)).pipe(flatMap((data) => from(this.storage.set(value, ((data ? data : 0) + number)))));
-    }
-
-    public keyExists(key) {
-        return from(this.storage.get(key)).pipe(
-            map((data) => (
-                (data && data > 0)
-                    ? data
-                    : false
-            ))
-        );
-    }
-
-    public setDeposeValue(value: string, number: number): Observable<any> {
-        return from(this.storage.get(value)).pipe(flatMap((data) => {
-            const res = (data - number);
-            return (
-                data
-                    ? from(this.storage.set(value, (res >= 0 ? res : 0)))
-                    : of(undefined)
-            )
-        }));
-    }
-
-    public prisesAreUnfinished(): Observable<boolean> {
-        let isUnfinished: boolean = false;
-        return from(this.storage.forEach((value: any, key: string) => {
-            if (!isUnfinished &&
-                (value >= 1) &&
-                (key !== StorageService.API_KEY) &&
-                (key !== StorageService.OPERATEUR) &&
-                (key !== StorageService.INVENTORY_MANAGER) &&
-                (key !== StorageService.NB_PREPS)) {
-                isUnfinished = true;
-            }
-        })).pipe(map(() => isUnfinished));
     }
 
     public getApiKey(): Observable<string> {

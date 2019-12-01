@@ -105,7 +105,7 @@ export class LivraisonEmplacementPage {
                             flatMap(() => this.sqliteProvider.finishLivraison(this.livraison.id, this.emplacement.label)),
                             flatMap((): any => (
                                 (this.network.type !== 'none')
-                                    ? this.localDataManager.saveFinishedProcess('livraison')
+                                    ? this.localDataManager.sendFinishedProcess('livraison')
                                     : of({offline: true})
                             ))
                         )

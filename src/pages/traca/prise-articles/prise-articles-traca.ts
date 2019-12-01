@@ -5,14 +5,17 @@ import {ChangeDetectorRef} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
-import {LocalDataManagerService} from "@app/services/local-data-manager.service";
-import {HeaderConfig} from "@helpers/components/panel/model/header-config";
-import {ListPanelItemConfig} from "@helpers/components/panel/model/list-panel/list-panel-item-config";
-import {TracaListFactoryService} from "@app/services/traca-list-factory.service";
-import {MouvementTraca} from "@app/entities/mouvement-traca";
-import {StorageService} from "@app/services/storage.service";
-import moment from "moment";
-import {BarcodeScannerComponent} from "@helpers/components/barcode-scanner/barcode-scanner.component";
+import {LocalDataManagerService} from '@app/services/local-data-manager.service';
+import {HeaderConfig} from '@helpers/components/panel/model/header-config';
+import {ListPanelItemConfig} from '@helpers/components/panel/model/list-panel/list-panel-item-config';
+import {TracaListFactoryService} from '@app/services/traca-list-factory.service';
+import {MouvementTraca} from '@app/entities/mouvement-traca';
+import {StorageService} from '@app/services/storage.service';
+import moment from 'moment';
+import {BarcodeScannerComponent} from '@helpers/components/barcode-scanner/barcode-scanner.component';
+import {flatMap, map} from "rxjs/operators";
+import {Network} from "@ionic-native/network";
+import {of} from "rxjs/observable/of";
 
 
 @IonicPage()
@@ -40,9 +43,11 @@ export class PriseArticlesPageTraca {
     private finishPrise: () => void;
 
     private operator: string;
+    private apiLoading: boolean;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
+    public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private network: Network,
                        private alertController: AlertController,
                        private toastService: ToastService,
                        private barcodeScannerManager: BarcodeScannerManagerService,
@@ -87,11 +92,44 @@ export class PriseArticlesPageTraca {
 
     public finishTaking(): void {
         if (this.colisPrise && this.colisPrise.length > 0) {
-            this.localDataManager
-                .saveMouvementsTraca(this.colisPrise, PriseArticlesPageTraca.MOUVEMENT_TRACA_PRISE)
-                .subscribe(() => {
-                    this.redirectAfterTake();
-                });
+            const multiPrise = (this.colisPrise.length > 1);
+            if (!this.apiLoading) {
+                this.apiLoading = true;
+                this.localDataManager
+                    .saveMouvementsTraca(this.colisPrise)
+                    .pipe(
+                        flatMap(() => {
+                            const online = (this.network.type !== 'none');
+                            return online
+                                ? this.toastService
+                                    .presentToast(multiPrise ? 'Envoi des prises en cours...' : 'Envoi de la prise en cours...')
+                                    .pipe(map(() => online))
+                                : of(online)
+                        }),
+                        flatMap((online: boolean) => (
+                            online
+                                ? this.localDataManager.sendMouvementTraca().pipe(map(() => online))
+                                : of(online)
+                        )),
+                        // we display toast
+                        flatMap((send: boolean) => {
+                            const message = send
+                                ? (multiPrise
+                                    ? 'Prises sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
+                                    : 'Prise sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé')
+                                : 'Les prises ont bien été sauvegardées';
+                            return this.toastService.presentToast(message);
+                        })
+                    )
+                    .subscribe(
+                        () => {
+                            this.apiLoading = false;
+                            this.redirectAfterTake();
+                        },
+                        () => {
+                            this.apiLoading = false;
+                        });
+            }
         }
         else {
             this.toastService.presentToast('Vous devez scanner au moins un colis')
@@ -142,6 +180,7 @@ export class PriseArticlesPageTraca {
             type: PriseArticlesPageTraca.MOUVEMENT_TRACA_PRISE,
             operateur: this.operator,
             ref_emplacement: this.emplacement.label,
+            finished: 0,
             date: moment().format()
         });
         this.refreshListComponent();
@@ -156,6 +195,7 @@ export class PriseArticlesPageTraca {
 
     private init(): void {
         this.loading = true;
+        this.apiLoading = false;
         this.listBody = [];
         this.colisPrise = [];
     }

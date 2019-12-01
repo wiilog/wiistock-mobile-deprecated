@@ -14,6 +14,9 @@ import {ListPanelItemConfig} from "@helpers/components/panel/model/list-panel/li
 import {TracaListFactoryService} from "@app/services/traca-list-factory.service";
 import moment from 'moment';
 import {DeposeConfirmPageTraca} from "@pages/traca/depose-confirm/depose-confirm-traca";
+import {flatMap, map} from "rxjs/operators";
+import {of} from "rxjs/observable/of";
+import {Network} from "@ionic-native/network";
 
 
 @IonicPage()
@@ -31,10 +34,13 @@ export class DeposeArticlesPageTraca {
     public emplacement: Emplacement;
     public colisPrise: Array<MouvementTraca>;
     public colisDepose: Array<MouvementTraca>;
+    public prisesToFinish: Array<number>;
 
     private zebraScanSubscription: Subscription;
 
     private finishDepose: () => void;
+
+    private apiLoading: boolean;
 
     public priseListConfig: {
         header: HeaderConfig;
@@ -52,8 +58,9 @@ export class DeposeArticlesPageTraca {
 
     private operator: string;
 
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
+    public constructor(private navCtrl: NavController,
+                       private network: Network,
+                       private navParams: NavParams,
                        private alertController: AlertController,
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
@@ -74,7 +81,13 @@ export class DeposeArticlesPageTraca {
             this.finishDepose = this.navParams.get('finishDepose');
             Observable
                 .zip(
-                    this.sqliteProvider.findByElement('`mouvement_traca`', 'type', 'prise'),
+                    this.sqliteProvider.findBy(
+                        'mouvement_traca',
+                        [
+                            `type LIKE 'prise'`,
+                            `finished = 0`
+                        ]
+                    ),
                     this.storageService.getOperateur()
                 )
                 .subscribe(([colisPrise, operator]) => {
@@ -104,11 +117,44 @@ export class DeposeArticlesPageTraca {
 
     public finishTaking(): void {
         if (this.colisDepose && this.colisDepose.length > 0) {
-            this.localDataManager
-                .saveMouvementsTraca(this.colisDepose, DeposeArticlesPageTraca.MOUVEMENT_TRACA_DEPOSE)
-                .subscribe(() => {
-                    this.redirectAfterTake();
-                });
+            if(!this.apiLoading) {
+                this.apiLoading = true;
+                const multiDepose = (this.colisDepose.length > 1);
+                this.localDataManager
+                    .saveMouvementsTraca(this.colisDepose, this.prisesToFinish)
+                    .pipe(
+                        flatMap(() => {
+                            const online = (this.network.type !== 'none');
+                            return online
+                                ? this.toastService
+                                    .presentToast(multiDepose ? 'Envoi des déposes en cours...' : 'Envoi de la dépose en cours...')
+                                    .pipe(map(() => online))
+                                : of(online)
+                        }),
+                        flatMap((online: boolean) => (
+                            online
+                                ? this.localDataManager.sendMouvementTraca().pipe(map(() => online))
+                                : of(online)
+                        )),
+                        // we display toast
+                        flatMap((send: boolean) => {
+                            const message = send
+                                ? (multiDepose
+                                    ? 'Déposes sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
+                                    : 'Dépose sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé')
+                                : 'Les déposes ont bien été sauvegardées';
+                            return this.toastService.presentToast(message);
+                        })
+                    )
+                    .subscribe(
+                        () => {
+                            this.apiLoading = false;
+                            this.redirectAfterTake();
+                        },
+                        () => {
+                            this.apiLoading = false;
+                        });
+            }
         }
         else {
             this.toastService.presentToast('Vous devez sélectionner au moins un article')
@@ -125,44 +171,34 @@ export class DeposeArticlesPageTraca {
     }
 
     public testColisDepose(barCode: string, isManualInput: boolean = false): void {
-        let numberOfColis = this.colisDepose
-            .filter(article => (article.ref_article === barCode))
-            .length;
-
-        this.storageService.keyExists(barCode).subscribe((value) => {
-            if (value !== false) {
-                if (value > numberOfColis) {
-                    if (isManualInput) {
-                        this.openConfirmDeposePage(barCode);
-                    }
-                    else {
-                        this.alertController
-                            .create({
-                                title: `Vous avez sélectionné le colis ${barCode}`,
-                                buttons: [
-                                    {
-                                        text: 'Annuler'
-                                    },
-                                    {
-                                        text: 'Confirmer',
-                                        handler: () => {
-                                            this.openConfirmDeposePage(barCode);
-                                        },
-                                        cssClass: 'alertAlert'
-                                    }
-                                ]
-                            })
-                            .present();
-                    }
-                }
-                else {
-                    this.toastService.presentToast('Ce colis est déjà enregistré assez de fois dans le panier.');
-                }
+        const priseExists = this.priseExists(barCode);
+        if (priseExists) {
+            if (isManualInput) {
+                this.openConfirmDeposePage(barCode);
             }
             else {
-                this.toastService.presentToast('Ce colis ne correspond à aucune prise.');
+                this.alertController
+                    .create({
+                        title: `Vous avez sélectionné le colis ${barCode}`,
+                        buttons: [
+                            {
+                                text: 'Annuler'
+                            },
+                            {
+                                text: 'Confirmer',
+                                handler: () => {
+                                    this.openConfirmDeposePage(barCode);
+                                },
+                                cssClass: 'alertAlert'
+                            }
+                        ]
+                    })
+                    .present();
             }
-        });
+        }
+        else {
+            this.toastService.presentToast('Ce colis ne correspond à aucune prise.');
+        }
     }
 
     private openConfirmDeposePage(barCode: string): void {
@@ -186,7 +222,11 @@ export class DeposeArticlesPageTraca {
             date: moment().format()
         });
 
-        this.colisPrise = this.colisPrise.filter(({ref_article}) => (ref_article !== barCode));
+        const firstPriseMatchingIndex = this.colisPrise.findIndex(({ref_article}) => (ref_article === barCode));
+        if (firstPriseMatchingIndex > -1) {
+            this.prisesToFinish.push(this.colisPrise[firstPriseMatchingIndex].id);
+            this.colisPrise.splice(firstPriseMatchingIndex, 1);
+        }
         this.refreshPriseListComponent();
         this.refresDeposeListComponent();
     }
@@ -201,7 +241,13 @@ export class DeposeArticlesPageTraca {
 
     private init(): void {
         this.loading = true;
+        this.apiLoading = false;
         this.colisDepose = [];
         this.colisPrise = [];
+        this.prisesToFinish = [];
+    }
+
+    private priseExists(barCode: string): boolean {
+        return this.colisPrise.filter(({ref_article}) => (ref_article === barCode)).length > 0;
     }
 }

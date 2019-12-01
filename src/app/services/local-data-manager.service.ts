@@ -12,7 +12,6 @@ import {Preparation} from '@app/entities/preparation';
 import {Mouvement} from '@app/entities/mouvement';
 import {Livraison} from '@app/entities/livraison';
 import {Collecte} from '@app/entities/collecte';
-import {StorageService} from '@app/services/storage.service';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import 'rxjs/add/observable/zip';
 
@@ -36,7 +35,6 @@ export class LocalDataManagerService {
 
     public constructor(private sqliteProvider: SqliteProvider,
                        private apiService: ApiService,
-                       private storageService: StorageService,
                        private alertManager: AlertManagerService,
                        private alertController: AlertController) {
         this.apiProccessConfigs = {
@@ -176,16 +174,19 @@ export class LocalDataManagerService {
             .pipe(
                 flatMap(() => {
                     synchronise$.next({finished: false, message: 'Envoi des préparations non synchronisées'});
-                    return this.saveFinishedProcess('preparation');
+                    return this.sendFinishedProcess('preparation').pipe(map(Boolean));
                 }),
-                map(Boolean),
                 flatMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des livraisons non synchronisées'});
-                    return this.saveFinishedProcess('livraison').pipe(map((needAnotherSynchroniseLivraison) => needAnotherSynchronise || Boolean(needAnotherSynchroniseLivraison)));
+                    return this.sendFinishedProcess('livraison').pipe(map((needAnotherSynchroniseLivraison) => needAnotherSynchronise || Boolean(needAnotherSynchroniseLivraison)));
                 }),
                 flatMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des collectes non synchronisées'});
-                    return this.saveFinishedProcess('collecte').pipe(map((needAnotherSynchroniseCollecte) => needAnotherSynchronise || Boolean(needAnotherSynchroniseCollecte)));
+                    return this.sendFinishedProcess('collecte').pipe(map((needAnotherSynchroniseCollecte) => needAnotherSynchronise || Boolean(needAnotherSynchroniseCollecte)));
+                }),
+                flatMap((needAnotherSynchronise) => {
+                    synchronise$.next({finished: false, message: 'Envoi des prises et des déposes'});
+                    return this.sendMouvementTraca().pipe(map(() => needAnotherSynchronise));
                 }),
                 // we reload data from API if we have save data in previous requests
                 flatMap((needAnotherSynchronise) => {
@@ -215,60 +216,47 @@ export class LocalDataManagerService {
             .pipe(flatMap(({data}) =>  this.sqliteProvider.importData(data)));
     }
 
-    public saveMouvementsTraca(mouvementsTraca: Array<MouvementTraca>,
-                               type: 'depose'|'prise'): Observable<any> {
-
-        // we count articles
-        const mouvements: Array<MouvementTraca&{cpt: number}> = mouvementsTraca
-            .reduce((acc: Array<{mouvement, cpt: number}>, mouvement: MouvementTraca) => {
-                const index = acc.findIndex(({mouvement: mouvementToCmp}) => (mouvementToCmp.ref_article === mouvement.ref_article));
-                if (index > -1) {
-                    acc[index].cpt++;
-                }
-                else {
-                    acc.push({
-                        mouvement,
-                        cpt: 1
-                    });
-                }
-                return acc;
-            }, [])
-            .map(({mouvement, cpt}) => ({
-                id: null,
-                ...mouvement,
-                date: mouvement.date + '_' + Math.random().toString(36).substr(2, 9),
-                cpt
-            }));
-
-        const setValue = (ref_article, cpt) => (
-            (type === 'depose')
-                ? this.storageService.setDeposeValue(ref_article, cpt)
-                // type === 'prise'
-                : this.storageService.setPriseValue(ref_article, cpt)
-        );
-
-        //we save cpt
-        return Observable
-            .zip(...mouvements.map((mouvement) => (
-                setValue(mouvement.ref_article, mouvement.cpt).pipe(map(() => mouvement)
-            ))))
+    public sendMouvementTraca(): Observable<any> {
+        return this.sqliteProvider.findAll('mouvement_traca')
             .pipe(
-                flatMap((mouvements) => {
-                    console.log(mouvements);
-                    return (
-                        // we save the mouvement
-                        Observable.zip(...mouvements.map(({cpt, ...mouvement}) => this.sqliteProvider.insert('`mouvement_traca`', mouvement)))
-                    );
-                }),
-                map(() => undefined)
+                flatMap((mouvements: Array<MouvementTraca>) => (
+                    this.apiService
+                        .requestApi('post', ApiService.POST_MOUVEMENT_TRACA, {mouvements: JSON.stringify(mouvements)})
+                        .pipe(map((apiResponse) => [apiResponse, mouvements]))
+                )),
+                flatMap(([apiResponse, mouvements]) => (
+                    (apiResponse && apiResponse.success)
+                        ? this.sqliteProvider.deleteById(
+                            'mouvement_traca',
+                            mouvements
+                                .filter(({finished, type}) => finished || type === 'depose')
+                                .map(({id}) => id)
+                        )
+                        : of(undefined)
+                ))
             );
+    }
+
+    public saveMouvementsTraca(mouvementsTraca: Array<MouvementTraca>, prisesToFinish: Array<number> = []): Observable<any> {
+        return Observable
+            .zip(
+                ...mouvementsTraca
+                    .map((mouvement) => ({
+                        id: null,
+                        ...mouvement,
+                        date: mouvement.date + '_' + Math.random().toString(36).substr(2, 9)
+                    }))
+                    .map((mouvement) => this.sqliteProvider.insert('`mouvement_traca`', mouvement)),
+                this.sqliteProvider.finishPrises(prisesToFinish)
+            )
+            .pipe(map(() => undefined))
     }
 
     /**
      * Send all "preparations", "livraisons" ou "collectes" finished in local database to the api
      * @return false if no request has been done, or api response
      */
-    public saveFinishedProcess(process: Process): Observable<{success: any, error: any}|false> {
+    public sendFinishedProcess(process: Process): Observable<{success: any, error: any}|false> {
         const apiProccessConfig = this.apiProccessConfigs[process];
         return apiProccessConfig.createApiParams()
             .pipe(

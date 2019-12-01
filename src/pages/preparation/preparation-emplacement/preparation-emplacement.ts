@@ -101,7 +101,7 @@ export class PreparationEmplacementPage {
                             flatMap(() => this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label)),
                             flatMap((): any => (
                                 this.network.type !== 'none'
-                                    ? this.localDataManager.saveFinishedProcess('preparation')
+                                    ? this.localDataManager.sendFinishedProcess('preparation')
                                     : of({offline: true})
                             ))
                         )

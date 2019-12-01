@@ -3,7 +3,6 @@ import {Injectable} from '@angular/core';
 import {StorageService} from '@app/services/storage.service';
 import moment from 'moment';
 import {Preparation} from '@app/entities/preparation';
-import {Mouvement} from '@app/entities/mouvement';
 import {Livraison} from '@app/entities/livraison';
 import {Anomalie} from '@app/entities/anomalie';
 import {Observable, ReplaySubject, Subject} from 'rxjs';
@@ -14,7 +13,7 @@ import {Platform} from 'ionic-angular';
 import {Collecte} from '@app/entities/collecte';
 import {Manutention} from '@app/entities/manutention';
 import 'rxjs/add/observable/zip';
-import {MouvementTraca} from "@app/entities/mouvement-traca";
+import {MouvementTraca} from '@app/entities/mouvement-traca';
 
 
 @Injectable()
@@ -1097,16 +1096,11 @@ export class SqliteProvider {
         return resp;
     }
 
-    public deleteMouvements(mouvements: Array<Mouvement>): Observable<any> {
-        return this.db$.pipe(
-            flatMap((db) => from(Promise.all(
-                mouvements.map(({id}) => db.executeSql(`DELETE FROM \`mouvement\` WHERE id = ${id}`, []))
-            )))
-        );
-    }
-
-    public deleteById(table, id): Observable<undefined> {
-        return this.executeQuery(`DELETE FROM ${table} WHERE id = ${id}`, false);
+    public deleteById(table: string, ids: Array<number>|number): Observable<undefined> {
+        const where = Array.isArray(ids)
+            ? `id IN (${ids.join(',')})`
+            : `id = ${ids}`;
+        return this.executeQuery(`DELETE FROM ${table} WHERE ${where}`, false);
     }
 
     public resetArticlePrepaByPrepa(ids: Array<number>): Observable<any> {
@@ -1168,6 +1162,10 @@ export class SqliteProvider {
                 this.executeQuery(`DELETE FROM \`article_collecte\` WHERE id_collecte IN (${joinedCollecte})`, false)
             )
             : of(undefined);
+    }
+
+    public finishPrises(ids: Array<number>): Observable<any> {
+        return this.executeQuery(`UPDATE mouvement_traca SET finished = 1 WHERE id IN (${ids.join(',')})`, false);
     }
 
 }
