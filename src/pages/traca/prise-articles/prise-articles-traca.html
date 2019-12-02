@@ -10,7 +10,7 @@
     </wii-list-panel>
 </ion-scroll>
 
-<div class="page-footer">
+<div class="page-footer persisted-page-footer" *ngIf="!loading">
     <barcode-scanner #footerScannerComponent
                      (add)="testIfBarcodeEquals($event[0], $event[1])">
     </barcode-scanner>

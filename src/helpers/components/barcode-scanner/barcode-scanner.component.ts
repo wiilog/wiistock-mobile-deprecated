@@ -1,5 +1,5 @@
 import {Component, EventEmitter, Output} from '@angular/core';
-import {BarcodeScannerManagerService} from "@app/services/barcode-scanner-manager.service";
+import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 
 
 @Component({
