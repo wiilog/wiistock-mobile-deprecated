@@ -31,9 +31,14 @@ wii-panel-header {
         .list-header-icon {
             padding-left: 2rem;
             padding-right: 2rem;
+
             wii-icon {
                 width: 5rem;
                 height: 5rem;
+            }
+
+            &:last-child {
+                margin-left: auto;
             }
         }
     }

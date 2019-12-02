@@ -15,18 +15,7 @@ export class TracaListFactoryService {
     } {
         const pickedArticlesNumber = articles.length;
         const plural = pickedArticlesNumber > 1 ? 's' : '';
-        console.log(fromPrise, articles, articles.map(({date, ref_article}) => ({
-            infos: {
-                object: {
-                    label: 'Objet',
-                    value: ref_article
-                },
-                date: {
-                    label: 'Date / Heure',
-                    value: moment(date, moment.defaultFormat).format('DD/MM/YYYY HH:mm:ss')
-                }
-            }
-        })));
+
         return {
             header: {
                 title: fromPrise ? 'PRISE' : 'DEPOSE',

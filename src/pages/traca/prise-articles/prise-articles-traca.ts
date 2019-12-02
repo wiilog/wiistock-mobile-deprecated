@@ -114,10 +114,10 @@ export class PriseArticlesPageTraca {
                         // we display toast
                         flatMap((send: boolean) => {
                             const message = send
-                                ? (multiPrise
+                                ? 'Les prises ont bien été sauvegardées'
+                                : (multiPrise
                                     ? 'Prises sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
-                                    : 'Prise sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé')
-                                : 'Les prises ont bien été sauvegardées';
+                                    : 'Prise sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
                             return this.toastService.presentToast(message);
                         })
                     )
@@ -140,7 +140,6 @@ export class PriseArticlesPageTraca {
         this.navCtrl.pop()
             .then(() => {
                 this.finishPrise();
-                this.toastService.presentToast('Prise enregistrée.')
             });
     }
 

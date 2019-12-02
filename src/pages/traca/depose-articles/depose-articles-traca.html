@@ -1,6 +1,8 @@
 <wii-main-loader [loading]="loading"></wii-main-loader>
 
-<div class="page-content" *ngIf="!loading">
+<ion-scroll class="page-content"
+            scrollY="true"
+            *ngIf="!loading">
     <wii-list-panel *ngIf="deposeListConfig"
                     [header]="deposeListConfig.header"
                     [body]="deposeListConfig.body"
@@ -12,8 +14,10 @@
                     [body]="priseListConfig.body"
                     [boldValues]="listBoldValues">
     </wii-list-panel>
-</div>
+</ion-scroll>
 
-<barcode-scanner #footerScannerComponent
-                 (add)="testColisDepose($event[0], $event[1])">
-</barcode-scanner>
+<div class="page-footer">
+    <barcode-scanner #footerScannerComponent
+                     (add)="testColisDepose($event[0], $event[1])">
+    </barcode-scanner>
+</div>

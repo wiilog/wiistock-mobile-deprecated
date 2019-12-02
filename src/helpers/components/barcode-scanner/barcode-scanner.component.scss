@@ -1,9 +1,11 @@
 @import "../../../theme/variables";
 
 barcode-scanner {
+    ion-item {
+        margin-bottom: .5rem !important;
+    }
+
     .validate_button {
-        margin-right: -12px;
-        margin-left: -12px;
         display: block;
 
         .button-text {
@@ -11,17 +13,17 @@ barcode-scanner {
             font-size: 30px !important;
             font-weight: bold;
         }
+
+        .scan-icon {
+            margin-left: 5px;
+            width: 40px;
+            height: 40px;
+        }
     }
 
     span {
         color: $white !important;
         font-size: 20px;
-    }
-
-    .scan-icon {
-        margin-left: 5px;
-        width: 40px;
-        height: 40px;
     }
 
     .plus-icon {

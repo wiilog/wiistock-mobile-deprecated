@@ -9,6 +9,9 @@
                     [boldValues]="listBoldValues">
     </wii-list-panel>
 </ion-scroll>
-<barcode-scanner #footerScannerComponent
-                 (add)="testIfBarcodeEquals($event[0], $event[1])">
-</barcode-scanner>
+
+<div class="page-footer">
+    <barcode-scanner #footerScannerComponent
+                     (add)="testIfBarcodeEquals($event[0], $event[1])">
+    </barcode-scanner>
+</div>

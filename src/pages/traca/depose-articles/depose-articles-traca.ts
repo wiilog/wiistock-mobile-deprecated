@@ -98,6 +98,7 @@ export class DeposeArticlesPageTraca {
                         this.testColisDepose(barcode);
                     });
 
+                    this.refresDeposeListComponent();
                     this.refreshPriseListComponent();
                     this.loading = false;
                 });
@@ -139,10 +140,10 @@ export class DeposeArticlesPageTraca {
                         // we display toast
                         flatMap((send: boolean) => {
                             const message = send
-                                ? (multiDepose
+                                ? 'Les déposes ont bien été sauvegardées'
+                                : (multiDepose
                                     ? 'Déposes sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
-                                    : 'Dépose sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé')
-                                : 'Les déposes ont bien été sauvegardées';
+                                    : 'Dépose sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
                             return this.toastService.presentToast(message);
                         })
                     )
@@ -166,7 +167,6 @@ export class DeposeArticlesPageTraca {
             .pop()
             .then(() => {
                 this.finishDepose();
-                this.toastService.presentToast('Dépose enregistrée.')
             });
     }
 

@@ -220,17 +220,23 @@ export class LocalDataManagerService {
         return this.sqliteProvider.findAll('mouvement_traca')
             .pipe(
                 flatMap((mouvements: Array<MouvementTraca>) => (
-                    this.apiService
-                        .requestApi('post', ApiService.POST_MOUVEMENT_TRACA, {mouvements: JSON.stringify(mouvements)})
-                        .pipe(map((apiResponse) => [apiResponse, mouvements]))
-                )),
-                flatMap(([apiResponse, mouvements]) => (
-                    (apiResponse && apiResponse.success)
-                        ? this.sqliteProvider.deleteById(
-                            'mouvement_traca',
-                            mouvements
-                                .filter(({finished, type}) => finished || type === 'depose')
-                                .map(({id}) => id)
+                    mouvements.length > 0
+                        ? (
+                            this.apiService
+                                .requestApi('post', ApiService.POST_MOUVEMENT_TRACA, {mouvements: JSON.stringify(mouvements)})
+                                .pipe(
+                                    map((apiResponse) => [apiResponse, mouvements]),
+                                    flatMap(([apiResponse, mouvements]) => (
+                                        (apiResponse && apiResponse.success)
+                                            ? this.sqliteProvider.deleteById(
+                                            'mouvement_traca',
+                                            mouvements
+                                                .filter(({finished, type}) => finished || type === 'depose')
+                                                .map(({id}) => id)
+                                            )
+                                            : of(undefined)
+                                    ))
+                                )
                         )
                         : of(undefined)
                 ))

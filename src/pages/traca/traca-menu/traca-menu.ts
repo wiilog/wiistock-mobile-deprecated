@@ -24,9 +24,7 @@ export class TracaMenuPage {
 
     public ionViewWillEnter(): void {
         this.sqliteProvider.findAll('mouvement_traca').subscribe((mouvementTraca: Array<MouvementTraca>) => {
-            this.unfinishedMvts = (mouvementTraca
-                .filter(({finished, type}) => (type === 'prise' && !finished))
-                .length) > 0;
+            this.unfinishedMvts = mouvementTraca.some(({finished, type}) => (type === 'prise' && !finished));
         });
     }
 
