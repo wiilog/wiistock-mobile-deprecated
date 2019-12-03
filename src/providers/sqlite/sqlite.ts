@@ -418,7 +418,7 @@ export class SqliteProvider {
 
         return Observable.zip(
             // we clear 'articleCollecte' table and add given articles
-            this.cleanTable('collecte')
+            this.cleanTable('article_collecte')
                 .pipe(
                     map(() => (
                         (articlesCollecteAPI && articlesCollecteAPI.length > 0)
@@ -467,26 +467,75 @@ export class SqliteProvider {
                         // we add 'collecte' in sqlite DB if it is in the api and not in DB
                         collectesValuesToAdd: collectesAPI
                             .filter(({id: idAPI}) => !collectesDB.some(({id: idDB}) => (idDB === idAPI)))
-                            .map(({id, number, location}) => `(${id}, '${number}', '${location}', NULL)`)
+                            .map(({id, number, location}) => this.getCollecteValueFromApi({id, number, location}))
                     })),
                     flatMap(({collectesIdToDelete, collectesValuesToAdd}) => (
                         Observable.zip(
                             (collectesIdToDelete.length > 0 ? this.deleteById('collecte', collectesIdToDelete) : of(undefined)),
                             (collectesValuesToAdd.length > 0
-                                ? this.executeQuery(
-                                    'INSERT INTO `collecte` (' +
-                                    '`id`, ' +
-                                    '`numero`, ' +
-                                    '`emplacement`, ' +
-                                    '`date_end`' +
-                                    ') ' +
-                                    'VALUES ' + collectesValuesToAdd.join(',') + ';'
-                                )
+                                ? this.executeQuery(this.getCollecteInsertQuery(collectesValuesToAdd))
                                 : of(undefined)),
                         )
                     ))
                 )
         ).pipe(map(() => undefined));
+    }
+
+    /**
+     * Send sql values for insert the collecte
+     */
+    public getCollecteValueFromApi({id, number, location}): string {
+        return `(${id}, '${number}', '${location}', NULL)`;
+    }
+
+    /**
+     * Create Sql query to insert given sqlValues
+     */
+    public getCollecteInsertQuery(collecteValues: Array<string>): string {
+        return 'INSERT INTO `collecte` (' +
+            '`id`, ' +
+            '`numero`, ' +
+            '`emplacement`, ' +
+            '`date_end`' +
+            ') ' +
+            'VALUES ' + collecteValues.join(',') + ';';
+    }
+
+    /**
+     * Send sql values for insert the article_collecte
+     */
+    public getArticleCollecteValueFromApi(articleCollecte): string {
+        return (
+            "(NULL, " +
+            "'" + articleCollecte.label + "', " +
+            "'" + articleCollecte.reference + "', " +
+            articleCollecte.quantity + ", " +
+            articleCollecte.is_ref + ", " +
+            articleCollecte.id_collecte + ", " +
+            "0, " +
+            "'" + articleCollecte.location + "', " +
+            "'" + articleCollecte.barCode + "')"
+        );
+    }
+
+    /**
+     * Create Sql query to insert given sqlValues
+     */
+    public getArticleCollecteInsertQuery(articlesCollecteValues: Array<string>): string {
+        return (
+            'INSERT INTO `article_collecte` (' +
+                '`id`, ' +
+                '`label`, ' +
+                '`reference`, ' +
+                '`quantite`, ' +
+                '`is_ref`, ' +
+                '`id_collecte`, ' +
+                '`has_moved`, ' +
+                '`emplacement`, ' +
+                '`barcode`' +
+            ') ' +
+            'VALUES ' + articlesCollecteValues.join(',') + ';'
+        );
     }
 
     public findArticlesByCollecte(id_col: number): Observable<Array<any>> {

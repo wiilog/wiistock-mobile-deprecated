@@ -154,6 +154,7 @@ export class LocalDataManagerService {
 
                     return Observable.zip(
                         this.sqliteProvider.deleteCollecteById(idsToDelete),
+                        this.sqliteProvider.deleteArticlesCollecte(idsToDelete),
                         this.sqliteProvider.deleteMouvementsBy('id_collecte', idsToDelete)
                     );
                 },
@@ -180,9 +181,8 @@ export class LocalDataManagerService {
             .pipe(
                 flatMap(() => {
                     synchronise$.next({finished: false, message: 'Envoi des préparations non synchronisées'});
-                    return this.saveFinishedProcess('preparation');
+                    return this.saveFinishedProcess('preparation').pipe(map(Boolean));
                 }),
-                map(Boolean),
                 flatMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des livraisons non synchronisées'});
                     return this.saveFinishedProcess('livraison').pipe(map((needAnotherSynchroniseLivraison) => needAnotherSynchronise || Boolean(needAnotherSynchroniseLivraison)));
