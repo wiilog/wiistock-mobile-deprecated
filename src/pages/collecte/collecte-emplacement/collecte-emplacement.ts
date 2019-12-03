@@ -98,7 +98,11 @@ export class CollecteEmplacementPage {
                             ...articles.map((article) => (
                                 this.sqliteProvider
                                     .findMvtByArticleCollecte(article.id)
-                                    .pipe(flatMap((mvt) => this.sqliteProvider.finishMvt(mvt.id, this.emplacement.label)))
+                                    .pipe(flatMap((mvt) => (
+                                        mvt
+                                            ? this.sqliteProvider.finishMvt(mvt.id, this.emplacement.label)
+                                            : of(undefined)
+                                    )))
                             ))
                         )),
                         flatMap(() => this.sqliteProvider.finishCollecte(this.collecte.id, this.emplacement.label)),
