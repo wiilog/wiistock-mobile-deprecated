@@ -24,6 +24,9 @@ export class ApiService {
     public static readonly VALIDATE_MANUT: string = '/validateManut';
     public static readonly GET_DATA: string = '/getData';
 
+    // time out for service verification and url ping, 10s
+    public static readonly VERIFICATION_SERVICE_TIMEOUT: number = 10000;
+
 
     public constructor(private sqliteProvider: SqliteProvider,
                        private storageService: StorageService,

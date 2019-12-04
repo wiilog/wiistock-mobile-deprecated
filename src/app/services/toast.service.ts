@@ -8,7 +8,8 @@ import {Observable} from "rxjs";
 @Injectable()
 export class ToastService {
 
-    private static readonly DEFAULT_DURATION: number = 2000;
+    public static readonly LONG_DURATION: number = 5000;
+    public static readonly DEFAULT_DURATION: number = 2000;
 
     private static readonly TOAST_OPTIONS: ToastOptions = {
         position: 'center',

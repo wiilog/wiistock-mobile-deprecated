@@ -10,7 +10,6 @@ import {IonicStorageModule} from '@ionic/storage';
 import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
 import {HttpClientModule} from '@angular/common/http';
-import {UsersApiProvider} from '@providers/users-api/users-api';
 import {PriseArticlesPageTraca} from '@pages/traca/prise-articles/prise-articles-traca';
 import {PriseEmplacementPageTraca} from '@pages/traca/prise-emplacement/prise-emplacement-traca';
 import {DeposeArticlesPageTraca} from '@pages/traca/depose-articles/depose-articles-traca';
@@ -129,7 +128,6 @@ import {LoadingService} from '@app/services/loading.service';
         StatusBar,
         SplashScreen,
         {provide: ErrorHandler, useClass: IonicErrorHandler},
-        UsersApiProvider,
         AppComponent,
         SQLite,
         VersionCheckerService,
