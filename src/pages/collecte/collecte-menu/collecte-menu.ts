@@ -27,16 +27,16 @@ export class CollecteMenuPage {
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
-        this.sqlLiteProvider.findAll('`collecte`').subscribe((collectes) => {
+        this.sqlLiteProvider.findAll('`collecte`').subscribe((collectes: Array<Collecte>) => {
             this.collectes = collectes
-                .filter(c => c.date_end === null)
-                .sort(({emplacement: emplacement1}, {emplacement: emplacement2}) => ((emplacement1 < emplacement2) ? -1 : 1));
+                .filter(({date_end, location_to}) => (!date_end && !location_to))
+                .sort(({location_from: location_from_1}, {location_from: location_from_2}) => ((location_from_1 < location_from_2) ? -1 : 1));
             this.hasLoaded = true;
             this.content.resize();
         });
     }
 
-    goToArticles(collecte) {
+    public goToArticles(collecte): void {
         this.navCtrl.push(CollecteArticlesPage, {collecte});
     }
 
