@@ -154,7 +154,6 @@ export class LocalDataManagerService {
 
                     return Observable.zip(
                         this.sqliteProvider.deleteCollecteById(idsToDelete),
-                        this.sqliteProvider.deleteArticlesCollecte(idsToDelete),
                         this.sqliteProvider.deleteMouvementsBy('id_collecte', idsToDelete)
                     );
                 },
