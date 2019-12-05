@@ -1,0 +1,17 @@
+<ion-scroll scrollY="true"
+            class="page-content">
+    <h3 text-center>Transfert</h3>
+    <ion-grid>
+        <ion-row class="row-menu-stats">
+            <ion-slides pager>
+                <ion-slide>
+                    <div class="col-menu-stats">
+                        <p class="number" [class.text-danger]="nbDrop > 0">{{nbDrop}}</p>
+                        <p>Produit<ng-container *ngIf="nbDrop > 1">s</ng-container> en prise</p>
+                    </div>
+                </ion-slide>
+            </ion-slides>
+        </ion-row>
+    </ion-grid>
+    <wii-menu [config]="menuConfig"></wii-menu>
+</ion-scroll>

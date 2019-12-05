@@ -14,6 +14,7 @@ import {FormPanelInputComponent} from "@helpers/components/panel/form-panel/form
 import {SignaturePadModule } from "angular2-signaturepad";
 import {FormPanelSigningComponent} from "@helpers/components/panel/form-panel/form-panel-signing/form-panel-signing.component";
 import {SignaturePadComponent} from "@helpers/components/signature-pad/signature-pad.component";
+import {MenuComponent} from "@helpers/components/menu/menu.component";
 
 
 @NgModule({
@@ -29,7 +30,8 @@ import {SignaturePadComponent} from "@helpers/components/signature-pad/signature
         IconComponent,
         BarcodeScannerComponent,
         MainHeaderComponent,
-        SignaturePadComponent
+        SignaturePadComponent,
+        MenuComponent
     ],
     exports: [
         SearchLocationComponent,
@@ -38,7 +40,8 @@ import {SignaturePadComponent} from "@helpers/components/signature-pad/signature
         FormPanelComponent,
         IconComponent,
         BarcodeScannerComponent,
-        MainHeaderComponent
+        MainHeaderComponent,
+        MenuComponent
     ],
     entryComponents: [
         SignaturePadComponent

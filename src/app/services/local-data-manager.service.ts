@@ -229,10 +229,10 @@ export class LocalDataManagerService {
                                     flatMap(([apiResponse, mouvements]) => (
                                         (apiResponse && apiResponse.success)
                                             ? this.sqliteProvider.deleteById(
-                                            'mouvement_traca',
-                                            mouvements
-                                                .filter(({finished, type}) => finished || type === 'depose')
-                                                .map(({id}) => id)
+                                                'mouvement_traca',
+                                                mouvements
+                                                    .filter(({finished, type}) => (finished || type === 'depose'))
+                                                    .map(({id}) => id)
                                             )
                                             : of(undefined)
                                     ))

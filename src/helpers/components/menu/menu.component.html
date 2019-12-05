@@ -1,0 +1,14 @@
+<div class="menu-list" *ngIf="config">
+    <ion-card class="menu-item"
+              ion-item
+              *ngFor="let item of config">
+        <button ion-button outline color="transparent"
+                (click)="item.action()">
+            <wii-icon [name]="item.icon" class="menu-icon"></wii-icon>
+            <span class="menu-label">{{ item.label }}</span>
+        </button>
+    </ion-card>
+    <div class="menu-item"
+         *ngIf="config.length % 2 === 1">
+    </div>
+</div>

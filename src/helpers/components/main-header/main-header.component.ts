@@ -2,7 +2,7 @@ import {ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy
 import {Nav} from 'ionic-angular';
 import {StorageService} from '@app/services/storage.service';
 import {Subscription} from 'rxjs';
-import {MenuPage} from '@pages/menu/menu';
+import {MainMenuPage} from '@pages/main-menu/main-menu';
 import {ConnectPage} from '@pages/connect/connect';
 import {ParamsPage} from "@pages/params/params";
 
@@ -28,12 +28,12 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     public loggedUser: string;
 
     public readonly iconMenuHide: Array<string> = [
-        MenuPage.name,
+        MainMenuPage.name,
         ParamsPage.name
     ];
 
     public readonly iconPopHide: Array<string> = [
-        MenuPage.name
+        MainMenuPage.name
     ];
 
     public readonly userHide: Array<string> = [
@@ -62,7 +62,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.operatorSubscription = this.storageService.getOperateur().subscribe((user) => {
             this.loggedUser = user;
             this.changeDetector.detectChanges();
-            this.heightChange.emit(this.height);
+            setTimeout(() => {
+                this.heightChange.emit(this.height);
+            });
         });
 
         this.viewDidEnterSubscription = this.nav.viewDidEnter.subscribe((data) => {
@@ -70,7 +72,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             this.currentPageName = data.component.name;
             this.withHeader.emit(this.headerHide.indexOf(this.currentPageName) === -1);
             this.changeDetector.detectChanges();
-            this.heightChange.emit(this.height);
+            setTimeout(() => {
+                this.heightChange.emit(this.height);
+            });
         });
     }
 
@@ -86,7 +90,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     }
 
     public goHome(): void {
-        this.nav.setRoot(MenuPage);
+        this.nav.setRoot(MainMenuPage);
     }
 
     public doPop(): void {

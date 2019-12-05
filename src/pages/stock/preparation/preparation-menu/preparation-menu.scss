@@ -1,0 +1,12 @@
+@import "../../../../theme/variables";
+
+page-preparation-menu {
+    .flex-margin {
+        position: absolute;
+        right: var(--padding-start);
+    }
+
+    .title-tmp {
+        font-size: $spacer;
+    }
+}

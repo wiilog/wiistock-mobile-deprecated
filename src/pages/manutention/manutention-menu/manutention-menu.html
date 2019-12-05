@@ -7,7 +7,7 @@
 
 <ion-scroll *ngIf="hasLoaded" scrollY="true" class="page-content">
     <div class="icon-manutention-container">
-        <wii-icon name="peoples.svg"></wii-icon>
+        <wii-icon name="people.svg"></wii-icon>
     </div>
     <ng-container *ngIf="manutentions && manutentions.length > 0 && hasLoaded">
         <ion-card *ngFor="let manutention of manutentions" (click)="goToManut(manutention)">

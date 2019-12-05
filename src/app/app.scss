@@ -129,11 +129,6 @@ button[ion-button] {
     .page-footer & {
         width: 100%;
     }
-
-    &.big-button {
-        height: 12em;
-        width: 90%;
-    }
 }
 
 .spinner {
@@ -156,6 +151,7 @@ button[ion-button] {
 
     .page-content {
         padding: $spacer;
+        flex: 1;
     }
 
     .page-footer {
@@ -165,5 +161,50 @@ button[ion-button] {
         ion-nav.keyboard-shown &:not(.persisted-page-footer) {
             display: none;
         }
+    }
+}
+
+
+
+.row-menu-stats {
+    display: flex;
+    justify-content: center;
+    background-color: white;
+    text-align: center;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+
+    p {
+        font-size: 20px;
+        margin-top: 0;
+        margin-bottom: 0;
+        font-weight: 100;
+        color: black;
+
+        &:last-child {
+            margin-top: 1rem;
+        }
+
+        &.number {
+            font-size: 26pt;
+        }
+    }
+
+    ion-slide {
+        padding-bottom: 10px;
+    }
+
+    .col-menu-stats {
+        margin: 0 auto;
+    }
+
+    .swiper-container {
+        padding-bottom: 2rem;
+    }
+}
+
+@each $color, $value in $colors {
+    .text-#{$color} {
+        color: #{$value};
     }
 }

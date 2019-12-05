@@ -1,0 +1,35 @@
+<wii-main-loader [loading]="loading"
+                 [message]="messageLoading"></wii-main-loader>
+
+<ion-scroll scrollY="true"
+            class="page-content"
+            *ngIf="!loading">
+    <ion-grid>
+        <ion-row class="row-menu-stats">
+            <ion-slides pager>
+                <ion-slide>
+                    <div class="col-menu-stats">
+                        <p class="number">{{nbPrep}}</p>
+                        <p>Préparation{{nbPrep > 1 ? 's' : ''}} à traiter</p>
+                    </div>
+                </ion-slide>
+                <ion-slide>
+                    <div class="col-menu-stats">
+                        <p class="number">{{nbPrepT}}</p>
+                        <p>Préparation{{nbPrepT > 1 ? 's' : ''}} traitée{{nbPrepT > 1 ? 's' : ''}}</p>
+                    </div>
+                </ion-slide>
+                <ion-slide>
+                    <div class="col-menu-stats">
+                        <p class="number">{{nbArtInvent}}</p>
+                        <p>Article{{nbArtInvent > 1 ? 's' : ''}} à inventorier</p>
+                    </div>
+                </ion-slide>
+            </ion-slides>
+        </ion-row>
+    </ion-grid>
+    <wii-menu [config]="menuConfig"></wii-menu>
+</ion-scroll>
+<div class="page-footer" *ngIf="!loading">
+    <ion-icon class="big-icon" name="refresh" item-right (click)="synchronise()"></ion-icon>
+</div>

@@ -1,7 +1,7 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
 import {IonicPage, NavController} from 'ionic-angular';
 import {UsersApiProvider} from '@providers/users-api/users-api';
-import {MenuPage} from '@pages/menu/menu';
+import {MainMenuPage} from '@pages/main-menu/main-menu';
 import {ParamsPage} from '@pages/params/params'
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ToastService} from '@app/services/toast.service';
@@ -110,7 +110,7 @@ export class ConnectPage {
                                         () => {
                                             this.loading = false;
                                             this.barcodeScannerManager.registerZebraBroadcastReceiver();
-                                            this.navCtrl.setRoot(MenuPage, {needReload : false});
+                                            this.navCtrl.setRoot(MainMenuPage, {needReload : false});
                                         },
                                         (err) => {
                                             this.finishLoading();
