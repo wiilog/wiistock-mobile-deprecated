@@ -5,8 +5,8 @@ import {MouvementTraca} from '@app/entities/mouvement-traca';
 import {ToastService} from '@app/services/toast.service';
 import {EmplacementScanPage} from "@pages/prise-depose/emplacement-scan/emplacement-scan";
 import {Emplacement} from '@app/entities/emplacement';
-import {PrisePage} from '@pages/prise-depose/prise-articles/prise';
-import {DeposeArticlesPageTraca} from '@pages/prise-depose/depose-articles/depose-articles-traca';
+import {PrisePage} from '@pages/prise-depose/prise/prise';
+import {DeposePage} from '@pages/prise-depose/depose/depose';
 import {MenuConfig} from "@helpers/components/menu/menu-config";
 
 
@@ -68,7 +68,7 @@ export class TracaMenuPage {
                 fromDepose: true,
                 menu: 'Dépose',
                 chooseEmp: (emplacement: Emplacement) => {
-                    this.navCtrl.push(DeposeArticlesPageTraca, {
+                    this.navCtrl.push(DeposePage, {
                         emplacement: emplacement,
                         finishDepose: () => {
                             this.navCtrl.pop();
