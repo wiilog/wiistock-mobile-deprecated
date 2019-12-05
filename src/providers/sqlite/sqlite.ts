@@ -267,7 +267,7 @@ export class SqliteProvider {
     }
 
     public importMouvementTraca(data): Observable<any> {
-        const apiPrises = data['prises'];
+        const apiPrises = data['trackingTaking'];
 
         return apiPrises && apiPrises.length > 0
             ? this.findBy('mouvement_traca', ['finished <> 1', `type LIKE 'prise'`])

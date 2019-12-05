@@ -25,16 +25,15 @@ export class NewEmplacementComponent {
 
     public loading: boolean;
 
-    constructor(
-        public navParams: NavParams,
-        private apiService: ApiService,
-        private toast: ToastService,
-        private loadingService: LoadingService,
-        private navCtrl: NavController) {
+    public constructor(private navParams: NavParams,
+                       private apiService: ApiService,
+                       private toast: ToastService,
+                       private loadingService: LoadingService,
+                       private navCtrl: NavController) {
         this.loading = false;
     }
 
-    ionViewWillEnter() {
+    public ionViewWillEnter(): void {
         this.createNewEmp = this.navParams.get('createNewEmp');
         this.fromDepose = this.navParams.get('fromDepose');
         this.menu = this.navParams.get('menu');
@@ -44,7 +43,7 @@ export class NewEmplacementComponent {
         };
     }
 
-    createEmp() {
+    public createEmp(): void {
         if (!this.loading) {
             this.loadingService.presentLoading('Création de l\'emplacement').subscribe((loader: Loading) => {
                 this.loading = true;

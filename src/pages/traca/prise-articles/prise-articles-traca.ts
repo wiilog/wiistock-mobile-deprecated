@@ -145,7 +145,7 @@ export class PriseArticlesPageTraca {
 
     public testIfBarcodeEquals(barCode: string, isManualAdd: boolean = false): void {
         if (this.colisPrise && this.colisPrise.some((colis) => (colis.ref_article === barCode))) {
-            this.toastService.presentToast('Cet article a déjà été ajouté à la prise.');
+            this.toastService.presentToast('Cet prise a déjà été effectuée');
         }
         else {
             if (isManualAdd) {
