@@ -122,12 +122,13 @@ export class CollecteArticlesPage {
                         .subscribe((articles) => {
                             this.updateList(articles);
                         });
-                } else {
+                }
+                else {
                     this.sqliteProvider.insert('`article_collecte`', newArticle).subscribe((insertId) => {
                         let mouvement: Mouvement = {
                             id: null,
                             reference: newArticle.reference,
-                            quantity: article.quantite,
+                            quantity: Number(quantite),
                             date_pickup: moment().format(),
                             location_from: newArticle.emplacement,
                             date_drop: null,
