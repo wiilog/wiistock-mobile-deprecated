@@ -2,7 +2,6 @@ import {Component, ViewChild} from '@angular/core';
 import {IonicPage, Navbar, NavController} from 'ionic-angular';
 import {Manutention} from '@app/entities/manutention';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {MenuPage} from '@pages/menu/menu';
 import {ManutentionValidatePage} from '@pages/manutention/manutention-validate/manutention-validate';
 
 
@@ -20,10 +19,6 @@ export class ManutentionMenuPage {
 
     public constructor(private navCtrl: NavController,
                        private sqliteProvider: SqliteProvider) {
-    }
-
-    public goHome(): void {
-        this.navCtrl.setRoot(MenuPage);
     }
 
     public ionViewWillEnter(): void {

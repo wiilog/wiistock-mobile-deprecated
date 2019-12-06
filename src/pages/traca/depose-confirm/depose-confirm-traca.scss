@@ -1,0 +1,14 @@
+@import "../../../theme/variables";
+
+page-depose-confirm-traca {
+    .page-content,
+    .page-content > wii-form-panel {
+        flex: 1;
+        display: flex;
+    }
+    .page-content > wii-form-panel {
+        margin-right: -$spacer;
+        margin-left: -$spacer;
+    }
+
+}

@@ -13,7 +13,6 @@
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
 @import "../theme/fonts";
-@import "../theme/icons";
 @import "../theme/variables";
 @import "../theme/style-variables";
 
@@ -70,12 +69,6 @@ ion-grid {
     font-size: 4em;
 }
 
-.big-button {
-    height: 12em;
-    width: 90%;
-    //background-color: $lightGrey;
-}
-
 .m-6 {
     margin: 6px;
 }
@@ -97,6 +90,11 @@ ion-grid {
 ion-item {
     padding: 0 !important;
 
+    .input-wrapper {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
     &.item-md.item-input.ng-valid.item-input-has-value:not(.input-has-focus):not(.item-input-has-focus) .item-inner,
     .item-md.item-input.ng-valid.input-has-value:not(.input-has-focus):not(.item-input-has-focus) .item-inner {
         border-bottom-color: $primary;
@@ -116,8 +114,26 @@ ion-item {
 }
 
 button[ion-button] {
-    padding-top: 3rem;
-    padding-bottom: 3rem;
+    font-weight: bold;
+    font-size: 1.6rem;
+    text-transform: uppercase;
+    margin: 0;
+    height: 5rem;
+
+    wii-icon {
+        margin-left: .7rem;
+        width: 1.8rem;
+        height: 1.8rem;
+    }
+
+    .page-footer & {
+        width: 100%;
+    }
+
+    &.big-button {
+        height: 12em;
+        width: 90%;
+    }
 }
 
 .spinner {
@@ -127,7 +143,6 @@ button[ion-button] {
 .alertAlert {
     background-color: #149914 !important;
     color: #FFF !important;
-    font-family: 'Myriad Pro' !important;
 }
 
 .text-right {
@@ -135,20 +150,20 @@ button[ion-button] {
 }
 
 .ion-page {
-    padding: 16px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-}
+    background-color: $lightGrey;
 
-ion-content {
-    &.with-header {
-        .ion-page {
-            height: calc(100% - 82px);
-        }
+    .page-content {
+        padding: $spacer;
     }
 
-    button[ion-button][color="success"] {
-        background-color: $green;
+    .page-footer {
+        margin-top: auto;
+        padding: $spacerMin;
+
+        ion-nav.keyboard-shown &:not(.persisted-page-footer) {
+            display: none;
+        }
     }
 }

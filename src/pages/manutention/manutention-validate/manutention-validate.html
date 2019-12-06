@@ -24,12 +24,12 @@
     </ion-item>
     <button class="commentaire_button" (click)="showCommentaire()">
         <span><b>Commentaire</b></span>
-        <img src="assets/icons/search.svg" class="arrow">
+        <wii-icon name="search.svg" class="icon"></wii-icon>
     </button>
     <div class="commentaire" *ngIf="showCom" [innerHTML]="manutention.commentaire">
     </div>
     <button class="validate_button" (click)="validateManut()">
         <span><b>VALIDER</b></span>
-        <img src="assets/icons/valider01.svg" class="arrow">
+        <wii-icon name="check.svg" class="icon"></wii-icon>
     </button>
 </ion-scroll>

@@ -1,0 +1,43 @@
+@import "../../../theme/variables";
+
+wii-icon {
+    display: inline-block;
+
+    .icon-button,
+    .icon-wrapper{
+        width: 100%;
+        height: 100%;
+    }
+
+    .icon-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        & > svg {
+            flex: 1;
+        }
+    }
+
+    .icon-button {
+        background-color: transparent;
+        padding: 0;
+    }
+
+    @each $color, $value in $colors {
+        & > .icon-wrapper.#{$color} {
+            svg {
+                width: 100%;
+                height: 100%;
+
+                .svg-stroke {
+                    stroke: $value !important;
+                }
+
+                .svg-fill {
+                    fill: $value !important;
+                }
+            }
+        }
+    }
+
+}

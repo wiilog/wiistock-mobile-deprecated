@@ -1,6 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
 import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
-import {MenuPage} from '@pages/menu/menu';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Livraison} from '@app/entities/livraison';
@@ -64,10 +63,6 @@ export class LivraisonEmplacementPage {
         return this.barcodeScannerManager.canGoBack;
     }
 
-    public goHome(): void {
-        this.navCtrl.setRoot(MenuPage);
-    }
-
     public scan(): void {
         this.barcodeScannerManager.scan().subscribe((barcode) => {
             this.testLocation(barcode);
@@ -110,7 +105,7 @@ export class LivraisonEmplacementPage {
                             flatMap(() => this.sqliteProvider.finishLivraison(this.livraison.id, this.emplacement.label)),
                             flatMap((): any => (
                                 (this.network.type !== 'none')
-                                    ? this.localDataManager.saveFinishedProcess('livraison')
+                                    ? this.localDataManager.sendFinishedProcess('livraison')
                                     : of({offline: true})
                             ))
                         )

@@ -1,0 +1,14 @@
+@import "../../../../../theme/variables";
+
+wii-form-panel-input {
+    display: block;
+    background-color: $white;
+    border: 1px solid $lightBlue;
+    padding-left: .35rem;
+    padding-right: .35rem;
+
+    .item-inner {
+        border: none !important;
+        box-shadow: none !important;
+    }
+}

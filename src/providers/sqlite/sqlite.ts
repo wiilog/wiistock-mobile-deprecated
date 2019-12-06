@@ -3,11 +3,10 @@ import {Injectable} from '@angular/core';
 import {StorageService} from '@app/services/storage.service';
 import moment from 'moment';
 import {Preparation} from '@app/entities/preparation';
-import {Mouvement} from '@app/entities/mouvement';
 import {Livraison} from '@app/entities/livraison';
 import {Anomalie} from '@app/entities/anomalie';
 import {Observable, ReplaySubject, Subject} from 'rxjs';
-import {flatMap, map, take, tap} from 'rxjs/operators';
+import {flatMap, map, take} from 'rxjs/operators';
 import {from} from 'rxjs/observable/from';
 import {of} from 'rxjs/observable/of';
 import {Platform} from 'ionic-angular';
@@ -63,7 +62,7 @@ export class SqliteProvider {
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article` (`id` INTEGER PRIMARY KEY, `reference` VARCHAR(255), `quantite` INTEGER, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location` TEXT, `type` VARCHAR(255), `is_ref` INTEGER, `id_article_prepa` INTEGER, `id_prepa` INTEGER, `id_article_livraison` INTEGER, `id_livraison` INTEGER, `id_article_collecte` INTEGER, `id_collecte` INTEGER, `selected_by_article` INTEGER)', []),
-                db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255))', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255), `comment` VARCHAR(255), `signature` TEXT, finished INTEGER)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []),
                 db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER, `destination` INTEGER, `type` TEXT)', []),
@@ -265,6 +264,21 @@ export class SqliteProvider {
             });
         }
         return ret$;
+    }
+
+    public importMouvementTraca(data): Observable<any> {
+        const apiPrises = data['prises'];
+
+        return apiPrises && apiPrises.length > 0
+            ? this.findBy('mouvement_traca', ['finished <> 1', `type LIKE 'prise'`])
+                  .pipe(flatMap((prises: Array<MouvementTraca>) => (
+                      Observable.zip(...apiPrises.map((apiPrise) => (
+                          !prises.some(({date}) => (date === apiPrise.date))
+                              ? this.insert('mouvement_traca', apiPrise)
+                              : of(undefined)
+                      )))
+                  )))
+            : of(undefined)
     }
 
     public importArticlesPrepas(data): Observable<any> {
@@ -670,6 +684,7 @@ export class SqliteProvider {
             this.importArticlesInventaire(data),
             this.importManutentions(data),
             this.importCollectes(data),
+            this.importMouvementTraca(data),
             (
                 from(this.storageService.getInventoryManagerRight()).pipe(
                     flatMap((res) => (res
@@ -1123,14 +1138,6 @@ export class SqliteProvider {
         return resp;
     }
 
-    public deleteMouvements(mouvements: Array<Mouvement>): Observable<any> {
-        return this.db$.pipe(
-            flatMap((db) => from(Promise.all(
-                mouvements.map(({id}) => db.executeSql(`DELETE FROM \`mouvement\` WHERE id = ${id}`, []))
-            )))
-        );
-    }
-
     public deleteById(table: string, ids: number|Array<number>): Observable<undefined> {
         const where = Array.isArray(ids)
             ? `id IN (${ids.join(',')})`
@@ -1193,10 +1200,14 @@ export class SqliteProvider {
         const joinedCollecte = collecteIds.join(',');
         return collecteIds.length > 0
             ? Observable.zip(
-                this.executeQuery(`DELETE FROM \`collecte\` WHERE id IN (${joinedCollecte});`).pipe(tap(() => {}, (err) => console.log(`DELETE FROM \`collecte\` WHERE id IN (${joinedCollecte});`, err))),
-                this.executeQuery(`DELETE FROM \`article_collecte\` WHERE id_collecte IN (${joinedCollecte})`).pipe(tap(() => {}, (err) => console.log(`DELETE FROM \`article_collecte\` WHERE id_collecte IN (${joinedCollecte})`, err)))
+                this.executeQuery(`DELETE FROM \`collecte\` WHERE id IN (${joinedCollecte});`),
+                this.executeQuery(`DELETE FROM \`article_collecte\` WHERE id_collecte IN (${joinedCollecte})`)
             )
             : of(undefined);
+    }
+
+    public finishPrises(ids: Array<number>): Observable<any> {
+        return this.executeQuery(`UPDATE mouvement_traca SET finished = 1 WHERE id IN (${ids.join(',')})`, false);
     }
 
 }

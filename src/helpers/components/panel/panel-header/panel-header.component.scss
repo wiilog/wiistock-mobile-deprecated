@@ -1,0 +1,45 @@
+@import "../../../../theme/variables";
+
+wii-panel-header {
+    display: block;
+    background-color: $white;
+    border: 1px solid $lightBlue;
+
+    .list-header-wrapper {
+        display: flex;
+        align-items: center;
+
+        .header-body,
+        .list-header-icon {
+            padding-bottom: 1.5rem;
+            padding-top: 1.5rem;
+        }
+
+        .header-body {
+            & > *:not(:last-child) {
+                margin-bottom: .35rem;
+            }
+
+            .header-title {
+                font-weight: bold;
+            }
+            .header-info {
+                color: $primary;
+            }
+        }
+
+        .list-header-icon {
+            padding-left: 2rem;
+            padding-right: 2rem;
+
+            wii-icon {
+                width: 5rem;
+                height: 5rem;
+            }
+
+            &:last-child {
+                margin-left: auto;
+            }
+        }
+    }
+}

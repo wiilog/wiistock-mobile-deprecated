@@ -3,7 +3,6 @@ import {AlertController, IonicPage, Loading, NavController, NavParams} from 'ion
 import {Manutention} from '@app/entities/manutention';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {HttpClient} from '@angular/common/http';
-import {MenuPage} from '@pages/menu/menu';
 import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
 import {ApiService} from "@app/services/api.service";
@@ -111,10 +110,6 @@ export class ManutentionValidatePage {
             this.manutention = manutention;
             this.hasLoaded = true;
         })
-    }
-
-    public goHome(): void {
-        this.navCtrl.setRoot(MenuPage);
     }
 
     public toDate(manutention: Manutention): Date {

@@ -1,0 +1,40 @@
+@import '../../theme/variables';
+
+new-emplacement {
+    .titles {
+        text-align: center !important;
+        align-content: center !important;
+
+        .title {
+            margin-top: 16px;
+        }
+
+        .title, .subtitle {
+            font-size: 18px;
+            color: #030F4C;
+            margin-bottom: 16px;
+        }
+    }
+
+    .submit-button {
+        display: block;
+
+        & > .validate-icon {
+            margin-left: 5px;
+            width: 20px;
+            height: 20px;
+        }
+    }
+
+    .label-emp {
+        margin-top: 1rem !important;
+        margin-bottom: 1rem !important;
+    }
+
+    .emp-title {
+        width: 100%;
+        .button-effect {
+            display: none;
+        }
+    }
+}

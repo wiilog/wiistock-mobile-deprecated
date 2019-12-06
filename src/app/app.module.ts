@@ -11,9 +11,7 @@ import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
 import {HttpClientModule} from '@angular/common/http';
 import {PriseArticlesPageTraca} from '@pages/traca/prise-articles/prise-articles-traca';
-import {PriseEmplacementPageTraca} from '@pages/traca/prise-emplacement/prise-emplacement-traca';
 import {DeposeArticlesPageTraca} from '@pages/traca/depose-articles/depose-articles-traca';
-import {DeposeEmplacementPageTraca} from '@pages/traca/depose-emplacement/depose-emplacement-traca';
 import {StorageService} from './services/storage.service';
 import {TracaMenuPage} from '@pages/traca/traca-menu/traca-menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
@@ -42,7 +40,6 @@ import {CollecteEmplacementPage} from '@pages/collecte/collecte-emplacement/coll
 import {ManutentionValidatePage} from '@pages/manutention/manutention-validate/manutention-validate';
 import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutention-menu';
 import {HelpersModule} from '@helpers/helpers.module';
-import {EntityFactoryService} from '@app/services/entity-factory.service';
 import {AlertManagerService} from '@app/services/alert-manager.service';
 import {ScssHelperService} from '@app/services/scss-helper.service';
 import {VersionCheckerService} from '@app/services/version-checker.service';
@@ -50,6 +47,10 @@ import {AppVersion} from '@ionic-native/app-version';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {ApiService} from '@app/services/api.service';
 import {LoadingService} from '@app/services/loading.service';
+import {NewEmplacementComponent} from '@pages/new-emplacement/new-emplacement';
+import {DeposeConfirmPageTraca} from '@pages/traca/depose-confirm/depose-confirm-traca';
+import {TracaListFactoryService} from '@app/services/traca-list-factory.service';
+import {EmplacementScanPage} from "@pages/traca/emplacement-scan/emplacement-scan";
 
 
 @NgModule({
@@ -61,7 +62,6 @@ import {LoadingService} from '@app/services/loading.service';
         PreparationMenuPage,
         PreparationArticlesPage,
         TracaMenuPage,
-        PriseEmplacementPageTraca,
         PriseArticlesPageTraca,
         PreparationArticleTakePage,
         ManutentionMenuPage,
@@ -70,7 +70,6 @@ import {LoadingService} from '@app/services/loading.service';
         LivraisonArticlesPage,
         LivraisonEmplacementPage,
         PreparationEmplacementPage,
-        DeposeEmplacementPageTraca,
         DeposeArticlesPageTraca,
         ManutentionValidatePage,
         InventaireMenuPage,
@@ -80,7 +79,11 @@ import {LoadingService} from '@app/services/loading.service';
         CollecteArticleTakePage,
         CollecteArticlesPage,
         CollecteEmplacementPage,
-        PreparationRefArticlesPage
+        PreparationRefArticlesPage,
+        NewEmplacementComponent,
+        DeposeConfirmPageTraca,
+        PreparationRefArticlesPage,
+        EmplacementScanPage
     ],
     imports: [
         IonicSelectableModule,
@@ -100,7 +103,6 @@ import {LoadingService} from '@app/services/loading.service';
         MenuPage,
         ParamsPage,
         TracaMenuPage,
-        PriseEmplacementPageTraca,
         PreparationMenuPage,
         PreparationArticleTakePage,
         PreparationEmplacementPage,
@@ -112,7 +114,6 @@ import {LoadingService} from '@app/services/loading.service';
         PriseArticlesPageTraca,
         ManutentionMenuPage,
         ManutentionValidatePage,
-        DeposeEmplacementPageTraca,
         DeposeArticlesPageTraca,
         InventaireMenuPage,
         ModalQuantityPage,
@@ -121,7 +122,11 @@ import {LoadingService} from '@app/services/loading.service';
         CollecteArticleTakePage,
         CollecteArticlesPage,
         CollecteEmplacementPage,
-        PreparationRefArticlesPage
+        PreparationRefArticlesPage,
+        NewEmplacementComponent,
+        DeposeConfirmPageTraca,
+        PreparationRefArticlesPage,
+        EmplacementScanPage
     ],
     providers: [
         BarcodeScannerManagerService,
@@ -139,11 +144,11 @@ import {LoadingService} from '@app/services/loading.service';
         AppVersion,
         ToastService,
         AlertManagerService,
-        EntityFactoryService,
         ApiService,
         LoadingService,
         LocalDataManagerService,
-        ScssHelperService
+        ScssHelperService,
+        TracaListFactoryService
     ]
 })
 export class AppModule {

@@ -55,7 +55,7 @@ export class MenuPage {
             {title: 'Préparation', icon: 'cart', page: PreparationMenuPage, img: null},
             {title: 'Livraison', icon: 'paper-plane', page: LivraisonMenuPage, img: null},
             {title: 'Inventaire', icon: 'list-box', page: InventaireMenuPage, img: null},
-            {title: 'Manutention', icon: 'list-box', page: ManutentionMenuPage, img: 'assets/icons/manut_icon.svg'},
+            {title: 'Manutention', icon: 'list-box', page: ManutentionMenuPage, img: 'peoples.svg'},
             {title: 'Collecte', icon: 'list-box', page: CollecteMenuPage, img: null},
             {title: 'Déconnexion', icon: 'log-out', page: null, img: null}
         ];

@@ -1,0 +1,18 @@
+<div class="wrapper">
+    <div class="page-header">
+        <button class="pop-button" (click)="onPop()">
+            <ion-icon name="arrow-back" color="primary"></ion-icon>
+        </button>
+        <h5>Signature</h5>
+        <wii-icon class="clear-button" color="danger" name="trash.svg" (action)="onClear()"></wii-icon>
+    </div>
+    <div #signatureWrapper class="signature-wrapper">
+        <signature-pad *ngIf="signaturePadOption" [options]="signaturePadOption"></signature-pad>
+    </div>
+    <div class="page-footer">
+        <button ion-button color="success" (click)="onValidate()">
+            Valider
+            <wii-icon name="check.svg" color="white"></wii-icon>
+        </button>
+    </div>
+</div>

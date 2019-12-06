@@ -20,9 +20,10 @@ export class ApiService {
     public static readonly TREAT_ANOMALIES: string = '/treatAnomalies';
     public static readonly CONNECT: string = '/connect';
     public static readonly ADD_INVENTORY_ENTRIES: string = '/addInventoryEntries';
-    public static readonly ADD_MOUVEMENT_TRACA: string = '/addMouvementTraca';
+    public static readonly POST_MOUVEMENT_TRACA: string = '/mouvements-traca';
     public static readonly VALIDATE_MANUT: string = '/validateManut';
     public static readonly GET_DATA: string = '/getData';
+    public static readonly NEW_EMP: string = '/emplacement';
 
     // time out for service verification and url ping, 10s
     public static readonly VERIFICATION_SERVICE_TIMEOUT: number = 10000;

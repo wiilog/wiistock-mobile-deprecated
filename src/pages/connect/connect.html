@@ -25,8 +25,6 @@
     </form>
 </div>
 <div class="page-footer">
-    <button class="parameters" (click)="goToParams()">
-        <img alt="Parametres" src="assets/icons/cogs.svg"/>
-    </button>
+    <wii-icon class="parameters" name="cogs.svg" (action)="goToParams()"></wii-icon>
     <div class="version-container" *ngIf="currentVersion">V {{ currentVersion }}</div>
 </div>

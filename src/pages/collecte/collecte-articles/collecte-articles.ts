@@ -1,6 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
 import {Alert, AlertController, IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
-import {MenuPage} from '@pages/menu/menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Mouvement} from '@app/entities/mouvement';
 import {CollecteArticleTakePage} from '@pages/collecte/collecte-article-take/collecte-article-take';
@@ -15,7 +14,7 @@ import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manage
 import {Subscription} from 'rxjs';
 import {StorageService} from '@app/services/storage.service';
 import {ApiService} from '@app/services/api.service';
-import {Network} from "@ionic-native/network";
+import {Network} from '@ionic-native/network';
 
 
 @IonicPage()
@@ -197,10 +196,6 @@ export class CollecteArticlesPage {
                 }
             }
         }
-    }
-
-    public goHome(): void {
-        this.navCtrl.setRoot(MenuPage);
     }
 
     public validate(): void {

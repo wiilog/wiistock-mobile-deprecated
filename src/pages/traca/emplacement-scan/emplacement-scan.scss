@@ -1,0 +1,62 @@
+@import "../../../theme/variables";
+
+page-emplacement-scan {
+
+    .titles {
+        text-align: center !important;
+        align-content: center !important;
+
+        .title {
+            margin-top: 16px;
+        }
+
+        .title, .subtitle {
+            font-size: 20px;
+            color: $primary;
+            margin-bottom: 16px;
+        }
+    }
+
+    .validate_button {
+        display: block;
+        background-color: $primary;
+        text-align: center;
+
+        .button-text {
+            margin-right: 5px !important;
+            font-size: 30px !important;
+            font-weight: bold;
+        }
+    }
+
+    span {
+        color: white !important;
+        font-size: 20px;
+    }
+
+    .label-emp {
+        margin-top: 50% !important;
+        margin-bottom: 50% !important;
+    }
+
+    .tools {
+        text-align: center;
+        margin-bottom: 20px;
+
+        .icon-emp:first-child {
+            margin-right: 50px !important;
+        }
+
+        .icon-emp {
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+        }
+    }
+
+    .validate-icon {
+        margin-left: 5px;
+        width: 40px;
+        height: 40px;
+    }
+}

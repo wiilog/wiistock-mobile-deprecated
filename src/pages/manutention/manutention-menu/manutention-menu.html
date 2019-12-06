@@ -7,7 +7,7 @@
 
 <ion-scroll *ngIf="hasLoaded" scrollY="true" class="page-content">
     <div class="icon-manutention-container">
-        <img src="assets/icons/manut_icon.svg" height="50px" width="50px">
+        <wii-icon name="peoples.svg"></wii-icon>
     </div>
     <ng-container *ngIf="manutentions && manutentions.length > 0 && hasLoaded">
         <ion-card *ngFor="let manutention of manutentions" (click)="goToManut(manutention)">
@@ -16,7 +16,7 @@
             </ion-card-header>
             <ion-card-content>
                 <span>Date attendue <b>{{ toDate(manutention) | date:'dd/MM/yyyy H:mm' }}</b></span>
-                <img src="assets/icons/side_arrow.svg" class="arrow">
+                <wii-icon name="arrow-right.svg" class="arrow"></wii-icon>
             </ion-card-content>
         </ion-card>
     </ng-container>

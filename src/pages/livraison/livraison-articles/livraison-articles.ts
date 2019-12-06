@@ -1,6 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
 import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
-import {MenuPage} from '@pages/menu/menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Mouvement} from '@app/entities/mouvement';
 import {LivraisonArticleTakePage} from '@pages/livraison/livraison-article-take/livraison-article-take';
@@ -215,11 +214,6 @@ export class LivraisonArticlesPage {
                 }
             }
         }
-    }
-
-
-    goHome() {
-        this.navCtrl.setRoot(MenuPage);
     }
 
     validate() {

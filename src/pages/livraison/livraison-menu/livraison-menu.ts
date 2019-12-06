@@ -1,6 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
 import {Content, IonicPage, Navbar, NavController} from 'ionic-angular';
-import {MenuPage} from '@pages/menu/menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {LivraisonArticlesPage} from '@pages/livraison/livraison-articles/livraison-articles';
 import {Livraison} from '@app/entities/livraison';
@@ -24,10 +23,6 @@ export class LivraisonMenuPage {
 
     public constructor(private navCtrl: NavController,
                        private sqliteProvider: SqliteProvider) {
-    }
-
-    public goHome(): void {
-        this.navCtrl.setRoot(MenuPage);
     }
 
     public ionViewWillEnter(): void {
