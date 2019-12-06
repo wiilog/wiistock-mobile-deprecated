@@ -1,6 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
 import {Slides, Platform, AlertController, Alert, NavController} from 'ionic-angular';
-import {TracaMenuPage} from '@pages/traca-menu/traca-menu'
 import {Page} from "ionic-angular/navigation/nav-util";
 import {PreparationMenuPage} from '@pages/stock/preparation/preparation-menu/preparation-menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
@@ -14,8 +13,9 @@ import {ToastService} from '@app/services/toast.service';
 import {StorageService} from '@app/services/storage.service';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {Subscription} from 'rxjs';
-import {MenuConfig} from "@helpers/components/menu/menu-config";
-import {StockMenuPage} from "@pages/stock/stock-menu/stock-menu";
+import {MenuConfig} from '@helpers/components/menu/menu-config';
+import {StockMenuPage} from '@pages/stock/stock-menu/stock-menu';
+import {PriseDeposeMenuPage} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu';
 
 
 @Component({
@@ -57,7 +57,9 @@ export class MainMenuPage {
                 icon: 'tracking.svg',
                 label: 'Traçabilité',
                 action() {
-                    navController.push(TracaMenuPage);
+                    navController.push(PriseDeposeMenuPage, {
+                        fromStock: false
+                    });
                 }
             },
             {

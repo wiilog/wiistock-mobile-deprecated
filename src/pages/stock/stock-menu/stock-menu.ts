@@ -4,6 +4,7 @@ import {MenuConfig} from "@helpers/components/menu/menu-config";
 import {PreparationMenuPage} from "@pages/stock/preparation/preparation-menu/preparation-menu";
 import {LivraisonMenuPage} from "@pages/stock/livraison/livraison-menu/livraison-menu";
 import {InventaireMenuPage} from "@pages/stock/inventaire-menu/inventaire-menu";
+import {PriseDeposeMenuPage} from "@pages/prise-depose/prise-depose-menu/prise-depose-menu";
 
 
 @IonicPage()
@@ -17,6 +18,15 @@ export class StockMenuPage {
 
     public constructor(navCtrl: NavController) {
         this.menuConfig = [
+            {
+                icon: 'stock-transfer.svg',
+                label: 'Transfert',
+                action: () => {
+                    navCtrl.push(PriseDeposeMenuPage, {
+                        fromStock: true
+                    });
+                }
+            },
             {
                 icon: 'preparation.svg',
                 label: 'Préparation',

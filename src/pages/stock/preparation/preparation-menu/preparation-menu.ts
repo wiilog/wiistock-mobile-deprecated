@@ -24,7 +24,7 @@ export class PreparationMenuPage {
                        private sqlLiteProvider: SqliteProvider) {
     }
 
-    public ionViewDidEnter(): void {
+    public ionViewWillEnter(): void {
         this.hasLoaded = false;
         this.sqlLiteProvider.findAll('`preparation`').subscribe((preparations) => {
             this.preparations = preparations

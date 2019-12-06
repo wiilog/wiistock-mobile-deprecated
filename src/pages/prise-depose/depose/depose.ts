@@ -36,6 +36,8 @@ export class DeposePage {
     public colisDepose: Array<MouvementTraca>;
     public prisesToFinish: Array<number>;
 
+    private fromStock: boolean;
+
     private zebraScanSubscription: Subscription;
 
     private finishDepose: () => void;
@@ -79,13 +81,15 @@ export class DeposePage {
             this.init();
             this.emplacement = this.navParams.get('emplacement');
             this.finishDepose = this.navParams.get('finishDepose');
+            this.fromStock = this.navParams.get('fromStock');
             Observable
                 .zip(
                     this.sqliteProvider.findBy(
                         'mouvement_traca',
                         [
                             `type LIKE 'prise'`,
-                            `finished = 0`
+                            `finished = 0`,
+                            `fromStock = ${Number(this.fromStock)}`
                         ]
                     ),
                     this.storageService.getOperateur()
@@ -205,6 +209,7 @@ export class DeposePage {
         this.navCtrl.push(DeposeConfirmPage, {
             location: this.emplacement,
             barCode,
+            fromStock: this.fromStock,
             validateDepose: (comment, signature) => {
                 this.saveMouvementTraca(barCode, comment, signature);
             }
@@ -212,21 +217,26 @@ export class DeposePage {
     }
 
     private saveMouvementTraca(barCode: string, comment: string, signature: string): void {
+        const firstPriseMatchingIndex = this.colisPrise.findIndex(({ref_article}) => (ref_article === barCode));
+        let quantity;
+        if (firstPriseMatchingIndex > -1) {
+            quantity = this.colisPrise[firstPriseMatchingIndex].quantity;
+            this.prisesToFinish.push(this.colisPrise[firstPriseMatchingIndex].id);
+            this.colisPrise.splice(firstPriseMatchingIndex, 1);
+        }
+
         this.colisDepose.push({
             ref_article: barCode,
             comment,
             signature,
+            fromStock: Number(this.fromStock),
+            quantity,
             type: DeposePage.MOUVEMENT_TRACA_DEPOSE,
             operateur: this.operator,
             ref_emplacement: this.emplacement.label,
             date: moment().format()
         });
 
-        const firstPriseMatchingIndex = this.colisPrise.findIndex(({ref_article}) => (ref_article === barCode));
-        if (firstPriseMatchingIndex > -1) {
-            this.prisesToFinish.push(this.colisPrise[firstPriseMatchingIndex].id);
-            this.colisPrise.splice(firstPriseMatchingIndex, 1);
-        }
         this.refreshPriseListComponent();
         this.refresDeposeListComponent();
     }

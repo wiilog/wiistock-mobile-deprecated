@@ -267,18 +267,21 @@ export class SqliteProvider {
     }
 
     public importMouvementTraca(data): Observable<any> {
-        const apiPrises = data['trackingTaking'];
+        const apiTaking = [
+            ...(data['trackingTaking'] || []),
+            ...(data['stockTaking'] || [])
+        ];
 
-        return apiPrises && apiPrises.length > 0
+        return (apiTaking && apiTaking.length > 0)
             ? this.findBy('mouvement_traca', ['finished <> 1', `type LIKE 'prise'`])
                   .pipe(flatMap((prises: Array<MouvementTraca>) => (
-                      Observable.zip(...apiPrises.map((apiPrise) => (
+                      Observable.zip(...apiTaking.map((apiPrise) => (
                           !prises.some(({date}) => (date === apiPrise.date))
                               ? this.insert('mouvement_traca', apiPrise)
                               : of(undefined)
                       )))
                   )))
-            : of(undefined)
+            : of(undefined);
     }
 
     public importArticlesPrepas(data): Observable<any> {

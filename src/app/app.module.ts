@@ -12,7 +12,7 @@ import {SplashScreen} from '@ionic-native/splash-screen';
 import {HttpClientModule} from '@angular/common/http';
 import {UsersApiProvider} from '@providers/users-api/users-api';
 import {StorageService} from './services/storage.service';
-import {TracaMenuPage} from '@pages/traca-menu/traca-menu';
+import {TracaMenuPage} from '@pages/prise-depose/traca-menu/traca-menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {IonicSelectableModule} from 'ionic-selectable'

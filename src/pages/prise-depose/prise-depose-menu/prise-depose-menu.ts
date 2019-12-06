@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {IonicPage, NavController} from 'ionic-angular';
+import {IonicPage, NavController, NavParams} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import {ToastService} from '@app/services/toast.service';
@@ -7,20 +7,25 @@ import {EmplacementScanPage} from "@pages/prise-depose/emplacement-scan/emplacem
 import {Emplacement} from '@app/entities/emplacement';
 import {PrisePage} from '@pages/prise-depose/prise/prise';
 import {DeposePage} from '@pages/prise-depose/depose/depose';
-import {MenuConfig} from "@helpers/components/menu/menu-config";
+import {MenuConfig} from '@helpers/components/menu/menu-config';
+import {Network} from "@ionic-native/network";
 
 
 @IonicPage()
 @Component({
-    selector: 'page-traca-menu',
-    templateUrl: 'traca-menu.html',
+    selector: 'page-prise-depose-menu',
+    templateUrl: 'prise-depose-menu.html',
 })
-export class TracaMenuPage {
+export class PriseDeposeMenuPage {
     public nbDrop: number;
+
+    private fromStock: boolean;
 
     public readonly menuConfig: Array<MenuConfig>;
 
     public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private network: Network,
                        private sqliteProvider: SqliteProvider,
                        private toastService: ToastService) {
         this.nbDrop = 0;
@@ -40,26 +45,41 @@ export class TracaMenuPage {
     }
 
     public ionViewWillEnter(): void {
+        this.fromStock = this.navParams.get('fromStock');
         this.sqliteProvider.findAll('mouvement_traca').subscribe((mouvementTraca: Array<MouvementTraca>) => {
             this.nbDrop = mouvementTraca
-                .filter(({finished, type}) => (type === 'prise' && !finished))
+                .filter(({finished, type, fromStock}) => (
+                    type === 'prise' &&
+                    !finished &&
+                    // this.fromStock: boolean & fromStock: number
+                    (
+                        this.fromStock && fromStock ||
+                        !this.fromStock && !fromStock
+                    )
+                ))
                 .length;
         });
     }
 
     public goToPrise(): void {
-        this.navCtrl.push(EmplacementScanPage, {
-            fromDepose: false,
-            menu: 'Prise',
-            chooseEmp: (emplacement: Emplacement) => {
-                this.navCtrl.push(PrisePage, {
-                    emplacement: emplacement,
-                    finishPrise: () => {
-                        this.navCtrl.pop();
-                    }
-                });
-            }
-        });
+        if (this.network.type !== 'none') {
+            this.navCtrl.push(EmplacementScanPage, {
+                fromDepose: false,
+                menu: 'Prise',
+                chooseEmp: (emplacement: Emplacement) => {
+                    this.navCtrl.push(PrisePage, {
+                        emplacement: emplacement,
+                        fromStock: this.fromStock,
+                        finishPrise: () => {
+                            this.navCtrl.pop();
+                        }
+                    });
+                }
+            });
+        }
+        else {
+            this.toastService.presentToast('Vous devez être connecté à internet pour effectuer une prise');
+        }
     }
 
     public goToDepose(): void {
@@ -70,6 +90,7 @@ export class TracaMenuPage {
                 chooseEmp: (emplacement: Emplacement) => {
                     this.navCtrl.push(DeposePage, {
                         emplacement: emplacement,
+                        fromStock: this.fromStock,
                         finishDepose: () => {
                             this.navCtrl.pop();
                         }

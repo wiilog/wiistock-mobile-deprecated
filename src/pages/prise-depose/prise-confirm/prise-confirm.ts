@@ -11,10 +11,10 @@ import {ToastService} from '@app/services/toast.service';
 
 @IonicPage()
 @Component({
-    selector: 'page-depose-confirm',
-    templateUrl: 'depose-confirm.html',
+    selector: 'page-prise-confirm',
+    templateUrl: 'prise-confirm.html',
 })
-export class DeposeConfirmPage {
+export class PriseConfirmPage {
 
     @ViewChild('formPanelComponent')
     public formPanelComponent: FormPanelComponent;
@@ -23,7 +23,9 @@ export class DeposeConfirmPage {
     public bodyConfig: Array<FormPanelItemConfig<FormPanelInputConfig|FormPanelSigningConfig>>;
 
     private location: Emplacement;
-    private validateDepose: (comment: string, signature: string) => void;
+    private validatePrise: (quantity: number) => void;
+
+    private maxQuantity: number;
 
     public constructor(private navCtrl: NavController,
                        private toastService: ToastService,
@@ -32,21 +34,18 @@ export class DeposeConfirmPage {
             {
                 type: 'input',
                 label: 'Commentaire',
-                name: 'comment',
+                name: 'quantity',
                 inputConfig: {
                     type: 'text',
-                    maxLength: '255'
+                    required: true,
+                    min: 0,
+                    max: this.maxQuantity
                 },
                 errors: {
-                    required: 'Votre commentaire est requis',
-                    maxlength: 'Votre commentaire est trop long'
+                    required: 'La quantité est requise',
+                    min: 'La quantité est invalide',
+                    max: 'La quantité est trop élevée'
                 }
-            },
-            {
-                type: 'signing',
-                label: 'Signature',
-                name: 'signature',
-                inputConfig: {}
             }
         ]
     }
@@ -54,9 +53,9 @@ export class DeposeConfirmPage {
     public ionViewWillEnter(): void {
         this.location = this.navParams.get('location');
         const barCode = this.navParams.get('barCode');
-        this.validateDepose = this.navParams.get('validateDepose');
+        this.validatePrise = this.navParams.get('validatePrise');
         this.headerConfig = {
-            title: `DEPOSE de ${barCode}`,
+            title: `PRISE de ${barCode}`,
             subtitle: `Emplacement : ${this.location.label}`,
             leftIcon: {
                 name: 'download.svg',
@@ -71,8 +70,8 @@ export class DeposeConfirmPage {
             this.toastService.presentToast(formError);
         }
         else {
-            const {comment, signature} = this.formPanelComponent.values;
-            this.validateDepose(comment, signature);
+            const {quantity} = this.formPanelComponent.values;
+            this.validatePrise(quantity);
             this.navCtrl.pop();
         }
     }

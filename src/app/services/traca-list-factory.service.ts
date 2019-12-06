@@ -37,12 +37,20 @@ export class TracaListFactoryService {
                         : {}
                 )
             },
-            body: articles.map(({date, ref_article}) => ({
+            body: articles.map(({date, ref_article, quantity}) => ({
                 infos: {
                     object: {
                         label: 'Objet',
                         value: ref_article
                     },
+                    ...(quantity
+                        ? {
+                            quantity: {
+                                label: 'Quantité',
+                                value: String(quantity)
+                            }
+                        }
+                        : {}),
                     date: {
                         label: 'Date / Heure',
                         value: moment(date, moment.defaultFormat).format('DD/MM/YYYY HH:mm:ss')

@@ -6,6 +6,10 @@ export interface MouvementTraca {
     date: string;
     id?: number;
 
+    //transfer
+    fromStock?: number;
+    quantity?: number;
+
     // prise
     finished?: number;
 

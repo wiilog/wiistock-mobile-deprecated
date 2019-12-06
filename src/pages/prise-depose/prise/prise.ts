@@ -45,6 +45,8 @@ export class PrisePage {
     private operator: string;
     private apiLoading: boolean;
 
+    private fromStock: boolean;
+
     public constructor(private navCtrl: NavController,
                        private navParams: NavParams,
                        private network: Network,
@@ -65,6 +67,7 @@ export class PrisePage {
         this.init();
         this.finishPrise = this.navParams.get('finishPrise');
         this.emplacement = this.navParams.get('emplacement');
+        this.fromStock = this.navParams.get('fromStock');
 
         this.storageService.getOperateur().subscribe((operator) => {
             this.operator = operator;
@@ -144,6 +147,10 @@ export class PrisePage {
     }
 
     public testIfBarcodeEquals(barCode: string, isManualAdd: boolean = false): void {
+        // TODO fromStock: TEST IF REF ON EMPLACEMENT
+        // TODO être connecter à internet pour les prises
+
+
         if (this.colisPrise && this.colisPrise.some((colis) => (colis.ref_article === barCode))) {
             this.toastService.presentToast('Cet prise a déjà été effectuée');
         }
@@ -162,6 +169,7 @@ export class PrisePage {
                             {
                                 text: 'Confirmer',
                                 handler: () => {
+                                    // TODO fromStock: prise-
                                     this.saveMouvementTraca(barCode);
                                 },
                                 cssClass: 'alertAlert'
@@ -180,6 +188,8 @@ export class PrisePage {
             operateur: this.operator,
             ref_emplacement: this.emplacement.label,
             finished: 0,
+            fromStock: Number(this.fromStock),
+            // TODO ADD QUANTITY FOR TRANSFER
             date: moment().format()
         });
         this.refreshListComponent();
