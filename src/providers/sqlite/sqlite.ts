@@ -13,6 +13,7 @@ import {Platform} from 'ionic-angular';
 import {Collecte} from '@app/entities/collecte';
 import {Manutention} from '@app/entities/manutention';
 import 'rxjs/add/observable/zip';
+import {MouvementTraca} from '@app/entities/mouvement-traca';
 
 
 @Injectable()
