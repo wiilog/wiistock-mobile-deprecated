@@ -35,7 +35,6 @@ export class DeposeConfirmPageTraca {
                 name: 'comment',
                 inputConfig: {
                     type: 'text',
-                    required: true,
                     maxLength: '255'
                 },
                 errors: {
