@@ -25,8 +25,8 @@ export class CollecteEmplacementPage {
     @ViewChild('searchComponent')
     public searchComponent: SearchLocationComponent;
 
-    emplacement: Emplacement;
-    collecte: Collecte;
+    public emplacement: Emplacement;
+    public collecte: Collecte;
 
     public validateCollecte: () => void;
 
@@ -93,7 +93,11 @@ export class CollecteEmplacementPage {
                             ...articles.map((article) => (
                                 this.sqliteProvider
                                     .findMvtByArticleCollecte(article.id)
-                                    .pipe(flatMap((mvt) => this.sqliteProvider.finishMvt(mvt.id, this.emplacement.label)))
+                                    .pipe(flatMap((mvt) => (
+                                        mvt
+                                            ? this.sqliteProvider.finishMvt(mvt.id, this.emplacement.label)
+                                            : of(undefined)
+                                    )))
                             ))
                         )),
                         flatMap(() => this.sqliteProvider.finishCollecte(this.collecte.id, this.emplacement.label)),
@@ -110,7 +114,7 @@ export class CollecteEmplacementPage {
                                 this.closeScreen();
                             }
                             else {
-                                this.handleCollectesSuccess(success.length);
+                                this.handleCollectesSuccess(success);
                             }
                         },
                         (error) => {
@@ -126,15 +130,35 @@ export class CollecteEmplacementPage {
         }
     }
 
-    private handleCollectesSuccess(nbCollectesSucceed: number): void {
-        if (nbCollectesSucceed > 0) {
-            this.toastService.presentToast(
-                (nbCollectesSucceed === 1
-                    ? 'Votre collecte a bien été enregistrée'
-                    : `Votre préparation et ${nbCollectesSucceed - 1} collecte${nbCollectesSucceed - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
-            );
+    private handleCollectesSuccess(success: Array<{newCollecte, articlesCollecte}>): void {
+        if (success.length > 0) {
+            Observable.zip(
+                ...success
+                    .filter(({newCollecte}) => newCollecte)
+                    .map(({newCollecte, articlesCollecte}) => (
+                        Observable.zip(
+                            this.sqliteProvider.executeQuery(
+                                this.sqliteProvider.getCollecteInsertQuery([this.sqliteProvider.getCollecteValueFromApi(newCollecte)])
+                            ),
+                            ...(articlesCollecte.map((newArticleCollecte) => (
+                                this.sqliteProvider.executeQuery(
+                                    this.sqliteProvider.getArticleCollecteInsertQuery([this.sqliteProvider.getArticleCollecteValueFromApi(newArticleCollecte)])
+                                )
+                            )))
+                        )
+                    )),
+                this.toastService.presentToast(
+                    (success.length === 1
+                        ? 'Votre collecte a bien été enregistrée'
+                        : `Votre collecte et ${success.length - 1} collecte${success.length - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
+                )
+            ).subscribe(() => {
+                this.closeScreen();
+            })
         }
-        this.closeScreen();
+        else {
+            this.closeScreen();
+        }
     }
 
     private handlePreparationError(resp): void {

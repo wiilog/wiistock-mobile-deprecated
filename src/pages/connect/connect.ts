@@ -1,6 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
 import {IonicPage, NavController} from 'ionic-angular';
-import {UsersApiProvider} from '@providers/users-api/users-api';
 import {MainMenuPage} from '@pages/main-menu/main-menu';
 import {ParamsPage} from '@pages/params/params'
 import {SqliteProvider} from '@providers/sqlite/sqlite';
@@ -9,7 +8,7 @@ import {Network} from '@ionic-native/network';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ApiService} from '@app/services/api.service';
 import {VersionCheckerService} from '@app/services/version-checker.service';
-import {flatMap, map} from 'rxjs/operators';
+import {flatMap, map, timeout} from 'rxjs/operators';
 import {StorageService} from '@app/services/storage.service';
 import {Subscription} from 'rxjs';
 
@@ -39,7 +38,6 @@ export class ConnectPage {
     private urlServerSubscription: Subscription;
 
     public constructor(private navCtrl: NavController,
-                       private usersApiProvider: UsersApiProvider,
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
                        private versionChecker: VersionCheckerService,
@@ -72,11 +70,11 @@ export class ConnectPage {
                         },
                         () => {
                             this.finishLoading();
-                            this.toastService.presentToast('Erreur : la liaison avec le serveur est impossible', 5000);
+                            this.toastService.presentToast('Erreur : la liaison avec le serveur est impossible', ToastService.LONG_DURATION);
                         });
             }
             else {
-                this.toastService.presentToast('Veuillez mettre à jour l\'url', 5000);
+                this.toastService.presentToast('Veuillez mettre à jour l\'url', ToastService.LONG_DURATION);
                 this.finishLoading();
                 this.goToParams();
             }
@@ -98,8 +96,10 @@ export class ConnectPage {
         if (!this.loading) {
             if (this.network.type !== 'none') {
                 this.loading = true;
-                this.apiService.getApiUrl(ApiService.CONNECT).subscribe((connectUrl) => {
-                    this.usersApiProvider.setProvider(this.form, connectUrl).subscribe(
+                this.apiService
+                    .requestApi('post', ApiService.CONNECT, this.form, false)
+                    .pipe(timeout(ApiService.VERIFICATION_SERVICE_TIMEOUT))
+                    .subscribe(
                         ({data, success}) => {
                             if (success) {
                                 const {apiKey, isInventoryManager} = data;
@@ -123,9 +123,8 @@ export class ConnectPage {
                         },
                         () => {
                             this.finishLoading();
-                            this.toastService.presentToast('Un problème est survenu, veuillez vérifier vos identifiants ainsi que l\'URL saisie sans les paramètres.');
+                            this.toastService.presentToast('Un problème est survenu, veuillez vérifier la connexion, vos identifiants et l\'URL saisie dans les paramètres', ToastService.LONG_DURATION);
                         });
-                });
             } else {
                 this.toastService.presentToast('Vous devez être connecté à internet pour vous authentifier');
             }

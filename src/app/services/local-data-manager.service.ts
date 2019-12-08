@@ -136,7 +136,9 @@ export class LocalDataManagerService {
                                 collectes: collectes
                                     .map((collecte) => ({
                                         ...collecte,
-                                        mouvements: mouvements.filter(({id_collecte}) => (id_collecte === collecte.id))
+                                        mouvements: mouvements
+                                            .filter(({id_collecte}) => (id_collecte === collecte.id))
+                                            .map(({is_ref, reference, quantity}) => ({is_ref, reference, quantity}))
                                     }))
                             }))
                         )

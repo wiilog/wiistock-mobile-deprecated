@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
+import {Alert, AlertController, IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Mouvement} from '@app/entities/mouvement';
 import {HttpClient} from '@angular/common/http';
@@ -36,12 +36,15 @@ export class CollecteArticlesPage {
 
     private zebraScannerSubscription: Subscription;
 
+    private partialCollecteAlert: Alert;
+
     public constructor(private navCtrl: NavController,
                        private navParams: NavParams,
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
                        private http: HttpClient,
                        private network: Network,
+                       private alertController: AlertController,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private apiService: ApiService,
                        private storageService: StorageService) {
@@ -56,8 +59,8 @@ export class CollecteArticlesPage {
         });
 
         this.sqliteProvider.findArticlesByCollecte(this.collecte.id).subscribe((articles) => {
-            this.articlesNT = articles.filter(article => article.has_moved === 0);
-            this.articlesT = articles.filter(article => article.has_moved === 1);
+            this.articlesNT = articles.filter((article) => (article.has_moved === 0));
+            this.articlesT = articles.filter((article) => (article.has_moved === 1));
             if (this.articlesT.length > 0) {
                 this.started = true;
             }
@@ -118,12 +121,13 @@ export class CollecteArticlesPage {
                         .subscribe((articles) => {
                             this.updateList(articles);
                         });
-                } else {
+                }
+                else {
                     this.sqliteProvider.insert('`article_collecte`', newArticle).subscribe((insertId) => {
                         let mouvement: Mouvement = {
                             id: null,
                             reference: newArticle.reference,
-                            quantity: article.quantite,
+                            quantity: Number(quantite),
                             date_pickup: moment().format(),
                             location_from: newArticle.emplacement,
                             date_drop: null,
@@ -196,15 +200,10 @@ export class CollecteArticlesPage {
 
     public validate(): void {
         if (this.articlesNT.length > 0) {
-            this.toastService.presentToast('Veuillez traiter tous les articles concernés');
+            this.alertPartialCollecte();
         }
         else {
-            this.navCtrl.push(CollecteEmplacementPage, {
-                collecte: this.collecte,
-                validateCollecte: () => {
-                    this.navCtrl.pop();
-                }
-            })
+            this.pushEmplacementPage();
         }
     }
 
@@ -222,6 +221,48 @@ export class CollecteArticlesPage {
         }
         else {
             this.toastService.presentToast('L\'article scanné n\'est pas dans la liste.');
+        }
+    }
+
+    private pushEmplacementPage(): void {
+        this.navCtrl.push(CollecteEmplacementPage, {
+            collecte: this.collecte,
+            validateCollecte: () => {
+                this.navCtrl.pop();
+            }
+        });
+    }
+
+    private alertPartialCollecte(): void {
+        if (this.partialCollecteAlert) {
+            this.partialCollecteAlert.dismiss();
+            this.partialCollecteAlert = undefined;
+        }
+        else {
+            this.partialCollecteAlert = this.alertController
+                .create({
+                    title: `Votre collecte est partielle`,
+                    // TODO backdropDismiss: false for ionic 4
+                    enableBackdropDismiss: false,
+                    buttons: [
+                        {
+                            text: 'Annuler',
+                            handler: () => {
+                                this.partialCollecteAlert = undefined;
+                            }
+                        },
+                        {
+                            text: 'Continuer',
+                            handler: () => {
+                                this.partialCollecteAlert = undefined;
+                                this.pushEmplacementPage();
+                            },
+                            cssClass: 'alertAlert'
+                        }
+                    ]
+                });
+
+            this.partialCollecteAlert.present();
         }
     }
 
@@ -260,7 +301,8 @@ export class CollecteArticlesPage {
         this.articlesT = articles.filter((article) => (article.has_moved === 1));
         if (this.articlesNT.length === 0) {
             this.refreshOver();
-        } else {
+        }
+        else {
             this.refresh();
         }
         this.loadingStartCollecte = false;

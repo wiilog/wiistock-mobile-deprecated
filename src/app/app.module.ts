@@ -137,7 +137,6 @@ import {EmplacementScanPage} from '@pages/prise-depose/emplacement-scan/emplacem
         StatusBar,
         SplashScreen,
         {provide: ErrorHandler, useClass: IonicErrorHandler},
-        UsersApiProvider,
         AppComponent,
         SQLite,
         VersionCheckerService,

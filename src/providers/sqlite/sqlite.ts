@@ -70,7 +70,7 @@ export class SqliteProvider {
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `type_quantite` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT, `deleted` INTEGER DEFAULT 0, original_quantity INTEGER)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_prepa_by_ref_article` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `reference` TEXT, `label` TEXT, `location` TEXT, `quantity` INTEGER, `reference_article` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []),
-                db.executeSql('CREATE TABLE IF NOT EXISTS `collecte` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `collecte` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `location_from` VARCHAR(255), `location_to` VARCHAR(255), `date_end` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_livraison` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_livraison` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_inventaire` (`id` INTEGER PRIMARY KEY, `id_mission` INTEGER, `reference` TEXT, `is_ref` INTEGER, `location` TEXT, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article_collecte` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_collecte` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)', []),
@@ -153,13 +153,14 @@ export class SqliteProvider {
             ? this.cleanTable('`emplacement`')
                 .pipe(
                     map(() => {
-                        let emplacementValues = apiEmplacements.map((emplacement) => (
-                            "(" + emplacement.id + ", '" + emplacement.label.replace(/(\"|\')/g, "\'$1") + "')"
-                        ));
-                        let emplacementValuesStr = emplacementValues.join(', ');
+                        const emplacementValuesStr = apiEmplacements
+                            .map((emplacement) => (
+                                "(" + emplacement.id + ", '" + emplacement.label.replace(/(\"|\')/g, "\'$1") + "')"
+                            ))
+                            .join(', ');
                         return 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';'
                     }),
-                    flatMap((query) => this.executeQuery(query))
+                    flatMap((query) => this.executeQuery(query, false))
             )
             : of(undefined);
     }
@@ -426,52 +427,134 @@ export class SqliteProvider {
         return ret$;
     }
 
+    /**
+     * Import in sqlite api data from collectes and articlesCollecte fields
+     * @param data
+     */
     public importCollectes(data): Observable<any> {
-        const ret$ = new ReplaySubject<any>(1);
-        let collectes = data['collectes'];
-        let collectesValues = [];
-        if (collectes.length === 0) {
-            this.findAll('`collecte`').subscribe((collecteDB) => {
-                this.deleteCollectes(collecteDB).then(() => {
-                    ret$.next(undefined);
-                });
-            });
-        }
-        for (let collecte of collectes) {
-            this.findOneById('collecte', collecte.id).subscribe((collecteInserted) => {
-                if (collecteInserted === null) {
-                    collectesValues.push("(" + collecte.id + ", '" + collecte.number + "', '" + collecte.location + "', " + null + ")");
-                }
-                if (collectes.indexOf(collecte) === collectes.length - 1) {
-                    this.findAll('`collecte`').subscribe((collectesDB) => {
-                        let collectesValuesStr = collectesValues.join(', ');
-                        let sqlCollectes = 'INSERT INTO `collecte` (`id`, `numero`, `emplacement`, `date_end`) VALUES ' + collectesValuesStr + ';';
-                        if (collectesDB.length === 0) {
-                            if(collectesValues.length > 0) {
-                                this.executeQuery(sqlCollectes).subscribe(() => {
-                                    ret$.next(true);
-                                });
-                            }
-                            else {
-                                ret$.next(undefined);
-                            }
-                        } else {
-                            this.deleteCollectes(collectesDB.filter(c => collectes.find(col => col.id === c.id) === undefined)).then(() => {
-                                if(collectesValues.length > 0) {
-                                    this.executeQuery(sqlCollectes).subscribe(() => {
-                                        ret$.next(true);
-                                    });
-                                }
-                                else {
-                                    ret$.next(undefined);
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        }
-        return ret$;
+        const collectesAPI = data['collectes'];
+        const articlesCollecteAPI = data['articlesCollecte'];
+
+        return Observable.zip(
+            // we clear 'articleCollecte' table and add given articles
+            this.cleanTable('article_collecte')
+                .pipe(
+                    map(() => (
+                        (articlesCollecteAPI && articlesCollecteAPI.length > 0)
+                            ? articlesCollecteAPI.map((articleCollecte) => (
+                                "(NULL, " +
+                                "'" + articleCollecte.label + "', " +
+                                "'" + articleCollecte.reference + "', " +
+                                articleCollecte.quantity + ", " +
+                                articleCollecte.is_ref + ", " +
+                                articleCollecte.id_collecte + ", " +
+                                "0, " +
+                                "'" + articleCollecte.location + "', " +
+                                "'" + articleCollecte.barCode + "')"
+                            ))
+                            : []
+                    )),
+                    flatMap((articlesCollecteValues: Array<string>) => (
+                        articlesCollecteValues.length > 0
+                            ? this.executeQuery(
+                                'INSERT INTO `article_collecte` (' +
+                                    '`id`, ' +
+                                    '`label`, ' +
+                                    '`reference`, ' +
+                                    '`quantite`, ' +
+                                    '`is_ref`, ' +
+                                    '`id_collecte`, ' +
+                                    '`has_moved`, ' +
+                                    '`emplacement`, ' +
+                                    '`barcode`' +
+                                ') ' +
+                                'VALUES ' + articlesCollecteValues.join(',') + ';'
+                            )
+                            : of(undefined)
+                    ))
+                ),
+
+            // we update collecte table
+            this.findAll('collecte')
+                .pipe(
+                    map((collectesDB: Array<Collecte>) => ({
+                        // we delete 'collecte' in sqlite DB if it is not in the api array and if it's not finished
+                        collectesIdToDelete: collectesDB
+                            .filter(({id: idDB, location_to, date_end}) => (!collectesAPI.some(({id: idAPI}) => ((idAPI === idDB)) && !location_to && !date_end)))
+                            .map(({id}) => id),
+
+                        // we add 'collecte' in sqlite DB if it is in the api and not in DB
+                        collectesValuesToAdd: collectesAPI
+                            .filter(({id: idAPI}) => !collectesDB.some(({id: idDB}) => (idDB === idAPI)))
+                            .map(({id, number, location_from}) => this.getCollecteValueFromApi({id, number, location_from}))
+                    })),
+                    flatMap(({collectesIdToDelete, collectesValuesToAdd}) => (
+                        Observable.zip(
+                            (collectesIdToDelete.length > 0 ? this.deleteById('collecte', collectesIdToDelete) : of(undefined)),
+                            (collectesValuesToAdd.length > 0
+                                ? this.executeQuery(this.getCollecteInsertQuery(collectesValuesToAdd))
+                                : of(undefined)),
+                        )
+                    ))
+                )
+        ).pipe(map(() => undefined));
+    }
+
+    /**
+     * Send sql values for insert the collecte
+     */
+    public getCollecteValueFromApi({id, number, location_from}): string {
+        return `(${id}, '${number}', '${location_from}', NULL)`;
+    }
+
+    /**
+     * Create Sql query to insert given sqlValues
+     */
+    public getCollecteInsertQuery(collecteValues: Array<string>): string {
+        return 'INSERT INTO `collecte` (' +
+            '`id`, ' +
+            '`numero`, ' +
+            '`location_from`, ' +
+            '`date_end`' +
+            ') ' +
+            'VALUES ' + collecteValues.join(',') + ';';
+    }
+
+    /**
+     * Send sql values for insert the article_collecte
+     */
+    public getArticleCollecteValueFromApi(articleCollecte): string {
+        return (
+            "(NULL, " +
+            "'" + articleCollecte.label + "', " +
+            "'" + articleCollecte.reference + "', " +
+            articleCollecte.quantity + ", " +
+            articleCollecte.is_ref + ", " +
+            articleCollecte.id_collecte + ", " +
+            "0, " +
+            "'" + articleCollecte.location + "', " +
+            "'" + articleCollecte.barCode + "')"
+        );
+    }
+
+    /**
+     * Create Sql query to insert given sqlValues
+     */
+    public getArticleCollecteInsertQuery(articlesCollecteValues: Array<string>): string {
+        return (
+            'INSERT INTO `article_collecte` (' +
+                '`id`, ' +
+                '`label`, ' +
+                '`reference`, ' +
+                '`quantite`, ' +
+                '`is_ref`, ' +
+                '`id_collecte`, ' +
+                '`has_moved`, ' +
+                '`emplacement`, ' +
+                '`barcode`' +
+            ') ' +
+            'VALUES ' + articlesCollecteValues.join(',') + ';'
+        );
     }
 
     public findArticlesByCollecte(id_col: number): Observable<Array<any>> {
@@ -487,45 +570,6 @@ export class SqliteProvider {
                 return list;
             })
         );
-    }
-
-    public importArticlesCollecte(data): Observable<any> {
-        const ret$ = new ReplaySubject<any>(1);
-        let articlesCols = data['articlesCollecte'];
-        let articlesCollecteValues = [];
-        if (articlesCols.length === 0) {
-            ret$.next(undefined);
-        }
-        for (let article of articlesCols) {
-            this.findArticlesByCollecte(article.id_collecte).subscribe((articles) => {
-                // TODO remove '=='
-                const found = articles.some((articleCol) => (
-                    (articleCol.reference === article.reference) &&
-                    (articleCol.is_ref == article.is_ref)
-                ));
-                if (!found) {
-                    articlesCollecteValues.push("(" + null + ", '" + article.label + "', '" + article.reference + "', " + article.quantity + ", " + article.is_ref + ", " + article.id_collecte + ", " + 0 + ", '" + article.location + "', '" + article.barCode + "')");
-                }
-                if (articlesCols.indexOf(article) === articlesCols.length - 1) {
-                    let articlesCollectesValuesStr = articlesCollecteValues.join(', ');
-                    let sqlArticlesCollecte = 'INSERT INTO `article_collecte` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_collecte`, `has_moved`, `emplacement`, `barcode`) VALUES ' + articlesCollectesValuesStr + ';';
-                    if(articlesCollecteValues.length > 0) {
-                        if (articlesCollecteValues.length > 0) {
-                            this.executeQuery(sqlArticlesCollecte).subscribe(() => {
-                                ret$.next(true);
-                            });
-                        }
-                        else {
-                            ret$.next(undefined);
-                        }
-                    }
-                    else {
-                        ret$.next(undefined);
-                    }
-                }
-            });
-        }
-        return ret$;
     }
 
     public importArticlesInventaire(data): Observable<any> {
@@ -644,7 +688,6 @@ export class SqliteProvider {
             this.importArticlesInventaire(data),
             this.importManutentions(data),
             this.importCollectes(data),
-            this.importArticlesCollecte(data),
             this.importMouvementTraca(data),
             (
                 from(this.storageService.getInventoryManagerRight()).pipe(
@@ -808,7 +851,6 @@ export class SqliteProvider {
         for (let whereValue of selections) {
             if (i == 0) {
                 query += " WHERE ";
-
             }
             else {
                 query += " AND ";
@@ -930,9 +972,12 @@ export class SqliteProvider {
         return this.executeQuery(`UPDATE \`livraison\` SET date_end = NULL, emplacement = NULL WHERE id IN (${idLivraisonsJoined})`, false);
     }
 
-    public resetFinishedCollectes(id_collectes: Array<number>): Observable<undefined> {
+    public resetFinishedCollectes(id_collectes: Array<number>): Observable<any> {
         const idCollectesJoined = id_collectes.join(',');
-        return this.executeQuery(`UPDATE \`livraison\` SET date_end = NULL, emplacement = NULL WHERE id IN (${idCollectesJoined})`, false);
+        return Observable.zip(
+            this.executeQuery(`UPDATE \`collecte\` SET date_end = NULL, location_to = NULL WHERE id IN (${idCollectesJoined})`, false),
+            this.executeQuery(`UPDATE \`article_collecte\` SET has_moved = 0 WHERE id_collecte IN (${idCollectesJoined})`, false)
+        );
     }
 
     public startPrepa(id_prepa: number): Observable<undefined> {
@@ -949,9 +994,9 @@ export class SqliteProvider {
         );
     }
 
-    public finishCollecte(id_collecte: number, emplacement): Observable<undefined> {
+    public finishCollecte(id_collecte: number, location_to: string): Observable<undefined> {
         return this.db$.pipe(
-            flatMap((db) => from(db.executeSql('UPDATE `collecte` SET date_end = \'' + moment().format() + '\', emplacement = \'' + emplacement + '\' WHERE id = ' + id_collecte, []))),
+            flatMap((db) => from(db.executeSql('UPDATE `collecte` SET date_end = \'' + moment().format() + '\', location_to = \'' + location_to + '\' WHERE id = ' + id_collecte, []))),
             map(() => undefined)
         );
     }
@@ -977,9 +1022,9 @@ export class SqliteProvider {
         );
     }
 
-    public moveArticleCollecte(id_collecte: number): Observable<undefined> {
+    public moveArticleCollecte(id_article_collecte: number): Observable<undefined> {
         return this.db$.pipe(
-            flatMap((db) => from(db.executeSql('UPDATE `article_collecte` SET has_moved = 1 WHERE id = ' + id_collecte, []))),
+            flatMap((db) => from(db.executeSql('UPDATE `article_collecte` SET has_moved = 1 WHERE id = ' + id_article_collecte, []))),
             map(() => undefined)
         );
     }
@@ -1097,7 +1142,7 @@ export class SqliteProvider {
         return resp;
     }
 
-    public deleteById(table: string, ids: Array<number>|number): Observable<undefined> {
+    public deleteById(table: string, ids: number|Array<number>): Observable<undefined> {
         const where = Array.isArray(ids)
             ? `id IN (${ids.join(',')})`
             : `id = ${ids}`;
@@ -1155,12 +1200,12 @@ export class SqliteProvider {
             : of(undefined);
     }
 
-    public deleteCollecteById(collected: Array<number>): Observable<any> {
-        const joinedCollecte = collected.join(',');
-        return collected.length > 0
+    public deleteCollecteById(collecteIds: Array<number>): Observable<any> {
+        const joinedCollecte = collecteIds.join(',');
+        return collecteIds.length > 0
             ? Observable.zip(
-                this.executeQuery(`DELETE FROM \`collecte\` WHERE id IN (${joinedCollecte});`, false),
-                this.executeQuery(`DELETE FROM \`article_collecte\` WHERE id_collecte IN (${joinedCollecte})`, false)
+                this.executeQuery(`DELETE FROM \`collecte\` WHERE id IN (${joinedCollecte});`),
+                this.executeQuery(`DELETE FROM \`article_collecte\` WHERE id_collecte IN (${joinedCollecte})`)
             )
             : of(undefined);
     }

@@ -2,7 +2,7 @@
     <div *ngIf="collecte">
         <div class="page-title">
             <h4>Collecte {{collecte.numero}}</h4>
-            <p>Point de collecte<br/>{{collecte.emplacement}}</p>
+            <p>Point de collecte<br/>{{collecte.location_from ? collecte.location_from : ''}}</p>
         </div>
 
         <div class="spinner" *ngIf="loadingStartCollecte">
