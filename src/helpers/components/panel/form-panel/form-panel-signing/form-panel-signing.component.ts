@@ -40,16 +40,10 @@ export class FormPanelSigningComponent implements FormPanelItemComponent<FormPan
         this.destroyed = false;
     }
 
-    public onValueChange(value: string) {
-        this.valueChange.emit(value);
-    }
-
     public get error(): string {
-        // TODO
-        // const errorsKeys = Object.keys(this.inputComponent.ngControl.errors || {});
-        // return (this.errors && errorsKeys.length > 0)
-        //     ? this.errors[errorsKeys[0]]
-            return undefined;
+        return !this.value
+            ? (this.errors && this.errors.required)
+            : undefined;
     }
 
     public onItemClicked(): void {
@@ -71,7 +65,8 @@ export class FormPanelSigningComponent implements FormPanelItemComponent<FormPan
                             if (data && (data.signature === false || data.signature)) {
                                 this.value = data.signature
                                     ? data.signature // not false
-                                    : undefined // if false we delete previous image
+                                    : undefined; // if false we delete previous image
+                                this.valueChange.emit(this.value);
                             }
                         });
                         modal.present();
