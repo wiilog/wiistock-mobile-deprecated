@@ -51,7 +51,8 @@ import {PrisePage} from '@pages/prise-depose/prise/prise';
 import {DeposePage} from '@pages/prise-depose/depose/depose';
 import {DeposeConfirmPage} from '@pages/prise-depose/depose-confirm/depose-confirm';
 import {EmplacementScanPage} from '@pages/prise-depose/emplacement-scan/emplacement-scan';
-import {PriseDeposeMenuPage} from "@pages/prise-depose/prise-depose-menu/prise-depose-menu";
+import {PriseDeposeMenuPage} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu';
+import {FileService} from '@app/services/file.service';
 
 
 @NgModule({
@@ -151,7 +152,8 @@ import {PriseDeposeMenuPage} from "@pages/prise-depose/prise-depose-menu/prise-d
         LoadingService,
         LocalDataManagerService,
         ScssHelperService,
-        TracaListFactoryService
+        TracaListFactoryService,
+        FileService
     ]
 })
 export class AppModule {

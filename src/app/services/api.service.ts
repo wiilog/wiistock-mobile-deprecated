@@ -47,11 +47,26 @@ export class ApiService {
                     const keyParam = (method === 'get' || method === 'delete')
                         ? 'param'
                         : 'body';
+
+                    const tmpParams = {
+                        ...(secured ? {apiKey} : {}),
+                        ...params
+                    };
+                    let smartParams;
+                    if (method === 'post') {
+                        smartParams = new FormData();
+                        Object
+                            .keys(tmpParams)
+                            .forEach((key) => {
+                                smartParams.set(key, tmpParams[key])
+                            });
+                    }
+                    else {
+                        smartParams = tmpParams;
+                    }
+
                     const options = {
-                        [keyParam]: {
-                            ...(secured ? {apiKey} : {}),
-                            ...params
-                        },
+                        [keyParam]: smartParams,
                         responseType: 'json' as 'json'
                     };
 

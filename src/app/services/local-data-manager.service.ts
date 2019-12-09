@@ -14,6 +14,7 @@ import {Livraison} from '@app/entities/livraison';
 import {Collecte} from '@app/entities/collecte';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import 'rxjs/add/observable/zip';
+import {FileService} from "@app/services/file.service";
 
 
 type Process = 'preparation' | 'livraison' | 'collecte';
@@ -35,6 +36,7 @@ export class LocalDataManagerService {
 
     public constructor(private sqliteProvider: SqliteProvider,
                        private apiService: ApiService,
+                       private fileService: FileService,
                        private alertManager: AlertManagerService,
                        private alertController: AlertController) {
         this.apiProccessConfigs = {
@@ -222,10 +224,28 @@ export class LocalDataManagerService {
         return this.sqliteProvider.findAll('mouvement_traca')
             .pipe(
                 flatMap((mouvements: Array<MouvementTraca>) => (
+                    mouvements.map(({signature, ...mouvement}) => ({
+                        ...mouvement,
+                        signature: signature
+                            ? this.fileService.createFile(
+                                signature,
+                                FileService.SIGNATURE_IMAGE_EXTENSION,
+                                FileService.SIGNATURE_IMAGE_TYPE
+                            )
+                            : null
+                    }))
+                )),
+                flatMap((mouvements: Array<MouvementTraca&{signature: File}>) => (
                     mouvements.length > 0
                         ? (
                             this.apiService
-                                .requestApi('post', ApiService.POST_MOUVEMENT_TRACA, {mouvements: JSON.stringify(mouvements)})
+                                .requestApi('post', ApiService.POST_MOUVEMENT_TRACA, {
+                                    mouvements: JSON.stringify(mouvements.map(({signature, ...mouvements}) => mouvements)),
+                                    ...(mouvements.reduce((acc, {signature}, currentIndex) => ({
+                                        ...acc,
+                                        ...(signature ? {[`signature_${currentIndex}`]: signature} : {})
+                                    }), {}))
+                                })
                                 .pipe(
                                     map((apiResponse) => [apiResponse, mouvements]),
                                     flatMap(([apiResponse, mouvements]) => (
