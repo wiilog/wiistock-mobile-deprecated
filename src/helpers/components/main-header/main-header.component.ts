@@ -14,6 +14,8 @@ import {filter, map, take, tap} from 'rxjs/operators';
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {
 
+    public static readonly MAX_PSEUDO_LENGTH: number = 35;
+
     @Input()
     public nav: Nav;
 
@@ -100,6 +102,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             .pipe(
                 take(1),
                 filter((user: string) => user !== this.loggedUser),
+                map((user: string) => user.substring(0, MainHeaderComponent.MAX_PSEUDO_LENGTH)),
                 tap((user: string) => {
                     this.loggedUser = user;
                 }),
