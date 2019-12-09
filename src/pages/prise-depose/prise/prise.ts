@@ -2,7 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 import {AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
 import {Emplacement} from '@app/entities/emplacement';
 import {ChangeDetectorRef} from '@angular/core';
-import {Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
@@ -13,9 +13,10 @@ import {MouvementTraca} from '@app/entities/mouvement-traca';
 import {StorageService} from '@app/services/storage.service';
 import moment from 'moment';
 import {BarcodeScannerComponent} from '@helpers/components/barcode-scanner/barcode-scanner.component';
-import {flatMap, map} from "rxjs/operators";
-import {Network} from "@ionic-native/network";
-import {of} from "rxjs/observable/of";
+import {flatMap, map} from 'rxjs/operators';
+import {Network} from '@ionic-native/network';
+import {of} from 'rxjs/observable/of';
+import {ApiService} from '@app/services/api.service';
 
 
 @IonicPage()
@@ -50,6 +51,7 @@ export class PrisePage {
     public constructor(private navCtrl: NavController,
                        private navParams: NavParams,
                        private network: Network,
+                       private apiService: ApiService,
                        private alertController: AlertController,
                        private toastService: ToastService,
                        private barcodeScannerManager: BarcodeScannerManagerService,
@@ -147,41 +149,53 @@ export class PrisePage {
     }
 
     public testIfBarcodeEquals(barCode: string, isManualAdd: boolean = false): void {
-        // TODO fromStock: TEST IF REF ON EMPLACEMENT
-        // TODO être connecter à internet pour les prises
-
-
-        if (this.colisPrise && this.colisPrise.some((colis) => (colis.ref_article === barCode))) {
-            this.toastService.presentToast('Cet prise a déjà été effectuée');
+        if (!this.fromStock || this.network.type !== 'none') {
+            this.existsOnLocation(barCode).subscribe(
+                (quantity) => {
+                    if (quantity) {
+                        if (this.colisPrise && this.colisPrise.some((colis) => (colis.ref_article === barCode))) {
+                            this.toastService.presentToast('Cet prise a déjà été effectuée');
+                        }
+                        else {
+                            if (isManualAdd) {
+                                this.saveMouvementTraca(barCode, quantity);
+                            }
+                            else {
+                                const quantitySuffix = (typeof quantity === 'number')
+                                    ? ` en quantité de ${quantity}`
+                                    : '';
+                                this.alertController
+                                    .create({
+                                        title: `Prise de ${barCode}${quantitySuffix}`,
+                                        buttons: [
+                                            {
+                                                text: 'Annuler'
+                                            },
+                                            {
+                                                text: 'Confirmer',
+                                                handler: () => {
+                                                    this.saveMouvementTraca(barCode, quantity);
+                                                },
+                                                cssClass: 'alertAlert'
+                                            }
+                                        ]
+                                    })
+                                    .present();
+                            }
+                        }
+                    }
+                    else {
+                        this.toastService.presentToast('Ce code barre n\'est pas présent sur cet emplacement');
+                    }
+                }
+            )
         }
         else {
-            if (isManualAdd) {
-                this.saveMouvementTraca(barCode);
-            }
-            else {
-                this.alertController
-                    .create({
-                        title: `Vous avez sélectionné le colis ${barCode}`,
-                        buttons: [
-                            {
-                                text: 'Annuler'
-                            },
-                            {
-                                text: 'Confirmer',
-                                handler: () => {
-                                    // TODO fromStock: prise-
-                                    this.saveMouvementTraca(barCode);
-                                },
-                                cssClass: 'alertAlert'
-                            }
-                        ]
-                    })
-                    .present();
-            }
+            this.toastService.presentToast('Vous devez être connecté à internet pour effectuer une prise');
         }
     }
 
-    private saveMouvementTraca(barCode: string): void {
+    private saveMouvementTraca(barCode: string, quantity: boolean|number): void {
         this.colisPrise.push({
             ref_article: barCode,
             type: PrisePage.MOUVEMENT_TRACA_PRISE,
@@ -189,7 +203,7 @@ export class PrisePage {
             ref_emplacement: this.emplacement.label,
             finished: 0,
             fromStock: Number(this.fromStock),
-            // TODO ADD QUANTITY FOR TRANSFER
+            ...(typeof quantity === 'number' ? {quantity} : {}),
             date: moment().format()
         });
         this.refreshListComponent();
@@ -207,5 +221,23 @@ export class PrisePage {
         this.apiLoading = false;
         this.listBody = [];
         this.colisPrise = [];
+    }
+
+    private existsOnLocation(barCode: string): Observable<number|boolean> {
+        return this.fromStock
+            ? this.apiService
+                .requestApi('get', ApiService.GET_ARTICLES, {
+                    barCode,
+                    location: this.emplacement.label
+                })
+                .pipe(
+                    map((res) => (
+                        res &&
+                        res.success &&
+                        res.articles &&
+                        (res.articles.length > 0)
+                    ))
+                )
+            : of(true)
     }
 }

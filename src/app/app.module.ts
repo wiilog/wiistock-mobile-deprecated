@@ -10,9 +10,7 @@ import {IonicStorageModule} from '@ionic/storage';
 import {StatusBar} from '@ionic-native/status-bar';
 import {SplashScreen} from '@ionic-native/splash-screen';
 import {HttpClientModule} from '@angular/common/http';
-import {UsersApiProvider} from '@providers/users-api/users-api';
 import {StorageService} from './services/storage.service';
-import {TracaMenuPage} from '@pages/prise-depose/traca-menu/traca-menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner';
 import {IonicSelectableModule} from 'ionic-selectable'
@@ -53,6 +51,7 @@ import {PrisePage} from '@pages/prise-depose/prise/prise';
 import {DeposePage} from '@pages/prise-depose/depose/depose';
 import {DeposeConfirmPage} from '@pages/prise-depose/depose-confirm/depose-confirm';
 import {EmplacementScanPage} from '@pages/prise-depose/emplacement-scan/emplacement-scan';
+import {PriseDeposeMenuPage} from "@pages/prise-depose/prise-depose-menu/prise-depose-menu";
 
 
 @NgModule({
@@ -63,7 +62,7 @@ import {EmplacementScanPage} from '@pages/prise-depose/emplacement-scan/emplacem
         ParamsPage,
         PreparationMenuPage,
         PreparationArticlesPage,
-        TracaMenuPage,
+        PriseDeposeMenuPage,
         PrisePage,
         PreparationArticleTakePage,
         ManutentionMenuPage,
@@ -105,7 +104,7 @@ import {EmplacementScanPage} from '@pages/prise-depose/emplacement-scan/emplacem
         ConnectPage,
         MainMenuPage,
         ParamsPage,
-        TracaMenuPage,
+        PriseDeposeMenuPage,
         PreparationMenuPage,
         PreparationArticleTakePage,
         PreparationEmplacementPage,
