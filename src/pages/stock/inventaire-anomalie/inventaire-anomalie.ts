@@ -69,35 +69,30 @@ export class InventaireAnomaliePage {
 
     synchronize() {
         this.loading = true;
-        this.apiService.getApiUrl(ApiService.TREAT_ANOMALIES).subscribe((treatAnomaliesUrl) => {
-            this.storageService.getApiKey().subscribe((key) => {
-                this.sqliteProvider.findAll('`anomalie_inventaire`').subscribe(anomalies => {
-                    this.anomalies = anomalies;
-                    let locations = [];
-                    anomalies.forEach(anomaly => {
-                        if (locations.indexOf(anomaly.location) < 0 && anomaly.location) {
-                            locations.push(anomaly.location);
-                        }
-                    });
-                    // envoi des anomalies traitées
-                    this.sqliteProvider.findByElement(`anomalie_inventaire`, 'treated', '1').subscribe((anomalies) => {
-                        let params = {
-                            anomalies: anomalies,
-                            apiKey: key
-                        };
-                        this.http.post<any>(treatAnomaliesUrl, params).subscribe(resp => {
-                            if (resp.success) {
-                                // supprime les anomalies traitée de la base
-                                this.sqliteProvider.deleteAnomalies(anomalies);
+
+        this.sqliteProvider.findAll('`anomalie_inventaire`').subscribe(anomalies => {
+            this.anomalies = anomalies;
+            let locations = anomalies
+                .filter(({location}) => (location && locations.indexOf(location) === -1))
+                .map(({location}) => location);
+            // envoi des anomalies traitées
+            this.sqliteProvider.findByElement(`anomalie_inventaire`, 'treated', '1').subscribe((anomalies) => {
+                this.apiService.requestApi('post', ApiService.TREAT_ANOMALIES, {anomalies}).subscribe((resp) => {
+                    this.locations = locations;
+                    if (resp.success) {
+                        // supprime les anomalies traitée de la base
+                        this.sqliteProvider
+                            .deleteById('anomalie_inventaire', anomalies.map(({id}) => id))
+                            .subscribe(() => {
+                                this.loading = false;
                                 this.toastService.presentToast(resp.data.status);
-                            } else {
-                                this.toastService.presentToast('Une erreur est survenue lors de la mise à jour des anomalies.');
-                            }
-                            this.locations = locations;
-                            this.loading = false;
-                            this.content.resize();
-                        });
-                    });
+                                this.content.resize();
+                            });
+                    } else {
+                        this.loading = false;
+                        this.toastService.presentToast('Une erreur est survenue lors de la mise à jour des anomalies.');
+                        this.content.resize();
+                    }
                 });
             });
         });

@@ -35,11 +35,15 @@ export class ApiService {
                        private httpClient: HttpClient) {}
 
 
-    public requestApi(method: string, service: string, params: {[x: string]: string} = {}, secured: boolean = true): Observable<any> {
+    public requestApi(method: string,
+                      service: string,
+                      params: {[x: string]: any} = {}, secured: boolean = true): Observable<any> {
         const storageDataArray$ = [
             this.getApiUrl(service),
             ...(secured ? [this.storageService.getApiKey()] : [])
         ];
+
+        params = ApiService.ObjectToHttpParams(params);
 
         return Observable.zip(...storageDataArray$)
             .pipe(
@@ -52,18 +56,9 @@ export class ApiService {
                         ...(secured ? {apiKey} : {}),
                         ...params
                     };
-                    let smartParams;
-                    if (method === 'post') {
-                        smartParams = new FormData();
-                        Object
-                            .keys(tmpParams)
-                            .forEach((key) => {
-                                smartParams.set(key, tmpParams[key])
-                            });
-                    }
-                    else {
-                        smartParams = tmpParams;
-                    }
+                    let smartParams = (method === 'post')
+                        ? ApiService.ObjectToFormData(tmpParams)
+                        : tmpParams;
 
                     const options = {
                         [keyParam]: smartParams,
@@ -84,5 +79,26 @@ export class ApiService {
 
     public getApiUrl(service: string, newUrl?: string): Observable<any> {
         return this.getApiBaseUrl(newUrl).pipe(map((baseUrl) => (baseUrl ? `${baseUrl}${service}` : null)));
+    }
+
+    private static ObjectToFormData(object: {[x: string]: string}): FormData {
+        const formData = new FormData();
+        Object
+            .keys(object)
+            .forEach((key) => {
+                formData.set(key, object[key])
+            });
+        return formData;
+    }
+
+    private static ObjectToHttpParams(object: {[x: string]: any}): {[x: string]: string|number} {
+        return Object
+            .keys(object)
+            .reduce((acc, key) => ({
+                ...acc,
+                [key]: ((typeof object[key] !== 'string') && (typeof object[key] !== 'number') && !(object[key] instanceof Blob))
+                    ? JSON.stringify(object[key])
+                    : object[key]
+            }), {});
     }
 }

@@ -2,17 +2,17 @@ import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {Content, IonicPage, Navbar, NavController, ModalController} from 'ionic-angular';
 import {ModalQuantityPage} from '@pages/stock/inventaire-menu/modal-quantity';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {HttpClient} from '@angular/common/http';
 import {ArticleInventaire} from '@app/entities/article-inventaire';
 import {SaisieInventaire} from '@app/entities/saisie-inventaire';
 import {InventaireAnomaliePage} from '@pages/stock/inventaire-anomalie/inventaire-anomalie';
 import moment from 'moment';
-import {filter} from 'rxjs/operators';
-import {Observable, ReplaySubject, Subscription} from 'rxjs';
+import {filter, flatMap, map} from 'rxjs/operators';
+import {Observable, Subscription} from 'rxjs';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
 import {ApiService} from '@app/services/api.service';
 import {StorageService} from '@app/services/storage.service';
+import {of} from 'rxjs/observable/of';
 
 
 @IonicPage()
@@ -36,7 +36,6 @@ export class InventaireMenuPage {
 
     public constructor(private navCtrl: NavController,
                        private sqliteProvider: SqliteProvider,
-                       private http: HttpClient,
                        private apiService: ApiService,
                        private modalController: ModalController,
                        private changeDetector: ChangeDetectorRef,
@@ -71,31 +70,23 @@ export class InventaireMenuPage {
     }
 
     addInventoryEntries() : Observable<any> {
-        let ret$: ReplaySubject<any> = new ReplaySubject(1);
-        this.apiService.getApiUrl(ApiService.ADD_INVENTORY_ENTRIES).subscribe((addInventoryEntriesUrl) => {
-            this.sqliteProvider.findAll('`saisie_inventaire`').subscribe(data => {
-                if (data.length > 0) {
-                    this.storageService.getApiKey().subscribe((apiKey) => {
-                        let params = {
-                            entries: data,
-                            apiKey
-                        };
-                        this.http.post<any>(addInventoryEntriesUrl, params).subscribe(resp => {
-                            if (resp.success) {
-                                this.sqliteProvider.cleanTable('`saisie_inventaire`');
-                                this.toastService.presentToast(resp.data.status);
-                                ret$.next(undefined);
-                            } else {
-                                ret$.next(undefined);
-                            }
-                        }, () => ret$.next(undefined));
-                    });
-                } else {
-                    ret$.next(undefined);
-                }
-            })
-        });
-        return ret$;
+        return this.sqliteProvider
+            .findAll('`saisie_inventaire`')
+            .pipe(
+                flatMap((entries) => (
+                    entries.length > 0
+                        ? this.apiService.requestApi('post', ApiService.ADD_INVENTORY_ENTRIES, {entries})
+                        : of({success: false})
+                )),
+                flatMap((resp) => (
+                    resp.success
+                        ? this.sqliteProvider.cleanTable('`saisie_inventaire`').pipe(
+                            flatMap(() => this.toastService.presentToast(resp.data.status)),
+                            map(() => undefined)
+                        )
+                        : of(undefined)
+                ))
+            );
     }
 
     public synchronize(): void {

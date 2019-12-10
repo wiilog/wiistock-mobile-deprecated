@@ -4,7 +4,6 @@ import {StorageService} from '@app/services/storage.service';
 import moment from 'moment';
 import {Preparation} from '@app/entities/preparation';
 import {Livraison} from '@app/entities/livraison';
-import {Anomalie} from '@app/entities/anomalie';
 import {Observable, ReplaySubject, Subject} from 'rxjs';
 import {flatMap, map, take} from 'rxjs/operators';
 import {from} from 'rxjs/observable/from';
@@ -1117,23 +1116,6 @@ export class SqliteProvider {
                                     resolve();
                                 }
                             }).catch(err => console.log(err));
-                        }).catch(err => console.log(err));
-                    });
-                });
-            }
-        });
-        return resp;
-    }
-
-    public deleteAnomalies(anomalies: Array<Anomalie>) {
-        let resp = new Promise<any>((resolve) => {
-            if (anomalies.length === 0) {
-                resolve();
-            }
-            else {
-                this.db$.subscribe((db) => {
-                    anomalies.forEach(anomaly => {
-                        db.executeSql('DELETE FROM `anomalie_inventaire` WHERE id = ' + anomaly.id, []).then(() => {
                         }).catch(err => console.log(err));
                     });
                 });

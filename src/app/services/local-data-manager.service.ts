@@ -223,7 +223,7 @@ export class LocalDataManagerService {
     public sendMouvementTraca(): Observable<any> {
         return this.sqliteProvider.findAll('mouvement_traca')
             .pipe(
-                flatMap((mouvements: Array<MouvementTraca>) => (
+                map((mouvements: Array<MouvementTraca>) => (
                     mouvements.map(({signature, ...mouvement}) => ({
                         ...mouvement,
                         signature: signature
@@ -232,7 +232,7 @@ export class LocalDataManagerService {
                                 FileService.SIGNATURE_IMAGE_EXTENSION,
                                 FileService.SIGNATURE_IMAGE_TYPE
                             )
-                            : null
+                            : undefined
                     }))
                 )),
                 flatMap((mouvements: Array<MouvementTraca&{signature: File}>) => (
@@ -240,7 +240,7 @@ export class LocalDataManagerService {
                         ? (
                             this.apiService
                                 .requestApi('post', ApiService.POST_MOUVEMENT_TRACA, {
-                                    mouvements: JSON.stringify(mouvements.map(({signature, ...mouvements}) => mouvements)),
+                                    mouvements: mouvements.map(({signature, ...mouvements}) => mouvements),
                                     ...(mouvements.reduce((acc, {signature}, currentIndex) => ({
                                         ...acc,
                                         ...(signature ? {[`signature_${currentIndex}`]: signature} : {})
