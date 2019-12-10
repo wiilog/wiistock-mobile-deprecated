@@ -1,8 +1,10 @@
+@import '../../../theme/variables.scss';
+
 wii-main-loader {
     .spinner-container {
         position: fixed;
         text-align: center;
-        background-color: white;
+        background-color: $white;
         display: flex;
         flex-direction: column;
         align-items: center;
