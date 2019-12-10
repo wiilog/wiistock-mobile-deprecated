@@ -27,7 +27,8 @@ export class InventaireAnomaliePage {
     article: Article;
     locations: Array<string>;
     location: string;
-    isLoaded: boolean;
+
+    public loading: boolean;
 
     private zebraScannerSubscription: Subscription;
 
@@ -44,7 +45,7 @@ export class InventaireAnomaliePage {
     public ionViewWillEnter(): void {
         this.synchronize();
         this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$
-            .pipe(filter(() => this.isLoaded && this.anomalies && this.anomalies.length > 0 ))
+            .pipe(filter(() => (!this.loading && this.anomalies && this.anomalies.length > 0)))
             .subscribe((barcode: string) => {
                 if (this.location) {
                     this.checkBarcodeIsRef(barcode);
@@ -59,7 +60,7 @@ export class InventaireAnomaliePage {
         return this.barcodeScannerManager.canGoBack;
     }
 
-    public ionViewDidLeave(): void {
+    public ionViewWillLeave(): void {
         if (this.zebraScannerSubscription) {
             this.zebraScannerSubscription.unsubscribe();
             this.zebraScannerSubscription = undefined;
@@ -67,7 +68,7 @@ export class InventaireAnomaliePage {
     }
 
     synchronize() {
-        this.isLoaded = false;
+        this.loading = true;
         this.apiService.getApiUrl(ApiService.TREAT_ANOMALIES).subscribe((treatAnomaliesUrl) => {
             this.storageService.getApiKey().subscribe((key) => {
                 this.sqliteProvider.findAll('`anomalie_inventaire`').subscribe(anomalies => {
@@ -90,11 +91,10 @@ export class InventaireAnomaliePage {
                                 this.sqliteProvider.deleteAnomalies(anomalies);
                                 this.toastService.presentToast(resp.data.status);
                             } else {
-                                this.isLoaded = true;
                                 this.toastService.presentToast('Une erreur est survenue lors de la mise à jour des anomalies.');
                             }
                             this.locations = locations;
-                            this.isLoaded = true;
+                            this.loading = false;
                             this.content.resize();
                         });
                     });

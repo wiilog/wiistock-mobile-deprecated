@@ -1,7 +1,7 @@
 <ion-content padding>
-    <wii-main-loader [loading]="isLoaded"></wii-main-loader>
+    <wii-main-loader [loading]="loading"></wii-main-loader>
 
-    <ng-container *ngIf="isLoaded">
+    <ng-container *ngIf="!loading">
         <button ion-button block color="danger" outline (click)="goToAnomalies()" *ngIf="isInventoryManager">Anomalies à traiter</button>
 
         <ion-grid>
@@ -56,7 +56,7 @@
     </ng-container>
 
 </ion-content>
-<ion-footer padding *ngIf="isLoaded && !location">
+<ion-footer padding *ngIf="!loading && !location">
   <div class="d-flex">
     <ion-icon class="big-icon" name="refresh" item-right (click)="synchronize()"></ion-icon>
   </div>
