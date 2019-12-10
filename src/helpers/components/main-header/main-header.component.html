@@ -1,4 +1,5 @@
-<ion-toolbar *ngIf="!loading && headerHide.indexOf(currentPageName) === -1">
+<ion-toolbar *ngIf="!loading && headerHide.indexOf(currentPageName) === -1"
+             #content>
     <button *ngIf="iconPopHide.indexOf(currentPageName) === -1; else leftElement"
             (click)="doPop()">
         <ion-icon name="arrow-back"></ion-icon>

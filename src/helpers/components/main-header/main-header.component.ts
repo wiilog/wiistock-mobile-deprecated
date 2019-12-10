@@ -25,7 +25,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     @Output()
     public heightChange: EventEmitter<number>;
 
-    @ViewChild('content')
+    @ViewChild('content', {read: ElementRef})
     public content: ElementRef;
 
     public loggedUser: string;
@@ -53,8 +53,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     private viewDidEnterSubscription: Subscription;
 
     public constructor(private storageService: StorageService,
-                       private changeDetector: ChangeDetectorRef,
-                       private elementRef: ElementRef) {
+                       private changeDetector: ChangeDetectorRef) {
         this.loading = true;
         this.withHeader = new EventEmitter<boolean>();
         this.heightChange = new EventEmitter<number>();
@@ -91,8 +90,14 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.nav.pop();
     }
 
+    /**
+     * Return blockSize without px
+     */
     private get height(): number {
-        return this.elementRef.nativeElement.getBoundingClientRect().height;
+        const resRegex = this.content
+            ? (/(\d+(?:\.\d+)?).*/.exec((window.getComputedStyle(this.content.nativeElement) as any).blockSize) || [])
+            : [];
+        return resRegex.length > 1 ? resRegex[1] : 0;
     }
 
     private onPageChange(data: any): void {
@@ -115,9 +120,11 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     }
 
     private notifyHeightChange(): void {
-        this.changeDetector.detectChanges();
         setTimeout(() => {
-            this.heightChange.emit(this.height);
+            this.changeDetector.detectChanges();
+            setTimeout(() => {
+                this.heightChange.emit(this.height);
+            });
         });
     }
 }
