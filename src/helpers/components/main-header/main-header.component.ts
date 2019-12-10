@@ -5,7 +5,7 @@ import {Observable, Subscription} from 'rxjs';
 import {MenuPage} from '@pages/menu/menu';
 import {ConnectPage} from '@pages/connect/connect';
 import {ParamsPage} from '@pages/params/params';
-import {filter, flatMap, map, take, tap} from 'rxjs/operators';
+import {flatMap, map, take, tap} from 'rxjs/operators';
 
 
 @Component({
@@ -116,6 +116,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
     private notifyHeightChange(): void {
         this.changeDetector.detectChanges();
-        this.heightChange.emit(this.height);
+        setTimeout(() => {
+            this.heightChange.emit(this.height);
+        });
     }
 }
