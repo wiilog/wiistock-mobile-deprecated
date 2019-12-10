@@ -9,7 +9,7 @@ import moment from "moment";
 @Injectable()
 export class TracaListFactoryService {
 
-    public createListConfig(articles: Array<MouvementTraca>, location: Emplacement, fromPrise: boolean, validate?: () => void): {
+    public createListConfig(articles: Array<MouvementTraca>, location: Emplacement|undefined, fromPrise: boolean, validate?: () => void): {
         header: HeaderConfig;
         body: Array<ListPanelItemConfig>;
     } {
@@ -19,7 +19,7 @@ export class TracaListFactoryService {
         return {
             header: {
                 title: fromPrise ? 'PRISE' : 'DEPOSE',
-                subtitle: `Emplacement : ${location.label}`,
+                subtitle: location ? `Emplacement : ${location.label}` : undefined,
                 info: `${pickedArticlesNumber} produit${plural} scanné${plural}`,
                 leftIcon: {
                     name: fromPrise ? 'upload.svg' : 'download.svg',

@@ -242,7 +242,7 @@ export class DeposePage {
     }
 
     private refreshPriseListComponent(): void {
-        this.priseListConfig = this.tracaListFactory.createListConfig(this.colisPrise, this.emplacement, true);
+        this.priseListConfig = this.tracaListFactory.createListConfig(this.colisPrise, undefined, true);
     }
 
     private refresDeposeListComponent(): void {
