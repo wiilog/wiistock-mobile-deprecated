@@ -67,7 +67,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
         this.viewDidEnterSubscription = this.nav
             .viewDidEnter
-            .pipe(flatMap((data) => this.refreshUser().pipe(map(() => data))))
+            .pipe(
+                flatMap((data) => this.refreshUser().pipe(map(() => data)))
+            )
             .subscribe((data) => {
                 this.onPageChange(data);
                 this.notifyHeightChange();
@@ -114,6 +116,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
     private notifyHeightChange(): void {
         this.changeDetector.detectChanges();
-        this.heightChange.emit(this.height);
+        setTimeout(() => {
+            this.heightChange.emit(this.height);
+        });
     }
 }
