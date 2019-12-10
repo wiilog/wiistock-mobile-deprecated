@@ -5,7 +5,7 @@ import {Observable, Subscription} from 'rxjs';
 import {MenuPage} from '@pages/menu/menu';
 import {ConnectPage} from '@pages/connect/connect';
 import {ParamsPage} from '@pages/params/params';
-import {filter, map, take, tap} from 'rxjs/operators';
+import {filter, flatMap, map, take, tap} from 'rxjs/operators';
 
 
 @Component({
@@ -65,10 +65,15 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             this.notifyHeightChange();
         });
 
-        this.viewDidEnterSubscription = this.nav.viewDidEnter.subscribe((data) => {
-            this.onPageChange(data);
-            this.notifyHeightChange();
-        });
+        this.viewDidEnterSubscription = this.nav
+            .viewDidEnter
+            .pipe(
+                flatMap((data) => this.refreshUser().pipe(map(() => data)))
+            )
+            .subscribe((data) => {
+                this.onPageChange(data);
+                this.notifyHeightChange();
+            });
     }
 
     public ngOnDestroy(): void {
@@ -101,7 +106,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             .getOperateur()
             .pipe(
                 take(1),
-                filter((user: string) => user !== this.loggedUser),
                 map((user: string) => user.substring(0, MainHeaderComponent.MAX_PSEUDO_LENGTH)),
                 tap((user: string) => {
                     this.loggedUser = user;
