@@ -8,7 +8,7 @@
         <div class="icon-placeholder"></div>
     </ng-template>
     <div class="header-title">
-        <img alt="FollowGT" src="assets/images/followgt_bg_transparent.svg" class="logo"/>
+        <img alt="FollowGT" src="assets/images/followgt_bg_transparent.svg" class="logo" (load)="onImageLoad()"/>
         <div class="user" *ngIf="userHide.indexOf(currentPageName) === -1 && loggedUser">{{ loggedUser }}</div>
     </div>
     <button *ngIf="iconMenuHide.indexOf(currentPageName) === -1; else rightElement" (click)="goHome()">

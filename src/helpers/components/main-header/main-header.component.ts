@@ -90,6 +90,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.nav.pop();
     }
 
+    public onImageLoad() {
+        this.notifyHeightChange();
+    }
+
     /**
      * Return blockSize without px
      */
@@ -120,11 +124,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     }
 
     private notifyHeightChange(): void {
-        setTimeout(() => {
-            this.changeDetector.detectChanges();
-            setTimeout(() => {
-                this.heightChange.emit(this.height);
-            });
-        });
+        this.changeDetector.detectChanges();
+        this.heightChange.emit(this.height);
     }
 }
