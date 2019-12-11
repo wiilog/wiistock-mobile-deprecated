@@ -648,28 +648,29 @@ export class SqliteProvider {
         let ret$: ReplaySubject<any> = new ReplaySubject(1);
         let anomalies = data.anomalies;
 
-        if (anomalies.length === 0) {
-            this.cleanTable('`anomalie_inventaire`').subscribe(_ => {
+        this.cleanTable('`anomalie_inventaire`').subscribe(_ => {
+            if (anomalies.length === 0) {
                 ret$.next(undefined);
-            });
-        }
-        else {
-            const anomaliesValuesStr = anomalies
-                .map((anomaly) => (
-                    "(" +
-                    anomaly.id + ", " +
-                    "'" + anomaly.reference + "', " +
-                    anomaly.is_ref + ", " +
-                    "'" + anomaly.quantity + "', " +
-                    "'" + (anomaly.location ? anomaly.location : 'N/A') + "', " +
-                    "'" + anomaly.barCode + "')"
-                ))
-                .join(', ');
-            let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `location`, `barcode`) VALUES ' + anomaliesValuesStr + ';';
-            this.executeQuery(sqlAnomaliesInventaire).subscribe(() => {
-                ret$.next(true);
-            });
-        }
+            }
+            else {
+                const anomaliesValuesStr = anomalies
+                    .map((anomaly) => (
+                        "(" +
+                        anomaly.id + ", " +
+                        "'" + anomaly.reference + "', " +
+                        anomaly.is_ref + ", " +
+                        "'" + anomaly.quantity + "', " +
+                        "'" + (anomaly.location ? anomaly.location : 'N/A') + "', " +
+                        "'" + anomaly.barCode + "')"
+                    ))
+                    .join(', ');
+                let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `location`, `barcode`) VALUES ' + anomaliesValuesStr + ';';
+                this.executeQuery(sqlAnomaliesInventaire).subscribe(() => {
+                    ret$.next(true);
+                });
+            }
+        });
+
         return ret$;
     }
 
