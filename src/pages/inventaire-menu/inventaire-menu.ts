@@ -29,7 +29,8 @@ export class InventaireMenuPage {
     locations: Array<string>;
     location: string;
     isInventoryManager: boolean;
-    isLoaded: boolean;
+
+    public loading: boolean;
 
     private zebraScannerSubscription: Subscription;
 
@@ -45,14 +46,14 @@ export class InventaireMenuPage {
     }
 
     public ionViewWillEnter(): void {
-        this.synchronize();
-
+        this.loading = true;
         this.storageService.getInventoryManagerRight().subscribe((isInventoryManager) => {
             this.isInventoryManager = isInventoryManager;
+            this.synchronize();
         });
 
         this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$
-            .pipe(filter(() => (this.isLoaded && this.articles && this.articles.length > 0)))
+            .pipe(filter(() => (!this.loading && this.articles && this.articles.length > 0)))
             .subscribe((barcode: string) => {
                 if (!this.location) {
                     this.checkBarcodeIsLocation(barcode);
@@ -97,8 +98,8 @@ export class InventaireMenuPage {
         return ret$;
     }
 
-    synchronize() {
-        this.isLoaded = false;
+    public synchronize(): void {
+        this.loading = true;
         this.sqliteProvider.findAll('`article_inventaire`').subscribe(articles => {
             this.articles = articles;
             let locations = [];
@@ -109,7 +110,7 @@ export class InventaireMenuPage {
             });
             this.addInventoryEntries().subscribe(_ => {
                 this.locations = locations;
-                this.isLoaded = true;
+                this.loading = false;
                 this.content.resize();
             });
         });
