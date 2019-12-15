@@ -102,7 +102,7 @@ export class DeposePage {
                         this.testColisDepose(barcode);
                     });
 
-                    this.refresDeposeListComponent();
+                    this.refreshDeposeListComponent();
                     this.refreshPriseListComponent();
                     this.loading = false;
                 });
@@ -178,7 +178,7 @@ export class DeposePage {
         const priseExists = this.priseExists(barCode);
         if (priseExists) {
             if (isManualInput) {
-                this.openConfirmDeposePage(barCode);
+                this.saveMouvementTracaWrapper(barCode);
             }
             else {
                 this.alertController
@@ -191,7 +191,7 @@ export class DeposePage {
                             {
                                 text: 'Confirmer',
                                 handler: () => {
-                                    this.openConfirmDeposePage(barCode);
+                                    this.saveMouvementTracaWrapper(barCode);
                                 },
                                 cssClass: 'alertAlert'
                             }
@@ -205,18 +205,23 @@ export class DeposePage {
         }
     }
 
-    private openConfirmDeposePage(barCode: string): void {
-        this.navCtrl.push(DeposeConfirmPage, {
-            location: this.emplacement,
-            barCode,
-            fromStock: this.fromStock,
-            validateDepose: (comment, signature) => {
-                this.saveMouvementTraca(barCode, comment, signature);
-            }
-        });
+    private saveMouvementTracaWrapper(barCode: string): void {
+        if (this.fromStock) {
+            this.saveMouvementTraca(barCode);
+        }
+        else {
+            this.navCtrl.push(DeposeConfirmPage, {
+                location: this.emplacement,
+                barCode,
+                fromStock: this.fromStock,
+                validateDepose: (comment, signature) => {
+                    this.saveMouvementTraca(barCode, comment, signature);
+                }
+            });
+        }
     }
 
-    private saveMouvementTraca(barCode: string, comment: string, signature: string): void {
+    private saveMouvementTraca(barCode: string, comment?: string, signature?: string): void {
         const firstPriseMatchingIndex = this.colisPrise.findIndex(({ref_article}) => (ref_article === barCode));
         let quantity;
         if (firstPriseMatchingIndex > -1) {
@@ -238,7 +243,7 @@ export class DeposePage {
         });
 
         this.refreshPriseListComponent();
-        this.refresDeposeListComponent();
+        this.refreshDeposeListComponent();
     }
 
     private refreshPriseListComponent(): void {
@@ -253,7 +258,7 @@ export class DeposePage {
         );
     }
 
-    private refresDeposeListComponent(): void {
+    private refreshDeposeListComponent(): void {
         this.deposeListConfig = this.tracaListFactory.createListConfig(
             this.colisDepose,
             this.emplacement,

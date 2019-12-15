@@ -1,5 +1,6 @@
 import {Component, EventEmitter, Output} from '@angular/core';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
+import {ToastService} from "@app/services/toast.service";
 
 
 @Component({
@@ -13,7 +14,8 @@ export class BarcodeScannerComponent {
     @Output()
     public add: EventEmitter<[string, boolean]> = new EventEmitter();
 
-    public constructor(private barcodeScannerManager: BarcodeScannerManagerService) {}
+    public constructor(private barcodeScannerManager: BarcodeScannerManagerService,
+                       private toastService: ToastService) {}
 
     public scan(): void {
         this.barcodeScannerManager.scan().subscribe((barcode) => {
@@ -25,6 +27,9 @@ export class BarcodeScannerComponent {
         if (this.input) {
             this.add.emit([this.input, true]);
             this.clear()
+        }
+        else {
+            this.toastService.presentToast('Aucune donnée saisie');
         }
     }
 

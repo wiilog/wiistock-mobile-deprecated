@@ -37,7 +37,8 @@ export class ApiService {
 
     public requestApi(method: string,
                       service: string,
-                      params: {[x: string]: any} = {}, secured: boolean = true): Observable<any> {
+                      params: {[x: string]: any} = {},
+                      secured: boolean = true): Observable<any> {
         const storageDataArray$ = [
             this.getApiUrl(service),
             ...(secured ? [this.storageService.getApiKey()] : [])
@@ -49,7 +50,7 @@ export class ApiService {
             .pipe(
                 flatMap(([url, apiKey]) => {
                     const keyParam = (method === 'get' || method === 'delete')
-                        ? 'param'
+                        ? 'params'
                         : 'body';
 
                     const tmpParams = {

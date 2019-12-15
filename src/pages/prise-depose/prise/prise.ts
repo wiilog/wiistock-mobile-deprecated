@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
+import {AlertController, IonicPage, Loading, NavController, NavParams} from 'ionic-angular';
 import {Emplacement} from '@app/entities/emplacement';
 import {ChangeDetectorRef} from '@angular/core';
 import {Observable, Subscription} from 'rxjs';
@@ -13,10 +13,12 @@ import {MouvementTraca} from '@app/entities/mouvement-traca';
 import {StorageService} from '@app/services/storage.service';
 import moment from 'moment';
 import {BarcodeScannerComponent} from '@helpers/components/barcode-scanner/barcode-scanner.component';
-import {flatMap, map} from 'rxjs/operators';
+import {flatMap, map, tap} from 'rxjs/operators';
 import {Network} from '@ionic-native/network';
 import {of} from 'rxjs/observable/of';
 import {ApiService} from '@app/services/api.service';
+import {LoadingService} from "@app/services/loading.service";
+import {from} from "rxjs/observable/from";
 
 
 @IonicPage()
@@ -39,10 +41,12 @@ export class PrisePage {
     public listBoldValues: Array<string>;
 
     public loading: boolean;
+    public barcodeCheckLoading: boolean;
 
     private zebraScanSubscription: Subscription;
-    private finishPrise: () => void;
+    private barcodeCheckSubscription: Subscription;
 
+    private finishPrise: () => void;
     private operator: string;
     private apiLoading: boolean;
 
@@ -54,6 +58,7 @@ export class PrisePage {
                        private apiService: ApiService,
                        private alertController: AlertController,
                        private toastService: ToastService,
+                       private loadingService: LoadingService,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private changeDetectorRef: ChangeDetectorRef,
                        private localDataManager: LocalDataManagerService,
@@ -84,15 +89,20 @@ export class PrisePage {
     }
 
     public ionViewWillLeave(): void {
+        this.barcodeCheckLoading = false;
         if (this.zebraScanSubscription) {
             this.zebraScanSubscription.unsubscribe();
             this.zebraScanSubscription = undefined;
+        }
+        if (this.barcodeCheckSubscription) {
+            this.barcodeCheckSubscription.unsubscribe();
+            this.barcodeCheckSubscription = undefined;
         }
     }
 
 
     public ionViewCanLeave(): boolean {
-        return !this.footerScannerComponent.isScanning;
+        return !this.footerScannerComponent.isScanning && !this.barcodeCheckLoading && !this.apiLoading;
     }
 
     public finishTaking(): void {
@@ -100,20 +110,37 @@ export class PrisePage {
             const multiPrise = (this.colisPrise.length > 1);
             if (!this.apiLoading) {
                 this.apiLoading = true;
+                let loader: Loading;
                 this.localDataManager
                     .saveMouvementsTraca(this.colisPrise)
                     .pipe(
                         flatMap(() => {
                             const online = (this.network.type !== 'none');
                             return online
-                                ? this.toastService
-                                    .presentToast(multiPrise ? 'Envoi des prises en cours...' : 'Envoi de la prise en cours...')
-                                    .pipe(map(() => online))
+                                ? this.loadingService
+                                    .presentLoading(multiPrise ? 'Envoi des prises en cours...' : 'Envoi de la prise en cours...')
+                                    .pipe(
+                                        tap((presentedLoader: Loading) =>  {
+                                            loader = presentedLoader;
+                                        }),
+                                        map(() => online)
+                                    )
                                 : of(online)
                         }),
                         flatMap((online: boolean) => (
                             online
-                                ? this.localDataManager.sendMouvementTraca().pipe(map(() => online))
+                                ? this.localDataManager
+                                    .sendMouvementTraca()
+                                    .pipe(
+                                        flatMap(() => (
+                                            loader
+                                                ? from(loader.dismiss())
+                                                : of(undefined)
+                                        )),
+                                        tap(() => {
+                                            loader = undefined;
+                                        }),
+                                        map(() => online))
                                 : of(online)
                         )),
                         // we display toast
@@ -133,6 +160,10 @@ export class PrisePage {
                         },
                         () => {
                             this.apiLoading = false;
+                            if (loader) {
+                                loader.dismiss();
+                                loader = undefined;
+                            }
                         });
             }
         }
@@ -150,8 +181,19 @@ export class PrisePage {
 
     public testIfBarcodeEquals(barCode: string, isManualAdd: boolean = false): void {
         if (!this.fromStock || this.network.type !== 'none') {
-            this.existsOnLocation(barCode).subscribe(
-                (quantity) => {
+            this.barcodeCheckLoading = true;
+            let loader: Loading;
+            this.barcodeCheckSubscription = this.loadingService
+                .presentLoading('Vérification...')
+                .pipe(
+                    tap((presentedLoader) => {
+                        loader = presentedLoader;
+                    }),
+                    flatMap(() => this.existsOnLocation(barCode)),
+                    flatMap((quantity) => from(loader.dismiss()).pipe(map(() => quantity)))
+                )
+                .subscribe((quantity) => {
+                    this.barcodeCheckLoading = false;
                     if (quantity) {
                         if (this.colisPrise && this.colisPrise.some((colis) => (colis.ref_article === barCode))) {
                             this.toastService.presentToast('Cet prise a déjà été effectuée');
@@ -187,8 +229,7 @@ export class PrisePage {
                     else {
                         this.toastService.presentToast('Ce code barre n\'est pas présent sur cet emplacement');
                     }
-                }
-            )
+            });
         }
         else {
             this.toastService.presentToast('Vous devez être connecté à internet pour effectuer une prise');
