@@ -45,6 +45,7 @@ export class PrisePage {
 
     private zebraScanSubscription: Subscription;
     private barcodeCheckSubscription: Subscription;
+    private saveSubscription: Subscription;
 
     private finishPrise: () => void;
     private operator: string;
@@ -98,6 +99,10 @@ export class PrisePage {
             this.barcodeCheckSubscription.unsubscribe();
             this.barcodeCheckSubscription = undefined;
         }
+        if (this.saveSubscription) {
+            this.saveSubscription.unsubscribe();
+            this.saveSubscription = undefined;
+        }
     }
 
 
@@ -111,7 +116,7 @@ export class PrisePage {
             if (!this.apiLoading) {
                 this.apiLoading = true;
                 let loader: Loading;
-                this.localDataManager
+                this.saveSubscription = this.localDataManager
                     .saveMouvementsTraca(this.colisPrise)
                     .pipe(
                         flatMap(() => {
@@ -140,7 +145,8 @@ export class PrisePage {
                                         tap(() => {
                                             loader = undefined;
                                         }),
-                                        map(() => online))
+                                        map(() => online)
+                                    )
                                 : of(online)
                         )),
                         // we display toast

@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
+import {AlertController, IonicPage, Loading, NavController, NavParams} from 'ionic-angular';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ToastService} from '@app/services/toast.service';
@@ -14,9 +14,11 @@ import {ListPanelItemConfig} from "@helpers/components/panel/model/list-panel/li
 import {TracaListFactoryService} from "@app/services/traca-list-factory.service";
 import moment from 'moment';
 import {DeposeConfirmPage} from "@pages/prise-depose/depose-confirm/depose-confirm";
-import {flatMap, map} from "rxjs/operators";
+import {flatMap, map, tap} from "rxjs/operators";
 import {of} from "rxjs/observable/of";
 import {Network} from "@ionic-native/network";
+import {LoadingService} from "@app/services/loading.service";
+import {from} from "rxjs/observable/from";
 
 
 @IonicPage()
@@ -36,14 +38,6 @@ export class DeposePage {
     public colisDepose: Array<MouvementTraca>;
     public prisesToFinish: Array<number>;
 
-    private fromStock: boolean;
-
-    private zebraScanSubscription: Subscription;
-
-    private finishDepose: () => void;
-
-    private apiLoading: boolean;
-
     public priseListConfig: {
         header: HeaderConfig;
         body: Array<ListPanelItemConfig>;
@@ -58,6 +52,15 @@ export class DeposePage {
 
     public loading: boolean;
 
+    private fromStock: boolean;
+
+    private zebraScanSubscription: Subscription;
+    private saveSubscription: Subscription;
+
+    private finishDepose: () => void;
+
+    private apiLoading: boolean;
+
     private operator: string;
 
     public constructor(private navCtrl: NavController,
@@ -65,6 +68,7 @@ export class DeposePage {
                        private navParams: NavParams,
                        private alertController: AlertController,
                        private toastService: ToastService,
+                       private loadingService: LoadingService,
                        private sqliteProvider: SqliteProvider,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private localDataManager: LocalDataManagerService,
@@ -114,6 +118,10 @@ export class DeposePage {
             this.zebraScanSubscription.unsubscribe();
             this.zebraScanSubscription = undefined;
         }
+        if (this.saveSubscription) {
+            this.saveSubscription.unsubscribe();
+            this.saveSubscription = undefined;
+        }
     }
 
     public ionViewCanLeave(): boolean {
@@ -125,20 +133,38 @@ export class DeposePage {
             if(!this.apiLoading) {
                 this.apiLoading = true;
                 const multiDepose = (this.colisDepose.length > 1);
-                this.localDataManager
+                let loader: Loading;
+                this.saveSubscription = this.localDataManager
                     .saveMouvementsTraca(this.colisDepose, this.prisesToFinish)
                     .pipe(
                         flatMap(() => {
                             const online = (this.network.type !== 'none');
                             return online
-                                ? this.toastService
-                                    .presentToast(multiDepose ? 'Envoi des déposes en cours...' : 'Envoi de la dépose en cours...')
-                                    .pipe(map(() => online))
+                                ? this.loadingService
+                                    .presentLoading(multiDepose ? 'Envoi des déposes en cours...' : 'Envoi de la dépose en cours...')
+                                    .pipe(
+                                        tap((presentedLoader: Loading) =>  {
+                                            loader = presentedLoader;
+                                        }),
+                                        map(() => online)
+                                    )
                                 : of(online)
                         }),
                         flatMap((online: boolean) => (
                             online
-                                ? this.localDataManager.sendMouvementTraca().pipe(map(() => online))
+                                ? this.localDataManager
+                                    .sendMouvementTraca()
+                                    .pipe(
+                                        flatMap(() => (
+                                            loader
+                                                ? from(loader.dismiss())
+                                                : of(undefined)
+                                        )),
+                                        tap(() => {
+                                            loader = undefined;
+                                        }),
+                                        map(() => online)
+                                    )
                                 : of(online)
                         )),
                         // we display toast
@@ -158,6 +184,10 @@ export class DeposePage {
                         },
                         () => {
                             this.apiLoading = false;
+                            if (loader) {
+                                loader.dismiss();
+                                loader = undefined;
+                            }
                         });
             }
         }
