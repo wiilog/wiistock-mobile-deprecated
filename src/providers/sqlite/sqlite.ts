@@ -62,7 +62,7 @@ export class SqliteProvider {
                 db.executeSql('CREATE TABLE IF NOT EXISTS `article` (`id` INTEGER PRIMARY KEY, `reference` VARCHAR(255), `quantite` INTEGER, `barcode` TEXT)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location` TEXT, `type` VARCHAR(255), `is_ref` INTEGER, `id_article_prepa` INTEGER, `id_prepa` INTEGER, `id_article_livraison` INTEGER, `id_livraison` INTEGER, `id_article_collecte` INTEGER, `id_collecte` INTEGER, `selected_by_article` INTEGER)', []),
-                db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` INTEGER, `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255), `comment` VARCHAR(255), `signature` TEXT, finished INTEGER, fromStock INTEGER, quantity INTEGER)', []),
+                db.executeSql('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` VARCHAR(255), `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255), `comment` VARCHAR(255), `signature` TEXT, finished INTEGER, fromStock INTEGER, quantity INTEGER)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)', []),
                 db.executeSql('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)', []),
                 db.executeSql('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER, `destination` INTEGER, `type` TEXT)', []),
@@ -650,28 +650,29 @@ export class SqliteProvider {
         let ret$: ReplaySubject<any> = new ReplaySubject(1);
         let anomalies = data.anomalies;
 
-        if (anomalies.length === 0) {
-            this.cleanTable('`anomalie_inventaire`').subscribe(_ => {
+        this.cleanTable('`anomalie_inventaire`').subscribe(_ => {
+            if (anomalies.length === 0) {
                 ret$.next(undefined);
-            });
-        }
-        else {
-            const anomaliesValuesStr = anomalies
-                .map((anomaly) => (
-                    "(" +
-                    anomaly.id + ", " +
-                    "'" + anomaly.reference + "', " +
-                    anomaly.is_ref + ", " +
-                    "'" + anomaly.quantity + "', " +
-                    "'" + (anomaly.location ? anomaly.location : 'N/A') + "', " +
-                    "'" + anomaly.barCode + "')"
-                ))
-                .join(', ');
-            let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `location`, `barcode`) VALUES ' + anomaliesValuesStr + ';';
-            this.executeQuery(sqlAnomaliesInventaire).subscribe(() => {
-                ret$.next(true);
-            });
-        }
+            }
+            else {
+                const anomaliesValuesStr = anomalies
+                    .map((anomaly) => (
+                        "(" +
+                        anomaly.id + ", " +
+                        "'" + anomaly.reference + "', " +
+                        anomaly.is_ref + ", " +
+                        "'" + anomaly.quantity + "', " +
+                        "'" + (anomaly.location ? anomaly.location : 'N/A') + "', " +
+                        "'" + anomaly.barCode + "')"
+                    ))
+                    .join(', ');
+                let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `location`, `barcode`) VALUES ' + anomaliesValuesStr + ';';
+                this.executeQuery(sqlAnomaliesInventaire).subscribe(() => {
+                    ret$.next(true);
+                });
+            }
+        });
+
         return ret$;
     }
 

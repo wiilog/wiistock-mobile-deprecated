@@ -93,10 +93,12 @@ export class InventaireMenuPage {
         this.loading = true;
         this.sqliteProvider.findAll('`article_inventaire`').subscribe(articles => {
             this.articles = articles;
-            let locations = articles
-                .filter(({location}) => (location && locations.indexOf(location) === -1))
-                .map(({location}) => location);
-
+            let locations = [];
+            articles.forEach(article => {
+                if (locations.indexOf(article.location) < 0 && article.location) {
+                    locations.push(article.location);
+                }
+            });
             this.addInventoryEntries().subscribe(_ => {
                 this.locations = locations;
                 this.loading = false;
