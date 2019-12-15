@@ -242,11 +242,24 @@ export class DeposePage {
     }
 
     private refreshPriseListComponent(): void {
-        this.priseListConfig = this.tracaListFactory.createListConfig(this.colisPrise, undefined, true);
+        this.priseListConfig = this.tracaListFactory.createListConfig(
+            this.colisPrise,
+            undefined,
+            true,
+            undefined,
+            ({object}) => {
+                this.testColisDepose(object.value, true);
+            }
+        );
     }
 
     private refresDeposeListComponent(): void {
-        this.deposeListConfig = this.tracaListFactory.createListConfig(this.colisDepose, this.emplacement, false, (() => this.finishTaking()));
+        this.deposeListConfig = this.tracaListFactory.createListConfig(
+            this.colisDepose,
+            this.emplacement,
+            false,
+            () => this.finishTaking()
+        );
     }
 
     private init(): void {

@@ -4,12 +4,17 @@ import {ListPanelItemConfig} from '@helpers/components/panel/model/list-panel/li
 import {Emplacement} from '@app/entities/emplacement';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import moment from "moment";
+import {IconColor} from "@helpers/components/icon/icon-color";
 
 
 @Injectable()
 export class TracaListFactoryService {
 
-    public createListConfig(articles: Array<MouvementTraca>, location: Emplacement|undefined, fromPrise: boolean, validate?: () => void): {
+    public createListConfig(articles: Array<MouvementTraca>,
+                            location: Emplacement|undefined,
+                            fromPrise: boolean,
+                            validate?: () => void,
+                            uploadItem?: (item: {[name: string]: {label: string; value: string;} }) => void): {
         header: HeaderConfig;
         body: Array<ListPanelItemConfig>;
     } {
@@ -37,8 +42,8 @@ export class TracaListFactoryService {
                         : {}
                 )
             },
-            body: articles.map(({date, ref_article, quantity}) => ({
-                infos: {
+            body: articles.map(({date, ref_article, quantity}) => {
+                const infos = {
                     object: {
                         label: 'Objet',
                         value: ref_article
@@ -55,8 +60,20 @@ export class TracaListFactoryService {
                         label: 'Date / Heure',
                         value: moment(date, moment.defaultFormat).format('DD/MM/YYYY HH:mm:ss')
                     }
-                }
-            }))
+                };
+                return {
+                    infos,
+                    ...(uploadItem
+                        ? {
+                            rightIcon: {
+                                color: 'grey' as IconColor,
+                                name: 'up.svg',
+                                action: () => uploadItem(infos)
+                            }
+                        }
+                        : {})
+                };
+            })
         }
     }
 }

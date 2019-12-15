@@ -6,7 +6,24 @@ wii-list-panel-item {
     border: 1px solid $lightBlue;
     padding: 1.5rem;
 
-    .element-value-bold {
-        font-weight: bold;
+    .list-element-wrapper {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+
+        .list-element-body-wrapper {
+            flex: 1;
+            .element-value-bold {
+                font-weight: bold;
+            }
+        }
+
+        .list-element-icon {
+            padding-left: 1rem;
+            wii-icon {
+                height: 2rem;
+                width: 2rem;
+            }
+        }
     }
 }

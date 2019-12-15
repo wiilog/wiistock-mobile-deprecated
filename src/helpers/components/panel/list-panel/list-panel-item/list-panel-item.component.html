@@ -5,4 +5,11 @@
             {{line.label}} : <span class="element-value" [class.element-value-bold]="boldValues.indexOf(line.key) > -1">{{line.value}}</span>
         </div>
     </div>
+    <div class="list-element-icon"
+         *ngIf="rightIcon">
+        <wii-icon [name]="rightIcon.name"
+                  [color]="rightIcon.color"
+                  (action)="rightIcon.action()">
+        </wii-icon>
+    </div>
 </div>
