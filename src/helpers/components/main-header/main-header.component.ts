@@ -35,9 +35,11 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         ParamsPage.name
     ];
 
-    public readonly iconPopHide: Array<string> = [
+    public readonly iconLogoutShow: Array<string> = [
         MainMenuPage.name
     ];
+
+    public readonly iconLeftHide: Array<string> = [];
 
     public readonly userHide: Array<string> = [
         ParamsPage.name
@@ -88,6 +90,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
     public doPop(): void {
         this.nav.pop();
+    }
+
+    public doLogout(): void {
+        this.nav.setRoot(ConnectPage);
     }
 
     public onImageLoad() {

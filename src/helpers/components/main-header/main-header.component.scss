@@ -5,8 +5,13 @@ wii-main-header {
     display: block;
 
     ion-toolbar {
-        .icon-placeholder {
-            width: 29px;
+        .header-icon-container {
+            padding: 6px;
+
+            .header-icon {
+                height: 21px;
+                width: 21px;
+            }
         }
 
         .toolbar-content {
