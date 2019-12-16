@@ -5,31 +5,37 @@
 </div>
 <wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
 <ion-scroll scrollY="true" *ngIf="hasLoaded" class="page-content">
-    <ion-item class="readonly" text-wrap>
-        <ion-label>Demandeur</ion-label>
-        <ion-textarea value="{{ manutention.demandeur }}" [readonly]="true"></ion-textarea>
-    </ion-item>
-    <ion-item class="readonly" text-wrap>
-        <ion-label>Date attendue</ion-label>
-        <ion-textarea value="{{ toDate(manutention) | date:'dd/MM/yyyy H:mm'  }}"
-                      [readonly]="true"></ion-textarea>
-    </ion-item>
-    <ion-item class="readonly" text-wrap>
-        <ion-label>Source</ion-label>
-        <ion-textarea value="{{ manutention.source  }}" [readonly]="true"></ion-textarea>
-    </ion-item>
-    <ion-item class="readonly" text-wrap>
-        <ion-label>Destination</ion-label>
-        <ion-textarea value="{{ manutention.destination }}" [readonly]="true"></ion-textarea>
-    </ion-item>
+    <ion-list class="manutention-details">
+        <ion-row>
+            <ion-col class="label">Demandeur</ion-col>
+            <ion-col class="value">{{ manutention.demandeur }}</ion-col>
+        </ion-row>
+        <ion-row>
+            <ion-col class="label">Date attendue</ion-col>
+            <ion-col class="value">{{ toDate(manutention) | date:'dd/MM/yyyy H:mm'  }}</ion-col>
+        </ion-row>
+        <ion-row>
+            <ion-col class="label">Source</ion-col>
+            <ion-col class="value">{{ manutention.source }}"</ion-col>
+        </ion-row>
+        <ion-row>
+            <ion-col class="label">Destination</ion-col>
+            <ion-col class="value">{{ manutention.destination }}"</ion-col>
+        </ion-row>
+    </ion-list>
     <button class="commentaire_button" (click)="showCommentaire()">
         <span><b>Commentaire</b></span>
-        <wii-icon name="search.svg" class="icon"></wii-icon>
+        <wii-icon name="search.svg" class="icon" color="dark"></wii-icon>
     </button>
     <div class="commentaire" *ngIf="showCom" [innerHTML]="manutention.commentaire">
     </div>
-    <button class="validate_button" (click)="validateManut()">
-        <span><b>VALIDER</b></span>
-        <wii-icon name="check.svg" class="icon"></wii-icon>
-    </button>
 </ion-scroll>
+<div class="page-footer">
+    <button class="validate-button"
+            color="success"
+            ion-button
+            (click)="validateManut()">
+        <span><b>VALIDER</b></span>
+        <wii-icon name="check.svg" class="icon" color="white"></wii-icon>
+    </button>
+</div>

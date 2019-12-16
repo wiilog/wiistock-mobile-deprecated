@@ -40,10 +40,12 @@ $danger: #F53D3D;
 $lightGrey: #F2F2F4;
 $darkGrey: #424242;
 $green: #149914;
+$success: $green;
+$dark: #222;
 
 $colors: (
     primary: $primary,
-    success: $green,
+    success: $success,
     secondary: #32db64,
     danger: $danger,
     light: #f4f4f4,

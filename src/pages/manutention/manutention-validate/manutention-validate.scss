@@ -5,27 +5,35 @@ page-manutention-validate {
         background-color: #030F4C !important;
     }
 
-    span {
-        color: white !important;
-        font-size: 20px;
-    }
-
     .user-title {
         .toolbar-title {
-            color: white;
+            color: $white;
         }
 
         text-align: center !important;
     }
 
-    .custom-button,
-    .custom-button.icon:before {
-        font-size: 30px !important;
-        color: white !important;
+    .validate-button{
+        .icon {
+            height: 30px;
+            width: 30px;
+        }
     }
 
-    .button-custom {
-        margin: -5px 0 -5px -5px !important;
+    .commentaire_button {
+        wii-icon {
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+        }
+
+        margin: auto;
+        display: block;
+        background-color: transparent;
+        text-align: center;
+        height: 70px;
+        width: 100%;
+        color: $dark;
     }
 
     ion-navbar.toolbar {
@@ -33,12 +41,12 @@ page-manutention-validate {
     }
 
     ion-card-header {
-        background-color: #149914;
+        background-color: $success;
         height: 30px;
         padding: 5px !important;
 
         p {
-            color: white !important;
+            color: $white !important;
         }
     }
 
@@ -67,50 +75,32 @@ page-manutention-validate {
         color: #030F4C;
     }
 
-    .search-icon {
-        width: 15px !important;
-        height: 15px !important;
-        display: inline-block;
-    }
+    .manutention-details {
+        background-color: $white;
 
-    ion-icon {
-        font-size: 100% !important;
-    }
+        ion-row {
+            &:not(:last-child) {
+                border-bottom: 1px solid #dedede;
+            }
+            ion-col {
+                padding: 20px;
 
-    .readonly {
-        pointer-events: none !important;
-    }
+                &.label {
+                    font-size: 14px;
+                    width: 30% !important;
+                }
 
-    ion-label {
-        width: 30% !important;
-    }
-
-    .validate_button {
-        margin: auto;
-        display: block;
-        background-color: #149914;
-        text-align: center;
-        height: 70px;
-        width: 80%;
+                &.value {
+                    font-size: 16px;
+                    color: black;
+                }
+            }
+        }
     }
 
     .commentaire {
         margin-bottom: 7%;
         padding: 5px;
-    }
-
-    .commentaire_button {
-        span {
-            margin-right: 5px;
-            color: black !important;
-        }
-
-        margin: auto;
-        display: block;
-        background-color: #F2F2F4;
-        text-align: center;
-        height: 70px;
-        width: 100%;
     }
 
     .alert {
@@ -119,9 +109,8 @@ page-manutention-validate {
     }
 
     .page-content {
-        margin: -$spacer;
         background-color: #F2F2F4 !important;
-        height: 80%;
+        flex: 1;
 
         .item-inner {
             padding-left: 8px;
