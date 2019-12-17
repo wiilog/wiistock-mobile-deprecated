@@ -91,50 +91,52 @@ export class InventaireMenuPage {
 
     public synchronize(): void {
         this.loading = true;
-        this.sqliteProvider.findAll('`article_inventaire`').subscribe(articles => {
-            this.articles = articles;
-            let locations = [];
-            articles.forEach(article => {
-                if (locations.indexOf(article.location) < 0 && article.location) {
-                    locations.push(article.location);
-                }
-            });
-            this.addInventoryEntries().subscribe(_ => {
-                this.locations = locations;
+        this.addInventoryEntries()
+            .pipe(flatMap(() => this.sqliteProvider.findAll('`article_inventaire`')))
+            .subscribe((articles) => {
+                this.articles = articles;
+                this.locations = this.articles
+                    .reduce((acc, {location}) => ([
+                        ...acc,
+                        ...(acc.indexOf(location) === -1 ? [location] : [])
+                    ]), []);
                 this.loading = false;
                 this.content.resize();
             });
-        });
     }
 
 
     async openModalQuantity(article) {
-        let modal = this.modalController.create(ModalQuantityPage, {article: article});
-        modal.onDidDismiss(data => {
-            //crée saisie inventaire et envoie vers api
-            let saisieInventaire: SaisieInventaire = {
-                id: null,
-                id_mission: article.id_mission,
-                date: moment().format(),
-                reference: article.reference,
-                is_ref: article.is_ref,
-                quantity: data.quantity,
-                location: article.location,
-            };
-            this.sqliteProvider.insert('`saisie_inventaire`', saisieInventaire).subscribe(() => {
-                // supprime l'article de la base
-                this.sqliteProvider.deleteById('`article_livraison`', article.id);
-                // supprime la ligne des tableaux
-                let index1 = this.articles.indexOf(article);
-                if (index1 > -1) this.articles.splice(index1, 1);
-                let index2 = this.articlesByLocation.indexOf(article);
-                if (index2 > -1) this.articlesByLocation.splice(index2, 1);
-                this.addInventoryEntries();
-                // si liste vide retour aux emplacements
-                if (this.articlesByLocation.length === 0) {
-                    this.backToLocations();
-                }
-            });
+        let modal = this.modalController.create(ModalQuantityPage);
+        modal.onDidDismiss((data) => {
+            if (data && data.quantity) {
+                //crée saisie inventaire et envoie vers api
+                let saisieInventaire: SaisieInventaire = {
+                    id: null,
+                    id_mission: article.id_mission,
+                    date: moment().format(),
+                    reference: article.reference,
+                    is_ref: article.is_ref,
+                    quantity: data.quantity,
+                    location: article.location,
+                };
+                Observable.zip(
+                    this.sqliteProvider.insert('`saisie_inventaire`', saisieInventaire),
+                    this.sqliteProvider.deleteById('`article_inventaire`', article.id)
+                ).subscribe(() => {
+                    // supprime la ligne des tableaux
+                    let index1 = this.articles.indexOf(article);
+                    if (index1 > -1) this.articles.splice(index1, 1);
+                    let index2 = this.articlesByLocation.indexOf(article);
+                    if (index2 > -1) this.articlesByLocation.splice(index2, 1);
+                    this.addInventoryEntries().subscribe(() => {
+                        // si liste vide retour aux emplacements
+                        if (this.articlesByLocation.length === 0) {
+                            this.backToLocations();
+                        }
+                    });
+                });
+            }
         });
         modal.present();
     }
@@ -171,7 +173,7 @@ export class InventaireMenuPage {
     }
 
     checkBarcodeIsRef(barcode: string) {
-        if (this.articlesByLocation.some(article => (article.barcode === barcode))) {
+        if (this.articlesByLocation.some((article) => (article.barcode === barcode))) {
             this.article = this.articlesByLocation.find(article => (article.barcode === barcode));
             this.changeDetector.detectChanges();
             this.openModalQuantity(this.article);

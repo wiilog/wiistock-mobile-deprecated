@@ -1,7 +1,14 @@
 <ion-content>
-    <ion-list>
-        <ion-item>
-            <ion-input #inputQuantity type="number" [(ngModel)]="quantity">{{ quantity }}</ion-input>
-        </ion-item>
-    </ion-list>
+    <form (ngSubmit)="dismiss()">
+        <ion-list>
+            <ion-item>
+                <ion-label>Quantité relevée :</ion-label>
+                <ion-input #inputQuantity
+                           autofocus
+                           type="number"
+                           name="quantity"
+                           [(ngModel)]="quantity">{{ quantity }}</ion-input>
+            </ion-item>
+        </ion-list>
+    </form>
 </ion-content>

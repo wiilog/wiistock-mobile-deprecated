@@ -1,27 +1,26 @@
 import {Component, ViewChild} from '@angular/core';
-import {NavParams, ViewController} from 'ionic-angular';
-import {ArticleInventaire} from '@app/entities/article-inventaire';
+import {TextInput, ViewController} from 'ionic-angular';
+
 
 @Component({
     templateUrl: 'modal-quantity.html',
 })
 export class ModalQuantityPage {
-    @ViewChild('inputQuantity') inputQuantity;
-    article: ArticleInventaire;
-    quantity: number;
-    locations: Array<string>;
-    location: string;
+    @ViewChild('inputQuantity')
+    public inputQuantity: TextInput;
 
-    constructor(params: NavParams, public viewCtrl: ViewController) {
-        this.article = params.data.article;
+    public quantity: number;
+
+    public constructor(private viewCtrl: ViewController) {}
+
+    public dismiss(): void {
+        if (this.quantity) {
+            let data = {quantity: this.quantity};
+            this.viewCtrl.dismiss(data);
+        }
     }
 
-    dismiss() {
-        let data = {quantity: this.quantity};
-        this.viewCtrl.dismiss(data);
-    }
-
-    ngAfterViewChecked() {
+    public ionViewDidLoad(): void {
         this.inputQuantity.setFocus();
     }
 }

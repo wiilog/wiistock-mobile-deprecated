@@ -757,8 +757,7 @@ export class SqliteProvider {
 
         const sqlQuery = 'SELECT * FROM ' + table + (sqlWhereClauses ? sqlWhereClauses : '');
 
-        return this.db$.pipe(
-            flatMap((db) => from(db.executeSql(sqlQuery, []))),
+        return this.executeQuery(sqlQuery).pipe(
             map((data) => {
                 let ret;
                 if (data) {

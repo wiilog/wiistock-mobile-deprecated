@@ -1,7 +1,6 @@
 import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {Content, IonicPage, ModalController, Navbar} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {HttpClient} from '@angular/common/http';
 import {Anomalie} from '@app/entities/anomalie';
 import {ModalQuantityPage} from '@pages/stock/inventaire-menu/modal-quantity';
 import {Article} from '@app/entities/article';
@@ -10,7 +9,6 @@ import {filter} from 'rxjs/operators';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
 import {ApiService} from '@app/services/api.service';
-import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()
@@ -33,13 +31,11 @@ export class InventaireAnomaliePage {
     private zebraScannerSubscription: Subscription;
 
     public constructor(private sqliteProvider: SqliteProvider,
-                       private http: HttpClient,
                        private changeDetector: ChangeDetectorRef,
                        private modalController: ModalController,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService,
-                       private apiService: ApiService,
-                       private storageService: StorageService) {}
+                       private apiService: ApiService) {}
 
 
     public ionViewWillEnter(): void {
@@ -73,8 +69,11 @@ export class InventaireAnomaliePage {
         this.sqliteProvider.findAll('`anomalie_inventaire`').subscribe(anomalies => {
             this.anomalies = anomalies;
             let locations = anomalies
-                .filter(({location}) => (location && locations.indexOf(location) === -1))
-                .map(({location}) => location);
+                .reduce((acc, {location}) => ([
+                    ...acc,
+                    ...(acc.indexOf(location) === -1 ? [location] : [])
+                ]), []);
+
             // envoi des anomalies traitées
             this.sqliteProvider.findByElement(`anomalie_inventaire`, 'treated', '1').subscribe((anomalies) => {
                 this.apiService.requestApi('post', ApiService.TREAT_ANOMALIES, {anomalies}).subscribe((resp) => {
@@ -135,31 +134,27 @@ export class InventaireAnomaliePage {
     async openModalQuantity(article) {
         let modal = this.modalController.create(ModalQuantityPage, {article: article});
         modal.onDidDismiss(data => {
-            this.anomaly.quantity = data.quantity;
-            this.anomaly.treated = "1";
+            if (data && data.quantity) {
+                this.anomaly.quantity = data.quantity;
+                this.anomaly.treated = "1";
 
-            // envoi de l'anomalie modifiée à l'API
-            this.apiService.getApiUrl(ApiService.TREAT_ANOMALIES).subscribe((treatAnomaliesUrl) => {
-                this.storageService.getApiKey().subscribe((apiKey) => {
-                    let params = {
-                        anomalies: [this.anomaly],
-                        apiKey
-                    };
-                    this.http.post<any>(treatAnomaliesUrl, params).subscribe(resp => {
-                        if (resp.success) {
-                            // supprime l'anomalie traitée de la base
-                            this.sqliteProvider.deleteById(`anomalie_inventaire`, this.anomaly.id);
-                            this.toastService.presentToast(resp.data.status);
-                            // supprime l'anomalie de la liste
-                            this.anomaliesByLocation = this.anomaliesByLocation.filter(anomaly => parseInt(anomaly.treated) !== 1);
-                            // si liste vide retour aux emplacements
-                            if (this.anomaliesByLocation.length === 0) {
-                                this.backToLocations();
-                            }
-                        }
-                    });
+                // envoi de l'anomalie modifiée à l'API
+                this.apiService.requestApi('post', ApiService.TREAT_ANOMALIES, {anomalies: [this.anomaly]}).subscribe((resp) => {
+                    if (resp.success) {
+                        // supprime l'anomalie traitée de la base
+                        this.sqliteProvider.deleteById(`anomalie_inventaire`, this.anomaly.id).subscribe(() => {
+                            this.toastService.presentToast(resp.data.status).subscribe(() => {
+                                // supprime l'anomalie de la liste
+                                this.anomaliesByLocation = this.anomaliesByLocation.filter(anomaly => parseInt(anomaly.treated) !== 1);
+                                // si liste vide retour aux emplacements
+                                if (this.anomaliesByLocation.length === 0) {
+                                    this.backToLocations();
+                                }
+                            });
+                        });
+                    }
                 });
-            });
+            }
         });
         modal.present();
     }
