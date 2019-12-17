@@ -1,12 +1,7 @@
 import {Component, ViewChild} from '@angular/core';
 import {Slides, Platform, AlertController, Alert, NavController} from 'ionic-angular';
-import {Page} from "ionic-angular/navigation/nav-util";
-import {PreparationMenuPage} from '@pages/stock/preparation/preparation-menu/preparation-menu';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Preparation} from '@app/entities/preparation';
-import {LivraisonMenuPage} from '@pages/stock/livraison/livraison-menu/livraison-menu';
-import {InventaireMenuPage} from '@pages/stock/inventaire-menu/inventaire-menu';
-import {CollecteMenuPage} from '@pages/stock/collecte/collecte-menu/collecte-menu';
 import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutention-menu';
 import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
@@ -24,8 +19,9 @@ import {PriseDeposeMenuPage} from '@pages/prise-depose/prise-depose-menu/prise-d
 })
 export class MainMenuPage {
 
-    @ViewChild(Slides) slides: Slides;
-    items: Array<{ title: string, icon: string, page: Page, img: string }>;
+    @ViewChild(Slides)
+    slides: Slides;
+
     nbPrep: number;
     nbPrepT: number;
     nbArtInvent: number;
@@ -66,7 +62,7 @@ export class MainMenuPage {
                 icon: 'stock.svg',
                 label: 'Stock',
                 action() {
-                    navController.push(StockMenuPage);
+                    navController.push(StockMenuPage, {fromMainMenu: true});
                 }
             },
             {
@@ -76,14 +72,6 @@ export class MainMenuPage {
                     navController.push(ManutentionMenuPage);
                 }
             }
-        ];
-
-        this.items = [
-            {title: 'Préparation', icon: 'cart', page: PreparationMenuPage, img: null},
-            {title: 'Livraison', icon: 'paper-plane', page: LivraisonMenuPage, img: null},
-            {title: 'Inventaire', icon: 'list-box', page: InventaireMenuPage, img: null},
-            {title: 'Collecte', icon: 'list-box', page: CollecteMenuPage, img: null},
-            {title: 'Déconnexion', icon: 'log-out', page: null, img: null}
         ];
     }
 

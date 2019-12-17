@@ -6,6 +6,7 @@ import {MainMenuPage} from '@pages/main-menu/main-menu';
 import {ConnectPage} from '@pages/connect/connect';
 import {ParamsPage} from '@pages/params/params';
 import {flatMap, map, take, tap} from 'rxjs/operators';
+import {MainHeaderService} from "@app/services/main-header.service";
 
 
 @Component({
@@ -55,6 +56,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     private viewDidEnterSubscription: Subscription;
 
     public constructor(private storageService: StorageService,
+                       private mainHeaderService: MainHeaderService,
                        private changeDetector: ChangeDetectorRef) {
         this.loading = true;
         this.withHeader = new EventEmitter<boolean>();
@@ -85,14 +87,17 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     }
 
     public goHome(): void {
+        this.mainHeaderService.emitNavigationChange();
         this.nav.setRoot(MainMenuPage);
     }
 
     public doPop(): void {
+        this.mainHeaderService.emitNavigationChange();
         this.nav.pop();
     }
 
     public doLogout(): void {
+        this.mainHeaderService.emitNavigationChange();
         this.nav.setRoot(ConnectPage);
     }
 

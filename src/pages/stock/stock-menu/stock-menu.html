@@ -1,5 +1,16 @@
+<wii-main-loader [loading]="loading"
+                 [message]="messageLoading"></wii-main-loader>
+
 <ion-scroll scrollY="true"
-            class="page-content">
+            class="page-content"
+            *ngIf="!loading">
     <h3 text-center>Stock</h3>
     <wii-menu [config]="menuConfig"></wii-menu>
 </ion-scroll>
+
+<ion-fab *ngIf="!loading" slot="fixed">
+    <button ion-fab color="primary" (click)="synchronise()">
+        <ion-icon class="big-icon" name="refresh" item-right ></ion-icon>
+    </button>
+</ion-fab>
+

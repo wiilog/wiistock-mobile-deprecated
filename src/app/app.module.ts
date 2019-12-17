@@ -53,6 +53,7 @@ import {DeposeConfirmPage} from '@pages/prise-depose/depose-confirm/depose-confi
 import {EmplacementScanPage} from '@pages/prise-depose/emplacement-scan/emplacement-scan';
 import {PriseDeposeMenuPage} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu';
 import {FileService} from '@app/services/file.service';
+import {MainHeaderService} from "@app/services/main-header.service";
 
 
 @NgModule({
@@ -153,7 +154,8 @@ import {FileService} from '@app/services/file.service';
         LocalDataManagerService,
         ScssHelperService,
         TracaListFactoryService,
-        FileService
+        FileService,
+        MainHeaderService
     ]
 })
 export class AppModule {

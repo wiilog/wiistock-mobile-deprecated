@@ -203,6 +203,11 @@ button[ion-button] {
     }
 }
 
+ion-fab {
+    bottom: $spacer;
+    right: $spacer;
+}
+
 @each $color, $value in $colors {
     .text-#{$color} {
         color: #{$value};
