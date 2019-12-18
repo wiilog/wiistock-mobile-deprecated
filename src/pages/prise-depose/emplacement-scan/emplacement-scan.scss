@@ -12,7 +12,7 @@ page-emplacement-scan {
 
         .title, .subtitle {
             font-size: 20px;
-            color: $primary;
+            color: $primary !important;
             margin-bottom: 16px;
         }
     }
@@ -27,11 +27,6 @@ page-emplacement-scan {
             font-size: 30px !important;
             font-weight: bold;
         }
-    }
-
-    span {
-        color: white !important;
-        font-size: 20px;
     }
 
     .label-emp {
