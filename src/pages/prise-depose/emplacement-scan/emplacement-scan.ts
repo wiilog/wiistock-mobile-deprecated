@@ -15,22 +15,27 @@ import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
 })
 export class EmplacementScanPage {
     public menu: string;
-    private zebraScanSubscription: Subscription;
     @ViewChild('searchComponent')
     public searchComponent: SearchLocationComponent;
+
+    public fromStock: boolean;
+
     private chooseEmp: (emplacement: Emplacement) => void;
     private fromDepose: boolean;
     private emplacement: Emplacement;
+    private zebraScanSubscription: Subscription;
 
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService) {
+
     }
 
     public ionViewWillEnter(): void {
         this.chooseEmp = this.navParams.get('chooseEmp');
         this.fromDepose = this.navParams.get('fromDepose');
+        this.fromStock = this.navParams.get('fromStock');
         this.menu = this.navParams.get('menu');
         this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
             this.testIfBarcodeEquals(barcode);

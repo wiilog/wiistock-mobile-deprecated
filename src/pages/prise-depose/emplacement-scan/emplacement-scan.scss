@@ -43,8 +43,8 @@ page-emplacement-scan {
         text-align: center;
         margin-bottom: 20px;
 
-        .icon-emp:first-child {
-            margin-right: 50px !important;
+        .icon-emp:not(:first-child) {
+            margin-left: 50px !important;
         }
 
         .icon-emp {
