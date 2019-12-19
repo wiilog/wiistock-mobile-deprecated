@@ -14,19 +14,22 @@ export class FileService {
         // get the real base64 content of the file
         const realData = block[1].split(",")[1];
 
-        const sliceSize = 512;
-        const byteCharacters = atob(realData);
-        const byteArrays = Array
-            .from(byteCharacters)
-            .reduce((acc: Array<Array<string>>, currentChar: string, currentIndex: number) => {
-                const arrayIndex = Math.abs(Math.trunc(currentIndex / sliceSize));
-                if (!acc[arrayIndex]) {
-                    acc[arrayIndex] = [];
-                }
-                acc[arrayIndex].push(currentChar);
-                return acc;
-            }, [])
-            .map((bytesNumber) => new Uint8Array(bytesNumber as ArrayLike<any>));
+        let sliceSize = 1024;
+        let byteCharacters = atob(realData);
+        let bytesLength = byteCharacters.length;
+        let slicesCount = Math.ceil(bytesLength / sliceSize);
+        let byteArrays = new Array(slicesCount);
+
+        for (let sliceIndex = 0; sliceIndex < slicesCount; ++sliceIndex) {
+            let begin = sliceIndex * sliceSize;
+            let end = Math.min(begin + sliceSize, bytesLength);
+
+            let bytes = new Array(end - begin);
+            for (let offset = begin, i = 0; offset < end; ++i, ++offset) {
+                bytes[i] = byteCharacters[offset].charCodeAt(0);
+            }
+            byteArrays[sliceIndex] = new Uint8Array(bytes);
+        }
 
         return new File(
             byteArrays,
