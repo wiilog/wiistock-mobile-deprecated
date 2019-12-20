@@ -337,7 +337,8 @@ export class PreparationArticlesPage {
             id_prepa: this.preparation.id,
             isSelectableByUser: 1,
             emplacement: (selectedArticle as ArticlePrepaByRefArticle).location,
-            quantite: selectedQuantityValid
+            quantite: selectedQuantityValid,
+            reference_article_reference: selectedArticle.reference_article_reference,
         };
         return ((selectedArticle as ArticlePrepaByRefArticle).isSelectableByUser)
             ? this.sqliteProvider

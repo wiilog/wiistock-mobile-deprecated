@@ -1,4 +1,3 @@
-
 <ion-content padding>
     <div class="page-title" *ngIf="preparation">
         <h4>Préparation {{preparation.numero}}</h4>
@@ -11,17 +10,24 @@
     </div>
 
     <div *ngIf="!loadingStartPreparation && articlesNT && articlesNT.length > 0">
-        <div class="d-flex" >
+        <div class="d-flex">
             <p>Flashez les articles</p>
-            <ion-icon item-right name="barcode"> </ion-icon>
+            <ion-icon item-right name="barcode"></ion-icon>
         </div>
         <ion-list>
             <ion-grid>
-                <button [disabled]="!isValid" (click)="testIfBarcodeEquals(article, true)" class="list" ion-item *ngFor="let article of articlesNT">
+                <button [disabled]="!isValid" (click)="testIfBarcodeEquals(article, true)" class="list" ion-item
+                        *ngFor="let article of articlesNT">
                     <ion-row>
-                        <ion-col>{{ article.label }}</ion-col>
-                        <ion-col>{{ article.emplacement === "null" ? '' : article.emplacement }}</ion-col>
-                        <ion-col>{{ article.quantite }}</ion-col>
+                        <ion-col>
+                            <p class="title-tmp">Article {{ article.reference }}</p>
+                            <div class="sub">
+                                <p *ngIf="!article.is_ref">Référence article : {{ article.reference_article_reference }}</p>
+                                <p>Label : {{ article.label }}</p>
+                                <p>Emplacement : {{ article.emplacement === "null" ? '' : article.emplacement }}</p>
+                                <p>Quantité : {{ article.quantite }}</p>
+                            </div>
+                        </ion-col>
                     </ion-row>
                 </button>
             </ion-grid>
@@ -34,9 +40,15 @@
             <ion-grid>
                 <button [disabled]="!isValid" class="list" ion-item *ngFor="let article of articlesT">
                     <ion-row>
-                        <ion-col>{{ article.label }}</ion-col>
-                        <ion-col>{{ article.emplacement === "null" ? '' : article.emplacement }}</ion-col>
-                        <ion-col>{{ article.quantite }}</ion-col>
+                        <ion-col>
+                            <p class="title-tmp">Article {{ article.reference }}</p>
+                            <div class="sub">
+                                <p *ngIf="!article.is_ref">Référence article : {{ article.reference_article_reference }}</p>
+                                <p>Label : {{ article.label }}</p>
+                                <p>Emplacement : {{ article.emplacement === "null" ? '' : article.emplacement }}</p>
+                                <p>Quantité : {{ article.quantite }}</p>
+                            </div>
+                        </ion-col>
                     </ion-row>
                 </button>
             </ion-grid>
@@ -45,7 +57,9 @@
 </ion-content>
 <ion-footer padding>
     <div class="d-flex">
-        <ion-icon class="big-icon" name="qr-scanner" (click)="scan()" [hidden]="articlesNT && articlesNT.length === 0"></ion-icon>
-        <ion-icon class="big-icon" item-right name="checkmark-circle" (click)="validate()" [class.alert]="articlesNT && articlesNT.length === 0"></ion-icon>
+        <ion-icon class="big-icon" name="qr-scanner" (click)="scan()"
+                  [hidden]="articlesNT && articlesNT.length === 0"></ion-icon>
+        <ion-icon class="big-icon" item-right name="checkmark-circle" (click)="validate()"
+                  [class.alert]="articlesNT && articlesNT.length === 0"></ion-icon>
     </div>
 </ion-footer>
