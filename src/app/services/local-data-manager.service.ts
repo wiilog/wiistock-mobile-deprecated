@@ -224,16 +224,24 @@ export class LocalDataManagerService {
         return this.sqliteProvider.findAll('mouvement_traca')
             .pipe(
                 map((mouvements: Array<MouvementTraca>) => (
-                    mouvements.map(({signature, ...mouvement}) => ({
-                        ...mouvement,
-                        signature: signature
-                            ? this.fileService.createFile(
-                                signature,
-                                FileService.SIGNATURE_IMAGE_EXTENSION,
-                                FileService.SIGNATURE_IMAGE_TYPE
-                            )
-                            : undefined
-                    }))
+                    mouvements
+                        .map(({signature, ...mouvement}) => ({
+                            ...mouvement,
+                            signature: signature
+                                ? this.fileService.createFile(
+                                    signature,
+                                    FileService.SIGNATURE_IMAGE_EXTENSION,
+                                    FileService.SIGNATURE_IMAGE_TYPE
+                                )
+                                : undefined
+                        }))
+                        .sort(({date: dateStr1}, {date: dateStr2}) => {
+                            const date1 = new Date(dateStr1.split('_')[0]);
+                            const date2 = new Date(dateStr2.split('_')[0]);
+                            return date1.getTime() <= date2.getTime()
+                                ? -1
+                                : 1
+                        })
                 )),
                 flatMap((mouvements: Array<MouvementTraca&{signature: File}>) => (
                     mouvements.length > 0
