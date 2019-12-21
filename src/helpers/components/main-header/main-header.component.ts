@@ -5,8 +5,9 @@ import {Observable, Subscription} from 'rxjs';
 import {MainMenuPage} from '@pages/main-menu/main-menu';
 import {ConnectPage} from '@pages/connect/connect';
 import {ParamsPage} from '@pages/params/params';
-import {flatMap, map, take, tap} from 'rxjs/operators';
+import {filter, flatMap, map, take, tap} from 'rxjs/operators';
 import {MainHeaderService} from "@app/services/main-header.service";
+import {of} from "rxjs/observable/of";
 
 
 @Component({
@@ -64,12 +65,11 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     }
 
     public ngOnInit(): void {
-        this.refreshUser().subscribe(() => {
-            this.notifyHeightChange();
-        });
-
-        this.viewDidEnterSubscription = this.nav
-            .viewDidEnter
+        this.viewDidEnterSubscription = Observable
+            .merge(
+                of(this.nav.getActive()).pipe(filter(Boolean)),
+                this.nav.viewDidEnter
+            )
             .pipe(
                 flatMap((data) => this.refreshUser().pipe(map(() => data)))
             )
