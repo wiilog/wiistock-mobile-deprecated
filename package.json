@@ -13,9 +13,9 @@
         "build": "ionic-app-scripts build",
         "lint": "ionic-app-scripts lint",
         "wiis:clean": "cordova clean && ionic cordova resources android",
-        "wiis:build": "npm run wiis:clean && ionic cordova build android",
-        "wiis:run": "npm run wiis:clean && ionic cordova run android",
-        "wiis:run:livereload": "npm run wiis:clean && ionic cordova run android --livereload"
+        "wiis:build": "yarn wiis:clean && ionic cordova build android",
+        "wiis:run": "yarn wiis:clean && ionic cordova run android",
+        "wiis:run:livereload": "yarn wiis:clean && ionic cordova run android --livereload"
     },
     "dependencies": {
         "@angular/animations": "5.2.11",
