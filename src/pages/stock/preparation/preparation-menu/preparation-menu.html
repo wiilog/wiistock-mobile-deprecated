@@ -1,6 +1,5 @@
 <ion-content padding>
     <wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
-    <ion-title *ngIf="hasLoaded && preparations && preparations.length === 0">Aucune préparation<br>à traiter.</ion-title>
     <ion-list *ngIf="hasLoaded && preparations && preparations.length > 0">
         <ion-grid>
             <button (click)="goToArticles(preparation)" class="list" ion-item *ngFor="let preparation of preparations">

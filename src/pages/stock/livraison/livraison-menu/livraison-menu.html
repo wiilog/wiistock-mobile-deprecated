@@ -1,6 +1,5 @@
 <ion-content padding>
     <wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
-    <ion-title *ngIf="hasLoaded && livraisons && livraisons.length === 0">Aucune livraison<br>à traiter.</ion-title>
     <ion-list *ngIf="hasLoaded && livraisons && livraisons.length > 0">
         <ion-grid>
             <button (click)="goToLivraison(livraison)" class="list" ion-item *ngFor="let livraison of livraisons">

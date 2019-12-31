@@ -3,6 +3,7 @@ import {Content, IonicPage, Navbar, NavController} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {CollecteArticlesPage} from '@pages/stock/collecte/collecte-articles/collecte-articles';
 import {Collecte} from '@app/entities/collecte';
+import {MainHeaderService} from "@app/services/main-header.service";
 
 
 @IonicPage()
@@ -17,6 +18,7 @@ export class CollecteMenuPage {
     hasLoaded: boolean;
 
     public constructor(private navCtrl: NavController,
+                       private mainHeaderService: MainHeaderService,
                        private sqlLiteProvider: SqliteProvider) {
     }
 
@@ -27,6 +29,7 @@ export class CollecteMenuPage {
                 .filter(({date_end, location_to}) => (!date_end && !location_to))
                 .sort(({location_from: location_from_1}, {location_from: location_from_2}) => ((location_from_1 < location_from_2) ? -1 : 1));
             this.hasLoaded = true;
+            this.refreshSubTitle();
             this.content.resize();
         });
     }
@@ -35,4 +38,8 @@ export class CollecteMenuPage {
         this.navCtrl.push(CollecteArticlesPage, {collecte});
     }
 
+    public refreshSubTitle(): void {
+        const collectesLength = this.collectes.length;
+        this.mainHeaderService.emitSubTitle(`${collectesLength === 0 ? 'Aucune' : collectesLength} collecte${collectesLength > 1 ? 's' : ''}`)
+    }
 }
