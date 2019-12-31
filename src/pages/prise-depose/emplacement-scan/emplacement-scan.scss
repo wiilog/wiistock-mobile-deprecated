@@ -1,22 +1,6 @@
 @import "../../../theme/variables";
 
 page-emplacement-scan {
-
-    .titles {
-        text-align: center !important;
-        align-content: center !important;
-
-        .title {
-            margin-top: 16px;
-        }
-
-        .title, .subtitle {
-            font-size: 20px;
-            color: $primary !important;
-            margin-bottom: 16px;
-        }
-    }
-
     .validate_button {
         display: block;
         background-color: $primary;

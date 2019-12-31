@@ -1,21 +1,6 @@
 @import '../../theme/variables';
 
 new-emplacement {
-    .titles {
-        text-align: center !important;
-        align-content: center !important;
-
-        .title {
-            margin-top: 16px;
-        }
-
-        .title, .subtitle {
-            font-size: 18px;
-            color: #030F4C;
-            margin-bottom: 16px;
-        }
-    }
-
     .submit-button {
         display: block;
 

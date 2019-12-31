@@ -14,14 +14,13 @@ import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
     templateUrl: 'emplacement-scan.html',
 })
 export class EmplacementScanPage {
-    public menu: string;
     @ViewChild('searchComponent')
     public searchComponent: SearchLocationComponent;
 
+    public fromDepose: boolean;
     public fromStock: boolean;
 
     private chooseEmp: (emplacement: Emplacement) => void;
-    private fromDepose: boolean;
     private emplacement: Emplacement;
     private zebraScanSubscription: Subscription;
 
@@ -36,7 +35,6 @@ export class EmplacementScanPage {
         this.chooseEmp = this.navParams.get('chooseEmp');
         this.fromDepose = this.navParams.get('fromDepose');
         this.fromStock = this.navParams.get('fromStock');
-        this.menu = this.navParams.get('menu');
         this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
             this.testIfBarcodeEquals(barcode);
         });
@@ -97,7 +95,6 @@ export class EmplacementScanPage {
     public createEmp(): void {
         this.navCtrl.push(NewEmplacementComponent, {
             fromDepose: this.fromDepose,
-            menu: this.menu,
             createNewEmp: (emplacement: Emplacement) => {
                 this.chooseEmp(emplacement);
             }

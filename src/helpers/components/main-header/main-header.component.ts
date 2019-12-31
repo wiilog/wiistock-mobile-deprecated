@@ -1,4 +1,15 @@
-import {ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import {
+    ChangeDetectorRef,
+    Component,
+    ElementRef,
+    EventEmitter,
+    Input,
+    OnDestroy,
+    OnInit,
+    Output,
+    Type,
+    ViewChild
+} from '@angular/core';
 import {Nav} from 'ionic-angular';
 import {StorageService} from '@app/services/storage.service';
 import {Observable, Subscription} from 'rxjs';
@@ -6,8 +17,9 @@ import {MainMenuPage} from '@pages/main-menu/main-menu';
 import {ConnectPage} from '@pages/connect/connect';
 import {ParamsPage} from '@pages/params/params';
 import {filter, flatMap, map, take, tap} from 'rxjs/operators';
-import {MainHeaderService} from "@app/services/main-header.service";
-import {of} from "rxjs/observable/of";
+import {MainHeaderService} from '@app/services/main-header.service';
+import {of} from 'rxjs/observable/of';
+import {TitleConfig} from '@helpers/components/main-header/title-config';
 
 
 @Component({
@@ -31,6 +43,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     public content: ElementRef;
 
     public loggedUser: string;
+
+    public currentTitles: Array<TitleConfig<any>>;
 
     public readonly iconMenuHide: Array<string> = [
         MainMenuPage.name,
@@ -62,6 +76,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.loading = true;
         this.withHeader = new EventEmitter<boolean>();
         this.heightChange = new EventEmitter<number>();
+        this.currentTitles = [];
     }
 
     public ngOnInit(): void {
@@ -105,6 +120,17 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.notifyHeightChange();
     }
 
+    public onTitleClick(page: Type<any>): void {
+        const viewTo = this.nav
+            .getViews()
+            .reverse()
+            .find(({name}) => (page.name === name));
+
+        if (viewTo) {
+            this.nav.popTo(viewTo);
+        }
+    }
+
     /**
      * Return blockSize without px
      */
@@ -118,7 +144,37 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     private onPageChange(data: any): void {
         this.loading = false;
         this.currentPageName = data.component.name;
+        this.refreshTitles(this.currentPageName, data.instance);
         this.withHeader.emit(this.headerHide.indexOf(this.currentPageName) === -1);
+    }
+
+    private refreshTitles(name: string, instance: any): void {
+        const configsToDisplay = this.mainHeaderService.matchTitleConfig(name, instance);
+        const configToDisplay = (configsToDisplay.length > 0) ? configsToDisplay[0] : undefined;
+        console.log(name, ' + ', instance, ' ---> ', configToDisplay);
+        if (configToDisplay) {
+            const currentIndex = this.mainHeaderService.findIndexTitleConfig(configToDisplay, this.currentTitles);
+            // if title already shown then we remove all titles after
+            if (currentIndex > -1) {
+                // if it's the last we do nothing
+                if (currentIndex < (this.currentTitles.length - 1)) {
+                    const startIndexToRemove = (currentIndex + 1);
+                    const nbTiTlesToRemove = (this.currentTitles.length - (currentIndex + 1));
+                    this.currentTitles.splice(startIndexToRemove, nbTiTlesToRemove);
+
+                    console.log('ON PASSE ICI 1');
+                }
+
+                console.log('ON PASSE ICI 2');
+            }
+            // if not title not shown
+            else {
+                this.currentTitles.push(configToDisplay);
+                console.log('ON PASSE ICI 3');
+            }
+            this.changeDetector.detectChanges();
+        }
+        console.log('RES --> ', this.currentTitles)
     }
 
     private refreshUser(): Observable<undefined> {

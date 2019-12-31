@@ -66,7 +66,6 @@ export class PriseDeposeMenuPage {
             this.navCtrl.push(EmplacementScanPage, {
                 fromDepose: false,
                 fromStock: this.fromStock,
-                menu: 'Prise',
                 chooseEmp: (emplacement: Emplacement) => {
                     this.navCtrl.push(PrisePage, {
                         emplacement: emplacement,
@@ -88,7 +87,6 @@ export class PriseDeposeMenuPage {
             this.navCtrl.push(EmplacementScanPage, {
                 fromDepose: true,
                 fromStock: this.fromStock,
-                menu: 'Dépose',
                 chooseEmp: (emplacement: Emplacement) => {
                     this.navCtrl.push(DeposePage, {
                         emplacement: emplacement,

@@ -1,9 +1,4 @@
 <div class="page-content">
-    <div class="titles">
-        <div class="title">Menu | <span *ngIf="fromStock else fromTracaTemplate">Transfert de stock</span> | <b class="important">{{ menu }}</b></div>
-        <ng-template #fromTracaTemplate>Traçabilité</ng-template>
-    </div>
-
     <wii-search-location #searchComponent
                          [(location)]="emplacement"
                          (locationChange)="empChanged(emplacement)"

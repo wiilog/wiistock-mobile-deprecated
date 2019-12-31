@@ -1,26 +1,35 @@
-<ion-toolbar *ngIf="!loading && headerHide.indexOf(currentPageName) === -1"
-             #content>
-    <ng-template #iconPlaceholderTemplate>
-        <div class="header-icon-container">
-            <div class="header-icon"></div>
-        </div>
-    </ng-template>
+<div *ngIf="!loading && headerHide.indexOf(currentPageName) === -1"
+     #content>
+    <ion-toolbar>
+        <ng-template #iconPlaceholderTemplate>
+            <div class="header-icon-container">
+                <div class="header-icon"></div>
+            </div>
+        </ng-template>
 
-    <button *ngIf="iconLeftHide.indexOf(currentPageName) === -1; else iconPlaceholderTemplate"
-            class="header-icon-container"
-            (click)="iconLogoutShow.indexOf(currentPageName) > -1 ? doLogout() : doPop()">
-        <wii-icon [name]="iconLogoutShow.indexOf(currentPageName) > -1 ? 'logout.svg' : 'arrow-left.svg'"
-                  color="white"
-                  class="header-icon">
-        </wii-icon>
-    </button>
-    <div class="header-title">
-        <img alt="FollowGT" src="assets/images/followgt_bg_transparent.svg" class="logo" (load)="onImageLoad()"/>
-        <div class="user" *ngIf="userHide.indexOf(currentPageName) === -1 && loggedUser">{{ loggedUser }}</div>
-    </div>
-    <button *ngIf="iconMenuHide.indexOf(currentPageName) === -1; else iconPlaceholderTemplate"
-            class="header-icon-container"
-            (click)="goHome()">
-        <wii-icon name="home.svg" color="white" class="header-icon"></wii-icon>
-    </button>
-</ion-toolbar>
+        <button *ngIf="iconLeftHide.indexOf(currentPageName) === -1; else iconPlaceholderTemplate"
+                class="header-icon-container"
+                (click)="iconLogoutShow.indexOf(currentPageName) > -1 ? doLogout() : doPop()">
+            <wii-icon [name]="iconLogoutShow.indexOf(currentPageName) > -1 ? 'logout.svg' : 'arrow-left.svg'"
+                      color="white"
+                      class="header-icon">
+            </wii-icon>
+        </button>
+        <div class="header-title">
+            <img alt="FollowGT" src="assets/images/followgt_bg_transparent.svg" class="logo" (load)="onImageLoad()"/>
+            <div class="user" *ngIf="userHide.indexOf(currentPageName) === -1 && loggedUser">{{ loggedUser }}</div>
+        </div>
+        <button *ngIf="iconMenuHide.indexOf(currentPageName) === -1; else iconPlaceholderTemplate"
+                class="header-icon-container"
+                (click)="goHome()">
+            <wii-icon name="home.svg" color="white" class="header-icon"></wii-icon>
+        </button>
+    </ion-toolbar>
+    <nav class="title-toolbar">
+        <ng-container *ngFor="let config of currentTitles; let last = last">
+            <span *ngIf="!last" (click)="onTitleClick(config.page)">{{config.name}}</span>
+            <span *ngIf="last">{{config.name}}</span>
+            <ng-container *ngIf="!last">|</ng-container>
+        </ng-container>
+    </nav>
+</div>

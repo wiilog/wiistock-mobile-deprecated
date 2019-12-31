@@ -21,7 +21,6 @@ export class NewEmplacementComponent {
     private createNewEmp: (emplacement) => void;
     private fromDepose: boolean;
     private emplacement: Emplacement;
-    public menu: string;
 
     public loading: boolean;
 
@@ -36,7 +35,6 @@ export class NewEmplacementComponent {
     public ionViewWillEnter(): void {
         this.createNewEmp = this.navParams.get('createNewEmp');
         this.fromDepose = this.navParams.get('fromDepose');
-        this.menu = this.navParams.get('menu');
         this.emplacement = {
             id: null,
             label: ''

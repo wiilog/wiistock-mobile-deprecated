@@ -1,8 +1,3 @@
-<div class="titles" *ngIf="hasLoaded">
-    <div class="title" *ngIf="!manutention">Aucune manutention<br>à traiter.</div>
-    <div class="title" *ngIf="manutention">Menu | <b class="important">Manutentions</b></div>
-    <p *ngIf="manutention" class="subtitle">Détails</p>
-</div>
 <wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
 <ion-scroll scrollY="true" *ngIf="hasLoaded" class="page-content">
     <ion-list class="manutention-details">

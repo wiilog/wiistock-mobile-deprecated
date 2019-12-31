@@ -1,23 +1,21 @@
-<div class="titles" *ngIf="hasLoaded">
-    <div class="title" *ngIf="manutentions && manutentions.length === 0">Aucune manutention<br>à traiter.</div>
-    <div class="title" *ngIf="manutentions && manutentions.length > 0">Menu | <b class="important">Manutentions</b></div>
-    <div class="subtitle" *ngIf="manutentions && manutentions.length > 0">{{ manutentions.length }} manutention{{ manutentions.length > 1 ? 's' : ''}}</div>
-</div>
 <wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
 
 <ion-scroll *ngIf="hasLoaded" scrollY="true" class="page-content">
     <div class="icon-manutention-container">
         <wii-icon name="people.svg"></wii-icon>
     </div>
-    <ng-container *ngIf="manutentions && manutentions.length > 0 && hasLoaded">
-        <ion-card *ngFor="let manutention of manutentions" (click)="goToManut(manutention)">
-            <ion-card-header>
-                <p>Demandeur <b>{{ manutention.demandeur }} </b></p>
-            </ion-card-header>
-            <ion-card-content>
-                <span>Date attendue <b>{{ toDate(manutention) | date:'dd/MM/yyyy H:mm' }}</b></span>
-                <wii-icon name="arrow-right.svg" class="arrow"></wii-icon>
-            </ion-card-content>
-        </ion-card>
+    <ng-container *ngIf="hasLoaded">
+        <div text-center *ngIf="manutentions && manutentions.length === 0">Aucune manutention<br>à traiter.</div>
+        <ng-container *ngIf="manutentions && manutentions.length > 0">
+            <ion-card *ngFor="let manutention of manutentions" (click)="goToManut(manutention)">
+                <ion-card-header>
+                    <p>Demandeur <b>{{ manutention.demandeur }} </b></p>
+                </ion-card-header>
+                <ion-card-content>
+                    <span>Date attendue <b>{{ toDate(manutention) | date:'dd/MM/yyyy H:mm' }}</b></span>
+                    <wii-icon name="arrow-right.svg" class="arrow"></wii-icon>
+                </ion-card-content>
+            </ion-card>
+        </ng-container>
     </ng-container>
 </ion-scroll>

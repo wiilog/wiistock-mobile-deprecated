@@ -6,7 +6,7 @@ page-manutention-menu {
     }
 
     ion-card-header {
-        background-color: #149914;
+        background-color: $success;
         height: 30px;
         padding: 5px !important;
 
@@ -20,22 +20,8 @@ page-manutention-menu {
         padding-bottom: 5px !important;
     }
 
-    .titles {
-        background-color: #FFFFFF !important;
-        text-align: center !important;
-        align-content: center !important;
-        .title {
-            margin-top: $spacer;
-        }
-        .title, .subtitle {
-            font-size: 20px;
-            color: #030F4C;
-            margin-bottom: $spacer;
-        }
-    }
-
     .important {
-        color: #030F4C;
+        color: $primary;
     }
 
     .arrow {
