@@ -46,13 +46,24 @@ wii-main-header {
     }
 
     .title-toolbar {
-        text-align: center;
         padding: 1.6rem 1rem;
-        font-size: 13pt;
+        .main-titles {
+            text-align: center;
+            font-size: 13pt;
 
-        :last-child {
-            color: $primary;
-            font-weight: bold;
+            :last-child {
+                color: $primary;
+                font-weight: bold;
+            }
         }
+
+        .sub-title {
+            text-align: center;
+            font-size: 11pt;
+            font-style: italic;
+            color: $primary;
+            padding-top: .5rem;
+        }
+
     }
 }

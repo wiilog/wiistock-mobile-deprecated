@@ -7,10 +7,9 @@ import {
     OnDestroy,
     OnInit,
     Output,
-    Type,
     ViewChild
 } from '@angular/core';
-import {Nav} from 'ionic-angular';
+import {Nav, ViewController} from 'ionic-angular';
 import {StorageService} from '@app/services/storage.service';
 import {Observable, Subscription} from 'rxjs';
 import {MainMenuPage} from '@pages/main-menu/main-menu';
@@ -20,6 +19,14 @@ import {filter, flatMap, map, take, tap} from 'rxjs/operators';
 import {MainHeaderService} from '@app/services/main-header.service';
 import {of} from 'rxjs/observable/of';
 import {TitleConfig} from '@helpers/components/main-header/title-config';
+import {PriseDeposeMenuPage} from "@pages/prise-depose/prise-depose-menu/prise-depose-menu";
+import {EmplacementScanPage} from "@pages/prise-depose/emplacement-scan/emplacement-scan";
+import {PreparationMenuPage} from "@pages/stock/preparation/preparation-menu/preparation-menu";
+import {LivraisonMenuPage} from "@pages/stock/livraison/livraison-menu/livraison-menu";
+import {CollecteMenuPage} from "@pages/stock/collecte/collecte-menu/collecte-menu";
+import {InventaireMenuPage} from "@pages/stock/inventaire-menu/inventaire-menu";
+import {ManutentionMenuPage} from "@pages/manutention/manutention-menu/manutention-menu";
+import {ManutentionValidatePage} from "@pages/manutention/manutention-validate/manutention-validate";
 
 
 @Component({
@@ -44,7 +51,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
     public loggedUser: string;
 
-    public currentTitles: Array<TitleConfig<any>>;
+    public currentTitles: Array<TitleConfig>;
+    public titlesConfig: Array<TitleConfig>;
+    public subTitle$: Observable<string>;
 
     public readonly iconMenuHide: Array<string> = [
         MainMenuPage.name,
@@ -69,6 +78,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     public loading: boolean;
 
     private viewDidEnterSubscription: Subscription;
+    private viewWillLeaveSubscription: Subscription;
 
     public constructor(private storageService: StorageService,
                        private mainHeaderService: MainHeaderService,
@@ -77,9 +87,58 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.withHeader = new EventEmitter<boolean>();
         this.heightChange = new EventEmitter<number>();
         this.currentTitles = [];
+        this.subTitle$ = this.mainHeaderService.subTitle$;
+
+        this.titlesConfig = [
+            {pageName: MainMenuPage.name, label: 'Menu'},
+            {
+                pageName: PriseDeposeMenuPage.name,
+                label: 'Traçabilité',
+                filter: (instance) => (
+                    (typeof instance.fromStock === 'boolean') &&
+                    !instance.fromStock
+                )
+            },
+            {
+                pageName: PriseDeposeMenuPage.name,
+                label: 'Transfert',
+                filter: (instance) => (
+                    (typeof instance.fromStock === 'boolean') &&
+                    instance.fromStock
+                )
+            },
+            {
+                pageName: EmplacementScanPage.name,
+                label: 'Prise',
+                filter: (instance) => (
+                    (typeof instance.fromDepose === 'boolean') &&
+                    !instance.fromDepose
+                )
+            },
+            {
+                pageName: EmplacementScanPage.name,
+                label: 'Dépose',
+                filter: (instance) => (
+                    (typeof instance.fromDepose === 'boolean') &&
+                    instance.fromDepose
+                )
+            },
+            {pageName: PreparationMenuPage.name, label: 'Préparation'},
+            {pageName: LivraisonMenuPage.name, label: 'Livraison'},
+            {pageName: CollecteMenuPage.name, label: 'Collecte'},
+            {pageName: InventaireMenuPage.name, label: 'Inventaire'},
+            {pageName: ManutentionMenuPage.name, label: 'Demande'},
+            {pageName: ManutentionValidatePage.name, label: 'Détails'}
+        ];
     }
 
     public ngOnInit(): void {
+        this.clearSubTitle();
+
+        this.viewWillLeaveSubscription = this.nav.viewWillLeave.subscribe(() => {
+            this.clearSubTitle();
+        });
+
         this.viewDidEnterSubscription = Observable
             .merge(
                 of(this.nav.getActive()).pipe(filter(Boolean)),
@@ -98,6 +157,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         if (this.viewDidEnterSubscription) {
             this.viewDidEnterSubscription.unsubscribe();
             this.viewDidEnterSubscription = undefined;
+        }
+        if (this.viewWillLeaveSubscription) {
+            this.viewWillLeaveSubscription.unsubscribe();
+            this.viewWillLeaveSubscription = undefined;
         }
     }
 
@@ -120,14 +183,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.notifyHeightChange();
     }
 
-    public onTitleClick(page: Type<any>): void {
-        const viewTo = this.nav
-            .getViews()
-            .reverse()
-            .find(({name}) => (page.name === name));
-
-        if (viewTo) {
-            this.nav.popTo(viewTo);
+    public onTitleClick(view: ViewController): void {
+        if (view) {
+            this.nav.popTo(view);
         }
     }
 
@@ -144,37 +202,27 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     private onPageChange(data: any): void {
         this.loading = false;
         this.currentPageName = data.component.name;
-        this.refreshTitles(this.currentPageName, data.instance);
+        this.refreshTitles();
         this.withHeader.emit(this.headerHide.indexOf(this.currentPageName) === -1);
     }
 
-    private refreshTitles(name: string, instance: any): void {
-        const configsToDisplay = this.mainHeaderService.matchTitleConfig(name, instance);
-        const configToDisplay = (configsToDisplay.length > 0) ? configsToDisplay[0] : undefined;
-        console.log(name, ' + ', instance, ' ---> ', configToDisplay);
-        if (configToDisplay) {
-            const currentIndex = this.mainHeaderService.findIndexTitleConfig(configToDisplay, this.currentTitles);
-            // if title already shown then we remove all titles after
-            if (currentIndex > -1) {
-                // if it's the last we do nothing
-                if (currentIndex < (this.currentTitles.length - 1)) {
-                    const startIndexToRemove = (currentIndex + 1);
-                    const nbTiTlesToRemove = (this.currentTitles.length - (currentIndex + 1));
-                    this.currentTitles.splice(startIndexToRemove, nbTiTlesToRemove);
+    private refreshTitles(): void {
+        const viewsLength = this.nav.getViews().length;
+        this.currentTitles = this.nav
+            .getViews()
+            .reduce((acc: Array<TitleConfig>, view: ViewController, index: number) => {
+                const titleConfig = this.findTitleConfig(view.name, view.instance);
 
-                    console.log('ON PASSE ICI 1');
+                if (titleConfig) {
+                    acc.push({
+                        ...titleConfig,
+                        view,
+                        // when it's not the last view displayed we can click on it
+                        enableClick: ((viewsLength - 1) !== index)
+                    });
                 }
-
-                console.log('ON PASSE ICI 2');
-            }
-            // if not title not shown
-            else {
-                this.currentTitles.push(configToDisplay);
-                console.log('ON PASSE ICI 3');
-            }
-            this.changeDetector.detectChanges();
-        }
-        console.log('RES --> ', this.currentTitles)
+                return acc;
+            }, []);
     }
 
     private refreshUser(): Observable<undefined> {
@@ -190,8 +238,22 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             );
     }
 
+    private clearSubTitle(): void {
+        this.mainHeaderService.emitSubTitle('');
+    }
+
     private notifyHeightChange(): void {
         this.changeDetector.detectChanges();
         this.heightChange.emit(this.height);
+    }
+
+    private findTitleConfig(name: string, instance: any): TitleConfig {
+        return this.titlesConfig.find(({pageName, filter}) => (
+            (pageName === name) &&
+            (
+                !filter ||
+                (instance && filter(instance))
+            )
+        ));
     }
 }

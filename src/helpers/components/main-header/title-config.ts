@@ -1,7 +1,9 @@
-import {Type} from "@angular/core";
+import {ViewController} from 'ionic-angular';
 
-export interface TitleConfig<T> {
-    name: string;
-    page: Type<T>;
+export interface TitleConfig {
+    label: string;
+    pageName: string;
     filter?: (instance: any) => boolean;
+    view?: ViewController;
+    enableClick?: boolean;
 }

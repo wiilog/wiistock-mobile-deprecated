@@ -26,10 +26,15 @@
         </button>
     </ion-toolbar>
     <nav class="title-toolbar">
+        <div class="main-titles">
         <ng-container *ngFor="let config of currentTitles; let last = last">
-            <span *ngIf="!last" (click)="onTitleClick(config.page)">{{config.name}}</span>
-            <span *ngIf="last">{{config.name}}</span>
+            <span *ngIf="config.enableClick" (click)="onTitleClick(config.view)">{{config.label}}</span>
+            <span *ngIf="!config.enableClick">{{config.label}}</span>
             <ng-container *ngIf="!last">|</ng-container>
         </ng-container>
+        </div>
+        <div class="sub-title" *ngIf="subTitle$|async as subtitle">
+            {{subtitle}}
+        </div>
     </nav>
 </div>

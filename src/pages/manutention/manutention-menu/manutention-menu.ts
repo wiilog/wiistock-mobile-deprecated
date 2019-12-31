@@ -3,6 +3,7 @@ import {IonicPage, Navbar, NavController} from 'ionic-angular';
 import {Manutention} from '@app/entities/manutention';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ManutentionValidatePage} from '@pages/manutention/manutention-validate/manutention-validate';
+import {MainHeaderService} from '@app/services/main-header.service';
 
 
 @IonicPage()
@@ -18,6 +19,7 @@ export class ManutentionMenuPage {
     public hasLoaded: boolean;
 
     public constructor(private navCtrl: NavController,
+                       private mainHeaderService: MainHeaderService,
                        private sqliteProvider: SqliteProvider) {
     }
 
@@ -25,8 +27,14 @@ export class ManutentionMenuPage {
         this.hasLoaded = false;
         this.sqliteProvider.findAll('`manutention`').subscribe((manutentions) => {
             this.manutentions = manutentions;
+            this.refreshSubTitle();
             this.hasLoaded = true;
         });
+    }
+
+    public refreshSubTitle(): void {
+        const manutentionLength = this.manutentions.length;
+        this.mainHeaderService.emitSubTitle(`${manutentionLength === 0 ? 'Aucune' : manutentionLength} demande${manutentionLength > 1 ? 's' : ''}`)
     }
 
     public goToManut(manutention: Manutention): void {
