@@ -199,7 +199,10 @@ export class CollecteArticlesPage {
     }
 
     public validate(): void {
-        if (this.articlesNT.length > 0) {
+        if (this.articlesT.length === 0) {
+            this.toastService.presentToast('Veuillez sélectionner au moins une ligne');
+        }
+        else if (this.articlesNT.length > 0) {
             this.alertPartialCollecte();
         }
         else {

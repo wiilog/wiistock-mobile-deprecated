@@ -217,7 +217,8 @@ export class LivraisonArticlesPage {
     }
 
     validate() {
-        if (this.articlesNT.length > 0) {
+        if ((this.articlesNT.length > 0) ||
+            (this.articlesT.length === 0)) {
             this.toastService.presentToast('Veuillez traiter tous les articles concernés');
         }
         else {

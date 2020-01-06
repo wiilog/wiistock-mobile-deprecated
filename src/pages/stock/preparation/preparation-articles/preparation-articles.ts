@@ -227,9 +227,11 @@ export class PreparationArticlesPage {
     }
 
     public validate(): void {
-        if (this.articlesNT.length > 0) {
+        if ((this.articlesNT.length > 0) ||
+            (this.articlesT.length === 0)) {
             this.toastService.presentToast('Veuillez traiter tous les articles concernés');
-        } else {
+        }
+        else {
             this.navCtrl.push(PreparationEmplacementPage, {
                 preparation: this.preparation,
                 validatePrepa: () => {
