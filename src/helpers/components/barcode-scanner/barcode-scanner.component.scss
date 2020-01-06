@@ -5,27 +5,6 @@ barcode-scanner {
         margin-bottom: .5rem !important;
     }
 
-    .validate_button {
-        display: block;
-
-        .button-text {
-            margin-right: 5px !important;
-            font-size: 30px !important;
-            font-weight: bold;
-        }
-
-        .scan-icon {
-            margin-left: 5px;
-            width: 40px;
-            height: 40px;
-        }
-    }
-
-    span {
-        color: $white !important;
-        font-size: 20px;
-    }
-
     .plus-icon {
         margin-left: 5px;
         width: 20px;

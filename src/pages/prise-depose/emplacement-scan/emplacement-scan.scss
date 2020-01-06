@@ -1,18 +1,6 @@
 @import "../../../theme/variables";
 
 page-emplacement-scan {
-    .validate_button {
-        display: block;
-        background-color: $primary;
-        text-align: center;
-
-        .button-text {
-            margin-right: 5px !important;
-            font-size: 30px !important;
-            font-weight: bold;
-        }
-    }
-
     .label-emp {
         margin-top: 50% !important;
         margin-bottom: 50% !important;
@@ -31,11 +19,5 @@ page-emplacement-scan {
             height: 30px;
             display: inline-block;
         }
-    }
-
-    .validate-icon {
-        margin-left: 5px;
-        width: 40px;
-        height: 40px;
     }
 }

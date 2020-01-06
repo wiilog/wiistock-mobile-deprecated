@@ -157,7 +157,7 @@ export class MainMenuPage {
                             handler: () => {
                                 this.platform.exitApp();
                             },
-                            cssClass: 'alertAlert'
+                            cssClass: 'alert-success'
                         }
                     ]
                 });

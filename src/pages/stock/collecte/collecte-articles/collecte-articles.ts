@@ -260,7 +260,7 @@ export class CollecteArticlesPage {
                                 this.partialCollecteAlert = undefined;
                                 this.pushEmplacementPage();
                             },
-                            cssClass: 'alertAlert'
+                            cssClass: 'alert-success'
                         }
                     ]
                 });

@@ -18,6 +18,7 @@
 
 <div class="page-footer persisted-page-footer" *ngIf="!loading">
     <barcode-scanner #footerScannerComponent
+                     [buttonSubtitle]="objectLabel"
                      (add)="testColisDepose($event[0], $event[1])">
     </barcode-scanner>
 </div>

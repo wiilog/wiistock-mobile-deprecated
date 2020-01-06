@@ -43,6 +43,8 @@ export class PrisePage {
     public loading: boolean;
     public barcodeCheckLoading: boolean;
 
+    public fromStock: boolean;
+
     private zebraScanSubscription: Subscription;
     private barcodeCheckSubscription: Subscription;
     private saveSubscription: Subscription;
@@ -50,8 +52,6 @@ export class PrisePage {
     private finishPrise: () => void;
     private operator: string;
     private apiLoading: boolean;
-
-    private fromStock: boolean;
 
     public constructor(private navCtrl: NavController,
                        private navParams: NavParams,
@@ -174,11 +174,11 @@ export class PrisePage {
             }
         }
         else {
-            this.toastService.presentToast('Vous devez scanner au moins un colis')
+            this.toastService.presentToast(`Vous devez scanner au moins un ${this.objectLabel}`)
         }
     }
 
-    redirectAfterTake() {
+    public redirectAfterTake(): void {
         this.navCtrl.pop()
             .then(() => {
                 this.finishPrise();
@@ -224,7 +224,7 @@ export class PrisePage {
                                                 handler: () => {
                                                     this.saveMouvementTraca(barCode, quantity);
                                                 },
-                                                cssClass: 'alertAlert'
+                                                cssClass: 'alert-success'
                                             }
                                         ]
                                     })
@@ -240,6 +240,12 @@ export class PrisePage {
         else {
             this.toastService.presentToast('Vous devez être connecté à internet pour effectuer une prise');
         }
+    }
+
+    public get objectLabel(): string {
+        return this.fromStock
+            ? 'article'
+            : 'objet';
     }
 
     private saveMouvementTraca(barCode: string, quantity: boolean|number): void {

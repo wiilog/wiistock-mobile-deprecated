@@ -61,7 +61,7 @@ export class ManutentionValidatePage {
                         this.commentaire = commentaire.commentaire;
                         this.notifyApi();
                     },
-                    cssClass: 'alertAlert'
+                    cssClass: 'alert-success'
                 }]
             }).present();
         } else {

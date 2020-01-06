@@ -52,7 +52,7 @@ export class DeposePage {
 
     public loading: boolean;
 
-    private fromStock: boolean;
+    public fromStock: boolean;
 
     private zebraScanSubscription: Subscription;
     private saveSubscription: Subscription;
@@ -192,7 +192,7 @@ export class DeposePage {
             }
         }
         else {
-            this.toastService.presentToast('Vous devez sélectionner au moins un article')
+            this.toastService.presentToast(`Vous devez sélectionner au moins un ${this.objectLabel}`)
         }
     }
 
@@ -213,7 +213,7 @@ export class DeposePage {
             else {
                 this.alertController
                     .create({
-                        title: `Vous avez sélectionné le colis ${barCode}`,
+                        title: `Vous avez sélectionné l'${this.objectLabel} ${barCode}`,
                         buttons: [
                             {
                                 text: 'Annuler'
@@ -223,7 +223,7 @@ export class DeposePage {
                                 handler: () => {
                                     this.saveMouvementTracaWrapper(barCode);
                                 },
-                                cssClass: 'alertAlert'
+                                cssClass: 'alert-success'
                             }
                         ]
                     })
@@ -231,8 +231,14 @@ export class DeposePage {
             }
         }
         else {
-            this.toastService.presentToast('Ce colis ne correspond à aucune prise.');
+            this.toastService.presentToast(`Cet ${this.objectLabel} ne correspond à aucune prise`);
         }
+    }
+
+    public get objectLabel(): string {
+        return this.fromStock
+            ? 'article'
+            : 'objet';
     }
 
     private saveMouvementTracaWrapper(barCode: string): void {

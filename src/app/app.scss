@@ -118,16 +118,30 @@ button[ion-button] {
     font-size: 1.6rem;
     text-transform: uppercase;
     margin: 0;
-    height: 5rem;
+    height: 7rem;
 
     wii-icon {
         margin-left: .7rem;
         width: 1.8rem;
         height: 1.8rem;
+
+        &.big {
+            margin-left: 1rem;
+            width: 3rem;
+            height: 3rem;
+        }
     }
 
     .page-footer & {
         width: 100%;
+    }
+
+    .title {
+        font-size: 20pt;
+    }
+
+    .subtitle {
+        font-size: 10pt;
     }
 }
 
@@ -135,9 +149,9 @@ button[ion-button] {
     text-align: center;
 }
 
-.alertAlert {
-    background-color: #149914 !important;
-    color: #FFF !important;
+.alert-success {
+    background-color: $success !important;
+    color: $white !important;
 }
 
 .text-right {
@@ -169,7 +183,7 @@ button[ion-button] {
 .row-menu-stats {
     display: flex;
     justify-content: center;
-    background-color: white;
+    background-color: $white;
     text-align: center;
     padding-top: 1rem;
     padding-bottom: 1rem;
@@ -179,7 +193,7 @@ button[ion-button] {
         margin-top: 0;
         margin-bottom: 0;
         font-weight: 100;
-        color: black;
+        color: $black;
 
         &:last-child {
             margin-top: 1rem;

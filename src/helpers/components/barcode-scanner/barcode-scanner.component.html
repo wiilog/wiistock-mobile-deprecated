@@ -10,6 +10,10 @@
     </ion-item>
 </div>
 <button class="validate_button" ion-button color="primary" (click)="scan()">
-    <span class="button-text">SCANNER</span>
-    <wii-icon name="scan.svg" color="white" class="scan-icon"></wii-icon>
+    <span class="button-text-wrapper">
+        <span class="title">SCANNER</span>
+        <br/>
+        <span class="subtitle" *ngIf="buttonSubtitle">{{buttonSubtitle}}</span>
+    </span>
+    <wii-icon name="scan.svg" color="white" class="big"></wii-icon>
 </button>

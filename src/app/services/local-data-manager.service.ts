@@ -344,7 +344,7 @@ export class LocalDataManagerService {
                 message: errors.map(({message, ...numeros}) => `${numeros[numeroFailedName]} : ${message}`).join(`\n`),
                 buttons: [{
                     text: 'Valider',
-                    cssClass: 'alertAlert'
+                    cssClass: 'alert-success'
                 }]
             })
             .present()
