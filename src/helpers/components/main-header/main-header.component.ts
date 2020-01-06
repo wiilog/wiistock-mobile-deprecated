@@ -230,7 +230,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             .getOperateur()
             .pipe(
                 take(1),
-                map((user: string) => user.substring(0, MainHeaderComponent.MAX_PSEUDO_LENGTH)),
+                map((user: string) => (user || '').substring(0, MainHeaderComponent.MAX_PSEUDO_LENGTH)),
                 tap((user: string) => {
                     this.loggedUser = user;
                 }),
