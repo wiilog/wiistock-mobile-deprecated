@@ -12,8 +12,8 @@
         "clean": "ionic-app-scripts clean",
         "build": "ionic-app-scripts build",
         "lint": "ionic-app-scripts lint",
-        "wiis:clean": "yarn clean && ionic cordova platform add android && cordova clean && ionic cordova resources android",
-        "wiis:build": "yarn wiis:clean && ionic cordova build --release android",
+        "wiis:clean": "yarn clean && ionic cordova resources android && ionic cordova platform add android && cordova clean",
+        "wiis:build": "yarn wiis:clean && ionic cordova build android",
         "wiis:run": "yarn wiis:clean && ionic cordova run android",
         "wiis:run:livereload": "yarn wiis:clean && ionic cordova run android --livereload"
     },
