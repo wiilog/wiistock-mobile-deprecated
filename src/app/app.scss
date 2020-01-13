@@ -114,11 +114,13 @@ ion-item {
 }
 
 button[ion-button] {
-    font-weight: bold;
-    font-size: 1.6rem;
-    text-transform: uppercase;
-    margin: 0;
-    height: 7rem;
+    &:not([ion-button="alert-button"]) {
+        font-weight: bold;
+        font-size: 1.6rem;
+        text-transform: uppercase;
+        margin: 0;
+        height: 7rem;
+    }
 
     wii-icon {
         margin-left: .7rem;

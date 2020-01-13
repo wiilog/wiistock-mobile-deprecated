@@ -32,6 +32,7 @@ export class EmplacementScanPage {
     }
 
     public ionViewWillEnter(): void {
+        this.emplacement = undefined;
         this.chooseEmp = this.navParams.get('chooseEmp');
         this.fromDepose = this.navParams.get('fromDepose');
         this.fromStock = this.navParams.get('fromStock');
