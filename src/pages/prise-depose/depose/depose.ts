@@ -115,6 +115,7 @@ export class DeposePage {
     }
 
     public ionViewWillLeave(): void {
+        this.unsubscribeZebraScanObserver();
         if (this.saveSubscription) {
             this.saveSubscription.unsubscribe();
             this.saveSubscription = undefined;
@@ -208,12 +209,16 @@ export class DeposePage {
                 this.saveMouvementTracaWrapper(barCode);
             }
             else {
+                this.unsubscribeZebraScanObserver();
                 this.alertController
                     .create({
                         title: `Vous avez sélectionné l'${this.objectLabel} ${barCode}`,
                         buttons: [
                             {
-                                text: 'Annuler'
+                                text: 'Annuler',
+                                handler: () => {
+                                    this.launchZebraScanObserver();
+                                },
                             },
                             {
                                 text: 'Confirmer',
@@ -241,6 +246,7 @@ export class DeposePage {
     private saveMouvementTracaWrapper(barCode: string): void {
         if (this.fromStock) {
             this.saveMouvementTraca(barCode);
+            this.launchZebraScanObserver();
         }
         else {
             this.navCtrl.push(DeposeConfirmPage, {

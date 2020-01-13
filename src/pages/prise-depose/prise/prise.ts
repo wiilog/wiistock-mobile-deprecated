@@ -80,9 +80,7 @@ export class PrisePage {
         this.storageService.getOperateur().subscribe((operator) => {
             this.operator = operator;
 
-            this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
-                this.testIfBarcodeEquals(barcode);
-            });
+            this.launchZebraScanObserver();
 
             this.refreshListComponent();
             this.loading = false;
@@ -91,10 +89,7 @@ export class PrisePage {
 
     public ionViewWillLeave(): void {
         this.barcodeCheckLoading = false;
-        if (this.zebraScanSubscription) {
-            this.zebraScanSubscription.unsubscribe();
-            this.zebraScanSubscription = undefined;
-        }
+        this.unsubscribeZebraScanObserver();
         if (this.barcodeCheckSubscription) {
             this.barcodeCheckSubscription.unsubscribe();
             this.barcodeCheckSubscription = undefined;
@@ -209,6 +204,7 @@ export class PrisePage {
                                 this.saveMouvementTraca(barCode, quantity);
                             }
                             else {
+                                this.unsubscribeZebraScanObserver();
                                 const quantitySuffix = (typeof quantity === 'number')
                                     ? ` en quantité de ${quantity}`
                                     : '';
@@ -217,12 +213,16 @@ export class PrisePage {
                                         title: `Prise de ${barCode}${quantitySuffix}`,
                                         buttons: [
                                             {
-                                                text: 'Annuler'
+                                                text: 'Annuler',
+                                                handler: () => {
+                                                    this.launchZebraScanObserver();
+                                                }
                                             },
                                             {
                                                 text: 'Confirmer',
                                                 handler: () => {
                                                     this.saveMouvementTraca(barCode, quantity);
+                                                    this.launchZebraScanObserver();
                                                 },
                                                 cssClass: 'alert-success'
                                             }
@@ -292,5 +292,19 @@ export class PrisePage {
                     ))
                 )
             : of(true)
+    }
+
+    private launchZebraScanObserver(): void {
+        this.unsubscribeZebraScanObserver();
+        this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
+            this.testIfBarcodeEquals(barcode);
+        });
+    }
+
+    private unsubscribeZebraScanObserver(): void {
+        if (this.zebraScanSubscription) {
+            this.zebraScanSubscription.unsubscribe();
+            this.zebraScanSubscription = undefined;
+        }
     }
 }
