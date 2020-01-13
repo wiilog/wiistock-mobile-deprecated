@@ -102,22 +102,19 @@ export class DeposePage {
                     this.colisPrise = colisPrise;
                     this.operator = operator;
 
-                    this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
-                        this.testColisDepose(barcode);
-                    });
+                    this.launchZebraScanObserver();
 
                     this.refreshDeposeListComponent();
                     this.refreshPriseListComponent();
                     this.loading = false;
                 });
         }
+        else {
+            this.launchZebraScanObserver();
+        }
     }
 
     public ionViewWillLeave(): void {
-        if (this.zebraScanSubscription) {
-            this.zebraScanSubscription.unsubscribe();
-            this.zebraScanSubscription = undefined;
-        }
         if (this.saveSubscription) {
             this.saveSubscription.unsubscribe();
             this.saveSubscription = undefined;
@@ -313,5 +310,19 @@ export class DeposePage {
 
     private priseExists(barCode: string): boolean {
         return this.colisPrise.filter(({ref_article}) => (ref_article === barCode)).length > 0;
+    }
+
+    private launchZebraScanObserver(): void {
+        this.unsubscribeZebraScanObserver();
+        this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
+            this.testColisDepose(barcode);
+        });
+    }
+
+    private unsubscribeZebraScanObserver(): void {
+        if (this.zebraScanSubscription) {
+            this.zebraScanSubscription.unsubscribe();
+            this.zebraScanSubscription = undefined;
+        }
     }
 }
