@@ -12,8 +12,8 @@
         "clean": "ionic-app-scripts clean",
         "build": "ionic-app-scripts build",
         "lint": "ionic-app-scripts lint",
-        "wiis:clean": "cordova clean && ionic cordova resources android",
-        "wiis:build": "yarn wiis:clean && ionic cordova build android",
+        "wiis:clean": "yarn clean && ionic cordova platform add android && cordova clean && ionic cordova resources android",
+        "wiis:build": "yarn wiis:clean && ionic cordova build --release android",
         "wiis:run": "yarn wiis:clean && ionic cordova run android",
         "wiis:run:livereload": "yarn wiis:clean && ionic cordova run android --livereload"
     },
@@ -41,7 +41,6 @@
         "com-darryncampbell-cordova-plugin-intent": "1.1.7",
         "cordova": "^9.0.0",
         "cordova-android": "^8.1.0",
-        "cordova-browser": "^5.0.4",
         "cordova-plugin-app-version": "^0.1.9",
         "cordova-plugin-device": "^2.0.2",
         "cordova-plugin-ionic": "5.3.0",
@@ -64,8 +63,10 @@
         "phonegap-plugin-barcodescanner": "^8.1.0",
         "rxjs": "5.5.11",
         "semver": "^6.3.0",
+        "sharp": "^0.23.4",
         "sw-toolbox": "3.6.0",
-        "zone.js": "0.8.29"
+        "zone.js": "0.8.29",
+        "cordova-browser": "^5.0.4"
     },
     "devDependencies": {
         "@ionic/app-scripts": "^3.2.3",
@@ -93,8 +94,8 @@
             "cordova-plugin-app-version": {}
         },
         "platforms": [
-            "browser",
-            "android"
+            "android",
+            "browser"
         ]
     }
 }
