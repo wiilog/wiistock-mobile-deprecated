@@ -1128,7 +1128,14 @@ component-emitter@^1.2.1:
   resolved "https://registry.yarnpkg.com/component-emitter/-/component-emitter-1.3.0.tgz#16e4070fba8ae29b679f2215853ee181ab2eabc0"
   integrity sha512-Rd3se6QB+sO1TwqZjscQrurpEPIfO0/yYnSin6Q/rD3mOutHvUrCAhJub3r90uNb+SESBuE0QYoB90YdfatsRg==
 
-compressible@~2.0.13, compressible@~2.0.16:
+compressible@~2.0.13:
+  version "2.0.18"
+  resolved "https://registry.yarnpkg.com/compressible/-/compressible-2.0.18.tgz#af53cca6b070d4c3c0750fbd77286a6d7cc46fba"
+  integrity sha512-AF3r7P5dWxL8MxyITRMlORQNaOA2IkAFaTr4k7BUumjPtRpGDTZpl0Pb1XCO6JeDCBdp126Cgs9sMxqSjgYyRg==
+  dependencies:
+    mime-db ">= 1.43.0 < 2"
+
+compressible@~2.0.16:
   version "2.0.17"
   resolved "https://registry.yarnpkg.com/compressible/-/compressible-2.0.17.tgz#6e8c108a16ad58384a977f3a482ca20bff2f38c1"
   integrity sha512-BGHeLCK1GV7j1bSmQQAi26X+GgWcTjLr/0tzSvMCl3LH1w1IJ4PFSPoV5316b30cneTziC+B1a+3OjoSUcQYmw==
@@ -3679,6 +3686,11 @@ mime-db@1.42.0, "mime-db@>= 1.40.0 < 2":
   resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.42.0.tgz#3e252907b4c7adb906597b4b65636272cf9e7bac"
   integrity sha512-UbfJCR4UAVRNgMpfImz05smAXK7+c+ZntjaA26ANtkXLlOe947Aag5zdIcKQULAiF9Cq4WxBi9jUs5zkA84bYQ==
 
+"mime-db@>= 1.43.0 < 2":
+  version "1.43.0"
+  resolved "https://registry.yarnpkg.com/mime-db/-/mime-db-1.43.0.tgz#0a12e0502650e473d735535050e7c8f4eb4fae58"
+  integrity sha512-+5dsGEEovYbT8UY9yD7eE4XTc4UwJ1jBYlgaQQF38ENsKR3wj/8q8RFZrF9WIZpB2V1ArTVFUva8sAul1NzRzQ==
+
 mime-types@2.1.18:
   version "2.1.18"
   resolved "https://registry.yarnpkg.com/mime-types/-/mime-types-2.1.18.tgz#6f323f60a83d11146f831ff11fd66e2fe5503bb8"
@@ -3940,9 +3952,9 @@ node-version-compare@>=1.0.1:
   integrity sha512-OVcHSPS3nROlBQXcALptOR0j2lOabC9wE2S+y+Fvr7nSDqoO/LCNzRdVGVovipeHUXs5jAqq7GelWE1X4J1sEw==
 
 node@^10.16.0:
-  version "10.18.0"
-  resolved "https://registry.yarnpkg.com/node/-/node-10.18.0.tgz#2a8bf0d407dd1e777008d758553f9074f036facd"
-  integrity sha512-QRG8rskm+2bswkc8c44rVeb01wLJSwWJNtesYhtws0AmEzU1AcTu7iSuv5hnL7Tc6F7tRTYfY7veu4QnOtTBIA==
+  version "10.18.1"
+  resolved "https://registry.yarnpkg.com/node/-/node-10.18.1.tgz#f3228f223df9feb13e9b14a04130ace74db3877b"
+  integrity sha512-q1a2p7bUcAGN3NCpIkD3J/RtXXUToiwaqgJHzAZltHFZVq37l3+XQq/G1fU5limbxdUYf0LNEs/b6Icz/JGMog==
   dependencies:
     node-bin-setup "^1.0.0"
 
@@ -5180,7 +5192,7 @@ sha.js@^2.4.0, sha.js@^2.4.8:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
-sharp@^0.23.1:
+sharp@^0.23.1, sharp@^0.23.4:
   version "0.23.4"
   resolved "https://registry.yarnpkg.com/sharp/-/sharp-0.23.4.tgz#ca36067cb6ff7067fa6c77b01651cb9a890f8eb3"
   integrity sha512-fJMagt6cT0UDy9XCsgyLi0eiwWWhQRxbwGmqQT6sY8Av4s0SVsT/deg8fobBQCTDU5iXRgz0rAeXoE2LBZ8g+Q==

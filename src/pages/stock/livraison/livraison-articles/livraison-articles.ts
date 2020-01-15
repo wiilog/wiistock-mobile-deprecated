@@ -195,7 +195,7 @@ export class LivraisonArticlesPage {
                     this.sqliteProvider
                         .updateArticleLivraisonQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite)
                         .pipe(
-                            flatMap(() => this.sqliteProvider.deleteById('`article_livraison`', mouvement.id_article_livraison)),
+                            flatMap(() => this.sqliteProvider.deleteBy('`article_livraison`', mouvement.id_article_livraison)),
                             flatMap(() => this.sqliteProvider.findArticlesByLivraison(this.livraison.id))
                         )
                         .subscribe((articles) => {

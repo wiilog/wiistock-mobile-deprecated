@@ -87,7 +87,7 @@ export class ManutentionValidatePage {
                                     this.sendCommentToApiLoading = false;
                                     loading.dismiss();
                                     if (response.success) {
-                                        this.sqliteProvider.deleteById('`manutention`', this.manutention.id).subscribe(() => {
+                                        this.sqliteProvider.deleteBy('`manutention`', this.manutention.id).subscribe(() => {
                                             this.navCtrl.pop();
                                         })
                                     }

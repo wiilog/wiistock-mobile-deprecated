@@ -77,7 +77,6 @@ export class MainMenuPage {
 
     public ionViewWillEnter(): void {
         this.synchronise();
-        this.refreshCounters();
 
         this.unregisterBackButtonAction = this.platform.registerBackButtonAction(() => {
             this.onBackButton();
@@ -119,12 +118,16 @@ export class MainMenuPage {
                         this.refreshCounters();
                     }
                 },
-                ({api, message}) => {
+                (error) => {
+                    const {api, message} = error;
                     this.loading = false;
+                    this.refreshCounters();
                     if (api && message) {
                         this.toastService.presentToast(message);
                     }
-                    this.refreshCounters();
+                    else {
+                        throw error;
+                    }
                 });
         }
         else {

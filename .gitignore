@@ -27,7 +27,10 @@ platforms/
 plugins/
 plugins/android.json
 plugins/ios.json
-resources/
+resources/android/icon
+resources/android/splash
+resources/ios/icon
+resources/ios/splash
 www/
 $RECYCLE.BIN/
 

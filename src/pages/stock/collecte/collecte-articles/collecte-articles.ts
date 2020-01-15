@@ -177,7 +177,7 @@ export class CollecteArticlesPage {
                     this.sqliteProvider
                         .updateArticleCollecteQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite)
                         .pipe(
-                            flatMap(() => this.sqliteProvider.deleteById('`article_collecte`', mouvement.id_article_collecte)),
+                            flatMap(() => this.sqliteProvider.deleteBy('`article_collecte`', mouvement.id_article_collecte)),
                             flatMap(() => this.sqliteProvider.findArticlesByCollecte(this.collecte.id))
                         )
                         .subscribe((articles) => {
