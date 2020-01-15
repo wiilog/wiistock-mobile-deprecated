@@ -58,7 +58,6 @@ export class SqliteProvider {
 
     private createTables(): Observable<undefined> {
         return of(undefined).pipe(
-            flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `article` (`id` INTEGER PRIMARY KEY, `reference` VARCHAR(255), `quantite` INTEGER, `barcode` TEXT)')),
             flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))')),
             flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location` TEXT, `type` VARCHAR(255), `is_ref` INTEGER, `id_article_prepa` INTEGER, `id_prepa` INTEGER, `id_article_livraison` INTEGER, `id_livraison` INTEGER, `id_article_collecte` INTEGER, `id_collecte` INTEGER, `selected_by_article` INTEGER)')),
             flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` VARCHAR(255), `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255), `comment` VARCHAR(255), `signature` TEXT, finished INTEGER, fromStock INTEGER, quantity INTEGER)')),
@@ -97,7 +96,6 @@ export class SqliteProvider {
     private dropTables(): Observable<any> {
         return this.isDBCreated$
             .pipe(
-                flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `article`;')),
                 flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `emplacement`;')),
                 flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `mouvement_traca`;')),
                 flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `preparation`;')),
@@ -115,28 +113,6 @@ export class SqliteProvider {
                 map(() => undefined),
                 take(1)
             );
-    }
-
-    private importArticles(data): Observable<any> {
-        let articles = data['articles'];
-        let articleValuesStr;
-        const filled = (articles && articles.length > 0);
-
-        if (filled) {
-            let articleValues = articles.map((article) => (
-                "(" +
-                "NULL, " +
-                `'${this.escapeQuotes(article.reference)}',` +
-                (article.quantiteStock || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ', ' +
-                (article.barCode ? `'${article.barCode}'` : 'null') +
-                ")"
-            ));
-            articleValuesStr = articleValues.join(', ');
-        }
-
-        return filled
-            ? this.executeQuery('INSERT INTO `article` (`id`, `reference`, `quantite`, `barcode`) VALUES ' + articleValuesStr + ';')
-            : of(undefined);
     }
 
     private importEmplacements(data): Observable<any> {
@@ -679,7 +655,6 @@ export class SqliteProvider {
         return of(undefined).pipe(
             flatMap(() => this.importEmplacements(data)),
             flatMap(() => this.importArticlesPrepaByRefArticle(data)),
-            flatMap(() => this.importArticles(data)),
             flatMap(() => this.importPreparations(data)),
             flatMap(() => this.importArticlesPrepas(data)),
             flatMap(() => this.importLivraisons(data)),
