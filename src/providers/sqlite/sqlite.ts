@@ -131,7 +131,7 @@ export class SqliteProvider {
             let articleValues = articles.map((article) => (
                 "(" +
                 "NULL, " +
-                `'${article.reference}',` +
+                `'${this.escapeQuotes(article.reference)}',` +
                 (article.quantiteStock || article.quantiteStock === 0 ? article.quantiteStock : article.quantite) + ', ' +
                 (article.barCode ? `'${article.barCode}'` : 'null') +
                 ")"
@@ -154,7 +154,10 @@ export class SqliteProvider {
                     map(() => {
                         const emplacementValuesStr = apiEmplacements
                             .map((emplacement) => (
-                                "(" + emplacement.id + ", '" + emplacement.label.replace(/(\"|\')/g, "\'$1") + "')"
+                                "(" +
+                                emplacement.id + ", " +
+                                "'" + this.escapeQuotes(emplacement.label) +
+                                "')"
                             ))
                             .join(', ');
                         return 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';'
@@ -179,7 +182,7 @@ export class SqliteProvider {
         for (let prepa of prepas) {
             this.findOneById('preparation', prepa.id).subscribe((prepaInserted) => {
                 if (!prepaInserted) {
-                    prepasValues.push(`(${prepa.id}, '${prepa.number}', NULL, NULL, 0, '${prepa.destination}', '${prepa.type}')`);
+                    prepasValues.push(`(${prepa.id}, '${prepa.number}', NULL, NULL, 0, '${this.escapeQuotes(prepa.destination)}', '${prepa.type}')`);
                 }
 
                 if (prepas.indexOf(prepa) === prepas.length - 1) {
@@ -231,7 +234,16 @@ export class SqliteProvider {
                 if (manutInserted === null) {
                     let comment = manut.commentaire === null ? '' : this.escapeQuotes(manut.commentaire);
                     let date = manut.date_attendue ? manut.date_attendue.date : null;
-                    manutValues.push("(" + manut.id + ", '" + date + "', '" + manut.demandeur + "', '" + comment + "', '" + this.escapeQuotes(manut.source) + "', '" + this.escapeQuotes(manut.destination) + "')");
+                    manutValues.push(
+                        "(" +
+                        manut.id + ", " +
+                        "'" + date + "'" +
+                        ", '" + this.escapeQuotes(manut.demandeur) + "'" +
+                        ", '" + this.escapeQuotes(comment) + "'" +
+                        ", '" + this.escapeQuotes(manut.source) + "'" +
+                        ", '" + this.escapeQuotes(manut.destination) + "'" +
+                        ")"
+                    );
                 }
                 if (manutentions.indexOf(manut) === manutentions.length - 1) {
                     this.findAll('`manutention`').subscribe((manutentionsDB) => {
@@ -329,10 +341,6 @@ export class SqliteProvider {
         return ret$;
     }
 
-    escapeQuotes(string) {
-        return string.replace(/'/g, "\''");
-    }
-
     public importLivraisons(data): Observable<any> {
         const ret$ = new ReplaySubject<any>(1);
         let livraisons = data['livraisons'];
@@ -399,13 +407,13 @@ export class SqliteProvider {
                     articlesLivraisonValues.push(
                         "(" +
                         "NULL, " +
-                        "'" + article.label + "', " +
-                        "'" + article.reference + "'," +
+                        "'" + this.escapeQuotes(article.label) + "', " +
+                        "'" + this.escapeQuotes(article.reference) + "'," +
                         article.quantity + ", " +
                         article.is_ref + ", " +
                         "" + article.id_livraison + ", " +
                         "0, " +
-                        "'" + article.location + "'," +
+                        "'" + this.escapeQuotes(article.location) + "'," +
                         "'" + article.barCode + "'" +
                         ")");
                 }
@@ -441,13 +449,13 @@ export class SqliteProvider {
                         (articlesCollecteAPI && articlesCollecteAPI.length > 0)
                             ? articlesCollecteAPI.map((articleCollecte) => (
                                 "(NULL, " +
-                                "'" + articleCollecte.label + "', " +
-                                "'" + articleCollecte.reference + "', " +
+                                "'" + this.escapeQuotes(articleCollecte.label) + "', " +
+                                "'" + this.escapeQuotes(articleCollecte.reference) + "', " +
                                 articleCollecte.quantity + ", " +
                                 articleCollecte.is_ref + ", " +
                                 articleCollecte.id_collecte + ", " +
                                 "0, " +
-                                "'" + articleCollecte.location + "', " +
+                                "'" + this.escapeQuotes(articleCollecte.location) + "', " +
                                 "'" + articleCollecte.barCode + "')"
                             ))
                             : []
@@ -456,15 +464,15 @@ export class SqliteProvider {
                         articlesCollecteValues.length > 0
                             ? this.executeQuery(
                                 'INSERT INTO `article_collecte` (' +
-                                    '`id`, ' +
-                                    '`label`, ' +
-                                    '`reference`, ' +
-                                    '`quantite`, ' +
-                                    '`is_ref`, ' +
-                                    '`id_collecte`, ' +
-                                    '`has_moved`, ' +
-                                    '`emplacement`, ' +
-                                    '`barcode`' +
+                                '`id`, ' +
+                                '`label`, ' +
+                                '`reference`, ' +
+                                '`quantite`, ' +
+                                '`is_ref`, ' +
+                                '`id_collecte`, ' +
+                                '`has_moved`, ' +
+                                '`emplacement`, ' +
+                                '`barcode`' +
                                 ') ' +
                                 'VALUES ' + articlesCollecteValues.join(',') + ';'
                             )
@@ -524,13 +532,13 @@ export class SqliteProvider {
     public getArticleCollecteValueFromApi(articleCollecte): string {
         return (
             "(NULL, " +
-            "'" + articleCollecte.label + "', " +
-            "'" + articleCollecte.reference + "', " +
+            "'" + this.escapeQuotes(articleCollecte.label) + "', " +
+            "'" + this.escapeQuotes(articleCollecte.reference) + "', " +
             articleCollecte.quantity + ", " +
             articleCollecte.is_ref + ", " +
             articleCollecte.id_collecte + ", " +
             "0, " +
-            "'" + articleCollecte.location + "', " +
+            "'" + this.escapeQuotes(articleCollecte.location) + "', " +
             "'" + articleCollecte.barCode + "')"
         );
     }
@@ -585,9 +593,9 @@ export class SqliteProvider {
             articlesInventaireValues.push(
                 "(NULL, " +
                 "'" + article.id_mission + "', " +
-                "'" + article.reference + "', " +
+                "'" + this.escapeQuotes(article.reference) + "', " +
                 article.is_ref + ", " +
-                "'" + (article.location ? article.location : 'N/A') + "', " +
+                "'" + this.escapeQuotes(article.location ? article.location : 'N/A') + "', " +
                 "'" + article.barCode + "')"
             );
 
@@ -626,7 +634,7 @@ export class SqliteProvider {
                                 ...article,
                                 isSelectableByUser: 1
                             };
-                            return '(' + (articleKeys.map((key) => ("'" + articleTmp[key] + "'")).join(', ') + ')')
+                            return '(' + (articleKeys.map((key) => ("'" + this.escapeQuotes(articleTmp[key]) + "'")).join(', ') + ')')
                         });
 
                         return 'INSERT INTO `article_prepa_by_ref_article` (' +
@@ -658,10 +666,10 @@ export class SqliteProvider {
                     .map((anomaly) => (
                         "(" +
                         anomaly.id + ", " +
-                        "'" + anomaly.reference + "', " +
+                        "'" + this.escapeQuotes(anomaly.reference) + "', " +
                         anomaly.is_ref + ", " +
                         "'" + anomaly.quantity + "', " +
-                        "'" + (anomaly.location ? anomaly.location : 'N/A') + "', " +
+                        "'" + this.escapeQuotes(anomaly.location ? anomaly.location : 'N/A') + "', " +
                         "'" + anomaly.barCode + "')"
                     ))
                     .join(', ');
@@ -835,9 +843,13 @@ export class SqliteProvider {
     }
 
     public executeQuery(query: string, getRes: boolean = true, params: Array<any> = []): Observable<any> {
+        console.log('>>> ', query, params);
         return this.db$.pipe(
             flatMap((db) => from(db.executeSql(query, params))),
-            map((res) => getRes ? res : undefined)
+            map((res) => {
+                console.log('RESSSSSSSSSSSSS : ', query, res);
+                return (getRes ? res : undefined)
+            })
         );
     }
 
@@ -1101,28 +1113,6 @@ export class SqliteProvider {
         return resp;
     }
 
-    public deleteCollectes(collectes: Array<Collecte>) {
-        let resp = new Promise<any>((resolve) => {
-            if (collectes.length === 0) {
-                resolve();
-            }
-            else {
-                this.db$.subscribe((db) => {
-                    collectes.forEach(collecte => {
-                        db.executeSql('DELETE FROM `collecte` WHERE id = ' + collecte.id, []).then(() => {
-                            db.executeSql('DELETE FROM `article_collecte` WHERE id_collecte = ' + collecte.id, []).then(() => {
-                                if (collectes.indexOf(collecte) === collectes.length - 1) {
-                                    resolve();
-                                }
-                            }).catch(err => console.log(err));
-                        }).catch(err => console.log(err));
-                    });
-                });
-            }
-        });
-        return resp;
-    }
-
     public deleteById(table: string, ids: number|Array<number>): Observable<undefined> {
         const where = Array.isArray(ids)
             ? `id IN (${ids.join(',')})`
@@ -1148,12 +1138,12 @@ export class SqliteProvider {
     }
 
     public cleanTable(table): Observable<undefined> {
-        return this.executeQuery('DELETE FROM ' + table + ';', false);
+        return this.executeQuery('DELETE FROM ' + table, false);
     }
 
     private getValueForQuery(value: any): string {
         return (
-            (typeof value === 'string') ? `'${value}'` :
+            (typeof value === 'string') ? `'${this.escapeQuotes(value)}'` :
             (typeof value === 'boolean') ? `${Number(value)}` :
             ((value === null) || (value === undefined)) ? 'null' :
             `${value}`
@@ -1195,6 +1185,12 @@ export class SqliteProvider {
         return ids.length > 0
             ? this.executeQuery(`UPDATE mouvement_traca SET finished = 1 WHERE id IN (${ids.join(',')})`, false)
             : of(undefined);
+    }
+
+    private escapeQuotes(str: string): string {
+        return str
+            ? str.replace(/'/g, "''")
+            : str;
     }
 
 }
