@@ -81,7 +81,7 @@ export class InventaireAnomaliePage {
                     if (resp.success) {
                         // supprime les anomalies traitée de la base
                         this.sqliteProvider
-                            .deleteById('anomalie_inventaire', anomalies.map(({id}) => id))
+                            .deleteBy('anomalie_inventaire', anomalies.map(({id}) => id))
                             .subscribe(() => {
                                 this.loading = false;
                                 this.toastService.presentToast(resp.data.status);
@@ -142,7 +142,7 @@ export class InventaireAnomaliePage {
                 this.apiService.requestApi('post', ApiService.TREAT_ANOMALIES, {anomalies: [this.anomaly]}).subscribe((resp) => {
                     if (resp.success) {
                         // supprime l'anomalie traitée de la base
-                        this.sqliteProvider.deleteById(`anomalie_inventaire`, this.anomaly.id).subscribe(() => {
+                        this.sqliteProvider.deleteBy(`anomalie_inventaire`, this.anomaly.id).subscribe(() => {
                             this.toastService.presentToast(resp.data.status).subscribe(() => {
                                 // supprime l'anomalie de la liste
                                 this.anomaliesByLocation = this.anomaliesByLocation.filter(anomaly => parseInt(anomaly.treated) !== 1);
