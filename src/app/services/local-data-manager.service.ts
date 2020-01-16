@@ -258,7 +258,7 @@ export class LocalDataManagerService {
                                     map((apiResponse) => [apiResponse, mouvements]),
                                     flatMap(([apiResponse, mouvements]) => (
                                         (apiResponse && apiResponse.success)
-                                            ? this.sqliteProvider.deleteById(
+                                            ? this.sqliteProvider.deleteBy(
                                                 'mouvement_traca',
                                                 mouvements
                                                     .filter(({finished, type}) => (finished || type === 'depose'))

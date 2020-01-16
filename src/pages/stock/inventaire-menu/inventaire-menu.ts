@@ -80,7 +80,7 @@ export class InventaireMenuPage {
                 )),
                 flatMap((resp) => (
                     resp.success
-                        ? this.sqliteProvider.cleanTable('`saisie_inventaire`').pipe(
+                        ? this.sqliteProvider.deleteBy('saisie_inventaire').pipe(
                             flatMap(() => this.toastService.presentToast(resp.data.status)),
                             map(() => undefined)
                         )
@@ -122,7 +122,7 @@ export class InventaireMenuPage {
                 };
                 Observable.zip(
                     this.sqliteProvider.insert('`saisie_inventaire`', saisieInventaire),
-                    this.sqliteProvider.deleteById('`article_inventaire`', article.id)
+                    this.sqliteProvider.deleteBy('`article_inventaire`', article.id)
                 ).subscribe(() => {
                     // supprime la ligne des tableaux
                     let index1 = this.articles.indexOf(article);

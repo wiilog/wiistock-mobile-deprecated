@@ -353,7 +353,7 @@ export class PreparationArticlesPage {
                             insertId
                         )
                     )),
-                    flatMap(() => this.sqliteProvider.deleteById('article_prepa_by_ref_article', selectedArticle.id)),
+                    flatMap(() => this.sqliteProvider.deleteBy('article_prepa_by_ref_article', selectedArticle.id)),
                     flatMap(() => this.updateLists()),
 
                     // delete articlePrepa if all quantity has been selected
