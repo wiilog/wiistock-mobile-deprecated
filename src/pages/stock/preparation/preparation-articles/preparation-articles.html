@@ -24,7 +24,7 @@
                             <div class="sub">
                                 <p *ngIf="!article.is_ref">Référence article : {{ article.reference_article_reference }}</p>
                                 <p>Label : {{ article.label }}</p>
-                                <p>Emplacement : {{ article.emplacement === "null" ? '' : article.emplacement }}</p>
+                                <p *ngIf="article.emplacement && article.emplacement !== 'null'">Emplacement : {{ article.emplacement }}</p>
                                 <p>Quantité : {{ article.quantite }}</p>
                             </div>
                         </ion-col>

@@ -139,9 +139,7 @@ export class PreparationEmplacementPage {
     private handlePreparationsError(resp): void {
         this.isLoading = false;
         this.toastService.presentToast((resp && resp.api && resp.message) ? resp.message : 'Une erreur s\'est produite');
-        if (resp.api) {
-            throw resp;
-        }
+        throw resp;
     }
 
     private closeScreen(): void {
