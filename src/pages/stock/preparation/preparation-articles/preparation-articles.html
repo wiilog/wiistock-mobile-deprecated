@@ -59,7 +59,10 @@
     <div class="d-flex">
         <ion-icon class="big-icon" name="qr-scanner" (click)="scan()"
                   [hidden]="articlesNT && articlesNT.length === 0"></ion-icon>
-        <ion-icon class="big-icon" item-right name="checkmark-circle" (click)="validate()"
-                  [class.alert]="articlesNT && articlesNT.length === 0"></ion-icon>
+        <ion-icon class="big-icon"
+                  item-right name="checkmark-circle"
+                  (click)="validate()"
+                  [class.alert]="articlesT && articlesT.length > 0">
+        </ion-icon>
     </div>
 </ion-footer>
