@@ -91,7 +91,7 @@ export class PreparationArticlesPage {
                 ? (selectedArticle as ArticlePrepaByRefArticle).quantity
                 : (selectedArticle as ArticlePrepa).quantite;
 
-            // if the quantity selected is smaller than the number of article
+            // if the quantity selected is smaller than the requested quantity
             if (availableQuantity !== selectedQuantity) {
                 const {id_prepa, is_ref, reference} = (selectedArticle as ArticlePrepa);
 
@@ -101,31 +101,36 @@ export class PreparationArticlesPage {
                     (art.is_ref === is_ref) &&
                     (art.reference === reference)
                 ));
-                if (articleAlready !== undefined) {
+
+                // the article is already selected
+                if (articleAlready) {
                     // we update the quantity in the list of treated article
-                    this.sqliteProvider.updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), Number(selectedQuantity) + Number(articleAlready.quantite))
+                    // then we update quantity in the list of untreated articles
+                    of(undefined)
                         .pipe(
-                            // we update quantity in the list of untreated articles
-                            flatMap(() => this.sqliteProvider.updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), (selectedArticle as ArticlePrepa).quantite - selectedQuantity)),
+                            flatMap(() => this.sqliteProvider.updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), Number(selectedQuantity) + Number(articleAlready.quantite))),
+                            flatMap(() => this.sqliteProvider.updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), (selectedArticle as ArticlePrepa).quantite - selectedQuantity))
                         )
                         .subscribe(() => {
                             this.updateViewLists();
                         });
-                } else {
-                    if (isSelectableByUser) {
-                        this.moveArticle(selectedArticle, selectedQuantity)
-                            .subscribe(() => {
-                                this.updateViewLists();
-                            });
-                    } else {
-                        // we update value quantity of selected article
-                        this.sqliteProvider
-                            .updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), (selectedArticle as ArticlePrepa).quantite - selectedQuantity)
-                            .pipe(flatMap(() => this.moveArticle(selectedArticle, selectedQuantity)))
-                            .subscribe(() => {
-                                this.updateViewLists();
-                            })
-                    }
+                }
+
+                // the selection is a picking
+                else if (isSelectableByUser) {
+                    this.moveArticle(selectedArticle, selectedQuantity)
+                        .subscribe(() => {
+                            this.updateViewLists();
+                        });
+                }
+                else {
+                    // we update value quantity of selected article
+                    this.sqliteProvider
+                        .updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), (selectedArticle as ArticlePrepa).quantite - selectedQuantity)
+                        .pipe(flatMap(() => this.moveArticle(selectedArticle, selectedQuantity)))
+                        .subscribe(() => {
+                            this.updateViewLists();
+                        })
                 }
             }
             // if we select all the article
@@ -342,9 +347,9 @@ export class PreparationArticlesPage {
             reference_article_reference: selectedArticle.reference_article_reference,
         };
         return ((selectedArticle as ArticlePrepaByRefArticle).isSelectableByUser)
-            ? this.sqliteProvider
-                .insert('article_prepa', articleToInsert)
+            ? of(undefined)
                 .pipe(
+                    flatMap(() => this.sqliteProvider.insert('article_prepa', articleToInsert)),
                     flatMap((insertId) => (
                         this.insertMouvement(
                             selectedArticle as ArticlePrepaByRefArticle & ArticlePrepa,
@@ -379,16 +384,18 @@ export class PreparationArticlesPage {
                     })
                 )
             : (selectedQuantity
-                    ? this.sqliteProvider.insert('article_prepa', articleToInsert)
+                    ? of(undefined)
                         .pipe(
+                            flatMap(() => this.sqliteProvider.insert('article_prepa', articleToInsert)),
                             flatMap((insertId) => (
                                     this.insertMouvement(selectedArticle as ArticlePrepaByRefArticle & ArticlePrepa, selectedQuantityValid, insertId).pipe(
                                         flatMap(() => this.sqliteProvider.moveArticle(insertId))
                                     )
                                 )
                             ))
-                    : this.insertMouvement(selectedArticle as ArticlePrepaByRefArticle & ArticlePrepa, selectedQuantityValid)
+                    : of(undefined)
                         .pipe(
+                            flatMap(() => this.insertMouvement(selectedArticle as ArticlePrepaByRefArticle & ArticlePrepa, selectedQuantityValid)),
                             flatMap(() => this.sqliteProvider.moveArticle((selectedArticle as ArticlePrepa).id))
                         )
             )

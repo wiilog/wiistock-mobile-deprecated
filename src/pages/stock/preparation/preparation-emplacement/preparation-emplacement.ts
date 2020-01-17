@@ -93,7 +93,13 @@ export class PreparationEmplacementPage {
                                 ...articles.map((article) => (
                                     this.sqliteProvider
                                         .findMvtByArticlePrepa(article.id)
-                                        .pipe(flatMap((mvt) => this.sqliteProvider.finishMvt(mvt.id, this.emplacement.label)))
+                                        .pipe(
+                                            flatMap((mvt) => (
+                                                mvt
+                                                    ? this.sqliteProvider.finishMvt(mvt.id, this.emplacement.label)
+                                                    : of(undefined)
+                                            ))
+                                        )
                                 ))
                             )),
 
