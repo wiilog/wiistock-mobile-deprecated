@@ -21,33 +21,29 @@ export class SqliteProvider {
     private static readonly DB_NAME: string = 'follow_gt';
 
     private sqliteObject$: Subject<SQLiteObject>;
-    private dbCreated$: Subject<boolean>;
 
     public constructor(private sqlite: SQLite,
                        private storageService: StorageService,
                        private platform: Platform) {
         this.sqliteObject$ = new ReplaySubject<SQLiteObject>(1);
-        this.dbCreated$ = new ReplaySubject<boolean>(1);
-
         this.createDB();
-        this.createTablesAndNotity();
+    }
+
+    public static ExecuteQueryStatic(db: SQLiteObject, query: string, getRes: boolean = true, params: Array<any> = []) {
+        return from(db.executeSql(query, params)).pipe(map((res) => (getRes ? res : undefined)));
     }
 
     private get db$(): Observable<SQLiteObject> {
         return this.sqliteObject$.pipe(take(1));
     }
 
-    private get isDBCreated$(): Observable<boolean> {
-        return this.dbCreated$.pipe(take(1));
-    }
-
     private createDB(): void {
         // We wait sqlite plugin loading and we create the database
         from(this.platform.ready())
-            .pipe(flatMap(() => this.sqlite.create({
-                name: SqliteProvider.DB_NAME,
-                location: 'default'
-            })))
+            .pipe(
+                flatMap(() => this.sqlite.create({name: SqliteProvider.DB_NAME, location: 'default'})),
+                flatMap((sqliteObject: SQLiteObject) => SqliteProvider.ResetDataBase(sqliteObject).pipe(map(() => sqliteObject)))
+            )
             .subscribe(
                 (sqliteObject: SQLiteObject) => {
                     this.sqliteObject$.next(sqliteObject);
@@ -56,63 +52,60 @@ export class SqliteProvider {
             );
     }
 
-    private createTables(): Observable<undefined> {
+    private static CreateTables(db): Observable<undefined> {
         return of(undefined).pipe(
-            flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))')),
-            flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location` TEXT, `type` VARCHAR(255), `is_ref` INTEGER, `id_article_prepa` INTEGER, `id_prepa` INTEGER, `id_article_livraison` INTEGER, `id_livraison` INTEGER, `id_article_collecte` INTEGER, `id_collecte` INTEGER, `selected_by_article` INTEGER)')),
-            flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` VARCHAR(255), `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255), `comment` VARCHAR(255), `signature` TEXT, finished INTEGER, fromStock INTEGER, quantity INTEGER)')),
-            flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)')),
-            flatMap(() => this.executeQuery('INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)')),
-            flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER, `destination` INTEGER, `type` TEXT)')),
-            flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `type_quantite` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT, `deleted` INTEGER DEFAULT 0, original_quantity INTEGER, reference_article_reference TEXT)')),
-            flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `article_prepa_by_ref_article` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `reference` TEXT, `label` TEXT, `location` TEXT, `quantity` INTEGER, `reference_article` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT)')),
-            flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)')),
-            flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `collecte` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `location_from` VARCHAR(255), `location_to` VARCHAR(255), `date_end` TEXT)')),
-            flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `article_livraison` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_livraison` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)')),
-            flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `article_inventaire` (`id` INTEGER PRIMARY KEY, `id_mission` INTEGER, `reference` TEXT, `is_ref` INTEGER, `location` TEXT, `barcode` TEXT)')),
-            flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `article_collecte` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_collecte` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)')),
-            flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `saisie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_mission` INTEGER, `date` TEXT, `reference` TEXT, `is_ref` INTEGER, `quantity` INTEGER, `location` TEXT)')),
-            flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `anomalie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` TEXT, `is_ref` INTEGER, `quantity` INTEGER, `location` TEXT, `comment` TEXT, `treated` TEXT, `barcode` TEXT)')),
-            flatMap(() => this.executeQuery('CREATE TABLE IF NOT EXISTS `manutention` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `demandeur` TEXT, `date_attendue` TEXT, `commentaire` TEXT, `destination` TEXT, `source` TEXT)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location` TEXT, `type` VARCHAR(255), `is_ref` INTEGER, `id_article_prepa` INTEGER, `id_prepa` INTEGER, `id_article_livraison` INTEGER, `id_livraison` INTEGER, `id_article_collecte` INTEGER, `id_collecte` INTEGER, `selected_by_article` INTEGER)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` VARCHAR(255), `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255), `comment` VARCHAR(255), `signature` TEXT, finished INTEGER, fromStock INTEGER, quantity INTEGER)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER, `destination` INTEGER, `type` TEXT)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `type_quantite` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT, `deleted` INTEGER DEFAULT 0, original_quantity INTEGER, reference_article_reference TEXT)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_prepa_by_ref_article` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `reference` TEXT, `label` TEXT, `location` TEXT, `quantity` INTEGER, `reference_article` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `collecte` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `location_from` VARCHAR(255), `location_to` VARCHAR(255), `date_end` TEXT)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_livraison` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_livraison` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_inventaire` (`id` INTEGER PRIMARY KEY, `id_mission` INTEGER, `reference` TEXT, `is_ref` INTEGER, `location` TEXT, `barcode` TEXT)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_collecte` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_collecte` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `saisie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_mission` INTEGER, `date` TEXT, `reference` TEXT, `is_ref` INTEGER, `quantity` INTEGER, `location` TEXT)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `anomalie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` TEXT, `is_ref` INTEGER, `quantity` INTEGER, `location` TEXT, `comment` TEXT, `treated` TEXT, `barcode` TEXT)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `manutention` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `demandeur` TEXT, `date_attendue` TEXT, `commentaire` TEXT, `destination` TEXT, `source` TEXT)')),
             map(() => undefined)
         );
     }
 
-    private createTablesAndNotity(): void {
-        this.createTables().subscribe(() => {
-            this.dbCreated$.next(true);
-        });
-    }
-
-    public resetDataBase() {
-        return this.dropTables()
+    public static ResetDataBase(sqliteObject: SQLiteObject): Observable<any> {
+        return SqliteProvider.DropTables(sqliteObject)
             .pipe(
-                flatMap(() => this.createTables()),
+                flatMap(() => SqliteProvider.CreateTables(sqliteObject)),
                 map(() => undefined),
                 take(1)
             );
     }
 
-    private dropTables(): Observable<any> {
-        return this.isDBCreated$
-            .pipe(
-                flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `emplacement`;')),
-                flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `mouvement_traca`;')),
-                flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `preparation`;')),
-                flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `article_prepa`;')),
-                flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `article_prepa_by_ref_article`;')),
-                flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `mouvement`;')),
-                flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `collecte`;')),
-                flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `livraison`;')),
-                flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `article_livraison`;')),
-                flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `article_collecte`;')),
-                flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `article_inventaire`;')),
-                flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `saisie_inventaire`;')),
-                flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `anomalie_inventaire`;')),
-                flatMap(() => this.executeQuery('DROP TABLE IF EXISTS `manutention`;')),
-                map(() => undefined),
-                take(1)
-            );
+    private static DropTables(sqliteObject): Observable<any> {
+        return of(undefined).pipe(
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `emplacement`;')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `mouvement_traca`;')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `preparation`;')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `article_prepa`;')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `article_prepa_by_ref_article`;')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `mouvement`;')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `collecte`;')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `livraison`;')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `article_livraison`;')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `article_collecte`;')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `article_inventaire`;')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `saisie_inventaire`;')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `anomalie_inventaire`;')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `manutention`;')),
+            map(() => undefined),
+            take(1)
+        );
+    }
+
+    public resetDataBase(): Observable<any> {
+        return this.db$.pipe(flatMap((db) => SqliteProvider.ResetDataBase(db)));
     }
 
     private importEmplacements(data): Observable<any> {
@@ -287,16 +280,17 @@ export class SqliteProvider {
                 if (!isArticleAlreadySaved) {
                     articlesPrepaValues.push("(" +
                         null + ", " +
-                        "'" + article.label + "', " +
-                        "'" + article.reference + "', " +
+                        "'" + this.escapeQuotes(article.label) + "', " +
+                        "'" + this.escapeQuotes(article.reference) + "', " +
                         article.quantity + ", " +
                         article.is_ref + ", " +
                         article.id_prepa + ", " +
                         0 + ", " +
-                        "'" + article.location + "', " +
+                        "'" + this.escapeQuotes(article.location) + "', " +
                         "'" + article.type_quantite + "', " +
                         "'" + article.barCode + "', " +
-                        article.quantity + ", '" + article.reference_article_reference  + "')");
+                        article.quantity + ", " +
+                        "'" + this.escapeQuotes(article.reference_article_reference)  + "')");
                 }
                 if (articlesPrepa.indexOf(article) === articlesPrepa.length - 1) {
                     if (articlesPrepaValues.length > 0) {
@@ -329,7 +323,11 @@ export class SqliteProvider {
         for (let livraison of livraisons) {
             this.findOneById('livraison', livraison.id).subscribe((livraisonInserted) => {
                 if (livraisonInserted === null) {
-                    livraisonsValues.push("(" + livraison.id + ", '" + livraison.number + "', '" + livraison.location + "', " + null + ")");
+                    livraisonsValues.push("(" +
+                        livraison.id + ", " +
+                        "'" + livraison.number + "', " +
+                        "'" + this.escapeQuotes(livraison.location) + "', " +
+                        "null)");
                 }
                 if (livraisons.indexOf(livraison) === livraisons.length - 1) {
                     this.findAll('`livraison`').subscribe((livraisonsDB) => {
@@ -660,7 +658,7 @@ export class SqliteProvider {
             flatMap(() => this.importLivraisons(data)),
             flatMap(() => this.importArticlesLivraison(data)),
             flatMap(() => this.importArticlesInventaire(data)),
-            flatMap(() =>this.importManutentions(data)),
+            flatMap(() => this.importManutentions(data)),
             flatMap(() => this.importCollectes(data)),
             flatMap(() => this.importMouvementTraca(data)),
             flatMap(() => (
@@ -811,7 +809,7 @@ export class SqliteProvider {
 
     public executeQuery(query: string, getRes: boolean = true, params: Array<any> = []): Observable<any> {
         return this.db$.pipe(
-            flatMap((db) => from(db.executeSql(query, params))),
+            flatMap((db) => SqliteProvider.ExecuteQueryStatic(db, query, getRes, params)),
             map((res) => (getRes ? res : undefined))
         );
     }
