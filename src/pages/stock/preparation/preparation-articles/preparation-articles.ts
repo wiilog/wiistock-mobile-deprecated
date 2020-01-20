@@ -232,7 +232,8 @@ export class PreparationArticlesPage {
     }
 
     public validate(): void {
-        if (this.articlesT.length === 0) {
+        if ((this.articlesT.length === 0) ||
+            this.articlesT.every(({quantite}) => (!quantite || quantite === 0))) {
             this.toastService.presentToast('Veuillez traiter au moins un article');
         }
         else {
