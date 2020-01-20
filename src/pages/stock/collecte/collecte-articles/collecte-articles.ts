@@ -3,18 +3,19 @@ import {Alert, AlertController, IonicPage, Navbar, NavController, NavParams} fro
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Mouvement} from '@app/entities/mouvement';
 import {HttpClient} from '@angular/common/http';
-import {CollecteEmplacementPage} from '@pages/stock/collecte/collecte-emplacement/collecte-emplacement';
 import moment from 'moment';
 import {ArticleCollecte} from '@app/entities/article-collecte';
 import {Collecte} from '@app/entities/collecte';
 import {flatMap} from 'rxjs/operators';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
-import {Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {StorageService} from '@app/services/storage.service';
 import {ApiService} from '@app/services/api.service';
 import {Network} from '@ionic-native/network';
 import {CollecteArticleTakePage} from "@pages/stock/collecte/collecte-article-take/collecte-article-take";
+import {of} from "rxjs/observable/of";
+import {LocalDataManagerService} from "@app/services/local-data-manager.service";
 
 
 @IonicPage()
@@ -38,20 +39,25 @@ export class CollecteArticlesPage {
 
     private partialCollecteAlert: Alert;
 
+    private isLoading: boolean;
+
     public constructor(private navCtrl: NavController,
                        private navParams: NavParams,
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
                        private http: HttpClient,
                        private network: Network,
+                       private localDataManager: LocalDataManagerService,
                        private alertController: AlertController,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private apiService: ApiService,
                        private storageService: StorageService) {
         this.loadingStartCollecte = false;
+        this.isLoading = false;
     }
 
     public ionViewWillEnter(): void {
+        this.isLoading = false;
         this.collecte = this.navParams.get('collecte');
 
         this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
@@ -206,7 +212,7 @@ export class CollecteArticlesPage {
             this.alertPartialCollecte();
         }
         else {
-            this.pushEmplacementPage();
+            this.finishCollecte();
         }
     }
 
@@ -225,15 +231,6 @@ export class CollecteArticlesPage {
         else {
             this.toastService.presentToast('L\'article scanné n\'est pas dans la liste.');
         }
-    }
-
-    private pushEmplacementPage(): void {
-        this.navCtrl.push(CollecteEmplacementPage, {
-            collecte: this.collecte,
-            validateCollecte: () => {
-                this.navCtrl.pop();
-            }
-        });
     }
 
     private alertPartialCollecte(): void {
@@ -258,7 +255,7 @@ export class CollecteArticlesPage {
                             text: 'Continuer',
                             handler: () => {
                                 this.partialCollecteAlert = undefined;
-                                this.pushEmplacementPage();
+                                this.finishCollecte();
                             },
                             cssClass: 'alert-success'
                         }
@@ -309,5 +306,90 @@ export class CollecteArticlesPage {
             this.refresh();
         }
         this.loadingStartCollecte = false;
+    }
+
+    private finishCollecte(): void {
+        if (!this.isLoading) {
+            this.isLoading = true;
+
+            this.sqliteProvider
+                .findArticlesByCollecte(this.collecte.id)
+                .pipe(
+                    flatMap((articles) => Observable.zip(
+                        ...articles.map((article) => (
+                            this.sqliteProvider
+                                .findMvtByArticleCollecte(article.id)
+                                .pipe(flatMap((mvt) => (
+                                    mvt
+                                        ? this.sqliteProvider.finishMvt(mvt.id)
+                                        : of(undefined)
+                                )))
+                        ))
+                    )),
+                    flatMap(() => this.sqliteProvider.finishCollecte(this.collecte.id)),
+                    flatMap((): any => (
+                        this.network.type !== 'none'
+                            ? this.localDataManager.sendFinishedProcess('collecte')
+                            : of({offline: true})
+                    ))
+                )
+                .subscribe(
+                    ({offline, success}: any) => {
+                        if (offline) {
+                            this.toastService.presentToast('Collecte sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+                            this.closeScreen();
+                        }
+                        else {
+                            this.handleCollectesSuccess(success);
+                        }
+                    },
+                    (error) => {
+                        this.handlePreparationError(error);
+                    });
+        }
+        else {
+            this.toastService.presentToast('Chargement en cours veuillez patienter.');
+        }
+    }
+
+    private handleCollectesSuccess(success: Array<{newCollecte, articlesCollecte}>): void {
+        if (success.length > 0) {
+            Observable.zip(
+                ...success
+                    .filter(({newCollecte}) => newCollecte)
+                    .map(({newCollecte, articlesCollecte}) => (
+                        Observable.zip(
+                            this.sqliteProvider.executeQuery(
+                                this.sqliteProvider.getCollecteInsertQuery([this.sqliteProvider.getCollecteValueFromApi(newCollecte)])
+                            ),
+                            ...(articlesCollecte.map((newArticleCollecte) => (
+                                this.sqliteProvider.executeQuery(
+                                    this.sqliteProvider.getArticleCollecteInsertQuery([this.sqliteProvider.getArticleCollecteValueFromApi(newArticleCollecte)])
+                                )
+                            )))
+                        )
+                    )),
+                this.toastService.presentToast(
+                    (success.length === 1
+                        ? 'Votre collecte a bien été enregistrée'
+                        : `Votre collecte et ${success.length - 1} collecte${success.length - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
+                )
+            ).subscribe(() => {
+                this.closeScreen();
+            })
+        }
+        else {
+            this.closeScreen();
+        }
+    }
+
+    private handlePreparationError(resp): void {
+        this.isLoading = false;
+        this.toastService.presentToast((resp && resp.api && resp.message) ? resp.message : 'Une erreur s\'est produite');
+    }
+
+    private closeScreen(): void {
+        this.isLoading = false;
+        this.navCtrl.pop();
     }
 }

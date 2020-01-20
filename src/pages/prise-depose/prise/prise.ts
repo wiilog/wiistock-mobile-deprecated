@@ -130,7 +130,7 @@ export class PrisePage {
                         flatMap((online: boolean) => (
                             online
                                 ? this.localDataManager
-                                    .sendMouvementTraca()
+                                    .sendMouvementTraca(this.fromStock)
                                     .pipe(
                                         flatMap(() => (
                                             loader

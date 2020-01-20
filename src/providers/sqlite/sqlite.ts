@@ -965,18 +965,18 @@ export class SqliteProvider {
         );
     }
 
-    public finishCollecte(id_collecte: number, location_to: string): Observable<undefined> {
+    public finishCollecte(id_collecte: number): Observable<undefined> {
         return this.db$.pipe(
-            flatMap((db) => from(db.executeSql('UPDATE `collecte` SET date_end = \'' + moment().format() + '\', location_to = \'' + location_to + '\' WHERE id = ' + id_collecte, []))),
+            flatMap((db) => from(db.executeSql("UPDATE `collecte` SET date_end = '" + moment().format() + '\' WHERE id = ' + id_collecte, []))),
             map(() => undefined)
         );
     }
 
-    public finishMvt(id_mvt: number, location_to: string): Observable<undefined> {
-        return this.db$.pipe(
-            flatMap((db) => from(db.executeSql('UPDATE `mouvement` SET date_drop = \'' + moment().format() + '\', location = \'' + location_to + '\' WHERE id = ' + id_mvt, []))),
-            map(() => undefined)
-        );
+    public finishMvt(id_mvt: number, location_to?: string): Observable<undefined> {
+        const setLocationQuery = location_to
+            ? `, location = '${location_to}'`
+            : '';
+        return this.executeQuery(`UPDATE \`mouvement\` SET date_drop = '${moment().format()}' WHERE id = ${id_mvt}${setLocationQuery}`, false);
     }
 
     public moveArticle(id_article: number): Observable<undefined> {

@@ -33,7 +33,6 @@ import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manage
 import {CollecteMenuPage} from '@pages/stock/collecte/collecte-menu/collecte-menu';
 import {CollecteArticleTakePage} from '@pages/stock/collecte/collecte-article-take/collecte-article-take';
 import {CollecteArticlesPage} from '@pages/stock/collecte/collecte-articles/collecte-articles';
-import {CollecteEmplacementPage} from '@pages/stock/collecte/collecte-emplacement/collecte-emplacement';
 import {ManutentionValidatePage} from '@pages/manutention/manutention-validate/manutention-validate';
 import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutention-menu';
 import {HelpersModule} from '@helpers/helpers.module';
@@ -79,7 +78,6 @@ import {MainHeaderService} from "@app/services/main-header.service";
         CollecteMenuPage,
         CollecteArticleTakePage,
         CollecteArticlesPage,
-        CollecteEmplacementPage,
         PreparationRefArticlesPage,
         NewEmplacementComponent,
         DeposeConfirmPage,
@@ -123,7 +121,6 @@ import {MainHeaderService} from "@app/services/main-header.service";
         CollecteMenuPage,
         CollecteArticleTakePage,
         CollecteArticlesPage,
-        CollecteEmplacementPage,
         PreparationRefArticlesPage,
         NewEmplacementComponent,
         DeposeConfirmPage,

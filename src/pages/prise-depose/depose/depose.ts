@@ -132,61 +132,70 @@ export class DeposePage {
                 this.apiLoading = true;
                 const multiDepose = (this.colisDepose.length > 1);
                 let loader: Loading;
-                this.saveSubscription = this.localDataManager
-                    .saveMouvementsTraca(this.colisDepose, this.prisesToFinish)
-                    .pipe(
-                        flatMap(() => {
-                            const online = (this.network.type !== 'none');
-                            return online
-                                ? this.loadingService
-                                    .presentLoading(multiDepose ? 'Envoi des déposes en cours...' : 'Envoi de la dépose en cours...')
-                                    .pipe(
-                                        tap((presentedLoader: Loading) =>  {
-                                            loader = presentedLoader;
-                                        }),
-                                        map(() => online)
-                                    )
-                                : of(online)
-                        }),
-                        flatMap((online: boolean) => (
-                            online
-                                ? this.localDataManager
-                                    .sendMouvementTraca()
-                                    .pipe(
-                                        flatMap(() => (
-                                            loader
-                                                ? from(loader.dismiss())
-                                                : of(undefined)
-                                        )),
-                                        tap(() => {
-                                            loader = undefined;
-                                        }),
-                                        map(() => online)
-                                    )
-                                : of(online)
-                        )),
-                        // we display toast
-                        flatMap((send: boolean) => {
-                            const message = send
-                                ? 'Les déposes ont bien été sauvegardées'
-                                : (multiDepose
-                                    ? 'Déposes sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
-                                    : 'Dépose sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
-                            return this.toastService.presentToast(message);
-                        })
-                    )
-                    .subscribe(
-                        () => {
-                            this.apiLoading = false;
-                            this.redirectAfterTake();
-                        },
-                        () => {
-                            this.apiLoading = false;
-                            if (loader) {
-                                loader.dismiss();
-                                loader = undefined;
-                            }
-                        });
+                const online = (this.network.type !== 'none');
+
+                if (!this.fromStock || online) {
+                    this.saveSubscription = this.localDataManager
+                        .saveMouvementsTraca(this.colisDepose, this.prisesToFinish)
+                        .pipe(
+                            flatMap(() => {
+                                return online
+                                    ? this.loadingService
+                                        .presentLoading(multiDepose ? 'Envoi des déposes en cours...' : 'Envoi de la dépose en cours...')
+                                        .pipe(
+                                            tap((presentedLoader: Loading) => {
+                                                loader = presentedLoader;
+                                            }),
+                                            map(() => online)
+                                        )
+                                    : of(online)
+                            }),
+                            flatMap((online: boolean) => (
+                                online
+                                    ? this.localDataManager
+                                        .sendMouvementTraca(this.fromStock)
+                                        .pipe(
+                                            flatMap((res) => {
+                                                console.log(res); // TODO AB display errors
+                                                return (
+                                                    loader
+                                                        ? from(loader.dismiss())
+                                                        : of(undefined)
+                                                )
+                                            }),
+                                            tap(() => {
+                                                loader = undefined;
+                                            }),
+                                            map(() => online)
+                                        )
+                                    : of(online)
+                            )),
+                            // we display toast
+                            flatMap((send: boolean) => {
+                                const message = send
+                                    ? 'Les déposes ont bien été sauvegardées'
+                                    : (multiDepose
+                                        ? 'Déposes sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
+                                        : 'Dépose sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+                                return this.toastService.presentToast(message);
+                            })
+                        )
+                        .subscribe(
+                            () => {
+                                this.apiLoading = false;
+                                this.redirectAfterTake();
+                            },
+                            () => {
+                                this.apiLoading = false;
+                                if (loader) {
+                                    loader.dismiss();
+                                    loader = undefined;
+                                }
+                            });
+                }
+            }
+            else {
+                this.toastService.presentToast('Vous devez être connecté à internet pour effectuer la dépose.');
             }
         }
         else {

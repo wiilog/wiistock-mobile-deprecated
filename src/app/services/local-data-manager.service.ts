@@ -190,7 +190,7 @@ export class LocalDataManagerService {
                 }),
                 flatMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des prises et des déposes'});
-                    return this.sendMouvementTraca().pipe(map(() => needAnotherSynchronise));
+                    return this.sendMouvementTraca(false).pipe(map(() => needAnotherSynchronise));
                 }),
                 // we reload data from API if we have save data in previous requests
                 flatMap((needAnotherSynchronise) => {
@@ -220,11 +220,12 @@ export class LocalDataManagerService {
             .pipe(flatMap(({data}) =>  this.sqliteProvider.importData(data)));
     }
 
-    public sendMouvementTraca(): Observable<any> {
+    public sendMouvementTraca(sendFromStock: boolean): Observable<any> {
         return this.sqliteProvider.findAll('mouvement_traca')
             .pipe(
                 map((mouvements: Array<MouvementTraca>) => (
                     mouvements
+                        .filter(({fromStock}) => (sendFromStock === Boolean(fromStock)))
                         .map(({signature, ...mouvement}) => ({
                             ...mouvement,
                             signature: signature
@@ -258,12 +259,17 @@ export class LocalDataManagerService {
                                     map((apiResponse) => [apiResponse, mouvements]),
                                     flatMap(([apiResponse, mouvements]) => (
                                         (apiResponse && apiResponse.success)
-                                            ? this.sqliteProvider.deleteBy(
-                                                'mouvement_traca',
-                                                mouvements
-                                                    .filter(({finished, type}) => (finished || type === 'depose'))
-                                                    .map(({id}) => id)
-                                            )
+                                            ? this.sqliteProvider
+                                                .deleteBy(
+                                                    'mouvement_traca',
+                                                    mouvements
+                                                        .filter(({finished, type, ref_article}) => (
+                                                            (finished || type === 'depose') &&
+                                                            (!apiResponse.error || Object.keys(apiResponse.error).indexOf(ref_article) === -1)
+                                                        ))
+                                                        .map(({id}) => id)
+                                                )
+                                                .pipe(map(() => apiResponse))
                                             : of(undefined)
                                     ))
                                 )
