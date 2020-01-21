@@ -229,3 +229,7 @@ ion-fab {
         color: #{$value};
     }
 }
+
+.toast-message {
+    white-space: pre-line;
+}

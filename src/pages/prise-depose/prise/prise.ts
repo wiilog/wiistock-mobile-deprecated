@@ -17,8 +17,8 @@ import {flatMap, map, tap} from 'rxjs/operators';
 import {Network} from '@ionic-native/network';
 import {of} from 'rxjs/observable/of';
 import {ApiService} from '@app/services/api.service';
-import {LoadingService} from "@app/services/loading.service";
-import {from} from "rxjs/observable/from";
+import {LoadingService} from '@app/services/loading.service';
+import {from} from 'rxjs/observable/from';
 
 
 @IonicPage()
@@ -159,12 +159,13 @@ export class PrisePage {
                             this.apiLoading = false;
                             this.redirectAfterTake();
                         },
-                        () => {
+                        (error) => {
                             this.apiLoading = false;
                             if (loader) {
                                 loader.dismiss();
                                 loader = undefined;
                             }
+                            throw error;
                         });
             }
         }

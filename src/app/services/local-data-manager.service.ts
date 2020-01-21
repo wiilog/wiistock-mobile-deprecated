@@ -257,21 +257,39 @@ export class LocalDataManagerService {
                                 })
                                 .pipe(
                                     map((apiResponse) => [apiResponse, mouvements]),
-                                    flatMap(([apiResponse, mouvements]) => (
-                                        (apiResponse && apiResponse.success)
-                                            ? this.sqliteProvider
-                                                .deleteBy(
-                                                    'mouvement_traca',
-                                                    mouvements
-                                                        .filter(({finished, type, ref_article}) => (
-                                                            (finished || type === 'depose') &&
-                                                            (!apiResponse.error || Object.keys(apiResponse.error).indexOf(ref_article) === -1)
-                                                        ))
-                                                        .map(({id}) => id)
-                                                )
-                                                .pipe(map(() => apiResponse))
-                                            : of(undefined)
-                                    ))
+                                    flatMap(([apiResponse, mouvements]) => {
+                                        const refArticlesErrors = Object.keys((apiResponse && apiResponse.data && apiResponse.data.errors) || {});
+                                        return (
+                                            (apiResponse && apiResponse.success)
+                                                ? of(undefined)
+                                                    .pipe(
+                                                        // we delete succeed mouvement
+                                                        flatMap(() => (
+                                                            this.sqliteProvider
+                                                                .deleteBy(
+                                                                    'mouvement_traca',
+                                                                    mouvements
+                                                                        .filter(({finished, type, ref_article}) => (
+                                                                            (finished && (refArticlesErrors.indexOf(ref_article) === -1)) ||
+                                                                            (type === 'depose')
+                                                                        ))
+                                                                        .map(({id}) => id)
+                                                                )
+                                                        )),
+                                                        flatMap(() => (
+                                                            // we reset failed mouvement
+                                                            this.sqliteProvider
+                                                                .resetMouvementsTraca(
+                                                                    refArticlesErrors,
+                                                                    'prise',
+                                                                    sendFromStock
+                                                                )
+                                                        )),
+                                                        map(() => apiResponse)
+                                                    )
+                                                : of(undefined)
+                                        );
+                                    })
                                 )
                         )
                         : of(undefined)

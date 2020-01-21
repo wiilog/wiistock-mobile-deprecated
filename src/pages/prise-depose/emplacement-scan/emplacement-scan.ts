@@ -91,6 +91,9 @@ export class EmplacementScanPage {
 
     public empChanged(emplacement: Emplacement) {
         this.chooseEmp(emplacement);
+        setTimeout(() => {
+            this.emplacement = undefined;
+        })
     }
 
     public createEmp(): void {

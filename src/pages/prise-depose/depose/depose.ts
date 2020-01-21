@@ -169,28 +169,31 @@ export class DeposePage {
                             )),
                             // we display toast
                             flatMap(({online, apiResponse}) => {
-                                const errorsObject = Object.keys((apiResponse && apiResponse.data && apiResponse.data.errors) || {});
-                                const errorsValues = errorsObject.map((key) => errorsObject[key]);
-                                const errorMessage = errorsValues.join(', ');
+                                const errorsObject = ((apiResponse && apiResponse.data && apiResponse.data.errors) || {});
+                                const errorsValues = Object.keys(errorsObject).map((key) => errorsObject[key]);
+                                const errorsMessage = errorsValues.join('\n');
                                 const message = online
-                                    ? apiResponse.data.status
+                                    ? (errorsMessage.length > 0 ? '' : apiResponse.data.status)
                                     : (multiDepose
                                         ? 'Déposes sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
                                         : 'Dépose sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
-                                return this.toastService.presentToast(`${errorMessage}${errorMessage.length > 0 ? '\n' : ''}${message}`);
+                                return this.toastService
+                                    .presentToast(`${errorsMessage}${(errorsMessage && message) ? '\n' : ''}${message}`)
+                                    .pipe(map(() => errorsValues.length));
                             })
                         )
                         .subscribe(
-                            () => {
+                            (nbErrors: number) => {
                                 this.apiLoading = false;
-                                this.redirectAfterTake();
+                                this.redirectAfterTake(nbErrors > 0);
                             },
-                            () => {
+                            (error) => {
                                 this.apiLoading = false;
                                 if (loader) {
                                     loader.dismiss();
                                     loader = undefined;
                                 }
+                                throw error;
                             });
                 }
             }
@@ -203,11 +206,13 @@ export class DeposePage {
         }
     }
 
-    public redirectAfterTake(): void {
+    public redirectAfterTake(hasErrors: boolean = false): void {
         this.navCtrl
             .pop()
             .then(() => {
-                this.finishDepose();
+                if (!hasErrors) {
+                    this.finishDepose();
+                }
             });
     }
 

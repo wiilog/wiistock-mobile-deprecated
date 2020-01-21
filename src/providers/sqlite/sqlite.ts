@@ -1157,4 +1157,16 @@ export class SqliteProvider {
             : str;
     }
 
+    public resetMouvementsTraca(refArticles: Array<string>, type: string, fromStock: boolean): Observable<any> {
+        return refArticles.length > 0
+            ? this.executeQuery(
+                'UPDATE mouvement_traca ' +
+                'SET finished = 0 ' +
+                `WHERE type LIKE '${type}' ` +
+                `  AND fromStock = ${Number(fromStock)} ` +
+                `  AND ref_article IN (${refArticles.map((ref) => `'${this.escapeQuotes(ref)}'`).join(',')})`
+            )
+            : of(undefined);
+    }
+
 }

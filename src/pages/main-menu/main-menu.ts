@@ -125,9 +125,7 @@ export class MainMenuPage {
                     if (api && message) {
                         this.toastService.presentToast(message);
                     }
-                    else {
-                        throw error;
-                    }
+                    throw error;
                 });
         }
         else {

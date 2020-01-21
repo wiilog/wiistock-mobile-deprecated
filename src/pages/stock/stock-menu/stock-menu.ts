@@ -78,11 +78,13 @@ export class StockMenuPage {
                     this.messageLoading = message;
                     this.loading = !finished;
                 },
-                ({api, message}) => {
+                (error) => {
+                    const {api, message} = error;
                     this.loading = false;
                     if (api && message) {
                         this.toastService.presentToast(message);
                     }
+                    throw error;
                 });
         }
         else {
