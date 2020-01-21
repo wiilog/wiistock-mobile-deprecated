@@ -31,8 +31,11 @@
                 <ion-grid>
                     <button class="list" ion-item *ngFor="let anomaly of anomaliesByLocation" id="{{anomaly.id}}">
                         <ion-row>
-                            <ion-col>{{ anomaly.reference }}</ion-col>
-                            <ion-col>{{ anomaly.quantity }}</ion-col>
+                            <ion-col>
+                                <p>Référence : {{ anomaly.reference }}</p>
+                                <p>Code barre : {{ anomaly.barcode }}</p>
+                                <p>Quantité : {{ anomaly.quantity }}</p>
+                            </ion-col>
                         </ion-row>
                     </button>
                 </ion-grid>

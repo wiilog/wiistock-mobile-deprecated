@@ -36,7 +36,10 @@
                 <ion-grid>
                     <button class="list" ion-item *ngFor="let article of articlesByLocation" id="{{ article.id }}">
                         <ion-row>
-                            <ion-col>{{ article.reference }}</ion-col>
+                            <ion-col>
+                                <p>Référence : {{ article.reference }}</p>
+                                <p>Code barre : {{ article.barcode }}</p>
+                            </ion-col>
                         </ion-row>
                     </button>
                 </ion-grid>

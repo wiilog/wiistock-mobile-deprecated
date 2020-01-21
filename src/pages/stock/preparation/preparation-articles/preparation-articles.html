@@ -9,6 +9,21 @@
         <ion-spinner></ion-spinner>
     </div>
 
+    <ng-template #articleTemplate let-article='article'>
+        <ion-row>
+            <ion-col>
+                <p class="title-tmp">Article {{ article.reference }}</p>
+                <div class="sub">
+                    <p *ngIf="!article.is_ref">Référence article : {{ article.reference_article_reference }}</p>
+                    <p>Label : {{ article.label }}</p>
+                    <p *ngIf="article.barcode">Code barre : {{ article.barcode }}</p>
+                    <p *ngIf="article.emplacement && article.emplacement !== 'null'">Emplacement : {{ article.emplacement }}</p>
+                    <p>Quantité : {{ article.quantite }}</p>
+                </div>
+            </ion-col>
+        </ion-row>
+    </ng-template>
+
     <div *ngIf="!loadingStartPreparation && articlesNT && articlesNT.length > 0">
         <div class="d-flex">
             <p>Flashez les articles</p>
@@ -18,17 +33,9 @@
             <ion-grid>
                 <button [disabled]="!isValid" (click)="testIfBarcodeEquals(article, true)" class="list" ion-item
                         *ngFor="let article of articlesNT">
-                    <ion-row>
-                        <ion-col>
-                            <p class="title-tmp">Article {{ article.reference }}</p>
-                            <div class="sub">
-                                <p *ngIf="!article.is_ref">Référence article : {{ article.reference_article_reference }}</p>
-                                <p>Label : {{ article.label }}</p>
-                                <p *ngIf="article.emplacement && article.emplacement !== 'null'">Emplacement : {{ article.emplacement }}</p>
-                                <p>Quantité : {{ article.quantite }}</p>
-                            </div>
-                        </ion-col>
-                    </ion-row>
+                    <ng-container [ngTemplateOutlet]="articleTemplate"
+                                  [ngTemplateOutletContext]="{article: article}">
+                    </ng-container>
                 </button>
             </ion-grid>
         </ion-list>
@@ -39,18 +46,9 @@
         <ion-list>
             <ion-grid>
                 <button [disabled]="!isValid" class="list" ion-item *ngFor="let article of articlesT">
-                    <ion-row>
-                        <ion-col>
-                            <p class="title-tmp">Article {{ article.reference }}</p>
-                            <div class="sub">
-                                <p *ngIf="!article.is_ref">Référence article : {{ article.reference_article_reference }}</p>
-                                <p>Label : {{ article.label }}</p>
-                                <p>Code barre : {{ article.barcode }}</p>
-                                <p>Emplacement : {{ article.emplacement === "null" ? '' : article.emplacement }}</p>
-                                <p>Quantité : {{ article.quantite }}</p>
-                            </div>
-                        </ion-col>
-                    </ion-row>
+                    <ng-container [ngTemplateOutlet]="articleTemplate"
+                                  [ngTemplateOutletContext]="{article: article}">
+                    </ng-container>
                 </button>
             </ion-grid>
         </ion-list>
