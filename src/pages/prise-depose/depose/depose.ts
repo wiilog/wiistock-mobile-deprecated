@@ -150,34 +150,34 @@ export class DeposePage {
                                         )
                                     : of(online)
                             }),
-                            flatMap((online: boolean) => (
+                            flatMap((online: boolean): Observable<{ online: boolean; apiResponse?: { [x: string]: any } }> => (
                                 online
                                     ? this.localDataManager
                                         .sendMouvementTraca(this.fromStock)
                                         .pipe(
-                                            flatMap((res) => {
-                                                console.log(res); // TODO AB display errors
-                                                return (
-                                                    loader
-                                                        ? from(loader.dismiss())
-                                                        : of(undefined)
-                                                )
-                                            }),
+                                            flatMap((apiResponse) => (
+                                                loader
+                                                    ? from(loader.dismiss()).pipe(map(() => apiResponse))
+                                                    : of(apiResponse)
+                                            )),
                                             tap(() => {
                                                 loader = undefined;
                                             }),
-                                            map(() => online)
+                                            map((apiResponse) => ({ online, apiResponse }))
                                         )
-                                    : of(online)
+                                    : of({online})
                             )),
                             // we display toast
-                            flatMap((send: boolean) => {
-                                const message = send
-                                    ? 'Les déposes ont bien été sauvegardées'
+                            flatMap(({online, apiResponse}) => {
+                                const errorsObject = Object.keys((apiResponse && apiResponse.data && apiResponse.data.errors) || {});
+                                const errorsValues = errorsObject.map((key) => errorsObject[key]);
+                                const errorMessage = errorsValues.join(', ');
+                                const message = online
+                                    ? apiResponse.data.status
                                     : (multiDepose
                                         ? 'Déposes sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
                                         : 'Dépose sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
-                                return this.toastService.presentToast(message);
+                                return this.toastService.presentToast(`${errorMessage}${errorMessage.length > 0 ? '\n' : ''}${message}`);
                             })
                         )
                         .subscribe(
