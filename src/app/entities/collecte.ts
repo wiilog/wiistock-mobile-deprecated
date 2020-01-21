@@ -1,7 +1,8 @@
 export interface Collecte {
     id: number;
-    numero : string;
+    number: string;
     location_from: string;
-    location_to: string;
-    date_end : string;
+    location_to?: string;
+    date_end?: string;
+    forStock: number;
 }

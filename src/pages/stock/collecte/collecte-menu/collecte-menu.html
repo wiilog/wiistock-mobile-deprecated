@@ -6,8 +6,11 @@
         <ion-grid>
             <button (click)="goToArticles(collecte)" class="list" ion-item *ngFor="let collecte of collectes">
                 <ion-row>
-                    <ion-col col-6>{{ collecte.numero }}</ion-col>
-                    <ion-col class="emplacement-collecte" col-6>{{ collecte.location_from ? collecte.location_from : '' }}</ion-col>
+                    <ion-col>
+                        <p>Numéro : {{ collecte.number }}</p>
+                        <p *ngIf="collecte.location_from">Point de collecte : {{ collecte.location_from }}</p>
+                        <p>Destination : {{ collecte.forStock ? 'Mise en stock' : 'Destruction' }}</p>
+                    </ion-col>
                 </ion-row>
             </button>
         </ion-grid>

@@ -63,7 +63,7 @@ export class SqliteProvider {
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `type_quantite` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT, `deleted` INTEGER DEFAULT 0, original_quantity INTEGER, reference_article_reference TEXT)')),
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_prepa_by_ref_article` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `reference` TEXT, `label` TEXT, `location` TEXT, `quantity` INTEGER, `reference_article` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT)')),
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)')),
-            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `collecte` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `location_from` VARCHAR(255), `location_to` VARCHAR(255), `date_end` TEXT)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `collecte` (`id` INTEGER PRIMARY KEY, `number` TEXT, `location_from` VARCHAR(255), `location_to` VARCHAR(255), `date_end` TEXT, `forStock` INTEGER)')),
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_livraison` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_livraison` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)')),
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_inventaire` (`id` INTEGER PRIMARY KEY, `id_mission` INTEGER, `reference` TEXT, `is_ref` INTEGER, `location` TEXT, `barcode` TEXT)')),
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_collecte` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_collecte` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)')),
@@ -457,39 +457,21 @@ export class SqliteProvider {
                 const collectesIdToDelete = collectesDB
                     .filter(({id: idDB, location_to, date_end}) => (!collectesAPI.some(({id: idAPI}) => ((idAPI === idDB)) && !location_to && !date_end)))
                     .map(({id}) => id);
-                return (collectesIdToDelete.length > 0 ? this.deleteBy('collecte', collectesIdToDelete) : of(undefined)).pipe(map(() => collectesDB));
+                return (collectesIdToDelete.length > 0
+                    ? this.deleteBy('collecte', collectesIdToDelete)
+                    : of(undefined)).pipe(map(() => collectesDB));
             }),
             flatMap((collectesDB: Array<Collecte>) => {
                 // we add 'collecte' in sqlite DB if it is in the api and not in DB
                 const collectesValuesToAdd = collectesAPI
                     .filter(({id: idAPI}) => !collectesDB.some(({id: idDB}) => (idDB === idAPI)))
-                    .map(({id, number, location_from}) => this.getCollecteValueFromApi({id, number, location_from}));
+                    .map(({id, number, location_from, forStock}) => ({id, number, location_from, forStock}));
                 return (collectesValuesToAdd.length > 0
-                    ? this.executeQuery(this.getCollecteInsertQuery(collectesValuesToAdd))
+                    ? this.insert('`collecte`', collectesValuesToAdd)
                     : of(undefined));
             }),
             map(() => undefined)
         );
-    }
-
-    /**
-     * Send sql values for insert the collecte
-     */
-    public getCollecteValueFromApi({id, number, location_from}): string {
-        return `(${id}, '${number}', '${location_from}', NULL)`;
-    }
-
-    /**
-     * Create Sql query to insert given sqlValues
-     */
-    public getCollecteInsertQuery(collecteValues: Array<string>): string {
-        return 'INSERT INTO `collecte` (' +
-            '`id`, ' +
-            '`numero`, ' +
-            '`location_from`, ' +
-            '`date_end`' +
-            ') ' +
-            'VALUES ' + collecteValues.join(',') + ';';
     }
 
     /**

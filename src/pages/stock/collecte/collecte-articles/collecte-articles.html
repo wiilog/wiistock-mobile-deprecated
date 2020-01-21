@@ -1,8 +1,9 @@
 <ion-content padding>
     <div *ngIf="collecte">
         <div class="page-title">
-            <h4>Collecte {{collecte.numero}}</h4>
+            <h4>Collecte {{ collecte.number }}</h4>
             <p>Point de collecte<br/>{{collecte.location_from ? collecte.location_from : ''}}</p>
+            <p>{{ collecte.forStock ? 'Mise en stock' : 'Destruction' }}</p>
         </div>
 
         <div class="spinner" *ngIf="loadingStartCollecte">
