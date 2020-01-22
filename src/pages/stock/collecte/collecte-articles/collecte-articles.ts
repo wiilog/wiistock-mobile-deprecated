@@ -127,8 +127,7 @@ export class CollecteArticlesPage {
                         .subscribe((articles) => {
                             this.updateList(articles);
                         });
-                }
-                else {
+                } else {
                     this.sqliteProvider.insert('`article_collecte`', newArticle).subscribe((insertId) => {
                         let mouvement: Mouvement = {
                             id: null,
@@ -207,11 +206,9 @@ export class CollecteArticlesPage {
     public validate(): void {
         if (this.articlesT.length === 0) {
             this.toastService.presentToast('Veuillez sélectionner au moins une ligne');
-        }
-        else if (this.articlesNT.length > 0) {
+        } else if (this.articlesNT.length > 0) {
             this.alertPartialCollecte();
-        }
-        else {
+        } else {
             this.finishCollecte();
         }
     }
@@ -227,8 +224,7 @@ export class CollecteArticlesPage {
                     this.selectArticle(article, quantity);
                 }
             });
-        }
-        else {
+        } else {
             this.toastService.presentToast('L\'article scanné n\'est pas dans la liste.');
         }
     }
@@ -237,8 +233,7 @@ export class CollecteArticlesPage {
         if (this.partialCollecteAlert) {
             this.partialCollecteAlert.dismiss();
             this.partialCollecteAlert = undefined;
-        }
-        else {
+        } else {
             this.partialCollecteAlert = this.alertController
                 .create({
                     title: `Votre collecte est partielle`,
@@ -277,8 +272,7 @@ export class CollecteArticlesPage {
                             this.isValid = true;
                             this.toastService.presentToast('Collecte commencée.');
                             this.registerMvt(article, quantity);
-                        }
-                        else {
+                        } else {
                             this.isValid = false;
                             this.loadingStartCollecte = false;
                             this.toastService.presentToast(resp.msg);
@@ -286,8 +280,7 @@ export class CollecteArticlesPage {
                     });
                 });
             });
-        }
-        else {
+        } else {
             if (this.network.type === 'none') {
                 this.toastService.presentToast('Collecte commencée en mode hors ligne');
             }
@@ -301,8 +294,7 @@ export class CollecteArticlesPage {
         this.articlesT = articles.filter((article) => (article.has_moved === 1));
         if (this.articlesNT.length === 0) {
             this.refreshOver();
-        }
-        else {
+        } else {
             this.refresh();
         }
         this.loadingStartCollecte = false;
@@ -338,30 +330,27 @@ export class CollecteArticlesPage {
                         if (offline) {
                             this.toastService.presentToast('Collecte sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
                             this.closeScreen();
-                        }
-                        else {
+                        } else {
                             this.handleCollectesSuccess(success);
                         }
                     },
                     (error) => {
                         this.handlePreparationError(error);
                     });
-        }
-        else {
+        } else {
             this.toastService.presentToast('Chargement en cours veuillez patienter.');
         }
     }
 
-    private handleCollectesSuccess(success: Array<{newCollecte, articlesCollecte}>): void {
+    private handleCollectesSuccess(success: Array<{ newCollecte, articlesCollecte }>): void {
         if (success.length > 0) {
             Observable.zip(
                 ...success
                     .filter(({newCollecte}) => newCollecte)
                     .map(({newCollecte, articlesCollecte}) => (
                         Observable.zip(
-                            this.sqliteProvider.executeQuery(
-                                this.sqliteProvider.getCollecteInsertQuery([this.sqliteProvider.getCollecteValueFromApi(newCollecte)])
-                            ),
+                            this.sqliteProvider.insert('collecte', newCollecte)
+                            ,
                             ...(articlesCollecte.map((newArticleCollecte) => (
                                 this.sqliteProvider.executeQuery(
                                     this.sqliteProvider.getArticleCollecteInsertQuery([this.sqliteProvider.getArticleCollecteValueFromApi(newArticleCollecte)])
@@ -377,8 +366,7 @@ export class CollecteArticlesPage {
             ).subscribe(() => {
                 this.closeScreen();
             })
-        }
-        else {
+        } else {
             this.closeScreen();
         }
     }
