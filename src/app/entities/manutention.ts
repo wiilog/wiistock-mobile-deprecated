@@ -4,5 +4,6 @@ export interface Manutention {
     commentaire: string,
     destination: string,
     source: string,
-    demandeur: string
+    demandeur: string,
+    objet: string
 }

@@ -69,7 +69,7 @@ export class SqliteProvider {
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_collecte` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_collecte` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)')),
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `saisie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_mission` INTEGER, `date` TEXT, `reference` TEXT, `is_ref` INTEGER, `quantity` INTEGER, `location` TEXT)')),
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `anomalie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` TEXT, `is_ref` INTEGER, `quantity` INTEGER, `location` TEXT, `comment` TEXT, `treated` TEXT, `barcode` TEXT)')),
-            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `manutention` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `demandeur` TEXT, `date_attendue` TEXT, `commentaire` TEXT, `destination` TEXT, `source` TEXT)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `manutention` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `demandeur` TEXT, `date_attendue` TEXT, `commentaire` TEXT, `destination` TEXT, `source` TEXT, `objet` TEXT)')),
             map(() => undefined)
         );
     }
@@ -205,6 +205,7 @@ export class SqliteProvider {
                         ", '" + this.escapeQuotes(manut.demandeur) + "'" +
                         ", '" + this.escapeQuotes(comment) + "'" +
                         ", '" + this.escapeQuotes(manut.source) + "'" +
+                        ", '" + this.escapeQuotes(manut.objet) + "'" +
                         ", '" + this.escapeQuotes(manut.destination) + "'" +
                         ")"
                     );
@@ -212,7 +213,7 @@ export class SqliteProvider {
                 if (manutentions.indexOf(manut) === manutentions.length - 1) {
                     this.findAll('`manutention`').subscribe((manutentionsDB) => {
                         let manutValuesStr = manutValues.join(', ');
-                        let sqlManut = 'INSERT INTO `manutention` (`id`, `date_attendue`, `demandeur`, `commentaire`, `source`, `destination`) VALUES ' + manutValuesStr + ';';
+                        let sqlManut = 'INSERT INTO `manutention` (`id`, `date_attendue`, `demandeur`, `commentaire`, `source`, `objet`, `destination`) VALUES ' + manutValuesStr + ';';
 
                         if (manutentionsDB.length === 0) {
                             if (manutValues.length > 0) {
