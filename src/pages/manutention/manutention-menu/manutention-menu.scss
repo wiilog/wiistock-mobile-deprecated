@@ -18,6 +18,12 @@ page-manutention-menu {
     ion-card-content {
         padding-top: 5px !important;
         padding-bottom: 5px !important;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .actions {
+            display: inline-flex;
+        }
     }
 
     .important {
@@ -27,12 +33,6 @@ page-manutention-menu {
     .arrow {
         width: 15px !important;
         height: 15px !important;
-        float: right;
-        margin-top: 5% !important;
-    }
-
-    ion-icon {
-        font-size: 85% !important;
     }
 
     .icon-manutention-container {

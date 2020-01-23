@@ -10,9 +10,13 @@
                 <p>Demandeur <b>{{ manutention.demandeur }} </b></p>
             </ion-card-header>
             <ion-card-content>
-                <span>Date attendue <b>{{ toDate(manutention) | date:'dd/MM/yyyy H:mm' }}</b></span>
-                <wii-icon name="arrow-right.svg" class="arrow"></wii-icon>
-                <p>Objet <b>{{ manutention.objet }}</b></p>
+                <div class="content">
+                    <p>Date attendue <b>{{ toDate(manutention) | date:'dd/MM/yyyy H:mm' }}</b></p>
+                    <p>Objet <b>{{ manutention.objet }}</b></p>
+                </div>
+                <div class="actions">
+                    <wii-icon name="arrow-right.svg" class="arrow"></wii-icon>
+                </div>
             </ion-card-content>
         </ion-card>
     </ng-container>
