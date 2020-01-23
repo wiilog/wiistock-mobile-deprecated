@@ -5,7 +5,7 @@ import moment from 'moment';
 import {Preparation} from '@app/entities/preparation';
 import {Livraison} from '@app/entities/livraison';
 import {Observable, ReplaySubject, Subject} from 'rxjs';
-import {flatMap, map, take} from 'rxjs/operators';
+import {flatMap, map, take, tap} from 'rxjs/operators';
 import {from} from 'rxjs/observable/from';
 import {of} from 'rxjs/observable/of';
 import {Platform} from 'ionic-angular';
@@ -792,6 +792,7 @@ export class SqliteProvider {
     public executeQuery(query: string, getRes: boolean = true, params: Array<any> = []): Observable<any> {
         return this.db$.pipe(
             flatMap((db) => SqliteProvider.ExecuteQueryStatic(db, query, getRes, params)),
+            tap(() => {}, () => {console.error(query);}),
             map((res) => (getRes ? res : undefined))
         );
     }
@@ -956,7 +957,7 @@ export class SqliteProvider {
 
     public finishMvt(id_mvt: number, location_to?: string): Observable<undefined> {
         const setLocationQuery = location_to
-            ? `, location = '${location_to}'`
+            ? ` AND location = '${location_to}'`
             : '';
         return this.executeQuery(`UPDATE \`mouvement\` SET date_drop = '${moment().format()}' WHERE id = ${id_mvt}${setLocationQuery}`, false);
     }

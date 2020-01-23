@@ -76,7 +76,6 @@ export class EmplacementScanPage {
                 this.chooseEmp(this.emplacement);
             }
         }
-
     }
 
     public scanLocation(): void {
