@@ -13,10 +13,11 @@
         "clean": "ionic-app-scripts clean",
         "build": "ionic-app-scripts build",
         "lint": "ionic-app-scripts lint",
+        "wiis:generate:env": "node scripts/generate-env",
         "wiis:clean": "yarn clean && ionic cordova resources android && ionic cordova platform add android && cordova clean",
-        "wiis:build": "yarn wiis:clean && ionic cordova build android",
-        "wiis:run": "yarn wiis:clean && ionic cordova run android",
-        "wiis:run:livereload": "yarn wiis:clean && ionic cordova run android --livereload"
+        "wiis:build": "yarn wiis:generate:env prod && yarn wiis:clean && ionic cordova build android",
+        "wiis:run": "yarn wiis:generate:env dev && yarn wiis:clean && ionic cordova run android",
+        "wiis:run:livereload": "yarn wiis:generate:env dev && yarn wiis:clean && ionic cordova run android --livereload"
     },
     "dependencies": {
         "@angular/animations": "5.2.11",

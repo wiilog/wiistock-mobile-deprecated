@@ -37,3 +37,6 @@ $RECYCLE.BIN/
 .DS_Store
 Thumbs.db
 UserInterfaceState.xcuserstate
+/src/environment.json
+/credentials.json
+/credentials.json

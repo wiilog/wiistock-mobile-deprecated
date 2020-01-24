@@ -11,7 +11,10 @@ import {VersionCheckerService} from '@app/services/version-checker.service';
 import {flatMap, map, timeout} from 'rxjs/operators';
 import {StorageService} from '@app/services/storage.service';
 import {Subscription} from 'rxjs';
-
+// @ts-ignore
+import {env} from '../../environment';
+// @ts-ignore
+import {autoconnect, login, password} from '../../../credentials';
 
 @IonicPage()
 @Component({
@@ -67,6 +70,7 @@ export class ConnectPage {
                             this.currentVersion = currentVersion;
                             this.apkUrl = apkUrl;
                             this.finishLoading();
+                            this.autoLoginIfAllowed();
                         },
                         () => {
                             this.finishLoading();
@@ -140,5 +144,15 @@ export class ConnectPage {
     private finishLoading() {
         this.loading = false;
         this.changeDetector.detectChanges();
+    }
+
+    private autoLoginIfAllowed() {
+        if (env === 'dev' && autoconnect) {
+            this.form = {
+                login: login,
+                password: password
+            };
+            this.logForm();
+        }
     }
 }
