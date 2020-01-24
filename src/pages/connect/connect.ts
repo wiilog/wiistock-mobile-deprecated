@@ -1,5 +1,5 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
-import {IonicPage, NavController} from 'ionic-angular';
+import {IonicPage, NavController, NavParams} from 'ionic-angular';
 import {MainMenuPage} from '@pages/main-menu/main-menu';
 import {ParamsPage} from '@pages/params/params'
 import {SqliteProvider} from '@providers/sqlite/sqlite';
@@ -36,11 +36,12 @@ export class ConnectPage {
     public currentVersion: string;
 
     public apkUrl: string;
-
+    private wantToAutoConnect: boolean;
     private appVersionSubscription: Subscription;
     private urlServerSubscription: Subscription;
 
     public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
                        private versionChecker: VersionCheckerService,
@@ -55,6 +56,7 @@ export class ConnectPage {
 
     public ionViewWillEnter(): void {
         this.loading = true;
+        this.wantToAutoConnect = Boolean(this.navParams.get('autoconnect'));
         this.urlServerSubscription = this.sqliteProvider.getServerUrl().subscribe((url) => {
             if (url) {
                 this.appVersionSubscription = this.versionChecker.isAvailableVersion()
@@ -146,7 +148,7 @@ export class ConnectPage {
     }
 
     private autoLoginIfAllowed() {
-        if (env === 'dev' && autoconnect) {
+        if (env === 'dev' && autoconnect && this.wantToAutoConnect) {
             this.form = {
                 login: login,
                 password: password
