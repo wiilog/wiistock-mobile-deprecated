@@ -76,8 +76,7 @@ export class ConnectPage {
                             this.finishLoading();
                             this.toastService.presentToast('Erreur : la liaison avec le serveur est impossible', ToastService.LONG_DURATION);
                         });
-            }
-            else {
+            } else {
                 this.toastService.presentToast('Veuillez mettre à jour l\'url', ToastService.LONG_DURATION);
                 this.finishLoading();
                 this.goToParams();
@@ -114,7 +113,7 @@ export class ConnectPage {
                                         () => {
                                             this.loading = false;
                                             this.barcodeScannerManager.registerZebraBroadcastReceiver();
-                                            this.navCtrl.setRoot(MainMenuPage, {needReload : false});
+                                            this.navCtrl.setRoot(MainMenuPage, {needReload: false});
                                         },
                                         (err) => {
                                             this.finishLoading();
