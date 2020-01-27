@@ -533,36 +533,35 @@ export class SqliteProvider {
         let articlesInventaire = data['inventoryMission'];
 
         let articlesInventaireValues = [];
-        if (articlesInventaire.length === 0) {
+        // if (articlesInventaire.length === 0) {
             this.deleteBy('article_inventaire').subscribe(_ => {
-                importExecuted.next(false);
+                for (let article of articlesInventaire) {
+                    articlesInventaireValues.push(
+                        "(NULL, " +
+                        "'" + article.id_mission + "', " +
+                        "'" + this.escapeQuotes(article.reference) + "', " +
+                        article.is_ref + ", " +
+                        "'" + this.escapeQuotes(article.location ? article.location : 'N/A') + "', " +
+                        "'" + article.barCode + "')"
+                    );
+
+                    if (articlesInventaire.indexOf(article) === articlesInventaire.length - 1) {
+                        let articlesInventaireValuesStr = articlesInventaireValues.join(', ');
+                        let sqlArticlesInventaire = 'INSERT INTO `article_inventaire` (`id`, `id_mission`, `reference`, `is_ref`, `location`, `barcode`) VALUES ' + articlesInventaireValuesStr + ';';
+
+                        if (articlesInventaireValues.length > 0) {
+                            this.executeQuery(sqlArticlesInventaire).subscribe(() => {
+                                importExecuted.next(true);
+                            });
+                        }
+                        else {
+                            importExecuted.next(undefined);
+                        }
+                    }
+                }
             });
-        }
-
-        for (let article of articlesInventaire) {
-            articlesInventaireValues.push(
-                "(NULL, " +
-                "'" + article.id_mission + "', " +
-                "'" + this.escapeQuotes(article.reference) + "', " +
-                article.is_ref + ", " +
-                "'" + this.escapeQuotes(article.location ? article.location : 'N/A') + "', " +
-                "'" + article.barCode + "')"
-            );
-
-            if (articlesInventaire.indexOf(article) === articlesInventaire.length - 1) {
-                let articlesInventaireValuesStr = articlesInventaireValues.join(', ');
-                let sqlArticlesInventaire = 'INSERT INTO `article_inventaire` (`id`, `id_mission`, `reference`, `is_ref`, `location`, `barcode`) VALUES ' + articlesInventaireValuesStr + ';';
-
-                if (articlesInventaireValues.length > 0) {
-                    this.executeQuery(sqlArticlesInventaire).subscribe(() => {
-                        importExecuted.next(true);
-                    });
-                }
-                else {
-                    importExecuted.next(undefined);
-                }
-            }
-        }
+        // }
+        
         return importExecuted;
     }
 
