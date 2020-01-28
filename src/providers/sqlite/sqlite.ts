@@ -529,38 +529,28 @@ export class SqliteProvider {
     }
 
     public importArticlesInventaire(data): Observable<any> {
-        const importExecuted = new ReplaySubject<any>(1);
         let articlesInventaire = data['inventoryMission'];
+        return this.deleteBy('article_inventaire')
+            .pipe(
+                flatMap(() => {
+                    const articlesInventaireValues = (articlesInventaire && articlesInventaire.length > 0)
+                        ? articlesInventaire.map((article) => (
+                            "(NULL, " +
+                            "'" + article.id_mission + "', " +
+                            "'" + this.escapeQuotes(article.reference) + "', " +
+                            article.is_ref + ", " +
+                            "'" + this.escapeQuotes(article.location ? article.location : 'N/A') + "', " +
+                            "'" + article.barCode + "')"
+                        ))
+                        : [];
 
-        let articlesInventaireValues = [];
-        this.deleteBy('article_inventaire').subscribe(_ => {
-            for (let article of articlesInventaire) {
-                articlesInventaireValues.push(
-                    "(NULL, " +
-                    "'" + article.id_mission + "', " +
-                    "'" + this.escapeQuotes(article.reference) + "', " +
-                    article.is_ref + ", " +
-                    "'" + this.escapeQuotes(article.location ? article.location : 'N/A') + "', " +
-                    "'" + article.barCode + "')"
-                );
-
-                if (articlesInventaire.indexOf(article) === articlesInventaire.length - 1) {
                     let articlesInventaireValuesStr = articlesInventaireValues.join(', ');
                     let sqlArticlesInventaire = 'INSERT INTO `article_inventaire` (`id`, `id_mission`, `reference`, `is_ref`, `location`, `barcode`) VALUES ' + articlesInventaireValuesStr + ';';
-
-                    if (articlesInventaireValues.length > 0) {
-                        this.executeQuery(sqlArticlesInventaire).subscribe(() => {
-                            importExecuted.next(true);
-                        });
-                    }
-                    else {
-                        importExecuted.next(undefined);
-                    }
-                }
-            }
-        });
-
-        return importExecuted;
+                    return articlesInventaireValues.length > 0
+                        ? this.executeQuery(sqlArticlesInventaire).pipe(map(() => true))
+                        : of(undefined)
+                })
+            );
     }
 
     private importArticlesPrepaByRefArticle(data): Observable<any> {
@@ -638,16 +628,16 @@ export class SqliteProvider {
 
     public importData(data: any): Observable<any> {
         return of(undefined).pipe(
-            flatMap(() => this.importEmplacements(data)),
-            flatMap(() => this.importArticlesPrepaByRefArticle(data)),
-            flatMap(() => this.importPreparations(data)),
-            flatMap(() => this.importArticlesPrepas(data)),
-            flatMap(() => this.importLivraisons(data)),
-            flatMap(() => this.importArticlesLivraison(data)),
-            flatMap(() => this.importArticlesInventaire(data)),
-            flatMap(() => this.importManutentions(data)),
-            flatMap(() => this.importCollectes(data)),
-            flatMap(() => this.importMouvementTraca(data)),
+            flatMap(() => this.importEmplacements(data).pipe(tap(() => {console.log('--- > importEmplacements')}))),
+            flatMap(() => this.importArticlesPrepaByRefArticle(data).pipe(tap(() => {console.log('--- > importArticlesPrepaByRefArticle')}))),
+            flatMap(() => this.importPreparations(data).pipe(tap(() => {console.log('--- > importPreparations')}))),
+            flatMap(() => this.importArticlesPrepas(data).pipe(tap(() => {console.log('--- > importArticlesPrepas')}))),
+            flatMap(() => this.importLivraisons(data).pipe(tap(() => {console.log('--- > importLivraisons')}))),
+            flatMap(() => this.importArticlesLivraison(data).pipe(tap(() => {console.log('--- > importArticlesLivraison')}))),
+            flatMap(() => this.importArticlesInventaire(data).pipe(tap(() => {console.log('--- > importArticlesInventaire')}))),
+            flatMap(() => this.importManutentions(data).pipe(tap(() => {console.log('--- > importManutentions')}))),
+            flatMap(() => this.importCollectes(data).pipe(tap(() => {console.log('--- > importCollectes')}))),
+            flatMap(() => this.importMouvementTraca(data).pipe(tap(() => {console.log('--- > importMouvementTraca')}))),
             flatMap(() => (
                 this.storageService.getInventoryManagerRight().pipe(
                     flatMap((res) => (res
