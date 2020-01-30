@@ -14,6 +14,7 @@ import {Manutention} from '@app/entities/manutention';
 import 'rxjs/add/observable/zip';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import {Anomalie} from "@app/entities/anomalie";
+import {ArticlePrepaByRefArticle} from "@app/entities/article-prepa-by-ref-article";
 
 
 @Injectable()
@@ -553,12 +554,25 @@ export class SqliteProvider {
             );
     }
 
-    private importArticlesPrepaByRefArticle(data): Observable<any> {
-        const articlesPrepaByRefArticle = data['articlesPrepaByRefArticle'];
-
-        return this
-            .deleteBy('article_prepa_by_ref_article')
+    public importArticlesPrepaByRefArticle(data, partial: boolean = false): Observable<any> {
+        const articlesPrepaByRefArticle: Array<ArticlePrepaByRefArticle> = data['articlesPrepaByRefArticle'];
+        return of(undefined)
             .pipe(
+                flatMap(() => (
+                    partial
+                        ? this.findAll('article_prepa_by_ref_article')
+                        : this.deleteBy('article_prepa_by_ref_article').pipe(map(() => ([])))
+                )),
+                flatMap((articlesInDatabase: Array<ArticlePrepaByRefArticle>) => {
+                    // On supprimer les refArticleByRefarticle dont le champ reference_article est renvoyé par l'api
+                    const refArticleToDelete = (articlesInDatabase.length > 0 ? (articlesPrepaByRefArticle || []) : []).reduce((acc, {reference_article}) => {
+                        if (acc.indexOf(reference_article) === -1) {
+                            acc.push(reference_article);
+                        }
+                        return acc;
+                    }, []);
+                    return this.deleteBy('article_prepa_by_ref_article', refArticleToDelete, 'reference_article');
+                }),
                 map(() => {
                     if ((articlesPrepaByRefArticle && articlesPrepaByRefArticle.length > 0)) {
                         const articleKeys = [
@@ -574,9 +588,10 @@ export class SqliteProvider {
                             return '(' + (articleKeys.map((key) => ("'" + this.escapeQuotes(articleTmp[key]) + "'")).join(', ') + ')')
                         });
 
-                        return 'INSERT INTO `article_prepa_by_ref_article` (' +
-                            articleKeys.map((key) => `\`${key}\``).join(', ') + ') VALUES ' +
-                            articleValues + ';';
+                        return (
+                            'INSERT INTO `article_prepa_by_ref_article` (' + articleKeys.map((key) => `\`${key}\``).join(', ') + ') ' +
+                            'VALUES ' + articleValues + ';'
+                        );
                     }
                     else {
                         return undefined;
@@ -587,7 +602,7 @@ export class SqliteProvider {
                         ? this.executeQuery(query)
                         : of(undefined)
                 ))
-            )
+            );
     }
 
     public importAnomaliesInventaire(data, deleteOldAnomalies: boolean = true): Observable<any> {
@@ -1055,12 +1070,12 @@ export class SqliteProvider {
     /**
      * Call sqlite delete command. If ids is undefined, it clean the table
      */
-    public deleteBy(table: string, ids: number|Array<number> = undefined): Observable<undefined> {
-        const whereClause = ids
+    public deleteBy(table: string, toDelete: number|Array<number> = undefined, fieldName: string = 'id'): Observable<undefined> {
+        const whereClause = toDelete
             ? (
-                ' WHERE ' + (Array.isArray(ids)
-                    ? `id IN (${ids.join(',')})`
-                    : `id = ${ids}`)
+                ' WHERE ' + (Array.isArray(toDelete)
+                    ? `${fieldName} IN (${toDelete.map((val) => this.getValueForQuery(val)).join(',')})`
+                    : `${fieldName} = ${this.getValueForQuery(toDelete)}`)
             )
             : '';
         return this.executeQuery(`DELETE FROM ${table}${whereClause};`, false);
