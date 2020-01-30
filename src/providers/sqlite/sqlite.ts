@@ -967,9 +967,9 @@ export class SqliteProvider {
 
     public finishMvt(id_mvt: number, location_to?: string): Observable<undefined> {
         const setLocationQuery = location_to
-            ? ` AND location = '${location_to}'`
+            ? `, location = '${location_to}'`
             : '';
-        return this.executeQuery(`UPDATE \`mouvement\` SET date_drop = '${moment().format()}' WHERE id = ${id_mvt}${setLocationQuery}`, false);
+        return this.executeQuery(`UPDATE \`mouvement\` SET date_drop = '${moment().format()}'${setLocationQuery} WHERE id = ${id_mvt}`, false);
     }
 
     public moveArticle(id_article: number): Observable<undefined> {
