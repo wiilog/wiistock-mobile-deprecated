@@ -14,7 +14,7 @@ import {Subscription} from 'rxjs';
 // @ts-ignore
 import {env} from '../../environment';
 // @ts-ignore
-import {autoconnect, login, password} from '../../../credentials';
+import {autoconnect, login, password} from '../../credentials';
 
 @IonicPage()
 @Component({
@@ -148,6 +148,7 @@ export class ConnectPage {
     }
 
     private autoLoginIfAllowed() {
+        console.log(env === 'dev', autoconnect, this.wantToAutoConnect);
         if (env === 'dev' && autoconnect && this.wantToAutoConnect) {
             this.form = {
                 login: login,

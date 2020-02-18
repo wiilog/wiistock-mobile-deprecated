@@ -625,7 +625,6 @@ export class SqliteProvider {
                             "'" + this.escapeQuotes(anomaly.location ? anomaly.location : 'N/A') + "', " +
                             "'" + anomaly.barCode + "')"
                         ));
-                    console.log(anomaliesToInsert);
                     if (anomaliesToInsert.length === 0) {
                         ret$.next(undefined);
                     }
