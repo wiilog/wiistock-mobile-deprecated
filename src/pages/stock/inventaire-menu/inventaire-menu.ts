@@ -78,14 +78,24 @@ export class InventaireMenuPage {
                         ? this.apiService.requestApi('post', ApiService.ADD_INVENTORY_ENTRIES, {entries})
                         : of({success: false})
                 )),
-                flatMap((resp) => (
-                    resp.success
-                        ? this.sqliteProvider.deleteBy('saisie_inventaire').pipe(
-                            flatMap(() => this.toastService.presentToast(resp.data.status)),
-                            map(() => undefined)
-                        )
-                        : of(undefined)
-                ))
+                flatMap((resp) => {
+                    return (
+                        resp.success
+                            ? of(undefined)
+                                .pipe(
+                                    flatMap(() => this.sqliteProvider.deleteBy('saisie_inventaire')),
+                                    flatMap(() => this.storageService.getInventoryManagerRight()),
+                                    flatMap((hasInventoryManagerRight) => (
+                                        (hasInventoryManagerRight && resp.data && resp.data.anomalies && resp.data.anomalies.length > 0)
+                                            ? this.sqliteProvider.importAnomaliesInventaire({anomalies: resp.data.anomalies}, false)
+                                            : of(undefined)
+                                    )),
+                                    flatMap(() => this.toastService.presentToast(resp.data.status)),
+                                    map(() => undefined)
+                                )
+                            : of(undefined)
+                    )
+                })
             );
     }
 

@@ -25,6 +25,7 @@ interface ApiProccessConfig {
     // after api submit
     deleteSucceed: (resSuccess: any) => Observable<any>;
     resetFailed: (resError: any) => Observable<any>;
+    treatData?: (data: any) => Observable<any>;
     titleErrorAlert: string;
     numeroProccessFailed: string;
 }
@@ -79,6 +80,16 @@ export class LocalDataManagerService {
                         this.sqliteProvider.resetArticlePrepaByPrepa(idsToDelete),
                         this.sqliteProvider.deleteMouvementsBy('id_prepa', idsToDelete)
                     );
+                },
+                treatData: (data) => {
+                    const {preparations} = data;
+                    return (preparations && preparations.length > 0)
+                        ? of(undefined).pipe(
+                            flatMap(() => this.sqliteProvider.importPreparations(data)),
+                            flatMap(() => this.sqliteProvider.importArticlesPrepas(data)),
+                            flatMap(() => this.sqliteProvider.importArticlesPrepaByRefArticle(data, true))
+                        )
+                        : of(undefined)
                 }
             },
             livraison: {
@@ -327,7 +338,7 @@ export class LocalDataManagerService {
                         this.apiService
                             .requestApi('post', apiProccessConfig.service, params)
                             .pipe(flatMap((res) => {
-                                const {success, errors} = res;
+                                const {success, errors, data} = res;
                                 if (errors && errors.length > 0) {
                                     this.presentAlertError(
                                         apiProccessConfig.titleErrorAlert,
@@ -335,10 +346,13 @@ export class LocalDataManagerService {
                                         errors
                                     );
                                 }
-                                return Observable
-                                    .zip(
-                                        apiProccessConfig.deleteSucceed(success),
-                                        apiProccessConfig.resetFailed(errors)
+                                return of(undefined)
+                                    .pipe(
+                                        flatMap(() => apiProccessConfig.deleteSucceed(success)),
+                                        flatMap(() => apiProccessConfig.resetFailed(errors)),
+                                        flatMap(() => apiProccessConfig.treatData && data
+                                            ? apiProccessConfig.treatData(data)
+                                            : of(undefined)),
                                     )
                                     .pipe(map(() => res));
                             }))
