@@ -6,7 +6,7 @@ import {HttpClient} from '@angular/common/http';
 import moment from 'moment';
 import {ArticleCollecte} from '@app/entities/article-collecte';
 import {Collecte} from '@app/entities/collecte';
-import {flatMap, tap} from 'rxjs/operators';
+import {flatMap} from 'rxjs/operators';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Observable, Subscription} from 'rxjs';
@@ -345,24 +345,15 @@ export class CollecteArticlesPage {
                                         cssClass: 'alert-success',
                                         handler: () => {
                                             this.canLeave = true;
-                                            this
-                                                .closeScreen(
-                                                    offline ? [] : success,
-                                                    offline
-                                                )
-                                                .subscribe(() => {
-                                                    this.goToDepose();
-                                                });
+                                            this.closeScreen(offline ? [] : success, offline);
+                                            this.goToDepose();
                                         }
                                     }]
                                 })
                                 .present();
                         }
                         else {
-                            this.closeScreen(
-                                offline ? [] : success,
-                                offline
-                            );
+                            this.closeScreen(offline ? [] : success, offline);
                         }
                     },
                     (error) => {
@@ -373,26 +364,21 @@ export class CollecteArticlesPage {
         }
     }
 
-    private closeScreen(success: Array<{ newCollecte, articlesCollecte }>, isOffline: boolean = false): Observable<any> {
-        return (isOffline || success.length > 0
-            ? this.toastService
-                .presentToast(
-                    (success.length > 0)
-                        ? (
-                            (success.length === 1
-                                ? 'Votre collecte a bien été enregistrée'
-                                : `Votre collecte et ${success.length - 1} collecte${success.length - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
-                        )
-                        : 'Collecte sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé'
-                )
-            : of(undefined)
-        )
-        .pipe(
-            tap(() => {
-                this.isLoading = false;
-                this.navCtrl.pop();
-            })
-        );
+    private closeScreen(success: Array<{ newCollecte, articlesCollecte }>, isOffline: boolean = false): void {
+        if(isOffline || success.length > 0) {
+            this.toastService.presentToast(
+                (success.length > 0)
+                    ? (
+                        (success.length === 1
+                            ? 'Votre collecte a bien été enregistrée'
+                            : `Votre collecte et ${success.length - 1} collecte${success.length - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
+                    )
+                    : 'Collecte sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé'
+            );
+        }
+
+        this.isLoading = false;
+        this.navCtrl.pop();
     }
 
     private handlePreparationError(resp): void {

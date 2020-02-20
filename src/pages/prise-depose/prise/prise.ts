@@ -49,7 +49,7 @@ export class PrisePage {
     private barcodeCheckSubscription: Subscription;
     private saveSubscription: Subscription;
 
-    private finishPrise: () => void;
+    private finishAction: () => void;
     private operator: string;
     private apiLoading: boolean;
 
@@ -73,7 +73,7 @@ export class PrisePage {
 
     public ionViewWillEnter(): void {
         this.init();
-        this.finishPrise = this.navParams.get('finishPrise');
+        this.finishAction = this.navParams.get('finishAction');
         this.emplacement = this.navParams.get('emplacement');
         this.fromStock = this.navParams.get('fromStock');
 
@@ -177,7 +177,7 @@ export class PrisePage {
     public redirectAfterTake(): void {
         this.navCtrl.pop()
             .then(() => {
-                this.finishPrise();
+                this.finishAction();
             });
     }
 

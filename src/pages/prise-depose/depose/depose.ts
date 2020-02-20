@@ -57,7 +57,7 @@ export class DeposePage {
     private zebraScanSubscription: Subscription;
     private saveSubscription: Subscription;
 
-    private finishDepose: () => void;
+    private finishAction: () => void;
 
     private apiLoading: boolean;
 
@@ -84,7 +84,7 @@ export class DeposePage {
         if (!this.operator) {
             this.init();
             this.emplacement = this.navParams.get('emplacement');
-            this.finishDepose = this.navParams.get('finishDepose');
+            this.finishAction = this.navParams.get('finishAction');
             this.fromStock = this.navParams.get('fromStock');
             Observable
                 .zip(
@@ -211,7 +211,7 @@ export class DeposePage {
             .pop()
             .then(() => {
                 if (!hasErrors) {
-                    this.finishDepose();
+                    this.finishAction();
                 }
             });
     }

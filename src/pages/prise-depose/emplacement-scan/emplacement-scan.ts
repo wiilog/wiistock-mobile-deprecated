@@ -114,7 +114,7 @@ export class EmplacementScanPage {
         this.navCtrl.push(this.fromDepose ? DeposePage : PrisePage, {
             emplacement: emplacement,
             fromStock: this.fromStock,
-            finishDepose: () => {
+            finishAction: () => {
                 this.navCtrl.pop();
             }
         });
