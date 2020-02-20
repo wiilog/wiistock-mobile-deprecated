@@ -6,7 +6,7 @@ import {HttpClient} from '@angular/common/http';
 import moment from 'moment';
 import {ArticleCollecte} from '@app/entities/article-collecte';
 import {Collecte} from '@app/entities/collecte';
-import {flatMap} from 'rxjs/operators';
+import {flatMap, tap} from 'rxjs/operators';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Observable, Subscription} from 'rxjs';
@@ -16,6 +16,7 @@ import {Network} from '@ionic-native/network';
 import {CollecteArticleTakePage} from "@pages/stock/collecte/collecte-article-take/collecte-article-take";
 import {of} from "rxjs/observable/of";
 import {LocalDataManagerService} from "@app/services/local-data-manager.service";
+import {AlertManagerService} from "@app/services/alert-manager.service";
 
 
 @IonicPage()
@@ -41,6 +42,9 @@ export class CollecteArticlesPage {
 
     private isLoading: boolean;
 
+    private goToDepose: () => void;
+    private canLeave: boolean;
+
     public constructor(private navCtrl: NavController,
                        private navParams: NavParams,
                        private toastService: ToastService,
@@ -54,11 +58,13 @@ export class CollecteArticlesPage {
                        private storageService: StorageService) {
         this.loadingStartCollecte = false;
         this.isLoading = false;
+        this.canLeave = true;
     }
 
     public ionViewWillEnter(): void {
         this.isLoading = false;
         this.collecte = this.navParams.get('collecte');
+        this.goToDepose = this.navParams.get('goToDepose');
 
         this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
             this.testIfBarcodeEquals(barcode, true);
@@ -81,7 +87,7 @@ export class CollecteArticlesPage {
     }
 
     public ionViewCanLeave(): boolean {
-        return this.barcodeScannerManager.canGoBack;
+        return this.canLeave && this.barcodeScannerManager.canGoBack;
     }
 
     public scan(): void {
@@ -327,11 +333,36 @@ export class CollecteArticlesPage {
                 )
                 .subscribe(
                     ({offline, success}: any) => {
-                        if (offline) {
-                            this.toastService.presentToast('Collecte sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
-                            this.closeScreen();
-                        } else {
-                            this.handleCollectesSuccess(success);
+                        if (this.collecte && this.collecte.forStock) {
+                            this.canLeave = false;
+                            this.alertController
+                                .create({
+                                    title: 'Collecte validée',
+                                    cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
+                                    message: 'Pour valider l\'entrée en stock vous devez effectuer la dépose',
+                                    buttons: [{
+                                        text: 'Aller vers la dépose',
+                                        cssClass: 'alert-success',
+                                        handler: () => {
+                                            this.canLeave = true;
+                                            this
+                                                .closeScreen(
+                                                    offline ? [] : success,
+                                                    offline
+                                                )
+                                                .subscribe(() => {
+                                                    this.goToDepose();
+                                                });
+                                        }
+                                    }]
+                                })
+                                .present();
+                        }
+                        else {
+                            this.closeScreen(
+                                offline ? [] : success,
+                                offline
+                            );
                         }
                     },
                     (error) => {
@@ -342,42 +373,30 @@ export class CollecteArticlesPage {
         }
     }
 
-    private handleCollectesSuccess(success: Array<{ newCollecte, articlesCollecte }>): void {
-        if (success.length > 0) {
-            Observable.zip(
-                ...success
-                    .filter(({newCollecte}) => newCollecte)
-                    .map(({newCollecte, articlesCollecte}) => (
-                        Observable.zip(
-                            this.sqliteProvider.insert('collecte', newCollecte)
-                            ,
-                            ...(articlesCollecte.map((newArticleCollecte) => (
-                                this.sqliteProvider.executeQuery(
-                                    this.sqliteProvider.getArticleCollecteInsertQuery([this.sqliteProvider.getArticleCollecteValueFromApi(newArticleCollecte)])
-                                )
-                            )))
+    private closeScreen(success: Array<{ newCollecte, articlesCollecte }>, isOffline: boolean = false): Observable<any> {
+        return (isOffline || success.length > 0
+            ? this.toastService
+                .presentToast(
+                    (success.length > 0)
+                        ? (
+                            (success.length === 1
+                                ? 'Votre collecte a bien été enregistrée'
+                                : `Votre collecte et ${success.length - 1} collecte${success.length - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
                         )
-                    )),
-                this.toastService.presentToast(
-                    (success.length === 1
-                        ? 'Votre collecte a bien été enregistrée'
-                        : `Votre collecte et ${success.length - 1} collecte${success.length - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
+                        : 'Collecte sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé'
                 )
-            ).subscribe(() => {
-                this.closeScreen();
+            : of(undefined)
+        )
+        .pipe(
+            tap(() => {
+                this.isLoading = false;
+                this.navCtrl.pop();
             })
-        } else {
-            this.closeScreen();
-        }
+        );
     }
 
     private handlePreparationError(resp): void {
         this.isLoading = false;
         this.toastService.presentToast((resp && resp.api && resp.message) ? resp.message : 'Une erreur s\'est produite');
-    }
-
-    private closeScreen(): void {
-        this.isLoading = false;
-        this.navCtrl.pop();
     }
 }

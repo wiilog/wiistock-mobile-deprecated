@@ -161,7 +161,6 @@ export class InventaireMenuPage {
         });
     }
 
-
     public ionViewCanLeave(): boolean {
         return this.barcodeScannerManager.canGoBack;
     }

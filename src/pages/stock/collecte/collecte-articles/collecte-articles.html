@@ -18,9 +18,11 @@
                 <ion-grid>
                     <button [disabled]="!isValid" (click)="testIfBarcodeEquals(article, false)" class="list" ion-item *ngFor="let article of articlesNT">
                         <ion-row>
-                            <ion-col>{{ article.reference }}</ion-col>
-                            <ion-col>{{ article.emplacement === "null" ? '' : article.emplacement }}</ion-col>
-                            <ion-col>{{ article.quantite }}</ion-col>
+                            <ion-col>
+                                <p>Réference : {{ article.reference }}</p>
+                                <p *ngIf="article.emplacement && article.emplacement !== 'null'">Emplacement : {{ article.emplacement }}</p>
+                                <p *ngIf="article.quantite">Quantité : {{ article.quantite }}</p>
+                            </ion-col>
                         </ion-row>
                     </button>
                 </ion-grid>
@@ -36,9 +38,11 @@
                 <ion-grid>
                     <button [disabled]="!isValid" class="list" ion-item *ngFor="let article of articlesT">
                         <ion-row>
-                            <ion-col>{{ article.reference }}</ion-col>
-                            <ion-col>{{ article.emplacement === "null" ? '' : article.emplacement }}</ion-col>
-                            <ion-col>{{ article.quantite }}</ion-col>
+                            <ion-col>
+                                <p>Réference : {{ article.reference }}</p>
+                                <p *ngIf="article.emplacement && article.emplacement !== 'null'">Emplacement : {{ article.emplacement }}</p>
+                                <p *ngIf="article.quantite">Quantité : {{ article.quantite }}</p>
+                            </ion-col>
                         </ion-row>
                     </button>
                 </ion-grid>

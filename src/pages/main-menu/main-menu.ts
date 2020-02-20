@@ -62,7 +62,7 @@ export class MainMenuPage {
                 icon: 'stock.svg',
                 label: 'Stock',
                 action() {
-                    navController.push(StockMenuPage, {fromMainMenu: true});
+                    navController.push(StockMenuPage, {avoidSync: true});
                 }
             },
             {

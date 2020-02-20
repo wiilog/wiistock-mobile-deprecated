@@ -158,6 +158,34 @@ export class LocalDataManagerService {
                 ),
                 titleErrorAlert: `Des livraisons n'ont pas pu être synchronisées`,
                 numeroProccessFailed: 'numero_collecte',
+                treatData: (data) => {
+                    const dataToTreat = (data || {});
+
+                    const newCollectes = (dataToTreat.newCollectes || []);
+                    const articlesCollecte = (dataToTreat.articlesCollecte || []);
+                    const stockTakings = (dataToTreat.stockTakings || []);
+
+                    return (
+                        (newCollectes.length > 0 || articlesCollecte.length > 0 || stockTakings.length > 0)
+                            ? Observable.zip(
+                                // import collecte
+                                ...(newCollectes.map((newCollecte) => this.sqliteProvider.insert('collecte', newCollecte))),
+
+                                // import articlesCollecte
+                                ...(
+                                    articlesCollecte.map((newArticleCollecte) => (
+                                        this.sqliteProvider.executeQuery(
+                                            this.sqliteProvider.getArticleCollecteInsertQuery([this.sqliteProvider.getArticleCollecteValueFromApi(newArticleCollecte)])
+                                        )
+                                    ))
+                                ),
+
+                                // import new mouvementsTraca
+                                ...(stockTakings.map((taking) => this.sqliteProvider.insert('mouvement_traca', taking)))
+                            )
+                            : of(undefined)
+                    );
+                },
                 deleteSucceed: (resSuccess) => {
                     const idsToDelete = resSuccess.map(({id_collecte}) => id_collecte);
 

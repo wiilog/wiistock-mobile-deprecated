@@ -148,7 +148,6 @@ export class ConnectPage {
     }
 
     private autoLoginIfAllowed() {
-        console.log(env === 'dev', autoconnect, this.wantToAutoConnect);
         if (env === 'dev' && autoconnect && this.wantToAutoConnect) {
             this.form = {
                 login: login,

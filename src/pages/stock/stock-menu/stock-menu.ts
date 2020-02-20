@@ -25,23 +25,23 @@ export class StockMenuPage {
     public messageLoading: string;
     public loading: boolean;
 
-    private fromMainMenu: boolean;
+    private avoidSync: boolean;
     private synchronisationSubscription: Subscription;
     private navigationSubscription: Subscription;
 
-    public constructor(navCtrl: NavController,
+    public constructor(private navCtrl: NavController,
                        private platform: Platform,
                        private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
                        private network: Network,
                        private toastService: ToastService) {
-        this.fromMainMenu = true;
+        this.avoidSync = true;
         this.menuConfig = [
             {
                 icon: 'stock-transfer.svg',
                 label: 'Transfert',
                 action: () => {
-                    navCtrl.push(PriseDeposeMenuPage, {
+                    this.navCtrl.push(PriseDeposeMenuPage, {
                         fromStock: true
                     });
                 }
@@ -49,22 +49,34 @@ export class StockMenuPage {
             {
                 icon: 'preparation.svg',
                 label: 'Préparation',
-                action: () => { navCtrl.push(PreparationMenuPage); }
+                action: () => { this.navCtrl.push(PreparationMenuPage); }
             },
             {
                 icon: 'delivery.svg',
                 label: 'Livraison',
-                action: () => { navCtrl.push(LivraisonMenuPage); }
+                action: () => { this.navCtrl.push(LivraisonMenuPage); }
             },
             {
                 icon: 'collecte.svg',
                 label: 'Collecte',
-                action: () => { navCtrl.push(CollecteMenuPage); }
+                action: () => {
+                    this.navCtrl.push(
+                        CollecteMenuPage,
+                        {
+                            avoidSync: () => {
+                                this.setAvoidSync(true);
+                            },
+                            goToDepose: () => {
+                                this.goToDepose();
+                            }
+                        }
+                    );
+                }
             },
             {
                 icon: 'inventary.svg',
                 label: 'Inventaire',
-                action: () => { navCtrl.push(InventaireMenuPage); }
+                action: () => { this.navCtrl.push(InventaireMenuPage); }
             }
         ];
     }
@@ -100,14 +112,14 @@ export class StockMenuPage {
                 this.platform.backButton
             )
             .subscribe(() => {
-                this.fromMainMenu = true;
+                this.setAvoidSync(true);
             });
 
-        if (!this.fromMainMenu) {
+        if (!this.avoidSync) {
             this.synchronise();
         }
         else {
-            this.fromMainMenu = false;
+            this.setAvoidSync(false);
         }
     }
 
@@ -120,5 +132,17 @@ export class StockMenuPage {
             this.navigationSubscription.unsubscribe();
             this.navigationSubscription = undefined;
         }
+    }
+
+    public goToDepose() {
+        this.navCtrl
+            .push(PriseDeposeMenuPage, {
+                fromStock: true,
+                goToDeposeDirectly: true
+            });
+    }
+
+    public setAvoidSync(avoidSync: boolean) {
+        this.avoidSync = avoidSync;
     }
 }

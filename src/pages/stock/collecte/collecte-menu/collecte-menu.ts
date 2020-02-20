@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {Content, IonicPage, Navbar, NavController} from 'ionic-angular';
+import {Content, IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {CollecteArticlesPage} from '@pages/stock/collecte/collecte-articles/collecte-articles';
 import {Collecte} from '@app/entities/collecte';
@@ -17,13 +17,19 @@ export class CollecteMenuPage {
     collectes: Array<Collecte>;
     hasLoaded: boolean;
 
+    private goToDepose: () => void;
+    private avoidSync: () => void;
+
     public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
                        private mainHeaderService: MainHeaderService,
                        private sqlLiteProvider: SqliteProvider) {
     }
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
+        this.goToDepose = this.navParams.get('goToDepose');
+        this.avoidSync = this.navParams.get('avoidSync');
         this.sqlLiteProvider.findAll('`collecte`').subscribe((collectes: Array<Collecte>) => {
             this.collectes = collectes
                 .filter(({date_end, location_to}) => (!date_end && !location_to))
@@ -35,7 +41,14 @@ export class CollecteMenuPage {
     }
 
     public goToArticles(collecte): void {
-        this.navCtrl.push(CollecteArticlesPage, {collecte});
+        this.navCtrl.push(CollecteArticlesPage, {
+            collecte,
+            goToDepose: () => {
+                this.avoidSync();
+                this.navCtrl.pop();
+                this.goToDepose();
+            }
+        });
     }
 
     public refreshSubTitle(): void {
