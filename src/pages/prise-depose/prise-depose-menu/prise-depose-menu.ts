@@ -21,6 +21,8 @@ export class PriseDeposeMenuPage {
     private fromStock: boolean;
     private canLeave: boolean;
 
+    private deposeAlreadyNavigate: boolean;
+
     public readonly menuConfig: Array<MenuConfig>;
 
     public constructor(private navCtrl: NavController,
@@ -31,6 +33,7 @@ export class PriseDeposeMenuPage {
                        private toastService: ToastService) {
         this.nbDrop = 0;
         this.canLeave = true;
+        this.deposeAlreadyNavigate = false;
 
         this.menuConfig = [
             {
@@ -52,7 +55,7 @@ export class PriseDeposeMenuPage {
 
     public ionViewWillEnter(): void {
         this.fromStock = this.navParams.get('fromStock');
-        const goToDeposeDirectly = this.navParams.get('goToDeposeDirectly');
+        const goToDeposeDirectly = (!this.deposeAlreadyNavigate && this.navParams.get('goToDeposeDirectly'));
         this.canLeave = false;
 
         Observable
@@ -77,6 +80,7 @@ export class PriseDeposeMenuPage {
                 this.canLeave = true;
 
                 if (goToDeposeDirectly) {
+                    this.deposeAlreadyNavigate = true;
                     this.goToDepose();
                 }
             });
