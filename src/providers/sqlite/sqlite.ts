@@ -15,6 +15,9 @@ import 'rxjs/add/observable/zip';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import {Anomalie} from "@app/entities/anomalie";
 import {ArticlePrepaByRefArticle} from "@app/entities/article-prepa-by-ref-article";
+import {ArticleCollecte} from "@app/entities/article-collecte";
+import {ArticlePrepa} from "@app/entities/article-prepa";
+import {ArticleLivraison} from "@app/entities/article-livraison";
 
 
 @Injectable()
@@ -83,6 +86,16 @@ export class SqliteProvider {
                 map(() => undefined),
                 take(1)
             );
+    }
+
+    private static MultiSelectQueryMapper<T = any>(resQuery): Array<T> {
+        const list = [];
+        if (resQuery && resQuery.rows) {
+            for (let i = 0; i < resQuery.rows.length; i++) {
+                list.push(resQuery.rows.item(i));
+            }
+        }
+        return list;
     }
 
     private static DropTables(sqliteObject): Observable<any> {
@@ -514,18 +527,10 @@ export class SqliteProvider {
         );
     }
 
-    public findArticlesByCollecte(id_col: number): Observable<Array<any>> {
+    public findArticlesByCollecte(id_col: number): Observable<Array<ArticleCollecte>> {
         return this.db$.pipe(
             flatMap((db: SQLiteObject) => from(db.executeSql('SELECT * FROM `article_collecte` WHERE `id_collecte` = ' + id_col, []))),
-            map((articles) => {
-                const list = [];
-                if (articles && articles.rows) {
-                    for (let i = 0; i < articles.rows.length; i++) {
-                        list.push(articles.rows.item(i));
-                    }
-                }
-                return list;
-            })
+            map((articles) => SqliteProvider.MultiSelectQueryMapper<ArticleCollecte>(articles))
         );
     }
 
@@ -721,18 +726,7 @@ export class SqliteProvider {
         const sqlQuery = 'SELECT * FROM ' + table + (sqlWhereClauses ? sqlWhereClauses : '');
 
         return this.executeQuery(sqlQuery).pipe(
-            map((data) => {
-                let ret;
-                if (data) {
-                    ret = [];
-                    if (data.rows && data.rows.length > 0) {
-                        for (let i = 0; i < data.rows.length; i++) {
-                            ret.push(data.rows.item(i));
-                        }
-                    }
-                }
-                return ret;
-            }),
+            map((data) => SqliteProvider.MultiSelectQueryMapper<any>(data)),
             take(1)
         );
     }
@@ -741,35 +735,12 @@ export class SqliteProvider {
         return this.findBy(table)
     }
 
-    public findByElementNull(table: string, element: string): Observable<Array<any>> {
-        return this.db$.pipe(
-            flatMap((db: SQLiteObject) => from(db.executeSql('SELECT * FROM ' + table + 'WHERE ' + element + ' IS NULL', []))),
-            map((data) => {
-                const list = [];
-                if (data && data.rows) {
-                    for (let i = 0; i < data.rows.length; i++) {
-                        list.push(data.rows.item(i));
-                    }
-                }
-                return list;
-            })
-        );
-    }
-
     public findByElement(table: string, element: string, value: string): Observable<Array<any>> {
         const query = ('SELECT * FROM ' + table + ' WHERE ' + element + ' LIKE \'%' + value + '%\'');
         return (value !== '')
             ? this.db$.pipe(
                 flatMap((db: SQLiteObject) => from(db.executeSql(query, []))),
-                map((data) => {
-                    const list = [];
-                    if (data && data.rows) {
-                        for (let i = 0; i < data.rows.length; i++) {
-                            list.push(data.rows.item(i));
-                        }
-                    }
-                    return list;
-                })
+                map((data) => SqliteProvider.MultiSelectQueryMapper<any>(data))
             )
             : of(undefined);
     }
@@ -855,33 +826,17 @@ export class SqliteProvider {
             );
     }
 
-    public findArticlesByPrepa(id_prepa: number): Observable<Array<any>> {
+    public findArticlesByPrepa(id_prepa: number): Observable<Array<ArticlePrepa>> {
         return this.db$.pipe(
             flatMap((db: SQLiteObject) => from(db.executeSql(`SELECT * FROM \`article_prepa\` WHERE \`id_prepa\` = ${id_prepa} AND deleted <> 1`, []))),
-            map((articles) => {
-                const list = [];
-                if (articles && articles.rows) {
-                    for (let i = 0; i < articles.rows.length; i++) {
-                        list.push(articles.rows.item(i));
-                    }
-                }
-                return list;
-            })
+            map((articles) => SqliteProvider.MultiSelectQueryMapper<ArticlePrepa>(articles))
         );
     }
 
-    public findArticlesByLivraison(id_livr: number): Observable<Array<any>> {
+    public findArticlesByLivraison(id_livr: number): Observable<Array<ArticleLivraison>> {
         return this.db$.pipe(
             flatMap((db: SQLiteObject) => from(db.executeSql('SELECT * FROM `article_livraison` WHERE `id_livraison` = ' + id_livr, []))),
-            map((articles) => {
-                const list = [];
-                if (articles && articles.rows) {
-                    for (let i = 0; i < articles.rows.length; i++) {
-                        list.push(articles.rows.item(i));
-                    }
-                }
-                return list;
-            })
+            map((articles) => SqliteProvider.MultiSelectQueryMapper<ArticleLivraison>(articles))
         );
     }
 
@@ -1176,15 +1131,7 @@ export class SqliteProvider {
                 )
                 AND mouvement_traca.type = 'prise'
             `)
-            .pipe(map((articles) => {
-                const list = [];
-                if (articles && articles.rows) {
-                    for (let i = 0; i < articles.rows.length; i++) {
-                        list.push(articles.rows.item(i));
-                    }
-                }
-                return list;
-            }));
+            .pipe(map((articles) => SqliteProvider.MultiSelectQueryMapper<MouvementTraca>(articles)));
     }
 
 }
