@@ -1161,4 +1161,30 @@ export class SqliteProvider {
             : of(undefined);
     }
 
+    public getPrises(fromStock: boolean): Observable<Array<MouvementTraca>> {
+        return this
+            .executeQuery(`
+                SELECT *
+                FROM mouvement_traca mouvement_traca
+                WHERE id IN (
+                    SELECT mouvement_traca_2.id
+                    FROM mouvement_traca mouvement_traca_2
+                    WHERE mouvement_traca_2.ref_article = mouvement_traca.ref_article
+                      AND mouvement_traca_2.fromStock = ${Number(fromStock)}
+                    ORDER BY mouvement_traca_2.id DESC
+                    LIMIT 1
+                )
+                AND mouvement_traca.type = 'prise'
+            `)
+            .pipe(map((articles) => {
+                const list = [];
+                if (articles && articles.rows) {
+                    for (let i = 0; i < articles.rows.length; i++) {
+                        list.push(articles.rows.item(i));
+                    }
+                }
+                return list;
+            }));
+    }
+
 }

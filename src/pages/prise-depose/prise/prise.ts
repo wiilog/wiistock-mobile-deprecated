@@ -19,6 +19,7 @@ import {of} from 'rxjs/observable/of';
 import {ApiService} from '@app/services/api.service';
 import {LoadingService} from '@app/services/loading.service';
 import {from} from 'rxjs/observable/from';
+import {SqliteProvider} from "@providers/sqlite/sqlite";
 
 
 @IonicPage()
@@ -35,6 +36,7 @@ export class PrisePage {
 
     public emplacement: Emplacement;
     public colisPrise: Array<MouvementTraca>;
+    public colisPriseAlreadySaved: Array<MouvementTraca>;
 
     public listHeader: HeaderConfig;
     public listBody: Array<ListPanelItemConfig>;
@@ -57,6 +59,7 @@ export class PrisePage {
                        private navParams: NavParams,
                        private network: Network,
                        private apiService: ApiService,
+                       private sqliteProvider: SqliteProvider,
                        private alertController: AlertController,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
@@ -75,10 +78,16 @@ export class PrisePage {
         this.init();
         this.finishAction = this.navParams.get('finishAction');
         this.emplacement = this.navParams.get('emplacement');
-        this.fromStock = this.navParams.get('fromStock');
+        this.fromStock = Boolean(this.navParams.get('fromStock'));
 
-        this.storageService.getOperateur().subscribe((operator) => {
+        Observable.zip(
+            this.storageService.getOperateur(),
+            this.sqliteProvider.getPrises(this.fromStock)
+        )
+        .subscribe(([operator, colisPriseAlreadySaved]) => {
+            console.log(colisPriseAlreadySaved);
             this.operator = operator;
+            this.colisPriseAlreadySaved = colisPriseAlreadySaved;
 
             this.launchZebraScanObserver();
 
@@ -182,64 +191,73 @@ export class PrisePage {
     }
 
     public testIfBarcodeEquals(barCode: string, isManualAdd: boolean = false): void {
-        if (!this.fromStock || this.network.type !== 'none') {
-            this.barcodeCheckLoading = true;
-            let loader: Loading;
-            this.barcodeCheckSubscription = this.loadingService
-                .presentLoading('Vérification...')
-                .pipe(
-                    tap((presentedLoader) => {
-                        loader = presentedLoader;
-                    }),
-                    flatMap(() => this.existsOnLocation(barCode)),
-                    flatMap((quantity) => from(loader.dismiss()).pipe(map(() => quantity)))
-                )
-                .subscribe((quantity) => {
-                    this.barcodeCheckLoading = false;
-                    if (quantity) {
-                        if (this.colisPrise && this.colisPrise.some((colis) => (colis.ref_article === barCode))) {
-                            this.toastService.presentToast('Cet prise a déjà été effectuée');
-                        }
-                        else {
-                            if (isManualAdd) {
-                                this.saveMouvementTraca(barCode, quantity);
+        if (!this.barcodeCheckLoading) {
+            if (!this.fromStock || this.network.type !== 'none') {
+                this.barcodeCheckLoading = true;
+                let loader: Loading;
+                this.barcodeCheckSubscription = this.loadingService
+                    .presentLoading('Vérification...')
+                    .pipe(
+                        tap((presentedLoader) => {
+                            loader = presentedLoader;
+                        }),
+                        flatMap(() => this.existsOnLocation(barCode)),
+                        flatMap((quantity) => from(loader.dismiss()).pipe(map(() => quantity)))
+                    )
+                    .subscribe((quantity) => {
+                        this.barcodeCheckLoading = false;
+                        if (quantity) {
+                            if (this.colisPrise &&
+                                (
+                                    this.colisPrise.some((colis) => (colis.ref_article === barCode)) ||
+                                    this.colisPriseAlreadySaved.some((colis) => (colis.ref_article === barCode))
+                                )) {
+                                this.toastService.presentToast('Cette prise a déjà été effectuée');
                             }
                             else {
-                                this.unsubscribeZebraScanObserver();
-                                const quantitySuffix = (typeof quantity === 'number')
-                                    ? ` en quantité de ${quantity}`
-                                    : '';
-                                this.alertController
-                                    .create({
-                                        title: `Prise de ${barCode}${quantitySuffix}`,
-                                        buttons: [
-                                            {
-                                                text: 'Annuler',
-                                                handler: () => {
-                                                    this.launchZebraScanObserver();
-                                                }
-                                            },
-                                            {
-                                                text: 'Confirmer',
-                                                handler: () => {
-                                                    this.saveMouvementTraca(barCode, quantity);
-                                                    this.launchZebraScanObserver();
+                                if (isManualAdd) {
+                                    this.saveMouvementTraca(barCode, quantity);
+                                }
+                                else {
+                                    this.unsubscribeZebraScanObserver();
+                                    const quantitySuffix = (typeof quantity === 'number')
+                                        ? ` en quantité de ${quantity}`
+                                        : '';
+                                    this.alertController
+                                        .create({
+                                            title: `Prise de ${barCode}${quantitySuffix}`,
+                                            buttons: [
+                                                {
+                                                    text: 'Annuler',
+                                                    handler: () => {
+                                                        this.launchZebraScanObserver();
+                                                    }
                                                 },
-                                                cssClass: 'alert-success'
-                                            }
-                                        ]
-                                    })
-                                    .present();
+                                                {
+                                                    text: 'Confirmer',
+                                                    handler: () => {
+                                                        this.saveMouvementTraca(barCode, quantity);
+                                                        this.launchZebraScanObserver();
+                                                    },
+                                                    cssClass: 'alert-success'
+                                                }
+                                            ]
+                                        })
+                                        .present();
+                                }
                             }
                         }
-                    }
-                    else {
-                        this.toastService.presentToast('Ce code barre n\'est pas présent sur cet emplacement');
-                    }
-            });
+                        else {
+                            this.toastService.presentToast('Ce code barre n\'est pas présent sur cet emplacement');
+                        }
+                    });
+            }
+            else {
+                this.toastService.presentToast('Vous devez être connecté à internet pour effectuer une prise');
+            }
         }
         else {
-            this.toastService.presentToast('Vous devez être connecté à internet pour effectuer une prise');
+            this.toastService.presentToast('Chargement...');
         }
     }
 
@@ -275,6 +293,7 @@ export class PrisePage {
         this.apiLoading = false;
         this.listBody = [];
         this.colisPrise = [];
+        this.colisPriseAlreadySaved = [];
     }
 
     private existsOnLocation(barCode: string): Observable<number|boolean> {
