@@ -85,7 +85,6 @@ export class PrisePage {
             this.sqliteProvider.getPrises(this.fromStock)
         )
         .subscribe(([operator, colisPriseAlreadySaved]) => {
-            console.log(colisPriseAlreadySaved);
             this.operator = operator;
             this.colisPriseAlreadySaved = colisPriseAlreadySaved;
 
@@ -215,7 +214,7 @@ export class PrisePage {
                                 this.toastService.presentToast('Cette prise a déjà été effectuée');
                             }
                             else {
-                                if (isManualAdd) {
+                                if (isManualAdd || !this.fromStock) {
                                     this.saveMouvementTraca(barCode, quantity);
                                 }
                                 else {

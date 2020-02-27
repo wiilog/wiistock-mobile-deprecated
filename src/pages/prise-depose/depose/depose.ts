@@ -219,7 +219,7 @@ export class DeposePage {
     public testColisDepose(barCode: string, isManualInput: boolean = false): void {
         const priseExists = this.priseExists(barCode);
         if (priseExists) {
-            if (isManualInput) {
+            if (isManualInput || !this.fromStock) {
                 this.saveMouvementTracaWrapper(barCode);
             }
             else {
