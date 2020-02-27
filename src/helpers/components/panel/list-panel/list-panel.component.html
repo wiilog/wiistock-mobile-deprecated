@@ -8,6 +8,7 @@
 
 <wii-list-panel-item *ngFor="let object of body"
                      [infos]="object.infos"
+                     [longPressAction]="object.longPressAction"
                      [rightIcon]="object.rightIcon"
                      [boldValues]="boldValues">
 </wii-list-panel-item>

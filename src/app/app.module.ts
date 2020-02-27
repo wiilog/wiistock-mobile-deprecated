@@ -1,4 +1,4 @@
-import {BrowserModule} from '@angular/platform-browser';
+import {BrowserModule, HAMMER_GESTURE_CONFIG} from '@angular/platform-browser';
 import {NgModule, ErrorHandler} from '@angular/core';
 import {IonicApp, IonicModule, IonicErrorHandler} from 'ionic-angular';
 import {AppComponent} from '@app/app.component';
@@ -53,6 +53,8 @@ import {EmplacementScanPage} from '@pages/prise-depose/emplacement-scan/emplacem
 import {PriseDeposeMenuPage} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu';
 import {FileService} from '@app/services/file.service';
 import {MainHeaderService} from "@app/services/main-header.service";
+import {IonicGestureConfig} from "@app/utils/ionic-gesture-config";
+import {LongPressModule} from "ionic-long-press";
 
 
 @NgModule({
@@ -88,6 +90,7 @@ import {MainHeaderService} from "@app/services/main-header.service";
         ManutentionMenuPage,
     ],
     imports: [
+        LongPressModule,
         IonicSelectableModule,
         BrowserModule,
         IonicModule.forRoot(AppComponent, {
@@ -135,6 +138,7 @@ import {MainHeaderService} from "@app/services/main-header.service";
         StatusBar,
         SplashScreen,
         {provide: ErrorHandler, useClass: IonicErrorHandler},
+        {provide: HAMMER_GESTURE_CONFIG, useClass: IonicGestureConfig},
         AppComponent,
         SQLite,
         VersionCheckerService,

@@ -34,7 +34,7 @@ export class DeposePage {
     public footerScannerComponent: BarcodeScannerComponent;
 
     public emplacement: Emplacement;
-    public colisPrise: Array<MouvementTraca>;
+    public colisPrise: Array<MouvementTraca&{hidden?: boolean}>;
     public colisDepose: Array<MouvementTraca>;
     public prisesToFinish: Array<number>;
 
@@ -280,7 +280,7 @@ export class DeposePage {
         if (firstPriseMatchingIndex > -1) {
             quantity = this.colisPrise[firstPriseMatchingIndex].quantity;
             this.prisesToFinish.push(this.colisPrise[firstPriseMatchingIndex].id);
-            this.colisPrise.splice(firstPriseMatchingIndex, 1);
+            this.colisPrise[firstPriseMatchingIndex].hidden = true;
         }
 
         this.colisDepose.push({
@@ -301,12 +301,12 @@ export class DeposePage {
 
     private refreshPriseListComponent(): void {
         this.priseListConfig = this.tracaListFactory.createListConfig(
-            this.colisPrise,
-            undefined,
+            this.colisPrise.filter(({hidden}) => !hidden),
             true,
-            undefined,
-            ({object}) => {
-                this.testColisDepose(object.value, true);
+            {
+                uploadItem: ({object}) => {
+                    this.testColisDepose(object.value, true);
+                }
             }
         );
     }
@@ -314,9 +314,18 @@ export class DeposePage {
     private refreshDeposeListComponent(): void {
         this.deposeListConfig = this.tracaListFactory.createListConfig(
             this.colisDepose,
-            this.emplacement,
             false,
-            () => this.finishTaking()
+            {
+                location: this.emplacement,
+                validate: () => this.finishTaking(),
+                removeItem: TracaListFactoryService.CreateRemoveItemFromListHandler(
+                    this.colisDepose,
+                    this.colisPrise,
+                    () => {
+                        this.refreshPriseListComponent();
+                        this.refreshDeposeListComponent();
+                    })
+            }
         );
     }
 

@@ -282,7 +282,14 @@ export class PrisePage {
     }
 
     private refreshListComponent(): void {
-        const {header, body} = this.tracaListFactory.createListConfig(this.colisPrise, this.emplacement, true, (() => this.finishTaking()));
+        const {header, body} = this.tracaListFactory.createListConfig(
+            this.colisPrise,
+            true,
+            {
+                location: this.emplacement,
+                validate: () => this.finishTaking(),
+                removeItem: TracaListFactoryService.CreateRemoveItemFromListHandler(this.colisPrise, undefined, () => this.refreshListComponent())
+            });
         this.listHeader = header;
         this.listBody = body;
     }

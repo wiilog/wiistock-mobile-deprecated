@@ -22,6 +22,9 @@ export class ListPanelItemComponent {
     @Input()
     public rightIcon?: IconConfig;
 
+    @Input()
+    public longPressAction?: (infos: {[name: string]: {label: string; value: string;};}) => void;
+
     public constructor() {
         this.boldValues = [];
     }
@@ -31,5 +34,11 @@ export class ListPanelItemComponent {
             key,
             ...(this.infos[key])
         }))
+    }
+
+    public onLongPress() {
+        if (this.longPressAction) {
+            this.longPressAction(this.infos);
+        }
     }
 }

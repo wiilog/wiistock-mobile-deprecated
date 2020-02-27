@@ -10,11 +10,36 @@ import {IconColor} from "@helpers/components/icon/icon-color";
 @Injectable()
 export class TracaListFactoryService {
 
+    public static CreateRemoveItemFromListHandler(listSource: Array<MouvementTraca>,
+                                                  listDest: Array<MouvementTraca&{hidden?: boolean}>|undefined,
+                                                  refreshList: () => void): (info: {object?: {value?: string}}) => void {
+        return ({object: {value} = {value: undefined}}) => {
+            const valueIndex = listSource.findIndex(({ref_article}) => (ref_article === value));
+            if (valueIndex > -1) {
+                if (listDest) {
+                    const valueIndexInDest = listDest.findIndex(({ref_article}) => (ref_article === value));
+                    if (valueIndexInDest > -1) {
+                        listDest[valueIndexInDest].hidden = false;
+                    }
+                    else {
+                        listDest.push(listSource[valueIndex]);
+                    }
+
+                }
+                listSource.splice(valueIndex, 1);
+                refreshList();
+            }
+        }
+    }
+
     public createListConfig(articles: Array<MouvementTraca>,
-                            location: Emplacement|undefined,
                             fromPrise: boolean,
-                            validate?: () => void,
-                            uploadItem?: (item: {[name: string]: {label: string; value: string;} }) => void): {
+                            {location, validate, uploadItem, removeItem}: {
+                                location?: Emplacement,
+                                validate?: () => void,
+                                uploadItem?: (info: {object: {value?: string}}) => void,
+                                removeItem?: (info: {[name: string]: {value?: string}}) => void
+                            } = {}): {
         header: HeaderConfig;
         body: Array<ListPanelItemConfig>;
     } {
@@ -63,6 +88,7 @@ export class TracaListFactoryService {
                 };
                 return {
                     infos,
+                    longPressAction: removeItem,
                     ...(uploadItem
                         ? {
                             rightIcon: {

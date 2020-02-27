@@ -232,6 +232,11 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
+"@types/hammerjs@^2.0.36":
+  version "2.0.36"
+  resolved "https://registry.yarnpkg.com/@types/hammerjs/-/hammerjs-2.0.36.tgz#17ce0a235e9ffbcdcdf5095646b374c2bf615a4c"
+  integrity sha512-7TUK/k2/QGpEAv/BCwSHlYu3NXZhQ9ZwBYpzr9tjlPIL2C5BeGhH3DmVavRx3ZNyELX5TLC91JTz/cen6AAtIQ==
+
 "@types/minimatch@*":
   version "3.0.3"
   resolved "https://registry.yarnpkg.com/@types/minimatch/-/minimatch-3.0.3.tgz#3dca0e3f33b200fc7d1139c0cd96c1268cadfd9d"
@@ -2664,6 +2669,11 @@ graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.2.0:
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.3.tgz#4a12ff1b60376ef09862c2093edd908328be8423"
   integrity sha512-a30VEBm4PEdx1dRB7MFK7BejejvCvBronbLjht+sHuGYj8PHs7M/5Z+rt5lw551vZ7yfTCj4Vuyy3mSJytDWRQ==
 
+hammerjs@^2.0.8:
+  version "2.0.8"
+  resolved "https://registry.yarnpkg.com/hammerjs/-/hammerjs-2.0.8.tgz#04ef77862cff2bb79d30f7692095930222bf60f1"
+  integrity sha1-BO93hiz/K7edMPdpIJWTAiK/YPE=
+
 har-schema@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/har-schema/-/har-schema-2.0.0.tgz#a94c2224ebcac04782a0d9035521f24735b7ec92"
@@ -2985,6 +2995,13 @@ ionic-angular@3.9.3:
   version "3.9.3"
   resolved "https://registry.yarnpkg.com/ionic-angular/-/ionic-angular-3.9.3.tgz#cdd9e46681e35fb2bbd827b4101eb5421451f2c9"
   integrity sha512-EOuz9nyu0lV4KbqN+HipXuhoMRMDfprZeckg7H1Z+9AZpK9d7VzaiweyRNG5iaLp+cGCzBIQCfWhwlCo2vyuUA==
+
+ionic-long-press@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/ionic-long-press/-/ionic-long-press-2.0.3.tgz#9a7e4fc7119025d83d49d6f540e6417f6d71be29"
+  integrity sha512-mFU61xIIAq1JEmXvKwYbqaHgBZ+yRm8NBpD7FugJfZpE66Tkwk8UYRTyUvW+0e8jCUBmuaqcGi81J1dGv9+a5g==
+  dependencies:
+    tslib "^1.9.0"
 
 ionic-select-searchable@^2.10.0:
   version "2.10.0"

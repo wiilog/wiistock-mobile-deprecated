@@ -15,6 +15,7 @@ import {SignaturePadModule } from "angular2-signaturepad";
 import {FormPanelSigningComponent} from "@helpers/components/panel/form-panel/form-panel-signing/form-panel-signing.component";
 import {SignaturePadComponent} from "@helpers/components/signature-pad/signature-pad.component";
 import {MenuComponent} from "@helpers/components/menu/menu.component";
+import {LongPressModule} from "ionic-long-press";
 
 
 @NgModule({
@@ -47,6 +48,7 @@ import {MenuComponent} from "@helpers/components/menu/menu.component";
         SignaturePadComponent
     ],
     imports: [
+        LongPressModule,
         IonicSelectableModule,
         IonicModule,
         SignaturePadModule,
