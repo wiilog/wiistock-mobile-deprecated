@@ -5,14 +5,22 @@ import {Emplacement} from '@app/entities/emplacement';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import moment from "moment";
 import {IconColor} from "@helpers/components/icon/icon-color";
+import {AlertController} from "ionic-angular";
+import {AlertManagerService} from "./alert-manager.service";
 
 
 @Injectable()
 export class TracaListFactoryService {
 
+    private alertPresented: boolean;
+
+    public constructor(private alertController: AlertController) {
+        this.alertPresented = false;
+    }
+
     public static CreateRemoveItemFromListHandler(listSource: Array<MouvementTraca>,
-                                                  listDest: Array<MouvementTraca&{hidden?: boolean}>|undefined,
-                                                  refreshList: () => void): (info: {object?: {value?: string}}) => void {
+                                                  listDest: Array<MouvementTraca & { hidden?: boolean }> | undefined,
+                                                  refreshList: () => void): (info: { object?: { value?: string } }) => void {
         return ({object: {value} = {value: undefined}}) => {
             const valueIndex = listSource.findIndex(({ref_article}) => (ref_article === value));
             if (valueIndex > -1) {
@@ -20,8 +28,7 @@ export class TracaListFactoryService {
                     const valueIndexInDest = listDest.findIndex(({ref_article}) => (ref_article === value));
                     if (valueIndexInDest > -1) {
                         listDest[valueIndexInDest].hidden = false;
-                    }
-                    else {
+                    } else {
                         listDest.push(listSource[valueIndex]);
                     }
 
@@ -32,14 +39,47 @@ export class TracaListFactoryService {
         }
     }
 
+    private createConfirmationBoxAlert(message?: string, removeItem?: (info: { [name: string]: { value?: string } }) => void): void {
+        if (!this.alertPresented) {
+            this.alertPresented = true;
+            let alert = this.alertController.create({
+                title: 'Suppression d\'un élément',
+                cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
+                message,
+                buttons: [
+                    {
+                        text: 'Confirmer',
+                        cssClass: 'alert-success',
+                        handler: removeItem
+                    },
+                    {
+                        text: 'Annuler',
+                        cssClass: 'alert-danger',
+                        role: 'cancel',
+                        handler: () => {
+                            this.alertPresented = false;
+                            return null;
+                        }
+                    },
+                ]
+            });
+            alert.onDidDismiss(() => {
+                this.alertPresented = false;
+            });
+            alert.present();
+        }
+    }
+
+
     public createListConfig(articles: Array<MouvementTraca>,
                             fromPrise: boolean,
                             {location, validate, uploadItem, removeItem}: {
                                 location?: Emplacement,
                                 validate?: () => void,
-                                uploadItem?: (info: {object: {value?: string}}) => void,
-                                removeItem?: (info: {[name: string]: {value?: string}}) => void
-                            } = {}): {
+                                uploadItem?: (info: { object: { value?: string } }) => void,
+                                removeItem?: (info: { [name: string]: { value?: string } }) => void
+                            } = {},
+                            deleteMessage?: string): {
         header: HeaderConfig;
         body: Array<ListPanelItemConfig>;
     } {
@@ -88,7 +128,13 @@ export class TracaListFactoryService {
                 };
                 return {
                     infos,
-                    longPressAction: removeItem,
+                    longPressAction: (
+                        deleteMessage && removeItem
+                            ? (info: { [name: string]: { value?: string } }) => {
+                                this.createConfirmationBoxAlert(deleteMessage, () => removeItem(info))
+                            }
+                            : removeItem
+                    ),
                     ...(uploadItem
                         ? {
                             rightIcon: {
