@@ -288,9 +288,9 @@ export class PrisePage {
             {
                 location: this.emplacement,
                 validate: () => this.finishTaking(),
-                removeItem: TracaListFactoryService.CreateRemoveItemFromListHandler(this.colisPrise, undefined, () => this.refreshListComponent())
-            },
-            'Êtes-vous sur de vouloir supprimer cet élément ?'
+                removeItem: TracaListFactoryService.CreateRemoveItemFromListHandler(this.colisPrise, undefined, () => this.refreshListComponent()),
+                removeConfirmationMessage: 'Êtes-vous sur de vouloir supprimer cet élément ?'
+            }
         );
         this.listHeader = header;
         this.listBody = body;

@@ -43,7 +43,7 @@ export class TracaListFactoryService {
         if (!this.alertPresented) {
             this.alertPresented = true;
             let alert = this.alertController.create({
-                title: 'Suppression d\'un élément',
+                title: 'Confirmation',
                 cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
                 message,
                 buttons: [
@@ -73,13 +73,13 @@ export class TracaListFactoryService {
 
     public createListConfig(articles: Array<MouvementTraca>,
                             fromPrise: boolean,
-                            {location, validate, uploadItem, removeItem}: {
-                                location?: Emplacement,
-                                validate?: () => void,
-                                uploadItem?: (info: { object: { value?: string } }) => void,
-                                removeItem?: (info: { [name: string]: { value?: string } }) => void
-                            } = {},
-                            deleteMessage?: string): {
+                            {location, validate, uploadItem, removeItem, removeConfirmationMessage}: {
+                                location?: Emplacement;
+                                validate?: () => void;
+                                uploadItem?: (info: { object: { value?: string } }) => void;
+                                removeItem?: (info: { [name: string]: { value?: string } }) => void;
+                                removeConfirmationMessage? : string;
+                            } = {}): {
         header: HeaderConfig;
         body: Array<ListPanelItemConfig>;
     } {
@@ -129,9 +129,9 @@ export class TracaListFactoryService {
                 return {
                     infos,
                     longPressAction: (
-                        deleteMessage && removeItem
+                        removeConfirmationMessage && removeItem
                             ? (info: { [name: string]: { value?: string } }) => {
-                                this.createConfirmationBoxAlert(deleteMessage, () => removeItem(info))
+                                this.createConfirmationBoxAlert(removeConfirmationMessage, () => removeItem(info))
                             }
                             : removeItem
                     ),

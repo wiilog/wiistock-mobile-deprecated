@@ -324,9 +324,9 @@ export class DeposePage {
                     () => {
                         this.refreshPriseListComponent();
                         this.refreshDeposeListComponent();
-                    })
-            },
-            'Êtes-vous sur de vouloir supprimer cet élément ?'
+                    }),
+                removeConfirmationMessage: 'Êtes-vous sur de vouloir supprimer cet élément ?'
+            }
         );
     }
 
