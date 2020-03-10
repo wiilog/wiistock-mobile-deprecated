@@ -252,9 +252,11 @@ export class DeposePage {
     }
 
     public get objectLabel(): string {
-        return this.fromStock
-            ? 'article'
-            : 'objet';
+        return TracaListFactoryService.GetObjectLabel(this.fromStock);
+    }
+
+    public get displayPrisesList(): boolean {
+        return this.colisPrise && this.colisPrise.filter(({hidden}) => !hidden).length > 0;
     }
 
     private saveMouvementTraca(pickingIndex: number, comment?: string, signature?: string): void {
@@ -299,8 +301,9 @@ export class DeposePage {
     private refreshPriseListComponent(): void {
         this.priseListConfig = this.tracaListFactory.createListConfig(
             this.colisPrise.filter(({hidden}) => !hidden),
-            true,
+            TracaListFactoryService.LIST_TYPE_DROP_SUB,
             {
+                objectLabel: this.objectLabel,
                 uploadItem: ({object}) => {
                     this.testColisDepose(object.value, true);
                 }
@@ -311,8 +314,9 @@ export class DeposePage {
     private refreshDeposeListComponent(): void {
         this.deposeListConfig = this.tracaListFactory.createListConfig(
             this.colisDepose,
-            false,
+            TracaListFactoryService.LIST_TYPE_DROP_MAIN,
             {
+                objectLabel: this.objectLabel,
                 location: this.emplacement,
                 validate: () => this.finishTaking(),
                 confirmItem: !this.fromStock

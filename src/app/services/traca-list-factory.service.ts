@@ -12,6 +12,37 @@ import {AlertManagerService} from "./alert-manager.service";
 @Injectable()
 export class TracaListFactoryService {
 
+    public static readonly LIST_TYPE_TAKING_MAIN = 0;
+    public static readonly LIST_TYPE_TAKING_SUB = 1;
+    public static readonly LIST_TYPE_DROP_MAIN = 2;
+    public static readonly LIST_TYPE_DROP_SUB = 3;
+    private static readonly LIST_TYPE_CONFIG = {
+        [TracaListFactoryService.LIST_TYPE_TAKING_MAIN]: {
+            title: 'PRISE',
+            hasScanLabel: true,
+            iconName: 'upload.svg',
+            iconColor: 'primary'
+        },
+        [TracaListFactoryService.LIST_TYPE_TAKING_SUB]: {
+            title: 'ENCOURS',
+            hasScanLabel: false,
+            iconName: 'download.svg',
+            iconColor: 'success'
+        },
+        [TracaListFactoryService.LIST_TYPE_DROP_MAIN]: {
+            title: 'DÉPOSE',
+            hasScanLabel: true,
+            iconName: 'download.svg',
+            iconColor: 'success'
+        },
+        [TracaListFactoryService.LIST_TYPE_DROP_SUB]: {
+            title: 'PRISE',
+            hasScanLabel: false,
+            iconName: 'upload.svg',
+            iconColor: 'primary'
+        },
+    };
+
     private alertPresented: boolean;
 
     public constructor(private alertController: AlertController) {
@@ -20,7 +51,7 @@ export class TracaListFactoryService {
 
     public static CreateRemoveItemFromListHandler(listSource: Array<MouvementTraca>,
                                                   listDest: Array<MouvementTraca & { hidden?: boolean }> | undefined,
-                                                  refreshList: () => void): (info: { object?: { value?: string } }) => void {
+                                                  refreshList: (value?: string) => void): (info: { object?: { value?: string } }) => void {
         return ({object: {value} = {value: undefined}}) => {
             const valueIndex = listSource.findIndex(({ref_article}) => (ref_article === value));
             if (valueIndex > -1) {
@@ -34,9 +65,15 @@ export class TracaListFactoryService {
 
                 }
                 listSource.splice(valueIndex, 1);
-                refreshList();
+                refreshList(value);
             }
         }
+    }
+
+    public static GetObjectLabel(fromStock: boolean): string {
+        return fromStock
+            ? 'article'
+            : 'objet';
     }
 
     private createConfirmationBoxAlert(message?: string, removeItem?: (info: { [name: string]: { value?: string } }) => void): void {
@@ -72,29 +109,38 @@ export class TracaListFactoryService {
 
 
     public createListConfig(articles: Array<MouvementTraca>,
-                            fromPrise: boolean,
-                            {location, validate, uploadItem, confirmItem, removeItem, removeConfirmationMessage}: {
+                            listType: number,
+                            {location, objectLabel,  validate, uploadItem, confirmItem, removeItem, removeConfirmationMessage}: {
                                 location?: Emplacement;
                                 validate?: () => void;
                                 uploadItem?: (info: { object: { value?: string } }) => void;
                                 removeItem?: (info: { [name: string]: { value?: string } }) => void;
                                 confirmItem?: (info: { [name: string]: { value?: string } }) => void;
                                 removeConfirmationMessage? : string;
-                            } = {}): {
+                                objectLabel: string;
+                            }): {
         header: HeaderConfig;
         body: Array<ListPanelItemConfig>;
     } {
         const pickedArticlesNumber = articles.length;
         const plural = pickedArticlesNumber > 1 ? 's' : '';
 
+        const config = TracaListFactoryService.LIST_TYPE_CONFIG[listType];
+
+        if (!config) {
+            throw new Error(`The parameter listType ${listType} is invalid`);
+        }
+
+        const {title, hasScanLabel, iconName, iconColor} = config;
+
         return {
             header: {
-                title: fromPrise ? 'PRISE' : 'DEPOSE',
+                title,
                 subtitle: location ? `Emplacement : ${location.label}` : undefined,
-                info: `${pickedArticlesNumber} produit${plural} scanné${plural}`,
+                info: `${pickedArticlesNumber} ${objectLabel}${plural}` + (hasScanLabel ? ` scanné${plural}` : ''),
                 leftIcon: {
-                    name: fromPrise ? 'upload.svg' : 'download.svg',
-                    color: fromPrise ? 'primary' : 'success'
+                    name: iconName,
+                    color: iconColor
                 },
                 ...(
                     validate

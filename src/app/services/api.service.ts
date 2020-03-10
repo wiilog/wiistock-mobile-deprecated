@@ -25,6 +25,7 @@ export class ApiService {
     public static readonly GET_DATA: string = '/getData';
     public static readonly NEW_EMP: string = '/emplacement';
     public static readonly GET_ARTICLES: string = '/articles';
+    public static readonly GET_TRACKING_DROPS: string = '/tracking-drops';
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'

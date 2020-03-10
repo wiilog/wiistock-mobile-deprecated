@@ -3,9 +3,15 @@
 <ion-scroll class="page-content"
             scrollY="true"
             *ngIf="!loading">
-    <wii-list-panel *ngIf="listHeader && listBody"
-                    [header]="listHeader"
-                    [body]="listBody"
+    <wii-list-panel *ngIf="listTakingHeader && listTakingBody"
+                    [header]="listTakingHeader"
+                    [body]="listTakingBody"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+
+    <wii-list-panel *ngIf="displayPacksOnLocationsList && listPacksOnLocationHeader && listPacksOnLocationBody"
+                    [header]="listPacksOnLocationHeader"
+                    [body]="listPacksOnLocationBody"
                     [boldValues]="listBoldValues">
     </wii-list-panel>
 </ion-scroll>
