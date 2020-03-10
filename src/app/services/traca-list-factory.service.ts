@@ -73,11 +73,12 @@ export class TracaListFactoryService {
 
     public createListConfig(articles: Array<MouvementTraca>,
                             fromPrise: boolean,
-                            {location, validate, uploadItem, removeItem, removeConfirmationMessage}: {
+                            {location, validate, uploadItem, confirmItem, removeItem, removeConfirmationMessage}: {
                                 location?: Emplacement;
                                 validate?: () => void;
                                 uploadItem?: (info: { object: { value?: string } }) => void;
                                 removeItem?: (info: { [name: string]: { value?: string } }) => void;
+                                confirmItem?: (info: { [name: string]: { value?: string } }) => void;
                                 removeConfirmationMessage? : string;
                             } = {}): {
         header: HeaderConfig;
@@ -135,6 +136,7 @@ export class TracaListFactoryService {
                             }
                             : removeItem
                     ),
+                    pressAction: confirmItem,
                     ...(uploadItem
                         ? {
                             rightIcon: {
