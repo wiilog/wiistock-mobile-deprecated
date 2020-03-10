@@ -2,7 +2,6 @@ import {Component, ViewChild} from '@angular/core';
 import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ArticlePrepa} from '@app/entities/article-prepa';
-import {HttpClient} from '@angular/common/http';
 import {ToastService} from '@app/services/toast.service';
 import {ArticlePrepaByRefArticle} from '@app/entities/article-prepa-by-ref-article';
 import {Observable, Subscription} from 'rxjs';
@@ -39,7 +38,6 @@ export class PreparationRefArticlesPage {
                        public navParams: NavParams,
                        public toastService: ToastService,
                        public sqliteProvider: SqliteProvider,
-                       public http: HttpClient,
                        private barcodeScannerManager: BarcodeScannerManagerService) {
         this.articles = [];
         this.articlesToShow = [];

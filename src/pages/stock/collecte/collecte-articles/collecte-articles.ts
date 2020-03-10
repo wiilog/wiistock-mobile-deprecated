@@ -2,7 +2,6 @@ import {Component, ViewChild} from '@angular/core';
 import {Alert, AlertController, IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Mouvement} from '@app/entities/mouvement';
-import {HttpClient} from '@angular/common/http';
 import moment from 'moment';
 import {ArticleCollecte} from '@app/entities/article-collecte';
 import {Collecte} from '@app/entities/collecte';
@@ -10,7 +9,6 @@ import {flatMap} from 'rxjs/operators';
 import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Observable, Subscription} from 'rxjs';
-import {StorageService} from '@app/services/storage.service';
 import {ApiService} from '@app/services/api.service';
 import {Network} from '@ionic-native/network';
 import {CollecteArticleTakePage} from "@pages/stock/collecte/collecte-article-take/collecte-article-take";
@@ -49,13 +47,11 @@ export class CollecteArticlesPage {
                        private navParams: NavParams,
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
-                       private http: HttpClient,
                        private network: Network,
                        private localDataManager: LocalDataManagerService,
                        private alertController: AlertController,
                        private barcodeScannerManager: BarcodeScannerManagerService,
-                       private apiService: ApiService,
-                       private storageService: StorageService) {
+                       private apiService: ApiService) {
         this.loadingStartCollecte = false;
         this.isLoading = false;
         this.canLeave = true;
@@ -270,23 +266,22 @@ export class CollecteArticlesPage {
     private selectArticle(article, quantity): void {
         if (!this.started && this.network.type !== 'none') {
             this.loadingStartCollecte = true;
-            this.apiService.getApiUrl(ApiService.BEGIN_COLLECTE).subscribe((url) => {
-                this.storageService.getApiKey().subscribe((key) => {
-                    this.http.post<any>(url, {id: this.collecte.id, apiKey: key}).subscribe(resp => {
-                        if (resp.success) {
-                            this.started = true;
-                            this.isValid = true;
-                            this.toastService.presentToast('Collecte commencée.');
-                            this.registerMvt(article, quantity);
-                        } else {
-                            this.isValid = false;
-                            this.loadingStartCollecte = false;
-                            this.toastService.presentToast(resp.msg);
-                        }
-                    });
+            this.apiService
+                .requestApi('post', ApiService.BEGIN_COLLECTE, {params: {id: this.collecte.id}})
+                .subscribe((resp) => {
+                    if (resp.success) {
+                        this.started = true;
+                        this.isValid = true;
+                        this.toastService.presentToast('Collecte commencée.');
+                        this.registerMvt(article, quantity);
+                    } else {
+                        this.isValid = false;
+                        this.loadingStartCollecte = false;
+                        this.toastService.presentToast(resp.msg);
+                    }
                 });
-            });
-        } else {
+        }
+        else {
             if (this.network.type === 'none') {
                 this.toastService.presentToast('Collecte commencée en mode hors ligne');
             }

@@ -76,7 +76,7 @@ export class InventaireAnomaliePage {
 
             // envoi des anomalies traitées
             this.sqliteProvider.findByElement(`anomalie_inventaire`, 'treated', '1').subscribe((anomalies) => {
-                this.apiService.requestApi('post', ApiService.TREAT_ANOMALIES, {anomalies}).subscribe((resp) => {
+                this.apiService.requestApi('post', ApiService.TREAT_ANOMALIES, {params: {anomalies}}).subscribe((resp) => {
                     this.locations = locations;
                     if (resp.success) {
                         // supprime les anomalies traitée de la base
@@ -139,7 +139,7 @@ export class InventaireAnomaliePage {
                 this.anomaly.treated = "1";
 
                 // envoi de l'anomalie modifiée à l'API
-                this.apiService.requestApi('post', ApiService.TREAT_ANOMALIES, {anomalies: [this.anomaly]}).subscribe((resp) => {
+                this.apiService.requestApi('post', ApiService.TREAT_ANOMALIES, {params: {anomalies: [this.anomaly]}}).subscribe((resp) => {
                     if (resp.success) {
                         // supprime l'anomalie traitée de la base
                         this.sqliteProvider.deleteBy(`anomalie_inventaire`, this.anomaly.id).subscribe(() => {

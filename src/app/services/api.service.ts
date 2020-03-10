@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs';
-import {flatMap, map} from 'rxjs/operators';
+import {flatMap, map, tap, timeout} from 'rxjs/operators';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {StorageService} from '@app/services/storage.service';
 import {HttpClient} from '@angular/common/http';
@@ -26,28 +26,43 @@ export class ApiService {
     public static readonly NEW_EMP: string = '/emplacement';
     public static readonly GET_ARTICLES: string = '/articles';
 
+    private static readonly DEFAULT_HEADERS = {
+        'X-Requested-With': 'XMLHttpRequest'
+    };
+
     // time out for service verification and url ping, 10s
-    public static readonly VERIFICATION_SERVICE_TIMEOUT: number = 10000;
+    private static readonly VERIFICATION_SERVICE_TIMEOUT: number = 10000;
 
 
     public constructor(private sqliteProvider: SqliteProvider,
                        private storageService: StorageService,
                        private httpClient: HttpClient) {}
 
+    public pingApi(url: string): Observable<any> {
+        return this.httpClient
+            .get(url, {headers: ApiService.DEFAULT_HEADERS})
+            .pipe(timeout(ApiService.VERIFICATION_SERVICE_TIMEOUT));
+    }
 
     public requestApi(method: string,
                       service: string,
-                      params: {[x: string]: any} = {},
-                      secured: boolean = true): Observable<any> {
-        const storageDataArray$ = [
-            this.getApiUrl(service),
-            ...(secured ? [this.storageService.getApiKey()] : [])
-        ];
-
+                      {params = {}, secured = true, timeout: requestWithTimeout= false}: {
+                          params?: { [x: string]: any };
+                          secured?: boolean;
+                          timeout?: boolean;
+                      } = {params: {}, secured: true, timeout: false}): Observable<any> {
         params = ApiService.ObjectToHttpParams(params);
 
-        return Observable.zip(...storageDataArray$)
+        let requestResponse = Observable.zip(
+            this.getApiUrl(service),
+            ...(secured ? [this.storageService.getApiKey()] : [])
+        )
             .pipe(
+                tap(([url]) => {
+                    if (!url) {
+                        throw new Error('The api url is not set');
+                    }
+                }),
                 flatMap(([url, apiKey]) => {
                     const keyParam = (method === 'get' || method === 'delete')
                         ? 'params'
@@ -63,12 +78,19 @@ export class ApiService {
 
                     const options = {
                         [keyParam]: smartParams,
-                        responseType: 'json' as 'json'
+                        responseType: 'json' as 'json',
+                        headers: ApiService.DEFAULT_HEADERS
                     };
 
                     return this.httpClient.request(method, url, options);
                 })
             );
+
+        if (requestWithTimeout) {
+            requestResponse = requestResponse.pipe(timeout(ApiService.VERIFICATION_SERVICE_TIMEOUT));
+        }
+
+        return requestResponse;
     }
 
 

@@ -45,11 +45,11 @@ export class NewEmplacementComponent {
         if (!this.loading) {
             this.loadingService.presentLoading('Création de l\'emplacement').subscribe((loader: Loading) => {
                 this.loading = true;
-                const serviceParams = {
+                const params = {
                     label: this.emplacement.label,
                     isDelivery: this.fromDepose ? '1' : '0'
                 };
-                this.apiService.requestApi("post", ApiService.NEW_EMP, serviceParams).subscribe(
+                this.apiService.requestApi("post", ApiService.NEW_EMP, {params}).subscribe(
                     (response) => {
                         this.loading = false;
                         loader.dismiss();

@@ -2,11 +2,9 @@ import {Component} from '@angular/core';
 import {AlertController, IonicPage, Loading, NavController, NavParams} from 'ionic-angular';
 import {Manutention} from '@app/entities/manutention';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {HttpClient} from '@angular/common/http';
 import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
 import {ApiService} from "@app/services/api.service";
-import {StorageService} from '@app/services/storage.service';
 import {LoadingService} from "@app/services/loading.service";
 
 
@@ -26,12 +24,10 @@ export class ManutentionValidatePage {
                        private navCtrl: NavController,
                        private navParams: NavParams,
                        private sqliteProvider: SqliteProvider,
-                       private client: HttpClient,
                        private toastService: ToastService,
                        private apiService: ApiService,
                        private network: Network,
-                       private loadingService: LoadingService,
-                       private storageService: StorageService) {
+                       private loadingService: LoadingService) {
         this.sendCommentToApiLoading = false;
     }
 
@@ -72,35 +68,30 @@ export class ManutentionValidatePage {
     public notifyApi(): void {
         if (!this.sendCommentToApiLoading) {
             this.sendCommentToApiLoading = true;
+            let params = {
+                id: this.manutention.id,
+                commentaire: this.commentaire
+            };
             this.loadingService
                 .presentLoading('Sauvegarde de la manutention...')
                 .subscribe((loading: Loading) => {
-                    this.apiService.getApiUrl(ApiService.VALIDATE_MANUT).subscribe((validateManutUrl) => {
-                        this.storageService.getApiKey().subscribe((key) => {
-                            let params = {
-                                id: this.manutention.id,
-                                apiKey: key,
-                                commentaire: this.commentaire
-                            };
-                            this.client.post<any>(validateManutUrl, params).subscribe(
-                                (response) => {
-                                    this.sendCommentToApiLoading = false;
-                                    loading.dismiss();
-                                    if (response.success) {
-                                        this.sqliteProvider.deleteBy('`manutention`', this.manutention.id).subscribe(() => {
-                                            this.navCtrl.pop();
-                                        })
-                                    }
-                                    else {
-                                        this.toastService.presentToast(response.msg);
-                                    }
-                                },
-                                () => {
-                                    loading.dismiss();
-                                });
+                    this.apiService.requestApi('post', ApiService.VALIDATE_MANUT, {params}).subscribe(
+                        (response) => {
+                            this.sendCommentToApiLoading = false;
+                            loading.dismiss();
+                            if (response.success) {
+                                this.sqliteProvider.deleteBy('`manutention`', this.manutention.id).subscribe(() => {
+                                    this.navCtrl.pop();
+                                })
+                            }
+                            else {
+                                this.toastService.presentToast(response.msg);
+                            }
+                        },
+                        () => {
+                            loading.dismiss();
                         });
-                    });
-            });
+                });
         }
     }
 

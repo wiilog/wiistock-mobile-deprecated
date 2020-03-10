@@ -1,10 +1,9 @@
 import {Component} from '@angular/core';
 import {IonicPage, Loading, NavController} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
-import {HttpClient} from '@angular/common/http';
 import {ToastService} from '@app/services/toast.service';
 import {ApiService} from '@app/services/api.service';
-import {flatMap, timeout} from 'rxjs/operators';
+import {flatMap} from 'rxjs/operators';
 import {LoadingService} from "@app/services/loading.service";
 import {from} from "rxjs/observable/from";
 
@@ -22,7 +21,6 @@ export class ParamsPage {
 
     public constructor(private navCtrl: NavController,
                        private sqliteProvider: SqliteProvider,
-                       private http: HttpClient,
                        private apiService: ApiService,
                        private loadingService: LoadingService,
                        private toastService: ToastService) {
@@ -52,7 +50,7 @@ export class ParamsPage {
                         loadingComponent = loading;
                         return this.apiService.getApiUrl(ApiService.GET_PING, this.URL);
                     }),
-                    flatMap((pingURL: string) => this.http.get(pingURL).pipe(timeout(ApiService.VERIFICATION_SERVICE_TIMEOUT))),
+                    flatMap((pingURL: string) => this.apiService.pingApi(pingURL)),
                     flatMap(() => this.sqliteProvider.setAPI_URL(this.URL)),
                     flatMap(() => from(loadingComponent.dismiss())),
                     flatMap(() => this.toastService.presentToast('URL enregistrée')),

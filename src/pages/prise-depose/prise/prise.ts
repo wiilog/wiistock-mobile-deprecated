@@ -308,8 +308,10 @@ export class PrisePage {
         return this.fromStock
             ? this.apiService
                 .requestApi('get', ApiService.GET_ARTICLES, {
-                    barCode,
-                    location: this.emplacement.label
+                    params: {
+                        barCode,
+                        location: this.emplacement.label
+                    }
                 })
                 .pipe(
                     map((res) => (

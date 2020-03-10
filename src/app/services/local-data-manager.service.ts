@@ -288,11 +288,13 @@ export class LocalDataManagerService {
                         ? (
                             this.apiService
                                 .requestApi('post', ApiService.POST_MOUVEMENT_TRACA, {
-                                    mouvements: mouvements.map(({signature, ...mouvements}) => mouvements),
-                                    ...(mouvements.reduce((acc, {signature}, currentIndex) => ({
-                                        ...acc,
-                                        ...(signature ? {[`signature_${currentIndex}`]: signature} : {})
-                                    }), {}))
+                                    params: {
+                                        mouvements: mouvements.map(({signature, ...mouvements}) => mouvements),
+                                        ...(mouvements.reduce((acc, {signature}, currentIndex) => ({
+                                            ...acc,
+                                            ...(signature ? {[`signature_${currentIndex}`]: signature} : {})
+                                        }), {}))
+                                    }
                                 })
                                 .pipe(
                                     map((apiResponse) => [apiResponse, mouvements]),
@@ -364,7 +366,7 @@ export class LocalDataManagerService {
                     if (params[paramName] && params[paramName].length > 0) {
                         res$ = new Subject();
                         this.apiService
-                            .requestApi('post', apiProccessConfig.service, params)
+                            .requestApi('post', apiProccessConfig.service, {params})
                             .pipe(flatMap((res) => {
                                 const {success, errors, data} = res;
                                 if (errors && errors.length > 0) {
