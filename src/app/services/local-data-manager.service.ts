@@ -259,8 +259,12 @@ export class LocalDataManagerService {
         return this.apiService
             .requestApi('post', ApiService.GET_DATA)
             .pipe(
-                flatMap(({data}) =>  this.sqliteProvider.importData(data)),
-                flatMap(({data}) =>  this.storageService.updateRights(data.right || {}))
+                flatMap(({data}) => (
+                    this.storageService
+                        .updateRights(data.rights || {})
+                        .pipe(map(() => ({data})))
+                )),
+                flatMap(({data}) => this.sqliteProvider.importData(data))
             );
     }
 

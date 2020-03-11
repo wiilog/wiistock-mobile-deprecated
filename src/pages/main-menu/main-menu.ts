@@ -26,7 +26,8 @@ export class MainMenuPage {
     nbPrep: number;
     nbPrepT: number;
     nbArtInvent: number;
-    loading: boolean;
+    public loading: boolean;
+    public displayNotifications: boolean;
 
     public menuConfig: Array<MenuConfig>;
 
@@ -46,8 +47,8 @@ export class MainMenuPage {
                        private alertController: AlertController,
                        private localDataManager: LocalDataManagerService,
                        private platform: Platform) {
-
         this.loading = true;
+        this.displayNotifications = false;
     }
 
     public ionViewWillEnter(): void {
@@ -104,6 +105,7 @@ export class MainMenuPage {
                         this.messageLoading = message;
                         this.loading = !finished;
                         if (finished) {
+                            this.displayNotifications = Boolean(rights.stock);
                             this.refreshCounters();
                             this.resetMainMenuConfig(rights);
                         }

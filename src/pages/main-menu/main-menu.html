@@ -4,7 +4,7 @@
 <ion-scroll scrollY="true"
             class="page-content"
             *ngIf="!loading">
-    <ion-grid>
+    <ion-grid *ngIf="displayNotifications">
         <ion-row class="row-menu-stats">
             <ion-slides pager>
                 <ion-slide>
