@@ -25,6 +25,9 @@ export class ListPanelItemComponent {
     @Input()
     public longPressAction?: (infos: {[name: string]: {label: string; value: string;};}) => void;
 
+    @Input()
+    public pressAction?: (infos: {[name: string]: {label: string; value: string;};}) => void;
+
     public constructor() {
         this.boldValues = [];
     }
@@ -36,9 +39,15 @@ export class ListPanelItemComponent {
         }))
     }
 
-    public onLongPress() {
+    public onLongPress(): void {
         if (this.longPressAction) {
             this.longPressAction(this.infos);
+        }
+    }
+
+    public onPress(): void {
+        if (this.pressAction) {
+            this.pressAction(this.infos);
         }
     }
 }

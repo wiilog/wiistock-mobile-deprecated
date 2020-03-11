@@ -5,7 +5,6 @@ import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ArticlePrepa} from '@app/entities/article-prepa';
 import {Mouvement} from '@app/entities/mouvement';
 import {PreparationArticleTakePage} from '@pages/stock/preparation/preparation-article-take/preparation-article-take';
-import {HttpClient} from '@angular/common/http';
 import {PreparationEmplacementPage} from '@pages/stock/preparation/preparation-emplacement/preparation-emplacement';
 import moment from 'moment';
 import {PreparationRefArticlesPage} from '@pages/stock/preparation/preparation-ref-articles/preparation-ref-articles';
@@ -17,7 +16,6 @@ import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Network} from '@ionic-native/network';
 import {ApiService} from '@app/services/api.service';
-import {StorageService} from '@app/services/storage.service';
 
 
 @IonicPage()
@@ -43,12 +41,10 @@ export class PreparationArticlesPage {
     public constructor(private navCtrl: NavController,
                        private navParams: NavParams,
                        private sqliteProvider: SqliteProvider,
-                       private http: HttpClient,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService,
                        private network: Network,
-                       private apiService: ApiService,
-                       private storageService: StorageService) {
+                       private apiService: ApiService) {
         this.loadingStartPreparation = false;
     }
 
@@ -202,24 +198,20 @@ export class PreparationArticlesPage {
             if (!this.started) {
                 if (this.network.type !== 'none') {
                     this.loadingStartPreparation = true;
-                    this.apiService.getApiUrl(ApiService.BEGIN_PREPA).subscribe((beginPrepaUrl) => {
-                        this.storageService.getApiKey().subscribe((key) => {
-                            this.http.post<any>(beginPrepaUrl, {id: this.preparation.id, apiKey: key}).subscribe(resp => {
-                                if (resp.success) {
-                                    this.started = true;
-                                    this.isValid = true;
-                                    this.sqliteProvider.startPrepa(this.preparation.id).subscribe(() => {
-                                        this.toastService.presentToast('Préparation commencée.');
-                                        this.saveSelectedArticle(selectedArticle, selectedQuantity);
-                                    });
-                                }
-                                else {
-                                    this.isValid = false;
-                                    this.loadingStartPreparation = false;
-                                    this.toastService.presentToast(resp.msg);
-                                }
+                    this.apiService.requestApi('post', ApiService.BEGIN_PREPA, {params: {id: this.preparation.id}}).subscribe((resp) => {
+                        if (resp.success) {
+                            this.started = true;
+                            this.isValid = true;
+                            this.sqliteProvider.startPrepa(this.preparation.id).subscribe(() => {
+                                this.toastService.presentToast('Préparation commencée.');
+                                this.saveSelectedArticle(selectedArticle, selectedQuantity);
                             });
-                        });
+                        }
+                        else {
+                            this.isValid = false;
+                            this.loadingStartPreparation = false;
+                            this.toastService.presentToast(resp.msg);
+                        }
                     });
                 }
                 else {

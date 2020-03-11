@@ -13,12 +13,12 @@ import {HeaderConfig} from "@helpers/components/panel/model/header-config";
 import {ListPanelItemConfig} from "@helpers/components/panel/model/list-panel/list-panel-item-config";
 import {TracaListFactoryService} from "@app/services/traca-list-factory.service";
 import moment from 'moment';
-import {DeposeConfirmPage} from "@pages/prise-depose/depose-confirm/depose-confirm";
 import {flatMap, map, tap} from "rxjs/operators";
-import {of} from "rxjs/observable/of";
-import {Network} from "@ionic-native/network";
-import {LoadingService} from "@app/services/loading.service";
-import {from} from "rxjs/observable/from";
+import {of} from 'rxjs/observable/of';
+import {Network} from '@ionic-native/network';
+import {LoadingService} from '@app/services/loading.service';
+import {from} from 'rxjs/observable/from';
+import {DeposeConfirmPage} from "@pages/prise-depose/depose-confirm/depose-confirm";
 
 
 @IonicPage()
@@ -217,10 +217,10 @@ export class DeposePage {
     }
 
     public testColisDepose(barCode: string, isManualInput: boolean = false): void {
-        const priseExists = this.priseExists(barCode);
-        if (priseExists) {
+        const pickingIndex = this.getPickingIndex(barCode);
+        if (pickingIndex > -1) {
             if (isManualInput || !this.fromStock) {
-                this.saveMouvementTracaWrapper(barCode);
+                this.saveMouvementTraca(pickingIndex);
             }
             else {
                 this.unsubscribeZebraScanObserver();
@@ -237,7 +237,7 @@ export class DeposePage {
                             {
                                 text: 'Confirmer',
                                 handler: () => {
-                                    this.saveMouvementTracaWrapper(barCode);
+                                    this.saveMouvementTraca(pickingIndex);
                                 },
                                 cssClass: 'alert-success'
                             }
@@ -252,58 +252,58 @@ export class DeposePage {
     }
 
     public get objectLabel(): string {
-        return this.fromStock
-            ? 'article'
-            : 'objet';
+        return TracaListFactoryService.GetObjectLabel(this.fromStock);
     }
 
-    private saveMouvementTracaWrapper(barCode: string): void {
-        if (this.fromStock) {
-            this.saveMouvementTraca(barCode);
-            this.launchZebraScanObserver();
-        }
-        else {
-            this.navCtrl.push(DeposeConfirmPage, {
-                location: this.emplacement,
-                barCode,
-                fromStock: this.fromStock,
-                validateDepose: (comment, signature) => {
-                    this.saveMouvementTraca(barCode, comment, signature);
-                }
+    public get displayPrisesList(): boolean {
+        return this.colisPrise && this.colisPrise.filter(({hidden}) => !hidden).length > 0;
+    }
+
+    private saveMouvementTraca(pickingIndex: number, comment?: string, signature?: string): void {
+        let quantity;
+        if (pickingIndex > -1) {
+            quantity = this.colisPrise[pickingIndex].quantity;
+            this.prisesToFinish.push(this.colisPrise[pickingIndex].id);
+            this.colisPrise[pickingIndex].hidden = true;
+
+            this.colisDepose.push({
+                ref_article: this.colisPrise[pickingIndex].ref_article,
+                comment,
+                signature,
+                fromStock: Number(this.fromStock),
+                quantity,
+                type: DeposePage.MOUVEMENT_TRACA_DEPOSE,
+                operateur: this.operator,
+                ref_emplacement: this.emplacement.label,
+                date: moment().format()
             });
         }
-    }
-
-    private saveMouvementTraca(barCode: string, comment?: string, signature?: string): void {
-        const firstPriseMatchingIndex = this.colisPrise.findIndex(({ref_article}) => (ref_article === barCode));
-        let quantity;
-        if (firstPriseMatchingIndex > -1) {
-            quantity = this.colisPrise[firstPriseMatchingIndex].quantity;
-            this.prisesToFinish.push(this.colisPrise[firstPriseMatchingIndex].id);
-            this.colisPrise[firstPriseMatchingIndex].hidden = true;
-        }
-
-        this.colisDepose.push({
-            ref_article: barCode,
-            comment,
-            signature,
-            fromStock: Number(this.fromStock),
-            quantity,
-            type: DeposePage.MOUVEMENT_TRACA_DEPOSE,
-            operateur: this.operator,
-            ref_emplacement: this.emplacement.label,
-            date: moment().format()
-        });
 
         this.refreshPriseListComponent();
         this.refreshDeposeListComponent();
+        this.launchZebraScanObserver();
+    }
+
+    private updatePicking(barCode: string, comment?: string, signature?: string): void {
+        const pickingIndex = this.colisDepose.findIndex(({ref_article}) => (ref_article === barCode));
+
+        if (pickingIndex > -1) {
+            this.colisDepose[pickingIndex].comment = comment;
+            this.colisDepose[pickingIndex].signature = signature;
+
+            this.refreshPriseListComponent();
+            this.refreshDeposeListComponent();
+        }
+
+        this.launchZebraScanObserver();
     }
 
     private refreshPriseListComponent(): void {
         this.priseListConfig = this.tracaListFactory.createListConfig(
             this.colisPrise.filter(({hidden}) => !hidden),
-            true,
+            TracaListFactoryService.LIST_TYPE_DROP_SUB,
             {
+                objectLabel: this.objectLabel,
                 uploadItem: ({object}) => {
                     this.testColisDepose(object.value, true);
                 }
@@ -314,10 +314,28 @@ export class DeposePage {
     private refreshDeposeListComponent(): void {
         this.deposeListConfig = this.tracaListFactory.createListConfig(
             this.colisDepose,
-            false,
+            TracaListFactoryService.LIST_TYPE_DROP_MAIN,
             {
+                objectLabel: this.objectLabel,
                 location: this.emplacement,
                 validate: () => this.finishTaking(),
+                confirmItem: !this.fromStock
+                    ? ({object: {value: barCode}}: { object?: { value?: string } }) => {
+                        const dropIndex = this.getDropIndex(barCode);
+                        if (dropIndex > -1) {
+                            const {comment, signature} = this.colisDepose[dropIndex];
+                            this.navCtrl.push(DeposeConfirmPage, {
+                                location: this.emplacement,
+                                barCode,
+                                comment,
+                                signature,
+                                validateDepose: (comment, signature) => {
+                                    this.updatePicking(barCode, comment, signature);
+                                }
+                            });
+                        }
+                    }
+                    : undefined,
                 removeItem: TracaListFactoryService.CreateRemoveItemFromListHandler(
                     this.colisDepose,
                     this.colisPrise,
@@ -338,8 +356,15 @@ export class DeposePage {
         this.prisesToFinish = [];
     }
 
-    private priseExists(barCode: string): boolean {
-        return this.colisPrise.filter(({ref_article}) => (ref_article === barCode)).length > 0;
+    private getPickingIndex(barCode: string): number {
+        return this.colisPrise.findIndex(({ref_article, hidden}) => (
+            ref_article === barCode
+            && !hidden
+        ));
+    }
+
+    private getDropIndex(barCode: string): number {
+        return this.colisDepose.findIndex(({ref_article}) => (ref_article === barCode));
     }
 
     private launchZebraScanObserver(): void {

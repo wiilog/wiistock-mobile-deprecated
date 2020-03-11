@@ -36,10 +36,14 @@ export class PrisePage {
 
     public emplacement: Emplacement;
     public colisPrise: Array<MouvementTraca>;
+    public currentPacksOnLocation: Array<MouvementTraca&{hidden?: boolean}>;
     public colisPriseAlreadySaved: Array<MouvementTraca>;
 
-    public listHeader: HeaderConfig;
-    public listBody: Array<ListPanelItemConfig>;
+    public listPacksOnLocationHeader: HeaderConfig;
+    public listPacksOnLocationBody: Array<ListPanelItemConfig>;
+
+    public listTakingHeader: HeaderConfig;
+    public listTakingBody: Array<ListPanelItemConfig>;
     public listBoldValues: Array<string>;
 
     public loading: boolean;
@@ -80,19 +84,23 @@ export class PrisePage {
         this.emplacement = this.navParams.get('emplacement');
         this.fromStock = Boolean(this.navParams.get('fromStock'));
 
-        Observable.zip(
-            this.storageService.getOperateur(),
-            this.sqliteProvider.getPrises(this.fromStock)
-        )
-        .subscribe(([operator, colisPriseAlreadySaved]) => {
-            this.operator = operator;
-            this.colisPriseAlreadySaved = colisPriseAlreadySaved;
+        Observable
+            .zip(
+                this.storageService.getOperateur(),
+                this.sqliteProvider.getPrises(this.fromStock),
+                (this.network.type !== 'none' && this.emplacement && !this.fromStock
+                    ? this.apiService.requestApi('get', ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})
+                    : of({trackingDrops: []}))
+            )
+            .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}]) => {
+                this.operator = operator;
+                this.colisPriseAlreadySaved = colisPriseAlreadySaved;
+                this.currentPacksOnLocation = trackingDrops;
+                this.launchZebraScanObserver();
 
-            this.launchZebraScanObserver();
-
-            this.refreshListComponent();
-            this.loading = false;
-        });
+                this.refreshListComponent();
+                this.loading = false;
+            });
     }
 
     public ionViewWillLeave(): void {
@@ -261,9 +269,11 @@ export class PrisePage {
     }
 
     public get objectLabel(): string {
-        return this.fromStock
-            ? 'article'
-            : 'objet';
+        return TracaListFactoryService.GetObjectLabel(this.fromStock);
+    }
+
+    public get displayPacksOnLocationsList(): boolean {
+        return this.currentPacksOnLocation && this.currentPacksOnLocation.filter(({hidden}) => !hidden).length > 0;
     }
 
     private saveMouvementTraca(barCode: string, quantity: boolean|number): void {
@@ -277,30 +287,51 @@ export class PrisePage {
             ...(typeof quantity === 'number' ? {quantity} : {}),
             date: moment().format()
         });
+        this.setPackOnLocationHidden(barCode, true);
         this.refreshListComponent();
         this.changeDetectorRef.detectChanges();
     }
 
     private refreshListComponent(): void {
-        const {header, body} = this.tracaListFactory.createListConfig(
+        const {header: listTakingHeader, body: listTakingBody} = this.tracaListFactory.createListConfig(
             this.colisPrise,
-            true,
+            TracaListFactoryService.LIST_TYPE_TAKING_MAIN,
             {
+                objectLabel: this.objectLabel,
                 location: this.emplacement,
                 validate: () => this.finishTaking(),
-                removeItem: TracaListFactoryService.CreateRemoveItemFromListHandler(this.colisPrise, undefined, () => this.refreshListComponent()),
+                removeItem: TracaListFactoryService.CreateRemoveItemFromListHandler(this.colisPrise, undefined, (barCode) => {
+                    this.setPackOnLocationHidden(barCode, false);
+                    this.refreshListComponent();
+                }),
                 removeConfirmationMessage: 'Êtes-vous sur de vouloir supprimer cet élément ?'
             }
         );
-        this.listHeader = header;
-        this.listBody = body;
+        this.listTakingHeader = listTakingHeader;
+        this.listTakingBody = listTakingBody;
+
+        const {header: listPacksOnLocationHeader, body: listPacksOnLocationBody} = this.tracaListFactory.createListConfig(
+            this.currentPacksOnLocation.filter(({hidden}) => !hidden),
+            TracaListFactoryService.LIST_TYPE_TAKING_SUB,
+            {
+                objectLabel: this.objectLabel,
+                uploadItem: ({object}) => {
+                    this.testIfBarcodeEquals(object.value, true);
+                }
+            }
+        );
+
+        this.listPacksOnLocationHeader = listPacksOnLocationHeader;
+        this.listPacksOnLocationBody = listPacksOnLocationBody;
+
     }
 
     private init(): void {
         this.loading = true;
         this.apiLoading = false;
-        this.listBody = [];
+        this.listTakingBody = [];
         this.colisPrise = [];
+        this.currentPacksOnLocation = [];
         this.colisPriseAlreadySaved = [];
     }
 
@@ -308,8 +339,10 @@ export class PrisePage {
         return this.fromStock
             ? this.apiService
                 .requestApi('get', ApiService.GET_ARTICLES, {
-                    barCode,
-                    location: this.emplacement.label
+                    params: {
+                        barCode,
+                        location: this.emplacement.label
+                    }
                 })
                 .pipe(
                     map((res) => (
@@ -333,6 +366,15 @@ export class PrisePage {
         if (this.zebraScanSubscription) {
             this.zebraScanSubscription.unsubscribe();
             this.zebraScanSubscription = undefined;
+        }
+    }
+
+    private setPackOnLocationHidden(barCode: string, hidden: boolean): void {
+        if (barCode) {
+            const trackingIndex = this.currentPacksOnLocation.findIndex(({ref_article}) => (ref_article === barCode));
+            if (trackingIndex > -1) {
+                this.currentPacksOnLocation[trackingIndex].hidden = hidden;
+            }
         }
     }
 }

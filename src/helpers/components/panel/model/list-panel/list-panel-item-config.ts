@@ -9,5 +9,6 @@ export interface ListPanelItemConfig {
         };
     };
     longPressAction?: (infos: {[name: string]: {label: string; value: string;};}) => void;
+    pressAction?: (infos: {[name: string]: {label: string; value: string;};}) => void;
     rightIcon?: IconConfig;
 }

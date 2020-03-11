@@ -28,11 +28,31 @@ export class DeposeConfirmPage {
     public constructor(private navCtrl: NavController,
                        private toastService: ToastService,
                        private navParams: NavParams) {
+    }
+
+    public ionViewWillEnter(): void {
+        this.location = this.navParams.get('location');
+        this.validateDepose = this.navParams.get('validateDepose');
+
+        const barCode = this.navParams.get('barCode');
+        const comment = this.navParams.get('comment');
+        const signature = this.navParams.get('signature');
+
+        this.headerConfig = {
+            title: `DEPOSE de ${barCode}`,
+            subtitle: `Emplacement : ${this.location.label}`,
+            leftIcon: {
+                name: 'download.svg',
+                color: 'success'
+            }
+        };
+
         this.bodyConfig = [
             {
                 type: 'input',
                 label: 'Commentaire',
                 name: 'comment',
+                value: comment,
                 inputConfig: {
                     type: 'text',
                     maxLength: '255'
@@ -46,23 +66,10 @@ export class DeposeConfirmPage {
                 type: 'signing',
                 label: 'Signature',
                 name: 'signature',
+                value: signature,
                 inputConfig: {}
             }
-        ]
-    }
-
-    public ionViewWillEnter(): void {
-        this.location = this.navParams.get('location');
-        const barCode = this.navParams.get('barCode');
-        this.validateDepose = this.navParams.get('validateDepose');
-        this.headerConfig = {
-            title: `DEPOSE de ${barCode}`,
-            subtitle: `Emplacement : ${this.location.label}`,
-            leftIcon: {
-                name: 'download.svg',
-                color: 'success'
-            }
-        };
+        ];
     }
 
     public onFormSubmit(): void {

@@ -75,7 +75,7 @@ export class InventaireMenuPage {
             .pipe(
                 flatMap((entries) => (
                     entries.length > 0
-                        ? this.apiService.requestApi('post', ApiService.ADD_INVENTORY_ENTRIES, {entries})
+                        ? this.apiService.requestApi('post', ApiService.ADD_INVENTORY_ENTRIES, {params: {entries}})
                         : of({success: false})
                 )),
                 flatMap((resp) => {

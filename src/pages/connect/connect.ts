@@ -8,7 +8,7 @@ import {Network} from '@ionic-native/network';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ApiService} from '@app/services/api.service';
 import {VersionCheckerService} from '@app/services/version-checker.service';
-import {flatMap, map, timeout} from 'rxjs/operators';
+import {flatMap, map} from 'rxjs/operators';
 import {StorageService} from '@app/services/storage.service';
 import {Subscription} from 'rxjs';
 // @ts-ignore
@@ -102,8 +102,7 @@ export class ConnectPage {
             if (this.network.type !== 'none') {
                 this.loading = true;
                 this.apiService
-                    .requestApi('post', ApiService.CONNECT, this.form, false)
-                    .pipe(timeout(ApiService.VERIFICATION_SERVICE_TIMEOUT))
+                    .requestApi('post', ApiService.CONNECT, {params: this.form, secured: false, timeout: true})
                     .subscribe(
                         ({data, success}) => {
                             if (success) {
