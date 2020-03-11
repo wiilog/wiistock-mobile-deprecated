@@ -107,10 +107,10 @@ export class ConnectPage {
                     .subscribe(
                         ({data, success}) => {
                             if (success) {
-                                const {apiKey, isInventoryManager} = data;
+                                const {apiKey, rights} = data;
                                 this.sqliteProvider
                                     .resetDataBase()
-                                    .pipe(flatMap(() => this.storageService.initStorage(apiKey, this.form.login, isInventoryManager)))
+                                    .pipe(flatMap(() => this.storageService.initStorage(apiKey, this.form.login, rights)))
                                     .subscribe(
                                         () => {
                                             this.loading = false;

@@ -28,7 +28,7 @@
             </ion-slides>
         </ion-row>
     </ion-grid>
-    <wii-menu [config]="menuConfig"></wii-menu>
+    <wii-menu *ngIf="menuConfig" [config]="menuConfig"></wii-menu>
 </ion-scroll>
 <ion-fab *ngIf="!loading" slot="fixed">
     <button ion-fab color="primary" (click)="synchronise()">

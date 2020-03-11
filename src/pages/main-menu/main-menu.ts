@@ -7,10 +7,11 @@ import {Network} from '@ionic-native/network';
 import {ToastService} from '@app/services/toast.service';
 import {StorageService} from '@app/services/storage.service';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
-import {Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {MenuConfig} from '@helpers/components/menu/menu-config';
 import {StockMenuPage} from '@pages/stock/stock-menu/stock-menu';
 import {PriseDeposeMenuPage} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu';
+import {flatMap, map} from "rxjs/operators";
 
 
 @Component({
@@ -27,7 +28,7 @@ export class MainMenuPage {
     nbArtInvent: number;
     loading: boolean;
 
-    public readonly menuConfig: Array<MenuConfig>;
+    public menuConfig: Array<MenuConfig>;
 
     public messageLoading?: string;
 
@@ -37,7 +38,7 @@ export class MainMenuPage {
 
     private synchronisationSubscription: Subscription;
 
-    public constructor(navController: NavController,
+    public constructor(private navController: NavController,
                        private sqliteProvider: SqliteProvider,
                        private network: Network,
                        private toastService: ToastService,
@@ -47,32 +48,6 @@ export class MainMenuPage {
                        private platform: Platform) {
 
         this.loading = true;
-
-        this.menuConfig = [
-            {
-                icon: 'tracking.svg',
-                label: 'Traçabilité',
-                action() {
-                    navController.push(PriseDeposeMenuPage, {
-                        fromStock: false
-                    });
-                }
-            },
-            {
-                icon: 'stock.svg',
-                label: 'Stock',
-                action() {
-                    navController.push(StockMenuPage, {avoidSync: true});
-                }
-            },
-            {
-                icon: 'people.svg',
-                label: 'Demande',
-                action() {
-                    navController.push(ManutentionMenuPage);
-                }
-            }
-        ];
     }
 
     public ionViewWillEnter(): void {
@@ -110,23 +85,38 @@ export class MainMenuPage {
         if (this.network.type !== 'none') {
             this.loading = true;
 
-            this.synchronisationSubscription = this.localDataManager.synchroniseData().subscribe(
-                ({finished, message}) => {
-                    this.messageLoading = message;
-                    this.loading = !finished;
-                    if (finished) {
+            this.synchronisationSubscription = this.localDataManager.synchroniseData()
+                .pipe(
+                    flatMap(({finished, message}) => (
+                        Observable.zip(
+                            this.storageService.getDemandeAccessRight(),
+                            this.storageService.getTrackingAccessRight(),
+                            this.storageService.getStockAccessRight()
+                        ).pipe(map(([demande, tracking, stock]) => ({
+                            finished,
+                            message,
+                            rights: {demande, tracking, stock}
+                        })))
+                    ))
+                )
+                .subscribe(
+                    ({finished, message, rights}) => {
+                        this.messageLoading = message;
+                        this.loading = !finished;
+                        if (finished) {
+                            this.refreshCounters();
+                            this.resetMainMenuConfig(rights);
+                        }
+                    },
+                    (error) => {
+                        const {api, message} = error;
+                        this.loading = false;
                         this.refreshCounters();
-                    }
-                },
-                (error) => {
-                    const {api, message} = error;
-                    this.loading = false;
-                    this.refreshCounters();
-                    if (api && message) {
-                        this.toastService.presentToast(message);
-                    }
-                    throw error;
-                });
+                        if (api && message) {
+                            this.toastService.presentToast(message);
+                        }
+                        throw error;
+                    });
         }
         else {
             this.loading = false;
@@ -164,6 +154,41 @@ export class MainMenuPage {
                 });
 
             this.exitAlert.present();
+        }
+    }
+
+    private resetMainMenuConfig(rights: {stock?: boolean, demande?: boolean, tracking?: boolean}) {
+        this.menuConfig = [];
+        if (rights.tracking) {
+            this.menuConfig.push({
+                icon: 'tracking.svg',
+                label: 'Traçabilité',
+                action: () => {
+                    this.navController.push(PriseDeposeMenuPage, {
+                        fromStock: false
+                    });
+                }
+            });
+        }
+
+        if (rights.stock) {
+            this.menuConfig.push({
+                icon: 'stock.svg',
+                label: 'Stock',
+                action: () => {
+                    this.navController.push(StockMenuPage, {avoidSync: true});
+                }
+            });
+        }
+
+        if (rights.demande) {
+            this.menuConfig.push({
+                icon: 'people.svg',
+                label: 'Demande',
+                action: () => {
+                    this.navController.push(ManutentionMenuPage);
+                }
+            });
         }
     }
 }

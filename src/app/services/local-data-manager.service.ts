@@ -15,6 +15,7 @@ import {Collecte} from '@app/entities/collecte';
 import {MouvementTraca} from '@app/entities/mouvement-traca';
 import 'rxjs/add/observable/zip';
 import {FileService} from "@app/services/file.service";
+import {StorageService} from "@app/services/storage.service";
 
 
 type Process = 'preparation' | 'livraison' | 'collecte';
@@ -38,6 +39,7 @@ export class LocalDataManagerService {
     public constructor(private sqliteProvider: SqliteProvider,
                        private apiService: ApiService,
                        private fileService: FileService,
+                       private storageService: StorageService,
                        private alertManager: AlertManagerService,
                        private alertController: AlertController) {
         this.apiProccessConfigs = {
@@ -256,7 +258,10 @@ export class LocalDataManagerService {
     public importData(): Observable<any> {
         return this.apiService
             .requestApi('post', ApiService.GET_DATA)
-            .pipe(flatMap(({data}) =>  this.sqliteProvider.importData(data)));
+            .pipe(
+                flatMap(({data}) =>  this.sqliteProvider.importData(data)),
+                flatMap(({data}) =>  this.storageService.updateRights(data.right || {}))
+            );
     }
 
     public sendMouvementTraca(sendFromStock: boolean): Observable<any> {
