@@ -1,18 +1,9 @@
-<ion-content padding>
+<wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
 
-    <wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
-
-    <ion-list *ngIf="hasLoaded">
-        <ion-grid>
-            <button (click)="goToArticles(collecte)" class="list" ion-item *ngFor="let collecte of collectes">
-                <ion-row>
-                    <ion-col>
-                        <p>Numéro : {{ collecte.number }}</p>
-                        <p *ngIf="collecte.location_from">Point de collecte : {{ collecte.location_from }}</p>
-                        <p>Destination : {{ collecte.forStock ? 'Mise en stock' : 'Destruction' }}</p>
-                    </ion-col>
-                </ion-row>
-            </button>
-        </ion-grid>
-    </ion-list>
-</ion-content>
+<ion-scroll *ngIf="hasLoaded" scrollY="true" class="page-content">
+    <wii-card-list *ngIf="hasLoaded && collectes && collectes.length > 0"
+                   [listIconName]="collectesIconName"
+                   [color]="collectesListColor"
+                   [config]="collectesListConfig">
+    </wii-card-list>
+</ion-scroll>

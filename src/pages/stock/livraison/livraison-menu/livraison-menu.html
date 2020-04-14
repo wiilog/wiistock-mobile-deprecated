@@ -1,13 +1,9 @@
-<ion-content padding>
-    <wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
-    <ion-list *ngIf="hasLoaded && livraisons && livraisons.length > 0">
-        <ion-grid>
-            <button (click)="goToLivraison(livraison)" class="list" ion-item *ngFor="let livraison of livraisons">
-                <ion-row>
-                    <ion-col col-6>{{ livraison.numero }}</ion-col>
-                    <ion-col class="text-right" col-6>{{ livraison.emplacement }}</ion-col>
-                </ion-row>
-            </button>
-        </ion-grid>
-    </ion-list>
-</ion-content>
+<wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
+
+<ion-scroll *ngIf="hasLoaded" scrollY="true" class="page-content">
+    <wii-card-list *ngIf="hasLoaded && livraisons && livraisons.length > 0"
+                   [listIconName]="livraisonsIconName"
+                   [color]="livraisonsListColor"
+                   [config]="livraisonsListConfig">
+    </wii-card-list>
+</ion-scroll>>

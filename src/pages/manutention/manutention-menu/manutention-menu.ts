@@ -21,6 +21,7 @@ export class ManutentionMenuPage {
     public manutentions: Array<Manutention>;
     public manutentionsListConfig: Array<CardListConfig>;
     public readonly manutentionsListColor = CardListColorEnum.GREEN;
+    public readonly manutentionsIconName = 'people.svg';
 
     public hasLoaded: boolean;
 

@@ -3,7 +3,9 @@ import {Content, IonicPage, Navbar, NavController, NavParams} from 'ionic-angula
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {CollecteArticlesPage} from '@pages/stock/collecte/collecte-articles/collecte-articles';
 import {Collecte} from '@app/entities/collecte';
-import {MainHeaderService} from "@app/services/main-header.service";
+import {MainHeaderService} from '@app/services/main-header.service';
+import {CardListConfig} from '@helpers/components/card-list/card-list-config';
+import {CardListColorEnum} from '@helpers/components/card-list/card-list-color.enum';
 
 
 @IonicPage()
@@ -12,10 +14,19 @@ import {MainHeaderService} from "@app/services/main-header.service";
     templateUrl: 'collecte-menu.html',
 })
 export class CollecteMenuPage {
-    @ViewChild(Navbar) navBar: Navbar;
-    @ViewChild(Content) content: Content;
-    collectes: Array<Collecte>;
-    hasLoaded: boolean;
+    @ViewChild(Navbar)
+    public navBar: Navbar;
+
+    @ViewChild(Content)
+    public content: Content;
+
+    public hasLoaded: boolean;
+
+    public collectes: Array<Collecte>;
+
+    public collectesListConfig: Array<CardListConfig>;
+    public readonly collectesListColor = CardListColorEnum.YELLOW;
+    public readonly collectesIconName = 'delivery.svg';
 
     private goToDepose: () => void;
     private avoidSync: () => void;
@@ -34,23 +45,48 @@ export class CollecteMenuPage {
             this.collectes = collectes
                 .filter(({date_end, location_to}) => (!date_end && !location_to))
                 .sort(({location_from: location_from_1}, {location_from: location_from_2}) => ((location_from_1 < location_from_2) ? -1 : 1));
+
+            this.collectesListConfig = this.collectes.map((collecte: Collecte) => ({
+                title: {
+                    label: 'Demandeur',
+                    value: collecte.requester
+                },
+                content: [
+                    {
+                        label: 'Numéro',
+                        value: collecte.number
+                    },
+                    {
+                        label: 'Flux',
+                        value: collecte.type
+                    },
+                    {
+                        label: 'Point de collecte',
+                        value: collecte.location_from
+                    },
+                    {
+                        label: 'Destination',
+                        value: (collecte.forStock ? 'Mise en stock' : 'Destruction')
+                    }
+                ],
+                action: () => {
+                    const self = this;
+                    self.navCtrl.push(CollecteArticlesPage, {
+                        collecte,
+                        goToDepose: () => {
+                            self.avoidSync();
+                            self.navCtrl.pop();
+                            self.goToDepose();
+                        }
+                    });
+                }
+            }));
+
             this.hasLoaded = true;
             this.refreshSubTitle();
             this.content.resize();
         });
     }
-
-    public goToArticles(collecte): void {
-        this.navCtrl.push(CollecteArticlesPage, {
-            collecte,
-            goToDepose: () => {
-                this.avoidSync();
-                this.navCtrl.pop();
-                this.goToDepose();
-            }
-        });
-    }
-
     public refreshSubTitle(): void {
         const collectesLength = this.collectes.length;
         this.mainHeaderService.emitSubTitle(`${collectesLength === 0 ? 'Aucune' : collectesLength} collecte${collectesLength > 1 ? 's' : ''}`)

@@ -2,7 +2,7 @@
 
 <ion-scroll *ngIf="hasLoaded" scrollY="true" class="page-content">
     <wii-card-list *ngIf="hasLoaded && manutentionsListConfig && manutentionsListConfig.length > 0"
-                   listIconName="people.svg"
+                   [listIconName]="manutentionsIconName"
                    [color]="manutentionsListColor"
                    [config]="manutentionsListConfig">
     </wii-card-list>

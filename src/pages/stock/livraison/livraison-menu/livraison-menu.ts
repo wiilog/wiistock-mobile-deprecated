@@ -4,6 +4,8 @@ import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {LivraisonArticlesPage} from '@pages/stock/livraison/livraison-articles/livraison-articles';
 import {Livraison} from '@app/entities/livraison';
 import {MainHeaderService} from '@app/services/main-header.service';
+import {CardListConfig} from '@helpers/components/card-list/card-list-config';
+import {CardListColorEnum} from '@helpers/components/card-list/card-list-color.enum';
 
 
 @IonicPage()
@@ -20,6 +22,10 @@ export class LivraisonMenuPage {
 
     public livraisons: Array<Livraison>;
 
+    public livraisonsListConfig: Array<CardListConfig>;
+    public readonly livraisonsListColor = CardListColorEnum.YELLOW;
+    public readonly livraisonsIconName = 'delivery.svg';
+
     public hasLoaded: boolean;
 
     public constructor(private navCtrl: NavController,
@@ -30,15 +36,35 @@ export class LivraisonMenuPage {
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
         this.sqliteProvider.findAll('`livraison`').subscribe((livraisons) => {
-            this.livraisons = livraisons.filter(l => l.date_end === null);
+            this.livraisons = livraisons.filter(({date_end}) => (date_end === null));
+            this.livraisonsListConfig = this.livraisons.map((livraison: Livraison) => ({
+                title: {
+                    label: 'Demandeur',
+                    value: livraison.requester
+                },
+                content: [
+                    {
+                        label: 'Numéro',
+                        value: livraison.numero
+                    },
+                    {
+                        label: 'Flux',
+                        value: livraison.type
+                    },
+                    {
+                        label: 'Destination',
+                        value: livraison.emplacement
+                    }
+                ],
+                action: () => {
+                    this.navCtrl.push(LivraisonArticlesPage, {livraison});
+                }
+            }));
+
             this.hasLoaded = true;
             this.refreshSubTitle();
             this.content.resize();
         });
-    }
-
-    public goToLivraison(livraison): void {
-        this.navCtrl.push(LivraisonArticlesPage, {livraison});
     }
 
     public refreshSubTitle(): void {

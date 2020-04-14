@@ -64,11 +64,11 @@ export class SqliteProvider {
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` VARCHAR(255), `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255), `comment` VARCHAR(255), `signature` TEXT, finished INTEGER, fromStock INTEGER, quantity INTEGER)')),
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `API_PARAMS` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT)')),
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'INSERT INTO `API_PARAMS` (url) SELECT (\'\') WHERE NOT EXISTS (SELECT * FROM `API_PARAMS`)')),
-            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER, `destination` INTEGER, `type` TEXT)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER, `destination` TEXT, requester VARCHAR(255), `type`  VARCHAR(255))')),
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `type_quantite` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT, `deleted` INTEGER DEFAULT 0, original_quantity INTEGER, reference_article_reference TEXT)')),
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_prepa_by_ref_article` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `reference` TEXT, `label` TEXT, `location` TEXT, `quantity` INTEGER, `reference_article` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT)')),
-            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT)')),
-            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `collecte` (`id` INTEGER PRIMARY KEY, `number` TEXT, `location_from` VARCHAR(255), `location_to` VARCHAR(255), `date_end` TEXT, `forStock` INTEGER)')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, requester VARCHAR(255), `type` VARCHAR(255))')),
+            flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `collecte` (`id` INTEGER PRIMARY KEY, `number` TEXT, `location_from` VARCHAR(255), `location_to` VARCHAR(255), `date_end` TEXT, `forStock` INTEGER, requester VARCHAR(255), `type` VARCHAR(255))')),
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_livraison` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_livraison` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)')),
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_inventaire` (`id` INTEGER PRIMARY KEY, `id_mission` INTEGER, `reference` TEXT, `is_ref` INTEGER, `location` TEXT, `barcode` TEXT)')),
             flatMap(() => SqliteProvider.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_collecte` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_collecte` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)')),
@@ -161,13 +161,22 @@ export class SqliteProvider {
         for (let prepa of prepas) {
             this.findOneById('preparation', prepa.id).subscribe((prepaInserted) => {
                 if (!prepaInserted) {
-                    prepasValues.push(`(${prepa.id}, '${prepa.number}', NULL, NULL, 0, '${this.escapeQuotes(prepa.destination)}', '${prepa.type}')`);
+                    prepasValues.push(`(
+                        ${prepa.id},
+                        '${prepa.number}',
+                        NULL,
+                        NULL,
+                        0,
+                        '${this.escapeQuotes(prepa.destination)}',
+                        '${this.escapeQuotes(prepa.type)}',
+                        ${prepa.requester ? `'${this.escapeQuotes(prepa.requester)}'` : 'NULL'}
+                    )`);
                 }
 
                 if (prepas.indexOf(prepa) === prepas.length - 1) {
                     this.findAll('`preparation`').subscribe((preparations) => {
                         let prepasValuesStr = prepasValues.join(', ');
-                        let sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`, `destination`, `type`) VALUES ' + prepasValuesStr + ';';
+                        let sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`, `destination`, `type`, `requester`) VALUES ' + prepasValuesStr + ';';
                         if (preparations.length === 0) {
                             if (prepasValues.length > 0) {
                                 this.executeQuery(sqlPrepas).subscribe(() => {
@@ -343,12 +352,15 @@ export class SqliteProvider {
                         livraison.id + ", " +
                         "'" + livraison.number + "', " +
                         "'" + this.escapeQuotes(livraison.location) + "', " +
-                        "null)");
+                        "NULL, " +
+                        "'" + this.escapeQuotes(livraison.requester) + "', " +
+                        "'" + this.escapeQuotes(livraison.type) +
+                    ")");
                 }
                 if (livraisons.indexOf(livraison) === livraisons.length - 1) {
                     this.findAll('`livraison`').subscribe((livraisonsDB) => {
                         let livraisonsValuesStr = livraisonsValues.join(', ');
-                        let sqlLivraisons = 'INSERT INTO `livraison` (`id`, `numero`, `emplacement`, `date_end`) VALUES ' + livraisonsValuesStr + ';';
+                        let sqlLivraisons = 'INSERT INTO `livraison` (`id`, `numero`, `emplacement`, `date_end`, `requester`, `type`) VALUES ' + livraisonsValuesStr + ';';
                         if (livraisonsDB.length === 0) {
                             if(livraisonsValues.length > 0) {
                                 this.executeQuery(sqlLivraisons).subscribe(() => {
@@ -481,7 +493,8 @@ export class SqliteProvider {
                 // we add 'collecte' in sqlite DB if it is in the api and not in DB
                 const collectesValuesToAdd = collectesAPI
                     .filter(({id: idAPI}) => !collectesDB.some(({id: idDB}) => (idDB === idAPI)))
-                    .map(({id, number, location_from, forStock}) => ({id, number, location_from, forStock}));
+                    .map(({id, number, location_from, forStock, requester, type}) => ({id, number, location_from, forStock, requester, type}));
+
                 return (collectesValuesToAdd.length > 0
                     ? this.insert('`collecte`', collectesValuesToAdd)
                     : of(undefined));

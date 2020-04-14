@@ -4,6 +4,8 @@ import {Preparation} from '@app/entities/preparation';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {PreparationArticlesPage} from '@pages/stock/preparation/preparation-articles/preparation-articles';
 import {MainHeaderService} from '@app/services/main-header.service';
+import {CardListConfig} from "@helpers/components/card-list/card-list-config";
+import {CardListColorEnum} from "@helpers/components/card-list/card-list-color.enum";
 
 
 @IonicPage()
@@ -19,6 +21,11 @@ export class PreparationMenuPage {
     public content: Content;
 
     public preparations: Array<Preparation>;
+
+    public preparationsListConfig: Array<CardListConfig>;
+    public readonly preparationsListColor = CardListColorEnum.BLUE;
+    public readonly preparationsIconName = 'preparation.svg';
+
     public hasLoaded: boolean;
 
     public constructor(private navCtrl: NavController,
@@ -32,14 +39,35 @@ export class PreparationMenuPage {
             this.preparations = preparations
                 .filter(p => (p.date_end === null))
                 .sort(({type : type1}, {type : type2}) => (type1 > type2) ? 1 : ((type2 > type1) ? -1 : 0));
+
+            this.preparationsListConfig = this.preparations.map((preparation: Preparation) => ({
+                title: {
+                    label: 'Demandeur',
+                    value: preparation.requester
+                },
+                content: [
+                    {
+                        label: 'Numéro',
+                        value: preparation.numero
+                    },
+                    {
+                        label: 'Flux',
+                        value: preparation.type
+                    },
+                    {
+                        label: 'Destination',
+                        value: preparation.emplacement
+                    }
+                ],
+                action: () => {
+                    this.navCtrl.push(PreparationArticlesPage, {preparation});
+                }
+            }));
+
             this.hasLoaded = true;
             this.refreshSubTitle();
             this.content.resize();
         });
-    }
-
-    public goToArticles(preparation): void {
-        this.navCtrl.push(PreparationArticlesPage, {preparation: preparation});
     }
 
     public refreshSubTitle(): void {

@@ -3,4 +3,6 @@ export interface Livraison {
     numero: string;
     emplacement: string;
     date_end: string;
+    requester: string;
+    type: string;
 }
