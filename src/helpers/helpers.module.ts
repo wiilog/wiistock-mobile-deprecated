@@ -16,12 +16,14 @@ import {FormPanelSigningComponent} from "@helpers/components/panel/form-panel/fo
 import {SignaturePadComponent} from "@helpers/components/signature-pad/signature-pad.component";
 import {MenuComponent} from "@helpers/components/menu/menu.component";
 import {LongPressModule} from "ionic-long-press";
+import {CardListComponent} from "@helpers/components/card-list/card-list.component";
 
 
 @NgModule({
     declarations: [
         SearchLocationComponent,
         MainLoaderComponent,
+        CardListComponent,
         PanelHeaderComponent,
         ListPanelComponent,
         ListPanelItemComponent,
@@ -42,7 +44,8 @@ import {LongPressModule} from "ionic-long-press";
         IconComponent,
         BarcodeScannerComponent,
         MainHeaderComponent,
-        MenuComponent
+        MenuComponent,
+        CardListComponent
     ],
     entryComponents: [
         SignaturePadComponent

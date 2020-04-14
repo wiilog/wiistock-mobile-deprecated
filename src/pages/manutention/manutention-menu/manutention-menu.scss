@@ -1,58 +1,8 @@
 @import '../../../theme/variables.scss';
 
 page-manutention-menu {
-    span {
-        margin-right: 15px;
-    }
-
-    ion-card-header {
-        background-color: $success;
-        height: 30px;
-        padding: 5px !important;
-
-        p {
-            color: white !important;
-        }
-    }
-
-    ion-card-content {
-        padding-top: 5px !important;
-        padding-bottom: 5px !important;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        .actions {
-            display: inline-flex;
-        }
-    }
-
-    .important {
-        color: $primary;
-    }
-
-    .arrow {
-        width: 15px !important;
-        height: 15px !important;
-    }
-
-    .icon-manutention-container {
-        text-align: center;
-        margin-top: $spacer;
-        margin-bottom: $spacer;
-
-        wii-icon {
-            height: 50px;
-            width: 50px;
-        }
-    }
-
-    .placeholder-buttons {
-        width: 45px;
-    }
-
     .page-content {
-        background-color: #F2F2F4 !important;
+        background-color: $lightGrey !important;
         height: 80%;
     }
-
 }

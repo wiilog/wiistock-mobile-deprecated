@@ -1,0 +1,61 @@
+@import "../../../theme/variables";
+
+$cardListColors: (
+    'green': '#149914',
+    'blue': '#0842B7',
+    'orange': '#FF5B00',
+    'yellow': '#F4B400'
+);
+
+
+wii-card-list {
+
+    .list-icon-container {
+        text-align: center;
+        margin-top: $spacer;
+        margin-bottom: $spacer;
+
+        wii-icon {
+            height: 50px;
+            width: 50px;
+        }
+    }
+
+    ion-card-header {
+        height: 30px;
+        padding: 5px !important;
+
+        * {
+            color: white !important;
+        }
+
+        @each $name, $color in $cardListColors {
+            &.card-header-#{$name} {
+                background-color: #{$color};
+            }
+        }
+    }
+
+    ion-card-content {
+        padding-top: 5px !important;
+        padding-bottom: 5px !important;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .actions {
+            display: inline-flex;
+
+            .arrow {
+                width: 15px !important;
+                height: 15px !important;
+            }
+        }
+    }
+
+    ion-card-header .title-value,
+    ion-card-content .content-value {
+        font-weight: bold;
+    }
+
+}
