@@ -1,5 +1,5 @@
-import {Component, ViewChild} from '@angular/core';
-import {Content, IonicPage, Navbar, NavController} from 'ionic-angular';
+import {Component} from '@angular/core';
+import {IonicPage, NavController} from 'ionic-angular';
 import {Preparation} from '@app/entities/preparation';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {PreparationArticlesPage} from '@pages/stock/preparation/preparation-articles/preparation-articles';
@@ -14,12 +14,6 @@ import {CardListColorEnum} from "@helpers/components/card-list/card-list-color.e
     templateUrl: 'preparation-menu.html',
 })
 export class PreparationMenuPage {
-    @ViewChild(Navbar)
-    public navBar: Navbar;
-
-    @ViewChild(Content)
-    public content: Content;
-
     public preparations: Array<Preparation>;
 
     public preparationsListConfig: Array<CardListConfig>;
@@ -56,7 +50,7 @@ export class PreparationMenuPage {
                     },
                     {
                         label: 'Destination',
-                        value: preparation.emplacement
+                        value: preparation.destination
                     }
                 ],
                 action: () => {
@@ -66,7 +60,6 @@ export class PreparationMenuPage {
 
             this.hasLoaded = true;
             this.refreshSubTitle();
-            this.content.resize();
         });
     }
 

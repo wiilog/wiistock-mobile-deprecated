@@ -354,7 +354,7 @@ export class SqliteProvider {
                         "'" + this.escapeQuotes(livraison.location) + "', " +
                         "NULL, " +
                         "'" + this.escapeQuotes(livraison.requester) + "', " +
-                        "'" + this.escapeQuotes(livraison.type) +
+                        "'" + this.escapeQuotes(livraison.type) + "'" +
                     ")");
                 }
                 if (livraisons.indexOf(livraison) === livraisons.length - 1) {

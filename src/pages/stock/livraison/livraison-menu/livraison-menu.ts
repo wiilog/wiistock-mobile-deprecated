@@ -1,5 +1,5 @@
-import {Component, ViewChild} from '@angular/core';
-import {Content, IonicPage, Navbar, NavController} from 'ionic-angular';
+import {Component} from '@angular/core';
+import {IonicPage, NavController} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {LivraisonArticlesPage} from '@pages/stock/livraison/livraison-articles/livraison-articles';
 import {Livraison} from '@app/entities/livraison';
@@ -14,12 +14,6 @@ import {CardListColorEnum} from '@helpers/components/card-list/card-list-color.e
     templateUrl: 'livraison-menu.html',
 })
 export class LivraisonMenuPage {
-    @ViewChild(Navbar)
-    public navBar: Navbar;
-
-    @ViewChild(Content)
-    public content: Content;
-
     public livraisons: Array<Livraison>;
 
     public livraisonsListConfig: Array<CardListConfig>;
@@ -63,7 +57,6 @@ export class LivraisonMenuPage {
 
             this.hasLoaded = true;
             this.refreshSubTitle();
-            this.content.resize();
         });
     }
 

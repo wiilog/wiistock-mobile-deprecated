@@ -1,5 +1,5 @@
-import {Component, ViewChild} from '@angular/core';
-import {Content, IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
+import {Component} from '@angular/core';
+import {IonicPage, NavController, NavParams} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {CollecteArticlesPage} from '@pages/stock/collecte/collecte-articles/collecte-articles';
 import {Collecte} from '@app/entities/collecte';
@@ -14,18 +14,12 @@ import {CardListColorEnum} from '@helpers/components/card-list/card-list-color.e
     templateUrl: 'collecte-menu.html',
 })
 export class CollecteMenuPage {
-    @ViewChild(Navbar)
-    public navBar: Navbar;
-
-    @ViewChild(Content)
-    public content: Content;
-
     public hasLoaded: boolean;
 
     public collectes: Array<Collecte>;
 
     public collectesListConfig: Array<CardListConfig>;
-    public readonly collectesListColor = CardListColorEnum.YELLOW;
+    public readonly collectesListColor = CardListColorEnum.ORANGE;
     public readonly collectesIconName = 'delivery.svg';
 
     private goToDepose: () => void;
@@ -84,7 +78,6 @@ export class CollecteMenuPage {
 
             this.hasLoaded = true;
             this.refreshSubTitle();
-            this.content.resize();
         });
     }
     public refreshSubTitle(): void {
