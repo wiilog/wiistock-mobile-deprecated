@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
+import {IonicPage, NavController, NavParams} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Mouvement} from '@app/entities/mouvement';
 import {LivraisonArticleTakePage} from '@pages/stock/livraison/livraison-article-take/livraison-article-take';
@@ -11,8 +11,13 @@ import {flatMap} from 'rxjs/operators';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Subscription} from 'rxjs';
 import {ToastService} from '@app/services/toast.service';
-import {ApiService} from "@app/services/api.service";
-import {Network} from "@ionic-native/network";
+import {ApiService} from '@app/services/api.service';
+import {Network} from '@ionic-native/network';
+import {HeaderConfig} from '@helpers/components/panel/model/header-config';
+import {ListPanelItemConfig} from '@helpers/components/panel/model/list-panel/list-panel-item-config';
+import {IconConfig} from '@helpers/components/panel/model/icon-config';
+import {BarcodeScannerComponent} from '@helpers/components/barcode-scanner/barcode-scanner.component';
+import {IconColor} from '@helpers/components/icon/icon-color';
 
 
 @IonicPage()
@@ -21,13 +26,26 @@ import {Network} from "@ionic-native/network";
     templateUrl: 'livraison-articles.html',
 })
 export class LivraisonArticlesPage {
+    @ViewChild('footerScannerComponent')
+    public footerScannerComponent: BarcodeScannerComponent;
 
-    @ViewChild(Navbar) navBar: Navbar;
-    livraison: Livraison;
-    articlesNT: Array<ArticleLivraison>;
-    articlesT: Array<ArticleLivraison>;
-    started: boolean = false;
-    isValid: boolean = true;
+    public livraison: Livraison;
+
+    public articlesNT: Array<ArticleLivraison>;
+    public articlesT: Array<ArticleLivraison>;
+
+    public listBoldValues?: Array<string>;
+    public listToTreatConfig?: { header: HeaderConfig; body: Array<ListPanelItemConfig>; };
+    public listTreatedConfig?: { header: HeaderConfig; body: Array<ListPanelItemConfig>; };
+    public livraisonsHeaderConfig?: {
+        leftIcon: IconConfig;
+        title: string;
+        subtitle?: string;
+        info?: string;
+    };
+
+    public started: boolean = false;
+    public isValid: boolean = true;
 
     public loadingStartLivraison: boolean;
 
@@ -46,13 +64,21 @@ export class LivraisonArticlesPage {
     public ionViewWillEnter(): void {
         this.livraison = this.navParams.get('livraison');
 
+        this.livraisonsHeaderConfig = {
+            leftIcon: {name: 'delivery.svg'},
+            title: `Livraison ${this.livraison.numero}`,
+            subtitle: `Destination : ${this.livraison.emplacement}`
+        };
+
+        this.listBoldValues = ['label', 'barCode', 'location', 'quantity'];
+
         this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
-            this.testIfBarcodeEquals(barcode, true);
+            this.testIfBarcodeEquals(barcode);
         });
 
         this.sqliteProvider.findArticlesByLivraison(this.livraison.id).subscribe((articles) => {
-            this.articlesNT = articles.filter(article => article.has_moved === 0);
-            this.articlesT = articles.filter(article => article.has_moved === 1);
+            this.updateList(articles, true);
+
             if (this.articlesT.length > 0) {
                 this.started = true;
             }
@@ -67,13 +93,7 @@ export class LivraisonArticlesPage {
     }
 
     public ionViewCanLeave(): boolean {
-        return this.barcodeScannerManager.canGoBack;
-    }
-
-    public scan(): void {
-        this.barcodeScannerManager.scan().subscribe((barcode) => {
-            this.testIfBarcodeEquals(barcode, true);
-        });
+        return !this.footerScannerComponent.isScanning;
     }
 
     public selectArticle(article, quantity) {
@@ -104,15 +124,15 @@ export class LivraisonArticlesPage {
         }
     }
 
-    refreshOver() {
+    public refreshOver(): void {
         this.toastService.presentToast('Livraison prête à être finalisée.')
     }
 
-    refresh() {
+    public refresh(): void {
         this.toastService.presentToast('Quantité bien prélevée.')
     }
 
-    registerMvt(article, quantity) {
+    public registerMvt(article, quantity): void {
         if (this.isValid) {
             if (article.quantite !== Number(quantity)) {
                 let newArticle: ArticleLivraison = {
@@ -210,7 +230,7 @@ export class LivraisonArticlesPage {
         }
     }
 
-    validate() {
+    public validate(): void {
         if ((this.articlesNT.length > 0) ||
             (this.articlesT.length === 0)) {
             this.toastService.presentToast('Veuillez traiter tous les articles concernés');
@@ -225,7 +245,7 @@ export class LivraisonArticlesPage {
         }
     }
 
-    testIfBarcodeEquals(text, fromText) {
+    public testIfBarcodeEquals(text, fromText: boolean = true): void {
         const article = fromText
             ? this.articlesNT.find((article) => (article.barcode === text))
             : text;
@@ -243,15 +263,113 @@ export class LivraisonArticlesPage {
         }
     }
 
-    private updateList(articles: Array<ArticleLivraison>): void {
-        this.articlesNT = articles.filter(article => article.has_moved === 0);
-        this.articlesT = articles.filter(article => article.has_moved === 1);
-        if (this.articlesNT.length === 0) {
-            this.refreshOver();
-        } else {
-            this.refresh();
+    private createListToTreatConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
+        const articlesNumber = (this.articlesNT ? this.articlesNT.length : 0);
+        const articlesPlural = articlesNumber > 1 ? 's' : '';
+        return articlesNumber > 0
+            ? {
+                header: {
+                    title: 'À livrer',
+                    info: `${articlesNumber} article${articlesPlural} à scanner`,
+                    leftIcon: {
+                        name: 'download.svg',
+                        color: 'list-yellow-light'
+                    }
+                },
+                body: this.articlesNT.map((articleLivraison: ArticleLivraison) => ({
+                    infos: this.createArticleInfo(articleLivraison),
+                    rightIcon: {
+                        color: 'grey' as IconColor,
+                        name: 'up.svg',
+                        action: () => {
+                            this.testIfBarcodeEquals(articleLivraison, false)
+                        }
+                    }
+                }))
+            }
+            : undefined;
+    }
+
+    private ceateListTreatedConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
+        const pickedArticlesNumber = (this.articlesT ? this.articlesT.length : 0);
+        const pickedArticlesPlural = pickedArticlesNumber > 1 ? 's' : '';
+        return {
+            header: {
+                title: 'Livré',
+                info: `${pickedArticlesNumber} article${pickedArticlesPlural} scanné${pickedArticlesPlural}`,
+                leftIcon: {
+                    name: 'upload.svg',
+                    color: 'list-yellow'
+                },
+                rightIcon: {
+                    name: 'check.svg',
+                    color: 'success',
+                    action: () => {
+                        this.validate()
+                    }
+                }
+            },
+            body: this.articlesT.map((articleLivraison: ArticleLivraison) => ({
+                infos: this.createArticleInfo(articleLivraison)
+            }))
+        };
+    }
+
+    private createArticleInfo({label, barcode, emplacement, quantite}: ArticleLivraison): {[name: string]: { label: string; value: string; }} {
+        return {
+            label: {
+                label: 'Label',
+                value: label
+            },
+            ...(
+                barcode
+                    ? {
+                        barCode: {
+                            label: 'Code barre',
+                            value: barcode
+                        }
+                    }
+                    : {}
+            ),
+            ...(
+                emplacement && emplacement !== 'null'
+                    ? {
+                        location: {
+                            label: 'Emplacement',
+                            value: emplacement
+                        }
+                    }
+                    : {}
+            ),
+            ...(
+                quantite
+                    ? {
+                        quantity: {
+                            label: 'Quantité',
+                            value: `${quantite}`
+                        }
+                    }
+                    : {}
+            )
+        };
+    }
+
+    private updateList(articles: Array<ArticleLivraison>, isInit: boolean = false): void {
+        this.articlesNT = articles.filter(({has_moved}) => (has_moved === 0));
+        this.articlesT = articles.filter(({has_moved}) => (has_moved === 1));
+
+        this.listToTreatConfig = this.createListToTreatConfig();
+        this.listTreatedConfig = this.ceateListTreatedConfig();
+
+        if (!isInit) {
+            if (this.articlesNT.length === 0) {
+                this.refreshOver();
+            }
+            else {
+                this.refresh();
+            }
+            this.loadingStartLivraison = false;
         }
-        this.loadingStartLivraison = false;
     }
 
 }
