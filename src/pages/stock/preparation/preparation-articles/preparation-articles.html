@@ -1,67 +1,35 @@
-<ion-content padding>
-    <div class="page-title" *ngIf="preparation">
-        <h4>Préparation {{preparation.numero}}</h4>
-        <p>Emplacement de destination<br/>{{preparation.destination}}</p>
-        <p>Type de flux<br/>{{preparation.type}}</p>
-    </div>
+<div class="spinner" *ngIf="loadingStartPreparation">
+    <ion-spinner></ion-spinner>
+</div>
 
-    <div class="spinner" *ngIf="loadingStartPreparation">
-        <ion-spinner></ion-spinner>
-    </div>
+<ng-container *ngIf="!loadingStartPreparation && preparation && preparationsHeaderConfig">
+    <ion-scroll scrollY="true" class="page-content">
+        <wii-panel-header [leftIcon]="preparationsHeaderConfig.leftIcon"
+                          [title]="preparationsHeaderConfig.title"
+                          [subtitle]="preparationsHeaderConfig.subtitle"
+                          [info]="preparationsHeaderConfig.info"
+                          [transparent]="true"
+                          class="page-header">
+        </wii-panel-header>
 
-    <ng-template #articleTemplate let-article='article'>
-        <ion-row>
-            <ion-col>
-                <p class="title-tmp">Article {{ article.reference }}</p>
-                <div class="sub">
-                    <p *ngIf="!article.is_ref">Référence article : {{ article.reference_article_reference }}</p>
-                    <p>Label : {{ article.label }}</p>
-                    <p *ngIf="article.barcode">Code barre : {{ article.barcode }}</p>
-                    <p *ngIf="article.emplacement && article.emplacement !== 'null'">Emplacement : {{ article.emplacement }}</p>
-                    <p>Quantité : {{ article.quantite }}</p>
-                </div>
-            </ion-col>
-        </ion-row>
-    </ng-template>
+        <wii-list-panel *ngIf="listTreatedConfig"
+                        [header]="listTreatedConfig.header"
+                        [body]="listTreatedConfig.body"
+                        [boldValues]="listBoldValues">
+        </wii-list-panel>
 
-    <div *ngIf="!loadingStartPreparation && articlesNT && articlesNT.length > 0">
-        <div class="d-flex">
-            <p>Flashez les articles</p>
-            <ion-icon item-right name="barcode"></ion-icon>
-        </div>
-        <ion-list>
-            <ion-grid>
-                <button [disabled]="!isValid" (click)="testIfBarcodeEquals(article, true)" class="list" ion-item
-                        *ngFor="let article of articlesNT">
-                    <ng-container [ngTemplateOutlet]="articleTemplate"
-                                  [ngTemplateOutletContext]="{article: article}">
-                    </ng-container>
-                </button>
-            </ion-grid>
-        </ion-list>
-    </div>
+        <wii-list-panel *ngIf="listToTreatConfig"
+                        [header]="listToTreatConfig.header"
+                        [body]="listToTreatConfig.body"
+                        [boldValues]="listBoldValues">
+        </wii-list-panel>
+    </ion-scroll>
 
-    <div *ngIf="!loadingStartPreparation && articlesT && articlesT.length > 0">
-        <p>Liste des articles traités</p>
-        <ion-list>
-            <ion-grid>
-                <button [disabled]="!isValid" class="list" ion-item *ngFor="let article of articlesT">
-                    <ng-container [ngTemplateOutlet]="articleTemplate"
-                                  [ngTemplateOutletContext]="{article: article}">
-                    </ng-container>
-                </button>
-            </ion-grid>
-        </ion-list>
+    <div class="page-footer persisted-page-footer" *ngIf="listToTreatConfig">
+        <wii-barcode-scanner #footerScannerComponent
+                             [buttonSubtitle]="'article'"
+                             [onlyScan]="true"
+                             (add)="testIfBarcodeEquals($event[0])">
+        </wii-barcode-scanner>
     </div>
-</ion-content>
-<ion-footer padding>
-    <div class="d-flex">
-        <ion-icon class="big-icon" name="qr-scanner" (click)="scan()"
-                  [hidden]="articlesNT && articlesNT.length === 0"></ion-icon>
-        <ion-icon class="big-icon"
-                  item-right name="checkmark-circle"
-                  (click)="validate()"
-                  [class.alert]="articlesT && articlesT.length > 0">
-        </ion-icon>
-    </div>
-</ion-footer>
+</ng-container>

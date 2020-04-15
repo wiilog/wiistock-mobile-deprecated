@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
+import {IonicPage, NavController, NavParams} from 'ionic-angular';
 import {Preparation} from '@app/entities/preparation';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ArticlePrepa} from '@app/entities/article-prepa';
@@ -16,6 +16,11 @@ import {ToastService} from '@app/services/toast.service';
 import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Network} from '@ionic-native/network';
 import {ApiService} from '@app/services/api.service';
+import {BarcodeScannerComponent} from '@helpers/components/barcode-scanner/barcode-scanner.component';
+import {HeaderConfig} from "@helpers/components/panel/model/header-config";
+import {ListPanelItemConfig} from "@helpers/components/panel/model/list-panel/list-panel-item-config";
+import {IconConfig} from "@helpers/components/panel/model/icon-config";
+import {IconColor} from "@helpers/components/icon/icon-color";
 
 
 @IonicPage()
@@ -25,12 +30,23 @@ import {ApiService} from '@app/services/api.service';
 })
 export class PreparationArticlesPage {
 
-    @ViewChild(Navbar)
-    public navBar: Navbar;
+    @ViewChild('footerScannerComponent')
+    public footerScannerComponent: BarcodeScannerComponent;
 
     public preparation: Preparation;
     public articlesNT: Array<ArticlePrepa>;
     public articlesT: Array<ArticlePrepa>;
+
+    public listBoldValues?: Array<string>;
+    public listToTreatConfig?: { header: HeaderConfig; body: Array<ListPanelItemConfig>; };
+    public listTreatedConfig?: { header: HeaderConfig; body: Array<ListPanelItemConfig>; };
+    public preparationsHeaderConfig?: {
+        leftIcon: IconConfig;
+        title: string;
+        subtitle?: string;
+        info?: string;
+    };
+
     public started: boolean = false;
     public isValid: boolean = true;
 
@@ -50,11 +66,21 @@ export class PreparationArticlesPage {
 
     public ionViewWillEnter(): void {
         this.preparation = this.navParams.get('preparation');
-        this.updateLists().subscribe(() => {
-            if (this.articlesT.length > 0) {
-                this.started = true;
-            }
-        });
+        this.preparationsHeaderConfig = {
+            leftIcon: {name: 'preparation.svg'},
+            title: `Préparation ${this.preparation.numero}`,
+            subtitle: `Destination : ${this.preparation.destination ? this.preparation.destination : ''}`,
+            info: `Flux : ${this.preparation.type}`
+        };
+
+        this.listBoldValues = ['reference', 'referenceArticleReference', 'label', 'barCode', 'location', 'quantity'];
+
+        this.updateLists()
+            .subscribe(() => {
+                if (this.articlesT.length > 0) {
+                    this.started = true;
+                }
+            });
 
         this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
             this.testIfBarcodeEquals(barcode);
@@ -69,13 +95,7 @@ export class PreparationArticlesPage {
     }
 
     public ionViewCanLeave(): boolean {
-        return this.barcodeScannerManager.canGoBack;
-    }
-
-    public scan(): void {
-        this.barcodeScannerManager.scan().subscribe(barcode => {
-            this.testIfBarcodeEquals(barcode);
-        });
+        return !this.listToTreatConfig || !this.footerScannerComponent.isScanning;
     }
 
     public saveSelectedArticle(selectedArticle: ArticlePrepa | ArticlePrepaByRefArticle, selectedQuantity: number): void {
@@ -310,8 +330,12 @@ export class PreparationArticlesPage {
     private updateLists(): Observable<undefined> {
         return this.sqliteProvider.findArticlesByPrepa(this.preparation.id).pipe(
             flatMap((articlesPrepa: Array<ArticlePrepa>) => {
-                this.articlesNT = articlesPrepa.filter(article => article.has_moved === 0);
-                this.articlesT = articlesPrepa.filter(article => article.has_moved === 1);
+                this.articlesNT = articlesPrepa.filter(({has_moved}) => has_moved === 0);
+                this.articlesT = articlesPrepa.filter(({has_moved}) => has_moved === 1);
+
+                this.listToTreatConfig = this.createListToTreatConfig();
+                this.listTreatedConfig = this.ceateListTreatedConfig();
+
                 return of(undefined);
             }));
     }
@@ -418,6 +442,111 @@ export class PreparationArticlesPage {
         } else {
             return of(undefined);
         }
+    }
+
+    private createListToTreatConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
+        const articlesNumber = (this.articlesNT ? this.articlesNT.length : 0);
+        const articlesPlural = articlesNumber > 1 ? 's' : '';
+        return articlesNumber > 0
+            ? {
+                header: {
+                    title: 'À préparer',
+                    info: `${articlesNumber} article${articlesPlural} à scanner`,
+                    leftIcon: {
+                        name: 'download.svg',
+                        color: 'list-blue-light'
+                    }
+                },
+                body: this.articlesNT.map((articlePrepa: ArticlePrepa) => ({
+                    infos: this.createArticleInfo(articlePrepa),
+                    rightIcon: {
+                        color: 'grey' as IconColor,
+                        name: 'up.svg',
+                        action: () => {
+                            this.testIfBarcodeEquals(articlePrepa, true)
+                        }
+                    }
+                }))
+            }
+            : undefined;
+    }
+
+    private ceateListTreatedConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
+        const pickedArticlesNumber = (this.articlesT ? this.articlesT.length : 0);
+        const pickedArticlesPlural = pickedArticlesNumber > 1 ? 's' : '';
+        return {
+            header: {
+                title: 'Préparé',
+                info: `${pickedArticlesNumber} article${pickedArticlesPlural} scanné${pickedArticlesPlural}`,
+                leftIcon: {
+                    name: 'upload.svg',
+                    color: 'list-blue'
+                },
+                rightIcon: {
+                    name: 'check.svg',
+                    color: 'success',
+                    action: () => {
+                        this.validate()
+                    }
+                }
+            },
+            body: this.articlesT.map((articlePrepa: ArticlePrepa) => ({
+                infos: this.createArticleInfo(articlePrepa)
+            }))
+        };
+    }
+
+    private createArticleInfo({reference, is_ref, reference_article_reference, label,  barcode, emplacement, quantite}: ArticlePrepa): {[name: string]: { label: string; value: string; }} {
+        return {
+            reference: {
+                label: 'Référence',
+                value: reference
+            },
+            ...(
+                !is_ref && reference_article_reference
+                    ? {
+                        referenceArticleReference: {
+                            label: 'Référence article',
+                            value: reference_article_reference
+                        }
+                    }
+                    : {}
+            ),
+            label: {
+                label: 'Libellé',
+                value: label
+            },
+            ...(
+                barcode
+                    ? {
+                        barCode: {
+                            label: 'Code barre',
+                            value: barcode
+                        }
+                    }
+                    : {}
+            ),
+            ...(
+                emplacement && emplacement !== 'null'
+                    ? {
+                        location: {
+                            label: 'Emplacement',
+                            value: emplacement
+                        }
+                    }
+                    : {}
+            ),
+            ...(
+                quantite
+                    ? {
+                        quantity: {
+                            label: 'Quantité',
+                            value: `${quantite}`
+                        }
+                    }
+                    : {}
+            )
+        };
     }
 
 }

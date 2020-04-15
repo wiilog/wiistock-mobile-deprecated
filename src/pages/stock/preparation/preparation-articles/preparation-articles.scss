@@ -1,17 +1,13 @@
-page-preparation-articles {
-  .alert {
-    color: green;
-  }
+@import "../../../../theme/variables";
 
-    .page-title {
-        text-align: center;
-        h4 {
-            font-size: 15pt;
-            font-weight: lighter;
-        }
-        p {
-            font-size: 12pt;
-            font-weight: lighter;
-        }
+
+page-preparation-articles {
+    .spinner {
+        margin: $spacer;
+    }
+
+    wii-panel-header.page-header {
+        margin-top: $spacer;
+        margin-bottom: $spacer;
     }
 }
