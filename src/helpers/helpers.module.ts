@@ -39,6 +39,7 @@ import {CardListComponent} from "@helpers/components/card-list/card-list.compone
     exports: [
         SearchLocationComponent,
         MainLoaderComponent,
+        PanelHeaderComponent,
         ListPanelComponent,
         FormPanelComponent,
         IconComponent,

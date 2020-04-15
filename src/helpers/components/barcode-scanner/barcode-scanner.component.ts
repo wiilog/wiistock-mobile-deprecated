@@ -4,7 +4,7 @@ import {ToastService} from "@app/services/toast.service";
 
 
 @Component({
-    selector: 'barcode-scanner',
+    selector: 'wii-barcode-scanner',
     templateUrl: 'barcode-scanner.component.html'
 })
 export class BarcodeScannerComponent {
@@ -13,6 +13,9 @@ export class BarcodeScannerComponent {
 
     @Input()
     public buttonSubtitle?: string;
+
+    @Input()
+    public onlyScan?: boolean = false;
 
     @Output()
     public add: EventEmitter<[string, boolean]> = new EventEmitter();

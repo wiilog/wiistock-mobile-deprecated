@@ -43,6 +43,14 @@ $green: #149914;
 $success: $green;
 $dark: #222;
 
+// card list
+$list-blue: #0842B7;
+$list-blue-light: #6F91D5;
+$list-orange: #FF813B;
+$list-orange-light: #FFAC7D;
+$list-yellow: #F6C12C;
+$list-yellow-light: #F9D87C;
+
 $colors: (
     primary: $primary,
     success: $success,
@@ -53,7 +61,14 @@ $colors: (
     grey: $grey,
     green: $green,
     white: $white,
-    black: $black
+    black: $black,
+
+    list-blue: $list-blue,
+    list-blue-light: $list-blue-light,
+    list-orange: $list-orange,
+    list-orange-light: $list-orange-light,
+    list-yellow: $list-yellow,
+    list-yellow-light: $list-yellow-light,
 );
 
 

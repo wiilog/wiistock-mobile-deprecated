@@ -2,8 +2,11 @@
 
 wii-panel-header {
     display: block;
-    background-color: $white;
-    border: 1px solid $lightBlue;
+
+    &:not(.transparent-panel-header) {
+        background-color: $white;
+        border: 1px solid $lightBlue;
+    }
 
     .list-header-wrapper {
         display: flex;
@@ -11,13 +14,13 @@ wii-panel-header {
 
         .header-body,
         .list-header-icon {
-            padding-bottom: 1.5rem;
-            padding-top: 1.5rem;
+            padding-bottom: 1rem;
+            padding-top: 1rem;
         }
 
         .header-body {
             & > *:not(:last-child) {
-                margin-bottom: .35rem;
+                margin-bottom: .20rem;
             }
 
             .header-title {
@@ -25,6 +28,8 @@ wii-panel-header {
             }
             .header-info {
                 color: $primary;
+                font-size: 90%;
+                font-style: italic;
             }
         }
 

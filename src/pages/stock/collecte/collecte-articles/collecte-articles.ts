@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {Alert, AlertController, IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
+import {Alert, AlertController, IonicPage, NavController, NavParams} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Mouvement} from '@app/entities/mouvement';
 import moment from 'moment';
@@ -11,10 +11,15 @@ import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manage
 import {Observable, Subscription} from 'rxjs';
 import {ApiService} from '@app/services/api.service';
 import {Network} from '@ionic-native/network';
-import {CollecteArticleTakePage} from "@pages/stock/collecte/collecte-article-take/collecte-article-take";
-import {of} from "rxjs/observable/of";
-import {LocalDataManagerService} from "@app/services/local-data-manager.service";
-import {AlertManagerService} from "@app/services/alert-manager.service";
+import {CollecteArticleTakePage} from '@pages/stock/collecte/collecte-article-take/collecte-article-take';
+import {of} from 'rxjs/observable/of';
+import {LocalDataManagerService} from '@app/services/local-data-manager.service';
+import {AlertManagerService} from '@app/services/alert-manager.service';
+import {IconColor} from '@helpers/components/icon/icon-color';
+import {HeaderConfig} from '@helpers/components/panel/model/header-config';
+import {ListPanelItemConfig} from '@helpers/components/panel/model/list-panel/list-panel-item-config';
+import {IconConfig} from '@helpers/components/panel/model/icon-config';
+import {BarcodeScannerComponent} from '@helpers/components/barcode-scanner/barcode-scanner.component';
 
 
 @IonicPage()
@@ -24,12 +29,24 @@ import {AlertManagerService} from "@app/services/alert-manager.service";
 })
 export class CollecteArticlesPage {
 
-    @ViewChild(Navbar)
-    public navBar: Navbar;
+    @ViewChild('footerScannerComponent')
+    public footerScannerComponent: BarcodeScannerComponent;
+
     public collecte: Collecte;
 
     public articlesNT: Array<ArticleCollecte>;
     public articlesT: Array<ArticleCollecte>;
+
+    public listBoldValues?: Array<string>;
+    public listToTreatConfig?: { header: HeaderConfig; body: Array<ListPanelItemConfig>; };
+    public listTreatedConfig?: { header: HeaderConfig; body: Array<ListPanelItemConfig>; };
+    public collecteHeaderConfig?: {
+        leftIcon: IconConfig;
+        title: string;
+        subtitle?: string;
+        info?: string;
+    };
+
     public started: boolean = false;
     public isValid: boolean = true;
     public loadingStartCollecte: boolean;
@@ -62,13 +79,21 @@ export class CollecteArticlesPage {
         this.collecte = this.navParams.get('collecte');
         this.goToDepose = this.navParams.get('goToDepose');
 
+        this.collecteHeaderConfig = {
+            leftIcon: {name: 'collecte.svg'},
+            title: `Collecte ${this.collecte.number}`,
+            subtitle: `Point de collecte : ${this.collecte.location_from ? this.collecte.location_from : ''}`,
+            info: this.collecte.forStock ? 'Mise en stock' : 'Destruction'
+        };
+
+        this.listBoldValues = ['reference', 'barCode', 'location', 'quantity'];
+
         this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
-            this.testIfBarcodeEquals(barcode, true);
+            this.testIfBarcodeEquals(barcode);
         });
 
         this.sqliteProvider.findArticlesByCollecte(this.collecte.id).subscribe((articles) => {
-            this.articlesNT = articles.filter((article) => (article.has_moved === 0));
-            this.articlesT = articles.filter((article) => (article.has_moved === 1));
+            this.updateList(articles, true);
             if (this.articlesT.length > 0) {
                 this.started = true;
             }
@@ -83,13 +108,7 @@ export class CollecteArticlesPage {
     }
 
     public ionViewCanLeave(): boolean {
-        return this.canLeave && this.barcodeScannerManager.canGoBack;
-    }
-
-    public scan(): void {
-        this.barcodeScannerManager.scan().subscribe((barcode) => {
-            this.testIfBarcodeEquals(barcode, true);
-        });
+        return this.canLeave && !this.footerScannerComponent.isScanning;
     }
 
     public refreshOver(): void {
@@ -215,7 +234,7 @@ export class CollecteArticlesPage {
         }
     }
 
-    public testIfBarcodeEquals(text, fromText): void {
+    public testIfBarcodeEquals(text, fromText = true): void {
         const article = fromText
             ? this.articlesNT.find(article => (article.barcode === text))
             : text;
@@ -290,15 +309,22 @@ export class CollecteArticlesPage {
         }
     }
 
-    private updateList(articles: Array<ArticleCollecte>): void {
-        this.articlesNT = articles.filter((article) => (article.has_moved === 0));
-        this.articlesT = articles.filter((article) => (article.has_moved === 1));
-        if (this.articlesNT.length === 0) {
-            this.refreshOver();
-        } else {
-            this.refresh();
+    private updateList(articles: Array<ArticleCollecte>, isInit: boolean = false): void {
+        this.articlesNT = articles.filter(({has_moved}) => (has_moved === 0));
+        this.articlesT = articles.filter(({has_moved}) => (has_moved === 1));
+
+        this.listToTreatConfig = this.createListToTreatConfig();
+        this.listTreatedConfig = this.ceateListTreatedConfig();
+
+        if (!isInit) {
+            if (this.articlesNT.length === 0) {
+                this.refreshOver();
+            }
+            else {
+                this.refresh();
+            }
+            this.loadingStartCollecte = false;
         }
-        this.loadingStartCollecte = false;
     }
 
     private finishCollecte(): void {
@@ -380,4 +406,90 @@ export class CollecteArticlesPage {
         this.isLoading = false;
         this.toastService.presentToast((resp && resp.api && resp.message) ? resp.message : 'Une erreur s\'est produite');
     }
+
+    private createListToTreatConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
+        const articlesNumber = (this.articlesNT ? this.articlesNT.length : 0);
+        const articlesPlural = articlesNumber > 1 ? 's' : '';
+        return articlesNumber > 0
+            ? {
+                header: {
+                    title: 'À collecter',
+                    info: `${articlesNumber} article${articlesPlural} à scanner`,
+                    leftIcon: {
+                        name: 'download.svg',
+                        color: 'list-orange-light'
+                    }
+                },
+                body: this.articlesNT.map((articleCollecte: ArticleCollecte) => ({
+                    infos: this.createArticleInfo(articleCollecte),
+                    rightIcon: {
+                        color: 'grey' as IconColor,
+                        name: 'up.svg',
+                        action: () => {
+                            this.testIfBarcodeEquals(articleCollecte, false)
+                        }
+                    }
+                }))
+            }
+            : undefined;
+    }
+
+    private ceateListTreatedConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
+        const pickedArticlesNumber = (this.articlesT ? this.articlesT.length : 0);
+        const pickedArticlesPlural = pickedArticlesNumber > 1 ? 's' : '';
+        return {
+            header: {
+                title: 'Collecté',
+                info: `${pickedArticlesNumber} article${pickedArticlesPlural} scanné${pickedArticlesPlural}`,
+                leftIcon: {
+                    name: 'upload.svg',
+                    color: 'list-orange'
+                },
+                rightIcon: {
+                    name: 'check.svg',
+                    color: 'success',
+                    action: () => {
+                        this.validate()
+                    }
+                }
+            },
+            body: this.articlesT.map((articleCollecte: ArticleCollecte) => ({
+                infos: this.createArticleInfo(articleCollecte)
+            }))
+        };
+    }
+
+    private createArticleInfo({reference, barcode, emplacement, quantite}: ArticleCollecte): {[name: string]: { label: string; value: string; }} {
+        return {
+            reference: {
+                label: 'Référence',
+                value: reference
+            },
+            barCode: {
+                label: 'Code barre',
+                value: barcode
+            },
+            ...(
+                emplacement && emplacement !== 'null'
+                    ? {
+                        location: {
+                            label: 'Emplacement',
+                            value: emplacement
+                        }
+                    }
+                    : {}
+            ),
+            ...(
+                quantite
+                    ? {
+                        quantity: {
+                            label: 'Quantité',
+                            value: `${quantite}`
+                        }
+                    }
+                    : {}
+            )
+        };
+    }
+
 }

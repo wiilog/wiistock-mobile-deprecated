@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, HostBinding, Input} from '@angular/core';
 import {IconConfig} from '@helpers/components/panel/model/icon-config';
 
 @Component({
@@ -21,6 +21,10 @@ export class PanelHeaderComponent {
 
     @Input()
     public rightIcon: IconConfig;
+
+    @Input()
+    @HostBinding('class.transparent-panel-header')
+    public transparent?: boolean = false;
 
     public onLeftIconClick(): void {
         if (this.leftIcon.action) {

@@ -16,7 +16,8 @@ wii-card-list {
         margin-top: $spacer;
         margin-bottom: $spacer;
 
-        wii-icon {
+        & > wii-icon {
+            display: inline-block;
             height: 50px;
             width: 50px;
         }

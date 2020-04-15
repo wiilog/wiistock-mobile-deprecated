@@ -17,8 +17,8 @@
 </ion-scroll>
 
 <div class="page-footer persisted-page-footer" *ngIf="!loading">
-    <barcode-scanner #footerScannerComponent
-                     [buttonSubtitle]="objectLabel"
-                     (add)="testColisDepose($event[0], $event[1])">
-    </barcode-scanner>
+    <wii-barcode-scanner #footerScannerComponent
+                         [buttonSubtitle]="objectLabel"
+                         (add)="testColisDepose($event[0], $event[1])">
+    </wii-barcode-scanner>
 </div>

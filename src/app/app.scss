@@ -17,6 +17,11 @@
 @import "../theme/style-variables";
 
 // surcharges classes ionic
+
+ion-nav {
+    z-index: -1;
+}
+
 ion-title {
     text-align: center;
     margin-bottom: 2rem;

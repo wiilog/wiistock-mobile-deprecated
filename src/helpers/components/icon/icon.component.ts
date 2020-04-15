@@ -1,8 +1,9 @@
-import {Component, EventEmitter, Input, Output} from "@angular/core";
-import {HttpClient} from "@angular/common/http";
-import {DomSanitizer, SafeHtml} from "@angular/platform-browser";
-import {Observable} from "rxjs";
-import {map} from "rxjs/operators";
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {HttpClient} from '@angular/common/http';
+import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
+import {IconColor} from '@helpers/components/icon/icon-color';
 
 /**
  * Step to add svg icon into assets/icons :
@@ -21,7 +22,7 @@ export class IconComponent {
 
     // color declared in variables.scss
     @Input()
-    public color?: 'primary'|'secondary'|'danger'|'light'|'dark'|'grey'|'green'|'white';
+    public color?: IconColor;
 
     @Output()
     public action: EventEmitter<any>;

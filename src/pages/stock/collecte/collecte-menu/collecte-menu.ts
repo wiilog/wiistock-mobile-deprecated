@@ -20,7 +20,7 @@ export class CollecteMenuPage {
 
     public collectesListConfig: Array<CardListConfig>;
     public readonly collectesListColor = CardListColorEnum.ORANGE;
-    public readonly collectesIconName = 'delivery.svg';
+    public readonly collectesIconName = 'collecte.svg';
 
     private goToDepose: () => void;
     private avoidSync: () => void;

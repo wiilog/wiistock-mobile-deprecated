@@ -1,4 +1,5 @@
-<div class="input-article">
+<div class="input-article"
+     *ngIf="!onlyScan">
     <ion-item>
         <ion-input type="text" placeholder="Entrée manuelle..." [(ngModel)]="input"></ion-input>
         <wii-icon name="plus.svg"
