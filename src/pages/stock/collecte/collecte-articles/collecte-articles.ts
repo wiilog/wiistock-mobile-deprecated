@@ -108,7 +108,7 @@ export class CollecteArticlesPage {
     }
 
     public ionViewCanLeave(): boolean {
-        return this.canLeave && !this.footerScannerComponent.isScanning;
+        return this.canLeave && (!this.listToTreatConfig || !this.footerScannerComponent.isScanning);
     }
 
     public refreshOver(): void {

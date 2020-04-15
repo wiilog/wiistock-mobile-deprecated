@@ -93,7 +93,10 @@ export class LivraisonArticlesPage {
     }
 
     public ionViewCanLeave(): boolean {
-        return !this.footerScannerComponent.isScanning;
+        return (
+            !this.listToTreatConfig
+            || !this.footerScannerComponent.isScanning
+        );
     }
 
     public selectArticle(article, quantity) {
