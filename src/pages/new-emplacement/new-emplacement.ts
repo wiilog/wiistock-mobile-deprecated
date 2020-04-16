@@ -1,6 +1,5 @@
 import {Component} from '@angular/core';
 import {IonicPage, Loading, NavController, NavParams} from "ionic-angular";
-import {Emplacement} from "@app/entities/emplacement";
 import {ApiService} from "@app/services/api.service";
 import {ToastService} from "@app/services/toast.service";
 import {LoadingService} from "@app/services/loading.service";
@@ -18,53 +17,66 @@ import {LoadingService} from "@app/services/loading.service";
 })
 export class NewEmplacementComponent {
 
+    public loading: boolean;
+
+    public simpleFormConfig: { title: string; fields: Array<{label: string; name: string;}> };
+
     private createNewEmp: (emplacement) => void;
     private fromDepose: boolean;
-    private emplacement: Emplacement;
-
-    public loading: boolean;
 
     public constructor(private navParams: NavParams,
                        private apiService: ApiService,
-                       private toast: ToastService,
+                       private toastService: ToastService,
                        private loadingService: LoadingService,
                        private navCtrl: NavController) {
         this.loading = false;
+
+        this.simpleFormConfig = {
+            title: 'Nouvel emplacement',
+            fields: [
+                {
+                    label: 'Label',
+                    name: 'location'
+                }
+            ]
+        }
     }
 
     public ionViewWillEnter(): void {
         this.createNewEmp = this.navParams.get('createNewEmp');
         this.fromDepose = this.navParams.get('fromDepose');
-        this.emplacement = {
-            id: null,
-            label: ''
-        };
     }
 
-    public createEmp(): void {
+    public onFormSubmit({location}: {location: string}): void {
         if (!this.loading) {
-            this.loadingService.presentLoading('Création de l\'emplacement').subscribe((loader: Loading) => {
-                this.loading = true;
-                const params = {
-                    label: this.emplacement.label,
-                    isDelivery: this.fromDepose ? '1' : '0'
-                };
-                this.apiService.requestApi("post", ApiService.NEW_EMP, {params}).subscribe(
-                    (response) => {
-                        this.loading = false;
-                        loader.dismiss();
-                        this.emplacement.id = Number(response.msg);
-                        this.navCtrl.pop().then(() => {
-                            this.createNewEmp(this.emplacement);
+            if (location && location.length > 0) {
+                this.loadingService.presentLoading('Création de l\'emplacement').subscribe((loader: Loading) => {
+                    this.loading = true;
+                    const params = {
+                        label: location,
+                        isDelivery: this.fromDepose ? '1' : '0'
+                    };
+                    this.apiService.requestApi("post", ApiService.NEW_EMP, {params}).subscribe(
+                        (response) => {
+                            this.loading = false;
+                            loader.dismiss();
+                            this.navCtrl.pop().then(() => {
+                                this.createNewEmp({
+                                    id: Number(response.msg),
+                                    label: location
+                                });
+                            });
+                        },
+                        (response) => {
+                            this.loading = false;
+                            loader.dismiss();
+                            this.toastService.presentToast(response.error.msg);
                         });
-                    },
-                    (response) => {
-                        this.loading = false;
-                        loader.dismiss();
-                        this.toast.presentToast(response.error.msg);
-                    });
-            });
+                });
+            }
+            else {
+                this.toastService.presentToast('Vous devez saisir un emplacement valide.');
+            }
         }
     }
-
 }

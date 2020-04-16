@@ -1,0 +1,26 @@
+<div class="simple-form-wrapper">
+    <div class="simple-form-title" *ngIf="title">{{ title }}</div>
+
+    <ion-scroll scrollY="true" class="simple-form-content">
+        <div class="simple-form-content-wrapper">
+            <div class="simple-form-info"
+                 *ngIf="info && info.length > 0">
+                <div class="simple-form-info-item" *ngFor="let infoConfig of info">
+                    {{ infoConfig.label }} : <span class="simple-form-info-item-value">{{ infoConfig.value }}</span>
+                </div>
+            </div>
+
+            <ion-item class="simple-form-item" *ngFor="let fieldConfig of fields">
+                <ion-label>{{ fieldConfig.label }}</ion-label>
+                <ion-input [(ngModel)]="models[fieldConfig.name]" [type]="fieldConfig.type || 'text'" [value]="fieldConfig.value"></ion-input>
+            </ion-item>
+        </div>
+    </ion-scroll>
+
+    <div class="simple-form-footer">
+        <button class="submit-button" ion-button color="success" (click)="onFormSubmit()">
+            <span>VALIDER</span>
+            <wii-icon name="check.svg" color="white" class="validate-icon"></wii-icon>
+        </button>
+    </div>
+</div>

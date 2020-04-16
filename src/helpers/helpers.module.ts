@@ -17,6 +17,7 @@ import {SignaturePadComponent} from "@helpers/components/signature-pad/signature
 import {MenuComponent} from "@helpers/components/menu/menu.component";
 import {LongPressModule} from "ionic-long-press";
 import {CardListComponent} from "@helpers/components/card-list/card-list.component";
+import {SimpleFormComponent} from "@helpers/components/simple-form/simple-form.component";
 
 
 @NgModule({
@@ -34,7 +35,8 @@ import {CardListComponent} from "@helpers/components/card-list/card-list.compone
         BarcodeScannerComponent,
         MainHeaderComponent,
         SignaturePadComponent,
-        MenuComponent
+        MenuComponent,
+        SimpleFormComponent
     ],
     exports: [
         SearchLocationComponent,
@@ -46,7 +48,8 @@ import {CardListComponent} from "@helpers/components/card-list/card-list.compone
         BarcodeScannerComponent,
         MainHeaderComponent,
         MenuComponent,
-        CardListComponent
+        CardListComponent,
+        SimpleFormComponent
     ],
     entryComponents: [
         SignaturePadComponent

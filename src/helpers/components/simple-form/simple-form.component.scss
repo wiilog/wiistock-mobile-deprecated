@@ -1,0 +1,80 @@
+@import "../../../theme/variables";
+
+wii-simple-form {
+    display: flex;
+    flex: 1;
+
+    .simple-form-wrapper {
+        margin: .35rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+
+
+        .simple-form-title {
+            text-transform: uppercase;
+            color: white;
+            text-align: center;
+            padding-bottom: 2.5rem;
+            padding-top: 2.5rem;
+            font-size: large;
+            font-weight: bold;
+            background-color: $primary;
+        }
+
+        .simple-form-content {
+            flex: 1;
+            margin: 1rem;
+
+            .scroll-content {
+                display: flex;
+                .scroll-zoom-wrapper {
+                    display: flex;
+                    flex: 1;
+                    .simple-form-content-wrapper {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+
+                        & > *:not(:last-child) {
+                            margin-bottom: 2rem;
+                        }
+
+                        .simple-form-info {
+                            background-color: $white;
+                            border: 1px solid $lightBlue;
+                            padding: 1.5rem;
+                            margin-bottom: 3rem;
+
+                            & > .simple-form-info-item {
+                                font-size: 13pt;
+
+                                &:not(:last-child) {
+                                    margin-bottom: .8rem;
+                                }
+
+                                .simple-form-info-item-value {
+                                    font-weight: bold;
+                                }
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+
+        .simple-form-footer {
+            display: flex;
+
+            .submit-button {
+                flex: 1;
+            }
+        }
+    }
+}
+
+ion-nav.keyboard-shown .simple-form-footer {
+    display: none !important;
+}
