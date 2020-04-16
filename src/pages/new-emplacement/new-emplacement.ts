@@ -47,8 +47,9 @@ export class NewEmplacementComponent {
         this.fromDepose = this.navParams.get('fromDepose');
     }
 
-    public onFormSubmit({location}: {location: string}): void {
+    public onFormSubmit(data): void {
         if (!this.loading) {
+            const {location} = data;
             if (location && location.length > 0) {
                 this.loadingService.presentLoading('Création de l\'emplacement').subscribe((loader: Loading) => {
                     this.loading = true;

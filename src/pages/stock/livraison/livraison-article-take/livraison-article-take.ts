@@ -12,8 +12,13 @@ import {ToastService} from '@app/services/toast.service';
 export class LivraisonArticleTakePage {
 
     public article: ArticleLivraison;
-    public quantite: number;
-    public maxQuantity: number;
+
+    public simpleFormConfig: {
+        title: string;
+        info: Array<{label: string; value: string;}>
+        fields: Array<{label: string; name: string; type: string; value: string|number;}>
+    };
+
     private selectArticle: (quantity) => void;
 
     public constructor(private navCtrl: NavController,
@@ -24,13 +29,28 @@ export class LivraisonArticleTakePage {
     public ionViewWillEnter(): void {
         this.article = this.navParams.get('article');
         this.selectArticle = this.navParams.get('selectArticle');
-        this.quantite = this.article.quantite;
-        this.maxQuantity = this.article.quantite;
+
+        this.simpleFormConfig = {
+            title: 'Confirmation quantité',
+            info: [
+                {label: 'Article', value: this.article.reference},
+                {label: 'Quantité à livrer', value: `${this.article.quantite}`}
+            ],
+            fields: [
+                {
+                    label: 'Quantité souhaitée',
+                    name: 'quantity',
+                    type: 'number',
+                    value: this.article.quantite
+                }
+            ]
+        }
     }
 
-    public addArticle(): void {
-        if (this.quantite <= this.article.quantite && this.quantite > 0) {
-            this.selectArticle(this.quantite);
+    public addArticle(data): void {
+        const {quantity} = data;
+        if (quantity && quantity <= this.article.quantite && quantity > 0) {
+            this.selectArticle(quantity);
             this.navCtrl.pop();
         }
         else {

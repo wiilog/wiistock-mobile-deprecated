@@ -12,7 +12,9 @@
 
             <ion-item class="simple-form-item" *ngFor="let fieldConfig of fields">
                 <ion-label>{{ fieldConfig.label }}</ion-label>
-                <ion-input [(ngModel)]="models[fieldConfig.name]" [type]="fieldConfig.type || 'text'" [value]="fieldConfig.value"></ion-input>
+                <ion-input (change)="onInputChange(fieldConfig.name, fieldConfig.type || 'text', $event.target)"
+                           [type]="fieldConfig.type || 'text'"
+                           [value]="fieldConfig.value"></ion-input>
             </ion-item>
         </div>
     </ion-scroll>

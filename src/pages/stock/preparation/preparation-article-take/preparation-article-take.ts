@@ -15,15 +15,21 @@ export class PreparationArticleTakePage {
 
     public article: ArticlePrepa & ArticlePrepaByRefArticle;
     public refArticle: ArticlePrepa;
-    public quantite: number;
     public preparation: Preparation;
+
+    public simpleFormConfig: {
+        title: string;
+        info: Array<{label: string; value: string;}>
+        fields: Array<{label: string; name: string; type: string; value: string|number;}>
+    };
 
     private onlyOne: boolean;
     private selectArticle: (quantity: number) => void;
 
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
-                       public toastService: ToastService) {}
+                       public toastService: ToastService) {
+    }
 
     public ionViewWillEnter(): void {
         this.article = this.navParams.get('article');
@@ -32,19 +38,37 @@ export class PreparationArticleTakePage {
         this.selectArticle = this.navParams.get('selectArticle');
         this.onlyOne = this.navParams.get('onlyOne');
 
-        this.quantite = this.maxQuantityAvailable;
+        this.simpleFormConfig = {
+            title: 'Confirmation quantité',
+            info: [
+                ...(this.article.isSelectableByUser ? [{label: 'Référence', value: this.article.reference_article}] : []),
+                {label: 'Article', value: this.article.reference},
+                {label: 'Quantité à prélever', value: `${this.quantityToSelect}`},
+                ...(this.quantityToSelect !== this.availableQuantity ? [{label: 'Quantité disponible', value: `${this.availableQuantity}`}] : []),
+            ],
+            fields: [
+                {
+                    label: 'Quantité souhaitée',
+                    name: 'quantity',
+                    type: 'number',
+                    value: this.maxQuantityAvailable
+                }
+            ]
+        }
     }
 
-    public addArticle(): void {
+    public addArticle(data): void {
+        const {quantity} = data;
         const maxQuantityAvailable = this.maxQuantityAvailable;
-        if (!this.quantite || (this.quantite > maxQuantityAvailable) || this.quantite <= 0) {
+
+        if (!quantity || (quantity > maxQuantityAvailable) || quantity <= 0) {
             this.toastService.presentToast('Veuillez sélectionner une quantité valide.');
         }
-        else if (this.onlyOne && this.quantite !== maxQuantityAvailable) {
+        else if (this.onlyOne && quantity !== maxQuantityAvailable) {
             this.toastService.presentToast(`La quantité souhaitée doit obligatoirement être égale à `);
         }
         else {
-            this.selectArticle(this.quantite);
+            this.selectArticle(quantity);
             this.navCtrl.pop();
         }
     }
