@@ -1,23 +1,6 @@
 @import "../../../theme/variables";
 
 page-emplacement-scan {
-    .label-emp {
-        margin-top: 50% !important;
-        margin-bottom: 50% !important;
-    }
-
-    .tools {
-        text-align: center;
-        margin-bottom: 20px;
-
-        .icon-emp:not(:first-child) {
-            margin-left: 50px !important;
-        }
-
-        .icon-emp {
-            width: 30px;
-            height: 30px;
-            display: inline-block;
-        }
-    }
+    display: flex;
+    justify-content: flex-end;
 }

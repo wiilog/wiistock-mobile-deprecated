@@ -7,8 +7,7 @@ import {ArticleCollecte} from '@app/entities/article-collecte';
 import {Collecte} from '@app/entities/collecte';
 import {flatMap} from 'rxjs/operators';
 import {ToastService} from '@app/services/toast.service';
-import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
-import {Observable, Subscription} from 'rxjs';
+import {Observable} from 'rxjs';
 import {ApiService} from '@app/services/api.service';
 import {Network} from '@ionic-native/network';
 import {CollecteArticleTakePage} from '@pages/stock/collecte/collecte-article-take/collecte-article-take';
@@ -51,8 +50,6 @@ export class CollecteArticlesPage {
     public isValid: boolean = true;
     public loadingStartCollecte: boolean;
 
-    private zebraScannerSubscription: Subscription;
-
     private partialCollecteAlert: Alert;
 
     private isLoading: boolean;
@@ -67,7 +64,6 @@ export class CollecteArticlesPage {
                        private network: Network,
                        private localDataManager: LocalDataManagerService,
                        private alertController: AlertController,
-                       private barcodeScannerManager: BarcodeScannerManagerService,
                        private apiService: ApiService) {
         this.loadingStartCollecte = false;
         this.isLoading = false;
@@ -88,9 +84,7 @@ export class CollecteArticlesPage {
 
         this.listBoldValues = ['reference', 'barCode', 'location', 'quantity'];
 
-        this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
-            this.testIfBarcodeEquals(barcode);
-        });
+        this.footerScannerComponent.fireZebraScan();
 
         this.sqliteProvider.findArticlesByCollecte(this.collecte.id).subscribe((articles) => {
             this.updateList(articles, true);
@@ -101,10 +95,7 @@ export class CollecteArticlesPage {
     }
 
     public ionViewWillLeave(): void {
-        if (this.zebraScannerSubscription) {
-            this.zebraScannerSubscription.unsubscribe();
-            this.zebraScannerSubscription = undefined;
-        }
+        this.footerScannerComponent.unsubscribeZebraScan();
     }
 
     public ionViewCanLeave(): boolean {
@@ -245,7 +236,8 @@ export class CollecteArticlesPage {
                     this.selectArticle(article, quantity);
                 }
             });
-        } else {
+        }
+        else {
             this.toastService.presentToast('L\'article scanné n\'est pas dans la liste.');
         }
     }

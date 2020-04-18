@@ -8,19 +8,18 @@ import {PreparationArticleTakePage} from '@pages/stock/preparation/preparation-a
 import {PreparationEmplacementPage} from '@pages/stock/preparation/preparation-emplacement/preparation-emplacement';
 import moment from 'moment';
 import {PreparationRefArticlesPage} from '@pages/stock/preparation/preparation-ref-articles/preparation-ref-articles';
-import {Observable, Subscription} from 'rxjs';
+import {Observable} from 'rxjs';
 import {flatMap, map} from 'rxjs/operators';
 import {ArticlePrepaByRefArticle} from '@app/entities/article-prepa-by-ref-article';
 import {of} from 'rxjs/observable/of';
 import {ToastService} from '@app/services/toast.service';
-import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Network} from '@ionic-native/network';
 import {ApiService} from '@app/services/api.service';
 import {BarcodeScannerComponent} from '@helpers/components/barcode-scanner/barcode-scanner.component';
-import {HeaderConfig} from "@helpers/components/panel/model/header-config";
-import {ListPanelItemConfig} from "@helpers/components/panel/model/list-panel/list-panel-item-config";
-import {IconConfig} from "@helpers/components/panel/model/icon-config";
-import {IconColor} from "@helpers/components/icon/icon-color";
+import {HeaderConfig} from '@helpers/components/panel/model/header-config';
+import {ListPanelItemConfig} from '@helpers/components/panel/model/list-panel/list-panel-item-config';
+import {IconConfig} from '@helpers/components/panel/model/icon-config';
+import {IconColor} from '@helpers/components/icon/icon-color';
 
 
 @IonicPage()
@@ -52,12 +51,9 @@ export class PreparationArticlesPage {
 
     public loadingStartPreparation: boolean;
 
-    private zebraScannerSubscription: Subscription;
-
     public constructor(private navCtrl: NavController,
                        private navParams: NavParams,
                        private sqliteProvider: SqliteProvider,
-                       private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService,
                        private network: Network,
                        private apiService: ApiService) {
@@ -82,15 +78,14 @@ export class PreparationArticlesPage {
                 }
             });
 
-        this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
-            this.testIfBarcodeEquals(barcode);
-        });
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.fireZebraScan();
+        }
     }
 
     public ionViewWillLeave(): void {
-        if (this.zebraScannerSubscription) {
-            this.zebraScannerSubscription.unsubscribe();
-            this.zebraScannerSubscription = undefined;
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.unsubscribeZebraScan();
         }
     }
 
@@ -272,7 +267,8 @@ export class PreparationArticlesPage {
                 // result = {selectedArticle, refArticle}
                 this.navigateToPreparationTake(result);
             });
-        } else if (selectedArticle && (selectedArticle as ArticlePrepa).type_quantite === 'article') {
+        }
+        else if (selectedArticle && (selectedArticle as ArticlePrepa).type_quantite === 'article') {
             this.navCtrl.push(PreparationRefArticlesPage, {
                 article: selectedArticle,
                 preparation: this.preparation,
@@ -281,10 +277,10 @@ export class PreparationArticlesPage {
                 getArticleByBarcode: (barcode: string) => this.getArticleByBarcode(barcode),
                 selectArticle: (selectedQuantity: number, selectedArticleByRef: ArticlePrepaByRefArticle) => this.selectArticle(selectedArticleByRef, selectedQuantity)
             });
-        } else {
+        }
+        else {
             this.navigateToPreparationTake({selectedArticle: (selectedArticle as ArticlePrepa)});
         }
-
     }
 
     private getArticleByBarcode(barcode: string): Observable<{ selectedArticle?: ArticlePrepaByRefArticle, refArticle?: ArticlePrepa }> {

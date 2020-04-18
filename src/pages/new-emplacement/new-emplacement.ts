@@ -22,7 +22,7 @@ export class NewEmplacementComponent {
     public simpleFormConfig: { title: string; fields: Array<{label: string; name: string;}> };
 
     private createNewEmp: (emplacement) => void;
-    private fromDepose: boolean;
+    private isDelivery: boolean;
 
     public constructor(private navParams: NavParams,
                        private apiService: ApiService,
@@ -44,7 +44,7 @@ export class NewEmplacementComponent {
 
     public ionViewWillEnter(): void {
         this.createNewEmp = this.navParams.get('createNewEmp');
-        this.fromDepose = this.navParams.get('fromDepose');
+        this.isDelivery = this.navParams.get('isDelivery');
     }
 
     public onFormSubmit(data): void {
@@ -55,7 +55,7 @@ export class NewEmplacementComponent {
                     this.loading = true;
                     const params = {
                         label: location,
-                        isDelivery: this.fromDepose ? '1' : '0'
+                        isDelivery: this.isDelivery ? '1' : '0'
                     };
                     this.apiService.requestApi("post", ApiService.NEW_EMP, {params}).subscribe(
                         (response) => {

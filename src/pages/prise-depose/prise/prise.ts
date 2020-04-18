@@ -3,7 +3,6 @@ import {AlertController, IonicPage, Loading, NavController, NavParams} from 'ion
 import {Emplacement} from '@app/entities/emplacement';
 import {ChangeDetectorRef} from '@angular/core';
 import {Observable, Subscription} from 'rxjs';
-import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/services/toast.service';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {HeaderConfig} from '@helpers/components/panel/model/header-config';
@@ -20,6 +19,7 @@ import {ApiService} from '@app/services/api.service';
 import {LoadingService} from '@app/services/loading.service';
 import {from} from 'rxjs/observable/from';
 import {SqliteProvider} from "@providers/sqlite/sqlite";
+import {BarcodeScannerModeEnum} from "@helpers/components/barcode-scanner/barcode-scanner-mode.enum";
 
 
 @IonicPage()
@@ -46,12 +46,13 @@ export class PrisePage {
     public listTakingBody: Array<ListPanelItemConfig>;
     public listBoldValues: Array<string>;
 
+    public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.WITH_MANUAL;
+
     public loading: boolean;
     public barcodeCheckLoading: boolean;
 
     public fromStock: boolean;
 
-    private zebraScanSubscription: Subscription;
     private barcodeCheckSubscription: Subscription;
     private saveSubscription: Subscription;
 
@@ -67,7 +68,6 @@ export class PrisePage {
                        private alertController: AlertController,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
-                       private barcodeScannerManager: BarcodeScannerManagerService,
                        private changeDetectorRef: ChangeDetectorRef,
                        private localDataManager: LocalDataManagerService,
                        private tracaListFactory: TracaListFactoryService,
@@ -96,7 +96,7 @@ export class PrisePage {
                 this.operator = operator;
                 this.colisPriseAlreadySaved = colisPriseAlreadySaved;
                 this.currentPacksOnLocation = trackingDrops;
-                this.launchZebraScanObserver();
+                this.footerScannerComponent.fireZebraScan();
 
                 this.refreshListComponent();
                 this.loading = false;
@@ -105,7 +105,7 @@ export class PrisePage {
 
     public ionViewWillLeave(): void {
         this.barcodeCheckLoading = false;
-        this.unsubscribeZebraScanObserver();
+        this.footerScannerComponent.unsubscribeZebraScan();
         if (this.barcodeCheckSubscription) {
             this.barcodeCheckSubscription.unsubscribe();
             this.barcodeCheckSubscription = undefined;
@@ -226,7 +226,7 @@ export class PrisePage {
                                     this.saveMouvementTraca(barCode, quantity);
                                 }
                                 else {
-                                    this.unsubscribeZebraScanObserver();
+                                    this.footerScannerComponent.unsubscribeZebraScan();
                                     const quantitySuffix = (typeof quantity === 'number')
                                         ? ` en quantité de ${quantity}`
                                         : '';
@@ -237,14 +237,14 @@ export class PrisePage {
                                                 {
                                                     text: 'Annuler',
                                                     handler: () => {
-                                                        this.launchZebraScanObserver();
+                                                        this.footerScannerComponent.fireZebraScan();
                                                     }
                                                 },
                                                 {
                                                     text: 'Confirmer',
                                                     handler: () => {
                                                         this.saveMouvementTraca(barCode, quantity);
-                                                        this.launchZebraScanObserver();
+                                                        this.footerScannerComponent.fireZebraScan();
                                                     },
                                                     cssClass: 'alert-success'
                                                 }
@@ -353,20 +353,6 @@ export class PrisePage {
                     ))
                 )
             : of(true)
-    }
-
-    private launchZebraScanObserver(): void {
-        this.unsubscribeZebraScanObserver();
-        this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
-            this.testIfBarcodeEquals(barcode);
-        });
-    }
-
-    private unsubscribeZebraScanObserver(): void {
-        if (this.zebraScanSubscription) {
-            this.zebraScanSubscription.unsubscribe();
-            this.zebraScanSubscription = undefined;
-        }
     }
 
     private setPackOnLocationHidden(barCode: string, hidden: boolean): void {

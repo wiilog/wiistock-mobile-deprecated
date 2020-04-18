@@ -1,6 +1,7 @@
 import {Component, HostBinding, Input} from '@angular/core';
 import {IconConfig} from '@helpers/components/panel/model/icon-config';
 
+
 @Component({
     selector: 'wii-panel-header',
     templateUrl: 'panel-header.component.html'

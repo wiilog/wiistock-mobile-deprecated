@@ -8,8 +8,6 @@ import moment from 'moment';
 import {ArticleLivraison} from '@app/entities/article-livraison';
 import {Livraison} from '@app/entities/livraison';
 import {flatMap} from 'rxjs/operators';
-import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
-import {Subscription} from 'rxjs';
 import {ToastService} from '@app/services/toast.service';
 import {ApiService} from '@app/services/api.service';
 import {Network} from '@ionic-native/network';
@@ -49,15 +47,12 @@ export class LivraisonArticlesPage {
 
     public loadingStartLivraison: boolean;
 
-    private zebraScannerSubscription: Subscription;
-
     public constructor(private navCtrl: NavController,
                        private navParams: NavParams,
                        private toastService: ToastService,
                        private sqliteProvider: SqliteProvider,
                        private network: Network,
-                       private apiService: ApiService,
-                       private barcodeScannerManager: BarcodeScannerManagerService) {
+                       private apiService: ApiService) {
         this.loadingStartLivraison = false;
     }
 
@@ -72,9 +67,7 @@ export class LivraisonArticlesPage {
 
         this.listBoldValues = ['label', 'barCode', 'location', 'quantity'];
 
-        this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
-            this.testIfBarcodeEquals(barcode);
-        });
+        this.footerScannerComponent.fireZebraScan();
 
         this.sqliteProvider.findArticlesByLivraison(this.livraison.id).subscribe((articles) => {
             this.updateList(articles, true);
@@ -86,10 +79,7 @@ export class LivraisonArticlesPage {
     }
 
     public ionViewWillLeave(): void {
-        if(this.zebraScannerSubscription) {
-            this.zebraScannerSubscription.unsubscribe();
-            this.zebraScannerSubscription = undefined;
-        }
+        this.footerScannerComponent.unsubscribeZebraScan();
     }
 
     public ionViewCanLeave(): boolean {

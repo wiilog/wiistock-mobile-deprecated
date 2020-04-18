@@ -3,7 +3,6 @@ import {AlertController, IonicPage, Loading, NavController, NavParams} from 'ion
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ToastService} from '@app/services/toast.service';
-import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
 import {Observable, Subscription} from 'rxjs';
 import {StorageService} from '@app/services/storage.service';
 import {LocalDataManagerService} from "@app/services/local-data-manager.service";
@@ -19,6 +18,7 @@ import {Network} from '@ionic-native/network';
 import {LoadingService} from '@app/services/loading.service';
 import {from} from 'rxjs/observable/from';
 import {DeposeConfirmPage} from "@pages/prise-depose/depose-confirm/depose-confirm";
+import {BarcodeScannerModeEnum} from "@helpers/components/barcode-scanner/barcode-scanner-mode.enum";
 
 
 @IonicPage()
@@ -50,11 +50,12 @@ export class DeposePage {
 
     public listBoldValues: Array<string>;
 
+    public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.WITH_MANUAL;
+
     public loading: boolean;
 
     public fromStock: boolean;
 
-    private zebraScanSubscription: Subscription;
     private saveSubscription: Subscription;
 
     private finishAction: () => void;
@@ -70,7 +71,6 @@ export class DeposePage {
                        private toastService: ToastService,
                        private loadingService: LoadingService,
                        private sqliteProvider: SqliteProvider,
-                       private barcodeScannerManager: BarcodeScannerManagerService,
                        private localDataManager: LocalDataManagerService,
                        private tracaListFactory: TracaListFactoryService,
                        private storageService: StorageService) {
@@ -102,7 +102,7 @@ export class DeposePage {
                     this.colisPrise = colisPrise;
                     this.operator = operator;
 
-                    this.launchZebraScanObserver();
+                    this.footerScannerComponent.fireZebraScan();
 
                     this.refreshDeposeListComponent();
                     this.refreshPriseListComponent();
@@ -110,12 +110,12 @@ export class DeposePage {
                 });
         }
         else {
-            this.launchZebraScanObserver();
+            this.footerScannerComponent.fireZebraScan();
         }
     }
 
     public ionViewWillLeave(): void {
-        this.unsubscribeZebraScanObserver();
+        this.footerScannerComponent.unsubscribeZebraScan();
         if (this.saveSubscription) {
             this.saveSubscription.unsubscribe();
             this.saveSubscription = undefined;
@@ -223,7 +223,7 @@ export class DeposePage {
                 this.saveMouvementTraca(pickingIndex);
             }
             else {
-                this.unsubscribeZebraScanObserver();
+                this.footerScannerComponent.unsubscribeZebraScan();
                 this.alertController
                     .create({
                         title: `Vous avez sélectionné l'${this.objectLabel} ${barCode}`,
@@ -231,7 +231,7 @@ export class DeposePage {
                             {
                                 text: 'Annuler',
                                 handler: () => {
-                                    this.launchZebraScanObserver();
+                                    this.footerScannerComponent.fireZebraScan();
                                 },
                             },
                             {
@@ -281,7 +281,7 @@ export class DeposePage {
 
         this.refreshPriseListComponent();
         this.refreshDeposeListComponent();
-        this.launchZebraScanObserver();
+        this.footerScannerComponent.fireZebraScan();
     }
 
     private updatePicking(barCode: string, comment?: string, signature?: string): void {
@@ -295,7 +295,7 @@ export class DeposePage {
             this.refreshDeposeListComponent();
         }
 
-        this.launchZebraScanObserver();
+        this.footerScannerComponent.fireZebraScan();
     }
 
     private refreshPriseListComponent(): void {
@@ -365,19 +365,5 @@ export class DeposePage {
 
     private getDropIndex(barCode: string): number {
         return this.colisDepose.findIndex(({ref_article}) => (ref_article === barCode));
-    }
-
-    private launchZebraScanObserver(): void {
-        this.unsubscribeZebraScanObserver();
-        this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
-            this.testColisDepose(barcode);
-        });
-    }
-
-    private unsubscribeZebraScanObserver(): void {
-        if (this.zebraScanSubscription) {
-            this.zebraScanSubscription.unsubscribe();
-            this.zebraScanSubscription = undefined;
-        }
     }
 }

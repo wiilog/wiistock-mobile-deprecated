@@ -25,10 +25,10 @@
         </wii-list-panel>
     </ion-scroll>
 
-    <div class="page-footer persisted-page-footer" *ngIf="listToTreatConfig">
+    <div class="page-footer persisted-page-footer">
         <wii-barcode-scanner #footerScannerComponent
                              [buttonSubtitle]="'article'"
-                             [onlyScan]="true"
+                             [hidden]="!articlesNT || articlesNT.length === 0"
                              (add)="testIfBarcodeEquals($event[0])">
         </wii-barcode-scanner>
     </div>

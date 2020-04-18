@@ -1,14 +1,13 @@
 import {Component, ViewChild} from '@angular/core';
 import {IonicPage, NavController, NavParams} from 'ionic-angular';
-import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
-import {Subscription} from 'rxjs';
-import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
 import {ToastService} from '@app/services/toast.service';
 import {Emplacement} from '@app/entities/emplacement';
 import {NewEmplacementComponent} from '@pages/new-emplacement/new-emplacement';
 import {DeposePage} from '@pages/prise-depose/depose/depose';
 import {PrisePage} from '@pages/prise-depose/prise/prise';
 import {Network} from '@ionic-native/network';
+import {SelectLocationComponent} from "@helpers/components/select-location/select-location.component";
+import {BarcodeScannerModeEnum} from "@helpers/components/barcode-scanner/barcode-scanner-mode.enum";
 
 
 @IonicPage()
@@ -17,19 +16,19 @@ import {Network} from '@ionic-native/network';
     templateUrl: 'emplacement-scan.html',
 })
 export class EmplacementScanPage {
-    @ViewChild('searchComponent')
-    public searchComponent: SearchLocationComponent;
+    @ViewChild('selectLocationComponent')
+    public selectLocationComponent: SelectLocationComponent;
 
     public fromDepose: boolean;
     public fromStock: boolean;
 
-    private emplacement: Emplacement;
-    private zebraScanSubscription: Subscription;
+    public barcodeScannerMode: BarcodeScannerModeEnum;
+
+    public emplacement: Emplacement;
 
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
                        private network: Network,
-                       private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService) {
 
     }
@@ -38,86 +37,56 @@ export class EmplacementScanPage {
         this.emplacement = undefined;
         this.fromDepose = this.navParams.get('fromDepose');
         this.fromStock = this.navParams.get('fromStock');
-        this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
-            this.testIfBarcodeEquals(barcode);
-        });
+
+        this.barcodeScannerMode = this.fromStock
+            ? BarcodeScannerModeEnum.TOOL_SEARCH
+            : BarcodeScannerModeEnum.TOOLS_FULL;
+
+        if (this.selectLocationComponent) {
+            this.selectLocationComponent.fireZebraScan();
+        }
     }
 
-
     public ionViewWillLeave(): void {
-        if (this.zebraScanSubscription) {
-            this.zebraScanSubscription.unsubscribe();
-            this.zebraScanSubscription = undefined;
+        if (this.selectLocationComponent) {
+            this.selectLocationComponent.unsubscribeZebraScan();
         }
     }
 
     public ionViewCanLeave(): boolean {
-        return this.barcodeScannerManager.canGoBack;
-    }
-
-    private testIfBarcodeEquals(barcode): void {
-        if (!this.fromStock || this.network.type !== 'none') {
-            if (!this.fromDepose) {
-                if (barcode) {
-                    this.emplacement = {
-                        id: new Date().getUTCMilliseconds(),
-                        label: barcode
-                    };
-                    this.selectLocation(this.emplacement);
-                }
-                else {
-                    this.toastService.presentToast('Veuillez flasher ou sélectionner un emplacement');
-                }
-            }
-            else {
-                let location = this.searchComponent.isKnownLocation(barcode);
-                if (!location) {
-                    this.toastService.presentToast('Veuillez flasher ou sélectionner un emplacement connu');
-                }
-                else {
-                    this.emplacement = location;
-                    this.selectLocation(this.emplacement);
-                }
-            }
-        }
-        else {this.toastService.presentToast('Vous devez être connecté à internet pour valider un transfert de stock');
-        }
-    }
-
-    public scanLocation(): void {
-        this.barcodeScannerManager.scan().subscribe((barcode) => {
-            this.testIfBarcodeEquals(barcode)
-        });
-    }
-
-    public openSearch(): void {
-        this.searchComponent.locationComponent.open();
-    }
-
-    public empChanged(emplacement: Emplacement) {
-        this.selectLocation(emplacement);
-        setTimeout(() => {
-            this.emplacement = undefined;
-        })
+        return !this.selectLocationComponent || !this.selectLocationComponent.isScanning;
     }
 
     public createEmp(): void {
-        this.navCtrl.push(NewEmplacementComponent, {
-            fromDepose: this.fromDepose,
-            createNewEmp: (emplacement: Emplacement) => {
-                this.selectLocation(emplacement)
-            }
+        this.testNetwork(() => {
+            this.navCtrl.push(NewEmplacementComponent, {
+                fromDepose: this.fromDepose,
+                createNewEmp: (emplacement: Emplacement) => {
+                    this.selectLocation(emplacement)
+                }
+            });
         });
     }
 
     private selectLocation(emplacement: Emplacement) {
-        this.navCtrl.push(this.fromDepose ? DeposePage : PrisePage, {
-            emplacement: emplacement,
-            fromStock: this.fromStock,
-            finishAction: () => {
-                this.navCtrl.pop();
-            }
+        this.testNetwork(() => {
+            this.emplacement = emplacement;
+            this.navCtrl.push(this.fromDepose ? DeposePage : PrisePage, {
+                emplacement: emplacement,
+                fromStock: this.fromStock,
+                finishAction: () => {
+                    this.navCtrl.pop();
+                }
+            });
         });
     }
 
+    private testNetwork(callback: () => void): void {
+        if (!this.fromStock || this.network.type !== 'none') {
+            callback();
+        }
+        else {
+            this.toastService.presentToast('Vous devez être connecté à internet pour valider un transfert de stock');
+        }
+    }
 }
