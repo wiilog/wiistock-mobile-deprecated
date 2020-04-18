@@ -1,18 +1,19 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
+import {IonicPage, NavController, NavParams} from 'ionic-angular';
 import {Emplacement} from '@app/entities/emplacement';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Preparation} from '@app/entities/preparation';
 import {ToastService} from '@app/services/toast.service';
-import {Observable, Subscription} from 'rxjs';
+import {Observable} from 'rxjs';
 import 'rxjs/add/observable/zip';
-import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
-import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
 import {StorageService} from '@app/services/storage.service';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {flatMap} from 'rxjs/operators';
 import {Network} from '@ionic-native/network';
 import {of} from 'rxjs/observable/of';
+import {SelectLocationComponent} from '@helpers/components/select-location/select-location.component';
+import {BarcodeScannerModeEnum} from '@helpers/components/barcode-scanner/barcode-scanner-mode.enum';
+import {IconConfig} from '@helpers/components/panel/model/icon-config';
 
 
 @IonicPage()
@@ -21,24 +22,29 @@ import {of} from 'rxjs/observable/of';
     templateUrl: 'preparation-emplacement.html',
 })
 export class PreparationEmplacementPage {
-    @ViewChild(Navbar)
-    public navBar: Navbar;
+    @ViewChild('selectLocationComponent')
+    public selectLocationComponent: SelectLocationComponent;
 
-    @ViewChild('searchComponent')
-    public searchComponent: SearchLocationComponent;
-
-    public emplacement: Emplacement;
+    public location: Emplacement;
     public preparation: Preparation;
+
+    public barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.TOOL_SEARCH;
+
+    public panelHeaderConfig: {
+        title: string;
+        subtitle?: string;
+        leftIcon: IconConfig;
+        rightIcon: IconConfig;
+        transparent: boolean;
+    };
 
     private isLoading: boolean;
 
-    private zebraScannerSubscription: Subscription;
     private validatePrepa: () => void;
 
     public constructor(private navCtrl: NavController,
                        private navParams: NavParams,
                        private sqliteProvider: SqliteProvider,
-                       private barcodeScannerManager: BarcodeScannerManagerService,
                        private toastService: ToastService,
                        private storageService: StorageService,
                        private network: Network,
@@ -49,42 +55,32 @@ export class PreparationEmplacementPage {
     public ionViewWillEnter(): void {
         this.preparation = this.navParams.get('preparation');
         this.validatePrepa = this.navParams.get('validatePrepa');
-        this.zebraScannerSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
-            this.testIfBarcodeEquals(barcode);
-        });
+
+        this.panelHeaderConfig = this.createPanelHeaderConfig();
+
+        if (this.selectLocationComponent) {
+            this.selectLocationComponent.fireZebraScan();
+        }
     }
 
     public ionViewWillLeave(): void {
-        if (this.zebraScannerSubscription) {
-            this.zebraScannerSubscription.unsubscribe();
-            this.zebraScannerSubscription = undefined;
+        if (this.selectLocationComponent) {
+            this.selectLocationComponent.unsubscribeZebraScan();
         }
     }
 
     public ionViewCanLeave(): boolean {
-        return this.barcodeScannerManager.canGoBack;
+        return !this.selectLocationComponent || !this.selectLocationComponent.isScanning;
     }
 
-    public scan(): void {
-        this.barcodeScannerManager.scan().subscribe(barcode => {
-            this.testIfBarcodeEquals(barcode);
-        });
-    }
-
-    public testIfBarcodeEquals(text): void {
-        const foundEmplacement = this.searchComponent.isKnownLocation(text);
-
-        if (foundEmplacement) {
-            this.emplacement = foundEmplacement;
-        }
-        else {
-            this.toastService.presentToast('Veuillez flasher ou sélectionner un emplacement connu.');
-        }
+    public selectLocation(location: Emplacement): void {
+        this.location = location;
+        this.panelHeaderConfig = this.createPanelHeaderConfig();
     }
 
     public validate(): void {
         if (!this.isLoading) {
-            if (this.emplacement.label !== '') {
+            if (this.location && this.location.label) {
                 this.isLoading = true;
                     this.sqliteProvider
                         .findArticlesByPrepa(this.preparation.id)
@@ -96,7 +92,7 @@ export class PreparationEmplacementPage {
                                         .pipe(
                                             flatMap((mvt) => (
                                                 mvt
-                                                    ? this.sqliteProvider.finishMvt(mvt.id, this.emplacement.label)
+                                                    ? this.sqliteProvider.finishMvt(mvt.id, this.location.label)
                                                     : of(undefined)
                                             ))
                                         )
@@ -104,7 +100,7 @@ export class PreparationEmplacementPage {
                             )),
 
                             flatMap(() => this.storageService.addPrepa()),
-                            flatMap(() => this.sqliteProvider.finishPrepa(this.preparation.id, this.emplacement.label)),
+                            flatMap(() => this.sqliteProvider.finishPrepa(this.preparation.id, this.location.label)),
                             flatMap((): any => (
                                 this.network.type !== 'none'
                                     ? this.localDataManager.sendFinishedProcess('preparation')
@@ -153,5 +149,21 @@ export class PreparationEmplacementPage {
         this.navCtrl.pop().then(() => {
             this.validatePrepa();
         });
+    }
+
+    private createPanelHeaderConfig(): { title: string; subtitle?: string; leftIcon: IconConfig; rightIcon: IconConfig; transparent: boolean;} {
+        return {
+            title: 'Emplacement sélectionné',
+            subtitle: this.location && this.location.label,
+            transparent: true,
+            leftIcon: {
+                name: 'preparation.svg'
+            },
+            rightIcon: {
+                name: 'check.svg',
+                color: 'success',
+                action: () => this.validate()
+            }
+        };
     }
 }

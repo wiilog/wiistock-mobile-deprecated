@@ -1,25 +1,16 @@
-<ion-content padding>
-    <div>
-        <div>
-            <div class="barcode-container">
-                <ion-icon class="barcode" name="barcode" (click)="scan()"></ion-icon>
-                <span *ngIf="!emplacement" class="barcode-label">Flashez un emplacement</span>
-                <span *ngIf="emplacement" class="barcode-label">Emplacement sélectionné</span>
-            </div>
+<wii-panel-header *ngIf="panelHeaderConfig"
+                  class="page-header"
+                  [transparent]="panelHeaderConfig.transparent"
+                  [title]="panelHeaderConfig.title"
+                  [subtitle]="panelHeaderConfig.subtitle"
+                  [leftIcon]="panelHeaderConfig.leftIcon"
+                  [rightIcon]="panelHeaderConfig.rightIcon">
+</wii-panel-header>
 
-            <wii-search-location #searchComponent
-                                 [(location)]="emplacement">
-            </wii-search-location>
-
-            <div class="spinner" *ngIf="isLoading">
-                <ion-spinner></ion-spinner>
-            </div>
-        </div>
-    </div>
-</ion-content>
-
-<ion-footer padding [hidden]="!emplacement">
-    <div class="d-flex">
-        <ion-icon class="big-icon" name="checkmark-circle" (click)="validate()" *ngIf="emplacement"></ion-icon>
-    </div>
-</ion-footer>
+<div class="page-footer">
+    <wii-select-location #selectLocationComponent
+                         (locationChange)="selectLocation($event)"
+                         [checkBarcodeValidity]="true"
+                         [scanMode]="barcodeScannerSearchMode">
+    </wii-select-location>
+</div>
