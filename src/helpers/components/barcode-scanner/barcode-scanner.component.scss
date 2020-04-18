@@ -1,6 +1,9 @@
 @import "../../../theme/variables";
 
 wii-barcode-scanner {
+    padding: .35rem;
+    display: block;
+
     ion-item {
         margin-bottom: .5rem !important;
     }
@@ -10,5 +13,24 @@ wii-barcode-scanner {
         width: 20px;
         height: 20px;
         z-index: 100;
+    }
+
+    .tools {
+        text-align: center;
+        margin-bottom: 20px;
+
+        .tools-icon:not(:first-child) {
+            margin-left: 50px !important;
+        }
+
+        .tools-icon {
+            width: 30px;
+            height: 30px;
+            display: inline-block;
+        }
+    }
+
+    .scanner-button {
+        width: 100%;
     }
 }

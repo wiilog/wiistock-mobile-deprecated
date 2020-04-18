@@ -18,6 +18,7 @@ import {MenuComponent} from "@helpers/components/menu/menu.component";
 import {LongPressModule} from "ionic-long-press";
 import {CardListComponent} from "@helpers/components/card-list/card-list.component";
 import {SimpleFormComponent} from "@helpers/components/simple-form/simple-form.component";
+import {SelectLocationComponent} from "@helpers/components/select-location/select-location.component";
 
 
 @NgModule({
@@ -36,7 +37,8 @@ import {SimpleFormComponent} from "@helpers/components/simple-form/simple-form.c
         MainHeaderComponent,
         SignaturePadComponent,
         MenuComponent,
-        SimpleFormComponent
+        SimpleFormComponent,
+        SelectLocationComponent
     ],
     exports: [
         SearchLocationComponent,
@@ -49,7 +51,8 @@ import {SimpleFormComponent} from "@helpers/components/simple-form/simple-form.c
         MainHeaderComponent,
         MenuComponent,
         CardListComponent,
-        SimpleFormComponent
+        SimpleFormComponent,
+        SelectLocationComponent
     ],
     entryComponents: [
         SignaturePadComponent

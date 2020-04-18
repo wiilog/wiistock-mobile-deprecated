@@ -1,5 +1,5 @@
-<div class="input-article"
-     *ngIf="!onlyScan">
+<div class="input-manual"
+     *ngIf="mode === WITH_MANUAL_MODE">
     <ion-item>
         <ion-input type="text" placeholder="Entrée manuelle..." [(ngModel)]="input"></ion-input>
         <wii-icon name="plus.svg"
@@ -10,7 +10,21 @@
         </wii-icon>
     </ion-item>
 </div>
-<button class="validate_button" ion-button color="primary" (click)="scan()">
+<div class="tools"
+     *ngIf="mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE">
+    <wii-icon name="search.svg"
+              color="black"
+              class="tools-icon"
+              (click)="onSearchClick()">
+    </wii-icon>
+    <wii-icon *ngIf="mode === TOOLS_FULL_MODE"
+              name="pen.svg"
+              color="black"
+              class="tools-icon"
+              (click)="onPenClick()">
+    </wii-icon>
+</div>
+<button class="scanner-button" ion-button color="primary" (click)="scan()">
     <span class="button-text-wrapper">
         <span class="title">SCANNER</span>
         <br/>

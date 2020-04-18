@@ -1,0 +1,14 @@
+<wii-search-location #searchComponent
+                     [location]="location"
+                     (locationChange)="onLocationChange($event)"
+                     hidden>
+</wii-search-location>
+<div class="select-location-footer">
+    <wii-barcode-scanner #barcodeScanner
+                         buttonSubtitle="Emplacement"
+                         [mode]="scanMode"
+                         (search)="openSearch()"
+                         (createForm)="onPenClick()"
+                         (add)="testIfBarcodeValid($event[0])">
+    </wii-barcode-scanner>
+</div>
