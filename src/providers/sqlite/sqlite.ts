@@ -700,30 +700,24 @@ export class SqliteProvider {
         );
     }
 
-    public count(table: string, where?: any[]): Observable<number> {
-        let query = "SELECT COUNT(*) AS nb FROM " + table;
+    public count(table: string, where: string[] = []): Observable<number> {
+        let whereClause = (where && where.length > 0)
+            ? ` WHERE ${where.map((condition) => `(${condition})`).join(' AND ')}`
+            : '';
 
-        let values = [];
-        if (where) {
-            let res = this.buildQueryWhereClause(where);
-            query += res.query;
-            values = res.values;
-        }
+        let query = `SELECT COUNT(*) AS nb FROM ${table}${whereClause}`;
 
-        const countExecuted = new ReplaySubject<number>(1);
-
-        this.db$.subscribe((db) => {
-            db.executeSql(query, values).then((data) => {
-                let count = 0;
-                if (data.rows.length > 0) {
-                    let item = data.rows.item(0);
-                    count = item.nb;
-                }
-                countExecuted.next(count);
-            });
-        });
-
-        return countExecuted;
+        return this.executeQuery(query)
+            .pipe(
+                map((data) => {
+                    let count = 0;
+                    if (data.rows.length > 0) {
+                        let item = data.rows.item(0);
+                        count = item.nb;
+                    }
+                    return Number(count);
+                })
+            );
     }
 
     /**
@@ -732,7 +726,7 @@ export class SqliteProvider {
      * @param {string[]} where boolean clauses to apply with AND separator
      */
     public findBy(table: string, where: Array<string> = []): Observable<any> {
-        const sqlWhereClauses = where.length > 0
+        const sqlWhereClauses = (where && where.length > 0)
             ? (' WHERE (' + where.join(' AND ') + ')')
             : undefined;
 
@@ -788,30 +782,6 @@ export class SqliteProvider {
             tap(() => {}, () => {console.error(query);}),
             map((res) => (getRes ? res : undefined))
         );
-    }
-
-
-    private buildQueryWhereClause(selections: any[]) {
-        let query = "";
-        let values = [];
-        let i = 0;
-        for (let whereValue of selections) {
-            if (i == 0) {
-                query += " WHERE ";
-            }
-            else {
-                query += " AND ";
-            }
-            let operator = "=";
-            if (whereValue.operator) {
-                operator = whereValue.operator;
-            }
-            query += whereValue.column + " " + operator + " ? ";
-            values.push(whereValue.value);
-            i++;
-        }
-
-        return {query: query, values: values};
     }
 
     public setAPI_URL(url): Observable<any> {

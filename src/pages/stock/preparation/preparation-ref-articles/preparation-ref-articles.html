@@ -1,38 +1,8 @@
-<ion-content padding>
-    <div *ngIf="refArticle && articles ">
-        <h4 class="page-title">Référence sélectionnée <br/>{{ refArticle.reference }}</h4>
-        <div class="scan-container">
-
-            <ion-icon class="big-icon" name="barcode" (click)="scan()"></ion-icon>
-            <br>
-            Flashez l'article ou
-        </div>
-        <div>
-            <ion-card>
-                <ion-card-content>
-                    <ion-item class="ionic-selectable-container without-label">
-                        <ionic-selectable item-content
-                                          [(ngModel)]="searchArticle"
-                                          [items]="articlesToShow"
-                                          itemValueField="reference"
-                                          itemTextField="location"
-                                          placeholder="Sélectionner l'article"
-                                          [canSearch]="true"
-                                          (onSelect)="selectArticle($event.item)"
-                                          (onSearch)="onArticleSearch($event)">
-                            <ng-template ionicSelectableSearchFailTemplate>
-                            </ng-template>
-                            <ng-template ionicSelectableItemTemplate let-article="item">
-                                <p class="article-title">Article {{article.reference}}</p>
-                                <div class="article-sub-title">
-                                    <p *ngIf="article.location !== 'null'">Emplacement : {{article.location}}</p>
-                                    <p *ngIf="article.quantity">Quantité restante : {{article.quantity}}</p>
-                                </div>
-                            </ng-template>
-                        </ionic-selectable>
-                    </ion-item>
-                </ion-card-content>
-            </ion-card>
-        </div>
-    </div>
-</ion-content>
+<wii-select-item #selectItemComponent
+                 *ngIf="!loading && refArticle"
+                 [type]="selectItemType"
+                 (itemChange)="selectArticle($event)"
+                 [checkBarcodeValidity]="true"
+                 [requestParams]="listWhereClause"
+                 [scanMode]="barcodeScannerMode">
+</wii-select-item>

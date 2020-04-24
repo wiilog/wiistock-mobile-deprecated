@@ -1,11 +1,12 @@
-<wii-search-location #searchComponent
-                     [location]="location"
-                     (locationChange)="onLocationChange($event)"
-                     hidden>
-</wii-search-location>
+<wii-search-item #searchComponent
+                 [type]="type"
+                 [requestParams]="requestParams"
+                 (itemChange)="onItemSelect($event)"
+                 hidden>
+</wii-search-item>
 <div class="select-location-footer">
     <wii-barcode-scanner #barcodeScanner
-                         buttonSubtitle="Emplacement"
+                         [buttonSubtitle]="config[type].buttonSubtitle"
                          [mode]="scanMode"
                          (search)="openSearch()"
                          (createForm)="onPenClick()"

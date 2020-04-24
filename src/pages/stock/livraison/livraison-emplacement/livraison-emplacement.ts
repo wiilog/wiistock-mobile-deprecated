@@ -10,9 +10,10 @@ import 'rxjs/add/observable/zip';
 import {of} from 'rxjs/observable/of';
 import {Network} from '@ionic-native/network';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
-import {SelectLocationComponent} from '@helpers/components/select-location/select-location.component';
 import {IconConfig} from '@helpers/components/panel/model/icon-config';
 import {BarcodeScannerModeEnum} from '@helpers/components/barcode-scanner/barcode-scanner-mode.enum';
+import {SelectItemComponent} from '@helpers/components/select-item/select-item.component';
+import {SelectItemTypeEnum} from '@helpers/components/select-item/select-item-type.enum';
 
 
 @IonicPage()
@@ -21,8 +22,10 @@ import {BarcodeScannerModeEnum} from '@helpers/components/barcode-scanner/barcod
     templateUrl: 'livraison-emplacement.html',
 })
 export class LivraisonEmplacementPage {
-    @ViewChild('selectLocationComponent')
-    public selectLocationComponent: SelectLocationComponent;
+    @ViewChild('selectItemComponent')
+    public selectItemComponent: SelectItemComponent;
+
+    public readonly selectItemType = SelectItemTypeEnum.LOCATION;
 
     public location: Emplacement;
     public livraison: Livraison;
@@ -55,19 +58,19 @@ export class LivraisonEmplacementPage {
 
         this.panelHeaderConfig = this.createPanelHeaderConfig();
 
-        if (this.selectLocationComponent) {
-            this.selectLocationComponent.fireZebraScan();
+        if (this.selectItemComponent) {
+            this.selectItemComponent.fireZebraScan();
         }
     }
 
     public ionViewWillLeave(): void {
-        if (this.selectLocationComponent) {
-            this.selectLocationComponent.unsubscribeZebraScan();
+        if (this.selectItemComponent) {
+            this.selectItemComponent.unsubscribeZebraScan();
         }
     }
 
     public ionViewCanLeave(): boolean {
-        return !this.selectLocationComponent || !this.selectLocationComponent.isScanning;
+        return !this.selectItemComponent || !this.selectItemComponent.isScanning;
     }
 
 

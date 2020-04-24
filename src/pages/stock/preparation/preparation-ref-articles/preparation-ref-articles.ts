@@ -1,108 +1,91 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, Navbar, NavController, NavParams} from 'ionic-angular';
+import {IonicPage, Loading, NavController, NavParams} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {ArticlePrepa} from '@app/entities/article-prepa';
 import {ToastService} from '@app/services/toast.service';
-import {ArticlePrepaByRefArticle} from '@app/entities/article-prepa-by-ref-article';
-import {Observable, Subscription} from 'rxjs';
 import {PreparationArticleTakePage} from '@pages/stock/preparation/preparation-article-take/preparation-article-take';
-import {IonicSelectableComponent} from 'ionic-selectable';
-import {BarcodeScannerManagerService} from '@app/services/barcode-scanner-manager.service';
+import {SelectItemTypeEnum} from '@helpers/components/select-item/select-item-type.enum';
+import {BarcodeScannerModeEnum} from '@helpers/components/barcode-scanner/barcode-scanner-mode.enum';
+import {SelectItemComponent} from '@helpers/components/select-item/select-item.component';
+import {flatMap, map, take, tap} from 'rxjs/operators';
+import {Subscription} from 'rxjs';
+import {LoadingService} from '@app/services/loading.service';
+import {from} from 'rxjs/observable/from';
 
 
 @IonicPage()
 @Component({
-    selector: 'page-preparation-articles',
+    selector: 'page-preparation-ref-articles',
     templateUrl: 'preparation-ref-articles.html'
 })
 export class PreparationRefArticlesPage {
 
-    public static readonly LIST_WHERE_CLAUSE = (reference) => ([
-        `reference_article LIKE '${reference}'`
-    ]);
+    @ViewChild('selectItemComponent')
+    public selectItemComponent: SelectItemComponent;
 
-    @ViewChild(Navbar)
-    public navBar: Navbar;
+    public readonly selectItemType = SelectItemTypeEnum.ARTICLE_TO_PICK;
+    public readonly barcodeScannerMode = BarcodeScannerModeEnum.TOOL_SEARCH;
+    public listWhereClause: Array<string>;
     public refArticle: ArticlePrepa;
-    public articles: Array<ArticlePrepaByRefArticle>;
 
-    public articlesToShow: Array<ArticlePrepaByRefArticle>;
+    public loading: boolean;
 
-    public searchArticle: string;
+    private countSubscription: Subscription;
 
-    private zebraBarcodeSubscription: Subscription;
-
-    private getArticleByBarcode: (barcode: string) => Observable<{selectedArticle?: ArticlePrepaByRefArticle, refArticle?: ArticlePrepa}>;
-
-    public constructor(public navCtrl: NavController,
-                       public navParams: NavParams,
-                       public toastService: ToastService,
-                       public sqliteProvider: SqliteProvider,
-                       private barcodeScannerManager: BarcodeScannerManagerService) {
-        this.articles = [];
-        this.articlesToShow = [];
+    public constructor(private navCtrl: NavController,
+                       private navParams: NavParams,
+                       private toastService: ToastService,
+                       private loadingService: LoadingService,
+                       private sqliteProvider: SqliteProvider) {
+        this.loading = true;
     }
 
     public ionViewWillEnter(): void {
         this.refArticle = this.navParams.get('article');
-        this.getArticleByBarcode = this.navParams.get('getArticleByBarcode');
+        this.listWhereClause = [`reference_article LIKE '${this.refArticle.reference}'`];
+        this.loading = true;
+        let loader: Loading;
 
-        this.sqliteProvider
-            .findBy('article_prepa_by_ref_article', [`reference_article LIKE '${this.refArticle.reference}'`])
-            .subscribe((articles) => {
-                this.articles = articles;
-                this.articlesToShow = articles;
+        this.countSubscription = this.loadingService
+            .presentLoading('Chargement...')
+            .pipe(
+                tap((loaderInstance) => {
+                    loader = loaderInstance;
+                }),
+                flatMap(() => this.sqliteProvider.count('article_prepa_by_ref_article', this.listWhereClause)),
+                take(1),
+                flatMap((counter) => from(loader.dismiss()).pipe(map(() => counter)))
+            )
+            .subscribe((counter) => {
+                if (!counter || counter <= 0) {
+                    this.toastService.presentToast('Aucun article trouvé...');
+                    this.navCtrl.pop();
+                }
+                else {
+                    this.loading = false;
+
+                    if (this.selectItemComponent) {
+                        this.selectItemComponent.fireZebraScan();
+                    }
+                }
             });
-
-        this.zebraBarcodeSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode: string) => {
-            this.testIfBarcodeEquals(barcode);
-        });
     }
 
     public ionViewWillLeave(): void {
-        if (this.zebraBarcodeSubscription) {
-            this.zebraBarcodeSubscription.unsubscribe();
-            this.zebraBarcodeSubscription = undefined;
+        if (this.selectItemComponent) {
+            this.selectItemComponent.unsubscribeZebraScan();
+        }
+        if (this.countSubscription) {
+            this.countSubscription.unsubscribe();
+            this.countSubscription = undefined;
         }
     }
 
-    public scan(): void {
-        this.barcodeScannerManager.scan().subscribe(barcode => {
-            this.testIfBarcodeEquals(barcode);
-        });
-    }
-
-    private testIfBarcodeEquals(barcode: string): void {
-        this.getArticleByBarcode(barcode).subscribe(({selectedArticle}) => {
-            if (selectedArticle) {
-                this.selectArticle(selectedArticle);
-            }
-            else {
-                this.toastService.presentToast('L\'article scanné n\'est pas présent dans la liste.');
-            }
-        });
-    }
-
-    public onArticleSearch(event: { component: IonicSelectableComponent, text: string }) {
-        let text = event.text.trim();
-        event.component.startSearch();
-        this.sqliteProvider
-            .findBy('article_prepa_by_ref_article', [
-                ...PreparationRefArticlesPage.LIST_WHERE_CLAUSE(this.refArticle.reference),
-                `reference LIKE '%${text}%'`
-            ])
-            .subscribe((items) => {
-                this.articlesToShow = items;
-                event.component.endSearch();
-            });
-    }
-
-    public selectArticle(selectedArticle: ArticlePrepaByRefArticle): void {
+    public selectArticle(selectedArticle): void {
         this.navCtrl.push(PreparationArticleTakePage, {
             article: selectedArticle,
             refArticle: this.refArticle,
             preparation: this.navParams.get('preparation'),
-            onlyOne: (this.articles.length === 1),
             started: this.navParams.get('started'),
             valid: this.navParams.get('valid'),
             selectArticle: (selectedQuantity: number) => {
@@ -112,13 +95,4 @@ export class PreparationRefArticlesPage {
             }
         });
     }
-
-    refreshOver() {
-        this.toastService.presentToast('Préparation prête à être finalisée.');
-    }
-
-    refresh() {
-        this.toastService.presentToast('Quantité bien prélevée.')
-    }
-
 }

@@ -10,7 +10,7 @@ import 'rxjs/add/observable/merge';
 import 'rxjs/add/observable/fromEvent';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
-
+import {Keyboard} from '@ionic-native/keyboard';
 
 @Injectable()
 @Component({
@@ -46,6 +46,7 @@ export class AppComponent {
                        public splashScreen: SplashScreen,
                        public networkProvider: NetworkProvider,
                        public network: Network,
+                       private keyboard: Keyboard,
                        private scssHelper: ScssHelperService) {
         this.platformReady = false;
         this.ionNavStyle = {};
@@ -53,8 +54,8 @@ export class AppComponent {
         this.initializeApp();
 
         this.keyboardShown$ = Observable.merge(
-            Observable.fromEvent(window, 'keyboardDidShow').pipe(map(() => true)),
-            Observable.fromEvent(window, 'keyboardDidHide').pipe(map(() => false))
+            keyboard.onKeyboardShow().pipe(map(() => true)),
+            keyboard.onKeyboardHide().pipe(map(() => false))
         );
     }
 

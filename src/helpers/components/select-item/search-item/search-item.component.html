@@ -1,0 +1,37 @@
+<ion-card>
+    <ion-card-content>
+        <ion-item class="without-label">
+            <ionic-selectable
+                #itemComponent
+                item-content
+                [(ngModel)]="_item"
+                [items]="dbItemsForList"
+                [itemValueField]="config[type].valueField"
+                [itemTextField]="config[type].label"
+                [placeholder]="config[type].placeholder"
+                searchPlaceholder="Rechercher"
+                [canSearch]="true"
+                [hasInfiniteScroll]="true"
+                (onSearch)="onItemSearch($event)"
+                (onChange)="onItemChange($event)"
+                (onInfiniteScroll)="onInfiniteScroll()">
+                <ng-template ionicSelectableSearchFailTemplate>
+                </ng-template>
+                <ng-template ionicSelectableItemTemplate
+                             let-article="item"
+                             *ngIf="config[type].templateIndex === 'article'">
+                    <p class="article-title">Article {{article.barcode}}</p>
+                    <div class="article-sub-title">
+                        <p *ngIf="article.location !== 'null'">Emplacement : {{article.location}}</p>
+                        <p *ngIf="article.quantity">Quantité restante : {{article.quantity}}</p>
+                    </div>
+                </ng-template>
+                <ng-template ionicSelectableItemTemplate
+                             let-location="item"
+                             *ngIf="config[type].templateIndex === 'location'">
+                    {{location.label}}
+                </ng-template>
+            </ionic-selectable>
+        </ion-item>
+    </ion-card-content>
+</ion-card>

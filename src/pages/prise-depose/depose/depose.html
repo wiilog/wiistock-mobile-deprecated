@@ -16,8 +16,9 @@
     </wii-list-panel>
 </ion-scroll>
 
-<div class="page-footer persisted-page-footer" *ngIf="!loading">
+<div class="page-footer">
     <wii-barcode-scanner #footerScannerComponent
+                         [hidden]="loading"
                          [buttonSubtitle]="objectLabel"
                          [mode]="scannerModeManual"
                          (add)="testColisDepose($event[0], $event[1])">

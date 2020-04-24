@@ -121,6 +121,11 @@
   resolved "https://registry.yarnpkg.com/@ionic-native/device/-/device-4.20.0.tgz#5c34912df4de735bc0c6d584fe3ab0552147e386"
   integrity sha512-ogHZwlC1GLbj2sL/eRp+RDs7bWc1AuwKNhgtDLE3yjXey09I5ErkADLydugMTEYoU/Wja9+YjXdZGymuaHwgNg==
 
+"@ionic-native/keyboard@4":
+  version "4.20.0"
+  resolved "https://registry.yarnpkg.com/@ionic-native/keyboard/-/keyboard-4.20.0.tgz#bb6aeed2cb89bbcbe59eb3d8f4fb1f72bac4958f"
+  integrity sha512-GA720A+sFvYVZ/84PaZQqm+zcUu7gS/DRKNU9UGwhBdjQUmUn15EaFF+vuyxLigUfJ0YRxmAOcBDBEiIL9pDaQ==
+
 "@ionic-native/network@^4.20.0":
   version "4.20.0"
   resolved "https://registry.yarnpkg.com/@ionic-native/network/-/network-4.20.0.tgz#762e7fe2d33b3b3c31464a8bc0f2e3500f55bd98"
@@ -1426,6 +1431,11 @@ cordova-plugin-file-transfer@*:
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/cordova-plugin-file-transfer/-/cordova-plugin-file-transfer-1.7.1.tgz#a75d8be2ebc3bb9b23c5b1bbd199214ec267586b"
   integrity sha1-p12L4uvDu5sjxbG70ZkhTsJnWGs=
+
+cordova-plugin-ionic-keyboard@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/cordova-plugin-ionic-keyboard/-/cordova-plugin-ionic-keyboard-2.2.0.tgz#53ba9ccd5e765165446a094cfe042a2ddd87d81d"
+  integrity sha512-yDUG+9ieKVRitq5mGlNxjaZh/MgEhFFIgTIPhqSbUaQ8UuZbawy5mhJAVClqY97q8/rcQtL6dCDa7x2sEtCLcA==
 
 cordova-plugin-ionic-webview@^3.1.2:
   version "3.1.2"

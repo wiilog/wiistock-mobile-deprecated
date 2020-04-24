@@ -1,7 +1,7 @@
-<wii-select-location #selectLocationComponent
-                     (createLocation)="createEmp()"
-                     (locationChange)="selectLocation($event)"
-                     [location]="emplacement"
-                     [checkBarcodeValidity]="fromDepose"
-                     [scanMode]="barcodeScannerMode">
-</wii-select-location>
+<wii-select-item #selectItemComponent
+                 [type]="selectItemType"
+                 (createItem)="createEmp()"
+                 (itemChange)="selectLocation($event)"
+                 [checkBarcodeValidity]="fromDepose"
+                 [scanMode]="barcodeScannerMode">
+</wii-select-item>

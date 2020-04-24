@@ -8,9 +8,10 @@
 </wii-panel-header>
 
 <div class="page-footer">
-    <wii-select-location #selectLocationComponent
-                         (locationChange)="selectLocation($event)"
-                         [checkBarcodeValidity]="true"
-                         [scanMode]="barcodeScannerSearchMode">
-    </wii-select-location>
+    <wii-select-item #selectItemComponent
+                     [type]="selectItemType"
+                     (itemChange)="selectLocation($event)"
+                     [checkBarcodeValidity]="true"
+                     [scanMode]="barcodeScannerSearchMode">
+    </wii-select-item>
 </div>

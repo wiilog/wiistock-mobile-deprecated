@@ -75,7 +75,7 @@ export class MainMenuPage {
             this.nbPrep = preparations.filter(p => p.date_end === null).length;
             this.storageService.getFinishedPreps().subscribe((preps) => {
                 this.nbPrepT = preps;
-                this.sqliteProvider.count('`article_inventaire`', []).subscribe((nbArticlesInventaire: number) => {
+                this.sqliteProvider.count('`article_inventaire`').subscribe((nbArticlesInventaire: number) => {
                     this.nbArtInvent = nbArticlesInventaire;
                 });
             });

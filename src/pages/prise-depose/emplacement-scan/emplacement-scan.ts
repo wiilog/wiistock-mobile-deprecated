@@ -6,8 +6,9 @@ import {NewEmplacementComponent} from '@pages/new-emplacement/new-emplacement';
 import {DeposePage} from '@pages/prise-depose/depose/depose';
 import {PrisePage} from '@pages/prise-depose/prise/prise';
 import {Network} from '@ionic-native/network';
-import {SelectLocationComponent} from "@helpers/components/select-location/select-location.component";
-import {BarcodeScannerModeEnum} from "@helpers/components/barcode-scanner/barcode-scanner-mode.enum";
+import {BarcodeScannerModeEnum} from '@helpers/components/barcode-scanner/barcode-scanner-mode.enum';
+import {SelectItemComponent} from '@helpers/components/select-item/select-item.component';
+import {SelectItemTypeEnum} from "@helpers/components/select-item/select-item-type.enum";
 
 
 @IonicPage()
@@ -16,15 +17,15 @@ import {BarcodeScannerModeEnum} from "@helpers/components/barcode-scanner/barcod
     templateUrl: 'emplacement-scan.html',
 })
 export class EmplacementScanPage {
-    @ViewChild('selectLocationComponent')
-    public selectLocationComponent: SelectLocationComponent;
+    @ViewChild('selectItemComponent')
+    public selectItemComponent: SelectItemComponent;
+
+    public readonly selectItemType = SelectItemTypeEnum.LOCATION;
 
     public fromDepose: boolean;
     public fromStock: boolean;
 
     public barcodeScannerMode: BarcodeScannerModeEnum;
-
-    public emplacement: Emplacement;
 
     public constructor(public navCtrl: NavController,
                        public navParams: NavParams,
@@ -34,7 +35,6 @@ export class EmplacementScanPage {
     }
 
     public ionViewWillEnter(): void {
-        this.emplacement = undefined;
         this.fromDepose = this.navParams.get('fromDepose');
         this.fromStock = this.navParams.get('fromStock');
 
@@ -42,19 +42,19 @@ export class EmplacementScanPage {
             ? BarcodeScannerModeEnum.TOOL_SEARCH
             : BarcodeScannerModeEnum.TOOLS_FULL;
 
-        if (this.selectLocationComponent) {
-            this.selectLocationComponent.fireZebraScan();
+        if (this.selectItemComponent) {
+            this.selectItemComponent.fireZebraScan();
         }
     }
 
     public ionViewWillLeave(): void {
-        if (this.selectLocationComponent) {
-            this.selectLocationComponent.unsubscribeZebraScan();
+        if (this.selectItemComponent) {
+            this.selectItemComponent.unsubscribeZebraScan();
         }
     }
 
     public ionViewCanLeave(): boolean {
-        return !this.selectLocationComponent || !this.selectLocationComponent.isScanning;
+        return !this.selectItemComponent || !this.selectItemComponent.isScanning;
     }
 
     public createEmp(): void {
@@ -70,7 +70,6 @@ export class EmplacementScanPage {
 
     private selectLocation(emplacement: Emplacement) {
         this.testNetwork(() => {
-            this.emplacement = emplacement;
             this.navCtrl.push(this.fromDepose ? DeposePage : PrisePage, {
                 emplacement: emplacement,
                 fromStock: this.fromStock,

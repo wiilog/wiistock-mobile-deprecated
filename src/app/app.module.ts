@@ -55,6 +55,7 @@ import {FileService} from '@app/services/file.service';
 import {MainHeaderService} from "@app/services/main-header.service";
 import {IonicGestureConfig} from "@app/utils/ionic-gesture-config";
 import {LongPressModule} from "ionic-long-press";
+import {Keyboard} from "@ionic-native/keyboard";
 
 
 @NgModule({
@@ -139,6 +140,7 @@ import {LongPressModule} from "ionic-long-press";
         SplashScreen,
         {provide: ErrorHandler, useClass: IonicErrorHandler},
         {provide: HAMMER_GESTURE_CONFIG, useClass: IonicGestureConfig},
+        Keyboard,
         AppComponent,
         SQLite,
         VersionCheckerService,

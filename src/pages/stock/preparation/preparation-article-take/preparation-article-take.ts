@@ -23,7 +23,6 @@ export class PreparationArticleTakePage {
         fields: Array<{label: string; name: string; type: string; value: string|number;}>
     };
 
-    private onlyOne: boolean;
     private selectArticle: (quantity: number) => void;
 
     public constructor(public navCtrl: NavController,
@@ -36,7 +35,6 @@ export class PreparationArticleTakePage {
         this.refArticle = this.navParams.get('refArticle');
         this.preparation = this.navParams.get('preparation');
         this.selectArticle = this.navParams.get('selectArticle');
-        this.onlyOne = this.navParams.get('onlyOne');
 
         this.simpleFormConfig = {
             title: 'Confirmation quantité',
@@ -63,9 +61,6 @@ export class PreparationArticleTakePage {
 
         if (!quantity || (quantity > maxQuantityAvailable) || quantity <= 0) {
             this.toastService.presentToast('Veuillez sélectionner une quantité valide.');
-        }
-        else if (this.onlyOne && quantity !== maxQuantityAvailable) {
-            this.toastService.presentToast(`La quantité souhaitée doit obligatoirement être égale à `);
         }
         else {
             this.selectArticle(quantity);

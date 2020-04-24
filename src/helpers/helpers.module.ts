@@ -1,6 +1,5 @@
 import {NgModule} from '@angular/core';
 import {IonicSelectableModule} from 'ionic-selectable';
-import {SearchLocationComponent} from '@helpers/components/search-location/search-location.component';
 import {IonicModule} from 'ionic-angular';
 import {MainLoaderComponent} from '@helpers/components/main-loader/main-loader.component';
 import {MainHeaderComponent} from '@helpers/components/main-header/main-header.component';
@@ -18,12 +17,13 @@ import {MenuComponent} from "@helpers/components/menu/menu.component";
 import {LongPressModule} from "ionic-long-press";
 import {CardListComponent} from "@helpers/components/card-list/card-list.component";
 import {SimpleFormComponent} from "@helpers/components/simple-form/simple-form.component";
-import {SelectLocationComponent} from "@helpers/components/select-location/select-location.component";
+import {SearchItemComponent} from "@helpers/components/select-item/search-item/search-item.component";
+import {SelectItemComponent} from "@helpers/components/select-item/select-item.component";
 
 
 @NgModule({
     declarations: [
-        SearchLocationComponent,
+        SearchItemComponent,
         MainLoaderComponent,
         CardListComponent,
         PanelHeaderComponent,
@@ -38,10 +38,10 @@ import {SelectLocationComponent} from "@helpers/components/select-location/selec
         SignaturePadComponent,
         MenuComponent,
         SimpleFormComponent,
-        SelectLocationComponent
+        SelectItemComponent
     ],
     exports: [
-        SearchLocationComponent,
+        SearchItemComponent,
         MainLoaderComponent,
         PanelHeaderComponent,
         ListPanelComponent,
@@ -52,7 +52,7 @@ import {SelectLocationComponent} from "@helpers/components/select-location/selec
         MenuComponent,
         CardListComponent,
         SimpleFormComponent,
-        SelectLocationComponent
+        SelectItemComponent
     ],
     entryComponents: [
         SignaturePadComponent

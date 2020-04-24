@@ -33,6 +33,7 @@
         "@ionic-native/barcode-scanner": "^4.20.0",
         "@ionic-native/core": "~4.18.0",
         "@ionic-native/device": "^4.20.0",
+        "@ionic-native/keyboard": "4",
         "@ionic-native/network": "^4.20.0",
         "@ionic-native/splash-screen": "~4.18.0",
         "@ionic-native/sqlite": "^4.20.0",
@@ -48,6 +49,7 @@
         "cordova-plugin-app-version": "^0.1.9",
         "cordova-plugin-device": "^2.0.2",
         "cordova-plugin-ionic": "5.3.0",
+        "cordova-plugin-ionic-keyboard": "^2.2.0",
         "cordova-plugin-ionic-webview": "^3.1.2",
         "cordova-plugin-network-information": "2.0.1",
         "cordova-plugin-splashscreen": "^5.0.2",
@@ -95,7 +97,8 @@
             },
             "com-darryncampbell-cordova-plugin-intent": {},
             "cordova-plugin-network-information": {},
-            "cordova-plugin-app-version": {}
+            "cordova-plugin-app-version": {},
+            "cordova-plugin-ionic-keyboard": {}
         },
         "platforms": [
             "android",
