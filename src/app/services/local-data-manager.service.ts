@@ -18,17 +18,17 @@ import {FileService} from "@app/services/file.service";
 import {StorageService} from "@app/services/storage.service";
 
 
-type Process = 'preparation' | 'livraison' | 'collecte';
+type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory';
 interface ApiProccessConfig {
     service: string;
     createApiParams: () => Observable<{paramName: string, [name: string]: any}>
 
     // after api submit
     deleteSucceed: (resSuccess: any) => Observable<any>;
-    resetFailed: (resError: any) => Observable<any>;
+    resetFailed?: (resError: any) => Observable<any>;
     treatData?: (data: any) => Observable<any>;
-    titleErrorAlert: string;
-    numeroProccessFailed: string;
+    titleErrorAlert?: string;
+    numeroProccessFailed?: string;
 }
 
 @Injectable()
@@ -203,6 +203,14 @@ export class LocalDataManagerService {
                         this.sqliteProvider.deleteMouvementsBy('id_collecte', idsToDelete)
                     );
                 }
+            },
+            inventory: {
+                service: ApiService.ADD_INVENTORY_ENTRIES,
+                createApiParams: () => this.sqliteProvider.findAll('`saisie_inventaire`').pipe(map((entries) => ({
+                    paramName: 'entries',
+                    entries
+                }))),
+                deleteSucceed: () => this.sqliteProvider.deleteBy('saisie_inventaire')
             }
         }
     }
@@ -232,6 +240,10 @@ export class LocalDataManagerService {
                 flatMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des prises et des déposes'});
                     return this.sendMouvementTraca(false).pipe(map(() => needAnotherSynchronise));
+                }),
+                flatMap((needAnotherSynchronise) => {
+                    synchronise$.next({finished: false, message: 'Envoi des saisies d\'inventaire'});
+                    return this.sendFinishedProcess('inventory').pipe(map(() => needAnotherSynchronise));
                 }),
                 // we reload data from API if we have save data in previous requests
                 flatMap((needAnotherSynchronise) => {
@@ -363,7 +375,7 @@ export class LocalDataManagerService {
     }
 
     /**
-     * Send all "preparations", "livraisons" ou "collectes" finished in local database to the api
+     * Send all "preparations", "livraisons" or "collectes", "inventory" finished in local database to the api
      * @return false if no request has been done, or api response
      */
     public sendFinishedProcess(process: Process): Observable<{success: any, error: any}|false> {
@@ -378,7 +390,10 @@ export class LocalDataManagerService {
                             .requestApi('post', apiProccessConfig.service, {params})
                             .pipe(flatMap((res) => {
                                 const {success, errors, data} = res;
-                                if (errors && errors.length > 0) {
+                                if (apiProccessConfig.titleErrorAlert
+                                    && apiProccessConfig.numeroProccessFailed
+                                    && errors
+                                    && errors.length > 0) {
                                     this.presentAlertError(
                                         apiProccessConfig.titleErrorAlert,
                                         apiProccessConfig.numeroProccessFailed,
@@ -388,7 +403,9 @@ export class LocalDataManagerService {
                                 return of(undefined)
                                     .pipe(
                                         flatMap(() => apiProccessConfig.deleteSucceed(success)),
-                                        flatMap(() => apiProccessConfig.resetFailed(errors)),
+                                        flatMap(() => apiProccessConfig.resetFailed
+                                            ? apiProccessConfig.resetFailed(errors)
+                                            : of(undefined)),
                                         flatMap(() => apiProccessConfig.treatData && data
                                             ? apiProccessConfig.treatData(data)
                                             : of(undefined)),

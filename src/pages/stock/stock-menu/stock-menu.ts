@@ -1,16 +1,16 @@
 import {Component} from '@angular/core';
 import {IonicPage, NavController, Platform} from 'ionic-angular';
-import {MenuConfig} from "@helpers/components/menu/menu-config";
-import {PreparationMenuPage} from "@pages/stock/preparation/preparation-menu/preparation-menu";
-import {LivraisonMenuPage} from "@pages/stock/livraison/livraison-menu/livraison-menu";
-import {InventaireMenuPage} from "@pages/stock/inventaire-menu/inventaire-menu";
-import {PriseDeposeMenuPage} from "@pages/prise-depose/prise-depose-menu/prise-depose-menu";
-import {CollecteMenuPage} from "@pages/stock/collecte/collecte-menu/collecte-menu";
-import {Observable, Subscription} from "rxjs";
-import {LocalDataManagerService} from "@app/services/local-data-manager.service";
-import {ToastService} from "@app/services/toast.service";
-import {Network} from "@ionic-native/network";
-import {MainHeaderService} from "@app/services/main-header.service";
+import {MenuConfig} from '@helpers/components/menu/menu-config';
+import {PreparationMenuPage} from '@pages/stock/preparation/preparation-menu/preparation-menu';
+import {LivraisonMenuPage} from '@pages/stock/livraison/livraison-menu/livraison-menu';
+import {PriseDeposeMenuPage} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu';
+import {CollecteMenuPage} from '@pages/stock/collecte/collecte-menu/collecte-menu';
+import {Observable, Subscription} from 'rxjs';
+import {LocalDataManagerService} from '@app/services/local-data-manager.service';
+import {ToastService} from '@app/services/toast.service';
+import {Network} from '@ionic-native/network';
+import {MainHeaderService} from '@app/services/main-header.service';
+import {InventoryLocationsPage} from '@pages/stock/inventory/inventory-locations/inventory-locations';
 
 
 @IonicPage()
@@ -76,7 +76,7 @@ export class StockMenuPage {
             {
                 icon: 'inventary.svg',
                 label: 'Inventaire',
-                action: () => { this.navCtrl.push(InventaireMenuPage); }
+                action: () => { this.navCtrl.push(InventoryLocationsPage); }
             }
         ];
     }

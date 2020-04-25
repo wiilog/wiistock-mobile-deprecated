@@ -1,0 +1,17 @@
+<ion-scroll class="page-content"
+            scrollY="true"
+            *ngIf="!loading">
+    <wii-list-panel *ngIf="listConfig && listConfig.body"
+                    [body]="listConfig.body"
+                    [boldValues]="listConfig.boldValues">
+    </wii-list-panel>
+</ion-scroll>
+
+<div class="page-footer">
+    <wii-barcode-scanner #footerScannerComponent
+                         [hidden]="loading"
+                         buttonSubtitle="Emplacement"
+                         [mode]="scannerMode"
+                         (add)="checkAndTreatBarcode($event[0])">
+    </wii-barcode-scanner>
+</div>

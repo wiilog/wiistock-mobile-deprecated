@@ -9,7 +9,7 @@ import {ListPanelItemConfig} from "@helpers/components/panel/model/list-panel/li
 })
 export class ListPanelComponent {
     @Input()
-    public header: HeaderConfig;
+    public header?: HeaderConfig;
 
     @Input()
     public body: Array<ListPanelItemConfig>;

@@ -19,14 +19,14 @@ import {filter, flatMap, map, take, tap} from 'rxjs/operators';
 import {MainHeaderService} from '@app/services/main-header.service';
 import {of} from 'rxjs/observable/of';
 import {TitleConfig} from '@helpers/components/main-header/title-config';
-import {PriseDeposeMenuPage} from "@pages/prise-depose/prise-depose-menu/prise-depose-menu";
-import {EmplacementScanPage} from "@pages/prise-depose/emplacement-scan/emplacement-scan";
-import {PreparationMenuPage} from "@pages/stock/preparation/preparation-menu/preparation-menu";
-import {LivraisonMenuPage} from "@pages/stock/livraison/livraison-menu/livraison-menu";
-import {CollecteMenuPage} from "@pages/stock/collecte/collecte-menu/collecte-menu";
-import {InventaireMenuPage} from "@pages/stock/inventaire-menu/inventaire-menu";
-import {ManutentionMenuPage} from "@pages/manutention/manutention-menu/manutention-menu";
-import {ManutentionValidatePage} from "@pages/manutention/manutention-validate/manutention-validate";
+import {PriseDeposeMenuPage} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu';
+import {EmplacementScanPage} from '@pages/prise-depose/emplacement-scan/emplacement-scan';
+import {PreparationMenuPage} from '@pages/stock/preparation/preparation-menu/preparation-menu';
+import {LivraisonMenuPage} from '@pages/stock/livraison/livraison-menu/livraison-menu';
+import {CollecteMenuPage} from '@pages/stock/collecte/collecte-menu/collecte-menu';
+import {ManutentionMenuPage} from '@pages/manutention/manutention-menu/manutention-menu';
+import {ManutentionValidatePage} from '@pages/manutention/manutention-validate/manutention-validate';
+import {InventoryLocationsPage} from '@pages/stock/inventory/inventory-locations/inventory-locations';
 
 
 @Component({
@@ -87,7 +87,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.withHeader = new EventEmitter<boolean>();
         this.heightChange = new EventEmitter<number>();
         this.currentTitles = [];
-        this.subTitle$ = this.mainHeaderService.subTitle$;
+        this.subTitle$ = this.mainHeaderService.subTitle$.pipe(tap(() => {
+            this.notifyHeightChange();
+        }));
 
         this.titlesConfig = [
             {pageName: MainMenuPage.name, label: 'Menu'},
@@ -126,7 +128,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pageName: PreparationMenuPage.name, label: 'Préparation'},
             {pageName: LivraisonMenuPage.name, label: 'Livraison'},
             {pageName: CollecteMenuPage.name, label: 'Collecte'},
-            {pageName: InventaireMenuPage.name, label: 'Inventaire'},
+            {pageName: InventoryLocationsPage.name, label: 'Inventaire'},
             {pageName: ManutentionMenuPage.name, label: 'Demande'},
             {pageName: ManutentionValidatePage.name, label: 'Détails'}
         ];

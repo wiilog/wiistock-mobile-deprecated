@@ -56,6 +56,9 @@ import {MainHeaderService} from "@app/services/main-header.service";
 import {IonicGestureConfig} from "@app/utils/ionic-gesture-config";
 import {LongPressModule} from "ionic-long-press";
 import {Keyboard} from "@ionic-native/keyboard";
+import {InventoryLocationsPage} from "@pages/stock/inventory/inventory-locations/inventory-locations";
+import {InventoryArticlePage} from "@pages/stock/inventory/inventory-article/inventory-article";
+import {InventoryValidatePage} from "@pages/stock/inventory/inventory-validate/inventory-validate";
 
 
 @NgModule({
@@ -89,6 +92,9 @@ import {Keyboard} from "@ionic-native/keyboard";
         StockMenuPage,
         PreparationMenuPage,
         ManutentionMenuPage,
+        InventoryLocationsPage,
+        InventoryArticlePage,
+        InventoryValidatePage
     ],
     imports: [
         LongPressModule,
@@ -133,6 +139,9 @@ import {Keyboard} from "@ionic-native/keyboard";
         StockMenuPage,
         PreparationMenuPage,
         ManutentionMenuPage,
+        InventoryLocationsPage,
+        InventoryArticlePage,
+        InventoryValidatePage
     ],
     providers: [
         BarcodeScannerManagerService,

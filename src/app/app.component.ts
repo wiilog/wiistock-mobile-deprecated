@@ -7,10 +7,10 @@ import {NetworkProvider} from '@providers/network/network';
 import {Network} from '@ionic-native/network';
 import {ScssHelperService} from '@app/services/scss-helper.service';
 import 'rxjs/add/observable/merge';
-import 'rxjs/add/observable/fromEvent';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 import {Keyboard} from '@ionic-native/keyboard';
+
 
 @Injectable()
 @Component({
@@ -46,8 +46,8 @@ export class AppComponent {
                        public splashScreen: SplashScreen,
                        public networkProvider: NetworkProvider,
                        public network: Network,
-                       private keyboard: Keyboard,
-                       private scssHelper: ScssHelperService) {
+                       private scssHelper: ScssHelperService,
+                       keyboard: Keyboard) {
         this.platformReady = false;
         this.ionNavStyle = {};
         this.primaryColor = this.scssHelper.getVariable('primary');
