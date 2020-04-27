@@ -1,5 +1,4 @@
 import {
-    ChangeDetectorRef,
     Component,
     ElementRef,
     EventEmitter,
@@ -81,8 +80,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     private viewWillLeaveSubscription: Subscription;
 
     public constructor(private storageService: StorageService,
-                       private mainHeaderService: MainHeaderService,
-                       private changeDetector: ChangeDetectorRef) {
+                       private mainHeaderService: MainHeaderService) {
         this.loading = true;
         this.withHeader = new EventEmitter<boolean>();
         this.heightChange = new EventEmitter<number>();
@@ -128,7 +126,16 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pageName: PreparationMenuPage.name, label: 'Préparation'},
             {pageName: LivraisonMenuPage.name, label: 'Livraison'},
             {pageName: CollecteMenuPage.name, label: 'Collecte'},
-            {pageName: InventoryLocationsPage.name, label: 'Inventaire'},
+            {
+                pageName: InventoryLocationsPage.name,
+                label: 'Inventaire',
+                filter: (instance) => (!instance.anomalyMode)
+            },
+            {
+                pageName: InventoryLocationsPage.name,
+                label: 'Anomalies',
+                filter: (instance) => instance.anomalyMode
+            },
             {pageName: ManutentionMenuPage.name, label: 'Demande'},
             {pageName: ManutentionValidatePage.name, label: 'Détails'}
         ];
@@ -245,8 +252,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     }
 
     private notifyHeightChange(): void {
-        this.changeDetector.detectChanges();
-        this.heightChange.emit(this.height);
+        setTimeout(() => {
+            this.heightChange.emit(this.height);
+        });
     }
 
     private findTitleConfig(name: string, instance: any): TitleConfig {

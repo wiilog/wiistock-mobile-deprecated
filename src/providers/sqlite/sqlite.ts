@@ -119,6 +119,13 @@ export class SqliteProvider {
         );
     }
 
+    private static JoinWhereClauses(where: Array<string>): string {
+        const whereJoined = where
+            .map((clause) => `(${clause})`)
+            .join(' AND ');
+        return `(${whereJoined})`;
+    }
+
     public resetDataBase(): Observable<any> {
         return this.db$.pipe(flatMap((db) => SqliteProvider.ResetDataBase(db)));
     }
@@ -727,7 +734,7 @@ export class SqliteProvider {
      */
     public findBy(table: string, where: Array<string> = []): Observable<any> {
         const sqlWhereClauses = (where && where.length > 0)
-            ? (' WHERE (' + where.join(' AND ') + ')')
+            ? ` WHERE ${SqliteProvider.JoinWhereClauses(where)}`
             : undefined;
 
         const sqlQuery = 'SELECT * FROM ' + table + (sqlWhereClauses ? sqlWhereClauses : '');
@@ -752,7 +759,6 @@ export class SqliteProvider {
             : of(undefined);
     }
 
-
     private createInsertQuery(name: string, objects: any|Array<any>): string {
         const isMultiple = Array.isArray(objects);
         const objectKeys = Object.keys(isMultiple ? objects[0] : objects);
@@ -771,9 +777,30 @@ export class SqliteProvider {
             valuesMap.join(', ');
     }
 
+    private createUpdateQuery(name: string, values: any, where: Array<string>): string {
+        const objectKeys = Object.keys(values);
+        const whereClauses = SqliteProvider.JoinWhereClauses(where);
+        const valuesMapped = objectKeys.map((key) => `${key} = ${this.getValueForQuery(values[key])}`);
+
+        return valuesMapped.length > 0
+            ? `
+                UPDATE ${name}
+                SET ${valuesMapped.join(', ')}
+                ${where.length > 0 ? 'WHERE ' + whereClauses : ''}
+            `
+            : undefined;
+    }
+
     public insert(name: string, objects: any|Array<any>): Observable<number> {
         let query = this.createInsertQuery(name, objects);
         return this.executeQuery(query).pipe(map(({insertId}) => insertId));
+    }
+
+    public update(name: string, values: any, where: Array<string>): Observable<any> {
+        let query = this.createUpdateQuery(name, values, where);
+        return query
+            ? this.executeQuery(query)
+            : of(false);
     }
 
     public executeQuery(query: string, getRes: boolean = true, params: Array<any> = []): Observable<any> {
@@ -1007,7 +1034,7 @@ export class SqliteProvider {
     /**
      * Call sqlite delete command. If ids is undefined, it clean the table
      */
-    public deleteBy(table: string, toDelete: number|Array<number> = undefined, fieldName: string = 'id'): Observable<undefined> {
+    public deleteBy(table: string, toDelete: number|Array<number>|string = undefined, fieldName: string = 'id'): Observable<undefined> {
         const whereClause = toDelete
             ? (
                 ' WHERE ' + (Array.isArray(toDelete)

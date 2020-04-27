@@ -8,6 +8,18 @@
 </ion-scroll>
 
 <div class="page-footer">
+    <div class="anomalies-button-container">
+        <button class="anomalies-button"
+                ion-button
+                color="primary"
+                *ngIf="!loading && !anomalyMode && isInventoryManager"
+                (click)="navigateToAnomalies()">
+            <span class="button-text-wrapper">
+                <span class="title">ANOMALIES</span>
+            </span>
+            <wii-icon name="exclamation-triangle.svg" color="white" class="big"></wii-icon>
+        </button>
+    </div>
     <wii-barcode-scanner #footerScannerComponent
                          [hidden]="loading"
                          buttonSubtitle="Emplacement"

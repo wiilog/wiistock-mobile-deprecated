@@ -15,6 +15,7 @@ import moment from 'moment';
 import {flatMap, map} from 'rxjs/operators';
 import {LocalDataManagerService} from '@app/services/local-data-manager.service';
 import {InventoryValidatePage} from "@pages/stock/inventory/inventory-validate/inventory-validate";
+import {Anomalie} from "@app/entities/anomalie";
 
 
 @IonicPage()
@@ -34,8 +35,10 @@ export class InventoryArticlePage {
 
     private alreadyInitialized: boolean;
 
-    private articles: Array<ArticleInventaire>;
+    private articles: Array<ArticleInventaire & Anomalie>;
     private selectedLocation: string;
+
+    private anomalyMode: boolean;
 
     public constructor(private sqliteProvider: SqliteProvider,
                        private navParams: NavParams,
@@ -53,14 +56,17 @@ export class InventoryArticlePage {
 
     public ionViewWillEnter(): void {
         this.loading = true;
-        this.listConfig.body = [];
 
         this.selectedLocation = this.navParams.get('selectedLocation');
+        this.anomalyMode = this.navParams.get('anomalyMode') || false;
 
         if (!this.alreadyInitialized) {
             Observable.zip(
                 this.loadingService.presentLoading('Chargement...'),
-                this.sqliteProvider.findBy('`article_inventaire`', [`location = '${this.selectedLocation}'`])
+                this.sqliteProvider.findBy(
+                    this.anomalyMode ? '`anomalie_inventaire`' : '`article_inventaire`',
+                    [`location = '${this.selectedLocation}'`]
+                )
             ).subscribe(([loader, articles]) => {
                 this.articles = articles;
 
@@ -72,6 +78,9 @@ export class InventoryArticlePage {
                     this.alreadyInitialized = true;
                 });
             });
+        }
+        else {
+            this.loading = false;
         }
 
         if (this.footerScannerComponent) {
@@ -95,12 +104,12 @@ export class InventoryArticlePage {
             this.navigateToInventoryValidate(articleScanned);
         }
         else {
-            this.toastService.presentToast('L\'emplacement scanné n\'est pas dans la liste');
+            this.toastService.presentToast('L\'article scanné n\'est pas dans la liste');
         }
     }
 
     private createListBodyConfig(): Array<ListPanelItemConfig> {
-        return this.articles.map(({reference, barcode}) => ({
+        return this.articles.map(({reference, barcode, quantity}) => ({
             infos: {
                 reference: {
                     label: 'Référence',
@@ -109,38 +118,39 @@ export class InventoryArticlePage {
                 barcode: {
                     label: 'Code barre',
                     value: barcode
-                }
+                },
+                ...(
+                    this.anomalyMode
+                        ? {
+                            quantity: {
+                                label: 'Quantité',
+                                value: `${quantity}`
+                            }
+                        }
+                        : {}
+                )
             },
             pressAction: (clickedItem) => {
-                this.onPressOnLocation(clickedItem);
+                this.onPressOnArticle(clickedItem);
             }
         }));
     }
 
-    private onPressOnLocation({barcode: {value: barcodeScanned}}: { barcode?: { value?: string } }) {
+    private onPressOnArticle({barcode: {value: barcodeScanned}}: { barcode?: { value?: string } }) {
         const articleScanned = this.articles.find(({barcode}) => (barcodeScanned === barcode));
         this.navigateToInventoryValidate(articleScanned);
     }
 
-    private navigateToInventoryValidate(selectedArticle: ArticleInventaire): void {
+    private navigateToInventoryValidate(selectedArticle: ArticleInventaire&Anomalie): void {
         this.navController.push(InventoryValidatePage, {
             selectedArticle,
+            quantity: this.anomalyMode ? selectedArticle.quantity : undefined,
             validateQuantity: (quantity: number) => {
                 const indexSelectedArticle = this.articles.findIndex(({barcode}) => (barcode === selectedArticle.barcode));
-                let saisieInventaire: SaisieInventaire = {
-                    id: null,
-                    id_mission: selectedArticle.id_mission,
-                    date: moment().format(),
-                    reference: selectedArticle.reference,
-                    is_ref: selectedArticle.is_ref,
-                    quantity,
-                    location: selectedArticle.location,
-                };
                 this.loading = true;
                 Observable.zip(
                     this.loadingService.presentLoading('Chargement...'),
-                    this.sqliteProvider.insert('`saisie_inventaire`', saisieInventaire),
-                    this.sqliteProvider.deleteBy('`article_inventaire`', selectedArticle.id)
+                    this.validateQuantity(selectedArticle, quantity)
                 )
                     .pipe(
                         flatMap(([loader]) => {
@@ -150,7 +160,9 @@ export class InventoryArticlePage {
 
                             this.listConfig.body = this.createListBodyConfig();
 
-                            return this.localDataManager.sendFinishedProcess('inventory').pipe(map(() => loader));
+                            return this.localDataManager
+                                .sendFinishedProcess(this.anomalyMode ? 'inventoryAnomalies' : 'inventory')
+                                .pipe(map(() => loader));
                         }),
                         flatMap((loader) => from(loader.dismiss()))
                     )
@@ -169,5 +181,27 @@ export class InventoryArticlePage {
         this.mainHeaderService.emitSubTitle(articlesLength === 0
             ? 'Les inventaires pour cet emplacements sont à jour'
             : `${articlesLength} article${articlesLength > 1 ? 's' : ''}`)
+    }
+
+    public validateQuantity(selectedArticle: ArticleInventaire&Anomalie, quantity: number): Observable<any> {
+        if (this.anomalyMode) {
+            return this.sqliteProvider.update('`anomalie_inventaire`', {quantity, treated: '1'}, [`id = ${selectedArticle.id}`]);
+        }
+        else {
+            let saisieInventaire: SaisieInventaire = {
+                id: null,
+                id_mission: selectedArticle.id_mission,
+                date: moment().format(),
+                reference: selectedArticle.reference,
+                is_ref: selectedArticle.is_ref,
+                quantity,
+                location: selectedArticle.location,
+            };
+
+            return Observable.zip(
+                this.sqliteProvider.insert('`saisie_inventaire`', saisieInventaire),
+                this.sqliteProvider.deleteBy('`article_inventaire`', selectedArticle.id)
+            );
+        }
     }
 }

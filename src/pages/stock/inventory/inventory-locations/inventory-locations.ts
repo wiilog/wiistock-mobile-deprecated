@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {IonicPage, NavController} from 'ionic-angular';
+import {IonicPage, NavController, NavParams} from 'ionic-angular';
 import {SqliteProvider} from '@providers/sqlite/sqlite';
 import {Observable} from 'rxjs';
 import {ToastService} from '@app/services/toast.service';
@@ -12,6 +12,7 @@ import {ListPanelItemConfig} from '@helpers/components/panel/model/list-panel/li
 import {BarcodeScannerModeEnum} from '@helpers/components/barcode-scanner/barcode-scanner-mode.enum';
 import {MainHeaderService} from '@app/services/main-header.service';
 import {InventoryArticlePage} from "@pages/stock/inventory/inventory-article/inventory-article";
+import {of} from "rxjs/observable/of";
 
 
 @IonicPage()
@@ -31,9 +32,12 @@ export class InventoryLocationsPage {
 
     public loading: boolean;
 
+    public anomalyMode: boolean;
+
     private locations: Array<Emplacement>;
 
     public constructor(private sqliteProvider: SqliteProvider,
+                       private navParams: NavParams,
                        private navController: NavController,
                        private loadingService: LoadingService,
                        private mainHeaderService: MainHeaderService,
@@ -49,10 +53,12 @@ export class InventoryLocationsPage {
         this.loading = true;
         this.listConfig.body = [];
 
+        this.anomalyMode = this.navParams.get('anomalyMode') || false;
+
         Observable.zip(
             this.loadingService.presentLoading('Chargement...'),
-            this.sqliteProvider.findAll('`article_inventaire`'),
-            this.storageService.getInventoryManagerRight()
+            this.sqliteProvider.findAll(this.anomalyMode ? '`anomalie_inventaire`' : '`article_inventaire`'),
+            this.anomalyMode ? of(false) : this.storageService.getInventoryManagerRight()
         ).subscribe(([loader, articles, isInventoryManager]) => {
             this.isInventoryManager = isInventoryManager;
             this.locations = articles
@@ -96,12 +102,18 @@ export class InventoryLocationsPage {
         }
     }
 
+    public navigateToAnomalies(): void {
+        this.navController.push(InventoryLocationsPage, {
+            anomalyMode: true
+        });
+    }
+
     private createListConfig(): Array<ListPanelItemConfig> {
         return this.locations.map(({label}) => ({
             infos: {
                 label: {
                     label: 'Emplacement',
-                        value: label
+                    value: label
                 }
             },
             pressAction: (clickedItem) => {
@@ -116,14 +128,17 @@ export class InventoryLocationsPage {
 
     private navigateToArticles(selectedLocation: string): void {
         this.navController.push(InventoryArticlePage, {
-            selectedLocation
+            selectedLocation,
+            anomalyMode: this.anomalyMode
         });
     }
 
     public refreshSubTitle(): void {
         const locationsLength = this.locations.length;
-        this.mainHeaderService.emitSubTitle(locationsLength === 0
-            ? 'Tous les inventaires sont à jour'
-            : `${locationsLength} emplacement${locationsLength > 1 ? 's' : ''}`)
+        this.mainHeaderService.emitSubTitle(
+            locationsLength === 0
+                ? (this.anomalyMode ? 'Toutes les anomalies ont été traitées' : 'Tous les inventaires sont à jour')
+                : `${locationsLength} emplacement${locationsLength > 1 ? 's' : ''}`
+        )
     }
 }

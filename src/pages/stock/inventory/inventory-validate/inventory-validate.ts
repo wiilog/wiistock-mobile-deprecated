@@ -29,6 +29,7 @@ export class InventoryValidatePage {
     public ionViewWillEnter(): void {
         this.selectedArticle = this.navParams.get('selectedArticle');
         this.validateQuantity = this.navParams.get('validateQuantity');
+        const quantity = this.navParams.get('quantity');
 
         this.simpleFormConfig = {
             title: 'Confirmation quantité',
@@ -41,7 +42,7 @@ export class InventoryValidatePage {
                     label: 'Quantité relevée',
                     name: 'quantity',
                     type: 'number',
-                    value: ''
+                    value: quantity ? `${quantity}` : ''
                 }
             ]
         }
