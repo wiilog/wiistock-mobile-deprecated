@@ -2,8 +2,9 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {Observable} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {map, tap} from 'rxjs/operators';
 import {IconColor} from '@helpers/components/icon/icon-color';
+import {of} from "rxjs/observable/of";
 
 /**
  * Step to add svg icon into assets/icons :
@@ -19,6 +20,8 @@ export class IconComponent {
 
     private static readonly ICONS_DIRECTORY: string = 'assets/icons';
     private static IconCounter: number = 0;
+
+    private static readonly IconsCache: {[name: string]: SafeHtml} = {};
 
     // color declared in variables.scss
     @Input()
@@ -46,14 +49,24 @@ export class IconComponent {
     public set name(name: string) {
         if (this._name !== name) {
             this._name = name;
-            this.svgObject$ = this.httpClient
-                .get(this.src, {responseType: "text"})
-                .pipe(map((svgStr: string) => {
-                    if(!this.isSvg(svgStr)) {
-                        throw Error('IconComponent support svg images only.');
-                    }
-                    return this.sanitizeSVG(svgStr);
-                }));
+            if (IconComponent.IconsCache[this._name]) {
+                this.svgObject$ = of(IconComponent.IconsCache[this._name]);
+            }
+            else {
+                this.svgObject$ = this.httpClient
+                    .get(this.src, {responseType: "text"})
+                    .pipe(
+                        map((svgStr: string) => {
+                            if (!this.isSvg(svgStr)) {
+                                throw Error('IconComponent support svg images only.');
+                            }
+                            return this.sanitizeSVG(svgStr);
+                        }),
+                        tap((sanitizedSVG: SafeHtml) => {
+                            IconComponent.IconsCache[this._name] = sanitizedSVG;
+                        })
+                    );
+            }
         }
     }
 
