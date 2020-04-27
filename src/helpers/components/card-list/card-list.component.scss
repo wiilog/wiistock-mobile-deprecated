@@ -1,20 +1,21 @@
 @import "../../../theme/variables";
 
 $cardListColors: (
-    'green': '#149914',
-    'blue': '#0842B7',
-    'orange': '#FF5B00',
-    'yellow': '#F4B400'
+    list-blue: $list-blue,
+    list-orange: $list-orange,
+    list-yellow: $list-yellow,
+    list-green: $list-green,
 );
 
+$card-padding: 4px 12px !important;
 
 wii-card-list {
     display: block;
 
     .list-icon-container {
         text-align: center;
-        margin-top: $spacer;
-        margin-bottom: $spacer;
+        margin-top: $spacer / 1.5;
+        margin-bottom: $spacer / 1.5;
 
         & > wii-icon {
             display: inline-block;
@@ -24,23 +25,22 @@ wii-card-list {
     }
 
     ion-card-header {
-        height: 30px;
-        padding: 5px !important;
+        font-size: 1.5rem !important;
+        padding: $card-padding;
 
         * {
-            color: white !important;
+            color: $white !important;
         }
+    }
 
-        @each $name, $color in $cardListColors {
-            &.card-header-#{$name} {
-                background-color: #{$color};
-            }
+    @each $name, $color in $cardListColors {
+        &.#{$name} ion-card-header {
+            background-color: #{$color};
         }
     }
 
     ion-card-content {
-        padding-top: 5px !important;
-        padding-bottom: 5px !important;
+        padding: $card-padding;
         display: flex;
         justify-content: space-between;
         align-items: center;

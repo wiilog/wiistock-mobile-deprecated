@@ -6,13 +6,14 @@ wii-menu {
         display: flex;
         flex-wrap: wrap;
         justify-content: space-around;
+        padding-top: $spacer / 4;
         padding-left: $spacer / 2;
         padding-right: $spacer / 2;
 
         .menu-item {
             margin: $spacer / 4;
             width: 16rem;
-            height: 16rem;
+            height: 15rem;
             padding: 0;
 
             .item-inner {
@@ -45,8 +46,8 @@ wii-menu {
             }
 
             .menu-icon {
-                width: 6rem;
-                height: 6rem;
+                width: 5rem;
+                height: 5rem;
                 margin: 0;
             }
         }

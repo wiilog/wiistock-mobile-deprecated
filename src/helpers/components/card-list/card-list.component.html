@@ -6,9 +6,9 @@
     </div>
 
 
-    <ion-card *ngFor="let cardConfig of config" (click)="onCardClick(cardConfig)">
-        <ion-card-header *ngIf="cardConfig.title"
-                         [className]="headerClass">
+    <ion-card *ngFor="let cardConfig of config"
+              (click)="onCardClick(cardConfig)">
+        <ion-card-header *ngIf="cardConfig.title">
             <span class="title-label">{{ cardConfig.title.label }}</span>
             <span class="title-value">{{ cardConfig.title.value }}</span>
         </ion-card-header>

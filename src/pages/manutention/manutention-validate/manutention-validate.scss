@@ -1,32 +1,8 @@
 @import "../../../theme/variables";
 
 page-manutention-validate {
-    .toolbar-background {
-        background-color: #030F4C !important;
-    }
-
-    .user-title {
-        .toolbar-title {
-            color: $white;
-        }
-
-        text-align: center !important;
-    }
-
-    .validate-button{
-        .icon {
-            height: 30px;
-            width: 30px;
-        }
-    }
 
     .commentaire_button {
-        wii-icon {
-            width: 15px;
-            height: 15px;
-            margin-right: 5px;
-        }
-
         margin: auto;
         display: block;
         background-color: transparent;
@@ -34,64 +10,35 @@ page-manutention-validate {
         height: 70px;
         width: 100%;
         color: $dark;
-    }
 
-    ion-navbar.toolbar {
-        min-height: 60px;
-    }
-
-    ion-card-header {
-        background-color: $success;
-        height: 30px;
-        padding: 5px !important;
-
-        p {
-            color: $white !important;
+        wii-icon {
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+            display: inline-block;
         }
-    }
-
-    ion-card-content {
-        padding-top: 5px !important;
-        padding-bottom: 5px !important;
-    }
-
-    .titles {
-        background-color: $white !important;
-        text-align: center !important;
-        align-content: center !important;
-
-        .title {
-            margin-top: $spacer;
-        }
-
-        .title, .subtitle {
-            font-size: 20px;
-            color: #030F4C;
-            margin-bottom: $spacer;
-        }
-    }
-
-    .important {
-        color: #030F4C;
     }
 
     .manutention-details {
         background-color: $white;
+        margin: 0;
 
         ion-row {
             &:not(:last-child) {
                 border-bottom: 1px solid #dedede;
             }
             ion-col {
-                padding: 20px;
+                padding: 15px;
+                flex: inherit;
 
                 &.label {
                     font-size: 14px;
-                    width: 30% !important;
+                    width: 40% !important;
                 }
 
                 &.value {
-                    font-size: 16px;
+                    flex: 1;
+                    font-size: 15px;
                     color: black;
                 }
             }
@@ -101,11 +48,6 @@ page-manutention-validate {
     .commentaire {
         margin-bottom: 7%;
         padding: 5px;
-    }
-
-    .alert {
-        background-color: #149914;
-        color: #FFF;
     }
 
     .page-content {

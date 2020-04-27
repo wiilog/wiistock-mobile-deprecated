@@ -84,7 +84,9 @@ export class CollecteArticlesPage {
 
         this.listBoldValues = ['reference', 'barCode', 'location', 'quantity'];
 
-        this.footerScannerComponent.fireZebraScan();
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.fireZebraScan();
+        }
 
         this.sqliteProvider.findArticlesByCollecte(this.collecte.id).subscribe((articles) => {
             this.updateList(articles, true);
@@ -95,7 +97,9 @@ export class CollecteArticlesPage {
     }
 
     public ionViewWillLeave(): void {
-        this.footerScannerComponent.unsubscribeZebraScan();
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.unsubscribeZebraScan();
+        }
     }
 
     public ionViewCanLeave(): boolean {

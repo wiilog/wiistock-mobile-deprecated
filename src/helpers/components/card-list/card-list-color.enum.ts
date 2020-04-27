@@ -1,6 +1,6 @@
 export enum CardListColorEnum {
-    GREEN = 'green',
-    BLUE = 'blue',
-    ORANGE = 'orange',
-    YELLOW = 'yellow'
+    GREEN = 'list-green',
+    BLUE = 'list-blue',
+    ORANGE = 'list-orange',
+    YELLOW = 'list-yellow'
 }

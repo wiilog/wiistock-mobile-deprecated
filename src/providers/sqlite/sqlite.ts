@@ -153,63 +153,32 @@ export class SqliteProvider {
             : of(undefined);
     }
 
-    public importPreparations(data): Observable<any> {
-        const ret$ = new ReplaySubject<any>(1);
+    public importPreparations(data, deleteOld: boolean = true): Observable<any> {
+        const prepas = data['preparations'];
+        let prepasValues = (prepas || []).map((prepa) => (`(
+            ${prepa.id},
+            '${prepa.number}',
+            NULL,
+            NULL,
+            0,
+            '${this.escapeQuotes(prepa.destination)}',
+            '${this.escapeQuotes(prepa.type)}',
+            ${prepa.requester ? `'${this.escapeQuotes(prepa.requester)}'` : 'NULL'}
+        )`));
 
-        let prepas = data['preparations'];
-        let prepasValues = [];
-        if (prepas.length === 0) {
-            this.findAll('`preparation`').subscribe((preparationsDB) => {
-                this.deletePreparations(preparationsDB).subscribe(() => {
-                    ret$.next(undefined);
-                });
-            });
-        }
-        for (let prepa of prepas) {
-            this.findOneById('preparation', prepa.id).subscribe((prepaInserted) => {
-                if (!prepaInserted) {
-                    prepasValues.push(`(
-                        ${prepa.id},
-                        '${prepa.number}',
-                        NULL,
-                        NULL,
-                        0,
-                        '${this.escapeQuotes(prepa.destination)}',
-                        '${this.escapeQuotes(prepa.type)}',
-                        ${prepa.requester ? `'${this.escapeQuotes(prepa.requester)}'` : 'NULL'}
-                    )`);
+        return of(undefined).pipe(
+            flatMap(() => deleteOld ? this.deleteBy('`preparation`') : of(undefined)),
+            flatMap(() => {
+                if (prepasValues.length > 0) {
+                    const prepasValuesStr = prepasValues.join(', ');
+                    const sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`, `destination`, `type`, `requester`) VALUES ' + prepasValuesStr + ';';
+                    return this.executeQuery(sqlPrepas).pipe(map(() => true));
                 }
-
-                if (prepas.indexOf(prepa) === prepas.length - 1) {
-                    this.findAll('`preparation`').subscribe((preparations) => {
-                        let prepasValuesStr = prepasValues.join(', ');
-                        let sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`, `destination`, `type`, `requester`) VALUES ' + prepasValuesStr + ';';
-                        if (preparations.length === 0) {
-                            if (prepasValues.length > 0) {
-                                this.executeQuery(sqlPrepas).subscribe(() => {
-                                    ret$.next(true);
-                                });
-                            }
-                            else {
-                                ret$.next(undefined);
-                            }
-                        } else {
-                            this.deletePreparations(preparations.filter(p => prepas.find(prep => prep.id === p.id) === undefined)).subscribe(() => {
-                                if (prepasValues.length > 0) {
-                                    this.executeQuery(sqlPrepas).subscribe(() => {
-                                        ret$.next(true);
-                                    });
-                                }
-                                else {
-                                    ret$.next(undefined);
-                                }
-                            });
-                        }
-                    });
+                else {
+                    return of(undefined);
                 }
-            });
-        }
-        return ret$;
+            })
+        );
     }
 
     public importManutentions(data): Observable<any> {

@@ -87,7 +87,7 @@ export class LocalDataManagerService {
                     const {preparations} = data;
                     return (preparations && preparations.length > 0)
                         ? of(undefined).pipe(
-                            flatMap(() => this.sqliteProvider.importPreparations(data)),
+                            flatMap(() => this.sqliteProvider.importPreparations(data, false)),
                             flatMap(() => this.sqliteProvider.importArticlesPrepas(data)),
                             flatMap(() => this.sqliteProvider.importArticlesPrepaByRefArticle(data, true))
                         )
