@@ -29,7 +29,7 @@ export class PreparationRefArticlesPage {
     public refArticle: ArticlePrepa;
 
     public loading: boolean;
-
+    private pageHasLoadedOnce: boolean;
     private countSubscription: Subscription;
 
     public constructor(private navCtrl: NavController,
@@ -38,37 +38,43 @@ export class PreparationRefArticlesPage {
                        private loadingService: LoadingService,
                        private sqliteProvider: SqliteProvider) {
         this.loading = true;
+        this.pageHasLoadedOnce = false;
+    }
+
+    public ionViewCanLeave(): boolean {
+        return (!this.selectItemComponent || !this.selectItemComponent.isScanning) && !this.loading;
     }
 
     public ionViewWillEnter(): void {
         this.refArticle = this.navParams.get('article');
         this.listWhereClause = [`reference_article LIKE '${this.refArticle.reference}'`];
-        this.loading = true;
         let loader: Loading;
-
-        this.countSubscription = this.loadingService
-            .presentLoading('Chargement...')
-            .pipe(
-                tap((loaderInstance) => {
-                    loader = loaderInstance;
-                }),
-                flatMap(() => this.sqliteProvider.count('article_prepa_by_ref_article', this.listWhereClause)),
-                take(1),
-                flatMap((counter) => from(loader.dismiss()).pipe(map(() => counter)))
-            )
-            .subscribe((counter) => {
-                if (!counter || counter <= 0) {
-                    this.toastService.presentToast('Aucun article trouvé...');
-                    this.navCtrl.pop();
-                }
-                else {
+        if (!this.pageHasLoadedOnce) {
+            this.loading = true;
+            this.pageHasLoadedOnce = true;
+            this.countSubscription = this.loadingService
+                .presentLoading('Chargement...')
+                .pipe(
+                    tap((loaderInstance) => {
+                        loader = loaderInstance;
+                    }),
+                    flatMap(() => this.sqliteProvider.count('article_prepa_by_ref_article', this.listWhereClause)),
+                    take(1),
+                    flatMap((counter) => from(loader.dismiss()).pipe(map(() => counter)))
+                )
+                .subscribe((counter) => {
                     this.loading = false;
+                    if (!counter || counter <= 0) {
+                        this.toastService.presentToast('Aucun article trouvé...');
+                        this.navCtrl.pop();
+                    } else {
 
-                    if (this.selectItemComponent) {
-                        this.selectItemComponent.fireZebraScan();
+                        if (this.selectItemComponent) {
+                            this.selectItemComponent.fireZebraScan();
+                        }
                     }
-                }
-            });
+                });
+        }
     }
 
     public ionViewWillLeave(): void {
