@@ -67,11 +67,9 @@ export class PreparationRefArticlesPage {
                     if (!counter || counter <= 0) {
                         this.toastService.presentToast('Aucun article trouvé...');
                         this.navCtrl.pop();
-                    } else {
-
-                        if (this.selectItemComponent) {
-                            this.selectItemComponent.fireZebraScan();
-                        }
+                    }
+                    else if (this.selectItemComponent) {
+                        this.selectItemComponent.fireZebraScan();
                     }
                 });
         }
