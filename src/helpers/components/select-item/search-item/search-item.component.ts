@@ -122,9 +122,10 @@ export class SearchItemComponent implements OnInit {
         this.itemComponent.hideLoading();
     }
 
-    public isKnownItem(search: string): Emplacement {
+    public isKnownItem(search: string): any {
+
         return this.dbItems
-            ? this.dbItems.find((element) => (element.label === search))
+            ? this.dbItems.find((element) => (element[this.config[this.type].label] === search))
             : undefined;
     }
 

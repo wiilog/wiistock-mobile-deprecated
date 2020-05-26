@@ -13,8 +13,11 @@ wii-list-panel-item {
 
         .list-element-body-wrapper {
             flex: 1;
-            .element-value-bold {
-                font-weight: bold;
+            .element-value {
+                word-break: break-all;
+                &.element-value-bold {
+                    font-weight: bold;
+                }
             }
         }
 
