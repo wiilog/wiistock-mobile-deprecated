@@ -34,3 +34,7 @@ wii-barcode-scanner {
         width: 100%;
     }
 }
+
+ion-nav.keyboard-shown .scanner-button.hidden-on-keyboard-shown {
+    display: none;
+}
