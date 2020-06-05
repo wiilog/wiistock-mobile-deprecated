@@ -9,7 +9,7 @@
         </div>
     </div>
     <div #signatureWrapper class="signature-wrapper">
-        <signature-pad *ngIf="signaturePadOption" [options]="signaturePadOption"></signature-pad>
+        <signature-pad *ngIf="signaturePadOption" #signaturePad [options]="signaturePadOption"></signature-pad>
     </div>
     <div class="page-footer">
         <ion-button class="larger"

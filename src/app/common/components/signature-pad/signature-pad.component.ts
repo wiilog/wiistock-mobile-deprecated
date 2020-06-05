@@ -1,4 +1,4 @@
-import {Component, ElementRef, Input, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, ElementRef, Input, ViewChild} from '@angular/core';
 import {SignaturePad} from 'angular2-signaturepad/signature-pad';
 import {ModalController} from '@ionic/angular';
 
@@ -6,9 +6,7 @@ import {ModalController} from '@ionic/angular';
 @Component({
     selector: 'wii-signature-pad',
     templateUrl: 'signature-pad.component.html',
-    styleUrls: [
-        './signature-pad.component.scss'
-    ]
+    styleUrls: ['./signature-pad.component.scss']
 })
 export class SignaturePadComponent {
 
@@ -20,25 +18,26 @@ export class SignaturePadComponent {
     @ViewChild('signatureWrapper', {static: false})
     public signatureWrapper: ElementRef;
 
-    @ViewChild(SignaturePad, {static: false})
+    @ViewChild('signaturePad', {static: false})
     public signaturePad: SignaturePad;
 
-    public constructor(private modalController: ModalController) {
+    public constructor(private modalController: ModalController,
+                       private changeDetectorRef: ChangeDetectorRef) {
     }
 
     public ionViewWillEnter(): void {
         setTimeout(() => {
             const componentSize = this.signatureWrapper.nativeElement.getBoundingClientRect();
-            console.log(componentSize)
             this.signaturePadOption = {
                 canvasWidth: componentSize.width,
                 canvasHeight: componentSize.height - 4,
                 backgroundColor: 'rgb(255, 255, 255)',
                 minWidth: 1
             };
-            setTimeout(() => {
+            if (this.signature) {
+                this.changeDetectorRef.detectChanges();
                 this.signaturePad.fromDataURL(this.signature);
-            });
+            }
         });
     }
 
