@@ -287,7 +287,7 @@ export class PrisePage implements CanLeave {
 
     private init(): void {
         this.loading = true;
-        this.apiLoading = true;
+        this.apiLoading = false;
         this.listTakingBody = [];
         this.colisPrise = [];
         this.currentPacksOnLocation = [];

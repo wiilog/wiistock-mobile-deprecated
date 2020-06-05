@@ -16,14 +16,14 @@ import {Mouvement} from '@entities/mouvement';
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {LivraisonEmplacementPageRoutingModule} from '@pages/stock/livraison/livraison-emplacement/livraison-emplacement-routing.module';
 import {LivraisonArticleTakePageRoutingModule} from '@pages/stock/livraison/livraison-article-take/livraison-article-take-routing.module';
-import {CanLeave} from '@app/guards/can-leave/can-leave';
+
 
 @Component({
     selector: 'wii-livraison-articles',
     templateUrl: './livraison-articles.page.html',
     styleUrls: ['./livraison-articles.page.scss'],
 })
-export class LivraisonArticlesPage implements CanLeave {
+export class LivraisonArticlesPage {
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
 
@@ -84,10 +84,6 @@ export class LivraisonArticlesPage implements CanLeave {
         if (this.footerScannerComponent) {
             this.footerScannerComponent.unsubscribeZebraScan();
         }
-    }
-
-    public wiiCanLeave(): boolean {
-        return !this.listToTreatConfig;
     }
 
     public selectArticle(article, quantity) {

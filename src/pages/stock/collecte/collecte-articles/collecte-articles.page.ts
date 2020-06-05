@@ -103,7 +103,7 @@ export class CollecteArticlesPage implements CanLeave {
     }
 
     public wiiCanLeave(): boolean {
-        return this.canLeave && !this.listToTreatConfig;
+        return this.canLeave;
     }
 
     public refreshOver(): void {
@@ -328,6 +328,7 @@ export class CollecteArticlesPage implements CanLeave {
         if (!this.isLoading) {
             this.isLoading = true;
 
+            this.canLeave = false;
             this.sqliteService
                 .findArticlesByCollecte(this.collecte.id)
                 .pipe(
@@ -352,7 +353,6 @@ export class CollecteArticlesPage implements CanLeave {
                 .subscribe(
                     ({offline, success}: any) => {
                         if (this.collecte && this.collecte.forStock) {
-                            this.canLeave = false;
                             from(this.alertController
                                 .create({
                                     header: 'Collecte validée',
@@ -374,6 +374,7 @@ export class CollecteArticlesPage implements CanLeave {
                                 });
                         }
                         else {
+                            this.canLeave = true;
                             this.closeScreen(offline ? [] : success, offline);
                         }
                     },

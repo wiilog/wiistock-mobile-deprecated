@@ -203,7 +203,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                     this.isShown.header = this.headerHide.indexOf(this.currentPagePath) === -1;
 
                     const {paramsId} = (this.activatedRoute.snapshot.queryParams || {paramsId: undefined});
-                    console.log(this.currentPagePath, this.lastDirections[navigationId], paramsId)
                     this.refreshTitles(navigationId, this.currentPagePath, paramsId);
                     this.withHeader.emit(this.headerHide.indexOf(this.currentPagePath) === -1);
                 }

@@ -19,7 +19,6 @@ import {IconColor} from '@app/common/components/icon/icon-color';
 import {PreparationEmplacementPageRoutingModule} from '@pages/stock/preparation/preparation-emplacement/preparation-emplacement-routing.module';
 import {PreparationRefArticlesPageRoutingModule} from '@pages/stock/preparation/preparation-ref-articles/preparation-ref-articles-routing.module';
 import {PreparationArticleTakePageRoutingModule} from '@pages/stock/preparation/preparation-article-take/preparation-article-take-routing.module';
-import {CanLeave} from '@app/guards/can-leave/can-leave';
 
 
 @Component({
@@ -27,7 +26,7 @@ import {CanLeave} from '@app/guards/can-leave/can-leave';
     templateUrl: './preparation-articles.page.html',
     styleUrls: ['./preparation-articles.page.scss'],
 })
-export class PreparationArticlesPage implements CanLeave {
+export class PreparationArticlesPage {
 
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
@@ -87,10 +86,6 @@ export class PreparationArticlesPage implements CanLeave {
         if (this.footerScannerComponent) {
             this.footerScannerComponent.unsubscribeZebraScan();
         }
-    }
-
-    public wiiCanLeave(): boolean {
-        return !this.listToTreatConfig;
     }
 
     public saveSelectedArticle(selectedArticle: ArticlePrepa | ArticlePrepaByRefArticle, selectedQuantity: number): void {
