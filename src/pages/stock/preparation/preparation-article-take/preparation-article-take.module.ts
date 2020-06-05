@@ -1,14 +1,20 @@
 import {NgModule} from '@angular/core';
-import {IonicPageModule} from 'ionic-angular';
-import {PreparationArticleTakePage} from '@pages/stock/preparation/preparation-article-take/preparation-article-take';
+import {FormsModule} from '@angular/forms';
+import {IonicModule} from '@ionic/angular';
+import {PreparationArticleTakePageRoutingModule} from './preparation-article-take-routing.module';
+import {PreparationArticleTakePage} from './preparation-article-take.page';
+import {CommonModule as AngularCommonModule} from '@angular/common';
+import {CommonModule} from '@app/common/common.module';
 
 @NgModule({
-    declarations: [
-        PreparationArticleTakePage,
-    ],
     imports: [
-        IonicPageModule.forChild(PreparationArticleTakePage),
+        AngularCommonModule,
+        FormsModule,
+        IonicModule,
+        PreparationArticleTakePageRoutingModule,
+        CommonModule
     ],
+    declarations: [PreparationArticleTakePage]
 })
 export class PreparationArticleTakePageModule {
 }

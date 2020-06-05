@@ -1,0 +1,7 @@
+@import "~theme/variables";
+
+.page-content,
+.page-content > wii-form-panel {
+    flex: 1;
+    display: flex;
+}

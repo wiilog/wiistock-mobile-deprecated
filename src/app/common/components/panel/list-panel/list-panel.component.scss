@@ -1,0 +1,18 @@
+@import "~theme/variables";
+
+:host {
+    display: block;
+
+    wii-panel-header {
+        margin: .35rem;
+    }
+
+    wii-list-panel-item {
+        margin-right: $spacer * 1.2;
+        margin-left: $spacer * 1.2;
+
+        &:not(:last-child) {
+            margin-bottom: .35rem;
+        }
+    }
+}

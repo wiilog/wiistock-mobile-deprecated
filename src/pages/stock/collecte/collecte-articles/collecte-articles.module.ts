@@ -1,15 +1,20 @@
-import { NgModule } from '@angular/core';
-import { IonicPageModule } from 'ionic-angular';
-import { CollecteArticlesPage } from './collecte-articles';
-import {HelpersModule} from "@helpers/helpers.module";
+import {NgModule} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {IonicModule} from '@ionic/angular';
+import {CollecteArticlesPageRoutingModule} from './collecte-articles-routing.module';
+import {CollecteArticlesPage} from './collecte-articles.page';
+import {CommonModule as AngularCommonModule} from '@angular/common';
+import {CommonModule} from '@app/common/common.module';
 
 @NgModule({
-  declarations: [
-    CollecteArticlesPage,
-  ],
     imports: [
-        IonicPageModule.forChild(CollecteArticlesPage),
-        HelpersModule,
+        AngularCommonModule,
+        FormsModule,
+        IonicModule,
+        CollecteArticlesPageRoutingModule,
+        CommonModule
     ],
+    declarations: [CollecteArticlesPage]
 })
-export class CollecteArticlesModule {}
+export class CollecteArticlesPageModule {
+}

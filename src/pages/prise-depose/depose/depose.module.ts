@@ -1,17 +1,20 @@
 import {NgModule} from '@angular/core';
-import {IonicPageModule} from 'ionic-angular';
-import {DeposePage} from './depose';
-import {HelpersModule} from '@helpers/helpers.module';
-
+import {FormsModule} from '@angular/forms';
+import {IonicModule} from '@ionic/angular';
+import {DeposePageRoutingModule} from './depose-routing.module';
+import {DeposePage} from './depose.page';
+import {CommonModule as AngularCommonModule} from '@angular/common';
+import {CommonModule} from '@app/common/common.module';
 
 @NgModule({
-    declarations: [
-        DeposePage,
-    ],
     imports: [
-        IonicPageModule.forChild(DeposePage),
-        HelpersModule,
+        AngularCommonModule,
+        FormsModule,
+        IonicModule,
+        DeposePageRoutingModule,
+        CommonModule
     ],
+    declarations: [DeposePage]
 })
 export class DeposePageModule {
 }

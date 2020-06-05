@@ -1,0 +1,13 @@
+<div class="menu-list" *ngIf="config">
+    <ion-card class="menu-item ion-activatable ripple-parent"
+              type="button"
+              *ngFor="let item of config"
+              (click)="item.action()">
+        <wii-icon [name]="item.icon" class="menu-icon"></wii-icon>
+        <span class="menu-label">{{ item.label }}</span>
+        <ion-ripple-effect></ion-ripple-effect>
+    </ion-card>
+    <div class="menu-item"
+         *ngIf="config.length % 2 === 1">
+    </div>
+</div>

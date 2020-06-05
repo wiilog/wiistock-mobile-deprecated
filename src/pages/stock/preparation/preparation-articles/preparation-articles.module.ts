@@ -1,15 +1,20 @@
-import { NgModule } from '@angular/core';
-import { IonicPageModule } from 'ionic-angular';
-import { PreparationArticlesPage } from './preparation-articles';
-import {HelpersModule} from "@helpers/helpers.module";
+import {NgModule} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {IonicModule} from '@ionic/angular';
+import {PreparationArticlesPageRoutingModule} from './preparation-articles-routing.module';
+import {PreparationArticlesPage} from './preparation-articles.page';
+import {CommonModule as AngularCommonModule} from '@angular/common';
+import {CommonModule} from '@app/common/common.module';
 
 @NgModule({
-  declarations: [
-    PreparationArticlesPage,
-  ],
     imports: [
-        IonicPageModule.forChild(PreparationArticlesPage),
-        HelpersModule,
+        AngularCommonModule,
+        FormsModule,
+        IonicModule,
+        PreparationArticlesPageRoutingModule,
+        CommonModule
     ],
+    declarations: [PreparationArticlesPage]
 })
-export class PreparationArticlesPageModule {}
+export class PreparationArticlesPageModule {
+}

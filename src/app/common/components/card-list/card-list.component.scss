@@ -1,0 +1,69 @@
+@import "~theme/variables";
+
+$cardListColors: (
+    "list-blue": $list-blue,
+    "list-orange": $list-orange,
+    "list-yellow": $list-yellow,
+    "list-green": $list-green
+);
+
+$card-padding: 4px 12px !important;
+
+:host {
+    display: block;
+
+    .list-icon-container {
+        text-align: center;
+        margin-top: $spacer / 1.5;
+        margin-bottom: $spacer / 1.5;
+
+        & > wii-icon {
+            display: inline-block;
+            height: 50px;
+            width: 50px;
+        }
+    }
+
+    ion-card-header {
+        padding: $card-padding;
+
+        * {
+            color: $white !important;
+        }
+    }
+
+    @each $name, $color in $cardListColors {
+        &.#{$name} ion-card-header {
+            background-color: #{$color};
+        }
+    }
+
+    ion-card-content {
+        padding: $card-padding;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: $black;
+
+        .actions {
+            display: inline-flex;
+
+            .arrow {
+                width: 15px !important;
+                height: 15px !important;
+            }
+        }
+    }
+
+    ion-card-header .title-label,
+    ion-card-header .title-value,
+    ion-card-content .content-label,
+    ion-card-content .content-value {
+        display: inline-block;
+        &.title-value,
+        &.content-value {
+            font-weight: bold;
+        }
+    }
+
+}

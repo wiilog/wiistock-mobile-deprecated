@@ -1,9 +1,0 @@
-<wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
-
-<ion-scroll *ngIf="hasLoaded" scrollY="true" class="page-content">
-    <wii-card-list *ngIf="hasLoaded && livraisons && livraisons.length > 0"
-                   [listIconName]="livraisonsIconName"
-                   [color]="livraisonsListColor"
-                   [config]="livraisonsListConfig">
-    </wii-card-list>
-</ion-scroll>>

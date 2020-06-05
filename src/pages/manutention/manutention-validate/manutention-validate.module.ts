@@ -1,15 +1,20 @@
-import { NgModule } from '@angular/core';
-import { IonicPageModule } from 'ionic-angular';
-import { ManutentionValidatePage } from './manutention-validate';
-import {HelpersModule} from "@helpers/helpers.module";
+import {NgModule} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {IonicModule} from '@ionic/angular';
+import {ManutentionValidatePageRoutingModule} from './manutention-validate-routing.module';
+import {ManutentionValidatePage} from './manutention-validate.page';
+import {CommonModule as AngularCommonModule} from '@angular/common';
+import {CommonModule} from '@app/common/common.module';
 
 @NgModule({
-  declarations: [
-    ManutentionValidatePage,
-  ],
     imports: [
-        IonicPageModule.forChild(ManutentionValidatePage),
-        HelpersModule,
+        AngularCommonModule,
+        FormsModule,
+        IonicModule,
+        ManutentionValidatePageRoutingModule,
+        CommonModule
     ],
+    declarations: [ManutentionValidatePage]
 })
-export class ManutentionValidatePageModule {}
+export class ManutentionValidatePageModule {
+}

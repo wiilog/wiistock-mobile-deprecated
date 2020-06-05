@@ -1,17 +1,20 @@
 import {NgModule} from '@angular/core';
-import {IonicPageModule} from 'ionic-angular';
-import {DeposeConfirmPage} from './depose-confirm';
-import {HelpersModule} from "@helpers/helpers.module";
-
+import {FormsModule} from '@angular/forms';
+import {IonicModule} from '@ionic/angular';
+import {DeposeConfirmPageRoutingModule} from './depose-confirm-routing.module';
+import {DeposeConfirmPage} from './depose-confirm.page';
+import {CommonModule as AngularCommonModule} from '@angular/common';
+import {CommonModule} from '@app/common/common.module';
 
 @NgModule({
-    declarations: [
-        DeposeConfirmPage
-    ],
     imports: [
-        HelpersModule,
-        IonicPageModule.forChild(DeposeConfirmPage)
+        AngularCommonModule,
+        FormsModule,
+        IonicModule,
+        DeposeConfirmPageRoutingModule,
+        CommonModule
     ],
+    declarations: [DeposeConfirmPage]
 })
 export class DeposeConfirmPageModule {
 }

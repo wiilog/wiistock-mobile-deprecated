@@ -1,0 +1,52 @@
+@import "~theme/variables";
+
+:host {
+    display: block;
+
+    &:not(.transparent-panel-header) {
+        background-color: $white;
+        border: 1px solid $lightBlue;
+    }
+
+    .list-header-wrapper {
+        display: flex;
+        align-items: center;
+
+        .header-body,
+        .list-header-icon {
+            padding-bottom: .5rem;
+            padding-top: .5rem;
+        }
+
+        .header-body {
+            font-size: $normalFontSize;
+
+            & > *:not(:last-child) {
+                margin-bottom: .20rem;
+            }
+
+            .header-title {
+                font-weight: bold;
+            }
+            .header-info {
+                color: $primary;
+                font-size: 90%;
+                font-style: italic;
+            }
+        }
+
+        .list-header-icon {
+            padding-left: 1rem;
+            padding-right: 1rem;
+
+            wii-icon {
+                width: 3rem;
+                height: 3rem;
+            }
+
+            &:last-child {
+                margin-left: auto;
+            }
+        }
+    }
+}

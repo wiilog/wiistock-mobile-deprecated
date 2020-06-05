@@ -1,0 +1,76 @@
+@import "~theme/variables";
+
+:host {
+    display: flex;
+    flex: 1;
+
+    .simple-form-wrapper {
+        margin: $spacerMin;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+
+        .simple-form-title {
+            text-transform: uppercase;
+            color: $white;
+            text-align: center;
+            padding-bottom: 1.5rem;
+            padding-top: 1.5rem;
+            font-size: large;
+            font-weight: bold;
+            background-color: $primary;
+        }
+
+        .simple-form-content {
+            flex: 1;
+            margin: $spacer;
+
+            .simple-form-content-wrapper {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+
+                & > *:not(:last-child) {
+                    margin-bottom: 2rem;
+                }
+
+                .simple-form-info {
+                    background-color: $white;
+                    border: 1px solid $lightBlue;
+                    padding: 1rem;
+                    margin-bottom: 3rem;
+
+                    & > .simple-form-info-item {
+                        font-size: $normalFontSize;
+
+                        &:not(:last-child) {
+                            margin-bottom: $spacerMin;
+                        }
+
+                        .simple-form-info-item-value {
+                            font-weight: bold;
+                        }
+                    }
+                }
+
+                ion-label,
+                ion-item {
+                    font-size: $normalFontSize;
+                }
+            }
+        }
+
+        .simple-form-footer {
+            display: flex;
+
+            .submit-button {
+                flex: 1;
+            }
+        }
+    }
+}
+
+ion-nav.keyboard-shown .simple-form-footer {
+    display: none !important;
+}

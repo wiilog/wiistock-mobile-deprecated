@@ -1,15 +1,20 @@
-import { NgModule } from '@angular/core';
-import { IonicPageModule } from 'ionic-angular';
-import { LivraisonArticlesPage } from './livraison-articles';
-import {HelpersModule} from "@helpers/helpers.module";
+import {NgModule} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {IonicModule} from '@ionic/angular';
+import {LivraisonArticlesPageRoutingModule} from './livraison-articles-routing.module';
+import {LivraisonArticlesPage} from './livraison-articles.page';
+import {CommonModule as AngularCommonModule} from '@angular/common';
+import {CommonModule} from '@app/common/common.module';
 
 @NgModule({
-  declarations: [
-    LivraisonArticlesPage,
-  ],
     imports: [
-        IonicPageModule.forChild(LivraisonArticlesPage),
-        HelpersModule,
+        AngularCommonModule,
+        FormsModule,
+        IonicModule,
+        LivraisonArticlesPageRoutingModule,
+        CommonModule
     ],
+    declarations: [LivraisonArticlesPage]
 })
-export class LivraisonArticlesPageModule {}
+export class LivraisonArticlesPageModule {
+}

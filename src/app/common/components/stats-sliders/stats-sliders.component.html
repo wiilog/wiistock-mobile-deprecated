@@ -1,0 +1,8 @@
+<ion-slides pager="true">
+    <ion-slide *ngFor="let datum of data">
+        <div class="menu-stats">
+            <p class="number" [class.text-danger]="datum.danger">{{ datum.counter }}</p>
+            <p class="label">{{ datum.label }}</p>
+        </div>
+    </ion-slide>
+</ion-slides>

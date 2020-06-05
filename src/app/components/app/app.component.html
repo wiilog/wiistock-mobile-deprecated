@@ -1,0 +1,5 @@
+<ion-app *ngIf="platformReady">
+    <wii-main-header (withHeader)="onHeaderChange($event)">
+    </wii-main-header>
+    <ion-router-outlet></ion-router-outlet>
+</ion-app>

@@ -1,0 +1,35 @@
+<div class="spinner" *ngIf="loadingStartPreparation">
+    <ion-spinner></ion-spinner>
+</div>
+
+<ng-container *ngIf="!loadingStartPreparation && preparation && preparationsHeaderConfig">
+    <div scroll-y="true" class="page-content">
+        <wii-panel-header [leftIcon]="preparationsHeaderConfig.leftIcon"
+                          [title]="preparationsHeaderConfig.title"
+                          [subtitle]="preparationsHeaderConfig.subtitle"
+                          [info]="preparationsHeaderConfig.info"
+                          [transparent]="true"
+                          class="page-header">
+        </wii-panel-header>
+
+        <wii-list-panel *ngIf="listTreatedConfig"
+                        [header]="listTreatedConfig.header"
+                        [body]="listTreatedConfig.body"
+                        [boldValues]="listBoldValues">
+        </wii-list-panel>
+
+        <wii-list-panel *ngIf="listToTreatConfig"
+                        [header]="listToTreatConfig.header"
+                        [body]="listToTreatConfig.body"
+                        [boldValues]="listBoldValues">
+        </wii-list-panel>
+    </div>
+
+    <div class="page-footer">
+        <wii-barcode-scanner #footerScannerComponent
+                             [buttonSubtitle]="'article'"
+                             [hidden]="!articlesNT || articlesNT.length === 0"
+                             (add)="testIfBarcodeEquals($event[0])">
+        </wii-barcode-scanner>
+    </div>
+</ng-container>

@@ -1,15 +1,20 @@
 import {NgModule} from '@angular/core';
-import {IonicPageModule} from 'ionic-angular';
-import {NewEmplacementComponent} from "@pages/new-emplacement/new-emplacement";
-
+import {FormsModule} from '@angular/forms';
+import {IonicModule} from '@ionic/angular';
+import {NewEmplacementPageRoutingModule} from './new-emplacement-routing.module';
+import {NewEmplacementPage} from './new-emplacement.page';
+import {CommonModule as AngularCommonModule} from '@angular/common';
+import {CommonModule} from '@app/common/common.module';
 
 @NgModule({
-    declarations: [
-        NewEmplacementComponent,
-    ],
     imports: [
-        IonicPageModule.forChild(NewEmplacementComponent)
-    ]
+        AngularCommonModule,
+        FormsModule,
+        IonicModule,
+        NewEmplacementPageRoutingModule,
+        CommonModule
+    ],
+    declarations: [NewEmplacementPage]
 })
-export class NewEmplacementModule {
+export class NewEmplacementPageModule {
 }

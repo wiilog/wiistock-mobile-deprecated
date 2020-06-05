@@ -1,0 +1,44 @@
+<div class="page-content">
+    <wii-main-loader [loading]="loading"></wii-main-loader>
+
+    <div class="logo-container" *ngIf="!loading">
+        <img alt="FollowGT" src="assets/images/followgt.svg" class="logo"/>
+    </div>
+
+    <div class="version-not-valid-container" *ngIf="!loading && appVersionInvalid">
+        <ion-button class="version-not-valid"
+                    [href]="apkUrl"
+                    size="large"
+                    color="primary"
+                    expand="full">
+            Veuillez mettre à jour<br/>
+            l'application
+        </ion-button>
+    </div>
+    <form (ngSubmit)="logForm()" *ngIf="!loading && !appVersionInvalid">
+        <div class="form-content">
+            <ion-item>
+                <ion-label color="medium">Login</ion-label>
+                <ion-input type="text" [(ngModel)]="form.login" name="login"></ion-input>
+            </ion-item>
+            <ion-item>
+                <ion-label color="medium">Mot de passe</ion-label>
+                <ion-input type="password"
+                           [(ngModel)]="form.password"
+                           name="passsword"
+                           (keyup.enter)="logForm()"
+                ></ion-input>
+            </ion-item>
+        </div>
+        <ion-button type="submit"
+                    size="large"
+                    color="primary"
+                    expand="full">
+            Connexion
+        </ion-button>
+    </form>
+</div>
+<div class="page-footer">
+    <wii-icon class="parameters" name="cogs.svg" (action)="goToParams()"></wii-icon>
+    <div class="version-container" *ngIf="currentVersion">V {{ currentVersion }}</div>
+</div>

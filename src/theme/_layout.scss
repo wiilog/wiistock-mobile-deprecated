@@ -1,0 +1,38 @@
+@import "~theme/variables";
+
+.ion-page {
+    display: flex;
+    flex-direction: column;
+    background-color: $lightGrey;
+
+    .page-content {
+        flex: 1;
+    }
+
+    .page-footer {
+        margin-top: auto;
+
+        ion-nav.keyboard-shown &:not(.persisted-page-footer) {
+            display: none;
+        }
+    }
+}
+
+// scrolling components
+div[scroll-x=true],
+div[scroll-y=true] {
+    position: relative;
+    overflow: hidden;
+
+    &[scroll-x=true] {
+        overflow-x: auto;
+    }
+
+    &[scroll-y=true] {
+        overflow-y: auto;
+    }
+
+    ::-webkit-scrollbar {
+        display: none;
+    }
+}

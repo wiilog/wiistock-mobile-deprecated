@@ -1,16 +1,20 @@
 import {NgModule} from '@angular/core';
-import {IonicPageModule} from 'ionic-angular';
-import {PreparationRefArticlesPage} from './preparation-ref-articles';
-import {IonicSelectableModule} from "ionic-selectable";
+import {FormsModule} from '@angular/forms';
+import {IonicModule} from '@ionic/angular';
+import {PreparationRefArticlesPageRoutingModule} from './preparation-ref-articles-routing.module';
+import {PreparationRefArticlesPage} from './preparation-ref-articles.page';
+import {CommonModule as AngularCommonModule} from '@angular/common';
+import {CommonModule} from '@app/common/common.module';
 
 @NgModule({
-    declarations: [
-        PreparationRefArticlesPage,
-    ],
     imports: [
-        IonicSelectableModule,
-        IonicPageModule.forChild(PreparationRefArticlesPage),
+        AngularCommonModule,
+        FormsModule,
+        IonicModule,
+        PreparationRefArticlesPageRoutingModule,
+        CommonModule
     ],
+    declarations: [PreparationRefArticlesPage]
 })
-export class PreparationArticlesPageModule {
+export class PreparationRefArticlesPageModule {
 }

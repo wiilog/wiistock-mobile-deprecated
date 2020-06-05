@@ -1,15 +1,20 @@
 import {NgModule} from '@angular/core';
-import {IonicPageModule} from 'ionic-angular';
-import {StockMenuPage} from "@pages/stock/stock-menu/stock-menu";
-
+import {FormsModule} from '@angular/forms';
+import {IonicModule} from '@ionic/angular';
+import {StockMenuPageRoutingModule} from './stock-menu-routing.module';
+import {StockMenuPage} from './stock-menu.page';
+import {CommonModule as AngularCommonModule} from '@angular/common';
+import {CommonModule} from '@app/common/common.module';
 
 @NgModule({
-    declarations: [
-        StockMenuPage,
-    ],
     imports: [
-        IonicPageModule.forChild(StockMenuPage)
+        AngularCommonModule,
+        FormsModule,
+        IonicModule,
+        StockMenuPageRoutingModule,
+        CommonModule
     ],
+    declarations: [StockMenuPage]
 })
-export class StockMenuModule {
+export class StockMenuPageModule {
 }

@@ -1,0 +1,369 @@
+import {Component, ViewChild} from '@angular/core';
+import {Livraison} from '@entities/livraison';
+import {BarcodeScannerComponent} from '@app/common/components/barcode-scanner/barcode-scanner.component';
+import {ArticleLivraison} from '@entities/article-livraison';
+import {HeaderConfig} from '@app/common/components/panel/model/header-config';
+import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel/list-panel-item-config';
+import {IconConfig} from '@app/common/components/panel/model/icon-config';
+import {ToastService} from '@app/common/services/toast.service';
+import {SqliteService} from '@app/common/services/sqlite.service';
+import {Network} from '@ionic-native/network/ngx';
+import {ApiService} from '@app/common/services/api.service';
+import {NavService} from '@app/common/services/nav.service';
+import {flatMap} from 'rxjs/operators';
+import * as moment from 'moment';
+import {Mouvement} from '@entities/mouvement';
+import {IconColor} from '@app/common/components/icon/icon-color';
+import {LivraisonEmplacementPageRoutingModule} from '@pages/stock/livraison/livraison-emplacement/livraison-emplacement-routing.module';
+import {LivraisonArticleTakePageRoutingModule} from '@pages/stock/livraison/livraison-article-take/livraison-article-take-routing.module';
+import {CanLeave} from '@app/guards/can-leave/can-leave';
+
+@Component({
+    selector: 'wii-livraison-articles',
+    templateUrl: './livraison-articles.page.html',
+    styleUrls: ['./livraison-articles.page.scss'],
+})
+export class LivraisonArticlesPage implements CanLeave {
+    @ViewChild('footerScannerComponent', {static: false})
+    public footerScannerComponent: BarcodeScannerComponent;
+
+    public livraison: Livraison;
+
+    public articlesNT: Array<ArticleLivraison>;
+    public articlesT: Array<ArticleLivraison>;
+
+    public listBoldValues?: Array<string>;
+    public listToTreatConfig?: { header: HeaderConfig; body: Array<ListPanelItemConfig>; };
+    public listTreatedConfig?: { header: HeaderConfig; body: Array<ListPanelItemConfig>; };
+    public livraisonsHeaderConfig?: {
+        leftIcon: IconConfig;
+        title: string;
+        subtitle?: string;
+        info?: string;
+    };
+
+    public started: boolean = false;
+    public isValid: boolean = true;
+
+    public loadingStartLivraison: boolean;
+
+    public constructor(private navService: NavService,
+                       private toastService: ToastService,
+                       private sqliteService: SqliteService,
+                       private network: Network,
+                       private apiService: ApiService) {
+        this.loadingStartLivraison = false;
+    }
+
+    public ionViewWillEnter(): void {
+        const navParams = this.navService.getCurrentParams();
+        this.livraison = navParams.get('livraison');
+
+        this.livraisonsHeaderConfig = {
+            leftIcon: {name: 'delivery.svg'},
+            title: `Livraison ${this.livraison.numero}`,
+            subtitle: `Destination : ${this.livraison.emplacement}`
+        };
+
+        this.listBoldValues = ['label', 'barCode', 'location', 'quantity'];
+
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.fireZebraScan();
+        }
+
+        this.sqliteService.findArticlesByLivraison(this.livraison.id).subscribe((articles) => {
+            this.updateList(articles, true);
+
+            if (this.articlesT.length > 0) {
+                this.started = true;
+            }
+        });
+    }
+
+    public ionViewWillLeave(): void {
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.unsubscribeZebraScan();
+        }
+    }
+
+    public wiiCanLeave(): boolean {
+        return !this.listToTreatConfig;
+    }
+
+    public selectArticle(article, quantity) {
+        if (!this.started && this.network.type !== 'none') {
+            this.loadingStartLivraison = true;
+            this.apiService
+                .requestApi('post', ApiService.BEGIN_LIVRAISON, {params: {id: this.livraison.id}})
+                .subscribe((resp) => {
+                    if (resp.success) {
+                        this.started = true;
+                        this.isValid = true;
+                        this.toastService.presentToast('Livraison commencée.');
+                        this.registerMvt(article, quantity);
+                    }
+                    else {
+                        this.isValid = false;
+                        this.loadingStartLivraison = false;
+                        this.toastService.presentToast(resp.msg);
+                    }
+                });
+        }
+        else {
+            if (this.network.type === 'none') {
+                this.toastService.presentToast('Livraison commencée en mode hors ligne');
+            }
+
+            this.registerMvt(article, quantity);
+        }
+    }
+
+    public refreshOver(): void {
+        this.toastService.presentToast('Livraison prête à être finalisée.')
+    }
+
+    public refresh(): void {
+        this.toastService.presentToast('Quantité bien prélevée.')
+    }
+
+    public registerMvt(article, quantity): void {
+        if (this.isValid) {
+            if (article.quantite !== Number(quantity)) {
+                let newArticle: ArticleLivraison = {
+                    id: null,
+                    label: article.label,
+                    reference: article.reference,
+                    quantite: Number(quantity),
+                    is_ref: article.is_ref,
+                    id_livraison: article.id_livraison,
+                    has_moved: 1,
+                    emplacement: article.emplacement,
+                    barcode: article.barcode
+                };
+                let articleAlready = this.articlesT.find(art => art.id_livraison === newArticle.id_livraison && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
+                if (articleAlready !== undefined) {
+                    this.sqliteService
+                        .updateArticleLivraisonQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite)
+                        .pipe(
+                            flatMap(() => this.sqliteService.updateArticleLivraisonQuantity(article.id, article.quantite - newArticle.quantite)),
+                            flatMap(() => this.sqliteService.findArticlesByLivraison(this.livraison.id))
+                        )
+                        .subscribe((articles) => {
+                            this.updateList(articles);
+                        });
+                } else {
+                    this.sqliteService.insert('`article_livraison`', newArticle).subscribe((insertId) => {
+                        let mouvement: Mouvement = {
+                            id: null,
+                            reference: newArticle.reference,
+                            quantity: article.quantite,
+                            date_pickup: moment().format(),
+                            location_from: newArticle.emplacement,
+                            date_drop: null,
+                            location: null,
+                            type: 'prise-dépose',
+                            is_ref: newArticle.is_ref,
+                            id_article_prepa: null,
+                            id_prepa: null,
+                            id_article_livraison: insertId,
+                            id_livraison: newArticle.id_livraison,
+                            id_article_collecte: null,
+                            id_collecte: null,
+                        };
+                        this.sqliteService
+                            .updateArticleLivraisonQuantity(article.id, article.quantite - Number(quantity))
+                            .pipe(
+                                flatMap(() => this.sqliteService.insert('`mouvement`', mouvement)),
+                                flatMap(() => this.sqliteService.findArticlesByLivraison(this.livraison.id)))
+                            .subscribe((articles) => {
+                                this.updateList(articles);
+                            });
+                    });
+                }
+            } else {
+                let mouvement: Mouvement = {
+                    id: null,
+                    reference: article.reference,
+                    quantity: article.quantite,
+                    date_pickup: moment().format(),
+                    location_from: article.emplacement,
+                    date_drop: null,
+                    location: null,
+                    type: 'prise-dépose',
+                    is_ref: article.is_ref,
+                    id_article_prepa: null,
+                    id_prepa: null,
+                    id_article_livraison: article.id,
+                    id_livraison: article.id_livraison,
+                    id_article_collecte: null,
+                    id_collecte: null,
+                };
+                let articleAlready = this.articlesT.find(art => art.id_livraison === mouvement.id_livraison && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
+                if (articleAlready !== undefined) {
+                    this.sqliteService
+                        .updateArticleLivraisonQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite)
+                        .pipe(
+                            flatMap(() => this.sqliteService.deleteBy('`article_livraison`', mouvement.id_article_livraison)),
+                            flatMap(() => this.sqliteService.findArticlesByLivraison(this.livraison.id))
+                        )
+                        .subscribe((articles) => {
+                            this.updateList(articles);
+                        });
+                } else {
+                    this.sqliteService
+                        .insert('`mouvement`', mouvement)
+                        .pipe(
+                            flatMap(() => this.sqliteService.moveArticleLivraison(article.id)),
+                            flatMap(() => this.sqliteService.findArticlesByLivraison(this.livraison.id))
+                        )
+                        .subscribe((articles) => {
+                            this.updateList(articles);
+                        });
+                }
+            }
+        }
+    }
+
+    public validate(): void {
+        if ((this.articlesNT.length > 0) ||
+            (this.articlesT.length === 0)) {
+            this.toastService.presentToast('Veuillez traiter tous les articles concernés');
+        }
+        else {
+            this.navService.push(LivraisonEmplacementPageRoutingModule.PATH, {
+                livraison: this.livraison,
+                validateLivraison: () => {
+                    this.navService.pop();
+                }
+            });
+        }
+    }
+
+    public testIfBarcodeEquals(text, fromText: boolean = true): void {
+        const article = fromText
+            ? this.articlesNT.find((article) => (article.barcode === text))
+            : text;
+
+        if (article) {
+            const self = this;
+            this.navService.push(LivraisonArticleTakePageRoutingModule.PATH, {
+                article,
+                selectArticle: (quantity) => {
+                    self.selectArticle(article, quantity);
+                }
+            });
+        }
+        else {
+            this.toastService.presentToast('L\'article scanné n\'est pas dans la liste.');
+        }
+    }
+
+    private createListToTreatConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
+        const articlesNumber = (this.articlesNT ? this.articlesNT.length : 0);
+        const articlesPlural = articlesNumber > 1 ? 's' : '';
+        return articlesNumber > 0
+            ? {
+                header: {
+                    title: 'À livrer',
+                    info: `${articlesNumber} article${articlesPlural} à scanner`,
+                    leftIcon: {
+                        name: 'download.svg',
+                        color: 'list-yellow-light'
+                    }
+                },
+                body: this.articlesNT.map((articleLivraison: ArticleLivraison) => ({
+                    infos: this.createArticleInfo(articleLivraison),
+                    rightIcon: {
+                        color: 'grey' as IconColor,
+                        name: 'up.svg',
+                        action: () => {
+                            this.testIfBarcodeEquals(articleLivraison, false)
+                        }
+                    }
+                }))
+            }
+            : undefined;
+    }
+
+    private ceateListTreatedConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
+        const pickedArticlesNumber = (this.articlesT ? this.articlesT.length : 0);
+        const pickedArticlesPlural = pickedArticlesNumber > 1 ? 's' : '';
+        return {
+            header: {
+                title: 'Livré',
+                info: `${pickedArticlesNumber} article${pickedArticlesPlural} scanné${pickedArticlesPlural}`,
+                leftIcon: {
+                    name: 'upload.svg',
+                    color: 'list-yellow'
+                },
+                rightIcon: {
+                    name: 'check.svg',
+                    color: 'success',
+                    action: () => {
+                        this.validate()
+                    }
+                }
+            },
+            body: this.articlesT.map((articleLivraison: ArticleLivraison) => ({
+                infos: this.createArticleInfo(articleLivraison)
+            }))
+        };
+    }
+
+    private createArticleInfo({label, barcode, emplacement, quantite}: ArticleLivraison): {[name: string]: { label: string; value: string; }} {
+        return {
+            label: {
+                label: 'Label',
+                value: label
+            },
+            ...(
+                barcode
+                    ? {
+                        barCode: {
+                            label: 'Code barre',
+                            value: barcode
+                        }
+                    }
+                    : {}
+            ),
+            ...(
+                emplacement && emplacement !== 'null'
+                    ? {
+                        location: {
+                            label: 'Emplacement',
+                            value: emplacement
+                        }
+                    }
+                    : {}
+            ),
+            ...(
+                quantite
+                    ? {
+                        quantity: {
+                            label: 'Quantité',
+                            value: `${quantite}`
+                        }
+                    }
+                    : {}
+            )
+        };
+    }
+
+    private updateList(articles: Array<ArticleLivraison>, isInit: boolean = false): void {
+        this.articlesNT = articles.filter(({has_moved}) => (has_moved === 0));
+        this.articlesT = articles.filter(({has_moved}) => (has_moved === 1));
+
+        this.listToTreatConfig = this.createListToTreatConfig();
+        this.listTreatedConfig = this.ceateListTreatedConfig();
+
+        if (!isInit) {
+            if (this.articlesNT.length === 0) {
+                this.refreshOver();
+            }
+            else {
+                this.refresh();
+            }
+            this.loadingStartLivraison = false;
+        }
+    }
+}

@@ -1,13 +1,20 @@
-import { NgModule } from '@angular/core';
-import { IonicPageModule } from 'ionic-angular';
-import { CollecteArticleTakePage } from './collecte-article-take';
+import {NgModule} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {IonicModule} from '@ionic/angular';
+import {CollecteArticleTakePageRoutingModule} from './collecte-article-take-routing.module';
+import {CollecteArticleTakePage} from './collecte-article-take.page';
+import {CommonModule as AngularCommonModule} from '@angular/common';
+import {CommonModule} from '@app/common/common.module';
 
 @NgModule({
-  declarations: [
-    CollecteArticleTakePage,
-  ],
-  imports: [
-    IonicPageModule.forChild(CollecteArticleTakePage),
-  ],
+    imports: [
+        AngularCommonModule,
+        FormsModule,
+        IonicModule,
+        CollecteArticleTakePageRoutingModule,
+        CommonModule
+    ],
+    declarations: [CollecteArticleTakePage]
 })
-export class CollecteArticleTakeModule {}
+export class CollecteArticleTakePageModule {
+}

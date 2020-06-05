@@ -1,0 +1,42 @@
+<wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
+<div scroll-y="true"
+     *ngIf="hasLoaded" class="page-content">
+    <ion-list class="manutention-details">
+        <ion-row>
+            <ion-col class="label">Demandeur</ion-col>
+            <ion-col class="value">{{ manutention.demandeur }}</ion-col>
+        </ion-row>
+        <ion-row>
+            <ion-col class="label">Date attendue</ion-col>
+            <ion-col class="value">{{ toDate(manutention) | date:'dd/MM/yyyy H:mm'  }}</ion-col>
+        </ion-row>
+        <ion-row>
+            <ion-col class="label">Objet</ion-col>
+            <ion-col class="value">{{ manutention.objet  }}</ion-col>
+        </ion-row>
+        <ion-row>
+            <ion-col class="label">Source</ion-col>
+            <ion-col class="value">{{ manutention.source }}</ion-col>
+        </ion-row>
+        <ion-row>
+            <ion-col class="label">Destination</ion-col>
+            <ion-col class="value">{{ manutention.destination }}</ion-col>
+        </ion-row>
+    </ion-list>
+    <button class="commentaire_button" (click)="showCommentaire()">
+        <span><b>Commentaire</b></span>
+        <wii-icon name="search.svg" class="icon" color="dark"></wii-icon>
+    </button>
+    <div class="commentaire" *ngIf="showCom" [innerHTML]="manutention.commentaire">
+    </div>
+</div>
+<div class="page-footer">
+    <ion-button class="validate-button larger"
+                color="success"
+                size="large"
+                expand="full"
+                (click)="validateManut()">
+        Valider
+        <wii-icon name="check.svg" class="button-icon" color="white"></wii-icon>
+    </ion-button>
+</div>

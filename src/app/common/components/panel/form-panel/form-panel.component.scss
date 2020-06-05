@@ -1,0 +1,22 @@
+@import "~theme/variables";
+
+:host {
+    display: flex;
+
+    & > .wrapper {
+        flex: 1;
+        wii-panel-header {
+            margin: $spacerMin $spacerMin $spacerMin ($spacerMin/2);
+        }
+
+        wii-form-panel-input,
+        wii-form-panel-signing {
+            margin-right: $spacer;
+            margin-left: $spacer;
+
+            &:not(:last-child) {
+                margin-bottom: $spacerMin;
+            }
+        }
+    }
+}

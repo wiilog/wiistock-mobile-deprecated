@@ -1,0 +1,9 @@
+@import "~theme/variables";
+
+:host {
+    padding-top: $spacer;
+
+    .anomalies-button-container ion-button {
+        margin: $spacerMin;
+    }
+}

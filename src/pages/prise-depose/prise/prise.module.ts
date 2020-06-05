@@ -1,17 +1,20 @@
 import {NgModule} from '@angular/core';
-import {IonicPageModule} from 'ionic-angular';
-import {PrisePage} from './prise';
-import {HelpersModule} from '@helpers/helpers.module';
-
+import {FormsModule} from '@angular/forms';
+import {IonicModule} from '@ionic/angular';
+import {PrisePageRoutingModule} from './prise-routing.module';
+import {PrisePage} from './prise.page';
+import {CommonModule as AngularCommonModule} from '@angular/common';
+import {CommonModule} from '@app/common/common.module';
 
 @NgModule({
-    declarations: [
-        PrisePage,
-    ],
     imports: [
-        IonicPageModule.forChild(PrisePage),
-        HelpersModule
+        AngularCommonModule,
+        FormsModule,
+        IonicModule,
+        PrisePageRoutingModule,
+        CommonModule
     ],
+    declarations: [PrisePage]
 })
 export class PrisePageModule {
 }

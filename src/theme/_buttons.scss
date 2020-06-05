@@ -1,0 +1,28 @@
+wii-icon.button-icon {
+    &:not(.big) {
+        margin-left: .7rem !important;
+        width: 1.8rem !important;
+        height: 1.8rem !important;
+    }
+
+    &.big {
+        margin-left: 1rem !important;
+        width: 3rem !important;
+        height: 3rem !important;
+    }
+}
+
+.button-text-wrapper {
+    .title {
+        font-size: 16pt;
+        font-weight: bold;
+    }
+
+    .subtitle {
+        font-size: 10pt;
+    }
+}
+
+ion-button.larger {
+    height: 5rem;
+}

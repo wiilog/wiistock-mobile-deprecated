@@ -1,8 +1,0 @@
-<wii-select-item #selectItemComponent
-                 *ngIf="!loading && refArticle"
-                 [type]="selectItemType"
-                 (itemChange)="selectArticle($event)"
-                 [checkBarcodeValidity]="true"
-                 [requestParams]="listWhereClause"
-                 [scanMode]="barcodeScannerMode">
-</wii-select-item>

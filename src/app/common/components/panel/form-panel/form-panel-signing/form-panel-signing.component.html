@@ -1,0 +1,12 @@
+<ion-item lines="none">
+    <ion-label color="medium">{{label}}</ion-label>
+    <img *ngIf="value else noValue"
+         item-content
+         class="signature-image"
+         alt="signature"
+         [src]="value"
+         (click)="onItemClicked()"/>
+    <ng-template #noValue>
+        <wii-icon class="add-signature" color="success" name="plus.svg" (action)="onItemClicked()"></wii-icon>
+    </ng-template>
+</ion-item>

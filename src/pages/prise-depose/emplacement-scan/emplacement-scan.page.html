@@ -1,0 +1,8 @@
+<wii-select-item #selectItemComponent
+                 [type]="selectItemType"
+                 (createItem)="createEmp()"
+                 (itemChange)="selectLocation($event)"
+                 [checkBarcodeValidity]="fromDepose"
+                 [resetEmitter]="resetEmitter$"
+                 [scanMode]="barcodeScannerMode">
+</wii-select-item>

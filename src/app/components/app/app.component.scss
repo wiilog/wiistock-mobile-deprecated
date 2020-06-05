@@ -1,0 +1,9 @@
+
+ion-app {
+    display: flex;
+
+    ::ng-deep ion-router-outlet {
+        flex: 1;
+        position: relative;
+    }
+}

@@ -1,0 +1,33 @@
+<div class="page-content"
+     scroll-y="true"
+     *ngIf="!loading">
+    <wii-list-panel *ngIf="listConfig && listConfig.body"
+                    [body]="listConfig.body"
+                    [boldValues]="listConfig.boldValues">
+    </wii-list-panel>
+</div>
+
+<div class="page-footer">
+    <div class="anomalies-button-container">
+        <ion-button class="anomalies-button larger"
+                    size="large"
+                    expand="full"
+                    color="primary"
+                    *ngIf="!loading && !anomalyMode && isInventoryManager"
+                    (click)="navigateToAnomalies()">
+            <span class="button-text-wrapper">
+                <span class="title">ANOMALIES</span>
+            </span>
+            <wii-icon name="exclamation-triangle.svg"
+                      color="white"
+                      class="button-icon">
+            </wii-icon>
+        </ion-button>
+    </div>
+    <wii-barcode-scanner #footerScannerComponent
+                         [hidden]="loading"
+                         buttonSubtitle="Emplacement"
+                         [mode]="scannerMode"
+                         (add)="checkAndTreatBarcode($event[0])">
+    </wii-barcode-scanner>
+</div>

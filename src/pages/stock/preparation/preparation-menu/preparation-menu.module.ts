@@ -1,18 +1,20 @@
 import {NgModule} from '@angular/core';
-import {IonicPageModule} from 'ionic-angular';
-import {PreparationMenuPage} from './preparation-menu';
-import {HelpersModule} from '@helpers/helpers.module';
-
+import {FormsModule} from '@angular/forms';
+import {IonicModule} from '@ionic/angular';
+import {PreparationMenuPageRoutingModule} from './preparation-menu-routing.module';
+import {PreparationMenuPage} from './preparation-menu.page';
+import {CommonModule as AngularCommonModule} from '@angular/common';
+import {CommonModule} from '@app/common/common.module';
 
 @NgModule({
-    declarations: [
-        PreparationMenuPage,
-    ],
     imports: [
-        IonicPageModule.forChild(PreparationMenuPage),
-        HelpersModule,
+        AngularCommonModule,
+        FormsModule,
+        IonicModule,
+        PreparationMenuPageRoutingModule,
+        CommonModule
     ],
-
+    declarations: [PreparationMenuPage]
 })
 export class PreparationMenuPageModule {
 }

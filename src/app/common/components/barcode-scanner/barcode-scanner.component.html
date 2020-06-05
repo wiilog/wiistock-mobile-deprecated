@@ -1,0 +1,43 @@
+<div class="input-manual"
+     *ngIf="mode === WITH_MANUAL_MODE">
+    <ion-item>
+        <ion-input type="text"
+                   placeholder="Entrée manuelle..."
+                   [(ngModel)]="input">
+        </ion-input>
+        <wii-icon name="plus.svg"
+                  color="success"
+                  class="plus-icon"
+                  (action)="addManually()">
+        </wii-icon>
+    </ion-item>
+</div>
+<div class="tools"
+     *ngIf="mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE">
+    <wii-icon name="search.svg"
+              color="black"
+              class="tools-icon"
+              (action)="onSearchClick()">
+    </wii-icon>
+    <wii-icon *ngIf="mode === TOOLS_FULL_MODE"
+              name="pen.svg"
+              color="black"
+              class="tools-icon"
+              (action)="onPenClick()">
+    </wii-icon>
+</div>
+<ion-button class="scanner-button larger"
+            size="large"
+            expand="full"
+            color="primary"
+            (click)="scan()">
+    <span class="button-text-wrapper">
+        <span class="title">SCANNER</span>
+        <br/>
+        <span class="subtitle" *ngIf="buttonSubtitle">{{buttonSubtitle}}</span>
+    </span>
+    <wii-icon name="scan.svg"
+              color="white"
+              class="button-icon big">
+    </wii-icon>
+</ion-button>
