@@ -36,3 +36,9 @@ div[scroll-y=true] {
         display: none;
     }
 }
+
+ion-toast,
+ion-modal,
+ion-loading {
+    outline: none;
+}
