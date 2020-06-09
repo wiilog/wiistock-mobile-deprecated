@@ -4,7 +4,7 @@ import {ToastService} from '@app/common/services/toast.service';
 import {ApiService} from '@app/common/services/api.service';
 import {Network} from '@ionic-native/network/ngx';
 import {LoadingService} from '@app/common/services/loading.service';
-import {SqliteService} from '@app/common/services/sqlite.service';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {NavService} from '@app/common/services/nav.service';
 import {AlertController} from '@ionic/angular';
 import {from} from 'rxjs';

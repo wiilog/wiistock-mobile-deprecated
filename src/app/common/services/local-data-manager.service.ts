@@ -8,7 +8,7 @@ import {MouvementTraca} from '@entities/mouvement-traca';
 import {FileService} from "@app/common/services/file.service";
 import {StorageService} from "@app/common/services/storage.service";
 import {from, Observable, of, ReplaySubject, Subject, zip} from 'rxjs';
-import {SqliteService} from '@app/common/services/sqlite.service';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {AlertController} from '@ionic/angular';
 import {flatMap, map} from 'rxjs/operators';
 import {AlertManagerService} from '@app/common/services/alert-manager.service';

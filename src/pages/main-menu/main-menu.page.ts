@@ -4,7 +4,7 @@ import {from, Observable, Subscription, zip} from 'rxjs';
 import {flatMap, map, take, tap} from 'rxjs/operators';
 import {AlertController, Platform} from '@ionic/angular';
 import { Preparation } from '@entities/preparation';
-import {SqliteService} from '@app/common/services/sqlite.service';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {StorageService} from '@app/common/services/storage.service';
 import {Network} from '@ionic-native/network/ngx';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
@@ -12,8 +12,9 @@ import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav.service';
 import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
 import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
-import {ManutentionMenuPageRoutingModule} from '@pages/manutention/manutention-menu/manutention-menu-routing.module';
+import {ManutentionMenuPageRoutingModule} from '@pages/demande/manutention/manutention-menu/manutention-menu-routing.module';
 import {StockMenuPageRoutingModule} from '@pages/stock/stock-menu/stock-menu-routing.module';
+import {DemandeMenuPageRoutingModule} from '@pages/demande/demande-menu/demande-menu-routing.module';
 
 
 @Component({
@@ -192,10 +193,11 @@ export class MainMenuPage {
 
         if (rights.demande) {
             this.menuConfig.push({
-                icon: 'people.svg',
+                icon: 'demande.svg',
+                iconColor: 'success',
                 label: 'Demande',
                 action: () => {
-                    this.navService.push(ManutentionMenuPageRoutingModule.PATH);
+                    this.navService.push(DemandeMenuPageRoutingModule.PATH);
                 }
             });
         }

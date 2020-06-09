@@ -3,7 +3,9 @@
               type="button"
               *ngFor="let item of config"
               (click)="item.action()">
-        <wii-icon [name]="item.icon" class="menu-icon"></wii-icon>
+        <wii-icon [name]="item.icon"
+                  [color]="item.iconColor"
+                  class="menu-icon"></wii-icon>
         <span class="menu-label">{{ item.label }}</span>
         <ion-ripple-effect></ion-ripple-effect>
     </ion-card>

@@ -11,8 +11,8 @@ import {PrisePageRoutingModule} from '@pages/prise-depose/prise/prise-routing.mo
 import {DeposePageRoutingModule} from '@pages/prise-depose/depose/depose-routing.module';
 import {DeposeConfirmPageRoutingModule} from '@pages/prise-depose/depose-confirm/depose-confirm-routing.module';
 import {NewEmplacementPageRoutingModule} from '@pages/new-emplacement/new-emplacement-routing.module';
-import {ManutentionMenuPageRoutingModule} from '@pages/manutention/manutention-menu/manutention-menu-routing.module';
-import {ManutentionValidatePageRoutingModule} from '@pages/manutention/manutention-validate/manutention-validate-routing.module';
+import {ManutentionMenuPageRoutingModule} from '@pages/demande/manutention/manutention-menu/manutention-menu-routing.module';
+import {ManutentionValidatePageRoutingModule} from '@pages/demande/manutention/manutention-validate/manutention-validate-routing.module';
 import {StockMenuPageRoutingModule} from '@pages/stock/stock-menu/stock-menu-routing.module';
 import {CollecteMenuPageRoutingModule} from '@pages/stock/collecte/collecte-menu/collecte-menu-routing.module';
 import {CollecteArticlesPageRoutingModule} from '@pages/stock/collecte/collecte-articles/collecte-articles-routing.module';
@@ -29,6 +29,8 @@ import {PreparationRefArticlesPageRoutingModule} from '@pages/stock/preparation/
 import {InventoryLocationsPageRoutingModule} from '@pages/stock/inventory/inventory-locations/inventory-locations-routing.module';
 import {InventoryArticlesPageRoutingModule} from '@pages/stock/inventory/inventory-articles/inventory-articles-routing.module';
 import {InventoryValidatePageRoutingModule} from '@pages/stock/inventory/inventory-validate/inventory-validate-routing.module';
+import {DemandeMenuPageRoutingModule} from '@pages/demande/demande-menu/demande-menu-routing.module';
+import {DemandeLivraisonMenuPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu-routing.module';
 
 
 const routes: Routes = [
@@ -80,12 +82,22 @@ const routes: Routes = [
     {
         path: ManutentionMenuPageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('../pages/manutention/manutention-menu/manutention-menu.module').then(m => m.ManutentionMenuPageModule)
+        loadChildren: () => import('../pages/demande/manutention/manutention-menu/manutention-menu.module').then(m => m.ManutentionMenuPageModule)
+    },
+    {
+        path: DemandeMenuPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/demande/demande-menu/demande-menu.module').then(m => m.DemandeMenuPageModule)
+    },
+    {
+        path: DemandeLivraisonMenuPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu.module').then(m => m.DemandeLivraisonMenuPageModule)
     },
     {
         path: ManutentionValidatePageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('../pages/manutention/manutention-validate/manutention-validate.module').then(m => m.ManutentionValidatePageModule)
+        loadChildren: () => import('../pages/demande/manutention/manutention-validate/manutention-validate.module').then(m => m.ManutentionValidatePageModule)
     },
     {
         path: StockMenuPageRoutingModule.PATH,

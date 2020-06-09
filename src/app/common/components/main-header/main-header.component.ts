@@ -8,18 +8,20 @@ import {ActivatedRoute, NavigationEnd, NavigationStart, Router} from '@angular/r
 import {MainMenuPageRoutingModule} from '@pages/main-menu/main-menu-routing.module';
 import {ParamsPageRoutingModule} from '@pages/params/params-routing.module';
 import {LoginPageRoutingModule} from '@pages/login/login-routing.module';
-import {SqliteService} from '@app/common/services/sqlite.service';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {RouterDirection} from '@ionic/core';
 import {NavService} from '@app/common/services/nav.service';
 import {NavController} from '@ionic/angular';
 import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
 import {EmplacementScanPageRoutingModule} from '@pages/prise-depose/emplacement-scan/emplacement-scan-routing.module';
-import {ManutentionMenuPageRoutingModule} from '@pages/manutention/manutention-menu/manutention-menu-routing.module';
-import {ManutentionValidatePageRoutingModule} from '@pages/manutention/manutention-validate/manutention-validate-routing.module';
+import {ManutentionMenuPageRoutingModule} from '@pages/demande/manutention/manutention-menu/manutention-menu-routing.module';
+import {ManutentionValidatePageRoutingModule} from '@pages/demande/manutention/manutention-validate/manutention-validate-routing.module';
 import {PreparationMenuPageRoutingModule} from '@pages/stock/preparation/preparation-menu/preparation-menu-routing.module';
 import {LivraisonMenuPageRoutingModule} from '@pages/stock/livraison/livraison-menu/livraison-menu-routing.module';
 import {CollecteMenuPageRoutingModule} from '@pages/stock/collecte/collecte-menu/collecte-menu-routing.module';
 import {InventoryLocationsPageRoutingModule} from '@pages/stock/inventory/inventory-locations/inventory-locations-routing.module';
+import {DemandeMenuPageRoutingModule} from '@pages/demande/demande-menu/demande-menu-routing.module';
+import {DemandeLivraisonMenuPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu-routing.module';
 
 
 @Component({
@@ -153,7 +155,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                 label: 'Anomalies',
                 filter: (params) => params.get('anomalyMode')
             },
-            {pagePath: ManutentionMenuPageRoutingModule.PATH, label: 'Demande'},
+            {pagePath: DemandeMenuPageRoutingModule.PATH, label: 'Demande'},
+            {pagePath: ManutentionMenuPageRoutingModule.PATH, label: 'Manutention'},
+            {pagePath: DemandeLivraisonMenuPageRoutingModule.PATH, label: 'Livraison'},
             {pagePath: ManutentionValidatePageRoutingModule.name, label: 'Détails'}
         ];
     }

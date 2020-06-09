@@ -4,7 +4,7 @@ import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {Anomalie} from '@entities/anomalie';
 import {ArticleInventaire} from '@entities/article-inventaire';
-import {SqliteService} from '@app/common/services/sqlite.service';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {NavService} from '@app/common/services/nav.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';

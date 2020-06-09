@@ -7,7 +7,7 @@ import {from, Subscription} from 'rxjs';
 import {NavService} from '@app/common/services/nav.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {LoadingService} from '@app/common/services/loading.service';
-import {SqliteService} from '@app/common/services/sqlite.service';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {flatMap, map, take, tap} from 'rxjs/operators';
 import {PreparationArticleTakePageRoutingModule} from '@pages/stock/preparation/preparation-article-take/preparation-article-take-routing.module';
 import {CanLeave} from '@app/guards/can-leave/can-leave';

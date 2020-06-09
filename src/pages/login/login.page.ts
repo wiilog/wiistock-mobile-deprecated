@@ -6,7 +6,7 @@ import {flatMap, map} from 'rxjs/operators';
 import {StorageService} from '@app/common/services/storage.service';
 import {VersionCheckerService} from '@app/common/services/version-checker.service';
 import {Network} from '@ionic-native/network/ngx';
-import {SqliteService} from '@app/common/services/sqlite.service';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {BarcodeScannerManagerService} from '@app/common/services/barcode-scanner-manager.service';
 import {NavService} from '@app/common/services/nav.service';
 import {ParamsPageRoutingModule} from '@pages/params/params-routing.module';
@@ -33,6 +33,8 @@ export class LoginPage {
     public _loading: boolean;
     public appVersionInvalid: boolean;
     public currentVersion: string;
+
+    public environment = environment;
 
     public apkUrl: string;
     private wantToAutoConnect: boolean;

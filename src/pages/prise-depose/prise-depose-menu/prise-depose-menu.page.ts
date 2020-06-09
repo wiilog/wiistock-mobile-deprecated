@@ -4,7 +4,7 @@ import {ToastService} from '@app/common/services/toast.service';
 import {zip} from 'rxjs';
 import {MenuConfig} from '@app/common/components/menu/menu-config';
 import {Network} from '@ionic-native/network/ngx';
-import {SqliteService} from '@app/common/services/sqlite.service';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
 import {NavService} from '@app/common/services/nav.service';

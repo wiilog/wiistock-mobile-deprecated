@@ -24,4 +24,3 @@ function deleteFolderRecursive(path) {
         fs.rmdirSync(path);
     }
 }
-;

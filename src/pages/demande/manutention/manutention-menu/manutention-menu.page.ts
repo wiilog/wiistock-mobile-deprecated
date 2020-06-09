@@ -4,9 +4,9 @@ import {Manutention} from '@entities/manutention';
 import {CardListConfig} from '@app/common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
 import {MainHeaderService} from '@app/common/services/main-header.service';
-import {SqliteService} from '@app/common/services/sqlite.service';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {NavService} from '@app/common/services/nav.service';
-import {ManutentionValidatePageRoutingModule} from '@pages/manutention/manutention-validate/manutention-validate-routing.module';
+import {ManutentionValidatePageRoutingModule} from '@pages/demande/manutention/manutention-validate/manutention-validate-routing.module';
 
 
 @Component({

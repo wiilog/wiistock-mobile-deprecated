@@ -4,7 +4,7 @@ import {CardListConfig} from '@app/common/components/card-list/card-list-config'
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
 import {NavService} from '@app/common/services/nav.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
-import {SqliteService} from '@app/common/services/sqlite.service';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {LivraisonArticlesPageRoutingModule} from '@pages/stock/livraison/livraison-articles/livraison-articles-routing.module';
 
 @Component({
@@ -60,7 +60,7 @@ export class LivraisonMenuPage {
     }
 
     public refreshSubTitle(): void {
-        const preparationsLength = this.livraisons.length;
-        this.mainHeaderService.emitSubTitle(`${preparationsLength === 0 ? 'Aucune' : preparationsLength} livraison${preparationsLength > 1 ? 's' : ''}`)
+        const livraisonsLength = this.livraisons.length;
+        this.mainHeaderService.emitSubTitle(`${livraisonsLength === 0 ? 'Aucune' : livraisonsLength} livraison${livraisonsLength > 1 ? 's' : ''}`)
     }
 }

@@ -7,7 +7,7 @@ import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/bar
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
 import {ToastService} from '@app/common/services/toast.service';
 import {Network} from '@ionic-native/network/ngx';
-import {SqliteService} from '@app/common/services/sqlite.service';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {NavService} from '@app/common/services/nav.service';
 import {of, zip} from 'rxjs';

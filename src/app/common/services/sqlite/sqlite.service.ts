@@ -15,6 +15,7 @@ import {ArticleLivraison} from "@entities/article-livraison";
 import {SQLite, SQLiteObject} from '@ionic-native/sqlite/ngx';
 import {Platform} from '@ionic/angular';
 import * as moment from 'moment';
+import {TableDefinitions} from '@app/common/services/sqlite/table-definitions';
 
 
 @Injectable({
@@ -56,24 +57,22 @@ export class SqliteService {
             );
     }
 
-    private static CreateTables(db): Observable<any> {
-        return of(undefined).pipe(
-            flatMap(() => SqliteService.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `emplacement` (`id` INTEGER PRIMARY KEY, `label` VARCHAR(255))')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `mouvement` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` INTEGER, `quantity` INTEGER, `date_pickup` VARCHAR(255), `location_from` TEXT, `date_drop` VARCHAR(255), `location` TEXT, `type` VARCHAR(255), `is_ref` INTEGER, `id_article_prepa` INTEGER, `id_prepa` INTEGER, `id_article_livraison` INTEGER, `id_livraison` INTEGER, `id_article_collecte` INTEGER, `id_collecte` INTEGER, `selected_by_article` INTEGER)')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `mouvement_traca` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `ref_article` VARCHAR(255), `date` VARCHAR(255), `ref_emplacement` VARCHAR(255), `type` VARCHAR(255), `operateur` VARCHAR(255), `comment` VARCHAR(255), `signature` TEXT, finished INTEGER, fromStock INTEGER, quantity INTEGER)')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `preparation` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, `started` INTEGER, `destination` TEXT, requester VARCHAR(255), `type`  VARCHAR(255))')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_prepa` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_prepa` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `type_quantite` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT, `deleted` INTEGER DEFAULT 0, original_quantity INTEGER, reference_article_reference TEXT)')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_prepa_by_ref_article` (`id` INTEGER PRIMARY KEY AUTOINCREMENT,  `reference` TEXT, `label` TEXT, `location` TEXT, `quantity` INTEGER, `reference_article` TEXT, `isSelectableByUser` INTEGER, `barcode` TEXT)')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `livraison` (`id` INTEGER PRIMARY KEY, `numero` TEXT, `emplacement` TEXT, `date_end` TEXT, requester VARCHAR(255), `type` VARCHAR(255))')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `collecte` (`id` INTEGER PRIMARY KEY, `number` TEXT, `location_from` VARCHAR(255), `location_to` VARCHAR(255), `date_end` TEXT, `forStock` INTEGER, requester VARCHAR(255), `type` VARCHAR(255))')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_livraison` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_livraison` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_inventaire` (`id` INTEGER PRIMARY KEY, `id_mission` INTEGER, `reference` TEXT, `is_ref` INTEGER, `location` TEXT, `barcode` TEXT)')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `article_collecte` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `label` TEXT, `reference` TEXT, `quantite` INTEGER, `is_ref` INTEGER, `id_collecte` INTEGER, `has_moved` INTEGER, `emplacement` TEXT, `barcode` TEXT)')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `saisie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `id_mission` INTEGER, `date` TEXT, `reference` TEXT, `is_ref` INTEGER, `quantity` INTEGER, `location` TEXT)')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `anomalie_inventaire` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `reference` TEXT, `is_ref` INTEGER, `quantity` INTEGER, `location` TEXT, `comment` TEXT, `treated` TEXT, `barcode` TEXT)')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(db, 'CREATE TABLE IF NOT EXISTS `manutention` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `demandeur` TEXT, `date_attendue` TEXT, `commentaire` TEXT, `destination` TEXT, `source` TEXT, `objet` TEXT)')),
-            map(() => undefined)
-        );
+    private static ExecuteQueryFlatMap(db: SQLiteObject, queries: Array<string>): Observable<void> {
+        const [firstQuery, ...remainingQueries] = queries;
+        return firstQuery
+            ? SqliteService.ExecuteQueryStatic(db, firstQuery).pipe(flatMap(() => SqliteService.ExecuteQueryFlatMap(db, remainingQueries)))
+            : of(undefined);
+    }
+
+    private static CreateTables(db: SQLiteObject): Observable<any> {
+        const createDatabaseRequests = TableDefinitions.map(({name, attributes}) => {
+            const attributesStr = Object
+                .keys(attributes)
+                .map((attr) => (`\`${attr}\` ${attributes[attr]}`))
+                .join(', ');
+            return `CREATE TABLE IF NOT EXISTS \`${name}\` (${attributesStr})`;
+        });
+        return SqliteService.ExecuteQueryFlatMap(db, createDatabaseRequests);
     }
 
     public static ResetDataBase(sqliteObject: SQLiteObject): Observable<any> {
@@ -95,25 +94,9 @@ export class SqliteService {
         return list;
     }
 
-    private static DropTables(sqliteObject): Observable<any> {
-        return of(undefined).pipe(
-            flatMap(() => SqliteService.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `emplacement`;')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `mouvement_traca`;')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `preparation`;')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `article_prepa`;')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `article_prepa_by_ref_article`;')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `mouvement`;')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `collecte`;')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `livraison`;')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `article_livraison`;')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `article_collecte`;')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `article_inventaire`;')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `saisie_inventaire`;')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `anomalie_inventaire`;')),
-            flatMap(() => SqliteService.ExecuteQueryStatic(sqliteObject, 'DROP TABLE IF EXISTS `manutention`;')),
-            map(() => undefined),
-            take(1)
-        );
+    private static DropTables(db: SQLiteObject): Observable<any> {
+        const createDatabaseRequests = TableDefinitions.map(({name}) => `DROP TABLE IF EXISTS \`${name}\`;`);
+        return SqliteService.ExecuteQueryFlatMap(db, createDatabaseRequests);
     }
 
     private static JoinWhereClauses(where: Array<string>): string {
@@ -260,6 +243,22 @@ export class SqliteService {
                           : of(undefined)
                   )))
             : of(undefined);
+    }
+
+    public importDemandesLivraisonData(data): Observable<void> {
+        const demandeLivraisonArticles = data['demandeLivraisonArticles'];
+        const demandeLivraisonTypes = data['demandeLivraisonTypes'];
+
+        return zip(
+            this.deleteBy('demande_livraison_article'),
+            this.deleteBy('demande_livraison_type')
+        ).pipe(flatMap(() => (((demandeLivraisonArticles && demandeLivraisonArticles.length > 0) || (demandeLivraisonTypes && demandeLivraisonTypes.length > 0))
+            ? zip(
+                ...(demandeLivraisonArticles || []).map((article) => this.insert('demande_livraison_article', article)),
+                ...(demandeLivraisonTypes || []).map((type) => this.insert('demande_livraison_type', type)),
+            )
+            : of(undefined)
+        )));
     }
 
     public importArticlesPrepas(data): Observable<any> {
@@ -644,6 +643,7 @@ export class SqliteService {
             flatMap(() => this.importManutentions(data).pipe(tap(() => {console.log('--- > importManutentions')}))),
             flatMap(() => this.importCollectes(data).pipe(tap(() => {console.log('--- > importCollectes')}))),
             flatMap(() => this.importMouvementTraca(data).pipe(tap(() => {console.log('--- > importMouvementTraca')}))),
+            flatMap(() => this.importDemandesLivraisonData(data).pipe(tap(() => {console.log('--- > importDemandeLivaisonData')}))),
             flatMap(() => (
                 this.storageService.getInventoryManagerRight().pipe(
                     flatMap((res) => (res

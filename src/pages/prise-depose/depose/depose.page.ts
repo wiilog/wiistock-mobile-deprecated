@@ -9,7 +9,7 @@ import {from, Observable, of, Subscription, zip} from 'rxjs';
 import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
 import {LoadingService} from '@app/common/services/loading.service';
-import {SqliteService} from '@app/common/services/sqlite.service';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {TracaListFactoryService} from '@app/common/services/traca-list-factory.service';
 import {StorageService} from '@app/common/services/storage.service';

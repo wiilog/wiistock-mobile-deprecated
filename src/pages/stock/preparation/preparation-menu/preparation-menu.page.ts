@@ -4,7 +4,7 @@ import {Preparation} from '@entities/preparation';
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
 import {NavService} from '@app/common/services/nav.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
-import {SqliteService} from '@app/common/services/sqlite.service';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {PreparationArticlesPageRoutingModule} from '@pages/stock/preparation/preparation-articles/preparation-articles-routing.module';
 
 @Component({

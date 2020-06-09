@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {IonicSelectableComponent} from 'ionic-selectable';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
-import {SqliteService} from '@app/common/services/sqlite.service';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {Emplacement} from '@entities/emplacement';
 
 
