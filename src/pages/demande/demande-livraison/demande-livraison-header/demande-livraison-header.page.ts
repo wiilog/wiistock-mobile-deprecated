@@ -2,7 +2,6 @@ import {Component, ViewChild} from '@angular/core';
 import {of, zip} from 'rxjs';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {DemandeLivraison} from '@entities/demande-livraison';
-import {DemandeLivraisonType} from '@entities/demande-livraison-type';
 import {StorageService} from '@app/common/services/storage.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {FormPanelItemConfig} from '@app/common/components/panel/model/form-panel/form-panel-item-config';
@@ -10,6 +9,7 @@ import {NavService} from '@app/common/services/nav.service';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
 import {ToastService} from '@app/common/services/toast.service';
+import {DemandeLivraisonArticlesPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-articles/demande-livraison-articles-routing.module';
 
 
 @Component({
@@ -43,14 +43,15 @@ export class DemandeLivraisonHeaderPage {
         const demandeId = navParams.get('demandeId');
         this.isUpdate = navParams.get('isUpdate');
 
+        this.formPanelComponent.fireZebraScan();
+
         zip(
-            this.isUpdate ? this.sqliteService.findBy('`demande_livraison`', [`id = ${demandeId}`]) : of(undefined),
-            this.sqliteService.findAll('`demande_livraison_type`'),
+            this.isUpdate ? this.sqliteService.findOneById('`demande_livraison`', demandeId) : of(this.demandeLivraisonToUpdate),
             this.storageService.getOperateur()
         )
-        .subscribe(([demandeLivraison, types, operator]: [DemandeLivraison|undefined, Array<DemandeLivraisonType>, string]) => {
+        .subscribe(([demandeLivraison, operator]: [DemandeLivraison|undefined, string]) => {
             this.demandeLivraisonToUpdate = demandeLivraison;
-
+            const {type_id: type, location_id: location, comment} = (demandeLivraison || {});
             this.formBodyConfig = [
                 {
                     type: 'input',
@@ -65,7 +66,8 @@ export class DemandeLivraisonHeaderPage {
                 {
                     type: 'select',
                     label: 'Type',
-                    name: 'type',
+                    name: 'type_id',
+                    value: type,
                     inputConfig: {
                         required: true,
                         searchType: SelectItemTypeEnum.DEMANDE_LIVRAISON_TYPE
@@ -78,7 +80,7 @@ export class DemandeLivraisonHeaderPage {
                     type: 'input',
                     label: 'Commentaire',
                     name: 'comment',
-                    // TODO value: comment,
+                    value: comment,
                     inputConfig: {
                         type: 'text',
                         maxLength: '255'
@@ -90,7 +92,8 @@ export class DemandeLivraisonHeaderPage {
                 {
                     type: 'select',
                     label: 'Destination',
-                    name: 'location',
+                    name: 'location_id',
+                    value: location,
                     inputConfig: {
                         required: true,
                         barcodeScanner: true,
@@ -104,6 +107,10 @@ export class DemandeLivraisonHeaderPage {
 
             this.hasLoaded = true;
         });
+    }
+
+    public ionViewWillLeave(): void {
+        this.formPanelComponent.unsubscribeZebraScan();
     }
 
     public onFormSubmit(): void {
@@ -122,6 +129,8 @@ export class DemandeLivraisonHeaderPage {
                         location_id,
                         comment
                     };
+
+                    this.navService.push(DemandeLivraisonArticlesPageRoutingModule.PATH)
                 });
         }
     }

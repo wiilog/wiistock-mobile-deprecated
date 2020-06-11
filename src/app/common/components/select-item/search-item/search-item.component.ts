@@ -27,6 +27,9 @@ export class SearchItemComponent implements OnInit {
     @Output()
     public itemChange: EventEmitter<any>;
 
+    @Output()
+    public itemsLoaded: EventEmitter<void>;
+
     @ViewChild('itemComponent', {static: false})
     public itemComponent: IonicSelectableComponent;
 
@@ -62,6 +65,7 @@ export class SearchItemComponent implements OnInit {
     public constructor(private sqliteService: SqliteService,
                        private changeDetector: ChangeDetectorRef) {
         this.itemChange = new EventEmitter<any>();
+        this.itemsLoaded = new EventEmitter<void>();
         this.dbItemsForList = [];
         this.dbItems = [];
         this.lastSearch = '';
@@ -87,6 +91,7 @@ export class SearchItemComponent implements OnInit {
         this.sqliteService.findBy(this.config[this.type].databaseTable, this.requestParams).subscribe((list) => {
             this.dbItems = list;
             this.loadFirstItems();
+            this.itemsLoaded.emit();
         });
     }
 
@@ -132,9 +137,9 @@ export class SearchItemComponent implements OnInit {
         this.itemComponent.hideLoading();
     }
 
-    public findItem(search: string): any {
+    public findItem(search: string|number, searchAttribute: string = this.config[this.type].label): any {
         return this.dbItems
-            ? this.dbItems.find((element) => (element[this.config[this.type].label] === search))
+            ? this.dbItems.find((element) => (element[searchAttribute] === search))
             : undefined;
     }
 

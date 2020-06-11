@@ -715,16 +715,6 @@ export class SqliteService {
         return this.findBy(table)
     }
 
-    public findByElement(table: string, element: string, value: string): Observable<Array<any>> {
-        const query = ('SELECT * FROM ' + table + ' WHERE ' + element + ' LIKE \'%' + value + '%\'');
-        return (value !== '')
-            ? this.db$.pipe(
-                flatMap((db: SQLiteObject) => from(db.executeSql(query, []))),
-                map((data) => SqliteService.MultiSelectQueryMapper<any>(data))
-            )
-            : of(undefined);
-    }
-
     private createInsertQuery(name: string, objects: any|Array<any>): string {
         const isMultiple = Array.isArray(objects);
         const objectKeys = Object.keys(isMultiple ? objects[0] : objects);
@@ -917,10 +907,6 @@ export class SqliteService {
             flatMap((db) => from(db.executeSql('UPDATE `article_collecte` SET quantite = ' + quantite + ' WHERE id = ' + id_article, []))),
             map(() => undefined)
         );
-    }
-
-    public deletePreparations(preparations: Array<Preparation>) {
-        return this.deletePreparationsById(preparations.map(({id}) => id))
     }
 
     public deletePreparationsById(preparations: Array<number>): Observable<any> {

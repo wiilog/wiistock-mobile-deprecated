@@ -195,9 +195,16 @@ export const TableDefinitions: Array<TableDefinition> = [
         name: 'demande_livraison',
         attributes: {
             id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-            location: 'VARCHAR(255)',
-            comment: 'comment',
+            location_id: 'integer',
+            comment: 'VARCHAR(255)',
             type_id: 'integer'
+        }
+    },
+    {
+        name: 'article_in_demande_livraison',
+        attributes: {
+            demande_id: 'INTEGER',
+            article_id: 'INTEGER'
         }
     },
     {

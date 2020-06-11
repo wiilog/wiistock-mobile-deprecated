@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {FormPanelSelectConfig} from '@app/common/components/panel/model/form-panel/form-panel-select-config';
 import {SearchItemComponent} from '@app/common/components/select-item/search-item/search-item.component';
 import {BarcodeScannerComponent} from '@app/common/components/barcode-scanner/barcode-scanner.component';
@@ -9,7 +9,7 @@ import {BarcodeScannerComponent} from '@app/common/components/barcode-scanner/ba
     templateUrl: 'form-panel-select.component.html',
     styleUrls: ['./form-panel-select.component.scss']
 })
-export class FormPanelSelectComponent implements OnInit, OnDestroy {
+export class FormPanelSelectComponent {
 
     @ViewChild('searchComponent', {static: false})
     public searchComponent: SearchItemComponent;
@@ -27,57 +27,38 @@ export class FormPanelSelectComponent implements OnInit, OnDestroy {
     public name: string;
 
     @Input()
-    public values: Array<{id: number; text: string;}>;
+    public errors?: {[errorName: string]: string};
 
     @Input()
-    public errors?: {[errorName: string]: string};
+    public value?: number;
 
     @Output()
     public valueChange: EventEmitter<string>;
 
     public text?: string;
 
-    private _value?: number;
-
     public constructor() {
         this.valueChange = new EventEmitter<string>();
     }
 
-    public ngOnInit(): void {
+    public fireZebraScan(): void {
         if (this.barcodeScanner) {
             this.barcodeScanner.fireZebraScan();
         }
     }
 
-    public ngOnDestroy() {
+    public unsubscribeZebraScan() {
         if (this.barcodeScanner) {
             this.barcodeScanner.unsubscribeZebraScan();
         }
     }
-
-    @Input()
-    public set value(value: number) {
-        if (value) {
-            this._value = value;
-            if (this.values) {
-                const selected = this.values.find(({id}) => (id === value));
-                if (selected) {
-                    this.text = selected.text;
-                }
-            }
-        }
-    };
-
-    public get value(): number {
-        return this._value;
-    };
 
     public onValueChange(value: string) {
         this.valueChange.emit(value);
     }
 
     public get error(): string {
-        const errorsKeys = this._value
+        const errorsKeys = this.value
             ? []
             : ['required'];
         return (errorsKeys.length > 0)
@@ -88,11 +69,11 @@ export class FormPanelSelectComponent implements OnInit, OnDestroy {
     public onItemSelect(itemSelected: {id: number; label: string;}) {
         if (itemSelected) {
             this.text = itemSelected.label;
-            this._value = itemSelected.id;
+            this.value = itemSelected.id;
         }
         else {
             this.text = undefined;
-            this._value = undefined;
+            this.value = undefined;
         }
     }
 
@@ -107,4 +88,15 @@ export class FormPanelSelectComponent implements OnInit, OnDestroy {
             this.onItemSelect(item);
         }
     }
+
+    public initText(): void {
+        if (this.value) {
+            const selected = this.searchComponent.findItem(this.value, 'id');
+            if (selected) {
+                this.text = selected.label;
+            }
+        }
+    }
+
+
 }

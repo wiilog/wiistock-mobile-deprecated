@@ -4,6 +4,7 @@
         <wii-search-item #searchComponent
                          [type]="inputConfig.searchType"
                          (itemChange)="onItemSelect($event)"
+                         (itemsLoaded)="initText()"
                          hidden>
         </wii-search-item>
         <div>{{ text }}</div>

@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {zip} from 'rxjs';
+import {of, zip} from 'rxjs';
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {DemandeLivraison} from '@entities/demande-livraison';
@@ -9,7 +9,7 @@ import {StorageService} from '@app/common/services/storage.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {NavService} from '@app/common/services/nav.service';
 import {DemandeLivraisonHeaderPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-header/demande-livraison-header-routing.module';
-import {isBoolean} from 'util';
+import {flatMap, map} from 'rxjs/operators';
 
 
 @Component({
@@ -44,34 +44,59 @@ export class DemandeLivraisonMenuPage {
             this.sqliteService.findAll('`demande_livraison_type`'),
             this.storageService.getOperateur()
         )
-        .subscribe(([demandesLivraison, types, operator]: [Array<DemandeLivraison>, Array<DemandeLivraisonType>, string]) => {
+            .pipe(flatMap(([demandesLivraison, types, operator]: [Array<DemandeLivraison>, Array<DemandeLivraisonType>, string]) => {
+                const locationIdsJoined = demandesLivraison
+                    .map(({location_id}) => location_id)
+                    .join(', ');
+                return (locationIdsJoined.length > 0
+                    ? this.sqliteService
+                        .findBy('emplacements', [`WHERE id IN (${locationIdsJoined})`])
+                        .pipe(
+                            flatMap((locations) => (
+                                locations.reduce((acc, {id, label}) => ({
+                                    ...acc,
+                                    [id]: label
+                                }), {})
+                            )),
+                    )
+                    : of({}))
+                        .pipe(
+                            map((locationsConverter) => ([
+                                demandesLivraison,
+                                types.reduce((acc, {id, label}) => ({
+                                    ...acc,
+                                    [id]: label
+                                }), {}),
+                                operator,
+                                locationsConverter
+                            ]))
+                        )
+            }))
+        .subscribe(([demandesLivraison, types, operator, locationsConverter]: [Array<DemandeLivraison>, {[id: number]: string}, string, {[id: number]: string}]) => {
             this.demandesLivraison = demandesLivraison;
-            this.demandesListConfig = this.demandesLivraison.map((demande: DemandeLivraison) => {
-                const typeDemande = types.find(({id: typeId}) => demande.type_id === typeId);
-                return {
-                    title: {
-                        label: 'Demandeur',
-                        value: operator
+            this.demandesListConfig = this.demandesLivraison.map((demande: DemandeLivraison) => ({
+                title: {
+                    label: 'Demandeur',
+                    value: operator
+                },
+                content: [
+                    {
+                        label: 'Emplacement',
+                        value: locationsConverter[demande.location_id] || ''
                     },
-                    content: [
-                        {
-                            label: 'Emplacement',
-                            value: demande.location || ''
-                        },
-                        {
-                            label: 'Type',
-                            value: typeDemande ? typeDemande.label : ''
-                        },
-                        {
-                            label: 'Commentaire',
-                            value: demande.comment
-                        }
-                    ],
-                    action: () => {
-                        // this.navService.push(LivraisonArticlesPageRoutingModule.PATH, {livraison});
+                    {
+                        label: 'Type',
+                        value: types[demande.type_id] || ''
+                    },
+                    {
+                        label: 'Commentaire',
+                        value: demande.comment
                     }
-                };
-            });
+                ],
+                action: () => {
+                    // this.navService.push(LivraisonArticlesPageRoutingModule.PATH, {livraison});
+                }
+            }));
 
             this.hasLoaded = true;
             this.refreshSubTitle();
