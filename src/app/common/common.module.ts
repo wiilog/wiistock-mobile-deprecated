@@ -29,6 +29,7 @@ import {BarcodeScanner} from '@ionic-native/barcode-scanner/ngx';
 import {SQLite} from '@ionic-native/sqlite/ngx';
 import {AppVersion} from '@ionic-native/app-version/ngx';
 import {StatsSlidersComponent} from '@app/common/components/stats-sliders/stats-sliders.component';
+import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 
 
 @NgModule({
@@ -41,6 +42,7 @@ import {StatsSlidersComponent} from '@app/common/components/stats-sliders/stats-
         MenuComponent,
         FormPanelInputComponent,
         FormPanelSigningComponent,
+        FormPanelSelectComponent,
         FormPanelComponent,
         ListPanelItemComponent,
         ListPanelComponent,

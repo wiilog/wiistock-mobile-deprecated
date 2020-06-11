@@ -1,7 +1,6 @@
 import {Component, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
 import {LoadingService} from '@app/common/services/loading.service';
 import {map} from 'rxjs/operators';
-import {FormPanelItemComponent} from '@app/common/components/panel/model/form-panel/form-panel-item-component';
 import {ModalController} from '@ionic/angular';
 import {from} from 'rxjs';
 import {SignaturePadComponent} from '@app/common/components/signature-pad/signature-pad.component';
@@ -15,7 +14,7 @@ import {FormPanelSigningConfig} from '@app/common/components/panel/model/form-pa
         './form-panel-signing.component.scss'
     ]
 })
-export class FormPanelSigningComponent implements FormPanelItemComponent<FormPanelSigningConfig>, OnDestroy {
+export class FormPanelSigningComponent implements OnDestroy {
 
     @Input()
     public inputConfig: FormPanelSigningConfig;
@@ -30,7 +29,7 @@ export class FormPanelSigningComponent implements FormPanelItemComponent<FormPan
     public name: string;
 
     @Input()
-    public errors?: {[erroName: string]: string};
+    public errors?: {[errorName: string]: string};
 
     @Output()
     public valueChange: EventEmitter<string>;

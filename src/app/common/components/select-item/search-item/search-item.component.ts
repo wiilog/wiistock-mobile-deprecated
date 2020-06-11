@@ -49,6 +49,13 @@ export class SearchItemComponent implements OnInit {
             templateIndex: 'location',
             databaseTable: 'emplacement',
             placeholder: 'Sélectionner un emplacement'
+        },
+        [SelectItemTypeEnum.DEMANDE_LIVRAISON_TYPE]: {
+            label: 'label',
+            valueField: 'id',
+            templateIndex: 'type-dl',
+            databaseTable: 'demande_livraison_type',
+            placeholder: 'Sélectionner un type'
         }
     }
 
@@ -125,7 +132,7 @@ export class SearchItemComponent implements OnInit {
         this.itemComponent.hideLoading();
     }
 
-    public isKnownItem(search: string): any {
+    public findItem(search: string): any {
         return this.dbItems
             ? this.dbItems.find((element) => (element[this.config[this.type].label] === search))
             : undefined;

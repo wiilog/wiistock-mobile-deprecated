@@ -7,6 +7,9 @@ import {DemandeLivraisonType} from '@entities/demande-livraison-type';
 import {CardListConfig} from '@app/common/components/card-list/card-list-config';
 import {StorageService} from '@app/common/services/storage.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
+import {NavService} from '@app/common/services/nav.service';
+import {DemandeLivraisonHeaderPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-header/demande-livraison-header-routing.module';
+import {isBoolean} from 'util';
 
 
 @Component({
@@ -23,13 +26,18 @@ export class DemandeLivraisonMenuPage {
     public demandesListConfig: Array<CardListConfig>;
     public demandesLivraison: Array<DemandeLivraison>;
 
+    public fabListActivated: boolean;
+
     public constructor(private sqliteService: SqliteService,
+                       private navService: NavService,
                        private mainHeaderService: MainHeaderService,
                        private storageService: StorageService) {
         this.hasLoaded = false;
+        this.fabListActivated = false
     }
 
     public ionViewWillEnter(): void {
+        this.fabListActivated = false
         this.hasLoaded = false;
         zip(
             this.sqliteService.findAll('`demande_livraison`'),
@@ -73,5 +81,19 @@ export class DemandeLivraisonMenuPage {
     public refreshSubTitle(): void {
         const demandeLivraisonsLength = (this.demandesLivraison || []).length;
         this.mainHeaderService.emitSubTitle(`${demandeLivraisonsLength === 0 ? 'Aucune' : demandeLivraisonsLength} livraison${demandeLivraisonsLength > 1 ? 's' : ''}`)
+    }
+
+    public onMenuClick(): void {
+        this.fabListActivated = !this.fabListActivated;
+    }
+
+    public onRefreshClick(): void {
+        this.fabListActivated = false;
+    }
+
+    public onAddClick(): void {
+        this.navService.push(DemandeLivraisonHeaderPageRoutingModule.PATH, {
+            isCreation: true
+        });
     }
 }

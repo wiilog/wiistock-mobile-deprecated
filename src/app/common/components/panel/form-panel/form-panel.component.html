@@ -24,5 +24,13 @@
                                 [name]="element.name"
                                 [errors]="element.errors">
         </wii-form-panel-signing>
+        <wii-form-panel-select #formElement
+                               *ngIf="element.type === 'select'"
+                               [inputConfig]="element.inputConfig"
+                               [(value)]="element.value"
+                               [label]="element.label"
+                               [name]="element.name"
+                               [errors]="element.errors">
+        </wii-form-panel-select>
     </ng-container>
 </div>

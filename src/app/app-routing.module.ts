@@ -31,6 +31,7 @@ import {InventoryArticlesPageRoutingModule} from '@pages/stock/inventory/invento
 import {InventoryValidatePageRoutingModule} from '@pages/stock/inventory/inventory-validate/inventory-validate-routing.module';
 import {DemandeMenuPageRoutingModule} from '@pages/demande/demande-menu/demande-menu-routing.module';
 import {DemandeLivraisonMenuPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu-routing.module';
+import {DemandeLivraisonHeaderPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-header/demande-livraison-header-routing.module';
 
 
 const routes: Routes = [
@@ -93,6 +94,11 @@ const routes: Routes = [
         path: DemandeLivraisonMenuPageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu.module').then(m => m.DemandeLivraisonMenuPageModule)
+    },
+    {
+        path: DemandeLivraisonHeaderPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/demande/demande-livraison/demande-livraison-header/demande-livraison-header.module').then(m => m.DemandeLivraisonHeaderPageModule)
     },
     {
         path: ManutentionValidatePageRoutingModule.PATH,

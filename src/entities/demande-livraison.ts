@@ -1,6 +1,6 @@
 export interface DemandeLivraison {
     id: number;
     type_id: number;
-    location: string;
+    location_id: number;
     comment: string;
 }

@@ -28,7 +28,7 @@
                 </ng-template>
                 <ng-template ionicSelectableItemTemplate
                              let-location="item"
-                             *ngIf="config[type].templateIndex === 'location'">
+                             *ngIf="config[type].templateIndex === 'location' || config[type].templateIndex === 'dl-type'">
                     {{location.label}}
                 </ng-template>
             </ionic-selectable>

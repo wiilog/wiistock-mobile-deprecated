@@ -88,7 +88,7 @@ export class SelectItemComponent implements OnInit, OnDestroy {
 
     public testIfBarcodeValid(barcode: string): void {
         if (barcode) {
-            let item = this.searchComponent.isKnownItem(barcode);
+            let item = this.searchComponent.findItem(barcode);
             if (!item) {
                 if (this.scanMode === BarcodeScannerModeEnum.TOOL_SEARCH || this.checkBarcodeValidity) {
                     this.presentInvalidItemToast();

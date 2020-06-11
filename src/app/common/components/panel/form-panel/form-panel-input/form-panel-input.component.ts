@@ -1,23 +1,20 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
-import {FormPanelItemComponent} from '@app/common/components/panel/model/form-panel/form-panel-item-component';
-import {FormPanelItemAvailable} from '@app/common/components/panel/model/form-panel-item-available';
 import {NgModel} from '@angular/forms';
+import {FormPanelInputConfig} from '@app/common/components/panel/model/form-panel/form-panel-input-config';
 
 
 @Component({
     selector: 'wii-form-panel-input',
     templateUrl: 'form-panel-input.component.html',
-    styleUrls: [
-        './form-panel-input.component.scss'
-    ]
+    styleUrls: ['./form-panel-input.component.scss']
 })
-export class FormPanelInputComponent implements FormPanelItemComponent<FormPanelItemAvailable> {
+export class FormPanelInputComponent {
 
     @ViewChild('inputComponent', {static: false})
     public inputComponent: NgModel;
 
     @Input()
-    public inputConfig: FormPanelItemAvailable;
+    public inputConfig: FormPanelInputConfig;
 
     @Input()
     public value?: string;

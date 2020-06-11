@@ -9,8 +9,7 @@
             margin: $spacerMin $spacerMin $spacerMin ($spacerMin/2);
         }
 
-        wii-form-panel-input,
-        wii-form-panel-signing {
+        :not(wii-panel-header) {
             margin-right: $spacer;
             margin-left: $spacer;
 

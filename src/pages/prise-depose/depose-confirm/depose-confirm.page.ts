@@ -2,8 +2,6 @@ import {Component, ViewChild} from '@angular/core';
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
 import {HeaderConfig} from '@app/common/components/panel/model/header-config';
 import {FormPanelItemConfig} from '@app/common/components/panel/model/form-panel/form-panel-item-config';
-import {FormPanelInputConfig} from '@app/common/components/panel/model/form-panel/form-panel-input-config';
-import {FormPanelSigningConfig} from '@app/common/components/panel/model/form-panel/form-panel-signing-config';
 import {Emplacement} from '@entities/emplacement';
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav.service';
@@ -19,7 +17,7 @@ export class DeposeConfirmPage {
     public formPanelComponent: FormPanelComponent;
 
     public headerConfig: HeaderConfig;
-    public bodyConfig: Array<FormPanelItemConfig<FormPanelInputConfig|FormPanelSigningConfig>>;
+    public bodyConfig: Array<FormPanelItemConfig>;
 
     private location: Emplacement;
     private validateDepose: (comment: string, signature: string) => void;

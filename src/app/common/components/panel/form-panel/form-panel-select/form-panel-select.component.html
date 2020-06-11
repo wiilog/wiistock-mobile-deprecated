@@ -1,0 +1,22 @@
+<ion-item lines="none">
+    <ion-label color="medium">{{label}}</ion-label>
+    <div class="wrapper">
+        <wii-search-item #searchComponent
+                         [type]="inputConfig.searchType"
+                         (itemChange)="onItemSelect($event)"
+                         hidden>
+        </wii-search-item>
+        <div>{{ text }}</div>
+        <wii-icon name="search.svg"
+                  color="medium"
+                  class="search-icon"
+                  (action)=" onSearchClick()">
+        </wii-icon>
+    </div>
+</ion-item>
+
+<wii-barcode-scanner #barcodeScanner
+                     *ngIf="inputConfig.barcodeScanner"
+                     buttonSubtitle="Destination"
+                     (add)="onBarcodeScanned($event[0])">
+</wii-barcode-scanner>

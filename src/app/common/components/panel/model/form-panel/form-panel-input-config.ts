@@ -4,4 +4,5 @@ export interface FormPanelInputConfig {
     max?: number;
     required?: true;
     maxLength?: string;
+    disabled?: boolean;
 }
