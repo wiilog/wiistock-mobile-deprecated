@@ -19,7 +19,7 @@
                 </ng-template>
                 <ng-template ionicSelectableItemTemplate
                              let-article="item"
-                             *ngIf="config[type].templateIndex === 'article'">
+                             *ngIf="config[type].templateIndex === 'article-prepa'">
                     <div class="ionic-selectable-item-wrapper">
                         <p>Article {{article.barcode}}</p>
                         <p *ngIf="article.location !== 'null'">Emplacement : {{article.location}}</p>
@@ -27,8 +27,26 @@
                     </div>
                 </ng-template>
                 <ng-template ionicSelectableItemTemplate
+                             let-article="item"
+                             *ngIf="config[type].templateIndex === 'article-demande'">
+                    <div class="ionic-selectable-item-wrapper">
+                        <p>Article : {{article.reference}}</p>
+                        <p>Libellé : {{article.label}}</p>
+                        <p>Code barre : {{article.bar_code}}</p>
+                        <p *ngIf="article.available_quantity">Quantité disponible : {{article.available_quantity}}</p>
+                        <p *ngIf="article.location_label">Emplacement : {{article.location_label}}</p>
+                        <p>
+                            Gestion : {{
+                                article.type_quantity === 'reference' ? 'Par référence' :
+                                article.type_quantity === 'article' ? 'Par article' :
+                                article.type_quantity
+                            }}
+                        </p>
+                    </div>
+                </ng-template>
+                <ng-template ionicSelectableItemTemplate
                              let-location="item"
-                             *ngIf="config[type].templateIndex === 'location' || config[type].templateIndex === 'dl-type'">
+                             *ngIf="config[type].templateIndex === 'default'">
                     {{location.label}}
                 </ng-template>
             </ionic-selectable>

@@ -16,6 +16,7 @@
                     <span class="content-label">{{ contentLine.label }}&nbsp;:&nbsp;</span>
                     <span class="content-value">{{ contentLine.value }}</span>
                 </p>
+                <p *ngIf="cardConfig.info" class="content-info">{{cardConfig.info}}</p>
             </div>
             <div class="actions"
                  *ngIf="cardConfig.action">

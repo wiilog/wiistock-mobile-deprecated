@@ -100,7 +100,7 @@ export class TracaListFactoryService {
                             this.alertPresented = false;
                             return null;
                         }
-                    },
+                    }
                 ]
             })).subscribe((alert: HTMLIonAlertElement) => {
                 alert.onDidDismiss().then(() => {

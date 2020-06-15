@@ -1,6 +1,5 @@
 import {Injectable} from '@angular/core';
 import {StorageService} from '@app/common/services/storage.service';
-import {Preparation} from '@entities/preparation';
 import {Livraison} from '@entities/livraison';
 import {from, Observable, of, ReplaySubject, Subject, zip} from 'rxjs';
 import {flatMap, map, take, tap} from 'rxjs/operators';
@@ -15,7 +14,7 @@ import {ArticleLivraison} from "@entities/article-livraison";
 import {SQLite, SQLiteObject} from '@ionic-native/sqlite/ngx';
 import {Platform} from '@ionic/angular';
 import * as moment from 'moment';
-import {TableDefinitions} from '@app/common/services/sqlite/table-definitions';
+import {TablesDefinitions} from '@app/common/services/sqlite/tables-definitions';
 
 
 @Injectable({
@@ -65,7 +64,7 @@ export class SqliteService {
     }
 
     private static CreateTables(db: SQLiteObject): Observable<any> {
-        const createDatabaseRequests = TableDefinitions.map(({name, attributes}) => {
+        const createDatabaseRequests = TablesDefinitions.map(({name, attributes}) => {
             const attributesStr = Object
                 .keys(attributes)
                 .map((attr) => (`\`${attr}\` ${attributes[attr]}`))
@@ -95,7 +94,7 @@ export class SqliteService {
     }
 
     private static DropTables(db: SQLiteObject): Observable<any> {
-        const createDatabaseRequests = TableDefinitions.map(({name}) => `DROP TABLE IF EXISTS \`${name}\`;`);
+        const createDatabaseRequests = TablesDefinitions.map(({name}) => `DROP TABLE IF EXISTS \`${name}\`;`);
         return SqliteService.ExecuteQueryFlatMap(db, createDatabaseRequests);
     }
 
@@ -692,6 +691,40 @@ export class SqliteService {
                     return Number(count);
                 })
             );
+    }
+
+    public findArticlesInDemandeLivraison(demandeId: number) {
+        const query = (
+            `SELECT demande_livraison_article.*, article_in_demande_livraison.quantity_to_pick AS quantity_to_pick ` +
+            `FROM demande_livraison_article ` +
+            `INNER JOIN article_in_demande_livraison ON article_in_demande_livraison.article_id = demande_livraison_article.id ` +
+            `WHERE article_in_demande_livraison.demande_id = ${demandeId}`
+        );
+        return this.executeQuery(query).pipe(
+            map((data) => SqliteService.MultiSelectQueryMapper<any>(data)),
+            take(1)
+        );
+    }
+
+    public countArticlesByDemandeLivraison(demandeIds: Array<number>): Observable<{ [demande_id: number]: number }> {
+        console.log(demandeIds)
+        const demandeIdsJoined = demandeIds.join(',');
+        const query = (
+            `SELECT COUNT(article_in_demande_livraison.article_id) AS counter, article_in_demande_livraison.demande_id AS demande_id ` +
+            `FROM article_in_demande_livraison ` +
+            `WHERE article_in_demande_livraison.demande_id IN (${demandeIdsJoined}) ` +
+            `GROUP BY article_in_demande_livraison.demande_id`
+        );
+        return this.executeQuery(query).pipe(
+            map((data) => SqliteService.MultiSelectQueryMapper<any>(data)),
+            map((counters: Array<{demande_id: number, counter: number}>) => (
+                counters.reduce((acc, {demande_id, counter}) => ({
+                    ...acc,
+                    [Number(demande_id)]: Number(counter)
+                }), {})
+            )),
+            take(1)
+        );
     }
 
     /**

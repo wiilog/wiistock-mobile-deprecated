@@ -1,6 +1,5 @@
 export interface DemandeLivraisonArticleSelected {
-    // TODO demande
-    id: number;
     demande_id: number;
     article_id: number;
+    quantity_to_pick: number;
 }

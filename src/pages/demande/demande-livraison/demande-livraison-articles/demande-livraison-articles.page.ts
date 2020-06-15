@@ -1,25 +1,25 @@
-import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
-import {BarcodeScannerComponent} from '@app/common/components/barcode-scanner/barcode-scanner.component';
+import {ChangeDetectorRef, Component, EventEmitter, ViewChild} from '@angular/core';
 import {Emplacement} from '@entities/emplacement';
-import {MouvementTraca} from '@entities/mouvement-traca';
 import {HeaderConfig} from '@app/common/components/panel/model/header-config';
 import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel/list-panel-item-config';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
-import {from, Observable, of, Subscription, zip} from 'rxjs';
-import {ApiService} from '@app/common/services/api.service';
+import {from, Observable, of, zip} from 'rxjs';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {LoadingService} from '@app/common/services/loading.service';
-import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
-import {TracaListFactoryService} from '@app/common/services/traca-list-factory.service';
 import {StorageService} from '@app/common/services/storage.service';
 import {AlertController} from '@ionic/angular';
-import {flatMap, map, tap} from 'rxjs/operators';
-import * as moment from 'moment';
-import {Network} from '@ionic-native/network/ngx';
-import {ActivatedRoute} from '@angular/router';
+import {filter, flatMap, map} from 'rxjs/operators';
 import {NavService} from '@app/common/services/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
+import {DemandeLivraison} from '@entities/demande-livraison';
+import {DemandeLivraisonType} from '@entities/demande-livraison-type';
+import {DemandeLivraisonArticle} from '@entities/demande-livraison-article';
+import {AlertManagerService} from '@app/common/services/alert-manager.service';
+import {DemandeLivraisonArticleTakePageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-article-take/demande-livraison-article-take-routing.module';
+import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
+import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
+import {IconColor} from '@app/common/components/icon/icon-color';
 
 
 @Component({
@@ -29,347 +29,306 @@ import {CanLeave} from '@app/guards/can-leave/can-leave';
 })
 export class DemandeLivraisonArticlesPage implements CanLeave {
 
-    private static readonly MOUVEMENT_TRACA_PRISE = 'prise';
+    @ViewChild('selectItemComponent', {static: false})
+    public selectItemComponent: SelectItemComponent;
 
-    @ViewChild('footerScannerComponent', {static: false})
-    public footerScannerComponent: BarcodeScannerComponent;
-
-    public emplacement: Emplacement;
-    public colisPrise: Array<MouvementTraca>;
-    public currentPacksOnLocation: Array<MouvementTraca&{hidden?: boolean}>;
-    public colisPriseAlreadySaved: Array<MouvementTraca>;
-
-    public listPacksOnLocationHeader: HeaderConfig;
-    public listPacksOnLocationBody: Array<ListPanelItemConfig>;
-
-    public listTakingHeader: HeaderConfig;
-    public listTakingBody: Array<ListPanelItemConfig>;
     public listBoldValues: Array<string>;
 
-    public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.WITH_MANUAL;
+    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.TOOL_SEARCH;
+    public readonly scannerType: SelectItemTypeEnum = SelectItemTypeEnum.DEMANDE_LIVRAISON_ARTICLES;
+
+    public resetSelectItemEmitter$: EventEmitter<void>;
 
     public loading: boolean;
-    public barcodeCheckLoading: boolean;
 
     public fromStock: boolean;
 
-    private barcodeCheckSubscription: Subscription;
-    private saveSubscription: Subscription;
+    public headerConfig: HeaderConfig;
+    public bodyConfig: Array<ListPanelItemConfig>;
 
-    private finishAction: () => void;
-    private operator: string;
-    private apiLoading: boolean;
+    private selectedArticles: Array<DemandeLivraisonArticle>;
 
-    public constructor(private network: Network,
-                       private apiService: ApiService,
-                       private sqliteService: SqliteService,
+    private demandeLivraisonId: number;
+
+    private alertPresented: boolean;
+    private loadingPresented: boolean;
+    private isUpdate: boolean;
+    private pageAlreadyInit: boolean;
+
+    public constructor(private sqliteService: SqliteService,
+                       private storageService: StorageService,
                        private alertController: AlertController,
                        private toastService: ToastService,
+                       private changeDetector: ChangeDetectorRef,
                        private loadingService: LoadingService,
-                       private changeDetectorRef: ChangeDetectorRef,
-                       private localDataManager: LocalDataManagerService,
-                       private tracaListFactory: TracaListFactoryService,
-                       private activatedRoute: ActivatedRoute,
-                       private navService: NavService,
-                       private storageService: StorageService) {
-        this.init();
+                       private navService: NavService) {
+        this.loading = false;
+        this.resetSelectItemEmitter$ = new EventEmitter<void>();
+        this.selectedArticles = [];
         this.listBoldValues = [
-            'object'
+            'reference',
+            'label',
+            'barCode',
+            'quantity',
+            'location',
+            'management'
         ];
     }
 
     public ionViewWillEnter(): void {
-        this.init();
+        this.selectItemComponent.fireZebraScan();
+
         const navParams = this.navService.getCurrentParams();
-        this.finishAction = navParams.get('finishAction');
-        this.emplacement = navParams.get('emplacement');
-        this.fromStock = Boolean(navParams.get('fromStock'));
+        this.demandeLivraisonId = navParams.get('demandeLivraisonId');
+        this.isUpdate = Boolean(navParams.get('isUpdate'));
 
-        zip(
-            this.storageService.getOperateur(),
-            this.sqliteService.getPrises(this.fromStock),
-            (this.network.type !== 'none' && this.emplacement && !this.fromStock
-                ? this.apiService.requestApi('get', ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})
-                : of({trackingDrops: []}))
-        )
-            .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}]) => {
-                this.operator = operator;
-                this.colisPriseAlreadySaved = colisPriseAlreadySaved;
-                this.currentPacksOnLocation = trackingDrops;
-                this.footerScannerComponent.fireZebraScan();
-
-                this.refreshListComponent();
-                this.loading = false;
-            });
+        if (!this.pageAlreadyInit) {
+            this.selectedArticles = [];
+            this.pageAlreadyInit = true;
+            this.loading = true;
+            this.sqliteService
+                .findOneById('demande_livraison', this.demandeLivraisonId)
+                .pipe(
+                    filter(Boolean),
+                    flatMap((demandeLivraison: DemandeLivraison) => (
+                        zip(
+                            this.sqliteService.findOneById('demande_livraison_type', demandeLivraison.type_id),
+                            this.sqliteService.findOneById('emplacement', demandeLivraison.location_id),
+                            this.sqliteService.findArticlesInDemandeLivraison(demandeLivraison.id),
+                            this.storageService.getOperateur()
+                        )
+                            .pipe((map(([type, location, articles, operator]) => ([demandeLivraison, type, location, articles, operator]))))
+                    ))
+                )
+                .subscribe(([demandeLivraison, type, location, articles, operator]: [DemandeLivraison, DemandeLivraisonType, Emplacement, Array<DemandeLivraisonArticle>, string]) => {
+                    this.loading = false;
+                    this.selectedArticles = articles;
+                    this.headerConfig = this.createHeaderConfig(demandeLivraison, type, location, operator, articles.length);
+                    this.bodyConfig = this.createBodyConfig(articles);
+                });
+        }
     }
 
     public ionViewWillLeave(): void {
-        this.barcodeCheckLoading = false;
-        this.footerScannerComponent.unsubscribeZebraScan();
-        if (this.barcodeCheckSubscription) {
-            this.barcodeCheckSubscription.unsubscribe();
-            this.barcodeCheckSubscription = undefined;
-        }
-        if (this.saveSubscription) {
-            this.saveSubscription.unsubscribe();
-            this.saveSubscription = undefined;
-        }
+        this.selectItemComponent.unsubscribeZebraScan();
     }
 
     public wiiCanLeave(): boolean {
-        return !this.barcodeCheckLoading && !this.apiLoading;
+        return !this.alertPresented && !this.loadingPresented;
     }
 
-    public finishTaking(): void {
-        if (this.colisPrise && this.colisPrise.length > 0) {
-            const multiPrise = (this.colisPrise.length > 1);
-            if (!this.apiLoading) {
-                this.apiLoading = true;
-                let loader: HTMLIonLoadingElement;
-                this.saveSubscription = this.localDataManager
-                    .saveMouvementsTraca(this.colisPrise)
-                    .pipe(
-                        flatMap(() => {
-                            const online = (this.network.type !== 'none');
-                            return online
-                                ? this.loadingService
-                                    .presentLoading(multiPrise ? 'Envoi des prises en cours...' : 'Envoi de la prise en cours...')
-                                    .pipe(
-                                        tap((presentedLoader: HTMLIonLoadingElement) =>  {
-                                            loader = presentedLoader;
-                                        }),
-                                        map(() => online)
-                                    )
-                                : of(online)
-                        }),
-                        flatMap((online: boolean) => (
-                            online
-                                ? this.localDataManager
-                                    .sendMouvementTraca(this.fromStock)
-                                    .pipe(
-                                        flatMap(() => (
-                                            loader
-                                                ? from(loader.dismiss())
-                                                : of(undefined)
-                                        )),
-                                        tap(() => {
-                                            loader = undefined;
-                                        }),
-                                        map(() => online)
-                                    )
-                                : of(online)
-                        )),
-                        // we display toast
-                        flatMap((send: boolean) => {
-                            const message = send
-                                ? 'Les prises ont bien été sauvegardées'
-                                : (multiPrise
-                                    ? 'Prises sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
-                                    : 'Prise sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
-                            return this.toastService.presentToast(message);
-                        })
-                    )
-                    .subscribe(
-                        () => {
-                            this.apiLoading = false;
-                            this.redirectAfterTake();
-                        },
-                        (error) => {
-                            this.apiLoading = false;
-                            if (loader) {
-                                loader.dismiss();
-                                loader = undefined;
-                            }
-                            throw error;
-                        });
-            }
+    public addArticleInDemande(article: DemandeLivraisonArticle) {
+        const index = this.selectedArticles.findIndex(({reference}) => (reference === article.reference));
+        if (index > -1) {
+            this.selectedArticles[index] = article;
         }
         else {
-            this.toastService.presentToast(`Vous devez scanner au moins un ${this.objectLabel}`)
+            this.selectedArticles.push(article);
         }
+        this.headerConfig.info = this.getInfoHeaderConfig(this.selectedArticles.length);
+        this.bodyConfig = this.createBodyConfig(this.selectedArticles);
+        this.resetSelectItemEmitter$.emit();
     }
 
-    public redirectAfterTake(): void {
-        this.navService
-            .pop()
+    public selectArticleQuantity(article?: DemandeLivraisonArticle) {
+        this.navService.push(DemandeLivraisonArticleTakePageRoutingModule.PATH, {
+            addArticleInDemande: (articleToSelect: DemandeLivraisonArticle) => this.addArticleInDemande(articleToSelect),
+            article
+        });
+    }
+
+    private createHeaderConfig(demandeLivraison: DemandeLivraison,
+                               type: DemandeLivraisonType,
+                               location: Emplacement,
+                               operator: string,
+                               articlesCounter: number): HeaderConfig {
+        const subtitle = [
+            `Demandeur : ${operator || ''}`,
+            `Emplacement : ${location ? location.label : ''}`,
+            `Type : ${type ? type.label : ''}`
+        ];
+
+        if (demandeLivraison.comment) {
+            subtitle.push(`Commentaire : ${demandeLivraison.comment}`);
+        }
+
+        const headerConfig = {
+            title: 'Demande',
+            subtitle,
+            // TODO action on click
+            // si isUpdate => push
+            // sinon pop
+            info: this.getInfoHeaderConfig(articlesCounter),
+            leftIcon: {
+                name: 'demande.svg',
+                color: 'warning' as IconColor
+            },
+            rightIcon: [
+                {
+                    name: 'check.svg',
+                    color: 'success' as IconColor,
+                    action: () => {
+                        this.saveSelectedArticles();
+                    }
+                },
+                {
+                    name: 'trash.svg',
+                    color: 'danger' as IconColor,
+                    action: () => {
+                        console.log('ON PASSE ICI 2')
+                        this.presentAlertToDeleteDemande();
+                    }
+                }
+            ]
+        };
+        return headerConfig;
+    }
+
+    private saveSelectedArticles(): void {
+        this.loadingPresented = true;
+        zip(
+            this.loadingService.presentLoading(),
+            this.deleteSavedArticleInDemande()
+        )
+            .pipe(
+                flatMap(([loading]: [HTMLIonLoadingElement]) => (
+                    this.selectedArticles.length > 0
+                        ? zip(
+                            ...(this.selectedArticles.map(({quantity_to_pick, id}) => (
+                                this.sqliteService.insert('article_in_demande_livraison', {
+                                    article_id: id,
+                                    demande_id: this.demandeLivraisonId,
+                                    quantity_to_pick
+                                })
+                            )))
+                        ).pipe(map(() => loading))
+                        : of(loading)
+                )),
+                flatMap((loading: [HTMLIonLoadingElement]) => from(loading.dismiss()))
+            )
             .subscribe(() => {
-                this.finishAction();
+                this.loadingPresented = false;
+                this.popPage();
             });
     }
 
-    public testIfBarcodeEquals(barCode: string, isManualAdd: boolean = false): void {
-        if (!this.barcodeCheckLoading) {
-            if (!this.fromStock) {
-                this.processCheckBarCode(barCode, isManualAdd);
-            }
-            else if (this.network.type !== 'none') {
-                this.barcodeCheckLoading = true;
-                let loader: HTMLIonLoadingElement;
-                this.barcodeCheckSubscription = this.loadingService
-                    .presentLoading('Vérification...')
-                    .pipe(
-                        tap((presentedLoader) => {
-                            loader = presentedLoader;
-                        }),
-                        flatMap(() => this.existsOnLocation(barCode)),
-                        flatMap((quantity) => from(loader.dismiss()).pipe(map(() => quantity)))
-                    )
-                    .subscribe((quantity) => {
-                        this.processCheckBarCode(barCode, isManualAdd, quantity);
-                    });
-            }
-            else {
-                this.toastService.presentToast('Vous devez être connecté à internet pour effectuer une prise');
-            }
-        }
-        else {
-            this.toastService.presentToast('Chargement...');
-        }
+    private getInfoHeaderConfig(articlesCounter: number): string {
+        const sArticle = articlesCounter > 1 ? 's' : '';
+        return `Non synchronisée, ${articlesCounter} article${sArticle} scanné${sArticle}`;
     }
 
-    public get objectLabel(): string {
-        return TracaListFactoryService.GetObjectLabel(this.fromStock);
-    }
-
-    public get displayPacksOnLocationsList(): boolean {
-        return this.currentPacksOnLocation && this.currentPacksOnLocation.filter(({hidden}) => !hidden).length > 0;
-    }
-
-    private saveMouvementTraca(barCode: string, quantity: boolean|number): void {
-        this.colisPrise.push({
-            ref_article: barCode,
-            type: DemandeLivraisonArticlesPage.MOUVEMENT_TRACA_PRISE,
-            operateur: this.operator,
-            ref_emplacement: this.emplacement.label,
-            finished: 0,
-            fromStock: Number(this.fromStock),
-            ...(typeof quantity === 'number' ? {quantity} : {}),
-            date: moment().format()
+    private presentAlertToDeleteDemande(): void {
+        this.alertPresented = true;
+        from(this.alertController.create({
+            header: 'Confirmation',
+            cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
+            message: 'Êtes-vous sur de vouloir supprimer cette demande de livraison ?',
+            buttons: [
+                {
+                    text: 'Confirmer',
+                    cssClass: 'alert-success',
+                    handler: () => {
+                        this.alertPresented = false;
+                        this.deleteDemande();
+                    }
+                },
+                {
+                    text: 'Annuler',
+                    cssClass: 'alert-danger',
+                    role: 'cancel',
+                    handler: () => {
+                        this.alertPresented = false;
+                        return null;
+                    }
+                }
+            ]
+        })).subscribe((alert: HTMLIonAlertElement) => {
+            alert.present();
         });
-        this.setPackOnLocationHidden(barCode, true);
-        this.refreshListComponent();
-        this.changeDetectorRef.detectChanges();
-    }
-
-    private refreshListComponent(): void {
-        const {header: listTakingHeader, body: listTakingBody} = this.tracaListFactory.createListConfig(
-            this.colisPrise,
-            TracaListFactoryService.LIST_TYPE_TAKING_MAIN,
-            {
-                objectLabel: this.objectLabel,
-                location: this.emplacement,
-                validate: () => this.finishTaking(),
-                removeItem: TracaListFactoryService.CreateRemoveItemFromListHandler(this.colisPrise, undefined, (barCode) => {
-                    this.setPackOnLocationHidden(barCode, false);
-                    this.refreshListComponent();
-                }),
-                removeConfirmationMessage: 'Êtes-vous sur de vouloir supprimer cet élément ?'
-            }
-        );
-        this.listTakingHeader = listTakingHeader;
-        this.listTakingBody = listTakingBody;
-
-        const {header: listPacksOnLocationHeader, body: listPacksOnLocationBody} = this.tracaListFactory.createListConfig(
-            this.currentPacksOnLocation.filter(({hidden}) => !hidden),
-            TracaListFactoryService.LIST_TYPE_TAKING_SUB,
-            {
-                objectLabel: this.objectLabel,
-                uploadItem: ({object}) => {
-                    this.testIfBarcodeEquals(object.value, true);
-                }
-            }
-        );
-
-        this.listPacksOnLocationHeader = listPacksOnLocationHeader;
-        this.listPacksOnLocationBody = listPacksOnLocationBody;
 
     }
 
-    private init(): void {
-        this.loading = true;
-        this.apiLoading = false;
-        this.listTakingBody = [];
-        this.colisPrise = [];
-        this.currentPacksOnLocation = [];
-        this.colisPriseAlreadySaved = [];
-    }
-
-    private existsOnLocation(barCode: string): Observable<number|boolean> {
-        return this.apiService
-            .requestApi('get', ApiService.GET_ARTICLES, {
-                params: {
-                    barCode,
-                    location: this.emplacement.label
-                }
-            })
+    private deleteDemande(): void {
+        this.loadingPresented = true;
+        zip(
+            this.loadingService.presentLoading(),
+            this.sqliteService.deleteBy('demande_livraison', this.demandeLivraisonId),
+            this.deleteSavedArticleInDemande()
+        )
             .pipe(
-                map((res) => (
-                    res
-                    && res.success
-                    && res.articles
-                    && (res.articles.length > 0)
-                    && res.articles[0]
-                    && res.articles[0].quantity
-                ))
-            );
+                flatMap(([loading]: [HTMLIonLoadingElement, any, any]) => from(loading.dismiss()))
+            )
+            .subscribe(() => {
+                this.loadingPresented = false;
+                this.popPage();
+            });
     }
 
-    private setPackOnLocationHidden(barCode: string, hidden: boolean): void {
-        if (barCode) {
-            const trackingIndex = this.currentPacksOnLocation.findIndex(({ref_article}) => (ref_article === barCode));
-            if (trackingIndex > -1) {
-                this.currentPacksOnLocation[trackingIndex].hidden = hidden;
+    private popPage() {
+        this.navService.pop().subscribe(() => {
+            if (!this.isUpdate) {
+                this.navService.pop();
             }
-        }
+        });
     }
 
-    private processCheckBarCode(barCode: string, isManualAdd: boolean, quantity: boolean|number = true) {
-        this.barcodeCheckLoading = false;
-        if (quantity) {
-            if (this.colisPrise &&
-                (
-                    this.colisPrise.some((colis) => (colis.ref_article === barCode)) ||
-                    this.colisPriseAlreadySaved.some((colis) => (colis.ref_article === barCode))
-                )) {
-                this.toastService.presentToast('Cette prise a déjà été effectuée');
-            }
-            else {
-                if (isManualAdd || !this.fromStock) {
-                    this.saveMouvementTraca(barCode, quantity);
+    private createBodyConfig(articles: Array<DemandeLivraisonArticle>): Array<ListPanelItemConfig> {
+        return articles.map((article: DemandeLivraisonArticle, index: number) => ({
+            infos: {
+                reference: {
+                    label: 'Article',
+                    value: article.reference
+                },
+                label: {
+                    label: 'Libellé',
+                    value: article.label
+                },
+                barCode: {
+                    label: 'Code barre',
+                    value: article.bar_code
+                },
+                quantity: {
+                    label: 'Quantité',
+                    value: article.quantity_to_pick ? String(article.quantity_to_pick) : '0'
+                },
+                ...(
+                    article.location_label
+                    ? {
+                        location: {
+                            label: 'Emplacement',
+                            value: article.location_label
+                        }
+                    }
+                : {}),
+                management: {
+                    label: 'Gestion',
+                    value: (
+                        article.type_quantity === 'reference' ? 'Par référence' :
+                        article.type_quantity === 'article' ? 'Par article' :
+                        article.type_quantity
+                    )
                 }
-                else {
-                    this.footerScannerComponent.unsubscribeZebraScan();
-                    const quantitySuffix = (typeof quantity === 'number')
-                        ? ` en quantité de ${quantity}`
-                        : '';
-                    from(this.alertController
-                        .create({
-                            header: `Prise de ${barCode}${quantitySuffix}`,
-                            buttons: [
-                                {
-                                    text: 'Annuler',
-                                    handler: () => {
-                                        this.footerScannerComponent.fireZebraScan();
-                                    }
-                                },
-                                {
-                                    text: 'Confirmer',
-                                    handler: () => {
-                                        this.saveMouvementTraca(barCode, quantity);
-                                        this.footerScannerComponent.fireZebraScan();
-                                    },
-                                    cssClass: 'alert-success'
-                                }
-                            ]
-                        }))
-                        .subscribe((alert: HTMLIonAlertElement) => {
-                            alert.present();
-                        });
+            },
+            pressAction: () => {
+                this.selectArticleQuantity(article);
+            },
+            rightIcon: {
+                name: 'trash.svg',
+                color: 'danger',
+                action: () => {
+                    this.removeArticleFromSelected(index);
                 }
-            }
-        }
-        else {
-            this.toastService.presentToast('Ce code barre n\'est pas présent sur cet emplacement');
-        }
+            },
+        }));
+    }
+
+    private removeArticleFromSelected(index: number): void {
+        this.selectedArticles.splice(index, 1);
+        this.headerConfig.info = this.getInfoHeaderConfig(this.selectedArticles.length);
+        this.bodyConfig = this.createBodyConfig(this.selectedArticles);
+    }
+
+    private deleteSavedArticleInDemande(): Observable<any> {
+        return this.sqliteService.deleteBy('article_in_demande_livraison', this.demandeLivraisonId, 'demande_id');
     }
 }

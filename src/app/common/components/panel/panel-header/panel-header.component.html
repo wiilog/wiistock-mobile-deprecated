@@ -10,16 +10,19 @@
 
     <div class="header-body">
         <div class="header-title">{{title}}</div>
-        <div *ngIf="subtitle" class="header-subtitle">{{subtitle}}</div>
+        <div *ngFor="let partSubTitle of _subtitle" class="header-subtitle">{{partSubTitle}}</div>
         <div *ngIf="info" class="header-info">{{info}}</div>
     </div>
 
     <!-- Right icon -->
-    <div class="list-header-icon" *ngIf="rightIcon">
-        <wii-icon [name]="rightIcon.name"
-                  [color]="rightIcon.color"
-                  [buttonWithoutRipple]="!rightIconHasAction"
-                  (action)="onRightIconClick()">
-        </wii-icon>
+    <div class="list-header-icon" *ngIf="rightIcons">
+        <div class="list-header-icon-wrapper"
+             *ngFor="let rightIcon of _rightIcons; let index = index">
+            <wii-icon [name]="rightIcon.name"
+                      [color]="rightIcon.color"
+                      [buttonWithoutRipple]="!rightIconHasAction(index)"
+                      (action)="onRightIconClick(index)">
+            </wii-icon>
+        </div>
     </div>
 </div>

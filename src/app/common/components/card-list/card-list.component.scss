@@ -44,6 +44,13 @@ $card-padding: 4px 12px !important;
         justify-content: space-between;
         align-items: center;
         color: $black;
+        .content {
+            .content-info {
+                color: $primary;
+                font-size: 90%;
+                font-style: italic;
+            }
+        }
 
         .actions {
             display: inline-flex;

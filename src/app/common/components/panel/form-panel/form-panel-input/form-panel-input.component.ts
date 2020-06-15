@@ -26,7 +26,7 @@ export class FormPanelInputComponent {
     public name: string;
 
     @Input()
-    public errors?: {[erroName: string]: string};
+    public errors?: {[errorName: string]: string};
 
     @Output()
     public valueChange: EventEmitter<string>;

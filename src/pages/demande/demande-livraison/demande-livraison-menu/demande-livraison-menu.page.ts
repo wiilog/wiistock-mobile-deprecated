@@ -10,6 +10,7 @@ import {MainHeaderService} from '@app/common/services/main-header.service';
 import {NavService} from '@app/common/services/nav.service';
 import {DemandeLivraisonHeaderPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-header/demande-livraison-header-routing.module';
 import {flatMap, map} from 'rxjs/operators';
+import {DemandeLivraisonArticlesPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-articles/demande-livraison-articles-routing.module';
 
 
 @Component({
@@ -44,59 +45,78 @@ export class DemandeLivraisonMenuPage {
             this.sqliteService.findAll('`demande_livraison_type`'),
             this.storageService.getOperateur()
         )
-            .pipe(flatMap(([demandesLivraison, types, operator]: [Array<DemandeLivraison>, Array<DemandeLivraisonType>, string]) => {
-                const locationIdsJoined = demandesLivraison
-                    .map(({location_id}) => location_id)
-                    .join(', ');
-                return (locationIdsJoined.length > 0
-                    ? this.sqliteService
-                        .findBy('emplacements', [`WHERE id IN (${locationIdsJoined})`])
-                        .pipe(
-                            flatMap((locations) => (
-                                locations.reduce((acc, {id, label}) => ({
-                                    ...acc,
-                                    [id]: label
-                                }), {})
-                            )),
-                    )
-                    : of({}))
-                        .pipe(
-                            map((locationsConverter) => ([
-                                demandesLivraison,
-                                types.reduce((acc, {id, label}) => ({
-                                    ...acc,
-                                    [id]: label
-                                }), {}),
-                                operator,
-                                locationsConverter
-                            ]))
-                        )
-            }))
-        .subscribe(([demandesLivraison, types, operator, locationsConverter]: [Array<DemandeLivraison>, {[id: number]: string}, string, {[id: number]: string}]) => {
+            .pipe(
+                flatMap(([demandesLivraison, types, operator]: [Array<DemandeLivraison>, Array<DemandeLivraisonType>, string]) => {
+                    const locationIdsJoined = demandesLivraison
+                        .map(({location_id}) => location_id)
+                        .filter(Boolean)
+                        .join(', ');
+                    return (locationIdsJoined.length > 0
+                        ? this.sqliteService.findBy('emplacement', [`id IN (${locationIdsJoined})`])
+                        : of([]))
+                            .pipe(
+                                map((locations) => ([
+                                    demandesLivraison,
+                                    types.reduce((acc, {id, label}) => ({
+                                        ...acc,
+                                        [id]: label
+                                    }), {}),
+                                    operator,
+                                    locations.reduce((acc, {id, label}) => ({
+                                        ...acc,
+                                        [id]: label
+                                    }), {})
+                                ]))
+                            )
+                }),
+                flatMap(([demandesLivraison, typesConverter, operator, locationsConverter]: [Array<DemandeLivraison>, {[id: number]: string}, string, {[id: number]: string}, {[id: number]: number}]) => {
+                    return (demandesLivraison.length > 0
+                        ? this.sqliteService.countArticlesByDemandeLivraison(demandesLivraison.map(({id}) => id))
+                        : of({}))
+                            .pipe(
+                                map((counters) => ([
+                                    demandesLivraison,
+                                    typesConverter,
+                                    operator,
+                                    locationsConverter,
+                                    counters
+                                ]))
+                            )
+                })
+            )
+        .subscribe(([demandesLivraison, typesConverter, operator, locationsConverter, articlesCounters]: [Array<DemandeLivraison>, {[id: number]: string}, string, {[id: number]: string}, {[id: number]: number}]) => {
             this.demandesLivraison = demandesLivraison;
-            this.demandesListConfig = this.demandesLivraison.map((demande: DemandeLivraison) => ({
-                title: {
-                    label: 'Demandeur',
-                    value: operator
-                },
-                content: [
-                    {
-                        label: 'Emplacement',
-                        value: locationsConverter[demande.location_id] || ''
+            this.demandesListConfig = this.demandesLivraison.map((demande: DemandeLivraison) => {
+                const articlesCounter = articlesCounters[demandesLivraison.id] || 0;
+                const sArticle = articlesCounter > 1 ? 's' : '';
+                return ({
+                    title: {
+                        label: 'Demandeur',
+                        value: operator
                     },
-                    {
-                        label: 'Type',
-                        value: types[demande.type_id] || ''
-                    },
-                    {
-                        label: 'Commentaire',
-                        value: demande.comment
+                    content: [
+                        {
+                            label: 'Emplacement',
+                            value: locationsConverter[demande.location_id] || ''
+                        },
+                        {
+                            label: 'Type',
+                            value: typesConverter[demande.type_id] || ''
+                        },
+                        {
+                            label: 'Commentaire',
+                            value: demande.comment
+                        }
+                    ],
+                    info: `Non synchronisée, ${articlesCounter} article${sArticle} scanné${sArticle}`,
+                    action: () => {
+                        this.navService.push(DemandeLivraisonArticlesPageRoutingModule.PATH, {
+                            demandeLivraisonId: demande.id,
+                            isUpdate: true
+                        });
                     }
-                ],
-                action: () => {
-                    // this.navService.push(LivraisonArticlesPageRoutingModule.PATH, {livraison});
-                }
-            }));
+                });
+            });
 
             this.hasLoaded = true;
             this.refreshSubTitle();
@@ -105,7 +125,7 @@ export class DemandeLivraisonMenuPage {
 
     public refreshSubTitle(): void {
         const demandeLivraisonsLength = (this.demandesLivraison || []).length;
-        this.mainHeaderService.emitSubTitle(`${demandeLivraisonsLength === 0 ? 'Aucune' : demandeLivraisonsLength} livraison${demandeLivraisonsLength > 1 ? 's' : ''}`)
+        this.mainHeaderService.emitSubTitle(`${demandeLivraisonsLength === 0 ? 'Aucune' : demandeLivraisonsLength} demande${demandeLivraisonsLength > 1 ? 's' : ''}`)
     }
 
     public onMenuClick(): void {

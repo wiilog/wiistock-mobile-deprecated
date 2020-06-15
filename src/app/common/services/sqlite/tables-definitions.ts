@@ -1,7 +1,6 @@
 import {TableDefinition} from '@app/common/services/sqlite/table-definition';
-import {flatMap} from 'rxjs/operators';
 
-export const TableDefinitions: Array<TableDefinition> = [
+export const TablesDefinitions: Array<TableDefinition> = [
     {
         name: 'emplacement',
         attributes: {
@@ -204,7 +203,8 @@ export const TableDefinitions: Array<TableDefinition> = [
         name: 'article_in_demande_livraison',
         attributes: {
             demande_id: 'INTEGER',
-            article_id: 'INTEGER'
+            article_id: 'INTEGER',
+            quantity_to_pick: 'INTEGER'
         }
     },
     {
@@ -220,10 +220,10 @@ export const TableDefinitions: Array<TableDefinition> = [
             id: 'INTEGER PRIMARY KEY',
             label: 'VARCHAR(255)',
             reference: 'VARCHAR(255)',
-            barCode: 'VARCHAR(255)',
-            typeQuantity: 'VARCHAR(255)',
-            locationLabel: 'VARCHAR(255)',
-            availableQuantity: 'INTEGER'
+            bar_code: 'VARCHAR(255)',
+            type_quantity: 'VARCHAR(255)',
+            location_label: 'VARCHAR(255)',
+            available_quantity: 'INTEGER'
         }
     }
 ];

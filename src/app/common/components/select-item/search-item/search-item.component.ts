@@ -42,23 +42,30 @@ export class SearchItemComponent implements OnInit {
         [SelectItemTypeEnum.ARTICLE_TO_PICK]: {
             label: 'barcode',
             valueField: 'barcode',
-            templateIndex: 'article',
+            templateIndex: 'article-prepa',
             databaseTable: 'article_prepa_by_ref_article',
             placeholder: 'Sélectionner l\'article'
         },
         [SelectItemTypeEnum.LOCATION]: {
             label: 'label',
             valueField: 'id',
-            templateIndex: 'location',
+            templateIndex: 'default',
             databaseTable: 'emplacement',
             placeholder: 'Sélectionner un emplacement'
         },
         [SelectItemTypeEnum.DEMANDE_LIVRAISON_TYPE]: {
             label: 'label',
             valueField: 'id',
-            templateIndex: 'type-dl',
+            templateIndex: 'default',
             databaseTable: 'demande_livraison_type',
             placeholder: 'Sélectionner un type'
+        },
+        [SelectItemTypeEnum.DEMANDE_LIVRAISON_ARTICLES]: {
+            label: 'bar_code',
+            valueField: 'bar_code',
+            templateIndex: 'article-demande',
+            databaseTable: 'demande_livraison_article',
+            placeholder: 'Sélectionner un article'
         }
     }
 

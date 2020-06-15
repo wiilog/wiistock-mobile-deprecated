@@ -130,7 +130,9 @@ export class DemandeLivraisonHeaderPage {
                         comment
                     };
 
-                    this.navService.push(DemandeLivraisonArticlesPageRoutingModule.PATH)
+                    this.navService.push(DemandeLivraisonArticlesPageRoutingModule.PATH, {
+                        demandeLivraisonId: insertId
+                    })
                 });
         }
     }
