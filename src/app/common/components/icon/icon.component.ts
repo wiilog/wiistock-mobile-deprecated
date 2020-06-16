@@ -31,7 +31,7 @@ export class IconComponent {
     public buttonWithoutRipple?: boolean;
 
     @Output()
-    public action: EventEmitter<any>;
+    public action: EventEmitter<Event>;
 
     public svgObject$: Observable<SafeHtml>;
 
@@ -44,7 +44,7 @@ export class IconComponent {
     public constructor(private httpClient: HttpClient,
                        private sanitizer: DomSanitizer) {
         this.id = ++IconComponent.IconCounter;
-        this.action = new EventEmitter<any>();
+        this.action = new EventEmitter<Event>();
         this.domParser = new DOMParser();
     }
 

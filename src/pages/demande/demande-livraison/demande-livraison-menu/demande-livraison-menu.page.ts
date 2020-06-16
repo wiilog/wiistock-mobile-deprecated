@@ -87,7 +87,7 @@ export class DemandeLivraisonMenuPage {
         .subscribe(([demandesLivraison, typesConverter, operator, locationsConverter, articlesCounters]: [Array<DemandeLivraison>, {[id: number]: string}, string, {[id: number]: string}, {[id: number]: number}]) => {
             this.demandesLivraison = demandesLivraison;
             this.demandesListConfig = this.demandesLivraison.map((demande: DemandeLivraison) => {
-                const articlesCounter = articlesCounters[demandesLivraison.id] || 0;
+                const articlesCounter = articlesCounters[demande.id] || 0;
                 const sArticle = articlesCounter > 1 ? 's' : '';
                 return ({
                     title: {
@@ -110,10 +110,17 @@ export class DemandeLivraisonMenuPage {
                     ],
                     info: `Non synchronisée, ${articlesCounter} article${sArticle} scanné${sArticle}`,
                     action: () => {
-                        this.navService.push(DemandeLivraisonArticlesPageRoutingModule.PATH, {
-                            demandeLivraisonId: demande.id,
-                            isUpdate: true
-                        });
+                        this.navService
+                            .push(DemandeLivraisonHeaderPageRoutingModule.PATH, {
+                                demandeId: demande.id,
+                                isUpdate: true
+                            })
+                            .subscribe(() => {
+                                this.navService.push(DemandeLivraisonArticlesPageRoutingModule.PATH, {
+                                    demandeId: demande.id,
+                                    isUpdate: true
+                                });
+                            });
                     }
                 });
             });
@@ -134,6 +141,7 @@ export class DemandeLivraisonMenuPage {
 
     public onRefreshClick(): void {
         this.fabListActivated = false;
+        // TODO
     }
 
     public onAddClick(): void {

@@ -2,6 +2,7 @@
 
 :host {
     display: block;
+    position: relative;
 
     &:not(.transparent-panel-header) {
         background-color: $white;
@@ -42,6 +43,16 @@
             wii-icon {
                 width: 3rem;
                 height: 3rem;
+                display: inline-block;
+            }
+
+            .list-header-icon-wrapper:not(:first-child) {
+                text-align: center;
+                wii-icon {
+                    margin-top: $spacer;
+                    width: 1.7rem;
+                    height: 1.7rem;
+                }
             }
 
             &:last-child {

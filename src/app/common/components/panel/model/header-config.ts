@@ -6,6 +6,6 @@ export interface HeaderConfig {
     title: string;
     subtitle?: string|Array<string>;
     info?: string;
-    action?: () => void;
+    action?: (event: Event) => void;
     rightIcon?: IconConfig|Array<IconConfig>;
 }

@@ -1,7 +1,9 @@
 <div class="card-list" *ngIf="config">
     <div class="list-icon-container"
          *ngIf="listIconName">
-        <wii-icon [name]="listIconName"></wii-icon>
+        <wii-icon [name]="listIconName"
+                  [color]="color">
+        </wii-icon>
     </div>
 
     <ion-card *ngFor="let cardConfig of config"

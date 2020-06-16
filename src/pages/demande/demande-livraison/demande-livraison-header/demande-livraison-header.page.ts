@@ -10,6 +10,7 @@ import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
 import {ToastService} from '@app/common/services/toast.service';
 import {DemandeLivraisonArticlesPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-articles/demande-livraison-articles-routing.module';
+import {map} from 'rxjs/operators';
 
 
 @Component({
@@ -120,8 +121,14 @@ export class DemandeLivraisonHeaderPage {
         }
         else {
             const {type_id, location_id, comment} = this.formPanelComponent.values;
-            this.sqliteService
-                .insert('demande_livraison', {type_id, location_id, comment})
+            const values = {type_id, location_id, comment};
+            (
+                this.isUpdate
+                    ? this.sqliteService
+                        .update('demande_livraison', values, [`id = ${this.demandeLivraisonToUpdate.id}`])
+                        .pipe(map(() => this.demandeLivraisonToUpdate.id))
+                    : this.sqliteService.insert('demande_livraison', values)
+            )
                 .subscribe((insertId) => {
                     this.demandeLivraisonToUpdate = {
                         id: insertId,
@@ -129,10 +136,10 @@ export class DemandeLivraisonHeaderPage {
                         location_id,
                         comment
                     };
-
                     this.navService.push(DemandeLivraisonArticlesPageRoutingModule.PATH, {
-                        demandeLivraisonId: insertId
-                    })
+                        demandeId: insertId,
+                        isUpdate: this.isUpdate
+                    });
                 });
         }
     }

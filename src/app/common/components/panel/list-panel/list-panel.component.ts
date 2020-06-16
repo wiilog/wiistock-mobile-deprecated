@@ -19,4 +19,10 @@ export class ListPanelComponent {
 
     @Input()
     public boldValues: Array<string>;
+
+    public onHeaderClicked(event: Event): void {
+        if (this.header && this.header.action) {
+            this.header.action(event);
+        }
+    }
 }

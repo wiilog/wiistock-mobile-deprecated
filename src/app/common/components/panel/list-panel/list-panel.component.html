@@ -1,9 +1,11 @@
 <wii-panel-header *ngIf="header"
-                 [leftIcon]="header.leftIcon"
-                 [title]="header.title"
-                 [subtitle]="header.subtitle"
-                 [info]="header.info"
-                  [rightIcons]="header.rightIcon">
+                  [leftIcon]="header.leftIcon"
+                  [title]="header.title"
+                  [subtitle]="header.subtitle"
+                  [info]="header.info"
+                  [rightIcons]="header.rightIcon"
+                  [fireAction]="!!header.action"
+                  (action)="onHeaderClicked($event)">
 </wii-panel-header>
 
 <wii-list-panel-item *ngFor="let object of body"

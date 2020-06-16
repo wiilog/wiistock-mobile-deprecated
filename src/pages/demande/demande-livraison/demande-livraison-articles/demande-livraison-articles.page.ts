@@ -48,7 +48,7 @@ export class DemandeLivraisonArticlesPage implements CanLeave {
 
     private selectedArticles: Array<DemandeLivraisonArticle>;
 
-    private demandeLivraisonId: number;
+    private demandeId: number;
 
     private alertPresented: boolean;
     private loadingPresented: boolean;
@@ -79,7 +79,7 @@ export class DemandeLivraisonArticlesPage implements CanLeave {
         this.selectItemComponent.fireZebraScan();
 
         const navParams = this.navService.getCurrentParams();
-        this.demandeLivraisonId = navParams.get('demandeLivraisonId');
+        this.demandeId = navParams.get('demandeId');
         this.isUpdate = Boolean(navParams.get('isUpdate'));
 
         if (!this.pageAlreadyInit) {
@@ -87,7 +87,7 @@ export class DemandeLivraisonArticlesPage implements CanLeave {
             this.pageAlreadyInit = true;
             this.loading = true;
             this.sqliteService
-                .findOneById('demande_livraison', this.demandeLivraisonId)
+                .findOneById('demande_livraison', this.demandeId)
                 .pipe(
                     filter(Boolean),
                     flatMap((demandeLivraison: DemandeLivraison) => (
@@ -155,9 +155,9 @@ export class DemandeLivraisonArticlesPage implements CanLeave {
         const headerConfig = {
             title: 'Demande',
             subtitle,
-            // TODO action on click
-            // si isUpdate => push
-            // sinon pop
+            action: () => {
+                this.navService.pop();
+            },
             info: this.getInfoHeaderConfig(articlesCounter),
             leftIcon: {
                 name: 'demande.svg',
@@ -175,7 +175,6 @@ export class DemandeLivraisonArticlesPage implements CanLeave {
                     name: 'trash.svg',
                     color: 'danger' as IconColor,
                     action: () => {
-                        console.log('ON PASSE ICI 2')
                         this.presentAlertToDeleteDemande();
                     }
                 }
@@ -191,20 +190,20 @@ export class DemandeLivraisonArticlesPage implements CanLeave {
             this.deleteSavedArticleInDemande()
         )
             .pipe(
-                flatMap(([loading]: [HTMLIonLoadingElement]) => (
+                flatMap(([loading]: [HTMLIonLoadingElement, any]) => (
                     this.selectedArticles.length > 0
                         ? zip(
                             ...(this.selectedArticles.map(({quantity_to_pick, id}) => (
                                 this.sqliteService.insert('article_in_demande_livraison', {
                                     article_id: id,
-                                    demande_id: this.demandeLivraisonId,
+                                    demande_id: this.demandeId,
                                     quantity_to_pick
                                 })
                             )))
                         ).pipe(map(() => loading))
                         : of(loading)
                 )),
-                flatMap((loading: [HTMLIonLoadingElement]) => from(loading.dismiss()))
+                flatMap((loading: HTMLIonLoadingElement) => from(loading.dismiss()))
             )
             .subscribe(() => {
                 this.loadingPresented = false;
@@ -252,7 +251,7 @@ export class DemandeLivraisonArticlesPage implements CanLeave {
         this.loadingPresented = true;
         zip(
             this.loadingService.presentLoading(),
-            this.sqliteService.deleteBy('demande_livraison', this.demandeLivraisonId),
+            this.sqliteService.deleteBy('demande_livraison', this.demandeId),
             this.deleteSavedArticleInDemande()
         )
             .pipe(
@@ -265,11 +264,11 @@ export class DemandeLivraisonArticlesPage implements CanLeave {
     }
 
     private popPage() {
-        this.navService.pop().subscribe(() => {
-            if (!this.isUpdate) {
+        this.navService
+            .pop()
+            .subscribe(() => {
                 this.navService.pop();
-            }
-        });
+            });
     }
 
     private createBodyConfig(articles: Array<DemandeLivraisonArticle>): Array<ListPanelItemConfig> {
@@ -329,6 +328,6 @@ export class DemandeLivraisonArticlesPage implements CanLeave {
     }
 
     private deleteSavedArticleInDemande(): Observable<any> {
-        return this.sqliteService.deleteBy('article_in_demande_livraison', this.demandeLivraisonId, 'demande_id');
+        return this.sqliteService.deleteBy('article_in_demande_livraison', this.demandeId, 'demande_id');
     }
 }
