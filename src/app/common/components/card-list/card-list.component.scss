@@ -44,11 +44,19 @@ $card-padding: 4px 12px !important;
         justify-content: space-between;
         align-items: center;
         color: $black;
+
         .content {
-            .content-info {
-                color: $primary;
+            .content-info,
+            .content-error {
                 font-size: 90%;
                 font-style: italic;
+
+                &.content-info {
+                    color: $primary;
+                }
+                &.content-error {
+                    color: $danger;
+                }
             }
         }
 

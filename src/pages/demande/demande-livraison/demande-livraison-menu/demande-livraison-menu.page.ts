@@ -11,6 +11,8 @@ import {NavService} from '@app/common/services/nav.service';
 import {DemandeLivraisonHeaderPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-header/demande-livraison-header-routing.module';
 import {flatMap, map} from 'rxjs/operators';
 import {DemandeLivraisonArticlesPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-articles/demande-livraison-articles-routing.module';
+import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
+import {ToastService} from '@app/common/services/toast.service';
 
 
 @Component({
@@ -29,12 +31,28 @@ export class DemandeLivraisonMenuPage {
 
     public fabListActivated: boolean;
 
+    private demandeLivraisonData: {
+        typesConverter: {[id: number]: string};
+        operator: string;
+        locationsConverter: {[id: number]: string};
+        articlesCounters: {[id: number]: number};
+    };
+
     public constructor(private sqliteService: SqliteService,
                        private navService: NavService,
                        private mainHeaderService: MainHeaderService,
+                       private localDataManager: LocalDataManagerService,
+                       private toastService: ToastService,
                        private storageService: StorageService) {
         this.hasLoaded = false;
         this.fabListActivated = false
+
+        this.demandeLivraisonData = {
+            typesConverter: {},
+            operator: undefined,
+            locationsConverter: {},
+            articlesCounters: {}
+        };
     }
 
     public ionViewWillEnter(): void {
@@ -43,14 +61,11 @@ export class DemandeLivraisonMenuPage {
         this.storageService.getOperatorId()
             .pipe(
                 flatMap((userId) => zip(
-                    this.sqliteService.findBy('`demande_livraison`'),
                     this.sqliteService.findBy('`demande_livraison`', [`user_id = ${userId}`]),
                     this.sqliteService.findAll('`demande_livraison_type`'),
                     this.storageService.getOperator()
                 )),
-                flatMap(([a, demandesLivraison, types, operator]: [Array<DemandeLivraison>, Array<DemandeLivraison>, Array<DemandeLivraisonType>, string]) => {
-                    console.log('1 --> ', a)
-                    console.log('2 --> ', demandesLivraison)
+                flatMap(([demandesLivraison, types, operator]: [Array<DemandeLivraison>, Array<DemandeLivraisonType>, string]) => {
                     const locationIdsJoined = demandesLivraison
                         .map(({location_id}) => location_id)
                         .filter(Boolean)
@@ -89,48 +104,14 @@ export class DemandeLivraisonMenuPage {
                 })
             )
         .subscribe(([demandesLivraison, typesConverter, operator, locationsConverter, articlesCounters]: [Array<DemandeLivraison>, {[id: number]: string}, string, {[id: number]: string}, {[id: number]: number}]) => {
-            this.demandesLivraison = demandesLivraison;
-            this.demandesListConfig = this.demandesLivraison.map((demande: DemandeLivraison) => {
-                const articlesCounter = articlesCounters[demande.id] || 0;
-                const sArticle = articlesCounter > 1 ? 's' : '';
-                return ({
-                    title: {
-                        label: 'Demandeur',
-                        value: operator
-                    },
-                    content: [
-                        {
-                            label: 'Emplacement',
-                            value: locationsConverter[demande.location_id] || ''
-                        },
-                        {
-                            label: 'Type',
-                            value: typesConverter[demande.type_id] || ''
-                        },
-                        {
-                            label: 'Commentaire',
-                            value: demande.comment
-                        }
-                    ],
-                    info: `Non synchronisée, ${articlesCounter} article${sArticle} scanné${sArticle}`,
-                    action: () => {
-                        this.navService
-                            .push(DemandeLivraisonHeaderPageRoutingModule.PATH, {
-                                demandeId: demande.id,
-                                isUpdate: true
-                            })
-                            .subscribe(() => {
-                                this.navService.push(DemandeLivraisonArticlesPageRoutingModule.PATH, {
-                                    demandeId: demande.id,
-                                    isUpdate: true
-                                });
-                            });
-                    }
-                });
-            });
+            this.demandeLivraisonData.typesConverter = typesConverter;
+            this.demandeLivraisonData.operator = operator;
+            this.demandeLivraisonData.locationsConverter = locationsConverter;
+            this.demandeLivraisonData.articlesCounters = articlesCounters;
+
+            this.refreshPageList(demandesLivraison);
 
             this.hasLoaded = true;
-            this.refreshSubTitle();
         });
     }
 
@@ -145,12 +126,76 @@ export class DemandeLivraisonMenuPage {
 
     public onRefreshClick(): void {
         this.fabListActivated = false;
-        // TODO
+        this.localDataManager.sendDemandesLivraisons().subscribe((data) => {
+            const nbSuccess = data.success.length;
+            const sSuccess = nbSuccess > 1 ? 's' : '';
+
+            const nbErrors = data.errors.length;
+            const sErrors = nbErrors > 1 ? 's' : '';
+
+            const messages = [
+                nbSuccess > 0 ? `${nbSuccess} demande${sSuccess} synchronisée${sSuccess}` : '',
+                nbErrors > 0 ? `${nbErrors} demande${sErrors} en erreur` : ''
+            ]
+                .filter(Boolean)
+                .join(', ');
+
+
+            this.refreshPageList(data.errors);
+            this.toastService.presentToast(messages);
+        });
     }
 
     public onAddClick(): void {
         this.navService.push(DemandeLivraisonHeaderPageRoutingModule.PATH, {
             isCreation: true
         });
+    }
+
+    private refreshPageList(demandesLivraison: Array<DemandeLivraison>) {
+        const {articlesCounters, operator, locationsConverter, typesConverter} = this.demandeLivraisonData;
+
+        this.demandesLivraison = demandesLivraison;
+        this.demandesListConfig = this.demandesLivraison.map((demande: DemandeLivraison): CardListConfig => {
+            const articlesCounter = articlesCounters[demande.id] || 0;
+            const sArticle = articlesCounter > 1 ? 's' : '';
+            return {
+                title: {
+                    label: 'Demandeur',
+                    value: operator
+                },
+                content: [
+                    {
+                        label: 'Emplacement',
+                        value: locationsConverter[demande.location_id] || ''
+                    },
+                    {
+                        label: 'Type',
+                        value: typesConverter[demande.type_id] || ''
+                    },
+                    {
+                        label: 'Commentaire',
+                        value: demande.comment
+                    }
+                ],
+                info: `Non synchronisée, ${articlesCounter} article${sArticle} scanné${sArticle}`,
+                error: demande.last_error,
+                action: () => {
+                    this.navService
+                        .push(DemandeLivraisonHeaderPageRoutingModule.PATH, {
+                            demandeId: demande.id,
+                            isUpdate: true
+                        })
+                        .subscribe(() => {
+                            this.navService.push(DemandeLivraisonArticlesPageRoutingModule.PATH, {
+                                demandeId: demande.id,
+                                isUpdate: true
+                            });
+                        });
+                }
+            };
+        });
+
+        this.refreshSubTitle();
     }
 }

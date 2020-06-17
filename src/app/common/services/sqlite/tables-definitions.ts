@@ -198,7 +198,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             location_id: 'integer',
             comment: 'VARCHAR(255)',
             type_id: 'integer',
-            user_id: 'integer'
+            user_id: 'integer',
+            last_error: 'VARCHAR(255)'
         }
     },
     {

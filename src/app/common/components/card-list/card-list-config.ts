@@ -8,4 +8,6 @@ export interface CardListConfig {
         value: string;
     }>;
     action?: () => void;
+    info?: string;
+    error?: string;
 }

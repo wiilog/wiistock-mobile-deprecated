@@ -19,6 +19,7 @@
                     <span class="content-value">{{ contentLine.value }}</span>
                 </p>
                 <p *ngIf="cardConfig.info" class="content-info">{{cardConfig.info}}</p>
+                <p *ngIf="cardConfig.error" class="content-error">{{cardConfig.error}}</p>
             </div>
             <div class="actions"
                  *ngIf="cardConfig.action">

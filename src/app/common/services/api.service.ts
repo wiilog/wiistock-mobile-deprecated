@@ -27,6 +27,8 @@ export class ApiService {
     public static readonly NEW_EMP: string = '/emplacement';
     public static readonly GET_ARTICLES: string = '/articles';
     public static readonly GET_TRACKING_DROPS: string = '/tracking-drops';
+    public static readonly POST_DEMANDE_LIVRAISON: string = '/valider-dl';
+    public static readonly GET_DEMANDE_LIVRAISON_DATA: string = '/demande-livraison-data';
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'

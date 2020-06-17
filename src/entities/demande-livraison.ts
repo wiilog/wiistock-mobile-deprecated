@@ -3,5 +3,6 @@ export interface DemandeLivraison {
     user_id: number;
     type_id: number;
     location_id: number;
-    comment: string;
+    comment?: string;
+    last_error?: string;
 }

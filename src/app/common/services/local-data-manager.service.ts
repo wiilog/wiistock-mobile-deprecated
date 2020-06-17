@@ -12,6 +12,8 @@ import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {AlertController} from '@ionic/angular';
 import {flatMap, map} from 'rxjs/operators';
 import {AlertManagerService} from '@app/common/services/alert-manager.service';
+import {DemandeLivraison} from '@entities/demande-livraison';
+import {DemandeLivraisonArticleSelected} from '@entities/demande-livraison-article-selected';
 
 
 type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies';
@@ -440,6 +442,109 @@ export class LocalDataManagerService {
                     return res$;
                 })
             );
+    }
+
+    /**
+     * Send all draft to the API
+     * Return observable with the list of id in success and DemandeLivraison errors
+     */
+    public sendDemandesLivraisons(): Observable<{success: Array<number>, errors: Array<DemandeLivraison>}> {
+        type DemandeForApi = {
+            type: number;
+            destination: number;
+            commentaire: string;
+            references: Array<{barCode: string; 'quantity-to-pick': number}>;
+        };
+
+        return zip(
+            this.sqliteService.findAll('demande_livraison'),
+            this.sqliteService.findAll('article_in_demande_livraison')
+        ).pipe(
+            // make data to send to the API
+            map(([demandeLivraison, articlesSelected]: [Array<DemandeLivraison>, Array<DemandeLivraisonArticleSelected>]) => {
+                return demandeLivraison.reduce((acc: Array<{apiData: DemandeForApi, demande: DemandeLivraison}>, demande: DemandeLivraison) => {
+                    const articleForDemande = articlesSelected.filter(({demande_id}) => (demande_id === demande.id));
+
+                    if (articleForDemande.length > 0) {
+                        acc.push({
+                            apiData: {
+                                type: demande.type_id,
+                                destination: demande.location_id,
+                                commentaire: demande.comment,
+                                references: articleForDemande.map(({article_bar_code: barCode, quantity_to_pick}) => ({
+                                    barCode,
+                                    'quantity-to-pick': quantity_to_pick
+                                })),
+                            },
+                            demande
+                        });
+                    }
+
+                    return acc;
+                }, []);
+            }),
+            // send all demande to API
+            flatMap((data: Array<{apiData: DemandeForApi, demande: DemandeLivraison}>) => (
+                data.length > 0
+                    ? zip(
+                        ...(data.map(({apiData, demande}) => (
+                            this.apiService.requestApi('post', ApiService.POST_DEMANDE_LIVRAISON, {params: {demande: apiData}}).pipe(map(({success, nomadMessage}) => ({
+                                success,
+                                message: nomadMessage,
+                                demande
+                            })))
+                        )))
+                    )
+                    : of([])
+            )),
+            // sync
+            flatMap((data: Array<{success: boolean; message: string; demandeLivraison: DemandeLivraison}>) => {
+                const sortedData: {success: Array<number>, errors: Array<DemandeLivraison>} = data.reduce(
+                    (acc, {success, message, demandeLivraison}) => {
+                        if (success) {
+                            acc.success.push(demandeLivraison.id);
+                        }
+                        else {
+                            acc.errors.push({
+                                ...demandeLivraison,
+                                last_error: message
+                            } as DemandeLivraison);
+                        }
+                        return acc;
+                    },
+                    {success: [], errors: []}
+                );
+
+                return (sortedData.success.length > 0 && sortedData.errors.length > 0)
+                    ? zip(
+                        ...(
+                            sortedData.success.length > 0
+                                ? [
+                                    this.sqliteService.deleteBy('demande_livraison', [`id IN (${sortedData.success.join(',')})`]),
+                                    this.sqliteService.deleteBy('article_in_demande_livraison', [`demande_id IN (${sortedData.success.join(',')})`])
+                                ]
+                                : []
+                        ),
+                        ...(
+                            sortedData.errors.length > 0
+                                ? sortedData.errors.map(({id, last_error}) => (
+                                    this.sqliteService.update('demande_livraison', {last_error}, [`id = ${id}`])
+                                ))
+                                : []
+                        )
+                    ).pipe(map(() => sortedData))
+                    : of (sortedData)
+            }),
+            // we sync DL data
+            flatMap((serviceRes) => (
+                this.apiService
+                    .requestApi('get', ApiService.GET_DEMANDE_LIVRAISON_DATA)
+                    .pipe(
+                        flatMap(({data}) => this.sqliteService.importDemandesLivraisonData(data)),
+                        map(() => serviceRes)
+                    )
+            ))
+        );
     }
 
     private presentAlertError(title: string,
