@@ -16,6 +16,7 @@
                      (itemChange)="selectArticleQuantity($event)"
                      [checkBarcodeValidity]="true"
                      [resetEmitter]="resetSelectItemEmitter$"
+                     [requestParams]="['to_delete IS NULL']"
                      [scanMode]="scannerMode">
     </wii-select-item>
 </div>

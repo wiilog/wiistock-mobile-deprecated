@@ -86,7 +86,7 @@ export class PrisePage implements CanLeave {
         this.fromStock = Boolean(navParams.get('fromStock'));
 
         zip(
-            this.storageService.getOperateur(),
+            this.storageService.getOperator(),
             this.sqliteService.getPrises(this.fromStock),
             (this.network.type !== 'none' && this.emplacement && !this.fromStock
                 ? this.apiService.requestApi('get', ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})

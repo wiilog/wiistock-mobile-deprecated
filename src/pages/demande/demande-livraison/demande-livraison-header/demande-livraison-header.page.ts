@@ -29,6 +29,8 @@ export class DemandeLivraisonHeaderPage {
     private isUpdate: boolean;
     private demandeLivraisonToUpdate?: DemandeLivraison;
 
+    private operatorId: number;
+
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
                        private navService: NavService,
@@ -47,11 +49,13 @@ export class DemandeLivraisonHeaderPage {
         this.formPanelComponent.fireZebraScan();
 
         zip(
+            this.storageService.getOperatorId(),
             this.isUpdate ? this.sqliteService.findOneById('`demande_livraison`', demandeId) : of(this.demandeLivraisonToUpdate),
-            this.storageService.getOperateur()
+            this.storageService.getOperator()
         )
-        .subscribe(([demandeLivraison, operator]: [DemandeLivraison|undefined, string]) => {
+        .subscribe(([operatorId, demandeLivraison, operator]: [number, DemandeLivraison|undefined, string]) => {
             this.demandeLivraisonToUpdate = demandeLivraison;
+            this.operatorId = operatorId;
             const {type_id: type, location_id: location, comment} = (demandeLivraison || {});
             this.formBodyConfig = [
                 {
@@ -71,7 +75,8 @@ export class DemandeLivraisonHeaderPage {
                     value: type,
                     inputConfig: {
                         required: true,
-                        searchType: SelectItemTypeEnum.DEMANDE_LIVRAISON_TYPE
+                        searchType: SelectItemTypeEnum.DEMANDE_LIVRAISON_TYPE,
+                        requestParams: ['to_delete IS NULL']
                     },
                     errors: {
                         required: 'Vous devez sélectionner un type'
@@ -121,7 +126,8 @@ export class DemandeLivraisonHeaderPage {
         }
         else {
             const {type_id, location_id, comment} = this.formPanelComponent.values;
-            const values = {type_id, location_id, comment};
+            const user_id = this.operatorId;
+            const values = {type_id, location_id, comment, user_id};
             (
                 this.isUpdate
                     ? this.sqliteService
@@ -132,9 +138,7 @@ export class DemandeLivraisonHeaderPage {
                 .subscribe((insertId) => {
                     this.demandeLivraisonToUpdate = {
                         id: insertId,
-                        type_id,
-                        location_id,
-                        comment
+                        ...values
                     };
                     this.navService.push(DemandeLivraisonArticlesPageRoutingModule.PATH, {
                         demandeId: insertId,

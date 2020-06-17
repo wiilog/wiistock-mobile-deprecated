@@ -15,7 +15,7 @@ export class UserDisconnectedGuard implements CanActivate {
 
     public canActivate(): Observable<UrlTree|boolean> {
         return zip(
-            this.storageService.getOperateur(),
+            this.storageService.getOperator(),
             this.storageService.getApiKey()
         ).pipe(
             map(([operator, apiKey]) => (

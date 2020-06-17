@@ -93,7 +93,7 @@ export class DeposePage {
                         `fromStock = ${Number(this.fromStock)}`
                     ]
                 ),
-                this.storageService.getOperateur()
+                this.storageService.getOperator()
             )
                 .subscribe(([colisPrise, operator]) => {
                     this.colisPrise = colisPrise;

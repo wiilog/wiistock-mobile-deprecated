@@ -199,7 +199,7 @@ export class LivraisonArticlesPage {
                     this.sqliteService
                         .updateArticleLivraisonQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite)
                         .pipe(
-                            flatMap(() => this.sqliteService.deleteBy('`article_livraison`', mouvement.id_article_livraison)),
+                            flatMap(() => this.sqliteService.deleteBy('`article_livraison`', [`id = ${mouvement.id_article_livraison}`])),
                             flatMap(() => this.sqliteService.findArticlesByLivraison(this.livraison.id))
                         )
                         .subscribe((articles) => {

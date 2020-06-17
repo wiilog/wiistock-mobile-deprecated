@@ -112,10 +112,10 @@ export class LoginPage {
                     .subscribe(
                         ({data, success}) => {
                             if (success) {
-                                const {apiKey, rights} = data;
+                                const {apiKey, rights, userId} = data;
                                 this.sqliteService
                                     .resetDataBase()
-                                    .pipe(flatMap(() => this.storageService.initStorage(apiKey, this.form.login, rights)))
+                                    .pipe(flatMap(() => this.storageService.initStorage(apiKey, this.form.login, userId, rights)))
                                     .subscribe(
                                         () => {
                                             this.form.password = '';

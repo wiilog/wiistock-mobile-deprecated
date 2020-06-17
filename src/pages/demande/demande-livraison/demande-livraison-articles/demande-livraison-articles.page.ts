@@ -95,7 +95,7 @@ export class DemandeLivraisonArticlesPage implements CanLeave {
                             this.sqliteService.findOneById('demande_livraison_type', demandeLivraison.type_id),
                             this.sqliteService.findOneById('emplacement', demandeLivraison.location_id),
                             this.sqliteService.findArticlesInDemandeLivraison(demandeLivraison.id),
-                            this.storageService.getOperateur()
+                            this.storageService.getOperator()
                         )
                             .pipe((map(([type, location, articles, operator]) => ([demandeLivraison, type, location, articles, operator]))))
                     ))
@@ -193,9 +193,9 @@ export class DemandeLivraisonArticlesPage implements CanLeave {
                 flatMap(([loading]: [HTMLIonLoadingElement, any]) => (
                     this.selectedArticles.length > 0
                         ? zip(
-                            ...(this.selectedArticles.map(({quantity_to_pick, id}) => (
+                            ...(this.selectedArticles.map(({quantity_to_pick, bar_code}) => (
                                 this.sqliteService.insert('article_in_demande_livraison', {
-                                    article_id: id,
+                                    article_bar_code: bar_code,
                                     demande_id: this.demandeId,
                                     quantity_to_pick
                                 })
@@ -251,7 +251,7 @@ export class DemandeLivraisonArticlesPage implements CanLeave {
         this.loadingPresented = true;
         zip(
             this.loadingService.presentLoading(),
-            this.sqliteService.deleteBy('demande_livraison', this.demandeId),
+            this.sqliteService.deleteBy('demande_livraison', [`id = ${this.demandeId}`]),
             this.deleteSavedArticleInDemande()
         )
             .pipe(
@@ -328,6 +328,6 @@ export class DemandeLivraisonArticlesPage implements CanLeave {
     }
 
     private deleteSavedArticleInDemande(): Observable<any> {
-        return this.sqliteService.deleteBy('article_in_demande_livraison', this.demandeId, 'demande_id');
+        return this.sqliteService.deleteBy('article_in_demande_livraison', [`demande_id = ${this.demandeId}`]);
     }
 }

@@ -198,7 +198,7 @@ export class CollecteArticlesPage implements CanLeave {
                     this.sqliteService
                         .updateArticleCollecteQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite)
                         .pipe(
-                            flatMap(() => this.sqliteService.deleteBy('`article_collecte`', mouvement.id_article_collecte)),
+                            flatMap(() => this.sqliteService.deleteBy('`article_collecte`', [`id = ${mouvement.id_article_collecte}`])),
                             flatMap(() => this.sqliteService.findArticlesByCollecte(this.collecte.id))
                         )
                         .subscribe((articles) => {

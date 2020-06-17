@@ -192,30 +192,36 @@ export const TablesDefinitions: Array<TableDefinition> = [
     },
     {
         name: 'demande_livraison',
+        keepOnConnection: true,
         attributes: {
             id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
             location_id: 'integer',
             comment: 'VARCHAR(255)',
-            type_id: 'integer'
+            type_id: 'integer',
+            user_id: 'integer'
         }
     },
     {
         name: 'article_in_demande_livraison',
+        keepOnConnection: true,
         attributes: {
             demande_id: 'INTEGER',
-            article_id: 'INTEGER',
+            article_bar_code: 'VARCHAR(255)',
             quantity_to_pick: 'INTEGER'
         }
     },
     {
         name: 'demande_livraison_type',
+        keepOnConnection: true,
         attributes: {
             id: 'INTEGER PRIMARY KEY',
-            label: 'VARCHAR(255)'
+            label: 'VARCHAR(255)',
+            to_delete: 'INTEGER'
         }
     },
     {
         name: 'demande_livraison_article',
+        keepOnConnection: true,
         attributes: {
             id: 'INTEGER PRIMARY KEY',
             label: 'VARCHAR(255)',
@@ -223,7 +229,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             bar_code: 'VARCHAR(255)',
             type_quantity: 'VARCHAR(255)',
             location_label: 'VARCHAR(255)',
-            available_quantity: 'INTEGER'
+            available_quantity: 'INTEGER',
+            to_delete: 'INTEGER'
         }
     }
 ];

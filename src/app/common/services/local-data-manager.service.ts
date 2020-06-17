@@ -221,7 +221,7 @@ export class LocalDataManagerService {
                     paramName: 'anomalies',
                     anomalies
                 }))),
-                deleteSucceed: () => this.sqliteService.deleteBy('anomalie_inventaire', '1', 'treated')
+                deleteSucceed: () => this.sqliteService.deleteBy('anomalie_inventaire', [`treated = '1'`])
             }
         }
     }
@@ -341,18 +341,16 @@ export class LocalDataManagerService {
                                                 ? of(undefined)
                                                     .pipe(
                                                         // we delete succeed mouvement
-                                                        flatMap(() => (
-                                                            this.sqliteService
-                                                                .deleteBy(
-                                                                    'mouvement_traca',
-                                                                    mouvements
-                                                                        .filter(({finished, type, ref_article}) => (
-                                                                            (finished && (refArticlesErrors.indexOf(ref_article) === -1)) ||
-                                                                            (type === 'depose')
-                                                                        ))
-                                                                        .map(({id}) => id)
-                                                                )
-                                                        )),
+                                                        flatMap(() => {
+                                                            const mouvementTracaToDelete = mouvements
+                                                                .filter(({finished, type, ref_article}) => (
+                                                                    (finished && (refArticlesErrors.indexOf(ref_article) === -1)) ||
+                                                                    (type === 'depose')
+                                                                ))
+                                                                .map(({id}) => id);
+                                                            return this.sqliteService
+                                                                .deleteBy('mouvement_traca', [`id IN (${mouvementTracaToDelete.join(',')})`]);
+                                                        }),
                                                         flatMap(() => (
                                                             // we reset failed mouvement
                                                             this.sqliteService

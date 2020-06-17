@@ -4,4 +4,5 @@ export interface FormPanelSelectConfig {
     required?: boolean;
     barcodeScanner?: boolean;
     searchType: SelectItemTypeEnum;
+    requestParams?: Array<string>;
 }

@@ -8,7 +8,6 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
 import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
-import {PreparationMenuPageRoutingModule} from '@pages/stock/preparation/preparation-menu/preparation-menu-routing.module';
 import {ManutentionMenuPageRoutingModule} from '@pages/demande/manutention/manutention-menu/manutention-menu-routing.module';
 import {DemandeLivraisonMenuPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu-routing.module';
 

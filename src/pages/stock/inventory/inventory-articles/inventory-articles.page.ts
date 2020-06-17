@@ -199,7 +199,7 @@ export class InventoryArticlesPage implements CanLeave {
 
             return zip(
                 this.sqliteService.insert('`saisie_inventaire`', saisieInventaire),
-                this.sqliteService.deleteBy('`article_inventaire`', selectedArticle.id)
+                this.sqliteService.deleteBy('`article_inventaire`', [`id = ${selectedArticle.id}`])
             );
         }
     }

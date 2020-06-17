@@ -94,8 +94,10 @@ export class SqliteService {
     }
 
     private static DropTables(db: SQLiteObject): Observable<any> {
-        const createDatabaseRequests = TablesDefinitions.map(({name}) => `DROP TABLE IF EXISTS \`${name}\`;`);
-        return SqliteService.ExecuteQueryFlatMap(db, createDatabaseRequests);
+        const dropDatabaseRequests = TablesDefinitions
+            .filter(({keepOnConnection}) => !keepOnConnection)
+            .map(({name}) => `DROP TABLE IF EXISTS \`${name}\`;`);
+        return SqliteService.ExecuteQueryFlatMap(db, dropDatabaseRequests);
     }
 
     private static JoinWhereClauses(where: Array<string>): string {
@@ -245,19 +247,67 @@ export class SqliteService {
     }
 
     public importDemandesLivraisonData(data): Observable<void> {
-        const demandeLivraisonArticles = data['demandeLivraisonArticles'];
-        const demandeLivraisonTypes = data['demandeLivraisonTypes'];
+        const demandeLivraisonArticles = data['demandeLivraisonArticles'] || [];
+        const demandeLivraisonTypes = data['demandeLivraisonTypes'] || [];
 
+        // On supprimer tous les types
         return zip(
-            this.deleteBy('demande_livraison_article'),
-            this.deleteBy('demande_livraison_type')
-        ).pipe(flatMap(() => (((demandeLivraisonArticles && demandeLivraisonArticles.length > 0) || (demandeLivraisonTypes && demandeLivraisonTypes.length > 0))
-            ? zip(
-                ...(demandeLivraisonArticles || []).map((article) => this.insert('demande_livraison_article', article)),
-                ...(demandeLivraisonTypes || []).map((type) => this.insert('demande_livraison_type', type)),
-            )
-            : of(undefined)
-        )));
+            this.findAll('article_in_demande_livraison'),
+            this.findAll('demande_livraison')
+        )
+            .pipe(
+                // On garde les types qui sont dans des demandes en brouillon
+                //  --> on supprime les types qui sont dans la liste du getDataArray ET ceux qui ne sont pas dans des demandes en brouillon
+                // On garde les articles qui sont dans des demandes en brouillon
+                //  --> on supprime les articles qui sont dans la liste du getDataArray ET ceux qui ne sont pas dans des demandes en brouillon
+                flatMap(([articleBarCodesInDemande, demandeLivraisonInDB]: [Array<{bar_code: string}>, Array<{type_id: number}>]) => {
+                    const demandeLivraisonArticlesBarCodesToImport = demandeLivraisonArticles.map(({bar_code}) => `'${bar_code}'`);
+                    const articleBarCodesInDemandeBarCodes = articleBarCodesInDemande.map(({bar_code}) => `'${bar_code}'`);
+
+                    const demandeLivraisonTypesIdsToImport = demandeLivraisonTypes.map(({id}) => id); // les ids des types à importer
+                    const typeIdsInDemandes = demandeLivraisonInDB.reduce((acc, {type_id}) => {
+                        if (acc.indexOf(type_id) === -1) {
+                            acc.push(type_id);
+                        }
+                        return acc;
+                    }, []); // les ids des types dans les demandes
+
+                    return zip(
+                        (demandeLivraisonTypesIdsToImport.length > 0 || typeIdsInDemandes.length > 0)
+                            ? this.deleteBy('demande_livraison_type', [
+                                [
+                                    demandeLivraisonTypesIdsToImport.length > 0 ? `(id IN (${demandeLivraisonTypesIdsToImport.join(',')}))` : '',
+                                    typeIdsInDemandes.length > 0 ? `(id NOT IN (${typeIdsInDemandes.join(',')}))` : ''
+                                ]
+                                    .filter(Boolean)
+                                    .join(' OR ')
+                            ])
+                            : of(undefined),
+                        (demandeLivraisonArticlesBarCodesToImport.length > 0 || articleBarCodesInDemandeBarCodes.length > 0)
+                            ? this.deleteBy('demande_livraison_article', [
+                                [
+                                    demandeLivraisonArticlesBarCodesToImport.length > 0 ? `(bar_code IN (${demandeLivraisonArticlesBarCodesToImport.join(',')}))` : '',
+                                    articleBarCodesInDemandeBarCodes.length > 0 ? `(bar_code NOT IN (${articleBarCodesInDemandeBarCodes.join(',')}))` : ''
+                                ]
+                                    .filter(Boolean)
+                                    .join(' OR ')
+                            ])
+                            : of(undefined)
+                    );
+                }),
+                flatMap(() => zip(
+                    this.update('demande_livraison_article', {to_delete: true}),
+                    this.update('demande_livraison_type', {to_delete: true})
+                )),
+                flatMap(() => (
+                    ((demandeLivraisonArticles && demandeLivraisonArticles.length > 0) || (demandeLivraisonTypes && demandeLivraisonTypes.length > 0))
+                    ? zip(
+                        ...(demandeLivraisonArticles || []).map((article) => this.insert('demande_livraison_article', article)),
+                        ...(demandeLivraisonTypes || []).map((type) => this.insert('demande_livraison_type', type)),
+                    )
+                    : of(undefined)
+                ))
+            );
     }
 
     public importArticlesPrepas(data): Observable<any> {
@@ -458,7 +508,7 @@ export class SqliteService {
                     .filter(({id: idDB, location_to, date_end}) => (!collectesAPI.some(({id: idAPI}) => ((idAPI === idDB)) && !location_to && !date_end)))
                     .map(({id}) => id);
                 return (collectesIdToDelete.length > 0
-                    ? this.deleteBy('collecte', collectesIdToDelete)
+                    ? this.deleteBy('collecte', [`id IN (${collectesIdToDelete.join(',')}`])
                     : of(undefined)).pipe(map(() => collectesDB));
             }),
             flatMap((collectesDB: Array<Collecte>) => {
@@ -555,13 +605,17 @@ export class SqliteService {
                 )),
                 flatMap((articlesInDatabase: Array<ArticlePrepaByRefArticle>) => {
                     // On supprimer les refArticleByRefarticle dont le champ reference_article est renvoyé par l'api
-                    const refArticleToDelete = (articlesInDatabase.length > 0 ? (articlesPrepaByRefArticle || []) : []).reduce((acc, {reference_article}) => {
-                        if (acc.indexOf(reference_article) === -1) {
-                            acc.push(reference_article);
-                        }
-                        return acc;
-                    }, []);
-                    return this.deleteBy('article_prepa_by_ref_article', refArticleToDelete, 'reference_article');
+                    const refArticleToDelete = (articlesInDatabase.length > 0 ? (articlesPrepaByRefArticle || []) : [])
+                        .reduce((acc, {reference_article}) => {
+                            if (acc.indexOf(reference_article) === -1) {
+                                acc.push(reference_article);
+                            }
+                            return acc;
+                        }, [])
+                        .map((reference) => `'${reference}'`);
+                    return refArticleToDelete.length > 0
+                        ? this.deleteBy('article_prepa_by_ref_article', [`reference_article IN (${refArticleToDelete})`])
+                    : of(undefined)
                 }),
                 map(() => {
                     if ((articlesPrepaByRefArticle && articlesPrepaByRefArticle.length > 0)) {
@@ -697,7 +751,7 @@ export class SqliteService {
         const query = (
             `SELECT demande_livraison_article.*, article_in_demande_livraison.quantity_to_pick AS quantity_to_pick ` +
             `FROM demande_livraison_article ` +
-            `INNER JOIN article_in_demande_livraison ON article_in_demande_livraison.article_id = demande_livraison_article.id ` +
+            `INNER JOIN article_in_demande_livraison ON article_in_demande_livraison.article_bar_code = demande_livraison_article.bar_code ` +
             `WHERE article_in_demande_livraison.demande_id = ${demandeId}`
         );
         return this.executeQuery(query).pipe(
@@ -710,7 +764,7 @@ export class SqliteService {
         console.log(demandeIds)
         const demandeIdsJoined = demandeIds.join(',');
         const query = (
-            `SELECT COUNT(article_in_demande_livraison.article_id) AS counter, article_in_demande_livraison.demande_id AS demande_id ` +
+            `SELECT COUNT(article_in_demande_livraison.article_bar_code) AS counter, article_in_demande_livraison.demande_id AS demande_id ` +
             `FROM article_in_demande_livraison ` +
             `WHERE article_in_demande_livraison.demande_id IN (${demandeIdsJoined}) ` +
             `GROUP BY article_in_demande_livraison.demande_id`
@@ -785,7 +839,7 @@ export class SqliteService {
         return this.executeQuery(query).pipe(map(({insertId}) => insertId));
     }
 
-    public update(name: string, values: any, where: Array<string>): Observable<any> {
+    public update(name: string, values: any, where: Array<string> = []): Observable<any> {
         let query = this.createUpdateQuery(name, values, where);
         return query
             ? this.executeQuery(query)
@@ -992,17 +1046,14 @@ export class SqliteService {
     }
 
     /**
-     * Call sqlite delete command. If ids is undefined, it clean the table
+     * Call sqlite delete command.
      */
-    public deleteBy(table: string, toDelete: number|Array<number>|string = undefined, fieldName: string = 'id'): Observable<undefined> {
-        const whereClause = toDelete
-            ? (
-                ' WHERE ' + (Array.isArray(toDelete)
-                    ? `${fieldName} IN (${toDelete.map((val) => this.getValueForQuery(val)).join(',')})`
-                    : `${fieldName} = ${this.getValueForQuery(toDelete)}`)
-            )
+    public deleteBy(table: string,
+                    where: Array<string> = []): Observable<undefined> {
+        const sqlWhereClauses = (where && where.length > 0)
+            ? `WHERE ${SqliteService.JoinWhereClauses(where)}`
             : '';
-        return this.executeQuery(`DELETE FROM ${table}${whereClause};`, false);
+        return this.executeQuery(`DELETE FROM ${table} ${sqlWhereClauses};`, false);
     }
 
     public resetArticlePrepaByPrepa(ids: Array<number>): Observable<any> {

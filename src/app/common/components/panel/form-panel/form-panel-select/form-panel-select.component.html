@@ -5,6 +5,7 @@
                          [type]="inputConfig.searchType"
                          (itemChange)="onItemSelect($event)"
                          (itemsLoaded)="initText()"
+                         [requestParams]="inputConfig.requestParams"
                          hidden>
         </wii-search-item>
         <div>{{ text }}</div>

@@ -85,15 +85,18 @@ export class ManutentionValidatePage implements CanLeave {
                             this.sendCommentToApiLoading = false;
                             loading.dismiss();
                             if (response.success) {
-                                this.sqliteService.deleteBy('`manutention`', this.manutention.id).subscribe(() => {
-                                    this.navService.pop();
-                                })
+                                this.sqliteService
+                                    .deleteBy('`manutention`', [`id = ${this.manutention.id}`])
+                                    .subscribe(() => {
+                                        this.navService.pop();
+                                    });
                             }
                             else {
                                 this.toastService.presentToast(response.msg);
                             }
                         },
                         () => {
+                            this.sendCommentToApiLoading = false;
                             loading.dismiss();
                         });
                 });

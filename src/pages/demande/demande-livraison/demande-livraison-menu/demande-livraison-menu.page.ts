@@ -40,13 +40,17 @@ export class DemandeLivraisonMenuPage {
     public ionViewWillEnter(): void {
         this.fabListActivated = false
         this.hasLoaded = false;
-        zip(
-            this.sqliteService.findAll('`demande_livraison`'),
-            this.sqliteService.findAll('`demande_livraison_type`'),
-            this.storageService.getOperateur()
-        )
+        this.storageService.getOperatorId()
             .pipe(
-                flatMap(([demandesLivraison, types, operator]: [Array<DemandeLivraison>, Array<DemandeLivraisonType>, string]) => {
+                flatMap((userId) => zip(
+                    this.sqliteService.findBy('`demande_livraison`'),
+                    this.sqliteService.findBy('`demande_livraison`', [`user_id = ${userId}`]),
+                    this.sqliteService.findAll('`demande_livraison_type`'),
+                    this.storageService.getOperator()
+                )),
+                flatMap(([a, demandesLivraison, types, operator]: [Array<DemandeLivraison>, Array<DemandeLivraison>, Array<DemandeLivraisonType>, string]) => {
+                    console.log('1 --> ', a)
+                    console.log('2 --> ', demandesLivraison)
                     const locationIdsJoined = demandesLivraison
                         .map(({location_id}) => location_id)
                         .filter(Boolean)

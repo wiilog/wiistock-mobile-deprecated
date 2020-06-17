@@ -15,21 +15,26 @@ export class StorageService {
     public static readonly RIGHT_TRACKING = 'tracking';
 
     private static readonly API_KEY = 'api-key';
-    private static readonly OPERATEUR = 'operateur';
+    private static readonly OPERATOR = 'operator';
+    private static readonly OPERATOR_ID = 'operator_id';
     private static readonly NB_PREPS = 'prep';
 
     private static readonly URL_SERVER = 'url-server';
 
     public constructor(private storage: Storage) {}
 
-    public initStorage(apiKey: string, operator: string, rights: {[name: string]: boolean}): Observable<any> {
+    public initStorage(apiKey: string,
+                       operator: string,
+                       operatorId: number,
+                       rights: {[name: string]: boolean}): Observable<any> {
         return from(this.getServerUrl())
             .pipe(
                 flatMap((serverUrl) => from(this.storage.clear()).pipe(map(() => serverUrl))),
                 flatMap((serverUrl) => zip(
                     from(this.storage.set(StorageService.URL_SERVER, serverUrl)),
                     from(this.storage.set(StorageService.API_KEY, apiKey)),
-                    from(this.storage.set(StorageService.OPERATEUR, operator)),
+                    from(this.storage.set(StorageService.OPERATOR, operator)),
+                    from(this.storage.set(StorageService.OPERATOR_ID, operatorId)),
                     from(this.storage.set(StorageService.NB_PREPS, 0)),
                     this.updateRights(rights)
                 ))
@@ -52,8 +57,12 @@ export class StorageService {
             : of(undefined);
     }
 
-    public getOperateur(): Observable<string> {
-        return from(this.storage.get(StorageService.OPERATEUR));
+    public getOperator(): Observable<string> {
+        return from(this.storage.get(StorageService.OPERATOR));
+    }
+
+    public getOperatorId(): Observable<number> {
+        return from(this.storage.get(StorageService.OPERATOR_ID)).pipe(map(Number));
     }
 
     public getFinishedPreps(): Observable<number> {

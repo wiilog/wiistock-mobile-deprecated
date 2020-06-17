@@ -313,7 +313,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
     private refreshUser(): Observable<void> {
         return this.storageService
-            .getOperateur()
+            .getOperator()
             .pipe(
                 take(1),
                 map((user: string) => (user || '').substring(0, MainHeaderComponent.MAX_PSEUDO_LENGTH)),
