@@ -11,15 +11,15 @@ import {ToastService} from '@app/common/services/toast.service';
 import {from} from 'rxjs';
 import {InventoryArticlesPageRoutingModule} from '@pages/stock/inventory/inventory-articles/inventory-articles-routing.module';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
-import {InventoryLocationsAnomaliesPageRoutingModule} from '@pages/stock/inventory/inventory-locations-anomalies/inventory-locations-anomalies-routing.module';
 import {InventoryService} from '@app/common/services/inventory.service';
 
+
 @Component({
-    selector: 'wii-inventory-locations',
-    templateUrl: './inventory-locations.page.html',
-    styleUrls: ['./inventory-locations.page.scss'],
+    selector: 'wii-inventory-locations-anomalies',
+    templateUrl: './inventory-locations-anomalies-page.component.html',
+    styleUrls: ['./inventory-locations-anomalies-page.component.scss'],
 })
-export class InventoryLocationsPage implements CanLeave {
+export class InventoryLocationsAnomaliesPage implements CanLeave {
 
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
@@ -36,9 +36,9 @@ export class InventoryLocationsPage implements CanLeave {
     public constructor(private sqliteService: SqliteService,
                        private navService: NavService,
                        private loadingService: LoadingService,
-                       private inventoryService: InventoryService,
                        private mainHeaderService: MainHeaderService,
-                       private toastService: ToastService) {
+                       private toastService: ToastService,
+                       private inventoryService: InventoryService) {
         this.listConfig = {
             body: [],
             boldValues: ['label']
@@ -49,11 +49,11 @@ export class InventoryLocationsPage implements CanLeave {
         this.loading = true;
         this.listConfig.body = [];
 
-        this.inventoryService.getData(false).subscribe(({isInventoryManager, loader, locations}) => {
+        this.inventoryService.getData(true).subscribe(({isInventoryManager, loader, locations}) => {
             this.isInventoryManager = isInventoryManager;
             this.locations = locations;
             this.listConfig.body = this.createListConfig();
-            this.inventoryService.refreshSubTitle(this.locations, false);
+            this.inventoryService.refreshSubTitle(this.locations, true);
 
             from(loader.dismiss()).subscribe(() => {
                 this.loading = false;
@@ -85,10 +85,6 @@ export class InventoryLocationsPage implements CanLeave {
         }
     }
 
-    public navigateToAnomalies(): void {
-        this.navService.push(InventoryLocationsAnomaliesPageRoutingModule.PATH);
-    }
-
     private createListConfig(): Array<ListPanelItemConfig> {
         return this.locations.map(({label}) => ({
             infos: {
@@ -110,7 +106,7 @@ export class InventoryLocationsPage implements CanLeave {
     private navigateToArticles(selectedLocation: string): void {
         this.navService.push(InventoryArticlesPageRoutingModule.PATH, {
             selectedLocation,
-            anomalyMode: false
+            anomalyMode: true
         });
     }
 }

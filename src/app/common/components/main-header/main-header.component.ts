@@ -22,6 +22,7 @@ import {CollecteMenuPageRoutingModule} from '@pages/stock/collecte/collecte-menu
 import {InventoryLocationsPageRoutingModule} from '@pages/stock/inventory/inventory-locations/inventory-locations-routing.module';
 import {DemandeMenuPageRoutingModule} from '@pages/demande/demande-menu/demande-menu-routing.module';
 import {DemandeLivraisonMenuPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu-routing.module';
+import {InventoryLocationsAnomaliesPageRoutingModule} from '@pages/stock/inventory/inventory-locations-anomalies/inventory-locations-anomalies-routing.module';
 
 
 @Component({
@@ -147,13 +148,11 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: CollecteMenuPageRoutingModule.PATH, label: 'Collecte'},
             {
                 pagePath: InventoryLocationsPageRoutingModule.PATH,
-                label: 'Inventaire',
-                filter: (params) => !params.get('anomalyMode')
+                label: 'Inventaire'
             },
             {
-                pagePath: InventoryLocationsPageRoutingModule.PATH,
+                pagePath: InventoryLocationsAnomaliesPageRoutingModule.PATH,
                 label: 'Anomalies',
-                filter: (params) => params.get('anomalyMode')
             },
             {pagePath: DemandeMenuPageRoutingModule.PATH, label: 'Demande'},
             {pagePath: ManutentionMenuPageRoutingModule.PATH, label: 'Manutention'},

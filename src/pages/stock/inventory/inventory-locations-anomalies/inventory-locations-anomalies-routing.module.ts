@@ -1,13 +1,13 @@
 import {NgModule} from '@angular/core';
 import {Routes, RouterModule} from '@angular/router';
 
-import {InventoryLocationsPage} from './inventory-locations.page';
+import {InventoryLocationsAnomaliesPage} from './inventory-locations-anomalies-page.component';
 import {CanLeaveGuard} from '@app/guards/can-leave/can-leave.guard';
 
 const routes: Routes = [
     {
         path: '',
-        component: InventoryLocationsPage,
+        component: InventoryLocationsAnomaliesPage,
         canDeactivate: [CanLeaveGuard]
     }
 ];
@@ -16,6 +16,6 @@ const routes: Routes = [
     imports: [RouterModule.forChild(routes)],
     exports: [RouterModule],
 })
-export class InventoryLocationsPageRoutingModule {
-    public static readonly PATH: string = 'inventory-locations';
+export class InventoryLocationsAnomaliesPageRoutingModule {
+    public static readonly PATH: string = 'inventory-locations-anomalies';
 }

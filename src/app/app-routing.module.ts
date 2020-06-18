@@ -34,6 +34,7 @@ import {DemandeLivraisonMenuPageRoutingModule} from '@pages/demande/demande-livr
 import {DemandeLivraisonHeaderPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-header/demande-livraison-header-routing.module';
 import {DemandeLivraisonArticlesPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-articles/demande-livraison-articles-routing.module';
 import {DemandeLivraisonArticleTakePageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-article-take/demande-livraison-article-take-routing.module';
+import {InventoryLocationsAnomaliesPageRoutingModule} from '@pages/stock/inventory/inventory-locations-anomalies/inventory-locations-anomalies-routing.module';
 
 
 const routes: Routes = [
@@ -194,6 +195,11 @@ const routes: Routes = [
         path: InventoryLocationsPageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/inventory/inventory-locations/inventory-locations.module').then(m => m.InventoryLocationsPageModule)
+    },
+    {
+        path: InventoryLocationsAnomaliesPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/stock/inventory/inventory-locations-anomalies/inventory-locations-anomalies.module').then(m => m.InventoryLocationsAnomaliesPageModule)
     },
     {
         path: InventoryArticlesPageRoutingModule.PATH,
