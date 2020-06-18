@@ -17,7 +17,7 @@ import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {LoadingService} from '@app/common/services/loading.service';
 import {Network} from "@ionic-native/network/ngx";
 import {AlertController} from "@ionic/angular";
-import {AlertManagerService} from "../../../../app/common/services/alert-manager.service";
+import {AlertManagerService} from "@app/common/services/alert-manager.service";
 
 
 @Component({
@@ -95,9 +95,9 @@ export class DemandeLivraisonMenuPage implements CanLeave {
 
     public onRefreshClick(): void {
         this.fabListActivated = false;
-        this.apiSending = true;
 
         if (this.network.type && this.network.type !== 'unknown' && this.network.type !== 'none') {
+            this.apiSending = true;
             zip(
                 this.loadingService.presentLoading(),
                 this.localDataManager.sendDemandesLivraisons()
@@ -131,7 +131,7 @@ export class DemandeLivraisonMenuPage implements CanLeave {
                     });
                 });
         } else {
-            this.alertController
+            from(this.alertController
                 .create({
                     header: 'Synchronisation impossible',
                     cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
@@ -140,7 +140,10 @@ export class DemandeLivraisonMenuPage implements CanLeave {
                         text: 'Confirmer',
                         cssClass: 'alert-success'
                     }]
-                })
+                }))
+                .subscribe((alert: HTMLIonAlertElement) => {
+                    alert.present();
+                });
         }
     }
 
