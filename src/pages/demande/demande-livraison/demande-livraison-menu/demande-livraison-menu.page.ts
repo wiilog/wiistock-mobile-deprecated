@@ -15,6 +15,9 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {ToastService} from '@app/common/services/toast.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {LoadingService} from '@app/common/services/loading.service';
+import {Network} from "@ionic-native/network/ngx";
+import {AlertController} from "@ionic/angular";
+import {AlertManagerService} from "../../../../app/common/services/alert-manager.service";
 
 
 @Component({
@@ -36,14 +39,16 @@ export class DemandeLivraisonMenuPage implements CanLeave {
     private apiSending: boolean;
 
     private readonly demandeLivraisonData: {
-        typesConverter: {[id: number]: string};
+        typesConverter: { [id: number]: string };
         operator: string;
-        locationsConverter: {[id: number]: string};
-        articlesCounters: {[id: number]: number};
+        locationsConverter: { [id: number]: string };
+        articlesCounters: { [id: number]: number };
     };
 
     public constructor(private sqliteService: SqliteService,
                        private navService: NavService,
+                       private network: Network,
+                       private alertController: AlertController,
                        private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
                        private toastService: ToastService,
@@ -92,38 +97,51 @@ export class DemandeLivraisonMenuPage implements CanLeave {
         this.fabListActivated = false;
         this.apiSending = true;
 
-        zip(
-            this.loadingService.presentLoading(),
-            this.localDataManager.sendDemandesLivraisons()
-        )
-            .pipe(
-                flatMap(([loading, data]: [HTMLIonLoadingElement, {success: Array<number>, errors: Array<DemandeLivraison>}]) => (
-                    (data.errors.length > 0
-                        ? this.preloadData(data.errors)
-                        : of(undefined)).pipe(map(() => ([loading, data])))
-                ))
+        if (this.network.type && this.network.type !== 'unknown' && this.network.type !== 'none') {
+            zip(
+                this.loadingService.presentLoading(),
+                this.localDataManager.sendDemandesLivraisons()
             )
-            .subscribe(([loading, data]: [HTMLIonLoadingElement, {success: Array<number>, errors: Array<DemandeLivraison>}]) => {
-                const nbSuccess = data.success.length;
-                const sSuccess = nbSuccess > 1 ? 's' : '';
+                .pipe(
+                    flatMap(([loading, data]: [HTMLIonLoadingElement, { success: Array<number>, errors: Array<DemandeLivraison> }]) => (
+                        (data.errors.length > 0
+                            ? this.preloadData(data.errors)
+                            : of(undefined)).pipe(map(() => ([loading, data])))
+                    ))
+                )
+                .subscribe(([loading, data]: [HTMLIonLoadingElement, { success: Array<number>, errors: Array<DemandeLivraison> }]) => {
+                    const nbSuccess = data.success.length;
+                    const sSuccess = nbSuccess > 1 ? 's' : '';
 
-                const nbErrors = data.errors.length;
-                const sErrors = nbErrors > 1 ? 's' : '';
+                    const nbErrors = data.errors.length;
+                    const sErrors = nbErrors > 1 ? 's' : '';
 
-                const messages = [
-                    nbSuccess > 0 ? `${nbSuccess} demande${sSuccess} synchronisée${sSuccess}` : '',
-                    nbErrors > 0 ? `${nbErrors} demande${sErrors} en erreur` : ''
-                ]
-                    .filter(Boolean)
-                    .join(', ');
+                    const messages = [
+                        nbSuccess > 0 ? `${nbSuccess} demande${sSuccess} synchronisée${sSuccess}` : '',
+                        nbErrors > 0 ? `${nbErrors} demande${sErrors} en erreur` : ''
+                    ]
+                        .filter(Boolean)
+                        .join(', ');
 
 
-                this.refreshPageList(data.errors);
-                this.apiSending = false;
-                from(loading.dismiss()).subscribe(() => {
-                    this.toastService.presentToast(messages);
+                    this.refreshPageList(data.errors);
+                    this.apiSending = false;
+                    from(loading.dismiss()).subscribe(() => {
+                        this.toastService.presentToast(messages);
+                    });
                 });
-            });
+        } else {
+            this.alertController
+                .create({
+                    header: 'Synchronisation impossible',
+                    cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
+                    message: 'Aucune connexion à internet, synchronisation des demandes impossible.',
+                    buttons: [{
+                        text: 'Confirmer',
+                        cssClass: 'alert-success'
+                    }]
+                })
+        }
     }
 
     public onAddClick(): void {
@@ -137,8 +155,6 @@ export class DemandeLivraisonMenuPage implements CanLeave {
 
         this.demandesLivraison = demandesLivraison;
 
-
-        console.log(this.demandesLivraison, '---------------', this.demandeLivraisonData)
         this.demandesListConfig = this.demandesLivraison.map((demande: DemandeLivraison): CardListConfig => {
             const articlesCounter = articlesCounters[demande.id] || 0;
             const sArticle = articlesCounter > 1 ? 's' : '';
@@ -182,7 +198,7 @@ export class DemandeLivraisonMenuPage implements CanLeave {
         this.refreshSubTitle();
     }
 
-    public preloadData(demandesLivraison: Array<DemandeLivraison>): Observable<[{[id: number]: string}, string, {[id: number]: string}, {[id: number]: number}]> {
+    public preloadData(demandesLivraison: Array<DemandeLivraison>): Observable<[{ [id: number]: string }, string, { [id: number]: string }, { [id: number]: number }]> {
         return zip(
             this.sqliteService.findAll('`demande_livraison_type`'),
             this.storageService.getOperator()
@@ -210,7 +226,7 @@ export class DemandeLivraisonMenuPage implements CanLeave {
                             ]))
                         )
                 }),
-                flatMap(([typesConverter, operator, locationsConverter]: [{[id: number]: string}, string, {[id: number]: string}, {[id: number]: number}]) => {
+                flatMap(([typesConverter, operator, locationsConverter]: [{ [id: number]: string }, string, { [id: number]: string }, { [id: number]: number }]) => {
                     return (demandesLivraison.length > 0
                         ? this.sqliteService.countArticlesByDemandeLivraison(demandesLivraison.map(({id}) => id))
                         : of({}))
@@ -223,7 +239,7 @@ export class DemandeLivraisonMenuPage implements CanLeave {
                             ]))
                         )
                 }),
-                tap(([typesConverter, operator, locationsConverter, articlesCounters]: [{[id: number]: string}, string, {[id: number]: string}, {[id: number]: number}]) => {
+                tap(([typesConverter, operator, locationsConverter, articlesCounters]: [{ [id: number]: string }, string, { [id: number]: string }, { [id: number]: number }]) => {
                     this.demandeLivraisonData.typesConverter = typesConverter;
                     this.demandeLivraisonData.operator = operator;
                     this.demandeLivraisonData.locationsConverter = locationsConverter;
