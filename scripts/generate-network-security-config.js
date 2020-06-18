@@ -5,10 +5,11 @@ const shell = require('shelljs');
 const ifaces = os.networkInterfaces();
 
 const isProdEnv = process.argv && (process.argv.length > 2 ? process.argv[2] === 'prod' : '') || false;
-
 const availableIPv4Addresses = Object
-    .values(ifaces)
-    .map((ifaceValues) => (ifaceValues && ifaceValues.find(({family}) => (family === 'IPv4'))))
+    .keys(ifaces)
+    .filter((ifaceKey) => ifaceKey !== 'VirtualBox Host-Only Network')
+    .map((ifaceKey) => ifaces[ifaceKey])
+    .map((ifaceDetails) => (ifaceDetails && ifaceDetails.find(({family}) => (family === 'IPv4'))))
     .filter((ifaceValue) => (ifaceValue && !ifaceValue.internal))
     .map(({address}) => address);
 
