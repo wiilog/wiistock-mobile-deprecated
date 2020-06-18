@@ -16,7 +16,8 @@
         "wiis:generate:network-security-config": "node scripts/generate-network-security-config",
         "wiis:generate:network-security-config:prod": "node scripts/generate-network-security-config prod",
         "wiis:clean": "node scripts/rmdir www && ionic cordova resources android && ionic cordova platform add android && cordova clean",
-        "wiis:build": "node scripts/rmdir platforms && yarn wiis:generate:build-json && yarn wiis:generate:dev-credentials && yarn wiis:generate:network-security-config:prod && yarn wiis:clean && ionic cordova build android --prod --release --buildConfig=build.json",
+        "wiis:build:prod": "yarn wiis:build --prod --release --buildConfig=build.json",
+        "wiis:build": "node scripts/rmdir platforms && yarn wiis:generate:build-json && yarn wiis:generate:dev-credentials && yarn wiis:generate:network-security-config:prod && yarn wiis:clean && ionic cordova build android",
         "wiis:run": "yarn wiis:generate:dev-credentials && yarn wiis:generate:network-security-config && yarn wiis:clean && ionic cordova run android",
         "wiis:run:livereload": "yarn wiis:generate:dev-credentials && yarn wiis:generate:network-security-config && yarn wiis:clean && ionic cordova run android --livereload"
     },
