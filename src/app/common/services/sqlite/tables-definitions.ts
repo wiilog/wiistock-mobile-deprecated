@@ -157,7 +157,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
         name: 'saisie_inventaire',
         attributes: {
             id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-            reference: 'TEXT',
+            bar_code: 'VARCHAR(255)',
             date: 'TEXT',
             location: 'TEXT',
             id_mission: 'INTEGER',

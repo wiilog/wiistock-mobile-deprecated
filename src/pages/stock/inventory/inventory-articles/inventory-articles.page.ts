@@ -191,7 +191,7 @@ export class InventoryArticlesPage implements CanLeave {
                 id: null,
                 id_mission: selectedArticle.id_mission,
                 date: moment().format(),
-                reference: selectedArticle.reference,
+                bar_code: selectedArticle.barcode,
                 is_ref: selectedArticle.is_ref,
                 quantity,
                 location: selectedArticle.location,

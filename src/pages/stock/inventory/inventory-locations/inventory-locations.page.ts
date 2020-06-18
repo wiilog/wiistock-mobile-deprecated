@@ -55,9 +55,9 @@ export class InventoryLocationsPage implements CanLeave {
             this.listConfig.body = this.createListConfig();
             this.inventoryService.refreshSubTitle(this.locations, false);
 
-            from(loader.dismiss()).subscribe(() => {
-                this.loading = false;
-            });
+            this.loading = false;
+
+            loader.dismiss();
         });
 
         if (this.footerScannerComponent) {
