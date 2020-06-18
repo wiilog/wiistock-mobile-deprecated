@@ -498,15 +498,15 @@ export class LocalDataManagerService {
                     : of([])
             )),
             // sync
-            flatMap((data: Array<{success: boolean; message: string; demandeLivraison: DemandeLivraison}>) => {
+            flatMap((data: Array<{success: boolean; message: string; demande: DemandeLivraison}>) => {
                 const sortedData: {success: Array<number>, errors: Array<DemandeLivraison>} = data.reduce(
-                    (acc, {success, message, demandeLivraison}) => {
+                    (acc, {success, message, demande}) => {
                         if (success) {
-                            acc.success.push(demandeLivraison.id);
+                            acc.success.push(demande.id);
                         }
                         else {
                             acc.errors.push({
-                                ...demandeLivraison,
+                                ...demande,
                                 last_error: message
                             } as DemandeLivraison);
                         }

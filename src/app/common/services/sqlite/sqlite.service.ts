@@ -696,7 +696,7 @@ export class SqliteService {
             flatMap(() => this.importManutentions(data).pipe(tap(() => {console.log('--- > importManutentions')}))),
             flatMap(() => this.importCollectes(data).pipe(tap(() => {console.log('--- > importCollectes')}))),
             flatMap(() => this.importMouvementTraca(data).pipe(tap(() => {console.log('--- > importMouvementTraca')}))),
-            flatMap(() => this.importDemandesLivraisonData(data).pipe(tap(() => {console.log('--- > importDemandeLivaisonData')}))),
+            flatMap(() => this.importDemandesLivraisonData(data).pipe(tap(() => {console.log('--- > importDemandeLivraisonData')}))),
             flatMap(() => (
                 this.storageService.getInventoryManagerRight().pipe(
                     flatMap((res) => (res
@@ -761,7 +761,6 @@ export class SqliteService {
     }
 
     public countArticlesByDemandeLivraison(demandeIds: Array<number>): Observable<{ [demande_id: number]: number }> {
-        console.log(demandeIds)
         const demandeIdsJoined = demandeIds.join(',');
         const query = (
             `SELECT COUNT(article_in_demande_livraison.article_bar_code) AS counter, article_in_demande_livraison.demande_id AS demande_id ` +

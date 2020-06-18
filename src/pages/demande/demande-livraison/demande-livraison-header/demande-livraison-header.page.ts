@@ -48,6 +48,12 @@ export class DemandeLivraisonHeaderPage {
 
         this.formPanelComponent.fireZebraScan();
 
+
+
+        this.sqliteService.findAll('`demande_livraison_type`').subscribe((types) => {
+            console.log("---------> types", types)
+        })
+
         zip(
             this.storageService.getOperatorId(),
             this.isUpdate ? this.sqliteService.findOneById('`demande_livraison`', demandeId) : of(this.demandeLivraisonToUpdate),
@@ -56,6 +62,7 @@ export class DemandeLivraisonHeaderPage {
         .subscribe(([operatorId, demandeLivraison, operator]: [number, DemandeLivraison|undefined, string]) => {
             this.demandeLivraisonToUpdate = demandeLivraison;
             this.operatorId = operatorId;
+            console.log(demandeLivraison)
             const {type_id: type, location_id: location, comment} = (demandeLivraison || {});
             this.formBodyConfig = [
                 {
