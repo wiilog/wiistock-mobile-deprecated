@@ -14,6 +14,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
             reference: 'INTEGER',
             quantity: 'INTEGER',
+            barcode: 'TEXT',
             date_pickup: 'VARCHAR(255)',
             location_from: 'TEXT',
             date_drop: 'VARCHAR(255)',

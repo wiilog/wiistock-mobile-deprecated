@@ -153,7 +153,7 @@ export class LocalDataManagerService {
                                         ...collecte,
                                         mouvements: mouvements
                                             .filter(({id_collecte}) => (id_collecte === collecte.id))
-                                            .map(({is_ref, reference, quantity}) => ({is_ref, reference, quantity}))
+                                            .map(({is_ref, barcode, quantity}) => ({is_ref, barcode, quantity}))
                                     }))
                             }))
                         )

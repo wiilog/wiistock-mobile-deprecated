@@ -1,6 +1,7 @@
 export interface Mouvement {
     id: number;
     reference: string;
+    barcode: string;
     quantity: number;
     date_pickup: string;
     location_from: string;

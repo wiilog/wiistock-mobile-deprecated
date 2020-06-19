@@ -130,8 +130,7 @@ export class CollecteArticlesPage implements CanLeave {
                 };
                 let articleAlready = this.articlesT.find(art => (
                     (art.id_collecte === newArticle.id_collecte) &&
-                    (art.is_ref === newArticle.is_ref) &&
-                    (art.reference === newArticle.reference)
+                    (art.barcode === newArticle.barcode)
                 ));
                 if (articleAlready !== undefined) {
                     this.sqliteService
@@ -147,6 +146,7 @@ export class CollecteArticlesPage implements CanLeave {
                     this.sqliteService.insert('`article_collecte`', newArticle).subscribe((insertId) => {
                         let mouvement: Mouvement = {
                             id: null,
+                            barcode: newArticle.barcode,
                             reference: newArticle.reference,
                             quantity: Number(quantite),
                             date_pickup: moment().format(),
@@ -176,6 +176,7 @@ export class CollecteArticlesPage implements CanLeave {
                     id: null,
                     reference: article.reference,
                     quantity: article.quantite,
+                    barcode: article.barcode,
                     date_pickup: moment().format(),
                     location_from: article.emplacement,
                     date_drop: null,
