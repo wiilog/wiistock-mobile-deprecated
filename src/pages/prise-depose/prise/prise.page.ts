@@ -227,7 +227,8 @@ export class PrisePage implements CanLeave {
                             if (loader) {
                                 loader.dismiss();
                             }
-                            this.toastService.presentToast('Erreur serveur.')
+                            this.barcodeCheckLoading = true;
+                            this.toastService.presentToast('Erreur serveur')
                         }
                     );
             }

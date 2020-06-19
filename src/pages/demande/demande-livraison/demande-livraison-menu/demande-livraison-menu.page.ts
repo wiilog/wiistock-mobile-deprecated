@@ -97,19 +97,21 @@ export class DemandeLivraisonMenuPage implements CanLeave {
         this.fabListActivated = false;
 
         if (this.network.type && this.network.type !== 'unknown' && this.network.type !== 'none') {
+            let loader: HTMLIonLoadingElement;
             this.apiSending = true;
-            zip(
-                this.loadingService.presentLoading(),
-                this.localDataManager.sendDemandesLivraisons()
-            )
+            this.loadingService.presentLoading()
                 .pipe(
-                    flatMap(([loading, data]: [HTMLIonLoadingElement, { success: Array<number>, errors: Array<DemandeLivraison> }]) => (
+                    tap((presentedLoader) => {
+                        loader = presentedLoader;
+                    }),
+                    flatMap(() => this.localDataManager.sendDemandesLivraisons()),
+                    flatMap((data: { success: Array<number>, errors: Array<DemandeLivraison> }) => (
                         (data.errors.length > 0
                             ? this.preloadData(data.errors)
-                            : of(undefined)).pipe(map(() => ([loading, data])))
+                            : of(undefined)).pipe(map(() => (data)))
                     ))
                 )
-                .subscribe(([loading, data]: [HTMLIonLoadingElement, { success: Array<number>, errors: Array<DemandeLivraison> }]) => {
+                .subscribe((data:  { success: Array<number>, errors: Array<DemandeLivraison> }) => {
                     const nbSuccess = data.success.length;
                     const sSuccess = nbSuccess > 1 ? 's' : '';
 
@@ -123,12 +125,17 @@ export class DemandeLivraisonMenuPage implements CanLeave {
                         .filter(Boolean)
                         .join(', ');
 
-
                     this.refreshPageList(data.errors);
                     this.apiSending = false;
-                    from(loading.dismiss()).subscribe(() => {
+                    from(loader.dismiss()).subscribe(() => {
                         this.toastService.presentToast(messages);
                     });
+                }, () => {
+                    if (loader) {
+                        loader.dismiss();
+                    }
+                    this.apiSending = false;
+                    this.toastService.presentToast('Erreur serveur');
                 });
         } else {
             from(this.alertController
