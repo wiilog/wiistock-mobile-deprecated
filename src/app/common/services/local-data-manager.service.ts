@@ -561,7 +561,7 @@ export class LocalDataManagerService {
                 }]
             })
         )
-            .pipe(flatMap((alert: HTMLIonAlertElement) => alert.present()))
+            .pipe(flatMap((alert: HTMLIonAlertElement) => from(alert.present())))
             .subscribe(() => {
                 this.alertManager.breakMessageLines();
             });
