@@ -214,9 +214,14 @@ export class PrisePage implements CanLeave {
                         flatMap(() => this.existsOnLocation(barCode)),
                         flatMap((quantity) => from(loader.dismiss()).pipe(map(() => quantity)))
                     )
-                    .subscribe((quantity) => {
-                        this.processCheckBarCode(barCode, isManualAdd, quantity);
-                    });
+                    .subscribe(
+                        (quantity) => {
+                            this.processCheckBarCode(barCode, isManualAdd, quantity);
+                        },
+                        () => {
+                            this.toastService.presentToast('Erreur serveur.')
+                        }
+                    );
             }
             else {
                 this.toastService.presentToast('Vous devez être connecté à internet pour effectuer une prise');
