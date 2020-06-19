@@ -212,13 +212,21 @@ export class PrisePage implements CanLeave {
                             loader = presentedLoader;
                         }),
                         flatMap(() => this.existsOnLocation(barCode)),
-                        flatMap((quantity) => from(loader.dismiss()).pipe(map(() => quantity)))
+                        flatMap((quantity) => from(loader.dismiss()).pipe(
+                            tap(() => {
+                                loader = undefined;
+                            }),
+                            map(() => quantity)
+                        ))
                     )
                     .subscribe(
                         (quantity) => {
                             this.processCheckBarCode(barCode, isManualAdd, quantity);
                         },
                         () => {
+                            if (loader) {
+                                loader.dismiss();
+                            }
                             this.toastService.presentToast('Erreur serveur.')
                         }
                     );
