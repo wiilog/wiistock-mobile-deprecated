@@ -79,7 +79,6 @@ export class PanelHeaderComponent {
     }
 
     public onRightIconClick(event: Event, index: number): void {
-        console.log('action right')
         if (this.rightIcons && this.rightIcons[index] && this.rightIcons[index].action) {
             this.rightIcons[index].action();
             event.preventDefault();
