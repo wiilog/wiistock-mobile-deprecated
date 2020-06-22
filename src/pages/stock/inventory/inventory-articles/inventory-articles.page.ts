@@ -121,7 +121,7 @@ export class InventoryArticlesPage implements CanLeave {
                     this.anomalyMode
                         ? {
                             quantity: {
-                                label: 'Quantité',
+                                label: 'Quantité en stock',
                                 value: `${quantity}`
                             }
                         }

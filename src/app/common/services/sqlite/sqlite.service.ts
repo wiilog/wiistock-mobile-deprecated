@@ -666,6 +666,7 @@ export class SqliteService {
                             "'" + this.escapeQuotes(anomaly.reference) + "', " +
                             anomaly.is_ref + ", " +
                             "'" + anomaly.quantity + "', " +
+                            "'" + anomaly.countedQuantity + "', " +
                             "'" + this.escapeQuotes(anomaly.location ? anomaly.location : 'N/A') + "', " +
                             "'" + anomaly.barCode + "')"
                         ));
@@ -674,7 +675,7 @@ export class SqliteService {
                     }
                     else {
                         const anomaliesValuesStr = anomaliesToInsert.join(', ');
-                        let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `location`, `barcode`) VALUES ' + anomaliesValuesStr + ';';
+                        let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `countedQuantity`, `location`, `barcode`) VALUES ' + anomaliesValuesStr + ';';
                         this.executeQuery(sqlAnomaliesInventaire).subscribe(() => {
                             ret$.next(true);
                         });
