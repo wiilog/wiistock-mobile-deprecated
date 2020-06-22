@@ -659,7 +659,7 @@ export class SqliteService {
                 .subscribe((oldAnomalies: Array<Anomalie>) => {
                     const anomaliesToInsert = anomalies
                         // we check if anomalies are not already in local database
-                        .filter(({id}) => oldAnomalies.every(({id: oldAnomaliesId}) => (id !== oldAnomaliesId)))
+                        .filter(({id}) => oldAnomalies.every(({id: oldAnomaliesId}) => (Number(id) !== Number(oldAnomaliesId))))
                         .map((anomaly) => (
                             "(" +
                             anomaly.id + ", " +
