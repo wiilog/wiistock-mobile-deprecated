@@ -175,7 +175,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             barcode: 'TEXT',
             treated: 'TEXT',
             is_ref: 'INTEGER',
-            quantity: 'INTEGER'
+            quantity: 'INTEGER',
+            countedQuantity: 'INTEGER'
         }
     },
     {
