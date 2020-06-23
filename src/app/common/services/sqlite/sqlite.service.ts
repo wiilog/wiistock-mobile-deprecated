@@ -178,7 +178,7 @@ export class SqliteService {
             this.findOneById('manutention', manut.id).subscribe((manutInserted) => {
                 if (manutInserted === null) {
                     let comment = manut.commentaire === null ? '' : this.escapeQuotes(manut.commentaire);
-                    let date = manut.date_attendue ? manut.date_attendue.date : null;
+                    let date = manut.date_attendue ? manut.date_attendue : null;
                     manutValues.push(
                         "(" +
                         manut.id + ", " +
@@ -659,13 +659,14 @@ export class SqliteService {
                 .subscribe((oldAnomalies: Array<Anomalie>) => {
                     const anomaliesToInsert = anomalies
                         // we check if anomalies are not already in local database
-                        .filter(({id}) => oldAnomalies.every(({id: oldAnomaliesId}) => (id !== oldAnomaliesId)))
+                        .filter(({id}) => oldAnomalies.every(({id: oldAnomaliesId}) => (Number(id) !== Number(oldAnomaliesId))))
                         .map((anomaly) => (
                             "(" +
                             anomaly.id + ", " +
                             "'" + this.escapeQuotes(anomaly.reference) + "', " +
                             anomaly.is_ref + ", " +
                             "'" + anomaly.quantity + "', " +
+                            "'" + anomaly.countedQuantity + "', " +
                             "'" + this.escapeQuotes(anomaly.location ? anomaly.location : 'N/A') + "', " +
                             "'" + anomaly.barCode + "')"
                         ));
@@ -674,7 +675,7 @@ export class SqliteService {
                     }
                     else {
                         const anomaliesValuesStr = anomaliesToInsert.join(', ');
-                        let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `location`, `barcode`) VALUES ' + anomaliesValuesStr + ';';
+                        let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `countedQuantity`, `location`, `barcode`) VALUES ' + anomaliesValuesStr + ';';
                         this.executeQuery(sqlAnomaliesInventaire).subscribe(() => {
                             ret$.next(true);
                         });

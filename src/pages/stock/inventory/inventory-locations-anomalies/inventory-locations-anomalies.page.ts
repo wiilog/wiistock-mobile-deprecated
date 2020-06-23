@@ -12,14 +12,15 @@ import {from} from 'rxjs';
 import {InventoryArticlesPageRoutingModule} from '@pages/stock/inventory/inventory-articles/inventory-articles-routing.module';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {InventoryService} from '@app/common/services/inventory.service';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
     selector: 'wii-inventory-locations-anomalies',
-    templateUrl: './inventory-locations-anomalies-page.component.html',
-    styleUrls: ['./inventory-locations-anomalies-page.component.scss'],
+    templateUrl: './inventory-locations-anomalies.page.html',
+    styleUrls: ['./inventory-locations-anomalies.page.scss'],
 })
-export class InventoryLocationsAnomaliesPage implements CanLeave {
+export class InventoryLocationsAnomaliesPage extends PageComponent implements CanLeave {
 
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
@@ -34,11 +35,12 @@ export class InventoryLocationsAnomaliesPage implements CanLeave {
     private locations: Array<Emplacement>;
 
     public constructor(private sqliteService: SqliteService,
-                       private navService: NavService,
                        private loadingService: LoadingService,
                        private mainHeaderService: MainHeaderService,
                        private toastService: ToastService,
-                       private inventoryService: InventoryService) {
+                       private inventoryService: InventoryService,
+                       navService: NavService) {
+        super(navService);
         this.listConfig = {
             body: [],
             boldValues: ['label']

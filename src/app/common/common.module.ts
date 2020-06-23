@@ -1,7 +1,6 @@
 import {NgModule} from '@angular/core';
 import {CommonModule as AngularCommonModule} from '@angular/common';
 import {IonicSelectableModule} from 'ionic-selectable';
-import {SignaturePadModule} from 'angular2-signaturepad';
 import {FormsModule} from '@angular/forms';
 import {LongPressModule} from 'ionic-long-press';
 import {BarcodeScannerComponent} from '@app/common/components/barcode-scanner/barcode-scanner.component';
@@ -58,7 +57,6 @@ import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/
         HttpClientModule,
         IonicModule,
         IonicSelectableModule,
-        SignaturePadModule,
         FormsModule,
         LongPressModule
     ],

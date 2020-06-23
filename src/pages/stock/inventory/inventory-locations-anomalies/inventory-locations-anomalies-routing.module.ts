@@ -1,7 +1,7 @@
 import {NgModule} from '@angular/core';
 import {Routes, RouterModule} from '@angular/router';
 
-import {InventoryLocationsAnomaliesPage} from './inventory-locations-anomalies-page.component';
+import {InventoryLocationsAnomaliesPage} from './inventory-locations-anomalies.page';
 import {CanLeaveGuard} from '@app/guards/can-leave/can-leave.guard';
 
 const routes: Routes = [

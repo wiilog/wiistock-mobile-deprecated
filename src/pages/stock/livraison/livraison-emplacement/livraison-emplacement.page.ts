@@ -12,13 +12,14 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {NavService} from '@app/common/services/nav.service';
 import {of, zip} from 'rxjs';
 import {flatMap} from 'rxjs/operators';
+import {PageComponent} from '@pages/page.component';
 
 @Component({
     selector: 'wii-livraison-emplacement',
     templateUrl: './livraison-emplacement.page.html',
     styleUrls: ['./livraison-emplacement.page.scss'],
 })
-export class LivraisonEmplacementPage {
+export class LivraisonEmplacementPage extends PageComponent {
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
 
@@ -42,11 +43,12 @@ export class LivraisonEmplacementPage {
     private validateIsLoading: boolean;
     private validateLivraison: () => void;
 
-    public constructor(private navService: NavService,
-                       private sqliteService: SqliteService,
+    public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
                        private network: Network,
-                       private localDataManager: LocalDataManagerService) {
+                       private localDataManager: LocalDataManagerService,
+                       navService: NavService) {
+        super(navService);
         this.validateIsLoading = false;
         this.resetEmitter$ = new EventEmitter<void>();
     }

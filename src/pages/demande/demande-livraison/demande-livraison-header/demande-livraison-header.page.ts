@@ -11,6 +11,7 @@ import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-p
 import {ToastService} from '@app/common/services/toast.service';
 import {DemandeLivraisonArticlesPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-articles/demande-livraison-articles-routing.module';
 import {map} from 'rxjs/operators';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -18,7 +19,7 @@ import {map} from 'rxjs/operators';
     templateUrl: './demande-livraison-header.page.html',
     styleUrls: ['./demande-livraison-header.page.scss'],
 })
-export class DemandeLivraisonHeaderPage {
+export class DemandeLivraisonHeaderPage extends PageComponent {
     @ViewChild('formPanelComponent', {static: false})
     public formPanelComponent: FormPanelComponent;
 
@@ -33,9 +34,10 @@ export class DemandeLivraisonHeaderPage {
 
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
-                       private navService: NavService,
                        private mainHeaderService: MainHeaderService,
-                       private storageService: StorageService) {
+                       private storageService: StorageService,
+                       navService: NavService) {
+        super(navService);
         this.hasLoaded = false;
     }
 
@@ -48,12 +50,6 @@ export class DemandeLivraisonHeaderPage {
 
         this.formPanelComponent.fireZebraScan();
 
-
-
-        this.sqliteService.findAll('`demande_livraison_type`').subscribe((types) => {
-            console.log("---------> types", types)
-        })
-
         zip(
             this.storageService.getOperatorId(),
             this.isUpdate ? this.sqliteService.findOneById('`demande_livraison`', demandeId) : of(this.demandeLivraisonToUpdate),
@@ -62,7 +58,6 @@ export class DemandeLivraisonHeaderPage {
         .subscribe(([operatorId, demandeLivraison, operator]: [number, DemandeLivraison|undefined, string]) => {
             this.demandeLivraisonToUpdate = demandeLivraison;
             this.operatorId = operatorId;
-            console.log(demandeLivraison)
             const {type_id: type, location_id: location, comment} = (demandeLivraison || {});
             this.formBodyConfig = [
                 {

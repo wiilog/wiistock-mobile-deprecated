@@ -2,13 +2,14 @@ import {Component} from '@angular/core';
 import {NavService} from '@app/common/services/nav.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {ArticleCollecte} from '@entities/article-collecte';
+import {PageComponent} from '@pages/page.component';
 
 @Component({
     selector: 'wii-collecte-article-take',
     templateUrl: './collecte-article-take.page.html',
     styleUrls: ['./collecte-article-take.page.scss'],
 })
-export class CollecteArticleTakePage {
+export class CollecteArticleTakePage extends PageComponent {
 
     public article: ArticleCollecte;
 
@@ -20,8 +21,9 @@ export class CollecteArticleTakePage {
 
     private selectArticle: (quantity: number) => void;
 
-    public constructor(private navService: NavService,
-                       private toastService: ToastService) {
+    public constructor(private toastService: ToastService,
+                       navService: NavService) {
+        super(navService);
     }
 
     public ionViewWillEnter(): void {

@@ -515,7 +515,7 @@ export class LocalDataManagerService {
                     {success: [], errors: []}
                 );
 
-                return (sortedData.success.length > 0 && sortedData.errors.length > 0)
+                return (sortedData.success.length > 0 || sortedData.errors.length > 0)
                     ? zip(
                         ...(
                             sortedData.success.length > 0
@@ -561,7 +561,7 @@ export class LocalDataManagerService {
                 }]
             })
         )
-            .pipe(flatMap((alert: HTMLIonAlertElement) => alert.present()))
+            .pipe(flatMap((alert: HTMLIonAlertElement) => from(alert.present())))
             .subscribe(() => {
                 this.alertManager.breakMessageLines();
             });

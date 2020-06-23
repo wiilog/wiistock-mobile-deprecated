@@ -6,13 +6,14 @@ import {MainHeaderService} from '@app/common/services/main-header.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {NavService} from '@app/common/services/nav.service';
 import {CollecteArticlesPageRoutingModule} from '@pages/stock/collecte/collecte-articles/collecte-articles-routing.module';
+import {PageComponent} from '@pages/page.component';
 
 @Component({
     selector: 'wii-collecte-menu',
     templateUrl: './collecte-menu.page.html',
     styleUrls: ['./collecte-menu.page.scss'],
 })
-export class CollecteMenuPage {
+export class CollecteMenuPage extends PageComponent {
     public hasLoaded: boolean;
 
     public collectes: Array<Collecte>;
@@ -24,9 +25,10 @@ export class CollecteMenuPage {
     private goToDepose: () => void;
     private avoidSync: () => void;
 
-    public constructor(private navService: NavService,
-                       private mainHeaderService: MainHeaderService,
-                       private sqliteService: SqliteService) {
+    public constructor(private mainHeaderService: MainHeaderService,
+                       private sqliteService: SqliteService,
+                       navService: NavService) {
+        super(navService);
     }
 
     public ionViewWillEnter(): void {

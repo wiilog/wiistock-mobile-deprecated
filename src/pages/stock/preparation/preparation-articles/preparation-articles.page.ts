@@ -19,6 +19,7 @@ import {IconColor} from '@app/common/components/icon/icon-color';
 import {PreparationEmplacementPageRoutingModule} from '@pages/stock/preparation/preparation-emplacement/preparation-emplacement-routing.module';
 import {PreparationRefArticlesPageRoutingModule} from '@pages/stock/preparation/preparation-ref-articles/preparation-ref-articles-routing.module';
 import {PreparationArticleTakePageRoutingModule} from '@pages/stock/preparation/preparation-article-take/preparation-article-take-routing.module';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -26,7 +27,7 @@ import {PreparationArticleTakePageRoutingModule} from '@pages/stock/preparation/
     templateUrl: './preparation-articles.page.html',
     styleUrls: ['./preparation-articles.page.scss'],
 })
-export class PreparationArticlesPage {
+export class PreparationArticlesPage extends PageComponent {
 
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
@@ -50,11 +51,12 @@ export class PreparationArticlesPage {
 
     public loadingStartPreparation: boolean;
 
-    public constructor(private navService: NavService,
-                       private sqliteService: SqliteService,
+    public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
                        private network: Network,
-                       private apiService: ApiService) {
+                       private apiService: ApiService,
+                       navService: NavService) {
+        super(navService);
         this.loadingStartPreparation = false;
     }
 

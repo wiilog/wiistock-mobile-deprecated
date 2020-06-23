@@ -6,13 +6,14 @@ import {NavService} from '@app/common/services/nav.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {PreparationArticlesPageRoutingModule} from '@pages/stock/preparation/preparation-articles/preparation-articles-routing.module';
+import {PageComponent} from '@pages/page.component';
 
 @Component({
     selector: 'wii-preparation-menu',
     templateUrl: './preparation-menu.page.html',
     styleUrls: ['./preparation-menu.page.scss'],
 })
-export class PreparationMenuPage {
+export class PreparationMenuPage extends PageComponent {
     public preparations: Array<Preparation>;
 
     public preparationsListConfig: Array<CardListConfig>;
@@ -21,9 +22,10 @@ export class PreparationMenuPage {
 
     public hasLoaded: boolean;
 
-    public constructor(private navService: NavService,
-                       private mainHeaderService: MainHeaderService,
-                       private sqlLiteProvider: SqliteService) {
+    public constructor(private mainHeaderService: MainHeaderService,
+                       private sqlLiteProvider: SqliteService,
+                       navService: NavService) {
+        super(navService);
     }
 
     public ionViewWillEnter(): void {

@@ -7,6 +7,7 @@ import {flatMap} from 'rxjs/operators';
 import {StorageService} from '@app/common/services/storage.service';
 import {NavService} from '@app/common/services/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -14,7 +15,7 @@ import {CanLeave} from '@app/guards/can-leave/can-leave';
     templateUrl: './params.page.html',
     styleUrls: ['./params.page.scss'],
 })
-export class ParamsPage implements CanLeave {
+export class ParamsPage extends PageComponent implements CanLeave {
 
     public URL: string;
 
@@ -22,11 +23,12 @@ export class ParamsPage implements CanLeave {
 
     private serverUrlSubscription: Subscription;
 
-    public constructor(private navService: NavService,
-                       private storageService: StorageService,
+    public constructor(private storageService: StorageService,
                        private apiService: ApiService,
                        private loadingService: LoadingService,
-                       private toastService: ToastService) {
+                       private toastService: ToastService,
+                       navService: NavService) {
+        super(navService);
         this.URL = '';
         this.isLoading = true;
     }

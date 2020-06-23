@@ -11,6 +11,7 @@ import {NavService} from '@app/common/services/nav.service';
 import {ActivatedRoute} from '@angular/router';
 import {EmplacementScanPageRoutingModule} from '@pages/prise-depose/emplacement-scan/emplacement-scan-routing.module';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -18,7 +19,7 @@ import {CanLeave} from '@app/guards/can-leave/can-leave';
     templateUrl: './prise-depose-menu.page.html',
     styleUrls: ['./prise-depose-menu.page.scss'],
 })
-export class PriseDeposeMenuPage implements CanLeave {
+export class PriseDeposeMenuPage extends PageComponent implements CanLeave {
 
     public nbDrop: number;
     public statsSlidersData: Array<StatsSlidersData>;
@@ -29,11 +30,12 @@ export class PriseDeposeMenuPage implements CanLeave {
     private deposeAlreadyNavigate: boolean;
 
     public constructor(private network: Network,
-                       private navService: NavService,
                        private loadingService: LoadingService,
                        private sqliteService: SqliteService,
                        private activatedRoute: ActivatedRoute,
-                       private toastService: ToastService) {
+                       private toastService: ToastService,
+                       navService: NavService) {
+        super(navService);
         this.nbDrop = 0;
         this.statsSlidersData = this.createStatsSlidersData(this.nbDrop);
         this.canLeave = true;

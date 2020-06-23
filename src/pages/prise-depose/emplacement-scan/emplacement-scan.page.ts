@@ -9,13 +9,14 @@ import {Emplacement} from '@entities/emplacement';
 import {PrisePageRoutingModule} from '@pages/prise-depose/prise/prise-routing.module';
 import {DeposePageRoutingModule} from '@pages/prise-depose/depose/depose-routing.module';
 import {NewEmplacementPageRoutingModule} from '@pages/new-emplacement/new-emplacement-routing.module';
+import {PageComponent} from '@pages/page.component';
 
 @Component({
     selector: 'wii-emplacement-scan',
     templateUrl: './emplacement-scan.page.html',
     styleUrls: ['./emplacement-scan.page.scss'],
 })
-export class EmplacementScanPage {
+export class EmplacementScanPage extends PageComponent {
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
 
@@ -29,8 +30,9 @@ export class EmplacementScanPage {
     public resetEmitter$: EventEmitter<void>;
 
     public constructor(private network: Network,
-                       private navService: NavService,
-                       private toastService: ToastService) {
+                       private toastService: ToastService,
+                       navService: NavService) {
+        super(navService);
         this.resetEmitter$ = new EventEmitter<void>();
     }
 

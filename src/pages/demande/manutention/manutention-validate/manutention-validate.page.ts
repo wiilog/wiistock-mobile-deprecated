@@ -9,6 +9,7 @@ import {NavService} from '@app/common/services/nav.service';
 import {AlertController} from '@ionic/angular';
 import {from} from 'rxjs';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -16,7 +17,7 @@ import {CanLeave} from '@app/guards/can-leave/can-leave';
     templateUrl: './manutention-validate.page.html',
     styleUrls: ['./manutention-validate.page.scss'],
 })
-export class ManutentionValidatePage implements CanLeave {
+export class ManutentionValidatePage extends PageComponent implements CanLeave {
     public manutention: Manutention;
     public commentaire: string;
     public hasLoaded: boolean;
@@ -24,12 +25,13 @@ export class ManutentionValidatePage implements CanLeave {
     private sendCommentToApiLoading;
 
     public constructor(private alertController: AlertController,
-                       private navService: NavService,
                        private sqliteService: SqliteService,
                        private toastService: ToastService,
                        private apiService: ApiService,
                        private network: Network,
-                       private loadingService: LoadingService) {
+                       private loadingService: LoadingService,
+                       navService: NavService) {
+        super(navService);
         this.sendCommentToApiLoading = false;
     }
 
@@ -109,10 +111,6 @@ export class ManutentionValidatePage implements CanLeave {
             this.manutention = manutention;
             this.hasLoaded = true;
         })
-    }
-
-    public toDate(manutention: Manutention): Date {
-        return new Date(manutention.date_attendue);
     }
 
     public showCommentaire(): void {

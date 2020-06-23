@@ -20,6 +20,7 @@ import {AlertManagerService} from '@app/common/services/alert-manager.service';
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {CollecteArticleTakePageRoutingModule} from '@pages/stock/collecte/collecte-article-take/collecte-article-take-routing.module';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -27,7 +28,7 @@ import {CanLeave} from '@app/guards/can-leave/can-leave';
     templateUrl: './collecte-articles.page.html',
     styleUrls: ['./collecte-articles.page.scss'],
 })
-export class CollecteArticlesPage implements CanLeave {
+export class CollecteArticlesPage extends PageComponent implements CanLeave {
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
 
@@ -57,13 +58,14 @@ export class CollecteArticlesPage implements CanLeave {
     private goToDepose: () => void;
     private canLeave: boolean;
 
-    public constructor(private navService: NavService,
-                       private toastService: ToastService,
+    public constructor(private toastService: ToastService,
                        private sqliteService: SqliteService,
                        private network: Network,
                        private localDataManager: LocalDataManagerService,
                        private alertController: AlertController,
-                       private apiService: ApiService) {
+                       private apiService: ApiService,
+                       navService: NavService) {
+        super(navService);
         this.loadingStartCollecte = false;
         this.isLoading = false;
         this.canLeave = true;

@@ -9,7 +9,14 @@
         </div>
     </div>
     <div #signatureWrapper class="signature-wrapper">
-        <signature-pad *ngIf="signaturePadOption" #signaturePad [options]="signaturePadOption"></signature-pad>
+        <!--suppress AngularUndefinedBinding -->
+        <canvas #signatureCanvas
+                *ngIf="canvasWidth && canvasHeight"
+                [height]="canvasHeight"
+                [width]="canvasWidth"
+                (touchstart)="startDrawing($event)"
+                (touchmove)="moved($event)">
+        </canvas>
     </div>
     <div class="page-footer">
         <ion-button class="larger"

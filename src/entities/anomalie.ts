@@ -3,6 +3,7 @@ export interface Anomalie {
     reference: string;
     is_ref: number;
     quantity: number;
+    countedQuantity: number;
     location: string;
     comment: string;
     treated: string;

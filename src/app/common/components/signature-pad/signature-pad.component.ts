@@ -1,5 +1,4 @@
 import {ChangeDetectorRef, Component, ElementRef, Input, ViewChild} from '@angular/core';
-import {SignaturePad} from 'angular2-signaturepad/signature-pad';
 import {ModalController} from '@ionic/angular';
 
 
@@ -10,42 +9,49 @@ import {ModalController} from '@ionic/angular';
 })
 export class SignaturePadComponent {
 
-    public signaturePadOption;
-
     @Input()
     public signature: string;
 
     @ViewChild('signatureWrapper', {static: false})
     public signatureWrapper: ElementRef;
 
-    @ViewChild('signaturePad', {static: false})
-    public signaturePad: SignaturePad;
+    @ViewChild('signatureCanvas')
+    public canvasElement: ElementRef<HTMLCanvasElement>;
+
+    public canvasWidth: number;
+    public canvasHeight: number;
+    public deleteRequested: boolean;
+
+    private canvasSaveX: number;
+    private canvasSaveY: number;
 
     public constructor(private modalController: ModalController,
                        private changeDetectorRef: ChangeDetectorRef) {
+        this.deleteRequested = false;
     }
 
     public ionViewWillEnter(): void {
         setTimeout(() => {
-            const componentSize = this.signatureWrapper.nativeElement.getBoundingClientRect();
-            this.signaturePadOption = {
-                canvasWidth: componentSize.width,
-                canvasHeight: componentSize.height - 4,
-                backgroundColor: 'rgb(255, 255, 255)',
-                minWidth: 1
-            };
+            const {width: wrapperWidth, height: wrapperHeight} = this.signatureWrapper.nativeElement.getBoundingClientRect();
+            this.canvasWidth = wrapperWidth;
+            this.canvasHeight = wrapperHeight;
+
             if (this.signature) {
                 this.changeDetectorRef.detectChanges();
-                this.signaturePad.fromDataURL(this.signature);
+                const image = new Image();
+                image.src = this.signature;
+                image.onload = () => {
+                    this.canvasContext.drawImage(image, 0, 0);
+                };
             }
         });
     }
 
     public onValidate(): void {
         this.modalController.dismiss({
-            signature: this.signaturePad.isEmpty()
+            signature: this.deleteRequested
                 ? false
-                : this.signaturePad.toDataURL('image/jpeg')
+                : this.getCanvasSignatureJpeg()
         });
     }
 
@@ -54,7 +60,53 @@ export class SignaturePadComponent {
     }
 
     public onClear(): void {
-        this.signaturePad.clear();
+        this.deleteRequested = true;
+        this.canvasContext.fillStyle = "#FFF";
+        this.canvasContext.clearRect(0, 0, this.canvasElement.nativeElement.width, this.canvasElement.nativeElement.height);
+    }
+
+    public startDrawing(ev): void {
+        this.deleteRequested = false;
+
+        const {x, y} = this.canvasElement.nativeElement.getBoundingClientRect();
+        this.canvasSaveX = ev.touches[0].pageX - x;
+        this.canvasSaveY = ev.touches[0].pageY - y;
+    }
+
+    public moved(ev): void {
+        const canvasPosition = this.canvasElement.nativeElement.getBoundingClientRect();
+
+        const ctx = this.canvasElement.nativeElement.getContext('2d');
+        const currentX = ev.touches[0].pageX - canvasPosition.x;
+        const currentY = ev.touches[0].pageY - canvasPosition.y;
+
+        ctx.lineJoin = 'round';
+        ctx.strokeStyle = '#000000';
+        ctx.lineWidth = 3;
+
+        ctx.beginPath();
+        ctx.moveTo(this.canvasSaveX, this.canvasSaveY);
+        ctx.lineTo(currentX, currentY);
+        ctx.closePath();
+
+        ctx.stroke();
+
+        this.canvasSaveX = currentX;
+        this.canvasSaveY = currentY;
+    }
+
+    private get canvasContext(): CanvasRenderingContext2D {
+        return this.canvasElement && this.canvasElement.nativeElement.getContext('2d');
+    }
+
+    private getCanvasSignatureJpeg(): string {
+        const canvas = this.canvasElement.nativeElement;
+        const newCanvas: HTMLCanvasElement = canvas.cloneNode(true) as HTMLCanvasElement;
+        const ctx = newCanvas.getContext('2d');
+        ctx.fillStyle = "#FFF";
+        ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+        ctx.drawImage(canvas, 0, 0);
+        return newCanvas.toDataURL('image/jpeg');
     }
 
 }

@@ -14,6 +14,7 @@ import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose
 import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
 import {StockMenuPageRoutingModule} from '@pages/stock/stock-menu/stock-menu-routing.module';
 import {DemandeMenuPageRoutingModule} from '@pages/demande/demande-menu/demande-menu-routing.module';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -21,7 +22,7 @@ import {DemandeMenuPageRoutingModule} from '@pages/demande/demande-menu/demande-
     templateUrl: './main-menu.page.html',
     styleUrls: ['./main-menu.page.scss'],
 })
-export class MainMenuPage {
+export class MainMenuPage extends PageComponent {
     public statsSlidersData: Array<StatsSlidersData>;
 
     public loading: boolean;
@@ -42,9 +43,10 @@ export class MainMenuPage {
                        private storageService: StorageService,
                        private localDataManager: LocalDataManagerService,
                        private toastService: ToastService,
-                       private navService: NavService,
                        private network: Network,
-                       private platform: Platform) {
+                       private platform: Platform,
+                       navService: NavService) {
+        super(navService);
         this.loading = true;
         this.displayNotifications = false;
     }

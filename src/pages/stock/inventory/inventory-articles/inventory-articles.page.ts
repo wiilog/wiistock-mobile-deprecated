@@ -16,13 +16,14 @@ import {SaisieInventaire} from '@entities/saisie-inventaire';
 import * as moment from 'moment';
 import {InventoryValidatePageRoutingModule} from '@pages/stock/inventory/inventory-validate/inventory-validate-routing.module';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
+import {PageComponent} from '@pages/page.component';
 
 @Component({
     selector: 'wii-inventory-articles',
     templateUrl: './inventory-articles.page.html',
     styleUrls: ['./inventory-articles.page.scss'],
 })
-export class InventoryArticlesPage implements CanLeave {
+export class InventoryArticlesPage extends PageComponent implements CanLeave {
 
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
@@ -40,11 +41,12 @@ export class InventoryArticlesPage implements CanLeave {
     private anomalyMode: boolean;
 
     public constructor(private sqliteService: SqliteService,
-                       private navService: NavService,
                        private loadingService: LoadingService,
                        private localDataManager: LocalDataManagerService,
                        private mainHeaderService: MainHeaderService,
-                       private toastService: ToastService) {
+                       private toastService: ToastService,
+                       navService: NavService) {
+        super(navService);
         this.listConfig = {
             body: [],
             boldValues: ['barcode', 'reference']
@@ -107,7 +109,7 @@ export class InventoryArticlesPage implements CanLeave {
     }
 
     private createListBodyConfig(): Array<ListPanelItemConfig> {
-        return this.articles.map(({reference, barcode, quantity}) => ({
+        return this.articles.map(({reference, barcode}) => ({
             infos: {
                 reference: {
                     label: 'Référence',
@@ -116,17 +118,7 @@ export class InventoryArticlesPage implements CanLeave {
                 barcode: {
                     label: 'Code barre',
                     value: barcode
-                },
-                ...(
-                    this.anomalyMode
-                        ? {
-                            quantity: {
-                                label: 'Quantité',
-                                value: `${quantity}`
-                            }
-                        }
-                        : {}
-                )
+                }
             },
             pressAction: (clickedItem) => {
                 this.onPressOnArticle(clickedItem);
@@ -143,7 +135,6 @@ export class InventoryArticlesPage implements CanLeave {
         const self = this;
         this.navService.push(InventoryValidatePageRoutingModule.PATH, {
             selectedArticle,
-            quantity: this.anomalyMode ? selectedArticle.quantity : undefined,
             validateQuantity: (quantity: number) => {
                 const indexSelectedArticle = this.articles.findIndex(({barcode}) => (barcode === selectedArticle.barcode));
                 this.loading = true;

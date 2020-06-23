@@ -18,6 +18,7 @@ import {LoadingService} from '@app/common/services/loading.service';
 import {Network} from "@ionic-native/network/ngx";
 import {AlertController} from "@ionic/angular";
 import {AlertManagerService} from "@app/common/services/alert-manager.service";
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -25,7 +26,7 @@ import {AlertManagerService} from "@app/common/services/alert-manager.service";
     templateUrl: './demande-livraison-menu.page.html',
     styleUrls: ['./demande-livraison-menu.page.scss'],
 })
-export class DemandeLivraisonMenuPage implements CanLeave {
+export class DemandeLivraisonMenuPage extends PageComponent implements CanLeave {
     public hasLoaded: boolean;
 
     public readonly demandeLivraisonListColor = CardListColorEnum.YELLOW;
@@ -46,14 +47,15 @@ export class DemandeLivraisonMenuPage implements CanLeave {
     };
 
     public constructor(private sqliteService: SqliteService,
-                       private navService: NavService,
                        private network: Network,
                        private alertController: AlertController,
                        private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
-                       private storageService: StorageService) {
+                       private storageService: StorageService,
+                       navService: NavService) {
+        super(navService);
         this.hasLoaded = false;
         this.fabListActivated = false
         this.apiSending = false;
@@ -97,19 +99,21 @@ export class DemandeLivraisonMenuPage implements CanLeave {
         this.fabListActivated = false;
 
         if (this.network.type && this.network.type !== 'unknown' && this.network.type !== 'none') {
+            let loader: HTMLIonLoadingElement;
             this.apiSending = true;
-            zip(
-                this.loadingService.presentLoading(),
-                this.localDataManager.sendDemandesLivraisons()
-            )
+            this.loadingService.presentLoading()
                 .pipe(
-                    flatMap(([loading, data]: [HTMLIonLoadingElement, { success: Array<number>, errors: Array<DemandeLivraison> }]) => (
+                    tap((presentedLoader) => {
+                        loader = presentedLoader;
+                    }),
+                    flatMap(() => this.localDataManager.sendDemandesLivraisons()),
+                    flatMap((data: { success: Array<number>, errors: Array<DemandeLivraison> }) => (
                         (data.errors.length > 0
                             ? this.preloadData(data.errors)
-                            : of(undefined)).pipe(map(() => ([loading, data])))
+                            : of(undefined)).pipe(map(() => (data)))
                     ))
                 )
-                .subscribe(([loading, data]: [HTMLIonLoadingElement, { success: Array<number>, errors: Array<DemandeLivraison> }]) => {
+                .subscribe((data:  { success: Array<number>, errors: Array<DemandeLivraison> }) => {
                     const nbSuccess = data.success.length;
                     const sSuccess = nbSuccess > 1 ? 's' : '';
 
@@ -123,12 +127,17 @@ export class DemandeLivraisonMenuPage implements CanLeave {
                         .filter(Boolean)
                         .join(', ');
 
-
                     this.refreshPageList(data.errors);
                     this.apiSending = false;
-                    from(loading.dismiss()).subscribe(() => {
+                    from(loader.dismiss()).subscribe(() => {
                         this.toastService.presentToast(messages);
                     });
+                }, () => {
+                    if (loader) {
+                        loader.dismiss();
+                    }
+                    this.apiSending = false;
+                    this.toastService.presentToast('Erreur serveur');
                 });
         } else {
             from(this.alertController

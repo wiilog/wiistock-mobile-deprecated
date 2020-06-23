@@ -26,6 +26,10 @@
                 margin-bottom: .20rem;
             }
 
+            .header-title, .header-subtitle, .header-info {
+                word-break: break-all;
+            }
+
             .header-title {
                 font-weight: bold;
             }

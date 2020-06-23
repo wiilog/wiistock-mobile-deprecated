@@ -12,13 +12,14 @@ import {PreparationMenuPageRoutingModule} from '@pages/stock/preparation/prepara
 import {LivraisonMenuPageRoutingModule} from '@pages/stock/livraison/livraison-menu/livraison-menu-routing.module';
 import {CollecteMenuPageRoutingModule} from '@pages/stock/collecte/collecte-menu/collecte-menu-routing.module';
 import {InventoryLocationsPageRoutingModule} from '@pages/stock/inventory/inventory-locations/inventory-locations-routing.module';
+import {PageComponent} from '@pages/page.component';
 
 @Component({
     selector: 'wii-stock-menu',
     templateUrl: './stock-menu.page.html',
     styleUrls: ['./stock-menu.page.scss'],
 })
-export class StockMenuPage {
+export class StockMenuPage extends PageComponent {
 
     public readonly menuConfig: Array<MenuConfig>;
 
@@ -29,12 +30,13 @@ export class StockMenuPage {
     private synchronisationSubscription: Subscription;
     private navigationSubscription: Subscription;
 
-    public constructor(private navService: NavService,
-                       private platform: Platform,
+    public constructor(private platform: Platform,
                        private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
                        private network: Network,
-                       private toastService: ToastService) {
+                       private toastService: ToastService,
+                       navService: NavService) {
+        super(navService);
         this.avoidSync = true;
         const self = this;
         this.menuConfig = [

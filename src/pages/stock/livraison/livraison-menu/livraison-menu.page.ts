@@ -6,13 +6,14 @@ import {NavService} from '@app/common/services/nav.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {LivraisonArticlesPageRoutingModule} from '@pages/stock/livraison/livraison-articles/livraison-articles-routing.module';
+import {PageComponent} from '@pages/page.component';
 
 @Component({
     selector: 'wii-livraison-menu',
     templateUrl: './livraison-menu.page.html',
     styleUrls: ['./livraison-menu.page.scss'],
 })
-export class LivraisonMenuPage {
+export class LivraisonMenuPage extends PageComponent {
     public livraisons: Array<Livraison>;
 
     public livraisonsListConfig: Array<CardListConfig>;
@@ -21,9 +22,10 @@ export class LivraisonMenuPage {
 
     public hasLoaded: boolean;
 
-    public constructor(private navService: NavService,
-                       private mainHeaderService: MainHeaderService,
-                       private sqliteService: SqliteService) {
+    public constructor(private mainHeaderService: MainHeaderService,
+                       private sqliteService: SqliteService,
+                       navService: NavService) {
+        super(navService);
     }
 
     public ionViewWillEnter(): void {
