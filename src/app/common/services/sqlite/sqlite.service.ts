@@ -178,7 +178,7 @@ export class SqliteService {
             this.findOneById('manutention', manut.id).subscribe((manutInserted) => {
                 if (manutInserted === null) {
                     let comment = manut.commentaire === null ? '' : this.escapeQuotes(manut.commentaire);
-                    let date = manut.date_attendue ? manut.date_attendue.date : null;
+                    let date = manut.date_attendue ? manut.date_attendue : null;
                     manutValues.push(
                         "(" +
                         manut.id + ", " +

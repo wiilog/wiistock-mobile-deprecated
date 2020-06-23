@@ -41,9 +41,7 @@ export class ManutentionMenuPage extends PageComponent {
                 content: [
                     {
                         label: 'Date attendue',
-                        value: manutention.date_attendue
-                            ? moment(manutention.date_attendue).locale('fr').format('L h:mm')
-                            : ''
+                        value: manutention.date_attendue || ''
                     },
                     {
                         label: 'Objet',

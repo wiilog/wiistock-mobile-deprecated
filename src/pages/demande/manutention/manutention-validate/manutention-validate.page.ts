@@ -113,10 +113,6 @@ export class ManutentionValidatePage extends PageComponent implements CanLeave {
         })
     }
 
-    public toDate(manutention: Manutention): Date {
-        return new Date(manutention.date_attendue);
-    }
-
     public showCommentaire(): void {
         this.showCom = !this.showCom;
     }
