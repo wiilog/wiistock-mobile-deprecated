@@ -38,7 +38,6 @@
         "@ionic/angular": "^5.0.0",
         "@ionic/storage": "^2.2.0",
         "@types/hammerjs": "^2.0.36",
-        "angular2-signaturepad": "^2.11.0",
         "com-darryncampbell-cordova-plugin-intent": "^2.0.0",
         "cordova-android": "^8.1.0",
         "cordova-plugin-androidx-adapter": "^1.1.0",

@@ -8,8 +8,9 @@
 
     .signature-wrapper {
         flex: 1;
-        signature-pad {
+        canvas {
             display: block;
+            background-color: $white;
         }
     }
 
