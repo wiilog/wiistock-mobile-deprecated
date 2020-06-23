@@ -4,7 +4,7 @@ import {OnDestroy} from '@angular/core';
 export abstract class PageComponent implements OnDestroy {
     protected constructor(protected navService: NavService) {}
 
-    public ngOnDestroy() {
-        this.navService.removeCurrentParams();
+    public ngOnDestroy(): void {
+        //this.navService.removeCurrentParams();
     }
 }

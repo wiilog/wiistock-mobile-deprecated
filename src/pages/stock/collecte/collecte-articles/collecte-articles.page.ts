@@ -314,7 +314,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
         this.articlesT = articles.filter(({has_moved}) => (has_moved === 1));
 
         this.listToTreatConfig = this.createListToTreatConfig();
-        this.listTreatedConfig = this.ceateListTreatedConfig();
+        this.listTreatedConfig = this.createListTreatedConfig();
 
         if (!isInit) {
             if (this.articlesNT.length === 0) {
@@ -355,7 +355,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                 )
                 .subscribe(
                     ({offline, success}: any) => {
-                        if (this.collecte && this.collecte.forStock) {
+                        if (this.collecte && this.collecte.forStock && success.length > 0) {
                             from(this.alertController
                                 .create({
                                     header: 'Collecte validée',
@@ -438,7 +438,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
             : undefined;
     }
 
-    private ceateListTreatedConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
+    private createListTreatedConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
         const pickedArticlesNumber = (this.articlesT ? this.articlesT.length : 0);
         const pickedArticlesPlural = pickedArticlesNumber > 1 ? 's' : '';
         return {
@@ -494,5 +494,9 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                     : {}
             )
         };
+    }
+
+    public ngOnDestroy() {
+        super.ngOnDestroy();
     }
 }
