@@ -20,6 +20,7 @@ import {DemandeLivraisonArticleTakePageRoutingModule} from '@pages/demande/deman
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {IconColor} from '@app/common/components/icon/icon-color';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -27,7 +28,7 @@ import {IconColor} from '@app/common/components/icon/icon-color';
     templateUrl: './demande-livraison-articles.page.html',
     styleUrls: ['./demande-livraison-articles.page.scss'],
 })
-export class DemandeLivraisonArticlesPage implements CanLeave {
+export class DemandeLivraisonArticlesPage extends PageComponent implements CanLeave {
 
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
@@ -61,7 +62,8 @@ export class DemandeLivraisonArticlesPage implements CanLeave {
                        private toastService: ToastService,
                        private changeDetector: ChangeDetectorRef,
                        private loadingService: LoadingService,
-                       private navService: NavService) {
+                       navService: NavService) {
+        super(navService);
         this.loading = false;
         this.resetSelectItemEmitter$ = new EventEmitter<void>();
         this.selectedArticles = [];
@@ -152,7 +154,7 @@ export class DemandeLivraisonArticlesPage implements CanLeave {
             subtitle.push(`Commentaire : ${demandeLivraison.comment}`);
         }
 
-        const headerConfig = {
+        return {
             title: 'Demande',
             subtitle,
             action: () => {
@@ -180,7 +182,6 @@ export class DemandeLivraisonArticlesPage implements CanLeave {
                 }
             ]
         };
-        return headerConfig;
     }
 
     private saveSelectedArticles(): void {

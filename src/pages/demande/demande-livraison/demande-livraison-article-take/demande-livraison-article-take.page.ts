@@ -2,6 +2,7 @@ import {Component} from '@angular/core';
 import {NavService} from '@app/common/services/nav.service';
 import {DemandeLivraisonArticle} from '@entities/demande-livraison-article';
 import {ToastService} from '@app/common/services/toast.service';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -9,7 +10,7 @@ import {ToastService} from '@app/common/services/toast.service';
     templateUrl: './demande-livraison-article-take.page.html',
     styleUrls: ['./demande-livraison-article-take.page.scss'],
 })
-export class DemandeLivraisonArticleTakePage {
+export class DemandeLivraisonArticleTakePage extends PageComponent {
 
     public simpleFormConfig: {
         title: string;
@@ -20,8 +21,10 @@ export class DemandeLivraisonArticleTakePage {
     private article: DemandeLivraisonArticle;
     private addArticleInDemande: (article: DemandeLivraisonArticle) => void;
 
-    public constructor(private navService: NavService,
-                       private toastService: ToastService) {}
+    public constructor(private toastService: ToastService,
+                       navService: NavService) {
+        super(navService)
+    }
 
     public ionViewWillEnter(): void {
         const navParams = this.navService.getCurrentParams();
@@ -55,8 +58,6 @@ export class DemandeLivraisonArticleTakePage {
     }
 
     public addArticle({quantity}): void {
-
-
         if (!quantity || !Number(quantity) || quantity <= 0) {
             this.toastService.presentToast('Veuillez sélectionner une quantité valide.');
         }

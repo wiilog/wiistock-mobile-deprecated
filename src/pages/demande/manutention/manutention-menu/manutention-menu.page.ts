@@ -7,6 +7,7 @@ import {MainHeaderService} from '@app/common/services/main-header.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {NavService} from '@app/common/services/nav.service';
 import {ManutentionValidatePageRoutingModule} from '@pages/demande/manutention/manutention-validate/manutention-validate-routing.module';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -14,7 +15,7 @@ import {ManutentionValidatePageRoutingModule} from '@pages/demande/manutention/m
     templateUrl: './manutention-menu.page.html',
     styleUrls: ['./manutention-menu.page.scss'],
 })
-export class ManutentionMenuPage {
+export class ManutentionMenuPage extends PageComponent {
     public manutentions: Array<Manutention>;
     public manutentionsListConfig: Array<CardListConfig>;
     public readonly manutentionsListColor = CardListColorEnum.GREEN;
@@ -22,9 +23,10 @@ export class ManutentionMenuPage {
 
     public hasLoaded: boolean;
 
-    public constructor(private navService: NavService,
-                       private mainHeaderService: MainHeaderService,
-                       private sqliteService: SqliteService) {
+    public constructor(private mainHeaderService: MainHeaderService,
+                       private sqliteService: SqliteService,
+                       navService: NavService) {
+        super(navService);
     }
 
     public ionViewWillEnter(): void {

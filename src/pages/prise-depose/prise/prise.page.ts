@@ -20,6 +20,7 @@ import {Network} from '@ionic-native/network/ngx';
 import {ActivatedRoute} from '@angular/router';
 import {NavService} from '@app/common/services/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -27,7 +28,7 @@ import {CanLeave} from '@app/guards/can-leave/can-leave';
     templateUrl: './prise.page.html',
     styleUrls: ['./prise.page.scss'],
 })
-export class PrisePage implements CanLeave {
+export class PrisePage extends PageComponent implements CanLeave {
 
     private static readonly MOUVEMENT_TRACA_PRISE = 'prise';
 
@@ -70,8 +71,9 @@ export class PrisePage implements CanLeave {
                        private localDataManager: LocalDataManagerService,
                        private tracaListFactory: TracaListFactoryService,
                        private activatedRoute: ActivatedRoute,
-                       private navService: NavService,
-                       private storageService: StorageService) {
+                       private storageService: StorageService,
+                       navService: NavService) {
+        super(navService);
         this.init();
         this.listBoldValues = [
             'object'

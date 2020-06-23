@@ -2,13 +2,14 @@ import {Component} from '@angular/core';
 import {ArticleInventaire} from '@entities/article-inventaire';
 import {NavService} from '@app/common/services/nav.service';
 import {ToastService} from '@app/common/services/toast.service';
+import {PageComponent} from '@pages/page.component';
 
 @Component({
     selector: 'wii-inventory-validate',
     templateUrl: './inventory-validate.page.html',
     styleUrls: ['./inventory-validate.page.scss'],
 })
-export class InventoryValidatePage {
+export class InventoryValidatePage extends PageComponent {
 
     public selectedArticle: ArticleInventaire;
 
@@ -20,8 +21,9 @@ export class InventoryValidatePage {
 
     private validateQuantity: (quantity: number) => void;
 
-    public constructor(public navService: NavService,
-                       public toastService: ToastService) {
+    public constructor(private toastService: ToastService,
+                       navService: NavService) {
+        super(navService);
     }
 
     public ionViewWillEnter(): void {

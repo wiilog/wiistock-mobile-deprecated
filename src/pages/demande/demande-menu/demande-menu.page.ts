@@ -10,6 +10,7 @@ import {ToastService} from '@app/common/services/toast.service';
 import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
 import {ManutentionMenuPageRoutingModule} from '@pages/demande/manutention/manutention-menu/manutention-menu-routing.module';
 import {DemandeLivraisonMenuPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu-routing.module';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -17,7 +18,7 @@ import {DemandeLivraisonMenuPageRoutingModule} from '@pages/demande/demande-livr
     templateUrl: './demande-menu.page.html',
     styleUrls: ['./demande-menu.page.scss'],
 })
-export class DemandeMenuPage {
+export class DemandeMenuPage extends PageComponent {
 
     public readonly menuConfig: Array<MenuConfig>;
 
@@ -28,12 +29,13 @@ export class DemandeMenuPage {
     private synchronisationSubscription: Subscription;
     private navigationSubscription: Subscription;
 
-    public constructor(private navService: NavService,
-                       private platform: Platform,
+    public constructor(private platform: Platform,
                        private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
                        private network: Network,
-                       private toastService: ToastService) {
+                       private toastService: ToastService,
+                       navService: NavService) {
+        super(navService);
         this.avoidSync = true;
         const self = this;
         this.menuConfig = [

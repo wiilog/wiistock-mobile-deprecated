@@ -5,13 +5,14 @@ import {LoadingService} from '@app/common/services/loading.service';
 import {NavService} from '@app/common/services/nav.service';
 import {flatMap, map} from 'rxjs/operators';
 import {from} from 'rxjs';
+import {PageComponent} from '@pages/page.component';
 
 @Component({
     selector: 'wii-new-emplacement',
     templateUrl: './new-emplacement.page.html',
     styleUrls: ['./new-emplacement.page.scss'],
 })
-export class NewEmplacementPage {
+export class NewEmplacementPage extends PageComponent {
 
     public loading: boolean;
 
@@ -23,7 +24,8 @@ export class NewEmplacementPage {
     public constructor(private apiService: ApiService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
-                       private navService: NavService) {
+                       navService: NavService) {
+        super(navService);
         this.loading = false;
 
         this.simpleFormConfig = {

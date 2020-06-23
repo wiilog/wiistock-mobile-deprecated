@@ -18,6 +18,7 @@ import {LoadingService} from '@app/common/services/loading.service';
 import {Network} from "@ionic-native/network/ngx";
 import {AlertController} from "@ionic/angular";
 import {AlertManagerService} from "@app/common/services/alert-manager.service";
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -25,7 +26,7 @@ import {AlertManagerService} from "@app/common/services/alert-manager.service";
     templateUrl: './demande-livraison-menu.page.html',
     styleUrls: ['./demande-livraison-menu.page.scss'],
 })
-export class DemandeLivraisonMenuPage implements CanLeave {
+export class DemandeLivraisonMenuPage extends PageComponent implements CanLeave {
     public hasLoaded: boolean;
 
     public readonly demandeLivraisonListColor = CardListColorEnum.YELLOW;
@@ -46,14 +47,15 @@ export class DemandeLivraisonMenuPage implements CanLeave {
     };
 
     public constructor(private sqliteService: SqliteService,
-                       private navService: NavService,
                        private network: Network,
                        private alertController: AlertController,
                        private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
-                       private storageService: StorageService) {
+                       private storageService: StorageService,
+                       navService: NavService) {
+        super(navService);
         this.hasLoaded = false;
         this.fabListActivated = false
         this.apiSending = false;

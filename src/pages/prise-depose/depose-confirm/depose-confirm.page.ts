@@ -5,6 +5,8 @@ import {FormPanelItemConfig} from '@app/common/components/panel/model/form-panel
 import {Emplacement} from '@entities/emplacement';
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav.service';
+import {ActivatedRoute} from '@angular/router';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -12,7 +14,7 @@ import {NavService} from '@app/common/services/nav.service';
     templateUrl: './depose-confirm.page.html',
     styleUrls: ['./depose-confirm.page.scss'],
 })
-export class DeposeConfirmPage {
+export class DeposeConfirmPage extends PageComponent {
     @ViewChild('formPanelComponent', {static: false})
     public formPanelComponent: FormPanelComponent;
 
@@ -22,8 +24,10 @@ export class DeposeConfirmPage {
     private location: Emplacement;
     private validateDepose: (comment: string, signature: string) => void;
 
-    public constructor(private navService: NavService,
-                       private toastService: ToastService) {
+    public constructor(private activatedRoute: ActivatedRoute,
+                       private toastService: ToastService,
+                       navService: NavService) {
+        super(navService);
     }
 
     public ionViewWillEnter(): void {

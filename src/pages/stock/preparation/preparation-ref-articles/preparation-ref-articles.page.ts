@@ -11,6 +11,7 @@ import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {flatMap, map, take, tap} from 'rxjs/operators';
 import {PreparationArticleTakePageRoutingModule} from '@pages/stock/preparation/preparation-article-take/preparation-article-take-routing.module';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -18,7 +19,7 @@ import {CanLeave} from '@app/guards/can-leave/can-leave';
     templateUrl: './preparation-ref-articles.page.html',
     styleUrls: ['./preparation-ref-articles.page.scss'],
 })
-export class PreparationRefArticlesPage implements CanLeave {
+export class PreparationRefArticlesPage extends PageComponent implements CanLeave {
 
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
@@ -36,10 +37,11 @@ export class PreparationRefArticlesPage implements CanLeave {
     private countSubscription: Subscription;
     private navParams: Map<string, any>;
 
-    public constructor(private navService: NavService,
-                       private toastService: ToastService,
+    public constructor(private toastService: ToastService,
                        private loadingService: LoadingService,
-                       private sqliteService: SqliteService) {
+                       private sqliteService: SqliteService,
+                       navService: NavService) {
+        super(navService);
         this.loading = true;
         this.pageHasLoadedOnce = false;
         this.resetEmitter$ = new EventEmitter<void>();

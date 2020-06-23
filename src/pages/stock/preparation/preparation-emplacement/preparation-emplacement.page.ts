@@ -13,13 +13,14 @@ import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {flatMap} from 'rxjs/operators';
 import {of, zip} from 'rxjs';
+import {PageComponent} from '@pages/page.component';
 
 @Component({
     selector: 'wii-preparation-emplacement',
     templateUrl: './preparation-emplacement.page.html',
     styleUrls: ['./preparation-emplacement.page.scss'],
 })
-export class PreparationEmplacementPage {
+export class PreparationEmplacementPage extends PageComponent {
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
 
@@ -44,12 +45,13 @@ export class PreparationEmplacementPage {
 
     private validatePrepa: () => void;
 
-    public constructor(private navService: NavService,
-                       private sqliteService: SqliteService,
+    public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
                        private storageService: StorageService,
                        private network: Network,
-                       private localDataManager: LocalDataManagerService) {
+                       private localDataManager: LocalDataManagerService,
+                       navService: NavService) {
+        super(navService);
         this.isLoading = false;
         this.resetEmitter$ = new EventEmitter<void>();
     }

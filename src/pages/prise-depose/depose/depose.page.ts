@@ -18,13 +18,14 @@ import {NavService} from '@app/common/services/nav.service';
 import {flatMap, map, tap} from 'rxjs/operators';
 import * as moment from 'moment';
 import {DeposeConfirmPageRoutingModule} from '@pages/prise-depose/depose-confirm/depose-confirm-routing.module';
+import {PageComponent} from '@pages/page.component';
 
 @Component({
     selector: 'wii-depose',
     templateUrl: './depose.page.html',
     styleUrls: ['./depose.page.scss'],
 })
-export class DeposePage {
+export class DeposePage extends PageComponent {
 
     private static readonly MOUVEMENT_TRACA_DEPOSE = 'depose';
 
@@ -70,7 +71,8 @@ export class DeposePage {
                        private localDataManager: LocalDataManagerService,
                        private tracaListFactory: TracaListFactoryService,
                        private storageService: StorageService,
-                       private navService: NavService) {
+                       navService: NavService) {
+        super(navService);
         this.init();
         this.listBoldValues = [
             'object'

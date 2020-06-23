@@ -2,13 +2,14 @@ import {Component} from '@angular/core';
 import {ArticleLivraison} from '@entities/article-livraison';
 import {NavService} from '@app/common/services/nav.service';
 import {ToastService} from '@app/common/services/toast.service';
+import {PageComponent} from '@pages/page.component';
 
 @Component({
     selector: 'wii-livraison-article-take',
     templateUrl: './livraison-article-take.page.html',
     styleUrls: ['./livraison-article-take.page.scss'],
 })
-export class LivraisonArticleTakePage {
+export class LivraisonArticleTakePage extends PageComponent {
 
     public article: ArticleLivraison;
 
@@ -20,8 +21,9 @@ export class LivraisonArticleTakePage {
 
     private selectArticle: (quantity) => void;
 
-    public constructor(private navService: NavService,
-                       private toastService: ToastService) {
+    public constructor(private toastService: ToastService,
+                       navService: NavService) {
+        super(navService);
     }
 
     public ionViewWillEnter(): void {

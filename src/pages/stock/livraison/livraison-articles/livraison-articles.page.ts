@@ -16,6 +16,7 @@ import {Mouvement} from '@entities/mouvement';
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {LivraisonEmplacementPageRoutingModule} from '@pages/stock/livraison/livraison-emplacement/livraison-emplacement-routing.module';
 import {LivraisonArticleTakePageRoutingModule} from '@pages/stock/livraison/livraison-article-take/livraison-article-take-routing.module';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -23,7 +24,7 @@ import {LivraisonArticleTakePageRoutingModule} from '@pages/stock/livraison/livr
     templateUrl: './livraison-articles.page.html',
     styleUrls: ['./livraison-articles.page.scss'],
 })
-export class LivraisonArticlesPage {
+export class LivraisonArticlesPage extends PageComponent {
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
 
@@ -47,11 +48,12 @@ export class LivraisonArticlesPage {
 
     public loadingStartLivraison: boolean;
 
-    public constructor(private navService: NavService,
-                       private toastService: ToastService,
+    public constructor(private toastService: ToastService,
                        private sqliteService: SqliteService,
                        private network: Network,
-                       private apiService: ApiService) {
+                       private apiService: ApiService,
+                       navService: NavService) {
+        super(navService);
         this.loadingStartLivraison = false;
     }
 

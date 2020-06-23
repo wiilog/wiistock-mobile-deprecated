@@ -15,6 +15,7 @@ import {SplashScreen} from '@ionic-native/splash-screen/ngx';
 import {ActivatedRoute} from '@angular/router';
 import {environment} from '@environments/environment';
 import {autoConnect, login, password} from '../../dev-credentials.json';
+import {PageComponent} from '@pages/page.component';
 
 
 @Component({
@@ -22,7 +23,7 @@ import {autoConnect, login, password} from '../../dev-credentials.json';
     templateUrl: './login.page.html',
     styleUrls: ['./login.page.scss'],
 })
-export class LoginPage {
+export class LoginPage extends PageComponent {
 
     private static readonly PATH_DOWNLOAD_APK: string = 'telecharger/nomade.apk';
 
@@ -48,10 +49,11 @@ export class LoginPage {
                        private changeDetector: ChangeDetectorRef,
                        private barcodeScannerManager: BarcodeScannerManagerService,
                        private sqliteService: SqliteService,
-                       private navService: NavService,
                        private activatedRoute: ActivatedRoute,
                        private versionChecker: VersionCheckerService,
-                       private storageService: StorageService) {
+                       private storageService: StorageService,
+                       navService: NavService) {
+        super(navService);
         this.loading = true;
         this.appVersionInvalid = false;
     }

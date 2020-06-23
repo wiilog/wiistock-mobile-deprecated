@@ -4,13 +4,14 @@ import {ArticlePrepaByRefArticle} from '@entities/article-prepa-by-ref-article';
 import {Preparation} from '@entities/preparation';
 import {NavService} from '@app/common/services/nav.service';
 import {ToastService} from '@app/common/services/toast.service';
+import {PageComponent} from '@pages/page.component';
 
 @Component({
     selector: 'wii-preparation-article-take',
     templateUrl: './preparation-article-take.page.html',
     styleUrls: ['./preparation-article-take.page.scss'],
 })
-export class PreparationArticleTakePage {
+export class PreparationArticleTakePage extends PageComponent {
 
     public article: ArticlePrepa & ArticlePrepaByRefArticle;
     public refArticle: ArticlePrepa;
@@ -24,8 +25,9 @@ export class PreparationArticleTakePage {
 
     private selectArticle: (quantity: number) => void;
 
-    public constructor(private navService: NavService,
-                       private toastService: ToastService) {
+    public constructor(private toastService: ToastService,
+                       navService: NavService) {
+        super(navService);
     }
 
     public ionViewWillEnter(): void {
