@@ -107,7 +107,7 @@ export class InventoryArticlesPage implements CanLeave {
     }
 
     private createListBodyConfig(): Array<ListPanelItemConfig> {
-        return this.articles.map(({reference, barcode, quantity}) => ({
+        return this.articles.map(({reference, barcode}) => ({
             infos: {
                 reference: {
                     label: 'Référence',
@@ -116,17 +116,7 @@ export class InventoryArticlesPage implements CanLeave {
                 barcode: {
                     label: 'Code barre',
                     value: barcode
-                },
-                ...(
-                    this.anomalyMode
-                        ? {
-                            quantity: {
-                                label: 'Quantité en stock',
-                                value: `${quantity}`
-                            }
-                        }
-                        : {}
-                )
+                }
             },
             pressAction: (clickedItem) => {
                 this.onPressOnArticle(clickedItem);
@@ -143,7 +133,6 @@ export class InventoryArticlesPage implements CanLeave {
         const self = this;
         this.navService.push(InventoryValidatePageRoutingModule.PATH, {
             selectedArticle,
-            quantity: this.anomalyMode ? selectedArticle.quantity : undefined,
             validateQuantity: (quantity: number) => {
                 const indexSelectedArticle = this.articles.findIndex(({barcode}) => (barcode === selectedArticle.barcode));
                 this.loading = true;
