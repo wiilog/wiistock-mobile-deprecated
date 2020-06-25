@@ -52,7 +52,7 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
     }
 
     public ionViewWillEnter(): void {
-        this.navParams = this.navService.getCurrentParams();
+        this.navParams = this.currentNavParams;
         this.refArticle = this.navParams.get('article');
         this.listWhereClause = [`reference_article LIKE '${this.refArticle.reference}'`];
 

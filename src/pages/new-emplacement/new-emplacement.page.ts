@@ -40,9 +40,8 @@ export class NewEmplacementPage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        const navParams = this.navService.getCurrentParams();
-        this.createNewEmp = navParams.get('createNewEmp');
-        this.isDelivery = navParams.get('isDelivery');
+        this.createNewEmp = this.currentNavParams.get('createNewEmp');
+        this.isDelivery = this.currentNavParams.get('isDelivery');
     }
 
     public onFormSubmit(data): void {

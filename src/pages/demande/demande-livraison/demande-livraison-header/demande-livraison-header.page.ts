@@ -44,9 +44,8 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
 
-        const navParams = this.navService.getCurrentParams();
-        const demandeId = navParams.get('demandeId');
-        this.isUpdate = navParams.get('isUpdate');
+        const demandeId = this.currentNavParams.get('demandeId');
+        this.isUpdate = this.currentNavParams.get('isUpdate');
 
         this.formPanelComponent.fireZebraScan();
 

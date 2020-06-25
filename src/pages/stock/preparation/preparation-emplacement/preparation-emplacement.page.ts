@@ -57,9 +57,8 @@ export class PreparationEmplacementPage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        const navParams = this.navService.getCurrentParams();
-        this.preparation = navParams.get('preparation');
-        this.validatePrepa = navParams.get('validatePrepa');
+        this.preparation = this.currentNavParams.get('preparation');
+        this.validatePrepa = this.currentNavParams.get('validatePrepa');
 
         this.resetEmitter$.emit();
 

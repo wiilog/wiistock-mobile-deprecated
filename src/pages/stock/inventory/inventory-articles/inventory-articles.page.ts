@@ -56,9 +56,8 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
 
     public ionViewWillEnter(): void {
         this.loading = true;
-        const navParams = this.navService.getCurrentParams();
-        this.selectedLocation = navParams.get('selectedLocation');
-        this.anomalyMode = navParams.get('anomalyMode') || false;
+        this.selectedLocation = this.currentNavParams.get('selectedLocation');
+        this.anomalyMode = this.currentNavParams.get('anomalyMode') || false;
 
         if (!this.alreadyInitialized) {
             zip(

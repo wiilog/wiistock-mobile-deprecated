@@ -8,6 +8,7 @@ import {NavService} from '@app/common/services/nav.service';
 import {CollecteArticlesPageRoutingModule} from '@pages/stock/collecte/collecte-articles/collecte-articles-routing.module';
 import {PageComponent} from '@pages/page.component';
 
+
 @Component({
     selector: 'wii-collecte-menu',
     templateUrl: './collecte-menu.page.html',
@@ -33,9 +34,8 @@ export class CollecteMenuPage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
-        const navParams = this.navService.getCurrentParams();
-        this.goToDepose = navParams.get('goToDepose');
-        this.avoidSync = navParams.get('avoidSync');
+        this.goToDepose = this.currentNavParams.get('goToDepose');
+        this.avoidSync = this.currentNavParams.get('avoidSync');
         this.sqliteService.findAll('`collecte`').subscribe((collectes: Array<Collecte>) => {
             this.collectes = collectes
                 .filter(({date_end, location_to}) => (!date_end && !location_to))
@@ -81,6 +81,7 @@ export class CollecteMenuPage extends PageComponent {
             this.refreshSubTitle();
         });
     }
+
     public refreshSubTitle(): void {
         const collectesLength = this.collectes.length;
         this.mainHeaderService.emitSubTitle(`${collectesLength === 0 ? 'Aucune' : collectesLength} collecte${collectesLength > 1 ? 's' : ''}`)

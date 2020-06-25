@@ -36,9 +36,8 @@ export class ManutentionValidatePage extends PageComponent implements CanLeave {
     }
 
     public ionViewWillEnter(): void {
-        const navParams = this.navService.getCurrentParams();
-        if (navParams.get('manutention') !== undefined) {
-            this.manutention = navParams.get('manutention');
+        if (this.currentNavParams.get('manutention') !== undefined) {
+            this.manutention = this.currentNavParams.get('manutention');
         }
         this.synchronise();
     }

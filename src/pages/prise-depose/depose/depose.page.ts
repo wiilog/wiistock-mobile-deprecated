@@ -82,10 +82,9 @@ export class DeposePage extends PageComponent {
     public ionViewWillEnter(): void {
         if (!this.operator) {
             this.init();
-            const navParams = this.navService.getCurrentParams();
-            this.emplacement = navParams.get('emplacement');
-            this.finishAction = navParams.get('finishAction');
-            this.fromStock = Boolean(navParams.get('fromStock'));
+            this.emplacement = this.currentNavParams.get('emplacement');
+            this.finishAction = this.currentNavParams.get('finishAction');
+            this.fromStock = Boolean(this.currentNavParams.get('fromStock'));
             zip(
                 this.sqliteService.findBy(
                     'mouvement_traca',

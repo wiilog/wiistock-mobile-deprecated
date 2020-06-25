@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import * as moment from 'moment';
 import {Manutention} from '@entities/manutention';
 import {CardListConfig} from '@app/common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';

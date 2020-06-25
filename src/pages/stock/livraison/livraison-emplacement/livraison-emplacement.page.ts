@@ -54,9 +54,8 @@ export class LivraisonEmplacementPage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        const navParams = this.navService.getCurrentParams();
-        this.validateLivraison = navParams.get('validateLivraison');
-        this.livraison = navParams.get('livraison');
+        this.validateLivraison = this.currentNavParams.get('validateLivraison');
+        this.livraison = this.currentNavParams.get('livraison');
 
         this.resetEmitter$.emit();
 

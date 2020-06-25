@@ -61,8 +61,7 @@ export class PreparationArticlesPage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        const navParams = this.navService.getCurrentParams();
-        this.preparation = navParams.get('preparation');
+        this.preparation = this.currentNavParams.get('preparation');
         this.preparationsHeaderConfig = {
             leftIcon: {name: 'preparation.svg'},
             title: `Préparation ${this.preparation.numero}`,

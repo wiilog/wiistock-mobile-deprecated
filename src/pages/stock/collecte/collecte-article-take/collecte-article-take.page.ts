@@ -27,9 +27,8 @@ export class CollecteArticleTakePage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        const navParams = this.navService.getCurrentParams();
-        this.article = navParams.get('article');
-        this.selectArticle = navParams.get('selectArticle');
+        this.article = this.currentNavParams.get('article');
+        this.selectArticle = this.currentNavParams.get('selectArticle');
 
         this.simpleFormConfig = {
             title: 'Confirmation quantité',

@@ -58,8 +58,7 @@ export class LivraisonArticlesPage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        const navParams = this.navService.getCurrentParams();
-        this.livraison = navParams.get('livraison');
+        this.livraison = this.currentNavParams.get('livraison');
 
         this.livraisonsHeaderConfig = {
             leftIcon: {name: 'delivery.svg'},

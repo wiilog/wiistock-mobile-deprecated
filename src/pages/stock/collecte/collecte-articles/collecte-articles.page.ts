@@ -73,9 +73,8 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
 
     public ionViewWillEnter(): void {
         this.isLoading = false;
-        const navParams = this.navService.getCurrentParams();
-        this.collecte = navParams.get('collecte');
-        this.goToDepose = navParams.get('goToDepose');
+        this.collecte = this.currentNavParams.get('collecte');
+        this.goToDepose = this.currentNavParams.get('goToDepose');
 
         this.collecteHeaderConfig = {
             leftIcon: {name: 'collecte.svg'},
@@ -494,9 +493,5 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                     : {}
             )
         };
-    }
-
-    public ngOnDestroy() {
-        super.ngOnDestroy();
     }
 }

@@ -80,9 +80,8 @@ export class DemandeLivraisonArticlesPage extends PageComponent implements CanLe
     public ionViewWillEnter(): void {
         this.selectItemComponent.fireZebraScan();
 
-        const navParams = this.navService.getCurrentParams();
-        this.demandeId = navParams.get('demandeId');
-        this.isUpdate = Boolean(navParams.get('isUpdate'));
+        this.demandeId = this.currentNavParams.get('demandeId');
+        this.isUpdate = Boolean(this.currentNavParams.get('isUpdate'));
 
         if (!this.pageAlreadyInit) {
             this.selectedArticles = [];

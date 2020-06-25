@@ -27,9 +27,8 @@ export class DemandeLivraisonArticleTakePage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        const navParams = this.navService.getCurrentParams();
-        this.article = navParams.get('article');
-        this.addArticleInDemande = navParams.get('addArticleInDemande');
+        this.article = this.currentNavParams.get('article');
+        this.addArticleInDemande = this.currentNavParams.get('addArticleInDemande');
 
         this.simpleFormConfig = {
             title: 'Confirmation quantité',

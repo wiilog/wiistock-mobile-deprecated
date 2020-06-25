@@ -27,10 +27,9 @@ export class InventoryValidatePage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        const navParams = this.navService.getCurrentParams();
-        this.selectedArticle = navParams.get('selectedArticle');
-        this.validateQuantity = navParams.get('validateQuantity');
-        const quantity = navParams.get('quantity');
+        this.selectedArticle = this.currentNavParams.get('selectedArticle');
+        this.validateQuantity = this.currentNavParams.get('validateQuantity');
+        const quantity = this.currentNavParams.get('quantity');
 
         this.simpleFormConfig = {
             title: 'Confirmation quantité',

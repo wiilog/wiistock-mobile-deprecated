@@ -37,9 +37,8 @@ export class EmplacementScanPage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        const navParams = this.navService.getCurrentParams();
-        this.fromDepose = Boolean(navParams.get('fromDepose'));
-        this.fromStock = Boolean(navParams.get('fromStock'));
+        this.fromDepose = Boolean(this.currentNavParams.get('fromDepose'));
+        this.fromStock = Boolean(this.currentNavParams.get('fromStock'));
 
         this.resetEmitter$.emit();
 

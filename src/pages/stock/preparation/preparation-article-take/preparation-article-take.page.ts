@@ -31,11 +31,10 @@ export class PreparationArticleTakePage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        const navParams = this.navService.getCurrentParams();
-        this.article = navParams.get('article');
-        this.refArticle = navParams.get('refArticle');
-        this.preparation = navParams.get('preparation');
-        this.selectArticle = navParams.get('selectArticle');
+        this.article = this.currentNavParams.get('article');
+        this.refArticle = this.currentNavParams.get('refArticle');
+        this.preparation = this.currentNavParams.get('preparation');
+        this.selectArticle = this.currentNavParams.get('selectArticle');
 
         this.simpleFormConfig = {
             title: 'Confirmation quantité',

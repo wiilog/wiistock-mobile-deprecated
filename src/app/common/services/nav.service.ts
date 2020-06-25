@@ -5,7 +5,7 @@ import {from, Observable} from 'rxjs';
 import {environment} from '@environments/environment';
 
 
-type Params = Map<string, any>;
+export type Params = Map<string, any>;
 
 @Injectable({
     providedIn: 'root'
@@ -30,12 +30,6 @@ export class NavService {
     private static SetParams(paramId: number, params: Params): void {
         if (params) {
             NavService.ParamsCollection[paramId] = params;
-        }
-    }
-
-    private static RemoveParams(paramId: number): void {
-        if (NavService.ParamsCollection[paramId]) {
-            delete NavService.ParamsCollection[paramId];
         }
     }
 
@@ -76,13 +70,13 @@ export class NavService {
         return NavService.ParamsCollection[paramId] || new Map<string, any>();
     }
 
-    public getCurrentParams(): Params {
-        const paramsId = this.activatedRoute.snapshot.queryParams.paramsId;
-        return this.getParams(paramsId);
+    public getCurrentParamId(): number {
+        return this.activatedRoute.snapshot.queryParams.paramsId;
     }
 
-    public removeCurrentParams(): void {
-        const paramsId = this.activatedRoute.snapshot.queryParams.paramsId;
-        NavService.RemoveParams(paramsId);
+    public removeParams(paramId: number): void {
+        if (NavService.ParamsCollection[paramId]) {
+            delete NavService.ParamsCollection[paramId];
+        }
     }
 }

@@ -82,10 +82,9 @@ export class PrisePage extends PageComponent implements CanLeave {
 
     public ionViewWillEnter(): void {
         this.init();
-        const navParams = this.navService.getCurrentParams();
-        this.finishAction = navParams.get('finishAction');
-        this.emplacement = navParams.get('emplacement');
-        this.fromStock = Boolean(navParams.get('fromStock'));
+        this.finishAction = this.currentNavParams.get('finishAction');
+        this.emplacement = this.currentNavParams.get('emplacement');
+        this.fromStock = Boolean(this.currentNavParams.get('fromStock'));
 
         zip(
             this.storageService.getOperator(),

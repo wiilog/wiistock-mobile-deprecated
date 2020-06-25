@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {Emplacement} from '@entities/emplacement';
 import {MainHeaderService} from '@app/common/services/main-header.service';
-import {from, of, zip} from 'rxjs';
+import {of, zip} from 'rxjs';
 import {LoadingService} from '@app/common/services/loading.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {StorageService} from '@app/common/services/storage.service';

@@ -31,13 +31,12 @@ export class DeposeConfirmPage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        const navParams = this.navService.getCurrentParams();
-        this.location = navParams.get('location');
-        this.validateDepose = navParams.get('validateDepose');
+        this.location = this.currentNavParams.get('location');
+        this.validateDepose = this.currentNavParams.get('validateDepose');
 
-        const barCode = navParams.get('barCode');
-        const comment = navParams.get('comment');
-        const signature = navParams.get('signature');
+        const barCode = this.currentNavParams.get('barCode');
+        const comment = this.currentNavParams.get('comment');
+        const signature = this.currentNavParams.get('signature');
 
         this.headerConfig = {
             title: `DEPOSE de ${barCode}`,

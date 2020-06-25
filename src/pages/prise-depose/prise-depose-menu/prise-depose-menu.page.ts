@@ -60,9 +60,8 @@ export class PriseDeposeMenuPage extends PageComponent implements CanLeave {
     }
 
     public ionViewWillEnter(): void {
-        const navParams = this.navService.getCurrentParams();
-        this.fromStock = Boolean(navParams.get('fromStock'));
-        const goToDeposeDirectly = (!this.deposeAlreadyNavigate && Boolean(navParams.get('goToDeposeDirectly')));
+        this.fromStock = Boolean(this.currentNavParams.get('fromStock'));
+        const goToDeposeDirectly = (!this.deposeAlreadyNavigate && Boolean(this.currentNavParams.get('goToDeposeDirectly')));
         this.canLeave = false;
 
         zip(

@@ -59,8 +59,7 @@ export class LoginPage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        const navParams = this.navService.getCurrentParams();
-        const autoConnect = navParams.get('autoConnect');
+        const autoConnect = this.currentNavParams.get('autoConnect');
 
         this.wantToAutoConnect = (typeof autoConnect === 'boolean' ? autoConnect : true);
         this.urlServerSubscription = this.storageService.getServerUrl().subscribe((url) => {
