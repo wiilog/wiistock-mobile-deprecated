@@ -28,6 +28,14 @@
                 </ng-template>
                 <ng-template ionicSelectableItemTemplate
                              let-article="item"
+                             *ngIf="config[type].templateIndex === 'article-inventory'">
+                    <div class="ionic-selectable-item-wrapper">
+                        <p>Référence : {{article.reference}}</p>
+                        <p>Code barre : {{article.barcode}}</p>
+                    </div>
+                </ng-template>
+                <ng-template ionicSelectableItemTemplate
+                             let-article="item"
                              *ngIf="config[type].templateIndex === 'article-demande'">
                     <div class="ionic-selectable-item-wrapper">
                         <p>Article : {{article.reference}}</p>

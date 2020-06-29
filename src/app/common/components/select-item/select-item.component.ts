@@ -1,10 +1,21 @@
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import {
+    AfterViewInit,
+    ChangeDetectorRef,
+    Component,
+    EventEmitter,
+    Input,
+    OnDestroy,
+    OnInit,
+    Output,
+    ViewChild
+} from '@angular/core';
 import {ToastService} from '@app/common/services/toast.service';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {SearchItemComponent} from '@app/common/components/select-item/search-item/search-item.component';
 import {BarcodeScannerComponent} from '@app/common/components/barcode-scanner/barcode-scanner.component';
-import {Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
+import {filter} from 'rxjs/operators';
 
 
 @Component({
@@ -12,7 +23,7 @@ import {Subscription} from 'rxjs';
     templateUrl: 'select-item.component.html',
     styleUrls: ['./select-item.component.scss']
 })
-export class SelectItemComponent implements OnInit, OnDestroy {
+export class SelectItemComponent implements AfterViewInit, OnDestroy {
 
     @Input()
     public type: SelectItemTypeEnum;
@@ -27,7 +38,7 @@ export class SelectItemComponent implements OnInit, OnDestroy {
     public requestParams?: Array<string> = [];
 
     @Input()
-    public resetEmitter?: EventEmitter<void>;
+    public resetEmitter?: Observable<void>;
 
     @Output()
     public itemChange: EventEmitter<any>;
@@ -57,21 +68,41 @@ export class SelectItemComponent implements OnInit, OnDestroy {
             buttonSubtitle: 'Article'
         },
         [SelectItemTypeEnum.LOCATION]: {
-            invalidMessage: 'Veuillez flasher ou sélectionner un emplacement',
+            invalidMessage: 'Veuillez flasher ou sélectionner un emplacement connu',
             buttonSubtitle: 'Emplacement'
+        },
+        [SelectItemTypeEnum.INVENTORY_LOCATION]: {
+            invalidMessage: 'L\'emplacement scanné n\'est pas dans la liste',
+            buttonSubtitle: 'Emplacement'
+        },
+        [SelectItemTypeEnum.INVENTORY_ARTICLE]: {
+            invalidMessage: 'L\'article scanné n\'est pas dans la liste',
+            buttonSubtitle: 'Article'
+        },
+        [SelectItemTypeEnum.INVENTORY_ANOMALIES_LOCATION]: {
+            invalidMessage: 'L\'emplacement scanné n\'est pas dans la liste',
+            buttonSubtitle: 'Emplacement'
+        },
+        [SelectItemTypeEnum.INVENTORY_ANOMALIES_ARTICLE]: {
+            invalidMessage: 'L\'article scanné n\'est pas dans la liste',
+            buttonSubtitle: 'Article'
         }
     }
 
-    public constructor(private toastService: ToastService) {
+    public constructor(private toastService: ToastService,
+                       private changeDetector: ChangeDetectorRef) {
         this.itemChange = new EventEmitter<any>();
         this.createItem = new EventEmitter<boolean>();
     }
 
-    public ngOnInit(): void {
+    public ngAfterViewInit() {
         if (this.resetEmitter) {
-            this.resetEmitterSubscription = this.resetEmitter.subscribe(() => {
-                this.searchComponent.item = undefined;
-            });
+            this.resetEmitterSubscription = this.resetEmitter
+                .pipe(filter(() => Boolean(this.searchComponent)))
+                .subscribe(() => {
+                    this.searchComponent.clear();
+                    this.changeDetector.detectChanges();
+                });
         }
     }
 
@@ -80,6 +111,10 @@ export class SelectItemComponent implements OnInit, OnDestroy {
             this.resetEmitterSubscription.unsubscribe();
             this.resetEmitterSubscription = undefined;
         }
+    }
+
+    public get dbItemsLength(): number {
+        return this.searchComponent.dbItemsLength;
     }
 
     public onItemSelect(item: any) {

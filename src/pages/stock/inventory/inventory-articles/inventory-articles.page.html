@@ -1,17 +1,20 @@
-<div class="page-content"
-     scroll-y="true"
-     *ngIf="!loading">
-    <wii-list-panel *ngIf="listConfig && listConfig.body"
-                    [body]="listConfig.body"
-                    [boldValues]="listConfig.boldValues">
-    </wii-list-panel>
+<div class="page-content">
+    <wii-panel-header *ngIf="selectedLocation"
+                      title="Emplacement"
+                      [leftIcon]="{name: 'inventory.svg'}"
+                      [subtitle]="selectedLocation">
+    </wii-panel-header>
 </div>
 
 <div class="page-footer">
-    <wii-barcode-scanner #footerScannerComponent
-                         [hidden]="loading"
-                         buttonSubtitle="Article"
-                         [mode]="scannerMode"
-                         (add)="checkAndTreatBarcode($event[0])">
-    </wii-barcode-scanner>
+    <wii-select-item #selectItemComponent
+                     [hidden]="!!dataSubscription"
+                     *ngIf="selectItemType !== undefined && requestParams"
+                     [type]="selectItemType"
+                     (itemChange)="navigateToInventoryValidate($event)"
+                     [checkBarcodeValidity]="true"
+                     [resetEmitter]="resetEmitter$"
+                     [requestParams]="requestParams"
+                     [scanMode]="scannerMode">
+    </wii-select-item>
 </div>

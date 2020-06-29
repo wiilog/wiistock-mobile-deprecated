@@ -1,9 +1,6 @@
 import {Component, ViewChild} from '@angular/core';
-import {BarcodeScannerComponent} from '@app/common/components/barcode-scanner/barcode-scanner.component';
-import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel/list-panel-item-config';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {Emplacement} from '@entities/emplacement';
 import {NavService} from '@app/common/services/nav.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
@@ -11,8 +8,14 @@ import {ToastService} from '@app/common/services/toast.service';
 import {InventoryArticlesPageRoutingModule} from '@pages/stock/inventory/inventory-articles/inventory-articles-routing.module';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {InventoryLocationsAnomaliesPageRoutingModule} from '@pages/stock/inventory/inventory-locations-anomalies/inventory-locations-anomalies-routing.module';
-import {InventoryService} from '@app/common/services/inventory.service';
 import {PageComponent} from '@pages/page.component';
+import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
+import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
+import {flatMap, map, tap} from 'rxjs/operators';
+import {from, of, ReplaySubject, Subscription, zip} from 'rxjs';
+import {Emplacement} from '@entities/emplacement';
+import {StorageService} from '@app/common/services/storage.service';
+
 
 @Component({
     selector: 'wii-inventory-locations',
@@ -21,91 +24,82 @@ import {PageComponent} from '@pages/page.component';
 })
 export class InventoryLocationsPage extends PageComponent implements CanLeave {
 
-    @ViewChild('footerScannerComponent', {static: false})
-    public footerScannerComponent: BarcodeScannerComponent;
+    @ViewChild('selectItemComponent', {static: false})
+    public selectItemComponent: SelectItemComponent;
 
     public isInventoryManager: boolean;
 
-    public listConfig: {body: Array<ListPanelItemConfig>; boldValues};
-    public readonly scannerMode = BarcodeScannerModeEnum.ONLY_SCAN;
+    public readonly scannerMode = BarcodeScannerModeEnum.TOOL_SEARCH;
+    public readonly selectItemType = SelectItemTypeEnum.INVENTORY_LOCATION;
 
-    public loading: boolean;
+    public resetEmitter$: ReplaySubject<void>;
 
-    private locations: Array<Emplacement>;
+    public dataSubscription: Subscription;
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
-                       private inventoryService: InventoryService,
                        private mainHeaderService: MainHeaderService,
                        private toastService: ToastService,
+                       private storageService: StorageService,
                        navService: NavService) {
         super(navService);
-        this.listConfig = {
-            body: [],
-            boldValues: ['label']
-        };
+        this.resetEmitter$ = new ReplaySubject<void>(1);
     }
 
     public ionViewWillEnter(): void {
-        this.loading = true;
-        this.listConfig.body = [];
+        this.resetEmitter$.next();
+        if (!this.dataSubscription) {
+            this.dataSubscription = zip(
+                this.loadingService.presentLoading('Chargement...'),
+                this.storageService.getInventoryManagerRight()
+            )
+                .pipe(
+                    map(([loader, isInventoryManager]) => ({loader, isInventoryManager})),
+                    flatMap((data) => (
+                        (this.selectItemComponent
+                            ? this.selectItemComponent.searchComponent.reload()
+                            : of(undefined)).pipe(map(() => data))
+                    )),
+                    tap(({isInventoryManager}) => {
+                        this.isInventoryManager = isInventoryManager;
 
-        this.inventoryService.getData(false).subscribe(({isInventoryManager, loader, locations}) => {
-            this.isInventoryManager = isInventoryManager;
-            this.locations = locations;
-            this.listConfig.body = this.createListConfig();
-            this.inventoryService.refreshSubTitle(this.locations, false);
-
-            this.loading = false;
-
-            loader.dismiss();
-        });
-
-        if (this.footerScannerComponent) {
-            this.footerScannerComponent.fireZebraScan();
+                        const locationsLength = this.selectItemComponent.dbItemsLength;
+                        this.mainHeaderService.emitSubTitle(
+                            locationsLength > 0
+                            ? `${locationsLength} emplacement${locationsLength > 1 ? 's' : ''}`
+                            : 'Tous les inventaires sont à jour'
+                        );
+                    }),
+                    flatMap(({loader}) => from(loader.dismiss()))
+                )
+                .subscribe(() => {
+                    this.unsubscribeData();
+                });
+        }
+        if (this.selectItemComponent) {
+            this.selectItemComponent.fireZebraScan();
         }
     }
 
     public ionViewWillLeave(): void {
-        if (this.footerScannerComponent) {
-            this.footerScannerComponent.unsubscribeZebraScan();
+        this.resetEmitter$.next();
+        this.unsubscribeData();
+        if (this.selectItemComponent) {
+            this.selectItemComponent.unsubscribeZebraScan();
         }
     }
 
     public wiiCanLeave(): boolean {
-        return !this.loading;
+        return !this.dataSubscription;
     }
 
-    public checkAndTreatBarcode(barcode: string): void {
-        const location = this.locations.find(({label}) => (label === barcode));
-        if (location) {
-            this.navigateToArticles(barcode);
-        }
-        else {
-            this.toastService.presentToast('L\'emplacement scanné n\'est pas dans la liste');
-        }
+    public selectLocation({label}: Emplacement): void {
+        this.resetEmitter$.next();
+        this.navigateToArticles(label);
     }
 
     public navigateToAnomalies(): void {
         this.navService.push(InventoryLocationsAnomaliesPageRoutingModule.PATH);
-    }
-
-    private createListConfig(): Array<ListPanelItemConfig> {
-        return this.locations.map(({label}) => ({
-            infos: {
-                label: {
-                    label: 'Emplacement',
-                    value: label
-                }
-            },
-            pressAction: (clickedItem) => {
-                this.onPressOnLocation(clickedItem);
-            }
-        }));
-    }
-
-    private onPressOnLocation({label: {value: location}}: { label?: { value?: string } }) {
-        this.navigateToArticles(location);
     }
 
     private navigateToArticles(selectedLocation: string): void {
@@ -113,5 +107,12 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
             selectedLocation,
             anomalyMode: false
         });
+    }
+
+    private unsubscribeData(): void {
+        if (this.dataSubscription) {
+            this.dataSubscription.unsubscribe();
+            this.dataSubscription = undefined;
+        }
     }
 }

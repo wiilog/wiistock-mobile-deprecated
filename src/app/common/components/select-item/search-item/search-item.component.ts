@@ -1,8 +1,11 @@
-import {ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
 import {IonicSelectableComponent} from 'ionic-selectable';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {Emplacement} from '@entities/emplacement';
+import {map, take, tap} from 'rxjs/operators';
+import {ArticleInventaire} from '@entities/article-inventaire';
+import {Observable, Subscription} from 'rxjs';
 
 
 @Component({
@@ -12,7 +15,7 @@ import {Emplacement} from '@entities/emplacement';
         './search-item.component.scss'
     ]
 })
-export class SearchItemComponent implements OnInit {
+export class SearchItemComponent implements OnInit, OnDestroy {
 
     private static readonly LENGTH_TO_LOAD: number = 30;
 
@@ -34,9 +37,12 @@ export class SearchItemComponent implements OnInit {
     public itemComponent: IonicSelectableComponent;
 
     public dbItemsForList: Array<any>;
+
     private dbItems: Array<any>;
 
     private lastSearch: string;
+
+    private itemsSubscription: Subscription;
 
     public readonly config = {
         [SelectItemTypeEnum.ARTICLE_TO_PICK]: {
@@ -53,6 +59,10 @@ export class SearchItemComponent implements OnInit {
             databaseTable: 'emplacement',
             placeholder: 'Sélectionner un emplacement'
         },
+        [SelectItemTypeEnum.INVENTORY_LOCATION]: SearchItemComponent.MakeMapForInventoryLocations(false),
+        [SelectItemTypeEnum.INVENTORY_ARTICLE]: SearchItemComponent.MakeMapForInventoryArticles(false),
+        [SelectItemTypeEnum.INVENTORY_ANOMALIES_LOCATION]: SearchItemComponent.MakeMapForInventoryLocations(true),
+        [SelectItemTypeEnum.INVENTORY_ANOMALIES_ARTICLE]: SearchItemComponent.MakeMapForInventoryArticles(true),
         [SelectItemTypeEnum.DEMANDE_LIVRAISON_TYPE]: {
             label: 'label',
             valueField: 'id',
@@ -78,6 +88,41 @@ export class SearchItemComponent implements OnInit {
         this.lastSearch = '';
     }
 
+    private static MakeMapForInventoryLocations(anomalyMode: boolean) {
+        return {
+            label: 'label',
+            valueField: 'id',
+            templateIndex: 'default',
+            databaseTable: anomalyMode ? '`anomalie_inventaire`' : '`article_inventaire`',
+            placeholder: 'Sélectionner un emplacement',
+            map: (list: Array<ArticleInventaire>) => {
+                return list
+                    .reduce((acc, {location}) => ([
+                        ...acc,
+                        ...(acc.findIndex(({label: locationAlreadySaved}) => (locationAlreadySaved === location)) === -1
+                            ? [{label: location, id: location}]
+                            : [])
+                    ]), []);
+            }
+        };
+    }
+
+    private static MakeMapForInventoryArticles(anomalyMode: boolean) {
+        return {
+            label: 'label',
+            valueField: 'id',
+            templateIndex: 'article-inventory',
+            databaseTable: anomalyMode ? '`anomalie_inventaire`' : '`article_inventaire`',
+            placeholder: 'Sélectionner un article'
+        };
+    }
+
+    public get dbItemsLength(): number {
+        return this.dbItems
+            ? this.dbItems.length
+            : 0;
+    }
+
     @Input('item')
     public set item(item: any) {
         if (this._item !== item
@@ -94,12 +139,39 @@ export class SearchItemComponent implements OnInit {
         return this._item;
     }
 
+    public clear(): void {
+        this.itemComponent.clear();
+    }
+
     public ngOnInit(): void {
-        this.sqliteService.findBy(this.config[this.type].databaseTable, this.requestParams).subscribe((list) => {
-            this.dbItems = list;
-            this.loadFirstItems();
+        this.itemsSubscription = this.reload().subscribe(() => {
             this.itemsLoaded.emit();
-        });
+        })
+    }
+
+    public reload(): Observable<Array<any>> {
+        return this.sqliteService
+            .findBy(this.config[this.type].databaseTable, this.requestParams)
+            .pipe(
+                take(1),
+                map((list) => {
+                    const {map} = this.config[this.type] as {map: any};
+                    return map
+                        ? map(list)
+                        : list;
+                }),
+                tap((list) => {
+                    this.dbItems = list;
+                    this.loadFirstItems();
+                })
+            );
+    }
+
+    public ngOnDestroy(): void {
+        if (this.itemsSubscription) {
+            this.itemsSubscription.unsubscribe();
+            this.itemsSubscription = undefined;
+        }
     }
 
     public loadMore(search?: string): void {

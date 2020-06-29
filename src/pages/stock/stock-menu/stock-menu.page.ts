@@ -76,7 +76,7 @@ export class StockMenuPage extends PageComponent {
                 }
             },
             {
-                icon: 'inventary.svg',
+                icon: 'inventory.svg',
                 label: 'Inventaire',
                 action: () => {
                     self.navService.push(InventoryLocationsPageRoutingModule.PATH);

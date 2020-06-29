@@ -1,5 +1,7 @@
 @import "~theme/variables";
 
-:host {
+.page-content {
     padding-top: $spacer;
+    padding-right: $spacer;
+    padding-left: $spacer;
 }

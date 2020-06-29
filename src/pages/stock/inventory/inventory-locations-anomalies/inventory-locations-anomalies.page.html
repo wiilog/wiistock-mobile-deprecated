@@ -1,17 +1,10 @@
-<div class="page-content"
-     scroll-y="true"
-     *ngIf="!loading">
-    <wii-list-panel *ngIf="listConfig && listConfig.body"
-                    [body]="listConfig.body"
-                    [boldValues]="listConfig.boldValues">
-    </wii-list-panel>
-</div>
-
 <div class="page-footer">
-    <wii-barcode-scanner #footerScannerComponent
-                         [hidden]="loading"
-                         buttonSubtitle="Emplacement"
-                         [mode]="scannerMode"
-                         (add)="checkAndTreatBarcode($event[0])">
-    </wii-barcode-scanner>
+    <wii-select-item #selectItemComponent
+                     [type]="selectItemType"
+                     [hidden]="!!dataSubscription"
+                     (itemChange)="selectLocation($event)"
+                     [checkBarcodeValidity]="true"
+                     [resetEmitter]="resetEmitter$"
+                     [scanMode]="scannerMode">
+    </wii-select-item>
 </div>
