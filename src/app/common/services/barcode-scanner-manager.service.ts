@@ -14,22 +14,28 @@ export class BarcodeScannerManagerService {
 
     private ngZone: NgZone;
 
+    private zebraBroadcastReceiverAlreadyReceived: boolean;
+
     public constructor(private barcodeScanner: BarcodeScanner) {
         this._zebraScan$ = new Subject<string>();
 
         this.ngZone = new NgZone({enableLongStackTrace : false});
+        this.zebraBroadcastReceiverAlreadyReceived = false;
     }
 
     public registerZebraBroadcastReceiver(): void {
-        (<any>window).plugins.intentShim.registerBroadcastReceiver({
-                filterActions: ['io.ionic.starter.ACTION'],
-                filterCategories: ['android.intent.category.DEFAULT']
-            },
-            (intent) => {
-                this.ngZone.run(() => {
-                    this._zebraScan$.next(intent.extras[BarcodeScannerManagerService.ZEBRA_VALUE_ATTRIBUTE]);
+        if (!this.zebraBroadcastReceiverAlreadyReceived) {
+            this.zebraBroadcastReceiverAlreadyReceived = true;
+            (<any>window).plugins.intentShim.registerBroadcastReceiver({
+                    filterActions: ['io.ionic.starter.ACTION'],
+                    filterCategories: ['android.intent.category.DEFAULT']
+                },
+                (intent) => {
+                    this.ngZone.run(() => {
+                        this._zebraScan$.next(intent.extras[BarcodeScannerManagerService.ZEBRA_VALUE_ATTRIBUTE]);
+                    });
                 });
-            });
+        }
     }
 
     /**

@@ -2,7 +2,7 @@ import {ChangeDetectorRef, Component} from '@angular/core';
 import {ApiService} from '@app/common/services/api.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {Subscription} from 'rxjs';
-import {flatMap, map} from 'rxjs/operators';
+import {filter, flatMap, map} from 'rxjs/operators';
 import {StorageService} from '@app/common/services/storage.service';
 import {VersionCheckerService} from '@app/common/services/version-checker.service';
 import {Network} from '@ionic-native/network/ngx';
@@ -35,12 +35,13 @@ export class LoginPage extends PageComponent {
     public appVersionInvalid: boolean;
     public currentVersion: string;
 
-    public environment = environment;
-
     public apkUrl: string;
     private wantToAutoConnect: boolean;
     private appVersionSubscription: Subscription;
     private urlServerSubscription: Subscription;
+    private zebraSubscription: Subscription;
+
+    private passwordInputIsFocused: boolean;
 
     public constructor(private toastService: ToastService,
                        private apiService: ApiService,
@@ -56,12 +57,29 @@ export class LoginPage extends PageComponent {
         super(navService);
         this.loading = true;
         this.appVersionInvalid = false;
+        this.passwordInputIsFocused = false;
     }
 
     public ionViewWillEnter(): void {
         const autoConnect = this.currentNavParams.get('autoConnect');
-
         this.wantToAutoConnect = (typeof autoConnect === 'boolean' ? autoConnect : true);
+
+        this.barcodeScannerManager.registerZebraBroadcastReceiver();
+
+        this.unsubscribeZebra();
+        this.zebraSubscription = this.barcodeScannerManager
+            .zebraScan$
+            .pipe(filter((barCode: string) => (
+                barCode
+                && barCode.length > 1
+                && barCode.charAt(barCode.length - 1) === '\n'
+                && this.passwordInputIsFocused
+            )))
+            .subscribe((barCode: string) => {
+                this.form.password = barCode.slice(0, barCode.length - 1);
+                this.logForm();
+            });
+
         this.urlServerSubscription = this.storageService.getServerUrl().subscribe((url) => {
             if (url) {
                 this.appVersionSubscription = this.versionChecker.isAvailableVersion()
@@ -94,6 +112,7 @@ export class LoginPage extends PageComponent {
     }
 
     public ionViewWillLeave(): void {
+        this.unsubscribeZebra();
         if (this.appVersionSubscription) {
             this.appVersionSubscription.unsubscribe();
             this.appVersionSubscription = undefined;
@@ -105,7 +124,9 @@ export class LoginPage extends PageComponent {
     }
 
     public logForm(): void {
-        if (!this.loading) {
+        if (!this.loading
+            && this.form.login
+            && this.form.password) {
             if (this.network.type !== 'none') {
                 this.loading = true;
                 this.apiService
@@ -120,7 +141,6 @@ export class LoginPage extends PageComponent {
                                     .subscribe(
                                         () => {
                                             this.form.password = '';
-                                            this.barcodeScannerManager.registerZebraBroadcastReceiver();
 
                                             this.navService.setRoot(MainMenuPageRoutingModule.PATH, {needReload: false}).subscribe(() => {
                                                 this.loading = false;
@@ -164,6 +184,14 @@ export class LoginPage extends PageComponent {
         return this._loading;
     }
 
+    public onPasswordInputFocusedIn(): void {
+        this.passwordInputIsFocused = true;
+    }
+
+    public onPasswordInputFocusedOut(): void {
+        this.passwordInputIsFocused = false;
+    }
+
     private finishLoading() {
         this.loading = false;
         this.changeDetector.detectChanges();
@@ -178,6 +206,13 @@ export class LoginPage extends PageComponent {
                 password: password
             };
             this.logForm();
+        }
+    }
+
+    private unsubscribeZebra(): void {
+        if (this.zebraSubscription) {
+            this.zebraSubscription.unsubscribe();
+            this.zebraSubscription = undefined;
         }
     }
 }

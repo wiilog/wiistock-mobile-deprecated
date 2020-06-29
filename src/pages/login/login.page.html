@@ -24,8 +24,10 @@
                 <ion-label color="medium">Mot de passe</ion-label>
                 <ion-input type="password"
                            [(ngModel)]="form.password"
-                           name="passsword"
+                           name="password"
                            (keyup.enter)="logForm()"
+                           (ionFocus)="onPasswordInputFocusedIn()"
+                           (ionBlur)="onPasswordInputFocusedOut()"
                 ></ion-input>
             </ion-item>
         </div>
