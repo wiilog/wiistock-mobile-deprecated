@@ -126,7 +126,25 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
     }
 
     public openSearch(): void {
-        this.searchComponent.itemComponent.open();
+        setTimeout(() => {
+            if (this.searchComponent
+                && this.searchComponent.itemComponent
+                && !this.searchComponent.itemComponent.isOpened
+                && this.searchComponent.itemComponent.isEnabled) {
+                this.searchComponent.itemComponent.open();
+            }
+        });
+    }
+
+    public closeSearch(): void {
+        setTimeout(() => {
+            if (this.searchComponent
+                && this.searchComponent.itemComponent
+                && this.searchComponent.itemComponent.isOpened
+                && this.searchComponent.itemComponent.isEnabled) {
+                this.searchComponent.itemComponent.close();
+            }
+        });
     }
 
     public testIfBarcodeValid(barcode: string): void {

@@ -101,6 +101,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
 
     public navigateToInventoryValidate(selectedArticle: ArticleInventaire&Anomalie): void {
         const self = this;
+        this.selectItemComponent.closeSearch();
         this.navService.push(InventoryValidatePageRoutingModule.PATH, {
             selectedArticle,
             validateQuantity: (quantity: number) => {

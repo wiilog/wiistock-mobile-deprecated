@@ -84,6 +84,7 @@ export class InventoryLocationsAnomaliesPage extends PageComponent implements Ca
     }
 
     public selectLocation({label: selectedLocation}: Emplacement): void {
+        this.selectItemComponent.closeSearch();
         this.navService.push(InventoryArticlesPageRoutingModule.PATH, {
             selectedLocation,
             anomalyMode: true

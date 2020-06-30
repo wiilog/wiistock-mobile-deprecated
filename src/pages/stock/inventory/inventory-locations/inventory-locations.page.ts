@@ -103,6 +103,7 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
     }
 
     private navigateToArticles(selectedLocation: string): void {
+        this.selectItemComponent.closeSearch();
         this.navService.push(InventoryArticlesPageRoutingModule.PATH, {
             selectedLocation,
             anomalyMode: false

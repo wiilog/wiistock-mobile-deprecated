@@ -109,8 +109,8 @@ export class SearchItemComponent implements OnInit, OnDestroy {
 
     private static MakeMapForInventoryArticles(anomalyMode: boolean) {
         return {
-            label: 'label',
-            valueField: 'id',
+            label: 'barcode',
+            valueField: 'barcode',
             templateIndex: 'article-inventory',
             databaseTable: anomalyMode ? '`anomalie_inventaire`' : '`article_inventaire`',
             placeholder: 'Sélectionner un article'
