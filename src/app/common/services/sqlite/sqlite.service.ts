@@ -668,7 +668,7 @@ export class SqliteService {
                             "'" + anomaly.quantity + "', " +
                             "'" + anomaly.countedQuantity + "', " +
                             "'" + this.escapeQuotes(anomaly.location ? anomaly.location : 'N/A') + "', " +
-                            anomaly.isTreatable +
+                            anomaly.isTreatable + ", " +
                             "'" + anomaly.barCode + "')"
                         ));
                     if (anomaliesToInsert.length === 0) {
