@@ -8,4 +8,5 @@ export interface Anomalie {
     comment: string;
     treated: string;
     barcode?: string;
+    is_treatable?: number;
 }
