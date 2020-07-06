@@ -222,6 +222,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                     )
                     .subscribe(
                         (quantity) => {
+                            console.log(quantity);
                             this.processCheckBarCode(barCode, isManualAdd, quantity);
                         },
                         () => {
@@ -384,7 +385,7 @@ export class PrisePage extends PageComponent implements CanLeave {
             }
         }
         else {
-            this.toastService.presentToast('Ce code barre n\'est pas présent sur cet emplacement');
+            this.toastService.presentToast(quantity === 0 ? 'La quantité disponible est à zéro ' : 'Ce code barre n\'est pas présent sur cet emplacement');
         }
     }
 }
