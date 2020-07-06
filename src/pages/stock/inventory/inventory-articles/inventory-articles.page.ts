@@ -106,30 +106,41 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
             selectedArticle,
             validateQuantity: (quantity: number) => {
                 if (!this.validateSubscription) {
-                    this.validateSubscription = zip(
-                        this.loadingService.presentLoading('Chargement...'),
-                        self.validateQuantity(selectedArticle, quantity)
-                    )
-                        .pipe(
-                            flatMap(([loader]) => zip(
-                                of(loader),
-                                this.localDataManager.sendFinishedProcess(this.anomalyMode ? 'inventoryAnomalies' : 'inventory')
-                            )),
-                            flatMap(([loader]) => zip(
-                                of(loader),
-                                this.selectItemComponent.searchComponent.reload()
-                            )),
-                            flatMap(([loader]) => from(loader.dismiss()))
+                    console.log(quantity, selectedArticle)
+                    if (!this.anomalyMode
+                        || selectedArticle.is_treatable
+                        || selectedArticle.quantity === quantity) {
+                        this.validateSubscription = zip(
+                            this.loadingService.presentLoading('Chargement...'),
+                            self.validateQuantity(selectedArticle, quantity)
                         )
-                        .subscribe(() => {
-                            this.unsubscribeValidate();
-                            if (this.selectItemComponent.dbItemsLength === 0) {
-                                this.navService.pop();
-                            }
-                            else {
-                                this.refreshSubTitle();
-                            }
-                        });
+                            .pipe(
+                                flatMap(([loader]) => zip(
+                                    of(loader),
+                                    this.localDataManager.sendFinishedProcess(this.anomalyMode ? 'inventoryAnomalies' : 'inventory')
+                                )),
+                                flatMap(([loader, resApi]: [HTMLIonLoadingElement, any]) => zip(
+                                    of(loader),
+                                    this.selectItemComponent.searchComponent.reload(),
+                                    ((resApi && resApi.success && resApi.data && resApi.data.status)
+                                        ? this.toastService.presentToast(resApi.data.status, ToastService.LONG_DURATION)
+                                        : of(undefined))
+                                )),
+                                flatMap(([loader]) => from(loader.dismiss()))
+                            )
+                            .subscribe(() => {
+                                this.unsubscribeValidate();
+                                if (this.selectItemComponent.dbItemsLength === 0) {
+                                    this.navService.pop();
+                                }
+                                else {
+                                    this.refreshSubTitle();
+                                }
+                            });
+                    }
+                    else {
+                        this.toastService.presentToast('Impossible : un ordre de livraison est en cours sur cet article ou il n\'est pas disponible');
+                    }
                 }
             }
         });

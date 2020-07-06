@@ -223,7 +223,10 @@ export class LocalDataManagerService {
                     paramName: 'anomalies',
                     anomalies
                 }))),
-                deleteSucceed: () => this.sqliteService.deleteBy('anomalie_inventaire', [`treated = '1'`])
+                deleteSucceed: ({errors}) => this.sqliteService.deleteBy('anomalie_inventaire', [
+                    `treated = '1'`,
+                    ...(errors && errors.length ? [`id NOT IN (${errors.join(',')})`] : [])
+                ])
             }
         }
     }

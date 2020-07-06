@@ -177,6 +177,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             treated: 'TEXT',
             is_ref: 'INTEGER',
             quantity: 'INTEGER',
+            is_treatable: 'INTEGER',
             countedQuantity: 'INTEGER'
         }
     },
