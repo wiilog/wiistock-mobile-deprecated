@@ -15,7 +15,7 @@
         .list-element-body-wrapper {
             flex: 1;
             .element-value {
-                word-break: break-all;
+                word-break: break-word;
                 &.element-value-bold {
                     font-weight: bold;
                 }

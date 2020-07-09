@@ -29,6 +29,13 @@ interface ApiProccessConfig {
     numeroProccessFailed?: string;
 }
 
+type DemandeForApi = {
+    type: number;
+    destination: number;
+    commentaire: string;
+    references: Array<{barCode: string; 'quantity-to-pick': number}>;
+};
+
 @Injectable({
     providedIn: 'root'
 })
@@ -452,13 +459,6 @@ export class LocalDataManagerService {
      * Return observable with the list of id in success and DemandeLivraison errors
      */
     public sendDemandesLivraisons(): Observable<{success: Array<number>, errors: Array<DemandeLivraison>}> {
-        type DemandeForApi = {
-            type: number;
-            destination: number;
-            commentaire: string;
-            references: Array<{barCode: string; 'quantity-to-pick': number}>;
-        };
-
         return zip(
             this.sqliteService.findAll('demande_livraison'),
             this.sqliteService.findAll('article_in_demande_livraison')
@@ -487,19 +487,12 @@ export class LocalDataManagerService {
                 }, []);
             }),
             // send all demande to API
-            flatMap((data: Array<{apiData: DemandeForApi, demande: DemandeLivraison}>) => (
-                data.length > 0
-                    ? zip(
-                        ...(data.map(({apiData, demande}) => (
-                            this.apiService.requestApi('post', ApiService.POST_DEMANDE_LIVRAISON, {params: {demande: apiData}}).pipe(map(({success, nomadMessage}) => ({
-                                success,
-                                message: nomadMessage,
-                                demande
-                            })))
-                        )))
-                    )
-                    : of([])
-            )),
+            flatMap((data: Array<{apiData: DemandeForApi, demande: DemandeLivraison}>) => {
+                if (!data || data.length === 0) {
+                    throw {success: false, message: 'Aucune demande de livraison à synchroniser'};
+                }
+                return this.requestApiForDeliveryRequests(data);
+            }),
             // sync
             flatMap((data: Array<{success: boolean; message: string; demande: DemandeLivraison}>) => {
                 const sortedData: {success: Array<number>, errors: Array<DemandeLivraison>} = data.reduce(
@@ -518,7 +511,9 @@ export class LocalDataManagerService {
                     {success: [], errors: []}
                 );
 
-                return (sortedData.success.length > 0 || sortedData.errors.length > 0)
+                const errors = sortedData.errors.filter(({id}) => id);
+
+                return (sortedData.success.length > 0 || errors.length > 0)
                     ? zip(
                         ...(
                             sortedData.success.length > 0
@@ -529,8 +524,8 @@ export class LocalDataManagerService {
                                 : []
                         ),
                         ...(
-                            sortedData.errors.length > 0
-                                ? sortedData.errors.map(({id, last_error}) => (
+                            errors.length > 0
+                                ? errors.map(({id, last_error}) => (
                                     this.sqliteService.update('demande_livraison', {last_error}, [`id = ${id}`])
                                 ))
                                 : []
@@ -568,5 +563,25 @@ export class LocalDataManagerService {
             .subscribe(() => {
                 this.alertManager.breakMessageLines();
             });
+    }
+
+    private requestApiForDeliveryRequests([first, ...remaining]: Array<{apiData: DemandeForApi, demande: DemandeLivraison}>): Observable<Array<{success: boolean; message: string; demande: DemandeLivraison}>> {
+        return !first
+            ? of([])
+            : this.apiService
+                .requestApi('post', ApiService.POST_DEMANDE_LIVRAISON, {params: {demande: first.apiData}})
+                .pipe(
+                    map(({success, nomadMessage}) => ({
+                        success,
+                        message: nomadMessage,
+                        demande: first.demande
+                    })),
+                    flatMap((requestResult: {success: boolean; message: string; demande: DemandeLivraison}) => (
+                        this.requestApiForDeliveryRequests(remaining).pipe(map((res) => ([
+                            requestResult,
+                            ...res
+                        ])))
+                    ))
+                );
     }
 }

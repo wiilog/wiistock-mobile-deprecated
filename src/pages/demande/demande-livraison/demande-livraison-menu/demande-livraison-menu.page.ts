@@ -132,12 +132,12 @@ export class DemandeLivraisonMenuPage extends PageComponent implements CanLeave 
                     from(loader.dismiss()).subscribe(() => {
                         this.toastService.presentToast(messages);
                     });
-                }, () => {
+                }, (result) => {
                     if (loader) {
                         loader.dismiss();
                     }
                     this.apiSending = false;
-                    this.toastService.presentToast('Erreur serveur');
+                    this.toastService.presentToast((result && result.message) ? result.message : 'Erreur serveur');
                 });
         } else {
             from(this.alertController
