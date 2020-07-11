@@ -165,7 +165,7 @@ export class LocalDataManagerService {
                             }))
                         )
                 ),
-                titleErrorAlert: `Des livraisons n'ont pas pu être synchronisées`,
+                titleErrorAlert: `Des collectes n'ont pas pu être synchronisées`,
                 numeroProccessFailed: 'numero_collecte',
                 treatData: (data) => {
                     const dataToTreat = (data || {});
