@@ -10,7 +10,7 @@ import {StorageService} from "@app/common/services/storage.service";
 import {from, Observable, of, ReplaySubject, Subject, zip} from 'rxjs';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {AlertController} from '@ionic/angular';
-import {flatMap, map} from 'rxjs/operators';
+import {catchError, flatMap, map} from 'rxjs/operators';
 import {AlertManagerService} from '@app/common/services/alert-manager.service';
 import {DemandeLivraison} from '@entities/demande-livraison';
 import {DemandeLivraisonArticleSelected} from '@entities/demande-livraison-article-selected';
@@ -576,6 +576,7 @@ export class LocalDataManagerService {
                         message: nomadMessage,
                         demande: first.demande
                     })),
+                    catchError((requestResult) => of(requestResult)),
                     flatMap((requestResult: {success: boolean; message: string; demande: DemandeLivraison}) => (
                         this.requestApiForDeliveryRequests(remaining).pipe(map((res) => ([
                             requestResult,

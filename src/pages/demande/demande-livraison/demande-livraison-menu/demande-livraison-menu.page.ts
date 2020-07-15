@@ -113,7 +113,7 @@ export class DemandeLivraisonMenuPage extends PageComponent implements CanLeave 
                             : of(undefined)).pipe(map(() => (data)))
                     ))
                 )
-                .subscribe((data:  { success: Array<number>, errors: Array<DemandeLivraison> }) => {
+                .subscribe((data: { success: Array<number>, errors: Array<DemandeLivraison> }) => {
                     const nbSuccess = data.success.length;
                     const sSuccess = nbSuccess > 1 ? 's' : '';
 
@@ -128,10 +128,15 @@ export class DemandeLivraisonMenuPage extends PageComponent implements CanLeave 
                         .join(', ');
 
                     this.refreshPageList(data.errors);
-                    this.apiSending = false;
-                    from(loader.dismiss()).subscribe(() => {
-                        this.toastService.presentToast(messages);
-                    });
+                    from(loader.dismiss())
+                        .subscribe(
+                            () => {
+                                this.toastService.presentToast(messages);
+                                this.apiSending = false;
+                            },
+                            () => {
+                                this.apiSending = false;
+                            });
                 }, (result) => {
                     if (loader) {
                         loader.dismiss();
