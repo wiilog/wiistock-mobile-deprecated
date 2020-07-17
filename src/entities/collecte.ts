@@ -9,4 +9,5 @@ export interface Collecte {
     location_to?: string;
     date_end?: string;
     forStock: number;
+    comment?: string;
 }
