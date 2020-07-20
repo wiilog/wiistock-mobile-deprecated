@@ -112,7 +112,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             location_to: 'VARCHAR(255)',
             requester: 'VARCHAR(255)',
             type: 'VARCHAR(255)',
-            forStock: 'INTEGER'
+            forStock: 'INTEGER',
+            comment: 'VARCHAR(255)'
         }
     },
     {

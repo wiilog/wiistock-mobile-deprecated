@@ -515,7 +515,7 @@ export class SqliteService {
                 // we add 'collecte' in sqlite DB if it is in the api and not in DB
                 const collectesValuesToAdd = collectesAPI
                     .filter(({id: idAPI}) => !collectesDB.some(({id: idDB}) => (idDB === idAPI)))
-                    .map(({id, number, location_from, forStock, requester, type}) => ({id, number, location_from, forStock, requester, type}));
+                    .map(({id, number, location_from, forStock, requester, type, comment}) => ({id, number, location_from, forStock, requester, type, comment}));
 
                 return (collectesValuesToAdd.length > 0
                     ? this.insert('`collecte`', collectesValuesToAdd)

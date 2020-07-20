@@ -43,7 +43,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
     public collecteHeaderConfig?: {
         leftIcon: IconConfig;
         title: string;
-        subtitle?: string;
+        subtitle?: Array<string>;
         info?: string;
     };
 
@@ -79,7 +79,10 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
         this.collecteHeaderConfig = {
             leftIcon: {name: 'collecte.svg'},
             title: `Collecte ${this.collecte.number}`,
-            subtitle: `Point de collecte : ${this.collecte.location_from ? this.collecte.location_from : ''}`,
+            subtitle: [
+                `Point de collecte : ${this.collecte.location_from ? this.collecte.location_from : ''}`,
+                this.collecte.comment ? `Commentaire : ${this.collecte.comment}` : undefined
+            ],
             info: this.collecte.forStock ? 'Mise en stock' : 'Destruction'
         };
 
