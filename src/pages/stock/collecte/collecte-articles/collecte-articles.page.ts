@@ -81,7 +81,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
             title: `Collecte ${this.collecte.number}`,
             subtitle: [
                 `Point de collecte : ${this.collecte.location_from ? this.collecte.location_from : ''}`,
-                `Commentaire : ${this.collecte.comment ? this.collecte.comment : undefined}`
+                this.collecte.comment ? `Commentaire : ${this.collecte.comment}` : undefined
             ],
             info: this.collecte.forStock ? 'Mise en stock' : 'Destruction'
         };
