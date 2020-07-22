@@ -42,7 +42,10 @@ export class NavService {
     public setRoot(routeName: string, params?: RouteParams): Observable<boolean> {
         const paramsId = this.treatParams(params);
         const navigationExtras = this.createNavigationOption(paramsId);
-        return from(this.navController.navigateRoot(routeName, navigationExtras));
+        return from(this.navController.navigateRoot(routeName, {
+            replaceUrl: true,
+            ...navigationExtras
+        }));
     }
 
     public pop(): Observable<void> {
@@ -53,8 +56,8 @@ export class NavService {
         let uniqueParamsId;
         if (params
             && (Object.keys(params).length > 0)) {
-            const mapParams = new Map<string, any>(Object.entries(params));
             uniqueParamsId = NavService.GetUniqueParamsId();
+            const mapParams = new Map<string, any>(Object.entries(params));
             NavService.SetParams(uniqueParamsId, mapParams);
         }
         return uniqueParamsId;

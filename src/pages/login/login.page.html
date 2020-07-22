@@ -17,17 +17,11 @@
     <form (ngSubmit)="logForm()" *ngIf="!loading && !appVersionInvalid">
         <div class="form-content">
             <ion-item>
-                <ion-label color="medium">Login</ion-label>
-                <ion-input type="text" [(ngModel)]="form.login" name="login"></ion-input>
-            </ion-item>
-            <ion-item>
-                <ion-label color="medium">Mot de passe</ion-label>
+                <ion-label color="medium">Clé de connexion</ion-label>
                 <ion-input type="password"
-                           [(ngModel)]="form.password"
-                           name="password"
+                           [(ngModel)]="loginKey"
+                           name="loginKey"
                            (keyup.enter)="logForm()"
-                           (ionFocus)="onPasswordInputFocusedIn()"
-                           (ionBlur)="onPasswordInputFocusedOut()"
                 ></ion-input>
             </ion-item>
         </div>

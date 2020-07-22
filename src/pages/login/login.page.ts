@@ -1,8 +1,8 @@
 import {ChangeDetectorRef, Component} from '@angular/core';
 import {ApiService} from '@app/common/services/api.service';
 import {ToastService} from '@app/common/services/toast.service';
-import {Subscription} from 'rxjs';
-import {filter, flatMap, map} from 'rxjs/operators';
+import {of, Subscription} from 'rxjs';
+import {filter, flatMap, map, tap} from 'rxjs/operators';
 import {StorageService} from '@app/common/services/storage.service';
 import {VersionCheckerService} from '@app/common/services/version-checker.service';
 import {Network} from '@ionic-native/network/ngx';
@@ -12,9 +12,9 @@ import {NavService} from '@app/common/services/nav.service';
 import {ParamsPageRoutingModule} from '@pages/params/params-routing.module';
 import {MainMenuPageRoutingModule} from '@pages/main-menu/main-menu-routing.module';
 import {SplashScreen} from '@ionic-native/splash-screen/ngx';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {environment} from '@environments/environment';
-import {autoConnect, login, password} from '../../dev-credentials.json';
+import {autoConnect, loginKey} from '../../dev-credentials.json';
 import {PageComponent} from '@pages/page.component';
 
 
@@ -27,10 +27,8 @@ export class LoginPage extends PageComponent {
 
     private static readonly PATH_DOWNLOAD_APK: string = 'telecharger/nomade.apk';
 
-    public form = {
-        login: '',
-        password: ''
-    };
+    public loginKey: string;
+
     public _loading: boolean;
     public appVersionInvalid: boolean;
     public currentVersion: string;
@@ -40,12 +38,14 @@ export class LoginPage extends PageComponent {
     private appVersionSubscription: Subscription;
     private urlServerSubscription: Subscription;
     private zebraSubscription: Subscription;
+    private apiSubscription: Subscription;
 
     private passwordInputIsFocused: boolean;
 
     public constructor(private toastService: ToastService,
                        private apiService: ApiService,
                        private network: Network,
+                       private router: Router,
                        private splashScreen: SplashScreen,
                        private changeDetector: ChangeDetectorRef,
                        private barcodeScannerManager: BarcodeScannerManagerService,
@@ -69,15 +69,19 @@ export class LoginPage extends PageComponent {
         this.unsubscribeZebra();
         this.zebraSubscription = this.barcodeScannerManager
             .zebraScan$
-            .pipe(filter((barCode: string) => (
-                barCode
-                && barCode.length > 1
-                && barCode.charAt(barCode.length - 1) === '\n'
-                && this.passwordInputIsFocused
-            )))
+            .pipe(
+                filter((barCode: string) => (
+                    barCode
+                    && barCode.length > 1
+                    && !this.loading
+                )),
+                map((barCode: string) => {
+                    const splitBarcode = barCode.split('\n');
+                    return (splitBarcode && splitBarcode[0]) || '';
+                })
+            )
             .subscribe((barCode: string) => {
-                this.form.password = barCode.slice(0, barCode.length - 1);
-                this.logForm();
+                this.fillForm(barCode);
             });
 
         this.urlServerSubscription = this.storageService.getServerUrl().subscribe((url) => {
@@ -113,6 +117,7 @@ export class LoginPage extends PageComponent {
 
     public ionViewWillLeave(): void {
         this.unsubscribeZebra();
+        this.unsubscribeApi();
         if (this.appVersionSubscription) {
             this.appVersionSubscription.unsubscribe();
             this.appVersionSubscription = undefined;
@@ -125,32 +130,38 @@ export class LoginPage extends PageComponent {
 
     public logForm(): void {
         if (!this.loading
-            && this.form.login
-            && this.form.password) {
+            && this.loginKey) {
             if (this.network.type !== 'none') {
                 this.loading = true;
-                this.apiService
-                    .requestApi('post', ApiService.CONNECT, {params: this.form, secured: false, timeout: true})
-                    .subscribe(
-                        ({data, success}) => {
-                            if (success) {
-                                const {apiKey, rights, userId} = data;
-                                this.sqliteService
-                                    .resetDataBase()
-                                    .pipe(flatMap(() => this.storageService.initStorage(apiKey, this.form.login, userId, rights)))
-                                    .subscribe(
-                                        () => {
-                                            this.form.password = '';
 
-                                            this.navService.setRoot(MainMenuPageRoutingModule.PATH, {needReload: false}).subscribe(() => {
-                                                this.loading = false;
-                                            });
-                                        },
-                                        () => {
-                                            this.finishLoading();
-                                        });
-                            } else {
-                                this.finishLoading();
+                this.unsubscribeApi();
+
+                this.apiSubscription = this.apiService
+                    .requestApi('post', ApiService.POST_API_KEY, {params: {loginKey: this.loginKey}, secured: false, timeout: true})
+                    .pipe(
+                        flatMap(({data, success}) => {
+                            if (success) {
+                                const {apiKey, rights, userId, username} = data;
+                                return this.sqliteService
+                                    .resetDataBase()
+                                    .pipe(
+                                        flatMap(() => this.storageService.initStorage(apiKey, username, userId, rights)),
+                                        tap(() => {
+                                            this.loginKey = '';
+                                        }),
+                                        flatMap(() => this.navService.setRoot(MainMenuPageRoutingModule.PATH, {needReload: false})),
+                                        map(() => ({success: true}))
+                                    )
+                            }
+                            else {
+                                return of({success: false})
+                            }
+                        })
+                    )
+                    .subscribe(
+                        ({success}) => {
+                            this.finishLoading();
+                            if (!success) {
                                 this.toastService.presentToast('Identifiants incorrects.');
                             }
                         },
@@ -184,12 +195,9 @@ export class LoginPage extends PageComponent {
         return this._loading;
     }
 
-    public onPasswordInputFocusedIn(): void {
-        this.passwordInputIsFocused = true;
-    }
-
-    public onPasswordInputFocusedOut(): void {
-        this.passwordInputIsFocused = false;
+    public fillForm(key: string): void {
+        this.loginKey = key;
+        this.logForm();
     }
 
     private finishLoading() {
@@ -201,11 +209,7 @@ export class LoginPage extends PageComponent {
         if (!environment.production
             && autoConnect
             && this.wantToAutoConnect) {
-            this.form = {
-                login: login,
-                password: password
-            };
-            this.logForm();
+            this.fillForm(loginKey);
         }
     }
 
@@ -213,6 +217,13 @@ export class LoginPage extends PageComponent {
         if (this.zebraSubscription) {
             this.zebraSubscription.unsubscribe();
             this.zebraSubscription = undefined;
+        }
+    }
+
+    private unsubscribeApi(): void {
+        if (this.apiSubscription) {
+            this.apiSubscription.unsubscribe();
+            this.apiSubscription = undefined;
         }
     }
 }

@@ -19,7 +19,7 @@ export class ApiService {
     public static readonly BEGIN_COLLECTE: string = '/beginCollecte';
     public static readonly FINISH_COLLECTE: string = '/finishCollecte';
     public static readonly TREAT_ANOMALIES: string = '/treatAnomalies';
-    public static readonly CONNECT: string = '/connect';
+    public static readonly POST_API_KEY: string = '/api-key';
     public static readonly ADD_INVENTORY_ENTRIES: string = '/addInventoryEntries';
     public static readonly POST_MOUVEMENT_TRACA: string = '/mouvements-traca';
     public static readonly VALIDATE_MANUT: string = '/validateManut';
