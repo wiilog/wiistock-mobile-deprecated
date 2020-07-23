@@ -197,7 +197,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                 let articleAlready = this.articlesT.find(art => (
                     (art.id_collecte === mouvement.id_collecte) &&
                     (art.is_ref === mouvement.is_ref) &&
-                    (art.reference === mouvement.reference)
+                    (art.barcode === mouvement.barcode)
                 ));
                 if (articleAlready !== undefined) {
                     this.sqliteService

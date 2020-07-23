@@ -211,10 +211,10 @@ export class DeposePage extends PageComponent {
     }
 
     public testColisDepose(barCode: string, isManualInput: boolean = false): void {
-        const pickingIndex = this.getPickingIndex(barCode);
-        if (pickingIndex > -1) {
+        const pickingIndexes = this.findPickingIndexes(barCode);
+        if (pickingIndexes.length > 0) {
             if (isManualInput || !this.fromStock) {
-                this.saveMouvementTraca(pickingIndex);
+                this.saveMouvementTraca(pickingIndexes);
             }
             else {
                 this.footerScannerComponent.unsubscribeZebraScan();
@@ -231,7 +231,7 @@ export class DeposePage extends PageComponent {
                             {
                                 text: 'Confirmer',
                                 handler: () => {
-                                    this.saveMouvementTraca(pickingIndex);
+                                    this.saveMouvementTraca(pickingIndexes);
                                 },
                                 cssClass: 'alert-success'
                             }
@@ -255,24 +255,25 @@ export class DeposePage extends PageComponent {
         return this.colisPrise && this.colisPrise.filter(({hidden}) => !hidden).length > 0;
     }
 
-    private saveMouvementTraca(pickingIndex: number, comment?: string, signature?: string): void {
-        let quantity;
-        if (pickingIndex > -1) {
-            quantity = this.colisPrise[pickingIndex].quantity;
-            this.prisesToFinish.push(this.colisPrise[pickingIndex].id);
-            this.colisPrise[pickingIndex].hidden = true;
+    private saveMouvementTraca(pickingIndexes: Array<number>, comment?: string, signature?: string): void {
+        if (pickingIndexes.length > 0) {
+            for(const pickingIndex of pickingIndexes) {
+                let quantity = this.colisPrise[pickingIndex].quantity;
+                this.prisesToFinish.push(this.colisPrise[pickingIndex].id);
+                this.colisPrise[pickingIndex].hidden = true;
 
-            this.colisDepose.push({
-                ref_article: this.colisPrise[pickingIndex].ref_article,
-                comment,
-                signature,
-                fromStock: Number(this.fromStock),
-                quantity,
-                type: DeposePage.MOUVEMENT_TRACA_DEPOSE,
-                operateur: this.operator,
-                ref_emplacement: this.emplacement.label,
-                date: moment().format()
-            });
+                this.colisDepose.push({
+                    ref_article: this.colisPrise[pickingIndex].ref_article,
+                    comment,
+                    signature,
+                    fromStock: Number(this.fromStock),
+                    quantity,
+                    type: DeposePage.MOUVEMENT_TRACA_DEPOSE,
+                    operateur: this.operator,
+                    ref_emplacement: this.emplacement.label,
+                    date: moment().format()
+                });
+            }
         }
 
         this.refreshPriseListComponent();
@@ -281,12 +282,13 @@ export class DeposePage extends PageComponent {
     }
 
     private updatePicking(barCode: string, comment?: string, signature?: string): void {
-        const pickingIndex = this.colisDepose.findIndex(({ref_article}) => (ref_article === barCode));
+        const dropIndexes = this.findDropIndexes(barCode);
 
-        if (pickingIndex > -1) {
-            this.colisDepose[pickingIndex].comment = comment;
-            this.colisDepose[pickingIndex].signature = signature;
-
+        if (dropIndexes.length > 0) {
+            for(const dropIndex of dropIndexes) {
+                this.colisDepose[dropIndex].comment = comment;
+                this.colisDepose[dropIndex].signature = signature;
+            }
             this.refreshPriseListComponent();
             this.refreshDeposeListComponent();
         }
@@ -317,8 +319,9 @@ export class DeposePage extends PageComponent {
                 validate: () => this.finishTaking(),
                 confirmItem: !this.fromStock
                     ? ({object: {value: barCode}}: { object?: { value?: string } }) => {
-                        const dropIndex = this.getDropIndex(barCode);
-                        if (dropIndex > -1) {
+                        const dropIndexes = this.findDropIndexes(barCode);
+                        if (dropIndexes.length > 0) {
+                            const dropIndex = dropIndexes[0];
                             const {comment, signature} = this.colisDepose[dropIndex];
                             this.navService.push(DeposeConfirmPageRoutingModule.PATH, {
                                 location: this.emplacement,
@@ -352,15 +355,28 @@ export class DeposePage extends PageComponent {
         this.prisesToFinish = [];
     }
 
-    private getPickingIndex(barCode: string): number {
-        return this.colisPrise.findIndex(({ref_article, hidden}) => (
-            ref_article === barCode
-            && !hidden
-        ));
+    private findPickingIndexes(barCode: string): Array<number> {
+        return this.colisPrise.reduce(
+            (acc: Array<number>, {ref_article, hidden}, currentIndex) => {
+                if (ref_article === barCode
+                    && !hidden) {
+                    acc.push(currentIndex);
+                }
+                return acc;
+            },
+            []
+        );
     }
 
-    private getDropIndex(barCode: string): number {
-        return this.colisDepose.findIndex(({ref_article}) => (ref_article === barCode));
+    private findDropIndexes(barCode: string): Array<number> {
+        return this.colisDepose.reduce(
+            (acc: Array<number>, {ref_article}, currentIndex) => {
+                if (ref_article === barCode) {
+                    acc.push(currentIndex);
+                }
+                return acc;
+            },
+            []
+        );
     }
-
 }

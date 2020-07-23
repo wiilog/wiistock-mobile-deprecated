@@ -9,6 +9,10 @@ import {from} from 'rxjs';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {Emplacement} from '@entities/emplacement';
 
+type ListConfig = {
+    header: HeaderConfig;
+    body: Array<ListPanelItemConfig>;
+};
 
 @Injectable({
     providedIn: 'root'
@@ -111,7 +115,6 @@ export class TracaListFactoryService {
         }
     }
 
-
     public createListConfig(articles: Array<MouvementTraca>,
                             listType: number,
                             {location, objectLabel,  validate, uploadItem, confirmItem, removeItem, removeConfirmationMessage}: {
@@ -122,11 +125,26 @@ export class TracaListFactoryService {
                                 confirmItem?: (info: { [name: string]: { value?: string } }) => void;
                                 removeConfirmationMessage? : string;
                                 objectLabel: string;
-                            }): {
-        header: HeaderConfig;
-        body: Array<ListPanelItemConfig>;
-    } {
-        const pickedArticlesNumber = articles.length;
+                            }): ListConfig {
+
+        const notDuplicateArticles = articles.reduce(
+            (acc, movement) => {
+                const alreadyIndex = acc.findIndex(({ref_article}) => (movement.ref_article === ref_article));
+                if (alreadyIndex > -1) {
+                    if (acc[alreadyIndex].fromStock) {
+                        acc[alreadyIndex].quantity += movement.quantity;
+                    }
+                }
+                else {
+                    acc.push({...movement});
+                }
+
+                return acc;
+            },
+            []
+        );
+
+        const pickedArticlesNumber = notDuplicateArticles.length;
         const plural = pickedArticlesNumber > 1 ? 's' : '';
 
         const config = TracaListFactoryService.LIST_TYPE_CONFIG[listType];
@@ -158,17 +176,17 @@ export class TracaListFactoryService {
                         : {}
                 )
             },
-            body: articles.map(({date, ref_article, quantity}) => {
+            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite}) => {
                 const infos = {
                     object: {
                         label: 'Objet',
                         value: ref_article
                     },
-                    ...(quantity
+                    ...(quantity || quantite
                         ? {
                             quantity: {
                                 label: 'Quantité',
-                                value: String(quantity)
+                                value: String(quantity || quantite)
                             }
                         }
                         : {}),
