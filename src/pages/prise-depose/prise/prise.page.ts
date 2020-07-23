@@ -201,7 +201,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     public testIfBarcodeEquals(barCode: string, isManualAdd: boolean = false): void {
         if (!this.barcodeCheckLoading) {
             if (!this.fromStock) {
-                this.processCheckBarCode(barCode, isManualAdd);
+                this.processTackingBarCode(barCode, isManualAdd);
             }
             else if (this.network.type !== 'none') {
                 this.barcodeCheckLoading = true;
@@ -212,7 +212,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                         tap((presentedLoader) => {
                             loader = presentedLoader;
                         }),
-                        flatMap(() => this.existsOnLocation(barCode)),
+                        flatMap(() => this.checkArticleOnLocation(barCode)),
                         flatMap((quantity) => from(loader.dismiss()).pipe(
                             tap(() => {
                                 loader = undefined;
@@ -222,7 +222,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                     )
                     .subscribe(
                         (quantity) => {
-                            this.processCheckBarCode(barCode, isManualAdd, quantity);
+                            this.processTackingBarCode(barCode, isManualAdd, quantity);
                         },
                         () => {
                             if (loader) {
@@ -309,7 +309,7 @@ export class PrisePage extends PageComponent implements CanLeave {
         this.colisPriseAlreadySaved = [];
     }
 
-    private existsOnLocation(barCode: string): Observable<number|boolean> {
+    private checkArticleOnLocation(barCode: string): Observable<number|boolean> {
         return this.apiService
             .requestApi('get', ApiService.GET_ARTICLES, {
                 params: {
@@ -318,14 +318,29 @@ export class PrisePage extends PageComponent implements CanLeave {
                 }
             })
             .pipe(
+                tap((res) => {
+                    const article = (
+                        res
+                        && res.success
+                        && res.article
+                    );
+                    if (!article || !article.quantity || article.ordre_collecte_in_progress) {
+                        this.toastService.presentToast(
+                            !article
+                                ? 'Ce code barre n\'est pas présent sur cet emplacement'
+                                : (!article.quantity
+                                    ? 'La quantité disponible de cet article est à 0'
+                                    : 'Un ordre de collecte est en cours sur cet référence, vous ne pouvez effectuer de transfert') // order in progress
+                        );
+                    }
+                }),
                 map((res) => (
                     res
                     && res.success
-                    && res.articles
-                    && (res.articles.length > 0)
-                    && res.articles[0]
-                    && res.articles[0].quantity
-                ))
+                    && res.article
+                    && res.article.quantity
+                    && !res.article.ordre_collecte_in_progress
+                )),
             );
     }
 
@@ -338,7 +353,7 @@ export class PrisePage extends PageComponent implements CanLeave {
         }
     }
 
-    private processCheckBarCode(barCode: string, isManualAdd: boolean, quantity: boolean|number = true) {
+    private processTackingBarCode(barCode: string, isManualAdd: boolean, quantity: boolean|number = true) {
         this.barcodeCheckLoading = false;
         if (quantity) {
             if (this.colisPrise &&
@@ -382,13 +397,6 @@ export class PrisePage extends PageComponent implements CanLeave {
                         });
                 }
             }
-        }
-        else {
-            this.toastService.presentToast(
-                quantity === 0
-                    ? 'La quantité disponible est à zéro '
-                    : 'Ce code barre n\'est pas présent sur cet emplacement'
-            );
         }
     }
 }
