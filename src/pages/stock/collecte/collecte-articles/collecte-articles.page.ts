@@ -357,6 +357,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                 )
                 .subscribe(
                     ({offline, success}: any) => {
+                        this.canLeave = true;
                         if (this.collecte && this.collecte.forStock && success.length > 0) {
                             from(this.alertController
                                 .create({
@@ -379,7 +380,6 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                                 });
                         }
                         else {
-                            this.canLeave = true;
                             this.closeScreen(offline ? [] : success, offline);
                         }
                     },
