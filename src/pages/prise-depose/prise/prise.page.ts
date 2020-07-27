@@ -228,8 +228,8 @@ export class PrisePage extends PageComponent implements CanLeave {
                             if (loader) {
                                 loader.dismiss();
                             }
-                            this.barcodeCheckLoading = true;
-                            this.toastService.presentToast('Erreur serveur')
+                            this.barcodeCheckLoading = false;
+                            this.toastService.presentToast('Erreur serveur');
                         }
                     );
             }
@@ -324,13 +324,18 @@ export class PrisePage extends PageComponent implements CanLeave {
                         && res.success
                         && res.article
                     );
-                    if (!article || !article.quantity || article.ordre_collecte_in_progress) {
+                    if (!article || !article.quantity || !article.can_transfer) {
+                        const errorMessageCantTransfer = article.is_ref
+                            ? 'un ordre de collecte est en cours ou elle est en statut inactif'
+                            : 'la référence liée est en statut inactif';
+                        const thisArticle = article.is_ref ? 'cette référence' : 'cet article';
                         this.toastService.presentToast(
                             !article
                                 ? 'Ce code barre n\'est pas présent sur cet emplacement'
                                 : (!article.quantity
                                     ? 'La quantité disponible de cet article est à 0'
-                                    : 'Un ordre de collecte est en cours sur cet référence, vous ne pouvez effectuer de transfert') // order in progress
+                                    : `Vous ne pouvez effectuer de transfert sur ${thisArticle}, ${errorMessageCantTransfer}`),
+                            ToastService.LONG_DURATION
                         );
                     }
                 }),
@@ -339,7 +344,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                     && res.success
                     && res.article
                     && res.article.quantity
-                    && !res.article.ordre_collecte_in_progress
+                    && res.article.can_transfer
                 )),
             );
     }
