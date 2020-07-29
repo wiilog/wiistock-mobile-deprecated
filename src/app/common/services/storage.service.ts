@@ -13,6 +13,7 @@ export class StorageService {
     public static readonly RIGHT_DEMANDE = 'demande';
     public static readonly RIGHT_STOCK = 'stock';
     public static readonly RIGHT_TRACKING = 'tracking';
+    public static readonly DEMO_MODE = 'demoMode';
 
     private static readonly API_KEY = 'api-key';
     private static readonly OPERATOR = 'operator';
@@ -79,6 +80,10 @@ export class StorageService {
 
     public getDemandeAccessRight(): Observable<boolean> {
         return this.getRight(StorageService.RIGHT_DEMANDE);
+    }
+
+    public isDemoMode(): Observable<boolean> {
+        return this.getRight(StorageService.DEMO_MODE);
     }
 
     public getTrackingAccessRight(): Observable<boolean> {

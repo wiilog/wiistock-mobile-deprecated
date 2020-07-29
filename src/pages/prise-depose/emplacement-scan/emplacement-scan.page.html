@@ -2,7 +2,8 @@
                  [type]="selectItemType"
                  (createItem)="createEmp()"
                  (itemChange)="selectLocation($event)"
-                 [checkBarcodeValidity]="fromDepose"
+                 [checkBarcodeValidity]="!isDemoMode"
+                 [hidden]="loading"
                  [resetEmitter]="resetEmitter$"
                  [scanMode]="barcodeScannerMode">
 </wii-select-item>

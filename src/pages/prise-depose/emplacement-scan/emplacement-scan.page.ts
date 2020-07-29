@@ -10,6 +10,7 @@ import {PrisePageRoutingModule} from '@pages/prise-depose/prise/prise-routing.mo
 import {DeposePageRoutingModule} from '@pages/prise-depose/depose/depose-routing.module';
 import {NewEmplacementPageRoutingModule} from '@pages/new-emplacement/new-emplacement-routing.module';
 import {PageComponent} from '@pages/page.component';
+import {StorageService} from '@app/common/services/storage.service';
 
 @Component({
     selector: 'wii-emplacement-scan',
@@ -29,26 +30,36 @@ export class EmplacementScanPage extends PageComponent {
 
     public resetEmitter$: EventEmitter<void>;
 
+    public loading: boolean;
+    public isDemoMode: boolean;
+
     public constructor(private network: Network,
                        private toastService: ToastService,
+                       private storageService: StorageService,
                        navService: NavService) {
         super(navService);
         this.resetEmitter$ = new EventEmitter<void>();
+        this.loading = true;
     }
 
     public ionViewWillEnter(): void {
-        this.fromDepose = Boolean(this.currentNavParams.get('fromDepose'));
-        this.fromStock = Boolean(this.currentNavParams.get('fromStock'));
+        this.loading = true;
+        this.storageService.isDemoMode().subscribe((isDemoMode) => {
+            this.fromDepose = Boolean(this.currentNavParams.get('fromDepose'));
+            this.fromStock = Boolean(this.currentNavParams.get('fromStock'));
+            this.loading = false;
+            this.isDemoMode = isDemoMode;
 
-        this.resetEmitter$.emit();
+            this.resetEmitter$.emit();
 
-        this.barcodeScannerMode = this.fromStock
-            ? BarcodeScannerModeEnum.TOOL_SEARCH
-            : BarcodeScannerModeEnum.TOOLS_FULL;
+            this.barcodeScannerMode = this.fromStock || !isDemoMode
+                ? BarcodeScannerModeEnum.TOOL_SEARCH
+                : BarcodeScannerModeEnum.TOOLS_FULL;
 
-        if (this.selectItemComponent) {
-            this.selectItemComponent.fireZebraScan();
-        }
+            if (this.selectItemComponent) {
+                this.selectItemComponent.fireZebraScan();
+            }
+        });
     }
 
     public ionViewWillLeave(): void {
