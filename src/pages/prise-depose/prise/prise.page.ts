@@ -326,7 +326,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                     );
                     if (!article || !article.quantity || !article.can_transfer) {
                         const errorMessageCantTransfer = article.is_ref
-                            ? 'un ordre de collecte est en cours ou elle est en statut inactif'
+                            ? 'un processus pouvant changer la quantité disponible est en cours ou elle est en statut inactif'
                             : 'la référence liée est en statut inactif';
                         const thisArticle = article.is_ref ? 'cette référence' : 'cet article';
                         this.toastService.presentToast(
