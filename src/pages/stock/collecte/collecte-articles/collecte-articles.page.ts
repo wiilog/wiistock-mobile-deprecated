@@ -12,7 +12,7 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {AlertController} from '@ionic/angular';
 import {ApiService} from '@app/common/services/api.service';
 import {NavService} from '@app/common/services/nav.service';
-import {flatMap} from 'rxjs/operators';
+import {filter, flatMap, map} from 'rxjs/operators';
 import {Mouvement} from '@entities/mouvement';
 import * as moment from 'moment';
 import {from, Observable, of, zip} from 'rxjs';
@@ -57,6 +57,8 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
 
     private goToDepose: () => void;
     private canLeave: boolean;
+
+    private screenAlreadyClosed: boolean;
 
     public constructor(private toastService: ToastService,
                        private sqliteService: SqliteService,
@@ -358,6 +360,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                 .subscribe(
                     ({offline, success}: any) => {
                         this.canLeave = true;
+                        this.screenAlreadyClosed = false;
                         if (this.collecte && this.collecte.forStock && success.length > 0) {
                             from(this.alertController
                                 .create({
@@ -369,13 +372,18 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                                         cssClass: 'alert-success',
                                         handler: () => {
                                             this.canLeave = true;
-                                            this.closeScreen(offline ? [] : success, offline).subscribe(() => {
-                                                this.goToDepose();
-                                            });
+                                            this.closeScreen(offline ? [] : success, offline)
+                                                .pipe(filter((screenClosed) => screenClosed))
+                                                .subscribe(() => {
+                                                    this.goToDepose();
+                                                });
                                         }
                                     }]
                                 }))
                                 .subscribe((alert: HTMLIonAlertElement) => {
+                                    alert.onDidDismiss().then(() => {
+                                        this.closeScreen(offline ? [] : success, offline)
+                                    });
                                     alert.present();
                                 });
                         }
@@ -391,21 +399,27 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
         }
     }
 
-    private closeScreen(success: Array<{ newCollecte, articlesCollecte }>, isOffline: boolean = false): Observable<void> {
-        if(isOffline || success.length > 0) {
-            this.toastService.presentToast(
-                (success.length > 0)
-                    ? (
-                        (success.length === 1
-                            ? 'Votre collecte a bien été enregistrée'
-                            : `Votre collecte et ${success.length - 1} collecte${success.length - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
-                    )
-                    : 'Collecte sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé'
-            );
-        }
+    private closeScreen(success: Array<{ newCollecte, articlesCollecte }>, isOffline: boolean = false): Observable<boolean> {
+        if (!this.screenAlreadyClosed) {
+            this.screenAlreadyClosed = true;
+            if (isOffline || success.length > 0) {
+                this.toastService.presentToast(
+                    (success.length > 0)
+                        ? (
+                            (success.length === 1
+                                ? 'Votre collecte a bien été enregistrée'
+                                : `Votre collecte et ${success.length - 1} collecte${success.length - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
+                        )
+                        : 'Collecte sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé'
+                );
+            }
 
-        this.isLoading = false;
-        return this.navService.pop();
+            this.isLoading = false;
+            return this.navService.pop().pipe(map(() => true));
+        }
+        else {
+            return of(false);
+        }
     }
 
     private handlePreparationError(resp): void {
