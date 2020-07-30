@@ -8,6 +8,7 @@ import {StorageService} from '@app/common/services/storage.service';
 import {NavService} from '@app/common/services/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
+import {SqliteService} from "../../app/common/services/sqlite/sqlite.service";
 
 
 @Component({
@@ -26,6 +27,7 @@ export class ParamsPage extends PageComponent implements CanLeave {
     public constructor(private storageService: StorageService,
                        private apiService: ApiService,
                        private loadingService: LoadingService,
+                       private sqliteService: SqliteService,
                        private toastService: ToastService,
                        navService: NavService) {
         super(navService);
@@ -64,6 +66,7 @@ export class ParamsPage extends PageComponent implements CanLeave {
                     }),
                     flatMap((pingURL: string) => this.apiService.pingApi(pingURL)),
                     flatMap(() => this.storageService.setServerUrl(this.URL)),
+                    flatMap(() => this.sqliteService.resetDataBase(true)),
                     flatMap(() => from(loadingComponent.dismiss())),
                     flatMap(() => this.toastService.presentToast('URL enregistrée')),
 

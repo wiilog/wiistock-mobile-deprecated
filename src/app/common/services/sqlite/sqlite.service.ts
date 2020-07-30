@@ -74,8 +74,8 @@ export class SqliteService {
         return SqliteService.ExecuteQueryFlatMap(db, createDatabaseRequests);
     }
 
-    public static ResetDataBase(sqliteObject: SQLiteObject): Observable<any> {
-        return SqliteService.DropTables(sqliteObject)
+    public static ResetDataBase(sqliteObject: SQLiteObject, force: boolean = false): Observable<any> {
+        return SqliteService.DropTables(sqliteObject, force)
             .pipe(
                 flatMap(() => SqliteService.CreateTables(sqliteObject)),
                 map(() => undefined),
@@ -93,9 +93,9 @@ export class SqliteService {
         return list;
     }
 
-    private static DropTables(db: SQLiteObject): Observable<any> {
+    private static DropTables(db: SQLiteObject, force: boolean): Observable<any> {
         const dropDatabaseRequests = TablesDefinitions
-            .filter(({keepOnConnection}) => !keepOnConnection)
+            .filter(({keepOnConnection}) => force || !keepOnConnection)
             .map(({name}) => `DROP TABLE IF EXISTS \`${name}\`;`);
         return SqliteService.ExecuteQueryFlatMap(db, dropDatabaseRequests);
     }
@@ -107,8 +107,8 @@ export class SqliteService {
         return `(${whereJoined})`;
     }
 
-    public resetDataBase(): Observable<any> {
-        return this.db$.pipe(flatMap((db) => SqliteService.ResetDataBase(db)));
+    public resetDataBase(force: boolean = false): Observable<any> {
+        return this.db$.pipe(flatMap((db) => SqliteService.ResetDataBase(db, force)));
     }
 
     private importEmplacements(data): Observable<any> {
