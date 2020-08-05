@@ -88,7 +88,9 @@
     "cordova": {
         "plugins": {
             "cordova-sqlite-storage": {},
-            "phonegap-plugin-barcodescanner": {},
+            "phonegap-plugin-barcodescanner": {
+                "ANDROID_SUPPORT_V4_VERSION": "27.+"
+            },
             "cordova-plugin-app-version": {},
             "cordova-plugin-network-information": {},
             "com-darryncampbell-cordova-plugin-intent": {},
