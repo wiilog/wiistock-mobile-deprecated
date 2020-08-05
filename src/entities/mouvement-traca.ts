@@ -5,6 +5,7 @@ export interface MouvementTraca {
     ref_emplacement: string;
     date: string;
     id?: number;
+    nature_id?: number;
 
     //transfer
     fromStock?: number;

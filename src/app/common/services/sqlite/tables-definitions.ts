@@ -43,7 +43,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             signature: 'TEXT',
             finished: 'INTEGER',
             fromStock: 'INTEGER',
-            quantity: 'INTEGER'
+            quantity: 'INTEGER',
+            nature_id: 'INTEGER'
         }
     },
     {
@@ -236,6 +237,34 @@ export const TablesDefinitions: Array<TableDefinition> = [
             location_label: 'VARCHAR(255)',
             available_quantity: 'INTEGER',
             to_delete: 'INTEGER'
+        }
+    },
+    {
+        name: 'free_fields',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            label: 'VARCHAR(255)',
+            type: 'VARCHAR(255)',
+            typage: 'VARCHAR(255)',
+            required: 'INTEGER',
+            elements: 'TEXT',
+            defaultValue: 'TEXT'
+        }
+    },
+    {
+        name: 'nature',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            label: 'VARCHAR(255)',
+            color: 'VARCHAR(255)',
+            hide: 'INTEGER'
+        }
+    },
+    {
+        name: 'allowed_nature_location',
+        attributes: {
+            location_id: 'INTEGER',
+            nature_id: 'INTEGER'
         }
     }
 ];

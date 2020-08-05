@@ -111,26 +111,14 @@ export class SqliteService {
         return this.db$.pipe(flatMap((db) => SqliteService.ResetDataBase(db, force)));
     }
 
-    private importEmplacements(data): Observable<any> {
-        let apiEmplacements = data['emplacements'];
+    private importLocations(data): Observable<any> {
+        let apiEmplacements = data['locations'];
         const filled = (apiEmplacements && apiEmplacements.length > 0);
 
         return filled
-            ? this.deleteBy('emplacement')
-                .pipe(
-                    map(() => {
-                        const emplacementValuesStr = apiEmplacements
-                            .map((emplacement) => (
-                                "(" +
-                                emplacement.id + ", " +
-                                "'" + this.escapeQuotes(emplacement.label) +
-                                "')"
-                            ))
-                            .join(', ');
-                        return 'INSERT INTO `emplacement` (`id`, `label`) VALUES ' + emplacementValuesStr + ';'
-                    }),
-                    flatMap((query) => this.executeQuery(query, false))
-            )
+            ? this
+                .deleteBy('emplacement')
+                .pipe(flatMap(() => this.insert('emplacement', apiEmplacements)))
             : of(undefined);
     }
 
@@ -308,6 +296,53 @@ export class SqliteService {
                     : of(undefined)
                 ))
             );
+    }
+
+    public importNaturesData(data, clearAll: boolean = true): Observable<void> {
+        const natures = data['natures'] || [];
+        const allowedNatureInLocations = data['allowedNatureInLocations'] || [];
+
+        const naturesInsert = natures.map(({id, ...remainingNature}) => (
+            flatMap(() => (
+                this.deleteBy('nature', [`id = ${id}`])
+                    .pipe(
+                        flatMap(() => this.insert('nature', {id, ...remainingNature}))
+                    )
+            ))
+        ));
+
+        if (naturesInsert.length === 0) {
+            naturesInsert.push(map(() => undefined));
+        }
+
+        return zip(
+            // @ts-ignore
+            (clearAll ? this.deleteBy('nature') : of(undefined)).pipe(...naturesInsert),
+            allowedNatureInLocations.length > 0
+                ? this.insert('allowed_nature_location', allowedNatureInLocations)
+                : of(undefined)
+        )
+            .pipe(map(() => undefined));
+    }
+
+    public importFreeFieldData(data): Observable<void> {
+        // for multiple types
+        const freeFields = [
+            ...(data['trackingFreeFields'] || [])
+        ];
+
+        // @ts-ignore
+        return this.deleteBy('free_fields').pipe(
+            ...freeFields.map(({id, ...freeField}) => (
+                flatMap(() => (
+                    this.deleteBy('free_fields', [`id = ${id}`])
+                        .pipe(
+                            flatMap(() => this.insert('free_fields', {id, ...freeField}))
+                        )
+                ))
+            )),
+            map(() => undefined)
+        );
     }
 
     public importArticlesPrepas(data): Observable<any> {
@@ -688,7 +723,7 @@ export class SqliteService {
 
     public importData(data: any): Observable<any> {
         return of(undefined).pipe(
-            flatMap(() => this.importEmplacements(data).pipe(tap(() => {console.log('--- > importEmplacements')}))),
+            flatMap(() => this.importLocations(data).pipe(tap(() => {console.log('--- > importLocations')}))),
             flatMap(() => this.importArticlesPrepaByRefArticle(data).pipe(tap(() => {console.log('--- > importArticlesPrepaByRefArticle')}))),
             flatMap(() => this.importPreparations(data).pipe(tap(() => {console.log('--- > importPreparations')}))),
             flatMap(() => this.importArticlesPrepas(data).pipe(tap(() => {console.log('--- > importArticlesPrepas')}))),
@@ -699,6 +734,8 @@ export class SqliteService {
             flatMap(() => this.importCollectes(data).pipe(tap(() => {console.log('--- > importCollectes')}))),
             flatMap(() => this.importMouvementTraca(data).pipe(tap(() => {console.log('--- > importMouvementTraca')}))),
             flatMap(() => this.importDemandesLivraisonData(data).pipe(tap(() => {console.log('--- > importDemandeLivraisonData')}))),
+            flatMap(() => this.importNaturesData(data).pipe(tap(() => {console.log('--- > importNaturesData')}))),
+            flatMap(() => this.importFreeFieldData(data).pipe(tap(() => {console.log('--- > importFreeFieldData')}))),
             flatMap(() => (
                 this.storageService.getInventoryManagerRight().pipe(
                     flatMap((res) => (res
@@ -1078,6 +1115,7 @@ export class SqliteService {
         return (
             (typeof value === 'string') ? `'${this.escapeQuotes(value)}'` :
             (typeof value === 'boolean') ? `${Number(value)}` :
+            Array.isArray(value) ? JSON.stringify(value) :
             ((value === null) || (value === undefined)) ? 'null' :
             `${value}`
         );
