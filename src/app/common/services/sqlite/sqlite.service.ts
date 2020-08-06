@@ -300,7 +300,6 @@ export class SqliteService {
 
     public importNaturesData(data, clearAll: boolean = true): Observable<void> {
         const natures = data['natures'] || [];
-        const allowedNatureInLocations = data['allowedNatureInLocations'] || [];
 
         const naturesInsert = natures.map(({id, ...remainingNature}) => (
             flatMap(() => (
@@ -317,12 +316,21 @@ export class SqliteService {
 
         return zip(
             // @ts-ignore
-            (clearAll ? this.deleteBy('nature') : of(undefined)).pipe(...naturesInsert),
-            allowedNatureInLocations.length > 0
-                ? this.insert('allowed_nature_location', allowedNatureInLocations)
-                : of(undefined)
+            (clearAll ? this.deleteBy('nature') : of(undefined)).pipe(...naturesInsert)
         )
             .pipe(map(() => undefined));
+    }
+
+    public importAllowedNaturesData(data): Observable<void> {
+        const allowedNatureInLocations = data['allowedNatureInLocations'] || [];
+        return this.deleteBy('allowed_nature_location').pipe(
+            flatMap(() => (
+                allowedNatureInLocations.length > 0
+                    ? this.insert('allowed_nature_location', allowedNatureInLocations)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
     }
 
     public importFreeFieldData(data): Observable<void> {
@@ -735,6 +743,7 @@ export class SqliteService {
             flatMap(() => this.importMouvementTraca(data).pipe(tap(() => {console.log('--- > importMouvementTraca')}))),
             flatMap(() => this.importDemandesLivraisonData(data).pipe(tap(() => {console.log('--- > importDemandeLivraisonData')}))),
             flatMap(() => this.importNaturesData(data).pipe(tap(() => {console.log('--- > importNaturesData')}))),
+            flatMap(() => this.importAllowedNaturesData(data).pipe(tap(() => {console.log('--- > importAllowedNaturesData')}))),
             flatMap(() => this.importFreeFieldData(data).pipe(tap(() => {console.log('--- > importFreeFieldData')}))),
             flatMap(() => (
                 this.storageService.getInventoryManagerRight().pipe(

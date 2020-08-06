@@ -21,6 +21,7 @@ import {ActivatedRoute} from '@angular/router';
 import {NavService} from '@app/common/services/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
+import {Nature} from '@entities/nature';
 
 
 @Component({
@@ -56,10 +57,13 @@ export class PrisePage extends PageComponent implements CanLeave {
 
     private barcodeCheckSubscription: Subscription;
     private saveSubscription: Subscription;
+    private saveMovementSubscription: Subscription;
 
     private finishAction: () => void;
     private operator: string;
     private apiLoading: boolean;
+
+    private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
 
     public constructor(private network: Network,
                        private apiService: ApiService,
@@ -91,13 +95,21 @@ export class PrisePage extends PageComponent implements CanLeave {
             this.sqliteService.getPrises(this.fromStock),
             (this.network.type !== 'none' && this.emplacement && !this.fromStock
                 ? this.apiService.requestApi('get', ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})
-                : of({trackingDrops: []}))
+                : of({trackingDrops: []})),
+            !this.fromStock ? this.sqliteService.findAll('nature') : of(undefined),
         )
-            .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}]) => {
+            .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures]) => {
                 this.operator = operator;
                 this.colisPriseAlreadySaved = colisPriseAlreadySaved;
                 this.currentPacksOnLocation = trackingDrops;
                 this.footerScannerComponent.fireZebraScan();
+
+                if (natures) {
+                    this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
+                        [id]: {label, color},
+                        ...acc
+                    }), {})
+                }
 
                 this.refreshListComponent();
                 this.loading = false;
@@ -114,6 +126,10 @@ export class PrisePage extends PageComponent implements CanLeave {
         if (this.saveSubscription) {
             this.saveSubscription.unsubscribe();
             this.saveSubscription = undefined;
+        }
+        if (this.saveMovementSubscription) {
+            this.saveMovementSubscription.unsubscribe();
+            this.saveMovementSubscription = undefined;
         }
     }
 
@@ -250,13 +266,14 @@ export class PrisePage extends PageComponent implements CanLeave {
         return this.currentPacksOnLocation && this.currentPacksOnLocation.filter(({hidden}) => !hidden).length > 0;
     }
 
-    private saveMouvementTraca(barCode: string, quantity: boolean|number): void {
+    private saveTrackingMovement(barCode: string, quantity: boolean|number, natureId?: number): void {
         this.colisPrise.push({
             ref_article: barCode,
             type: PrisePage.MOUVEMENT_TRACA_PRISE,
             operateur: this.operator,
             ref_emplacement: this.emplacement.label,
             finished: 0,
+            nature_id: natureId,
             fromStock: Number(this.fromStock),
             ...(typeof quantity === 'number' ? {quantity} : {}),
             date: moment().format()
@@ -264,6 +281,7 @@ export class PrisePage extends PageComponent implements CanLeave {
         this.setPackOnLocationHidden(barCode, true);
         this.refreshListComponent();
         this.changeDetectorRef.detectChanges();
+        this.footerScannerComponent.fireZebraScan();
     }
 
     private refreshListComponent(): void {
@@ -272,6 +290,7 @@ export class PrisePage extends PageComponent implements CanLeave {
             TracaListFactoryService.LIST_TYPE_TAKING_MAIN,
             {
                 objectLabel: this.objectLabel,
+                natureIdsToConfig: this.natureIdsToConfig,
                 location: this.emplacement,
                 validate: () => this.finishTaking(),
                 removeItem: TracaListFactoryService.CreateRemoveItemFromListHandler(this.colisPrise, undefined, (barCode) => {
@@ -369,11 +388,49 @@ export class PrisePage extends PageComponent implements CanLeave {
                 this.toastService.presentToast('Cette prise a déjà été effectuée');
             }
             else {
+                this.footerScannerComponent.unsubscribeZebraScan();
                 if (isManualAdd || !this.fromStock) {
-                    this.saveMouvementTraca(barCode, quantity);
+                    let loader: HTMLIonLoadingElement;
+
+                    if (this.saveMovementSubscription) {
+                        this.saveMovementSubscription.unsubscribe();
+                    }
+
+                    this.saveMovementSubscription = (
+                        (!this.fromStock && this.network.type !== 'none')
+                            ? this.loadingService.presentLoading().pipe(
+                                tap((createdLoader) => { loader = createdLoader; }),
+                                flatMap(() => this.apiService.requestApi('get', ApiService.GET_PACK_NATURE, {pathParams: {code: barCode}}))
+                            )
+                            : of(undefined)
+                    )
+                        .pipe(
+                            flatMap(({nature}) => this.sqliteService.importNaturesData({natures: [nature]}, false).pipe(map(() => nature))),
+                            tap((nature) => {
+                                if (nature) {
+                                    const {id, color, label} = nature;
+                                    this.natureIdsToConfig[id] = {label, color};
+                                }
+                            })
+                        )
+                        .subscribe(
+                            ({id}) => {
+                                this.saveTrackingMovement(barCode, quantity, id);
+                                if (loader) {
+                                    loader.dismiss();
+                                }
+                            },
+                            () => {
+                                this.saveTrackingMovement(barCode, quantity);
+                                if (loader) {
+                                    loader.dismiss();
+                                }
+                            }
+                        );
+
+
                 }
                 else {
-                    this.footerScannerComponent.unsubscribeZebraScan();
                     const quantitySuffix = (typeof quantity === 'number')
                         ? ` en quantité de ${quantity}`
                         : '';
@@ -390,8 +447,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                                 {
                                     text: 'Confirmer',
                                     handler: () => {
-                                        this.saveMouvementTraca(barCode, quantity);
-                                        this.footerScannerComponent.fireZebraScan();
+                                        this.saveTrackingMovement(barCode, quantity);
                                     },
                                     cssClass: 'alert-success'
                                 }

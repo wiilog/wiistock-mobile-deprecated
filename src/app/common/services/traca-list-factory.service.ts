@@ -117,8 +117,9 @@ export class TracaListFactoryService {
 
     public createListConfig(articles: Array<MouvementTraca>,
                             listType: number,
-                            {location, objectLabel,  validate, uploadItem, confirmItem, removeItem, removeConfirmationMessage}: {
+                            {location, objectLabel,  validate, uploadItem, confirmItem, removeItem, removeConfirmationMessage, natureIdsToConfig}: {
                                 location?: Emplacement;
+                                natureIdsToConfig?: {[id: number]: { label: string; color?: string; }};
                                 validate?: () => void;
                                 uploadItem?: (info: { object: { value?: string } }) => void;
                                 removeItem?: (info: { [name: string]: { value?: string } }) => void;
@@ -176,7 +177,8 @@ export class TracaListFactoryService {
                         : {}
                 )
             },
-            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite}) => {
+            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id}) => {
+                const natureConfig = (natureIdsToConfig && nature_id && natureIdsToConfig[nature_id]);
                 const infos = {
                     object: {
                         label: 'Objet',
@@ -193,10 +195,19 @@ export class TracaListFactoryService {
                     date: {
                         label: 'Date / Heure',
                         value: moment(date, moment.defaultFormat).format('DD/MM/YYYY HH:mm:ss')
-                    }
+                    },
+                    ...(
+                        natureConfig ? {
+                            quantity: {
+                                label: 'Nature',
+                                value: natureConfig.label
+                            }
+                        }
+                        : {}),
                 };
                 return {
                     infos,
+                    color: natureConfig && natureConfig.color,
                     longPressAction: (
                         removeConfirmationMessage && removeItem
                             ? (info: { [name: string]: { value?: string } }) => {

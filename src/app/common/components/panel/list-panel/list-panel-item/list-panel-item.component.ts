@@ -20,6 +20,9 @@ export class ListPanelItemComponent {
     };
 
     @Input()
+    public color?: string;
+
+    @Input()
     public boldValues?: Array<string>;
 
     @Input()

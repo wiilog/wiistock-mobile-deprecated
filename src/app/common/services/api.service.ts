@@ -29,6 +29,7 @@ export class ApiService {
     public static readonly GET_TRACKING_DROPS: string = '/tracking-drops';
     public static readonly POST_DEMANDE_LIVRAISON: string = '/valider-dl';
     public static readonly GET_DEMANDE_LIVRAISON_DATA: string = '/demande-livraison-data';
+    public static readonly GET_PACK_NATURE: string = '/packs/{code}/nature';
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'
@@ -50,15 +51,16 @@ export class ApiService {
 
     public requestApi(method: string,
                       service: string,
-                      {params = {}, secured = true, timeout: requestWithTimeout = false}: {
+                      {params = {}, secured = true, timeout: requestWithTimeout = false, pathParams = {}}: {
                           params?: { [x: string]: any };
+                          pathParams?: { [x: string]: string|number };
                           secured?: boolean;
                           timeout?: boolean;
-                      } = {params: {}, secured: true, timeout: false}): Observable<any> {
+                      } = {params: {}, pathParams: {}, secured: true, timeout: false}): Observable<any> {
         params = ApiService.ObjectToHttpParams(params);
 
         let requestResponse = zip(
-            this.getApiUrl(service),
+            this.getApiUrl(service, {pathParams}),
             ...(secured ? [this.storageService.getApiKey()] : [])
         )
             .pipe(
@@ -104,7 +106,12 @@ export class ApiService {
             : this.storageService.getServerUrl().pipe(map((url) => (url ? `${url}/api` : null)));
     }
 
-    public getApiUrl(service: string, newUrl?: string): Observable<any> {
+    public getApiUrl(service: string, {newUrl, pathParams = {}}: { newUrl?: string, pathParams?: { [x: string]: string | number } } = {}): Observable<any> {
+        for(let pathParamName in pathParams) {
+            const regexMatchParam = new RegExp(`\{${pathParamName}\}`, 'g');
+            service = service.replace(regexMatchParam, encodeURIComponent(pathParams[pathParamName]));
+        }
+
         return this.getApiBaseUrl(newUrl).pipe(map((baseUrl) => (baseUrl ? `${baseUrl}${service}` : null)));
     }
 

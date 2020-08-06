@@ -19,6 +19,7 @@ import {flatMap, map, tap} from 'rxjs/operators';
 import * as moment from 'moment';
 import {DeposeConfirmPageRoutingModule} from '@pages/prise-depose/depose-confirm/depose-confirm-routing.module';
 import {PageComponent} from '@pages/page.component';
+import {Nature} from '@entities/nature';
 
 @Component({
     selector: 'wii-depose',
@@ -63,6 +64,8 @@ export class DeposePage extends PageComponent {
 
     private operator: string;
 
+    private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
+
     public constructor(private network: Network,
                        private alertController: AlertController,
                        private toastService: ToastService,
@@ -94,11 +97,19 @@ export class DeposePage extends PageComponent {
                         `fromStock = ${Number(this.fromStock)}`
                     ]
                 ),
-                this.storageService.getOperator()
+                this.storageService.getOperator(),
+                !this.fromStock ? this.sqliteService.findAll('nature') : of(undefined)
             )
-                .subscribe(([colisPrise, operator]) => {
+                .subscribe(([colisPrise, operator, natures]) => {
                     this.colisPrise = colisPrise;
                     this.operator = operator;
+
+                    if (natures) {
+                        this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
+                            [id]: {label, color},
+                            ...acc
+                        }), {})
+                    }
 
                     this.footerScannerComponent.fireZebraScan();
 
@@ -264,6 +275,7 @@ export class DeposePage extends PageComponent {
 
                 this.colisDepose.push({
                     ref_article: this.colisPrise[pickingIndex].ref_article,
+                    nature_id: this.colisPrise[pickingIndex].nature_id,
                     comment,
                     signature,
                     fromStock: Number(this.fromStock),
@@ -304,7 +316,8 @@ export class DeposePage extends PageComponent {
                 objectLabel: this.objectLabel,
                 uploadItem: ({object}) => {
                     this.testColisDepose(object.value, true);
-                }
+                },
+                natureIdsToConfig: this.natureIdsToConfig
             }
         );
     }
@@ -314,6 +327,7 @@ export class DeposePage extends PageComponent {
             this.colisDepose,
             TracaListFactoryService.LIST_TYPE_DROP_MAIN,
             {
+                natureIdsToConfig: this.natureIdsToConfig,
                 objectLabel: this.objectLabel,
                 location: this.emplacement,
                 validate: () => this.finishTaking(),

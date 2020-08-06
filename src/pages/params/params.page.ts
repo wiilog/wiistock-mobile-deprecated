@@ -62,7 +62,7 @@ export class ParamsPage extends PageComponent implements CanLeave {
                 .pipe(
                     flatMap((loading) =>  {
                         loadingComponent = loading;
-                        return this.apiService.getApiUrl(ApiService.GET_PING, this.URL);
+                        return this.apiService.getApiUrl(ApiService.GET_PING, {newUrl: this.URL});
                     }),
                     flatMap((pingURL: string) => this.apiService.pingApi(pingURL)),
                     flatMap(() => this.storageService.setServerUrl(this.URL)),

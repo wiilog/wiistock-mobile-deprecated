@@ -2,10 +2,19 @@
 
 :host {
     display: block;
+    position: relative;
     background-color: $white;
     border: 1px solid $lightBlue;
     padding: .5rem 1rem;
     font-size: $normalFontSize;
+
+    .list-element-color {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 5px;
+    }
 
     .list-element-wrapper {
         display: flex;
