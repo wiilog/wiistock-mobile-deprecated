@@ -313,13 +313,22 @@ export class LocalDataManagerService {
                 map((mouvements: Array<MouvementTraca>) => (
                     mouvements
                         .filter(({fromStock}) => (sendFromStock === Boolean(fromStock)))
-                        .map(({signature, ...mouvement}) => ({
+                        .map(({signature, photo, ...mouvement}) => ({
                             ...mouvement,
                             signature: signature
                                 ? this.fileService.createFile(
                                     signature,
                                     FileService.SIGNATURE_IMAGE_EXTENSION,
-                                    FileService.SIGNATURE_IMAGE_TYPE
+                                    FileService.SIGNATURE_IMAGE_TYPE,
+                                    'signature'
+                                )
+                                : undefined,
+                            photo: photo
+                                ? this.fileService.createFile(
+                                    photo,
+                                    FileService.SIGNATURE_IMAGE_EXTENSION,
+                                    FileService.SIGNATURE_IMAGE_TYPE,
+                                    'photo'
                                 )
                                 : undefined
                         }))
@@ -331,16 +340,20 @@ export class LocalDataManagerService {
                                 : 1
                         })
                 )),
-                flatMap((mouvements: Array<MouvementTraca&{signature: File}>) => (
+                flatMap((mouvements: Array<MouvementTraca&{signature: File, photo: File}>) => (
                     mouvements.length > 0
                         ? (
                             this.apiService
                                 .requestApi('post', ApiService.POST_MOUVEMENT_TRACA, {
                                     params: {
-                                        mouvements: mouvements.map(({signature, ...mouvements}) => mouvements),
+                                        mouvements: mouvements.map(({signature, photo, ...mouvements}) => mouvements),
                                         ...(mouvements.reduce((acc, {signature}, currentIndex) => ({
                                             ...acc,
                                             ...(signature ? {[`signature_${currentIndex}`]: signature} : {})
+                                        }), {})),
+                                        ...(mouvements.reduce((acc, {photo}, currentIndex) => ({
+                                            ...acc,
+                                            ...(photo ? {[`photo_${currentIndex}`]: photo} : {})
                                         }), {}))
                                     }
                                 })

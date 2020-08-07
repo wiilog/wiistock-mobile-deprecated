@@ -293,13 +293,16 @@ export class DeposePage extends PageComponent {
         this.footerScannerComponent.fireZebraScan();
     }
 
-    private updatePicking(barCode: string, comment?: string, signature?: string): void {
+    private updatePicking(barCode: string,
+                          {comment, signature, photo, natureId}: {comment?: string; signature?: string; photo?: string; natureId: number;}): void {
         const dropIndexes = this.findDropIndexes(barCode);
 
         if (dropIndexes.length > 0) {
             for(const dropIndex of dropIndexes) {
                 this.colisDepose[dropIndex].comment = comment;
                 this.colisDepose[dropIndex].signature = signature;
+                this.colisDepose[dropIndex].photo = photo;
+                this.colisDepose[dropIndex].nature_id = natureId;
             }
             this.refreshPriseListComponent();
             this.refreshDeposeListComponent();
@@ -333,17 +336,19 @@ export class DeposePage extends PageComponent {
                 validate: () => this.finishTaking(),
                 confirmItem: !this.fromStock
                     ? ({object: {value: barCode}}: { object?: { value?: string } }) => {
-                        const dropIndexes = this.findDropIndexes(barCode);
-                        if (dropIndexes.length > 0) {
-                            const dropIndex = dropIndexes[0];
-                            const {comment, signature} = this.colisDepose[dropIndex];
+                        // we get first
+                        const [dropIndex] = this.findDropIndexes(barCode);
+                        if (dropIndex !== undefined) {
+                            const {comment, signature, photo, nature_id: natureId} = this.colisDepose[dropIndex];
                             this.navService.push(DeposeConfirmPageRoutingModule.PATH, {
                                 location: this.emplacement,
                                 barCode,
                                 comment,
                                 signature,
-                                validateDepose: (comment, signature) => {
-                                    this.updatePicking(barCode, comment, signature);
+                                natureId,
+                                photo,
+                                validateDepose: (values) => {
+                                    this.updatePicking(barCode, values);
                                 }
                             });
                         }

@@ -24,6 +24,14 @@
                                 [name]="element.name"
                                 [errors]="element.errors">
         </wii-form-panel-signing>
+        <wii-form-panel-camera #formElements
+                               *ngIf="element.type === 'camera'"
+                               [inputConfig]="element.inputConfig"
+                               [(value)]="element.value"
+                               [label]="element.label"
+                               [name]="element.name"
+                               [errors]="element.errors">
+        </wii-form-panel-camera>
         <wii-form-panel-select #formElements
                                *ngIf="element.type === 'select'"
                                [inputConfig]="element.inputConfig"

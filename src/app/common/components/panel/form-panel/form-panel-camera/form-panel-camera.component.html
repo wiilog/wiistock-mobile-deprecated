@@ -1,0 +1,12 @@
+<ion-item lines="none">
+    <ion-label color="medium">{{label}}</ion-label>
+    <img *ngIf="value else noValue"
+         class="camera-image"
+         alt="photo"
+         [src]="value"
+         (click)="onItemClicked()"/>
+    <ng-template #noValue>
+        <wii-icon class="add-camera" color="success" name="camera.svg" (action)="onItemClicked()"></wii-icon>
+    </ng-template>
+</ion-item>
+

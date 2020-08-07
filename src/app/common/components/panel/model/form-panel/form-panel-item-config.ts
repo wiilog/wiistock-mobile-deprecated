@@ -1,6 +1,7 @@
 import {FormPanelSigningConfig} from '@app/common/components/panel/model/form-panel/form-panel-signing-config';
 import {FormPanelInputConfig} from '@app/common/components/panel/model/form-panel/form-panel-input-config';
 import {FormPanelSelectConfig} from '@app/common/components/panel/model/form-panel/form-panel-select-config';
+import {FormPanelCameraConfig} from '@app/common/components/panel/model/form-panel/form-panel-camera-config';
 
 interface FormPanelItemConfigBase {
     label: string;
@@ -14,6 +15,11 @@ interface FormPanelItemConfigSigning extends FormPanelItemConfigBase {
     inputConfig: FormPanelSigningConfig;
 }
 
+interface FormPanelItemConfigCamera extends FormPanelItemConfigBase {
+    type: 'camera';
+    inputConfig: FormPanelCameraConfig;
+}
+
 interface FormPanelItemConfigInput extends FormPanelItemConfigBase {
     type: 'input';
     inputConfig: FormPanelInputConfig;
@@ -24,4 +30,7 @@ interface FormPanelItemConfigSelect extends FormPanelItemConfigBase {
     inputConfig: FormPanelSelectConfig;
 }
 
-export type FormPanelItemConfig = FormPanelItemConfigSigning|FormPanelItemConfigInput|FormPanelItemConfigSelect;
+export type FormPanelItemConfig = FormPanelItemConfigSigning
+                                | FormPanelItemConfigInput
+                                | FormPanelItemConfigSelect
+                                | FormPanelItemConfigCamera;

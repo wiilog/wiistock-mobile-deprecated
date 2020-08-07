@@ -41,6 +41,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             operateur: 'VARCHAR(255)',
             comment: 'VARCHAR(255)',
             signature: 'TEXT',
+            photo: 'photo',
             finished: 'INTEGER',
             fromStock: 'INTEGER',
             quantity: 'INTEGER',

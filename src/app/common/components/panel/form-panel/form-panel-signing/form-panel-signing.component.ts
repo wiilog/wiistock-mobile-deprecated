@@ -42,7 +42,7 @@ export class FormPanelSigningComponent implements OnDestroy {
     }
 
     public get error(): string {
-        return !this.value
+        return (this.inputConfig.required && !this.value)
             ? (this.errors && this.errors.required)
             : undefined;
     }
@@ -73,10 +73,7 @@ export class FormPanelSigningComponent implements OnDestroy {
                                 this.valueChange.emit(this.value);
                             }
                         });
-                        return zip(
-                            of(loading),
-                            from(modal.present())
-                        );
+                        return zip(of(loading), from(modal.present()));
                     })
                 )
                 .subscribe(([loading]: [HTMLIonLoadingElement, void]) => {

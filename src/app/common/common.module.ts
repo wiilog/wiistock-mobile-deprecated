@@ -25,10 +25,12 @@ import {IonicModule} from '@ionic/angular';
 import {HttpClientModule} from '@angular/common/http';
 import {Network} from '@ionic-native/network/ngx';
 import {BarcodeScanner} from '@ionic-native/barcode-scanner/ngx';
+import {Camera} from '@ionic-native/camera/ngx';
 import {SQLite} from '@ionic-native/sqlite/ngx';
 import {AppVersion} from '@ionic-native/app-version/ngx';
 import {StatsSlidersComponent} from '@app/common/components/stats-sliders/stats-sliders.component';
 import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
+import {FormPanelCameraComponent} from '@app/common/components/panel/form-panel/form-panel-camera/form-panel-camera.component';
 
 
 @NgModule({
@@ -41,6 +43,7 @@ import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/
         MenuComponent,
         FormPanelInputComponent,
         FormPanelSigningComponent,
+        FormPanelCameraComponent,
         FormPanelSelectComponent,
         FormPanelComponent,
         ListPanelItemComponent,
@@ -80,6 +83,7 @@ import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/
         BarcodeScanner,
         SQLite,
         AppVersion,
+        Camera,
 
         // ionic-long-press
         {provide: HAMMER_GESTURE_CONFIG, useClass: IonicGestureConfig},

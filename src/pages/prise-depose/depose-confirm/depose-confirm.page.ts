@@ -7,6 +7,7 @@ import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav.service';
 import {ActivatedRoute} from '@angular/router';
 import {PageComponent} from '@pages/page.component';
+import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 
 
 @Component({
@@ -22,7 +23,7 @@ export class DeposeConfirmPage extends PageComponent {
     public bodyConfig: Array<FormPanelItemConfig>;
 
     private location: Emplacement;
-    private validateDepose: (comment: string, signature: string) => void;
+    private validateDepose: (values: {comment: string; signature: string; photo: string; natureId: number}) => void;
 
     public constructor(private activatedRoute: ActivatedRoute,
                        private toastService: ToastService,
@@ -37,6 +38,8 @@ export class DeposeConfirmPage extends PageComponent {
         const barCode = this.currentNavParams.get('barCode');
         const comment = this.currentNavParams.get('comment');
         const signature = this.currentNavParams.get('signature');
+        const photo = this.currentNavParams.get('photo');
+        const natureId = this.currentNavParams.get('natureId');
 
         this.headerConfig = {
             title: `DEPOSE de ${barCode}`,
@@ -48,6 +51,20 @@ export class DeposeConfirmPage extends PageComponent {
         };
 
         this.bodyConfig = [
+            {
+                type: 'select',
+                label: 'Type',
+                name: 'natureId',
+                value: natureId,
+                inputConfig: {
+                    required: true,
+                    searchType: SelectItemTypeEnum.TRACKING_NATURES,
+                    requestParams: ['hide <> 1']
+                },
+                errors: {
+                    required: 'Vous devez sélectionner une nature'
+                }
+            },
             {
                 type: 'input',
                 label: 'Commentaire',
@@ -68,6 +85,13 @@ export class DeposeConfirmPage extends PageComponent {
                 name: 'signature',
                 value: signature,
                 inputConfig: {}
+            },
+            {
+                type: 'camera',
+                label: 'Photo',
+                name: 'photo',
+                value: photo,
+                inputConfig: {}
             }
         ];
     }
@@ -78,8 +102,8 @@ export class DeposeConfirmPage extends PageComponent {
             this.toastService.presentToast(formError);
         }
         else {
-            const {comment, signature} = this.formPanelComponent.values;
-            this.validateDepose(comment, signature);
+            const {comment, signature, photo, natureId} = this.formPanelComponent.values;
+            this.validateDepose({comment, signature, photo, natureId});
             this.navService.pop();
         }
     }

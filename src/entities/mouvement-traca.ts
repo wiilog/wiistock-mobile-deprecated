@@ -17,4 +17,5 @@ export interface MouvementTraca {
     // depose
     comment?: string;
     signature?: string;
+    photo?: string;
 }
