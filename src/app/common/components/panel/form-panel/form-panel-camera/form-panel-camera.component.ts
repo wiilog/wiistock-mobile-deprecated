@@ -2,7 +2,8 @@ import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {take} from 'rxjs/operators';
 import {from} from 'rxjs';
 import {Camera, CameraOptions} from '@ionic-native/camera/ngx';
-import {FormPanelCameraConfig} from '@app/common/components/panel/model/form-panel/form-panel-camera-config';
+import {FormPanelItemComponent} from '@app/common/components/panel/model/form-panel/form-panel-item.component';
+import {FormPanelCameraConfig} from '@app/common/components/panel/model/form-panel/configs/form-panel-camera-config';
 
 
 @Component({
@@ -10,7 +11,7 @@ import {FormPanelCameraConfig} from '@app/common/components/panel/model/form-pan
     templateUrl: 'form-panel-camera.component.html',
     styleUrls: ['./form-panel-camera.component.scss']
 })
-export class FormPanelCameraComponent {
+export class FormPanelCameraComponent implements FormPanelItemComponent<FormPanelCameraConfig> {
 
     private readonly cameraOptions: CameraOptions;
 
@@ -57,7 +58,7 @@ export class FormPanelCameraComponent {
                     this.value = imageData ? `data:image/jpeg;base64,${imageData}` : undefined;
                     this.valueChange.emit(this.value);
                 },
-                (err) => {
+                () => {
                     this.valueChange.emit(undefined);
                 }
             );

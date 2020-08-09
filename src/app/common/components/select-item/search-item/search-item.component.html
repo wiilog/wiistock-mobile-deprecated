@@ -5,10 +5,11 @@
                 #itemComponent
                 closeButtonText="Fermer"
                 [(ngModel)]="_item"
+                [isMultiple]="isMultiple"
                 [items]="dbItemsForList"
-                [itemValueField]="config[type].valueField"
-                [itemTextField]="config[type].label"
-                [placeholder]="config[type].placeholder"
+                [itemValueField]="config[smartType].valueField"
+                [itemTextField]="config[smartType].label"
+                [placeholder]="config[smartType].placeholder"
                 searchPlaceholder="Rechercher"
                 [canSearch]="true"
                 [hasInfiniteScroll]="true"
@@ -19,7 +20,7 @@
                 </ng-template>
                 <ng-template ionicSelectableItemTemplate
                              let-article="item"
-                             *ngIf="config[type].templateIndex === 'article-prepa'">
+                             *ngIf="config[smartType].templateIndex === 'article-prepa'">
                     <div class="ionic-selectable-item-wrapper">
                         <p>Article {{article.barcode}}</p>
                         <p *ngIf="article.location !== 'null'">Emplacement : {{article.location}}</p>
@@ -28,7 +29,7 @@
                 </ng-template>
                 <ng-template ionicSelectableItemTemplate
                              let-article="item"
-                             *ngIf="config[type].templateIndex === 'article-inventory'">
+                             *ngIf="config[smartType].templateIndex === 'article-inventory'">
                     <div class="ionic-selectable-item-wrapper">
                         <p>Référence : {{article.reference}}</p>
                         <p>Code barre : {{article.barcode}}</p>
@@ -36,7 +37,7 @@
                 </ng-template>
                 <ng-template ionicSelectableItemTemplate
                              let-article="item"
-                             *ngIf="config[type].templateIndex === 'article-demande'">
+                             *ngIf="config[smartType].templateIndex === 'article-demande'">
                     <div class="ionic-selectable-item-wrapper">
                         <p>Article : {{article.reference}}</p>
                         <p>Libellé : {{article.label}}</p>
@@ -54,7 +55,7 @@
                 </ng-template>
                 <ng-template ionicSelectableItemTemplate
                              let-location="item"
-                             *ngIf="config[type].templateIndex === 'default'">
+                             *ngIf="config[smartType].templateIndex === 'default'">
                     {{location.label}}
                 </ng-template>
             </ionic-selectable>

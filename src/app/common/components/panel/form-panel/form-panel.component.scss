@@ -2,19 +2,24 @@
 
 :host {
     display: flex;
+    overflow-y: auto;
 
     & > .wrapper {
         flex: 1;
-        wii-panel-header {
-            margin: $spacerMin $spacerMin $spacerMin ($spacerMin/2);
-        }
 
-        :not(wii-panel-header) {
-            margin-right: $spacer;
-            margin-left: $spacer;
+        & > div {
+            & > ::ng-deep * {
 
-            &:not(:last-child) {
-                margin-bottom: $spacerMin;
+                margin-right: $spacer;
+                margin-left: $spacer;
+
+                &:not(:last-child) {
+                    margin-bottom: $spacerMin;
+                }
+            }
+
+            & > wii-panel-header {
+                margin: $spacerMin $spacerMin $spacerMin ($spacerMin/2);
             }
         }
     }

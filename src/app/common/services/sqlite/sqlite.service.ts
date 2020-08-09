@@ -333,19 +333,19 @@ export class SqliteService {
         );
     }
 
-    public importFreeFieldData(data): Observable<void> {
+    public importFreeFieldsData(data): Observable<void> {
         // for multiple types
         const freeFields = [
-            ...(data['trackingFreeFields'] || [])
+            ...(data['freeFields'] || [])
         ];
 
         // @ts-ignore
-        return this.deleteBy('free_fields').pipe(
+        return this.deleteBy('free_field').pipe(
             ...freeFields.map(({id, ...freeField}) => (
                 flatMap(() => (
-                    this.deleteBy('free_fields', [`id = ${id}`])
+                    this.deleteBy('free_field', [`id = ${id}`])
                         .pipe(
-                            flatMap(() => this.insert('free_fields', {id, ...freeField}))
+                            flatMap(() => this.insert('free_field', {id, ...freeField}))
                         )
                 ))
             )),
@@ -744,7 +744,7 @@ export class SqliteService {
             flatMap(() => this.importDemandesLivraisonData(data).pipe(tap(() => {console.log('--- > importDemandeLivraisonData')}))),
             flatMap(() => this.importNaturesData(data).pipe(tap(() => {console.log('--- > importNaturesData')}))),
             flatMap(() => this.importAllowedNaturesData(data).pipe(tap(() => {console.log('--- > importAllowedNaturesData')}))),
-            flatMap(() => this.importFreeFieldData(data).pipe(tap(() => {console.log('--- > importFreeFieldData')}))),
+            flatMap(() => this.importFreeFieldsData(data).pipe(tap(() => {console.log('--- > importFreeFieldData')}))),
             flatMap(() => (
                 this.storageService.getInventoryManagerRight().pipe(
                     flatMap((res) => (res
@@ -1124,8 +1124,8 @@ export class SqliteService {
         return (
             (typeof value === 'string') ? `'${this.escapeQuotes(value)}'` :
             (typeof value === 'boolean') ? `${Number(value)}` :
-            Array.isArray(value) ? JSON.stringify(value) :
             ((value === null) || (value === undefined)) ? 'null' :
+            (Array.isArray(value) || typeof value === 'object') ? `'${JSON.stringify(value)}'` :
             `${value}`
         );
     }

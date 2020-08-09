@@ -31,6 +31,10 @@ import {AppVersion} from '@ionic-native/app-version/ngx';
 import {StatsSlidersComponent} from '@app/common/components/stats-sliders/stats-sliders.component';
 import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 import {FormPanelCameraComponent} from '@app/common/components/panel/form-panel/form-panel-camera/form-panel-camera.component';
+import {FormPanelToggleComponent} from '@app/common/components/panel/form-panel/form-panel-toggle/form-panel-toggle.component';
+import { FormPanelDirective } from './directives/form-panel/form-panel.directive';
+import {FormPanelCalendarComponent} from '@app/common/components/panel/form-panel/form-panel-calendar/form-panel-calendar.component';
+import {DatePicker} from '@ionic-native/date-picker/ngx';
 
 
 @NgModule({
@@ -44,6 +48,8 @@ import {FormPanelCameraComponent} from '@app/common/components/panel/form-panel/
         FormPanelInputComponent,
         FormPanelSigningComponent,
         FormPanelCameraComponent,
+        FormPanelToggleComponent,
+        FormPanelCalendarComponent,
         FormPanelSelectComponent,
         FormPanelComponent,
         ListPanelItemComponent,
@@ -53,7 +59,8 @@ import {FormPanelCameraComponent} from '@app/common/components/panel/form-panel/
         SelectItemComponent,
         SignaturePadComponent,
         SimpleFormComponent,
-        StatsSlidersComponent
+        StatsSlidersComponent,
+        FormPanelDirective
     ],
     imports: [
         AngularCommonModule,
@@ -84,12 +91,19 @@ import {FormPanelCameraComponent} from '@app/common/components/panel/form-panel/
         SQLite,
         AppVersion,
         Camera,
+        DatePicker,
 
         // ionic-long-press
         {provide: HAMMER_GESTURE_CONFIG, useClass: IonicGestureConfig},
     ],
     entryComponents: [
-        SignaturePadComponent
+        SignaturePadComponent,
+        FormPanelInputComponent,
+        FormPanelSigningComponent,
+        FormPanelCameraComponent,
+        FormPanelToggleComponent,
+        FormPanelCalendarComponent,
+        FormPanelSelectComponent,
     ]
 })
 export class CommonModule {

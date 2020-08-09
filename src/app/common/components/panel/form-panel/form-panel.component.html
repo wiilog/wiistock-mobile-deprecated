@@ -7,38 +7,11 @@
                       [info]="header.info"
                       [rightIcons]="header.rightIcon">
     </wii-panel-header>
-    <ng-container *ngFor="let element of body">
-        <wii-form-panel-input #formElements
-                              *ngIf="element.type === 'input'"
-                              [inputConfig]="element.inputConfig"
-                              [(value)]="element.value"
-                              [label]="element.label"
-                              [name]="element.name"
-                              [errors]="element.errors">
-        </wii-form-panel-input>
-        <wii-form-panel-signing #formElements
-                                *ngIf="element.type === 'signing'"
-                                [inputConfig]="element.inputConfig"
-                                [(value)]="element.value"
-                                [label]="element.label"
-                                [name]="element.name"
-                                [errors]="element.errors">
-        </wii-form-panel-signing>
-        <wii-form-panel-camera #formElements
-                               *ngIf="element.type === 'camera'"
-                               [inputConfig]="element.inputConfig"
-                               [(value)]="element.value"
-                               [label]="element.label"
-                               [name]="element.name"
-                               [errors]="element.errors">
-        </wii-form-panel-camera>
-        <wii-form-panel-select #formElements
-                               *ngIf="element.type === 'select'"
-                               [inputConfig]="element.inputConfig"
-                               [(value)]="element.value"
-                               [label]="element.label"
-                               [name]="element.name"
-                               [errors]="element.errors">
-        </wii-form-panel-select>
-    </ng-container>
+    <div>
+        <ng-template #formElements
+                     *ngFor="let param of body"
+                     [wiiFormPanel]
+                     [param]="param">
+        </ng-template>
+    </div>
 </div>

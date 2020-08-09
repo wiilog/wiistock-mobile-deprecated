@@ -2,10 +2,9 @@ import {ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Ou
 import {IonicSelectableComponent} from 'ionic-selectable';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {Emplacement} from '@entities/emplacement';
 import {map, take, tap} from 'rxjs/operators';
 import {ArticleInventaire} from '@entities/article-inventaire';
-import {Observable, Subscription} from 'rxjs';
+import {Observable, of, Subscription} from 'rxjs';
 
 
 @Component({
@@ -27,6 +26,12 @@ export class SearchItemComponent implements OnInit, OnDestroy {
     @Input()
     public requestParams?: Array<string> = [];
 
+    @Input()
+    public elements?: Array<{ id: string|number; label: string; }>;
+
+    @Input()
+    public isMultiple?: boolean = false;
+
     @Output()
     public itemChange: EventEmitter<any>;
 
@@ -45,6 +50,12 @@ export class SearchItemComponent implements OnInit, OnDestroy {
     private itemsSubscription: Subscription;
 
     public readonly config = {
+        default: {
+            label: 'label',
+            valueField: 'id',
+            templateIndex: 'default',
+            placeholder: 'Sélectionner un élément'
+        },
         [SelectItemTypeEnum.ARTICLE_TO_PICK]: {
             label: 'barcode',
             valueField: 'barcode',
@@ -157,12 +168,11 @@ export class SearchItemComponent implements OnInit, OnDestroy {
     }
 
     public reload(): Observable<Array<any>> {
-        return this.sqliteService
-            .findBy(this.config[this.type].databaseTable, this.requestParams)
+        return (this.elements ? of(this.elements) : this.sqliteService.findBy(this.config[this.type].databaseTable, this.requestParams))
             .pipe(
                 take(1),
                 map((list) => {
-                    const {map} = this.config[this.type] as {map: any};
+                    const {map} = this.config[this.smartType] as {map: any};
                     return map
                         ? map(list)
                         : list;
@@ -194,8 +204,9 @@ export class SearchItemComponent implements OnInit, OnDestroy {
         );
     }
 
-    public onItemChange({value}: { value: Emplacement }): void {
-        this.item = value;
+    public onItemChange(value: { value: any }): void {
+        console.log(value)
+        this.item = value.value;
         this.itemChange.emit(this.item);
     }
 
@@ -229,6 +240,10 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             : undefined;
     }
 
+    public get smartType(): string|number {
+        return this.type || 'default';
+    }
+
     private applySearch(text: string = ''): void {
         if (text) {
             const trimmedText = text.trim();
@@ -258,7 +273,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
         this.loadMore(search);
     }
 
-    private itemFiltered(search: string): Array<Emplacement> {
+    private itemFiltered(search: string): Array<any> {
         return search
             ? this.dbItems.filter((location) => location.label.toLowerCase().includes(search.toLowerCase()))
             : this.dbItems;

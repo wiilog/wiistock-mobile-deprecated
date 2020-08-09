@@ -41,7 +41,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             operateur: 'VARCHAR(255)',
             comment: 'VARCHAR(255)',
             signature: 'TEXT',
-            photo: 'photo',
+            freeFields: 'TEXT',
+            photo: 'TEXT',
             finished: 'INTEGER',
             fromStock: 'INTEGER',
             quantity: 'INTEGER',
@@ -241,12 +242,12 @@ export const TablesDefinitions: Array<TableDefinition> = [
         }
     },
     {
-        name: 'free_fields',
+        name: 'free_field',
         attributes: {
             id: 'INTEGER PRIMARY KEY',
             label: 'VARCHAR(255)',
             type: 'VARCHAR(255)',
-            typage: 'VARCHAR(255)',
+            typing: 'VARCHAR(255)',
             required: 'INTEGER',
             elements: 'TEXT',
             defaultValue: 'TEXT'

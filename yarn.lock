@@ -1039,6 +1039,13 @@
   dependencies:
     "@types/cordova" latest
 
+"@ionic-native/date-picker@^5.27.0":
+  version "5.27.0"
+  resolved "https://registry.yarnpkg.com/@ionic-native/date-picker/-/date-picker-5.27.0.tgz#8b5e97fce27e03ffed8da5b6bc21c18693980c8c"
+  integrity sha512-8/hrYaqk4KLHM7/2/bmw8PAZ0eM6i2J56meaM/Ha5OJr/Jj9HI7js0PJf4cANiuxTYE/HVfY+KFnUhSOxi6nEQ==
+  dependencies:
+    "@types/cordova" latest
+
 "@ionic-native/network@^5.25.0":
   version "5.26.0"
   resolved "https://registry.yarnpkg.com/@ionic-native/network/-/network-5.26.0.tgz#31c19a30cce2d49d7076b01f6fcc4ed50d992221"
@@ -2845,6 +2852,11 @@ cordova-plugin-camera@^4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/cordova-plugin-camera/-/cordova-plugin-camera-4.1.0.tgz#6474a3e080c4662aa00fd7425705d301c693ddc0"
   integrity sha512-fCLhWjWYn49q3X5xaypAPgTz6MAWSKFFQvD2Gpi5SuVlrRPRphtX2jIqR2zCBuDTBR082QVnlc+yUDXt65Mjgw==
+
+cordova-plugin-datepicker@^0.9.3:
+  version "0.9.3"
+  resolved "https://registry.yarnpkg.com/cordova-plugin-datepicker/-/cordova-plugin-datepicker-0.9.3.tgz#2558a9ce5998f6d6dc06cf92fd8bbb9d0901f16a"
+  integrity sha1-JVipzlmY9tbcBs+S/Yu7nQkB8Wo=
 
 cordova-plugin-device@^2.0.2:
   version "2.0.3"

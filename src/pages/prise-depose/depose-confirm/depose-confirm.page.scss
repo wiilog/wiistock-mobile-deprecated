@@ -1,7 +1,11 @@
 @import "~theme/variables";
 
-.page-content,
-.page-content > wii-form-panel {
-    flex: 1;
-    display: flex;
+.page-content {
+    overflow: hidden;
+
+    &,
+    & > wii-form-panel {
+        flex: 1;
+        display: flex;
+    }
 }

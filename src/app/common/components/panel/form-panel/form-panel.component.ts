@@ -1,8 +1,8 @@
 import {AfterViewInit, Component, Input, QueryList, ViewChildren} from '@angular/core';
 import {HeaderConfig} from '@app/common/components/panel/model/header-config';
-import {FormPanelItemConfig} from '@app/common/components/panel/model/form-panel/form-panel-item-config';
-import {FormPanelItemComponent} from '@app/common/components/panel/model/form-panel/form-panel-item-component';
 import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
+import {FormPanelParam} from '@app/common/directives/form-panel/form-panel-param';
+import {FormPanelDirective} from '@app/common/directives/form-panel/form-panel.directive';
 
 
 @Component({
@@ -15,27 +15,30 @@ export class FormPanelComponent implements AfterViewInit {
     public header?: HeaderConfig;
 
     @Input()
-    public body: Array<FormPanelItemConfig>;
+    public body: Array<FormPanelParam>;
 
-    @ViewChildren('formElements')
-    public formElements: QueryList<FormPanelItemComponent>;
+    @ViewChildren('formElements', {read: FormPanelDirective})
+    public formElements: QueryList<FormPanelDirective>;
 
     private afterViewInit: boolean;
     private fireZebraRequested: boolean;
 
     public get values(): {[name: string]: any} {
         return this.formElements
-            ? this.formElements.reduce((acc, element: FormPanelItemComponent) => ({
+            ? this.formElements.reduce((acc, {instance: {group, name, value}}: FormPanelDirective) => ({
                 ...acc,
-                [element.name]: element.value
+                [group || name]: group
+                    ? { ...(acc[group] || {}), [name]: value}
+                    : value
             }), {})
             : {};
     }
 
     public get firstError(): string {
+        console.log(this.formElements)
         return this.formElements
             ? this.formElements.reduce(
-                (error: string, element: FormPanelItemComponent) => (error ? error : element.error),
+                (error: string, {instance: {error: itemError}}: FormPanelDirective) => (error || itemError),
                 undefined
             )
             : undefined;
@@ -75,7 +78,7 @@ export class FormPanelComponent implements AfterViewInit {
 
     private getElementForZebraInit(): Array<FormPanelSelectComponent> {
         return (this.formElements
-            ? this.formElements.filter((element) => (element instanceof FormPanelSelectComponent))
+            ? this.formElements.filter(({instance}) => (instance instanceof FormPanelSelectComponent))
             : []) as unknown as Array<FormPanelSelectComponent>;
     }
 }

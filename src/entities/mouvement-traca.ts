@@ -18,4 +18,5 @@ export interface MouvementTraca {
     comment?: string;
     signature?: string;
     photo?: string;
+    freeFields?: string;
 }

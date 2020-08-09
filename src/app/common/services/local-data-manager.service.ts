@@ -346,7 +346,7 @@ export class LocalDataManagerService {
                             this.apiService
                                 .requestApi('post', ApiService.POST_MOUVEMENT_TRACA, {
                                     params: {
-                                        mouvements: mouvements.map(({signature, photo, ...mouvements}) => mouvements),
+                                        mouvements: mouvements.map(({signature, photo, ...mouvement}) => mouvement),
                                         ...(mouvements.reduce((acc, {signature}, currentIndex) => ({
                                             ...acc,
                                             ...(signature ? {[`signature_${currentIndex}`]: signature} : {})

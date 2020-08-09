@@ -6,6 +6,8 @@
                          (itemChange)="onItemSelect($event)"
                          (itemsLoaded)="initText()"
                          [requestParams]="inputConfig.requestParams"
+                         [elements]="inputConfig.elements"
+                         [isMultiple]="inputConfig.isMultiple || false"
                          hidden>
         </wii-search-item>
         <div>{{ text }}</div>

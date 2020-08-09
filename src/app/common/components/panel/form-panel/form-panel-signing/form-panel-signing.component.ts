@@ -4,7 +4,8 @@ import {delay, flatMap} from 'rxjs/operators';
 import {ModalController} from '@ionic/angular';
 import {from, of, Subscription, zip} from 'rxjs';
 import {SignaturePadComponent} from '@app/common/components/signature-pad/signature-pad.component';
-import {FormPanelSigningConfig} from '@app/common/components/panel/model/form-panel/form-panel-signing-config';
+import {FormPanelItemComponent} from '@app/common/components/panel/model/form-panel/form-panel-item.component';
+import {FormPanelSigningConfig} from '@app/common/components/panel/model/form-panel/configs/form-panel-signing-config';
 
 
 @Component({
@@ -14,7 +15,7 @@ import {FormPanelSigningConfig} from '@app/common/components/panel/model/form-pa
         './form-panel-signing.component.scss'
     ]
 })
-export class FormPanelSigningComponent implements OnDestroy {
+export class FormPanelSigningComponent implements OnDestroy, FormPanelItemComponent<FormPanelSigningConfig> {
 
     @Input()
     public inputConfig: FormPanelSigningConfig;

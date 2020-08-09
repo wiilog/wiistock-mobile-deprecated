@@ -1,21 +1,22 @@
 import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {NgModel} from '@angular/forms';
-import {FormPanelInputConfig} from '@app/common/components/panel/model/form-panel/configs/form-panel-input-config';
 import {FormPanelItemComponent} from '@app/common/components/panel/model/form-panel/form-panel-item.component';
+import {FormPanelToggleConfig} from '@app/common/components/panel/model/form-panel/configs/form-panel-toggle-config';
 
 
 @Component({
-    selector: 'wii-form-panel-input',
-    templateUrl: 'form-panel-input.component.html',
-    styleUrls: ['./form-panel-input.component.scss']
+    selector: 'wii-form-panel-toggle',
+    templateUrl: 'form-panel-toggle.component.html',
+    styleUrls: ['./form-panel-toggle.component.scss']
 })
-export class FormPanelInputComponent implements FormPanelItemComponent<FormPanelInputConfig> {
+export class FormPanelToggleComponent implements FormPanelItemComponent<FormPanelToggleConfig> {
+
 
     @ViewChild('inputComponent', {static: false})
     public inputComponent: NgModel;
 
     @Input()
-    public inputConfig: FormPanelInputConfig;
+    public inputConfig: FormPanelToggleConfig;
 
     @Input()
     public value?: string;
@@ -46,5 +47,4 @@ export class FormPanelInputComponent implements FormPanelItemComponent<FormPanel
             ? this.errors[errorsKeys[0]]
             : undefined;
     }
-
 }

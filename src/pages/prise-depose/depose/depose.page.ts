@@ -294,7 +294,7 @@ export class DeposePage extends PageComponent {
     }
 
     private updatePicking(barCode: string,
-                          {comment, signature, photo, natureId}: {comment?: string; signature?: string; photo?: string; natureId: number;}): void {
+                          {comment, signature, photo, natureId, freeFields}: {comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string}): void {
         const dropIndexes = this.findDropIndexes(barCode);
 
         if (dropIndexes.length > 0) {
@@ -303,6 +303,7 @@ export class DeposePage extends PageComponent {
                 this.colisDepose[dropIndex].signature = signature;
                 this.colisDepose[dropIndex].photo = photo;
                 this.colisDepose[dropIndex].nature_id = natureId;
+                this.colisDepose[dropIndex].freeFields = freeFields;
             }
             this.refreshPriseListComponent();
             this.refreshDeposeListComponent();
@@ -339,14 +340,17 @@ export class DeposePage extends PageComponent {
                         // we get first
                         const [dropIndex] = this.findDropIndexes(barCode);
                         if (dropIndex !== undefined) {
-                            const {comment, signature, photo, nature_id: natureId} = this.colisDepose[dropIndex];
+                            const {comment, signature, photo, nature_id: natureId, freeFields} = this.colisDepose[dropIndex];
                             this.navService.push(DeposeConfirmPageRoutingModule.PATH, {
                                 location: this.emplacement,
                                 barCode,
-                                comment,
-                                signature,
-                                natureId,
-                                photo,
+                                values: {
+                                    comment,
+                                    signature,
+                                    natureId,
+                                    photo,
+                                    freeFields
+                                },
                                 validateDepose: (values) => {
                                     this.updatePicking(barCode, values);
                                 }

@@ -1,0 +1,9 @@
+<ion-item lines="none">
+    <ion-label color="medium">{{label}}</ion-label>
+    <ion-toggle #inputComponent="ngModel"
+               [name]="name"
+               [(ngModel)]="value"
+               (ngModelChange)="onValueChange($event)"
+               [required]="inputConfig.required">
+    </ion-toggle>
+</ion-item>

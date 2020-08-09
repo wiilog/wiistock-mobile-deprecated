@@ -4,7 +4,6 @@ import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {DemandeLivraison} from '@entities/demande-livraison';
 import {StorageService} from '@app/common/services/storage.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
-import {FormPanelItemConfig} from '@app/common/components/panel/model/form-panel/form-panel-item-config';
 import {NavService} from '@app/common/services/nav.service';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
@@ -12,6 +11,9 @@ import {ToastService} from '@app/common/services/toast.service';
 import {DemandeLivraisonArticlesPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-articles/demande-livraison-articles-routing.module';
 import {map} from 'rxjs/operators';
 import {PageComponent} from '@pages/page.component';
+import {FormPanelParam} from '@app/common/directives/form-panel/form-panel-param';
+import {FormPanelInputComponent} from '@app/common/components/panel/form-panel/form-panel-input/form-panel-input.component';
+import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 
 
 @Component({
@@ -25,7 +27,7 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
 
     public hasLoaded: boolean;
 
-    public formBodyConfig: Array<FormPanelItemConfig>;
+    public formBodyConfig: Array<FormPanelParam>;
 
     private isUpdate: boolean;
     private demandeLivraisonToUpdate?: DemandeLivraison;
@@ -60,56 +62,64 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
             const {type_id: type, location_id: location, comment} = (demandeLivraison || {});
             this.formBodyConfig = [
                 {
-                    type: 'input',
-                    label: 'Demandeur',
-                    name: 'requester',
-                    value: operator,
-                    inputConfig: {
-                        type: 'text',
-                        disabled: true
+                    item: FormPanelInputComponent,
+                    config: {
+                        label: 'Demandeur',
+                        name: 'requester',
+                        value: operator,
+                        inputConfig: {
+                            type: 'text',
+                            disabled: true
+                        }
                     }
                 },
                 {
-                    type: 'select',
-                    label: 'Type',
-                    name: 'type_id',
-                    value: type,
-                    inputConfig: {
-                        required: true,
-                        searchType: SelectItemTypeEnum.DEMANDE_LIVRAISON_TYPE,
-                        requestParams: ['to_delete IS NULL']
-                    },
-                    errors: {
-                        required: 'Vous devez sélectionner un type'
+                    item: FormPanelSelectComponent,
+                    config: {
+                        label: 'Type',
+                        name: 'type_id',
+                        value: type,
+                        inputConfig: {
+                            required: true,
+                            searchType: SelectItemTypeEnum.DEMANDE_LIVRAISON_TYPE,
+                            requestParams: ['to_delete IS NULL']
+                        },
+                        errors: {
+                            required: 'Vous devez sélectionner un type'
+                        }
                     }
                 },
                 {
-                    type: 'input',
-                    label: 'Commentaire',
-                    name: 'comment',
-                    value: comment,
-                    inputConfig: {
-                        type: 'text',
-                        maxLength: '255'
-                    },
-                    errors: {
-                        maxlength: 'Votre commentaire est trop long'
+                    item: FormPanelInputComponent,
+                    config: {
+                        label: 'Commentaire',
+                        name: 'comment',
+                        value: comment,
+                        inputConfig: {
+                            type: 'text',
+                            maxLength: '255'
+                        },
+                        errors: {
+                            maxlength: 'Votre commentaire est trop long'
+                        }
                     }
                 },
                 {
-                    type: 'select',
-                    label: 'Destination',
-                    name: 'location_id',
-                    value: location,
-                    inputConfig: {
-                        required: true,
-                        barcodeScanner: true,
-                        searchType: SelectItemTypeEnum.LOCATION
-                    },
-                    errors: {
-                        required: 'Vous devez sélectionner une destination'
+                    item: FormPanelSelectComponent,
+                    config: {
+                        label: 'Destination',
+                        name: 'location_id',
+                        value: location,
+                        inputConfig: {
+                            required: true,
+                            barcodeScanner: true,
+                            searchType: SelectItemTypeEnum.LOCATION
+                        },
+                        errors: {
+                            required: 'Vous devez sélectionner une destination'
+                        }
                     }
-                },
+                }
             ]
 
             this.hasLoaded = true;
