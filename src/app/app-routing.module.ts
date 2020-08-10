@@ -9,7 +9,7 @@ import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose
 import {EmplacementScanPageRoutingModule} from '@pages/prise-depose/emplacement-scan/emplacement-scan-routing.module';
 import {PrisePageRoutingModule} from '@pages/prise-depose/prise/prise-routing.module';
 import {DeposePageRoutingModule} from '@pages/prise-depose/depose/depose-routing.module';
-import {DeposeConfirmPageRoutingModule} from '@pages/prise-depose/depose-confirm/depose-confirm-routing.module';
+import {ConfirmPageRoutingModule} from '@pages/prise-depose/movement-confirm/movement-confirm-routing.module';
 import {NewEmplacementPageRoutingModule} from '@pages/new-emplacement/new-emplacement-routing.module';
 import {ManutentionMenuPageRoutingModule} from '@pages/demande/manutention/manutention-menu/manutention-menu-routing.module';
 import {ManutentionValidatePageRoutingModule} from '@pages/demande/manutention/manutention-validate/manutention-validate-routing.module';
@@ -74,9 +74,9 @@ const routes: Routes = [
         loadChildren: () => import('../pages/prise-depose/depose/depose.module').then(m => m.DeposePageModule)
     },
     {
-        path: DeposeConfirmPageRoutingModule.PATH,
+        path: ConfirmPageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('../pages/prise-depose/depose-confirm/depose-confirm.module').then(m => m.DeposeConfirmPageModule)
+        loadChildren: () => import('../pages/prise-depose/movement-confirm/movement-confirm.module').then(m => m.MovementConfirmPageModule)
     },
     {
         path: NewEmplacementPageRoutingModule.PATH,

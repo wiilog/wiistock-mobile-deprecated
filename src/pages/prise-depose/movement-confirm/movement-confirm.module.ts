@@ -1,8 +1,8 @@
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {IonicModule} from '@ionic/angular';
-import {DeposeConfirmPageRoutingModule} from './depose-confirm-routing.module';
-import {DeposeConfirmPage} from './depose-confirm.page';
+import {ConfirmPageRoutingModule} from './movement-confirm-routing.module';
+import {MovementConfirmPage} from './movement-confirm.page';
 import {CommonModule as AngularCommonModule} from '@angular/common';
 import {CommonModule} from '@app/common/common.module';
 
@@ -11,10 +11,10 @@ import {CommonModule} from '@app/common/common.module';
         AngularCommonModule,
         FormsModule,
         IonicModule,
-        DeposeConfirmPageRoutingModule,
+        ConfirmPageRoutingModule,
         CommonModule
     ],
-    declarations: [DeposeConfirmPage]
+    declarations: [MovementConfirmPage]
 })
-export class DeposeConfirmPageModule {
+export class MovementConfirmPageModule {
 }

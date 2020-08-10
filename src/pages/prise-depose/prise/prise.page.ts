@@ -22,6 +22,7 @@ import {NavService} from '@app/common/services/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {Nature} from '@entities/nature';
+import {ConfirmPageRoutingModule} from "../movement-confirm/movement-confirm-routing.module";
 
 
 @Component({
@@ -85,7 +86,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     }
 
     public ionViewWillEnter(): void {
-        this.init();
+        this.init(false);
         this.finishAction = this.currentNavParams.get('finishAction');
         this.emplacement = this.currentNavParams.get('emplacement');
         this.fromStock = Boolean(this.currentNavParams.get('fromStock'));
@@ -293,6 +294,30 @@ export class PrisePage extends PageComponent implements CanLeave {
                 natureIdsToConfig: this.natureIdsToConfig,
                 location: this.emplacement,
                 validate: () => this.finishTaking(),
+                confirmItem: !this.fromStock
+                    ? ({object: {value: barCode}}: { object?: { value?: string } }) => {
+                        // we get first
+                        const [dropIndex] = this.findDropIndexes(barCode);
+                        if (dropIndex !== undefined) {
+                            const {comment, signature, photo, nature_id: natureId, freeFields} = this.colisPrise[dropIndex];
+                            this.navService.push(ConfirmPageRoutingModule.PATH, {
+                                location: this.emplacement,
+                                barCode,
+                                values: {
+                                    comment,
+                                    signature,
+                                    natureId,
+                                    photo,
+                                    freeFields
+                                },
+                                validate: (values) => {
+                                    this.updatePicking(barCode, values);
+                                },
+                                movementType: 'Prise'
+                            });
+                        }
+                    }
+                    : undefined,
                 removeItem: TracaListFactoryService.CreateRemoveItemFromListHandler(this.colisPrise, undefined, (barCode) => {
                     this.setPackOnLocationHidden(barCode, false);
                     this.refreshListComponent();
@@ -319,13 +344,31 @@ export class PrisePage extends PageComponent implements CanLeave {
 
     }
 
-    private init(): void {
+    private init(fromStart: boolean = true): void {
         this.loading = true;
         this.apiLoading = false;
         this.listTakingBody = [];
-        this.colisPrise = [];
+        if (fromStart) {
+            this.colisPrise = [];
+        }
         this.currentPacksOnLocation = [];
         this.colisPriseAlreadySaved = [];
+    }
+
+    private updatePicking(barCode: string,
+                          {comment, signature, photo, natureId, freeFields}: {comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string}): void {
+        const dropIndexes = this.findDropIndexes(barCode);
+        if (dropIndexes.length > 0) {
+            for(const dropIndex of dropIndexes) {
+                this.colisPrise[dropIndex].comment = comment;
+                this.colisPrise[dropIndex].signature = signature;
+                this.colisPrise[dropIndex].photo = photo;
+                this.colisPrise[dropIndex].nature_id = natureId;
+                this.colisPrise[dropIndex].freeFields = freeFields;
+            }
+            this.refreshListComponent();
+        }
+        this.footerScannerComponent.fireZebraScan();
     }
 
     private checkArticleOnLocation(barCode: string): Observable<number|boolean> {
@@ -375,6 +418,18 @@ export class PrisePage extends PageComponent implements CanLeave {
                 this.currentPacksOnLocation[trackingIndex].hidden = hidden;
             }
         }
+    }
+
+    private findDropIndexes(barCode: string): Array<number> {
+        return this.colisPrise.reduce(
+            (acc: Array<number>, {ref_article}, currentIndex) => {
+                if (ref_article === barCode) {
+                    acc.push(currentIndex);
+                }
+                return acc;
+            },
+            []
+        );
     }
 
     private processTackingBarCode(barCode: string, isManualAdd: boolean, quantity: boolean|number = true) {

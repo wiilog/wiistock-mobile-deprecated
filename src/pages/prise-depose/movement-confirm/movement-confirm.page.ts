@@ -18,11 +18,11 @@ import {FormPanelCameraComponent} from '@app/common/components/panel/form-panel/
 
 
 @Component({
-    selector: 'wii-depose-confirm',
-    templateUrl: './depose-confirm.page.html',
-    styleUrls: ['./depose-confirm.page.scss'],
+    selector: 'wii-movement-confirm',
+    templateUrl: './movement-confirm.page.html',
+    styleUrls: ['./movement-confirm.page.scss'],
 })
-export class DeposeConfirmPage extends PageComponent {
+export class MovementConfirmPage extends PageComponent {
     @ViewChild('formPanelComponent', {static: false})
     public formPanelComponent: FormPanelComponent;
 
@@ -30,7 +30,7 @@ export class DeposeConfirmPage extends PageComponent {
     public bodyConfig: Array<FormPanelParam>;
     private savedNatureId: string;
     private location: Emplacement;
-    private validateDepose: (values: {comment: string; signature: string; photo: string; natureId: number, freeFields: string}) => void;
+    private validate: (values: {comment: string; signature: string; photo: string; natureId: number, freeFields: string}) => void;
 
     public constructor(private activatedRoute: ActivatedRoute,
                        private toastService: ToastService,
@@ -43,14 +43,15 @@ export class DeposeConfirmPage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.location = this.currentNavParams.get('location');
-        this.validateDepose = this.currentNavParams.get('validateDepose');
+        this.validate = this.currentNavParams.get('validate');
 
         const barCode = this.currentNavParams.get('barCode');
+        const movementType = this.currentNavParams.get('movementType');
         const {comment, signature, photo, natureId, freeFields: freeFieldsValuesStr} = this.currentNavParams.get('values');
         const freeFieldsValues = freeFieldsValuesStr ? JSON.parse(freeFieldsValuesStr) : {};
 
         this.headerConfig = {
-            title: `DEPOSE de ${barCode}`,
+            title: `${movementType} de ${barCode}`,
             subtitle: `Emplacement : ${this.location.label}`,
             leftIcon: {
                 name: 'download.svg',
@@ -167,7 +168,7 @@ export class DeposeConfirmPage extends PageComponent {
                 }
                 freeFields[freeFieldId] = freeField;
             });
-            this.validateDepose({
+            this.validate({
                 comment,
                 signature,
                 photo,

@@ -17,7 +17,7 @@ import {AlertController} from '@ionic/angular';
 import {NavService} from '@app/common/services/nav.service';
 import {flatMap, map, tap} from 'rxjs/operators';
 import * as moment from 'moment';
-import {DeposeConfirmPageRoutingModule} from '@pages/prise-depose/depose-confirm/depose-confirm-routing.module';
+import {ConfirmPageRoutingModule} from '@pages/prise-depose/movement-confirm/movement-confirm-routing.module';
 import {PageComponent} from '@pages/page.component';
 import {Nature} from '@entities/nature';
 
@@ -266,7 +266,7 @@ export class DeposePage extends PageComponent {
         return this.colisPrise && this.colisPrise.filter(({hidden}) => !hidden).length > 0;
     }
 
-    private saveMouvementTraca(pickingIndexes: Array<number>, comment?: string, signature?: string): void {
+    private saveMouvementTraca(pickingIndexes: Array<number>): void {
         if (pickingIndexes.length > 0) {
             for(const pickingIndex of pickingIndexes) {
                 let quantity = this.colisPrise[pickingIndex].quantity;
@@ -276,14 +276,15 @@ export class DeposePage extends PageComponent {
                 this.colisDepose.push({
                     ref_article: this.colisPrise[pickingIndex].ref_article,
                     nature_id: this.colisPrise[pickingIndex].nature_id,
-                    comment,
-                    signature,
+                    comment: this.colisPrise[pickingIndex].comment,
+                    signature: this.colisPrise[pickingIndex].signature,
                     fromStock: Number(this.fromStock),
                     quantity,
                     type: DeposePage.MOUVEMENT_TRACA_DEPOSE,
                     operateur: this.operator,
                     ref_emplacement: this.emplacement.label,
-                    date: moment().format()
+                    date: moment().format(),
+                    freeFields: this.colisPrise[pickingIndex].freeFields
                 });
             }
         }
@@ -341,7 +342,7 @@ export class DeposePage extends PageComponent {
                         const [dropIndex] = this.findDropIndexes(barCode);
                         if (dropIndex !== undefined) {
                             const {comment, signature, photo, nature_id: natureId, freeFields} = this.colisDepose[dropIndex];
-                            this.navService.push(DeposeConfirmPageRoutingModule.PATH, {
+                            this.navService.push(ConfirmPageRoutingModule.PATH, {
                                 location: this.emplacement,
                                 barCode,
                                 values: {
@@ -351,9 +352,10 @@ export class DeposePage extends PageComponent {
                                     photo,
                                     freeFields
                                 },
-                                validateDepose: (values) => {
+                                validate: (values) => {
                                     this.updatePicking(barCode, values);
-                                }
+                                },
+                                movementType: 'Dépose'
                             });
                         }
                     }
