@@ -21,6 +21,7 @@ export class FormPanelService {
                 required: `Le champ ${freeField.label} est requis`
             }
         };
+        console.log(freeField.label, value);
         return (
             freeField.typing === FreeFieldTyping.BOOL ? {
                 item: FormPanelToggleComponent,
@@ -34,7 +35,11 @@ export class FormPanelService {
                 item: FormPanelCalendarComponent,
                 config: {
                     ...common,
-                    value: value || (freeField.defaultValue ? moment(freeField.defaultValue, 'DD/MM/YYYY').format('YYYY-MM-DD') : undefined),
+                    value: value === null || value === undefined
+                        ? (freeField.defaultValue
+                            ? moment(freeField.defaultValue, 'DD/MM/YYYY').format('YYYY-MM-DD')
+                            : undefined)
+                        : value,
                     inputConfig: {
                         required: Boolean(freeField.required),
                         mode: (freeField.typing === FreeFieldTyping.DATE ? FormPanelCalendarMode.DATE : FormPanelCalendarMode.DATETIME)
@@ -57,6 +62,7 @@ export class FormPanelService {
                 config: {
                     ...common,
                     value: (freeField.typing === FreeFieldTyping.LIST)
+
                         ? (value || freeField.defaultValue)
                         : (value || freeField.defaultValue || '').split(',').map((id) => ({id, label: id})),
                     inputConfig: {

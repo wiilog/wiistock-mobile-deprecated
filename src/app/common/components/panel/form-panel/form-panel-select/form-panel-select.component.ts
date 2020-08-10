@@ -65,9 +65,9 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
     }
 
     public get error(): string {
-        const errorsKeys = this.value
-            ? []
-            : ['required'];
+        const errorsKeys = !this.value && this.inputConfig.required
+            ? ['required']
+            : [];
         return (errorsKeys.length > 0)
             ? this.errors[errorsKeys[0]]
             : undefined;
@@ -105,6 +105,18 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
             const selected = this.searchComponent ? value.map((val) => this.searchComponent.findItem(val, 'id')) : [];
             if (selected.length > 0) {
                 this.text = FormPanelSelectComponent.ValueToText(selected);
+            } else if (!this.searchComponent) {
+                let valueArray = value.map((arrayValue) => {
+                    if (typeof arrayValue !== 'object') {
+                        return {
+                            id: arrayValue,
+                            label: arrayValue
+                        };
+                    } else {
+                        return arrayValue;
+                    }
+                })
+                this.onItemSelect(<any>valueArray);
             }
         }
     }

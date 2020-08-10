@@ -235,8 +235,12 @@ export class SearchItemComponent implements OnInit, OnDestroy {
     }
 
     public findItem(search: string|number, searchAttribute: string = this.config[this.type].label): any {
+        console.log(this.dbItems, searchAttribute, search);
         return this.dbItems
-            ? this.dbItems.find((element) => (element[searchAttribute] === search))
+            ? this.dbItems.find((element) => (
+                (Number.isInteger(element[searchAttribute])
+                    ? element[searchAttribute].toString()
+                    : element[searchAttribute])  === search))
             : undefined;
     }
 

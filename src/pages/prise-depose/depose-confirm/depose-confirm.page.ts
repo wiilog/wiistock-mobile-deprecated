@@ -28,7 +28,7 @@ export class DeposeConfirmPage extends PageComponent {
 
     public headerConfig: HeaderConfig;
     public bodyConfig: Array<FormPanelParam>;
-
+    private savedNatureId: string;
     private location: Emplacement;
     private validateDepose: (values: {comment: string; signature: string; photo: string; natureId: number, freeFields: string}) => void;
 
@@ -38,6 +38,7 @@ export class DeposeConfirmPage extends PageComponent {
                        private formPanelService: FormPanelService,
                        navService: NavService) {
         super(navService);
+        this.savedNatureId = null;
     }
 
     public ionViewWillEnter(): void {
@@ -57,71 +58,93 @@ export class DeposeConfirmPage extends PageComponent {
             }
         };
 
-        this.sqliteService
-            .findBy('free_field', [`type = '${FreeFieldType.TRACKING}'`])
-            .subscribe((freeFields: Array<FreeField>) => {
-                this.bodyConfig = [
-                    {
-                        item: FormPanelSelectComponent,
-                        config: {
-                            label: 'Type',
-                            name: 'natureId',
-                            value: natureId,
-                            inputConfig: {
-                                required: true,
-                                searchType: SelectItemTypeEnum.TRACKING_NATURES,
-                                requestParams: ['hide <> 1']
-                            },
-                            errors: {
-                                required: 'Vous devez sélectionner une nature'
+       this.sqliteService.findAll('nature').subscribe((natures) => {
+           const needsToShowNatures = natures.filter(nature => nature.hide === 1).length > 0;
+           const selectedNature = needsToShowNatures && natureId
+               ? natures.find((nature) => ((Number.isInteger(nature.id)
+                   ? nature.id.toString()
+                   : nature.id)  === natureId.toString()))
+               : null;
+           this.savedNatureId = selectedNature ? selectedNature.id : null;
+            this.sqliteService
+                .findBy('free_field', [`type = '${FreeFieldType.TRACKING}'`])
+                .subscribe((freeFields: Array<FreeField>) => {
+                    this.bodyConfig = [];
+                    if (natures.length > 0) {
+                        this.bodyConfig.push(selectedNature
+                            ? {
+                                item: FormPanelInputComponent,
+                                config: {
+                                    label: 'Type',
+                                    name: 'natureId',
+                                    value: selectedNature.label,
+                                    inputConfig: {
+                                        type: 'text',
+                                        disabled: true
+                                    }
+                                }
                             }
-                        }
-                    },
-                    {
-                        item: FormPanelInputComponent,
-                        config: {
-                            label: 'Commentaire',
-                            name: 'comment',
-                            value: comment,
-                            inputConfig: {
-                                type: 'text',
-                                maxLength: '255'
-                            },
-                            errors: {
-                                required: 'Votre commentaire est requis',
-                                maxlength: 'Votre commentaire est trop long'
+                            : {
+                            item: FormPanelSelectComponent,
+                            config: {
+                                label: 'Type',
+                                name: 'natureId',
+                                value: natureId,
+                                inputConfig: {
+                                    required: false,
+                                    searchType: SelectItemTypeEnum.TRACKING_NATURES,
+                                    requestParams: ['hide <> 1']
+                                }
                             }
-                        }
-                    },
-                    {
-                        item: FormPanelSigningComponent,
-                        config: {
-                            label: 'Signature',
-                            name: 'signature',
-                            value: signature,
-                            inputConfig: {}
-                        }
-                    },
-                    {
-                        item: FormPanelCameraComponent,
-                        config: {
-                            label: 'Photo',
-                            name: 'photo',
-                            value: photo,
-                            inputConfig: {}
-                        }
-                    },
-                    ...freeFields
-                        .map(({id, ...freeField}) => (
-                            this.formPanelService.createFromFreeField(
-                                {id, ...freeField},
-                                freeFieldsValues[id],
-                                'freeFields'
-                            )
-                        ))
-                        .filter(Boolean)
-                ];
-            });
+                        });
+                    }
+                    this.bodyConfig = this.bodyConfig.concat([
+                        {
+                            item: FormPanelInputComponent,
+                            config: {
+                                label: 'Commentaire',
+                                name: 'comment',
+                                value: comment,
+                                inputConfig: {
+                                    type: 'text',
+                                    maxLength: '255'
+                                },
+                                errors: {
+                                    required: 'Votre commentaire est requis',
+                                    maxlength: 'Votre commentaire est trop long'
+                                }
+                            }
+                        },
+                        {
+                            item: FormPanelSigningComponent,
+                            config: {
+                                label: 'Signature',
+                                name: 'signature',
+                                value: signature,
+                                inputConfig: {}
+                            }
+                        },
+                        {
+                            item: FormPanelCameraComponent,
+                            config: {
+                                label: 'Photo',
+                                name: 'photo',
+                                value: photo,
+                                inputConfig: {}
+                            }
+                        },
+                        ...freeFields
+                            .map(({id, ...freeField}) => (
+                                this.formPanelService.createFromFreeField(
+                                    {id, ...freeField},
+                                    freeFieldsValues[id],
+                                    'freeFields'
+                                )
+                            ))
+                            .filter(Boolean)
+                    ]);
+                });
+        })
     }
 
     public onFormSubmit(): void {
@@ -130,8 +153,20 @@ export class DeposeConfirmPage extends PageComponent {
             this.toastService.presentToast(formError);
         }
         else {
-            console.log(this.formPanelComponent.values)
-            const {comment, signature, photo, natureId, freeFields} = this.formPanelComponent.values;
+            let {comment, signature, photo, natureId, freeFields} = this.formPanelComponent.values;
+            natureId = this.savedNatureId ? this.savedNatureId : natureId
+            Object.keys(freeFields).forEach((freeFieldId) => {
+                let freeField = freeFields[freeFieldId];
+                console.log(freeField);
+                if (Array.isArray(freeField)) {
+                    if (freeField[0].id === "") {
+                        freeField = null;
+                    } else {
+                        freeField = freeField.map(ff => ff.id).join(',')
+                    }
+                }
+                freeFields[freeFieldId] = freeField;
+            });
             this.validateDepose({
                 comment,
                 signature,

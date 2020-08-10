@@ -35,10 +35,10 @@ export class FormPanelComponent implements AfterViewInit {
     }
 
     public get firstError(): string {
-        console.log(this.formElements)
         return this.formElements
-            ? this.formElements.reduce(
-                (error: string, {instance: {error: itemError}}: FormPanelDirective) => (error || itemError),
+            ? this.formElements.reduce(function (error: string, {instance: {error: itemError}}: FormPanelDirective) {
+                    return error || itemError
+                },
                 undefined
             )
             : undefined;

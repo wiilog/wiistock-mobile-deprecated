@@ -44,6 +44,10 @@ export class FormPanelCalendarComponent implements FormPanelItemComponent<FormPa
             : undefined;
     }
 
+    public emptyValue(): void {
+        this.value = '';
+    }
+
     public onItemClicked(): void {
         from(this.datePicker.show({
             date: this.valueDate,
