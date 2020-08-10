@@ -272,12 +272,13 @@ export class DeposePage extends PageComponent {
                 let quantity = this.colisPrise[pickingIndex].quantity;
                 this.prisesToFinish.push(this.colisPrise[pickingIndex].id);
                 this.colisPrise[pickingIndex].hidden = true;
-
+                console.log(this.colisPrise[pickingIndex]);
                 this.colisDepose.push({
                     ref_article: this.colisPrise[pickingIndex].ref_article,
                     nature_id: this.colisPrise[pickingIndex].nature_id,
                     comment: this.colisPrise[pickingIndex].comment,
                     signature: this.colisPrise[pickingIndex].signature,
+                    photo: this.colisPrise[pickingIndex].photo,
                     fromStock: Number(this.fromStock),
                     quantity,
                     type: DeposePage.MOUVEMENT_TRACA_DEPOSE,
