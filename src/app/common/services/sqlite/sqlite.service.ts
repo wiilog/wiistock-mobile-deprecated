@@ -729,6 +729,34 @@ export class SqliteService {
         return ret$;
     }
 
+    private importTranslations(data): Observable<any> {
+        let ret$: ReplaySubject<any> = new ReplaySubject(1);
+        let translations = data.translations;
+
+        this.deleteBy('anomalie_inventaire').subscribe(() => {
+            const translationsValues = translations.map((translation) => {
+                return (
+                    "('" +
+                    translation.menu + "', '" +
+                    translation.label + "', '" +
+                    (translation.translation || "") + "'" +
+                    ")"
+                )
+            });
+            if (translationsValues.length === 0) {
+                ret$.next(undefined);
+            }
+            else {
+                const translationsValuesStr = translationsValues.join(', ');
+                let sqlTranslations = 'INSERT INTO `translations` (`menu`, `label`, `translation`) VALUES ' + translationsValuesStr + ';';
+                this.executeQuery(sqlTranslations).subscribe(() => {
+                    ret$.next(true);
+                });
+            }
+        })
+        return ret$;
+    }
+
     public importData(data: any): Observable<any> {
         return of(undefined).pipe(
             flatMap(() => this.importLocations(data).pipe(tap(() => {console.log('--- > importLocations')}))),
@@ -745,6 +773,7 @@ export class SqliteService {
             flatMap(() => this.importNaturesData(data).pipe(tap(() => {console.log('--- > importNaturesData')}))),
             flatMap(() => this.importAllowedNaturesData(data).pipe(tap(() => {console.log('--- > importAllowedNaturesData')}))),
             flatMap(() => this.importFreeFieldsData(data).pipe(tap(() => {console.log('--- > importFreeFieldData')}))),
+            flatMap(() => this.importTranslations(data).pipe(tap(() => {console.log('--- > importTranslations')}))),
             flatMap(() => (
                 this.storageService.getInventoryManagerRight().pipe(
                     flatMap((res) => (res

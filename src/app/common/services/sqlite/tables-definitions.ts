@@ -268,5 +268,14 @@ export const TablesDefinitions: Array<TableDefinition> = [
             location_id: 'INTEGER',
             nature_id: 'INTEGER'
         }
+    },
+    {
+        name: 'translations',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            menu: 'VARCHAR(255)',
+            label: 'VARCHAR(255)',
+            translation: 'VARCHAR(255)'
+        }
     }
 ];

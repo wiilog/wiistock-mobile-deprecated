@@ -71,21 +71,21 @@ export class MovementConfirmPage extends PageComponent {
                 .findBy('free_field', [`type = '${FreeFieldType.TRACKING}'`])
                 .subscribe((freeFields: Array<FreeField>) => {
                     this.bodyConfig = [];
-                    if (natures.length > 0) {
-                        this.bodyConfig.push(selectedNature
-                            ? {
-                                item: FormPanelInputComponent,
-                                config: {
-                                    label: 'Type',
-                                    name: 'natureId',
-                                    value: selectedNature.label,
-                                    inputConfig: {
-                                        type: 'text',
-                                        disabled: true
-                                    }
+                    if (selectedNature) {
+                        this.bodyConfig.push({
+                            item: FormPanelInputComponent,
+                            config: {
+                                label: 'Type',
+                                name: 'natureId',
+                                value: selectedNature.label,
+                                inputConfig: {
+                                    type: 'text',
+                                    disabled: true
                                 }
                             }
-                            : {
+                        });
+                    } else if (needsToShowNatures) {
+                        this.bodyConfig.push({
                             item: FormPanelSelectComponent,
                             config: {
                                 label: 'Type',
