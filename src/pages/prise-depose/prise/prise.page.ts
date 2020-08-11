@@ -294,13 +294,14 @@ export class PrisePage extends PageComponent implements CanLeave {
     }
 
     private refreshListComponent(): void {
+        const natureLabel = this.natureTranslation.filter((translation) => translation.label === 'nature')[0];
         const {header: listTakingHeader, body: listTakingBody} = this.tracaListFactory.createListConfig(
             this.colisPrise,
             TracaListFactoryService.LIST_TYPE_TAKING_MAIN,
             {
                 objectLabel: this.objectLabel,
                 natureIdsToConfig: this.natureIdsToConfig,
-                natureTranslation: this.natureTranslation.filter((translation) => translation.label === 'nature')[0].translation,
+                natureTranslation: natureLabel.translation || natureLabel.label,
                 location: this.emplacement,
                 validate: () => this.finishTaking(),
                 confirmItem: !this.fromStock
@@ -323,7 +324,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                                     this.updatePicking(barCode, values);
                                 },
                                 movementType: 'Prise',
-                                natureTranslationLabel: this.natureTranslation.filter((translation) => translation.label === 'nature')[0].translation,
+                                natureTranslationLabel: natureLabel.translation || natureLabel.label,
                             });
                         }
                     }
