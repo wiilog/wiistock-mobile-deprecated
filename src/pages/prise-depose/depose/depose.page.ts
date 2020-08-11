@@ -331,12 +331,11 @@ export class DeposePage extends PageComponent {
                             alert.present();
                         })
                     }
+                    this.refreshPriseListComponent();
+                    this.refreshDeposeListComponent();
+                    this.footerScannerComponent.fireZebraScan();
                 })
             }
-
-            this.refreshPriseListComponent();
-            this.refreshDeposeListComponent();
-            this.footerScannerComponent.fireZebraScan();
         }
     }
 
