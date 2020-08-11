@@ -157,17 +157,19 @@ export class MovementConfirmPage extends PageComponent {
         else {
             let {comment, signature, photo, natureId, freeFields} = this.formPanelComponent.values;
             natureId = this.savedNatureId ? this.savedNatureId : natureId
-            Object.keys(freeFields).forEach((freeFieldId) => {
-                let freeField = freeFields[freeFieldId];
-                if (Array.isArray(freeField)) {
-                    if (freeField[0].id === "") {
-                        freeField = null;
-                    } else {
-                        freeField = freeField.map(ff => ff.id).join(',')
+            if (freeFields) {
+                Object.keys(freeFields).forEach((freeFieldId) => {
+                    let freeField = freeFields[freeFieldId];
+                    if (Array.isArray(freeField)) {
+                        if (freeField[0].id === "") {
+                            freeField = null;
+                        } else {
+                            freeField = freeField.map(ff => ff.id).join(',')
+                        }
                     }
-                }
-                freeFields[freeFieldId] = freeField;
-            });
+                    freeFields[freeFieldId] = freeField;
+                });
+            }
             this.validate({
                 comment,
                 signature,
