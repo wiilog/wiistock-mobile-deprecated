@@ -106,7 +106,6 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
             selectedArticle,
             validateQuantity: (quantity: number) => {
                 if (!this.validateSubscription) {
-                    console.log(quantity, selectedArticle)
                     if (!this.anomalyMode
                         || selectedArticle.is_treatable
                         || selectedArticle.quantity === quantity) {
