@@ -117,7 +117,7 @@ export class TracaListFactoryService {
 
     public createListConfig(articles: Array<MouvementTraca>,
                             listType: number,
-                            {location, objectLabel,  validate, uploadItem, confirmItem, removeItem, removeConfirmationMessage, natureIdsToConfig}: {
+                            {location, objectLabel,  validate, uploadItem, confirmItem, removeItem, removeConfirmationMessage, natureIdsToConfig, natureTranslation}: {
                                 location?: Emplacement;
                                 natureIdsToConfig?: {[id: number]: { label: string; color?: string; }};
                                 validate?: () => void;
@@ -126,6 +126,7 @@ export class TracaListFactoryService {
                                 confirmItem?: (info: { [name: string]: { value?: string } }) => void;
                                 removeConfirmationMessage? : string;
                                 objectLabel: string;
+                                natureTranslation?: string;
                             }): ListConfig {
 
         const notDuplicateArticles = articles.reduce(
@@ -199,7 +200,7 @@ export class TracaListFactoryService {
                     ...(
                         natureConfig ? {
                             quantity: {
-                                label: 'Nature',
+                                label: natureTranslation,
                                 value: natureConfig.label
                             }
                         }

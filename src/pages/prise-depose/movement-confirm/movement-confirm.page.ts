@@ -47,6 +47,7 @@ export class MovementConfirmPage extends PageComponent {
 
         const barCode = this.currentNavParams.get('barCode');
         const movementType = this.currentNavParams.get('movementType');
+        const natureTranslationLabel = this.currentNavParams.get('natureTranslationLabel');
         const {comment, signature, photo, natureId, freeFields: freeFieldsValuesStr} = this.currentNavParams.get('values');
         const freeFieldsValues = freeFieldsValuesStr ? JSON.parse(freeFieldsValuesStr) : {};
 
@@ -75,7 +76,7 @@ export class MovementConfirmPage extends PageComponent {
                         this.bodyConfig.push({
                             item: FormPanelInputComponent,
                             config: {
-                                label: 'Type',
+                                label: natureTranslationLabel,
                                 name: 'natureId',
                                 value: selectedNature.label,
                                 inputConfig: {
@@ -88,7 +89,7 @@ export class MovementConfirmPage extends PageComponent {
                         this.bodyConfig.push({
                             item: FormPanelSelectComponent,
                             config: {
-                                label: 'Type',
+                                label: natureTranslationLabel,
                                 name: 'natureId',
                                 value: natureId,
                                 inputConfig: {
@@ -158,7 +159,6 @@ export class MovementConfirmPage extends PageComponent {
             natureId = this.savedNatureId ? this.savedNatureId : natureId
             Object.keys(freeFields).forEach((freeFieldId) => {
                 let freeField = freeFields[freeFieldId];
-                console.log(freeField);
                 if (Array.isArray(freeField)) {
                     if (freeField[0].id === "") {
                         freeField = null;

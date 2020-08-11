@@ -23,6 +23,7 @@ import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {Nature} from '@entities/nature';
 import {ConfirmPageRoutingModule} from "../movement-confirm/movement-confirm-routing.module";
+import {Translation} from "../../../entities/translation";
 
 
 @Component({
@@ -63,6 +64,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     private finishAction: () => void;
     private operator: string;
     private apiLoading: boolean;
+    private natureTranslation: Array<Translation>;
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
 
@@ -98,13 +100,19 @@ export class PrisePage extends PageComponent implements CanLeave {
                 ? this.apiService.requestApi('get', ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})
                 : of({trackingDrops: []})),
             !this.fromStock ? this.sqliteService.findAll('nature') : of(undefined),
+            this.sqliteService.findBy(
+                'translations',
+                [
+                    `menu LIKE 'natures'`,
+                ]
+            )
         )
-            .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures]) => {
+            .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures, natureTranslations]) => {
                 this.operator = operator;
                 this.colisPriseAlreadySaved = colisPriseAlreadySaved;
                 this.currentPacksOnLocation = trackingDrops;
                 this.footerScannerComponent.fireZebraScan();
-
+                this.natureTranslation = natureTranslations;
                 if (natures) {
                     this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
                         [id]: {label, color},
@@ -292,6 +300,7 @@ export class PrisePage extends PageComponent implements CanLeave {
             {
                 objectLabel: this.objectLabel,
                 natureIdsToConfig: this.natureIdsToConfig,
+                natureTranslation: this.natureTranslation.filter((translation) => translation.label === 'nature')[0].translation,
                 location: this.emplacement,
                 validate: () => this.finishTaking(),
                 confirmItem: !this.fromStock
@@ -313,7 +322,8 @@ export class PrisePage extends PageComponent implements CanLeave {
                                 validate: (values) => {
                                     this.updatePicking(barCode, values);
                                 },
-                                movementType: 'Prise'
+                                movementType: 'Prise',
+                                natureTranslationLabel: this.natureTranslation.filter((translation) => translation.label === 'nature')[0].translation,
                             });
                         }
                     }

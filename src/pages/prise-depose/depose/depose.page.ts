@@ -20,6 +20,7 @@ import * as moment from 'moment';
 import {ConfirmPageRoutingModule} from '@pages/prise-depose/movement-confirm/movement-confirm-routing.module';
 import {PageComponent} from '@pages/page.component';
 import {Nature} from '@entities/nature';
+import {Translation} from "../../../entities/translation";
 
 @Component({
     selector: 'wii-depose',
@@ -64,6 +65,8 @@ export class DeposePage extends PageComponent {
 
     private operator: string;
 
+    private natureTranslation: Array<Translation>;
+
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
 
     public constructor(private network: Network,
@@ -98,12 +101,18 @@ export class DeposePage extends PageComponent {
                     ]
                 ),
                 this.storageService.getOperator(),
-                !this.fromStock ? this.sqliteService.findAll('nature') : of(undefined)
+                !this.fromStock ? this.sqliteService.findAll('nature') : of(undefined),
+                this.sqliteService.findBy(
+                    'translations',
+                    [
+                        `menu LIKE 'natures'`,
+                    ]
+                )
             )
-                .subscribe(([colisPrise, operator, natures]) => {
+                .subscribe(([colisPrise, operator, natures, natureTranslation]) => {
                     this.colisPrise = colisPrise;
                     this.operator = operator;
-
+                    this.natureTranslation = natureTranslation;
                     if (natures) {
                         this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
                             [id]: {label, color},
@@ -323,7 +332,8 @@ export class DeposePage extends PageComponent {
                 uploadItem: ({object}) => {
                     this.testColisDepose(object.value, true);
                 },
-                natureIdsToConfig: this.natureIdsToConfig
+                natureIdsToConfig: this.natureIdsToConfig,
+                natureTranslation: this.natureTranslation.filter((translation) => translation.label === 'nature')[0].translation,
             }
         );
     }
@@ -334,6 +344,7 @@ export class DeposePage extends PageComponent {
             TracaListFactoryService.LIST_TYPE_DROP_MAIN,
             {
                 natureIdsToConfig: this.natureIdsToConfig,
+                natureTranslation: this.natureTranslation.filter((translation) => translation.label === 'nature')[0].translation,
                 objectLabel: this.objectLabel,
                 location: this.emplacement,
                 validate: () => this.finishTaking(),
@@ -356,7 +367,8 @@ export class DeposePage extends PageComponent {
                                 validate: (values) => {
                                     this.updatePicking(barCode, values);
                                 },
-                                movementType: 'Dépose'
+                                movementType: 'Dépose',
+                                natureTranslationLabel: this.natureTranslation.filter((translation) => translation.label === 'nature')[0].translation,
                             });
                         }
                     }

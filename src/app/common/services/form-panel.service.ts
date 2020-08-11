@@ -27,7 +27,7 @@ export class FormPanelService {
                 item: FormPanelToggleComponent,
                 config: {
                     ...common,
-                    value: value ? Boolean(Number(value)) : Boolean(Number(freeField.defaultValue)),
+                    value: value !== null ? Boolean(Number(value)) : Boolean(Number(freeField.defaultValue)),
                     inputConfig: {}
                 }
             } :
