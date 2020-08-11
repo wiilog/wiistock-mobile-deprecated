@@ -737,9 +737,9 @@ export class SqliteService {
             const translationsValues = translations.map((translation) => {
                 return (
                     "('" +
-                    translation.menu + "', '" +
-                    translation.label + "', '" +
-                    (translation.translation || "") + "'" +
+                    translation.menu.replace(/'/gi, "''") + "', '" +
+                    translation.label.replace(/'/gi, "''") + "', '" +
+                    (translation.translation ? translation.translation.replace(/'/gi, "''") : "") + "'" +
                     ")"
                 )
             });
