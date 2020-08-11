@@ -360,6 +360,7 @@ export class DeposePage extends PageComponent {
     }
 
     private refreshPriseListComponent(): void {
+        const natureLabel = this.natureTranslation.filter((translation) => translation.label === 'nature')[0];
         this.priseListConfig = this.tracaListFactory.createListConfig(
             this.colisPrise.filter(({hidden}) => !hidden),
             TracaListFactoryService.LIST_TYPE_DROP_SUB,
@@ -369,18 +370,19 @@ export class DeposePage extends PageComponent {
                     this.testColisDepose(object.value, true);
                 },
                 natureIdsToConfig: this.natureIdsToConfig,
-                natureTranslation: this.natureTranslation.filter((translation) => translation.label === 'nature')[0].translation,
+                natureTranslation: natureLabel.translation || natureLabel.label,
             }
         );
     }
 
     private refreshDeposeListComponent(): void {
+        const natureLabel = this.natureTranslation.filter((translation) => translation.label === 'nature')[0];
         this.deposeListConfig = this.tracaListFactory.createListConfig(
             this.colisDepose,
             TracaListFactoryService.LIST_TYPE_DROP_MAIN,
             {
                 natureIdsToConfig: this.natureIdsToConfig,
-                natureTranslation: this.natureTranslation.filter((translation) => translation.label === 'nature')[0].translation,
+                natureTranslation: natureLabel.translation || natureLabel.label,
                 objectLabel: this.objectLabel,
                 location: this.emplacement,
                 validate: () => this.finishTaking(),
@@ -404,7 +406,7 @@ export class DeposePage extends PageComponent {
                                     this.updatePicking(barCode, values);
                                 },
                                 movementType: 'Dépose',
-                                natureTranslationLabel: this.natureTranslation.filter((translation) => translation.label === 'nature')[0].translation,
+                                natureTranslationLabel: natureLabel.translation || natureLabel.label,
                             });
                         }
                     }
