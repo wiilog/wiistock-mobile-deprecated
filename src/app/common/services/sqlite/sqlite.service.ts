@@ -733,7 +733,7 @@ export class SqliteService {
         let ret$: ReplaySubject<any> = new ReplaySubject(1);
         let translations = data.translations;
 
-        this.deleteBy('anomalie_inventaire').subscribe(() => {
+        this.deleteBy('translations').subscribe(() => {
             const translationsValues = translations.map((translation) => {
                 return (
                     "('" +
