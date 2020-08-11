@@ -61,7 +61,7 @@ export class MovementConfirmPage extends PageComponent {
         };
 
        this.sqliteService.findAll('nature').subscribe((natures) => {
-           const needsToShowNatures = natures.filter(nature => nature.hide === 1).length > 0;
+           const needsToShowNatures = natures.filter(nature => nature.hide !== 1).length > 0;
            const selectedNature = needsToShowNatures && natureId
                ? natures.find((nature) => ((Number.isInteger(nature.id)
                    ? nature.id.toString()
