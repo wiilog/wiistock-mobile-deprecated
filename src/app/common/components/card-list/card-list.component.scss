@@ -63,6 +63,11 @@ $card-padding: 4px 12px !important;
         .actions {
             display: inline-flex;
 
+            .right-icon {
+                width: 25px !important;
+                height: 25px !important;
+            }
+
             .arrow {
                 width: 15px !important;
                 height: 15px !important;
@@ -80,5 +85,4 @@ $card-padding: 4px 12px !important;
             font-weight: bold;
         }
     }
-
 }

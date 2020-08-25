@@ -277,5 +277,20 @@ export const TablesDefinitions: Array<TableDefinition> = [
             label: 'VARCHAR(255)',
             translation: 'VARCHAR(255)'
         }
+    },
+    {
+        name: 'dispatch',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
+            requester: 'VARCHAR(255)',
+            number: 'VARCHAR(255)',
+            startDate: 'VARCHAR(255)',
+            endDate: 'VARCHAR(255)',
+            urgent: 'INTEGER',
+            locationFromLabel: 'VARCHAR(255)',
+            locationToLabel: 'VARCHAR(255)',
+            typeLabel: 'VARCHAR(255)',
+            statusLabel: 'VARCHAR(255)'
+        }
     }
 ];

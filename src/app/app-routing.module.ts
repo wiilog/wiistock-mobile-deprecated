@@ -35,6 +35,8 @@ import {DemandeLivraisonHeaderPageRoutingModule} from '@pages/demande/demande-li
 import {DemandeLivraisonArticlesPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-articles/demande-livraison-articles-routing.module';
 import {DemandeLivraisonArticleTakePageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-article-take/demande-livraison-article-take-routing.module';
 import {InventoryLocationsAnomaliesPageRoutingModule} from '@pages/stock/inventory/inventory-locations-anomalies/inventory-locations-anomalies-routing.module';
+import {TrackingMenuPageRoutingModule} from '@pages/tracking/tracking-menu/tracking-menu-routing.module';
+import {DispatchMenuPageRoutingModule} from '@pages/tracking/dispatch/dispatch-menu/dispatch-menu-routing.module';
 
 
 const routes: Routes = [
@@ -52,6 +54,16 @@ const routes: Routes = [
         path: MainMenuPageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/main-menu/main-menu.module').then(m => m.MainMenuPageModule)
+    },
+    {
+        path: TrackingMenuPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/tracking/tracking-menu/tracking-menu.module').then(m => m.TrackingMenuPageModule)
+    },
+    {
+        path: DispatchMenuPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/tracking/dispatch/dispatch-menu/dispatch-menu.module').then(m => m.DispatchMenuPageModule)
     },
     {
         path: PriseDeposeMenuPageRoutingModule.PATH,

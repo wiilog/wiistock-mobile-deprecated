@@ -6,7 +6,6 @@ export abstract class PageComponent implements OnInit, OnDestroy {
 
     private _paramId: number;
 
-
     protected constructor(protected navService: NavService) {}
 
     public ngOnInit(): void {

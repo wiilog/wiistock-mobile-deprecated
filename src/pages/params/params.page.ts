@@ -8,7 +8,7 @@ import {StorageService} from '@app/common/services/storage.service';
 import {NavService} from '@app/common/services/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
-import {SqliteService} from "../../app/common/services/sqlite/sqlite.service";
+import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
 
 
 @Component({

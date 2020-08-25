@@ -15,6 +15,8 @@ import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-slide
 import {StockMenuPageRoutingModule} from '@pages/stock/stock-menu/stock-menu-routing.module';
 import {DemandeMenuPageRoutingModule} from '@pages/demande/demande-menu/demande-menu-routing.module';
 import {PageComponent} from '@pages/page.component';
+import {TrackingMenuPage} from '@pages/tracking/tracking-menu/tracking-menu.page';
+import {TrackingMenuPageRoutingModule} from '@pages/tracking/tracking-menu/tracking-menu-routing.module';
 
 
 @Component({
@@ -175,7 +177,7 @@ export class MainMenuPage extends PageComponent {
                 icon: 'tracking.svg',
                 label: 'Traçabilité',
                 action: () => {
-                    this.navService.push(PriseDeposeMenuPageRoutingModule.PATH, {
+                    this.navService.push(TrackingMenuPageRoutingModule.PATH, {
                         fromStock: false
                     });
                 }

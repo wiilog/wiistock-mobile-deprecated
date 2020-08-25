@@ -1,6 +1,7 @@
 import {Component, HostBinding, Input} from '@angular/core';
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
 import {CardListConfig} from '@app/common/components/card-list/card-list-config';
+import {IconConfig} from '@app/common/components/panel/model/icon-config';
 
 
 @Component({

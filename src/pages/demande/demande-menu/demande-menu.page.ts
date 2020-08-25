@@ -26,7 +26,7 @@ export class DemandeMenuPage extends PageComponent {
     public loading: boolean;
 
     private avoidSync: boolean;
-    private synchronisationSubscription: Subscription;
+    private synchronisationSubscription: Subscription;s
     private navigationSubscription: Subscription;
 
     public constructor(private platform: Platform,
@@ -107,14 +107,6 @@ export class DemandeMenuPage extends PageComponent {
             this.loading = false;
             this.toastService.presentToast('Veuillez vous connecter à internet afin de synchroniser vos données');
         }
-    }
-
-    public goToDepose() {
-        this.navService
-            .push(PriseDeposeMenuPageRoutingModule.PATH, {
-                fromStock: true,
-                goToDeposeDirectly: true
-            });
     }
 
     public setAvoidSync(avoidSync: boolean) {

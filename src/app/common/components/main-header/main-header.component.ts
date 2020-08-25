@@ -23,6 +23,8 @@ import {InventoryLocationsPageRoutingModule} from '@pages/stock/inventory/invent
 import {DemandeMenuPageRoutingModule} from '@pages/demande/demande-menu/demande-menu-routing.module';
 import {DemandeLivraisonMenuPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu-routing.module';
 import {InventoryLocationsAnomaliesPageRoutingModule} from '@pages/stock/inventory/inventory-locations-anomalies/inventory-locations-anomalies-routing.module';
+import {TrackingMenuPageRoutingModule} from '@pages/tracking/tracking-menu/tracking-menu-routing.module';
+import {DispatchMenuPageRoutingModule} from '@pages/tracking/dispatch/dispatch-menu/dispatch-menu-routing.module';
 
 
 @Component({
@@ -111,14 +113,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
         this.titlesConfig = [
             {pagePath: MainMenuPageRoutingModule.PATH, label: 'Menu'},
-            {
-                pagePath: PriseDeposeMenuPageRoutingModule.PATH,
-                label: 'Traçabilité',
-                filter: (params) => (
-                    (typeof params.get('fromStock') === 'boolean') &&
-                    !params.get('fromStock')
-                )
-            },
+            {pagePath: TrackingMenuPageRoutingModule.PATH, label: 'Traçabilité'},
+            {pagePath: DispatchMenuPageRoutingModule.PATH, label: 'Acheminements'},
             {
                 pagePath: PriseDeposeMenuPageRoutingModule.PATH,
                 label: 'Transfert',
@@ -146,14 +142,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: PreparationMenuPageRoutingModule.PATH, label: 'Préparation'},
             {pagePath: LivraisonMenuPageRoutingModule.PATH, label: 'Livraison'},
             {pagePath: CollecteMenuPageRoutingModule.PATH, label: 'Collecte'},
-            {
-                pagePath: InventoryLocationsPageRoutingModule.PATH,
-                label: 'Inventaire'
-            },
-            {
-                pagePath: InventoryLocationsAnomaliesPageRoutingModule.PATH,
-                label: 'Anomalies',
-            },
+            {pagePath: InventoryLocationsPageRoutingModule.PATH, label: 'Inventaire'},
+            {pagePath: InventoryLocationsAnomaliesPageRoutingModule.PATH, label: 'Anomalies'},
             {pagePath: DemandeMenuPageRoutingModule.PATH, label: 'Demande'},
             {pagePath: ManutentionMenuPageRoutingModule.PATH, label: 'Manutention'},
             {pagePath: DemandeLivraisonMenuPageRoutingModule.PATH, label: 'Livraison'},

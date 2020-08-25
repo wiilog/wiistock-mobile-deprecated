@@ -23,7 +23,7 @@ import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {Nature} from '@entities/nature';
 import {ConfirmPageRoutingModule} from "../movement-confirm/movement-confirm-routing.module";
-import {Translation} from "../../../entities/translation";
+import {Translation} from "@entities/translation";
 
 
 @Component({

@@ -23,7 +23,10 @@
             </div>
             <div class="actions"
                  *ngIf="cardConfig.action">
-                <wii-icon name="arrow-right.svg" class="arrow"></wii-icon>
+                <wii-icon [name]="cardConfig.rightIcon ? cardConfig.rightIcon.name : 'arrow-right.svg'"
+                          [color]="cardConfig.rightIcon && cardConfig.rightIcon.color"
+                          [attr.class]="cardConfig.rightIcon ? 'right-icon' : 'arrow'">
+                </wii-icon>
             </div>
         </ion-card-content>
     </ion-card>
