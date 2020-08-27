@@ -54,9 +54,9 @@
                     </div>
                 </ng-template>
                 <ng-template ionicSelectableItemTemplate
-                             let-location="item"
+                             let-item="item"
                              *ngIf="config[smartType].templateIndex === 'default'">
-                    {{location.label}}
+                    {{item.label}}
                 </ng-template>
             </ionic-selectable>
         </ion-item>

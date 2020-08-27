@@ -37,6 +37,8 @@ import {DemandeLivraisonArticleTakePageRoutingModule} from '@pages/demande/deman
 import {InventoryLocationsAnomaliesPageRoutingModule} from '@pages/stock/inventory/inventory-locations-anomalies/inventory-locations-anomalies-routing.module';
 import {TrackingMenuPageRoutingModule} from '@pages/tracking/tracking-menu/tracking-menu-routing.module';
 import {DispatchMenuPageRoutingModule} from '@pages/tracking/dispatch/dispatch-menu/dispatch-menu-routing.module';
+import {DispatchPacksPageRoutingModule} from '@pages/tracking/dispatch/dispatch-packs/dispatch-packs-routing.module';
+import {DispatchValidatePageRoutingModule} from '@pages/tracking/dispatch/dispatch-validate/dispatch-validate-routing.module';
 
 
 const routes: Routes = [
@@ -64,6 +66,16 @@ const routes: Routes = [
         path: DispatchMenuPageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/tracking/dispatch/dispatch-menu/dispatch-menu.module').then(m => m.DispatchMenuPageModule)
+    },
+    {
+        path: DispatchPacksPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/tracking/dispatch/dispatch-packs/dispatch-packs.module').then(m => m.DispatchPacksPageModule)
+    },
+    {
+        path: DispatchValidatePageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/tracking/dispatch/dispatch-validate/dispatch-validate.module').then(m => m.DispatchValidatePageModule)
     },
     {
         path: PriseDeposeMenuPageRoutingModule.PATH,

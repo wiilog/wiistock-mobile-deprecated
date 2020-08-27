@@ -3,6 +3,8 @@ import {Injectable} from '@angular/core';
 import {NavController} from '@ionic/angular';
 import {from, Observable} from 'rxjs';
 import {environment} from '@environments/environment';
+import {flatMap, map, tap} from 'rxjs/operators';
+import {MainHeaderService} from '@app/common/services/main-header.service';
 
 
 export type Params = Map<string, any>;
@@ -17,6 +19,7 @@ export class NavService {
     private static readonly ParamsCollection: {[paramId: number]: Params} = {};
 
     public constructor(private navController: NavController,
+                       private mainHeaderService: MainHeaderService,
                        private activatedRoute: ActivatedRoute) {
         if (!environment.production && window) {
             (window as any).NAV_PARAMS = NavService.ParamsCollection;
@@ -49,7 +52,7 @@ export class NavService {
     }
 
     public pop(): Observable<void> {
-        return from(this.navController.pop());
+        return from(this.navController.pop()).pipe(tap(() => this.mainHeaderService.emitSubTitle('')));
     }
 
     public treatParams(params?: RouteParams): number {

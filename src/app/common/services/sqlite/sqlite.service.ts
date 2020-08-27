@@ -122,22 +122,34 @@ export class SqliteService {
             : of(undefined);
     }
 
-    private importDispatches(data): Observable<any> {
+    private importDispatchesData(data): Observable<any> {
         const dispatches = data['dispatches'] || [];
+        const dispatchPacks = data['dispatchPacks'] || [];
         const englishDateMatcher = /^(\d{4})-(\d{2})-(\d{2})/;
 
-        return this
-            .deleteBy('dispatch')
+        return zip(
+            this.deleteBy('dispatch'),
+            this.deleteBy('dispatch_pack')
+        )
             .pipe(
-                flatMap(() => this.insert('dispatch', dispatches.map(({startDate, endDate, ...dispatch}) => {
-                    const [startDate_isDate, startDate_year, startDate_month, startDate_day] = ((startDate && startDate.date && englishDateMatcher.exec(startDate.date)) || []);
-                    const [endDate_isDate, endDate_year, endDate_month, endDate_day] = ((endDate && endDate.date && englishDateMatcher.exec(endDate.date)) || []);
-                    return {
-                         ...dispatch,
-                         startDate: startDate_isDate ? `${startDate_day}/${startDate_month}/${startDate_year}` : null,
-                         endDate: endDate_isDate ? `${endDate_day}/${endDate_month}/${endDate_year}` : null
-                    };
-                })))
+                flatMap(() => (
+                    dispatches.length > 0
+                        ? this.insert('dispatch', dispatches.map(({startDate, endDate, ...dispatch}) => {
+                            const [startDate_isDate, startDate_year, startDate_month, startDate_day] = ((startDate && startDate.date && englishDateMatcher.exec(startDate.date)) || []);
+                            const [endDate_isDate, endDate_year, endDate_month, endDate_day] = ((endDate && endDate.date && englishDateMatcher.exec(endDate.date)) || []);
+                            return {
+                                 ...dispatch,
+                                 startDate: startDate_isDate ? `${startDate_day}/${startDate_month}/${startDate_year}` : null,
+                                 endDate: endDate_isDate ? `${endDate_day}/${endDate_month}/${endDate_year}` : null
+                            };
+                        }))
+                        : of(undefined)
+                )),
+                flatMap(() => (
+                    dispatchPacks.length > 0
+                        ? this.insert('dispatch_pack', dispatchPacks)
+                        : of(undefined)
+                ))
             );
     }
 
@@ -346,6 +358,18 @@ export class SqliteService {
             flatMap(() => (
                 allowedNatureInLocations.length > 0
                     ? this.insert('allowed_nature_location', allowedNatureInLocations)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
+    public importStatusData(data): Observable<void> {
+        const status = data['status'] || [];
+        return this.deleteBy('status').pipe(
+            flatMap(() => (
+                status.length > 0
+                    ? this.insert('status', status)
                     : of(undefined)
             )),
             map(() => undefined)
@@ -793,7 +817,8 @@ export class SqliteService {
             flatMap(() => this.importAllowedNaturesData(data).pipe(tap(() => {console.log('--- > importAllowedNaturesData')}))),
             flatMap(() => this.importFreeFieldsData(data).pipe(tap(() => {console.log('--- > importFreeFieldData')}))),
             flatMap(() => this.importTranslations(data).pipe(tap(() => {console.log('--- > importTranslations')}))),
-            flatMap(() => this.importDispatches(data).pipe(tap(() => {console.log('--- > importDispatches')}))),
+            flatMap(() => this.importDispatchesData(data).pipe(tap(() => {console.log('--- > importDispatchesData')}))),
+            flatMap(() => this.importStatusData(data).pipe(tap(() => {console.log('--- > importStatusData')}))),
             flatMap(() => (
                 this.storageService.getInventoryManagerRight().pipe(
                     flatMap((res) => (res

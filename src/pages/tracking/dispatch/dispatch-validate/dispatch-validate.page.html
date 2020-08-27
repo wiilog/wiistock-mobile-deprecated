@@ -1,0 +1,35 @@
+<wii-panel-header *ngIf="locationHeaderConfig && currentPage == PageLocation"
+                  class="page-header"
+                  [transparent]="locationHeaderConfig.transparent"
+                  [title]="locationHeaderConfig.title"
+                  [subtitle]="locationHeaderConfig.subtitle"
+                  [leftIcon]="locationHeaderConfig.leftIcon"
+                  [rightIcons]="locationHeaderConfig.rightIcon">
+</wii-panel-header>
+
+<wii-panel-header *ngIf="statusHeaderConfig && currentPage == PageStatus"
+                  class="page-header"
+                  [transparent]="statusHeaderConfig.transparent"
+                  [title]="statusHeaderConfig.title"
+                  [subtitle]="statusHeaderConfig.subtitle"
+                  [leftIcon]="statusHeaderConfig.leftIcon"
+                  [rightIcons]="statusHeaderConfig.rightIcon">
+</wii-panel-header>
+
+<div class="page-footer">
+    <wii-select-item #locationSelectItemComponent
+                     [type]="selectItemLocation"
+                     (itemChange)="selectLocation($event)"
+                     [checkBarcodeValidity]="true"
+                     [scanMode]="barcodeScannerSearchMode"
+                     [hidden]="currentPage !== PageLocation">
+    </wii-select-item>
+    <wii-select-item #statusSelectItemComponent
+                     [type]="selectItemStatus"
+                     [requestParams]="statusRequestParams"
+                     (itemChange)="selectStatus($event)"
+                     [checkBarcodeValidity]="true"
+                     [scanMode]="barcodeScannerSearchMode"
+                     [hidden]="currentPage !== PageStatus">
+    </wii-select-item>
+</div>

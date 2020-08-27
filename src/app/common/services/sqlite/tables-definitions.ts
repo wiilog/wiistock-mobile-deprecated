@@ -281,7 +281,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
     {
         name: 'dispatch',
         attributes: {
-            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
+            id: 'INTEGER PRIMARY KEY',
             requester: 'VARCHAR(255)',
             number: 'VARCHAR(255)',
             startDate: 'VARCHAR(255)',
@@ -289,8 +289,30 @@ export const TablesDefinitions: Array<TableDefinition> = [
             urgent: 'INTEGER',
             locationFromLabel: 'VARCHAR(255)',
             locationToLabel: 'VARCHAR(255)',
+            typeId: 'INTEGER',
             typeLabel: 'VARCHAR(255)',
-            statusLabel: 'VARCHAR(255)'
+            statusLabel: 'VARCHAR(255)',
+            treatedStatusId: 'INTEGER'
+        }
+    },
+    {
+        name: 'dispatch_pack',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            code: 'VARCHAR(255)',
+            natureId: 'INTEGER',
+            quantity: 'INTEGER',
+            dispatchId: 'INTEGER'
+        }
+    },
+    {
+        name: 'status',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            label: 'VARCHAR(255)',
+            typeId: 'INTEGER',
+            treated: 'INTEGER',
+            category: 'VARCHAR(255)'
         }
     }
 ];

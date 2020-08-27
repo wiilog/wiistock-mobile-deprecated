@@ -1,0 +1,276 @@
+import {Component, ViewChild} from '@angular/core';
+import {Subscription, zip} from 'rxjs';
+import {NavService} from '@app/common/services/nav.service';
+import {PageComponent} from '@pages/page.component';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
+import {LoadingService} from '@app/common/services/loading.service';
+import {filter, flatMap, tap} from 'rxjs/operators';
+import {Dispatch} from '@entities/dispatch';
+import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
+import {MainHeaderService} from '@app/common/services/main-header.service';
+import {IconConfig} from '@app/common/components/panel/model/icon-config';
+import {DispatchPack} from '@entities/dispatch-pack';
+import {HeaderConfig} from '@app/common/components/panel/model/header-config';
+import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel/list-panel-item-config';
+import {Nature} from '@entities/nature';
+import {IconColor} from '@app/common/components/icon/icon-color';
+import {BarcodeScannerComponent} from '@app/common/components/barcode-scanner/barcode-scanner.component';
+import {Translation} from '@entities/translation';
+import {ToastService} from '@app/common/services/toast.service';
+import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
+import {DispatchValidatePageRoutingModule} from '@pages/tracking/dispatch/dispatch-validate/dispatch-validate-routing.module';
+
+@Component({
+    selector: 'wii-dispatch-packs',
+    templateUrl: './dispatch-packs.page.html',
+    styleUrls: ['./dispatch-packs.page.scss'],
+})
+export class DispatchPacksPage extends PageComponent {
+
+    @ViewChild('footerScannerComponent', {static: false})
+    public footerScannerComponent: BarcodeScannerComponent;
+
+    public loading: boolean;
+
+    public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SCAN;
+
+    public dispatchHeaderConfig: {
+        title: string;
+        subtitle?: string;
+        info?: string;
+        transparent: boolean;
+        leftIcon: IconConfig;
+        rightIcon?: IconConfig;
+    };
+
+    public packsToTreatListConfig: {
+        header: HeaderConfig;
+        body: Array<ListPanelItemConfig>;
+    };
+    public packsTreatedListConfig: {
+        header: HeaderConfig;
+        body: Array<ListPanelItemConfig>;
+    };
+
+    public readonly listBoldValues = ['code'];
+
+    private dispatch: Dispatch;
+    private dispatchPacks: Array<DispatchPack&{treated: boolean}>;
+
+    private natureIdsToColors: {[natureId: number]: string};
+    private natureIdsToLabels: {[natureId: number]: string};
+    private natureTranslations: {[item: string]: string};
+
+    private loadingSubscription: Subscription;
+    private loadingElement?: HTMLIonLoadingElement;
+
+    public constructor(private sqliteService: SqliteService,
+                       private loadingService: LoadingService,
+                       private mainHeaderService: MainHeaderService,
+                       private toastService: ToastService,
+                       navService: NavService) {
+        super(navService);
+        this.loading = true;
+        this.natureIdsToColors = {};
+        this.dispatchPacks = [];
+    }
+
+
+    public ionViewWillEnter(): void {
+        this.loading = true;
+        this.unsubscribeLoading();
+        const dispatchId = this.currentNavParams.get('dispatchId');
+
+        this.loadingSubscription = this.loadingService.presentLoading()
+            .pipe(
+                tap((loader) => {
+                    this.loadingElement = loader;
+                }),
+                flatMap(() => zip(
+                    this.sqliteService.findOneBy('dispatch', {id: dispatchId}),
+                    this.sqliteService.findBy('dispatch_pack', [`dispatchId = ${dispatchId}`]),
+                    this.sqliteService.findAll('nature'),
+                    this.sqliteService.findBy('translations', [`menu LIKE 'natures'`])
+                )),
+                filter(([dispatch]) => Boolean(dispatch))
+            )
+            .subscribe(([dispatch, packs, natures, natureTranslations]: [Dispatch, Array<DispatchPack>, Array<Nature>, Array<Translation>]) => {
+                this.natureIdsToColors = natures.reduce((acc, {id, color}) => ({
+                    ...acc,
+                    [Number(id)]: color
+                }), {});
+                this.natureIdsToLabels = natures.reduce((acc, {id, label}) => ({
+                    ...acc,
+                    [Number(id)]: label
+                }), {});
+                this.natureTranslations = natureTranslations.reduce((acc, {label, translation}) => ({
+                    ...acc,
+                    [label]: translation
+                }), {});
+                this.dispatchPacks = packs.map((pack) => ({
+                    ...pack,
+                    treated: false
+                }));
+                this.dispatch = dispatch;
+
+                this.refreshListToTreatConfig();
+                this.refreshListTreatedConfig();
+                this.refreshHeaderPanelConfigFromDispatch();
+
+                this.unsubscribeLoading();
+                this.loading = false;
+
+                this.footerScannerComponent.fireZebraScan();
+            });
+    }
+
+
+    public ionViewWillLeave(): void {
+        this.unsubscribeLoading();
+        this.footerScannerComponent.unsubscribeZebraScan();
+    }
+
+    public takePack(barCode: string): void {
+        const selectedIndex = this.dispatchPacks.findIndex(({code}) => (code === barCode));
+        if (selectedIndex > -1) {
+            if (this.dispatchPacks[selectedIndex].treated) {
+                this.toastService.presentToast(`Vous avez déjà traité ce colis.`);
+            }
+            else {
+                this.dispatchPacks[selectedIndex].treated = true;
+
+                this.refreshListToTreatConfig();
+                this.refreshListTreatedConfig();
+                this.refreshHeaderPanelConfigFromDispatch();
+            }
+        }
+        else {
+            this.toastService.presentToast(`Ce colis n'est pas dans cet acheminement.`);
+        }
+    }
+
+    private unsubscribeLoading(): void {
+        if (this.loadingSubscription) {
+            this.loadingSubscription.unsubscribe();
+            this.loadingSubscription = undefined;
+        }
+
+        if (this.loadingElement) {
+            this.loadingElement.dismiss();
+            this.loadingElement = undefined;
+        }
+    }
+
+    private refreshHeaderPanelConfigFromDispatch(): void {
+        this.dispatchHeaderConfig = {
+            title: `Demande ${this.dispatch.number}`,
+            subtitle: `Lieu départ ${this.dispatch.locationFromLabel}`,
+            info: `Type ${this.dispatch.typeLabel}`,
+            transparent: true,
+            leftIcon: {
+                color: CardListColorEnum.GREEN,
+                name: 'stock-transfer.svg'
+            },
+            ...((this.packsToTreatListConfig && this.packsToTreatListConfig.body.length === 0)
+                    ? {
+                        rightIcon: {
+                            name: 'check.svg',
+                            color: 'success',
+                            action: () => this.validate()
+                        }
+                    }
+                    : {})
+            // TODO CHECK
+        };
+    }
+
+    private refreshListToTreatConfig(): void {
+        const packsToTreat = this.dispatchPacks.filter(({treated}) => !treated);
+        const natureTranslation = (this.natureTranslations['nature'] || 'nature');
+        const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
+
+        const plural = packsToTreat.length > 1 ? 's' : '';
+        this.packsToTreatListConfig = {
+            header: {
+                title: 'À transférer',
+                info: `${packsToTreat.length} objet${plural} scanné${plural}`,
+                leftIcon: {
+                    name: 'download.svg',
+                    color: 'list-green-light'
+                }
+            },
+            body: packsToTreat.map((pack) => ({
+                ...(this.packToListConfig(pack, natureTranslationCapitalized)),
+                rightIcon: {
+                    color: 'grey' as IconColor,
+                    name: 'up.svg',
+                    action: () => this.takePack(pack.code)
+                }
+            }))
+        };
+    }
+
+    private refreshListTreatedConfig(): void {
+        const packsTreated = this.dispatchPacks.filter(({treated}) => treated);
+        const natureTranslation = (this.natureTranslations['nature'] || 'nature');
+        const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
+
+        const plural = packsTreated.length > 1 ? 's' : '';
+        this.packsTreatedListConfig = {
+            header: {
+                title: 'Transféré',
+                info: `${packsTreated.length} objet${plural} à scanner`,
+                leftIcon: {
+                    name: 'upload.svg',
+                    color: CardListColorEnum.GREEN
+                }
+            },
+            body: packsTreated.map((pack) => ({
+                ...(this.packToListConfig(pack, natureTranslationCapitalized)),
+                longPressAction: () => this.revertPack(pack.code)
+                // TODO pressAction
+            }))
+        };
+    }
+
+    private packToListConfig({code, quantity, natureId}: DispatchPack, natureTranslation: string) {
+        return {
+            infos: {
+                code: {
+                    label: 'Colis',
+                    value: code
+                },
+                quantity: {
+                    label: 'Quantité',
+                    value: `${quantity}`
+                },
+                nature: {
+                    label: natureTranslation,
+                    value: this.natureIdsToLabels[Number(natureId)]
+                }
+            },
+            color: this.natureIdsToColors[Number(natureId)],
+        }
+    }
+
+    private revertPack(barCode: string): void {
+        const selectedIndex = this.dispatchPacks.findIndex(({code}) => (code === barCode));
+        if (selectedIndex > -1
+            && this.dispatchPacks[selectedIndex].treated) {
+            this.dispatchPacks[selectedIndex].treated = false;
+
+            this.refreshListToTreatConfig();
+            this.refreshListTreatedConfig();
+            this.refreshHeaderPanelConfigFromDispatch();
+        }
+    }
+
+    private validate(): void {
+        this.navService.push(DispatchValidatePageRoutingModule.PATH, {
+            dispatchId: this.dispatch.id,
+            afterValidate: () => {
+                this.navService.pop();
+            }
+        });
+    }
+}

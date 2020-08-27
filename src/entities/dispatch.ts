@@ -8,5 +8,7 @@ export interface Dispatch {
     locationFromLabel: string;
     locationToLabel: string;
     typeLabel: string;
+    typeId: number;
+    treatedStatusId: number;
     statusLabel: string;
 }

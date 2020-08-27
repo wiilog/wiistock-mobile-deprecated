@@ -199,7 +199,7 @@ export class TracaListFactoryService {
                     },
                     ...(
                         natureConfig ? {
-                            quantity: {
+                            nature: {
                                 label: natureTranslation,
                                 value: natureConfig.label
                             }

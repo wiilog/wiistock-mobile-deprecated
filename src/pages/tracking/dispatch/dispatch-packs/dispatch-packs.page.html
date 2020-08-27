@@ -1,0 +1,34 @@
+<div *ngIf="!loading && dispatchHeaderConfig"
+     scroll-y="true"
+     class="page-content">
+    <wii-panel-header *ngIf="dispatchHeaderConfig"
+                      class="page-header"
+                      [title]="dispatchHeaderConfig.title"
+                      [subtitle]="dispatchHeaderConfig.subtitle"
+                      [info]="dispatchHeaderConfig.info"
+                      [transparent]="dispatchHeaderConfig.transparent"
+                      [leftIcon]="dispatchHeaderConfig.leftIcon"
+                      [rightIcons]="dispatchHeaderConfig.rightIcon">
+    </wii-panel-header>
+    <wii-list-panel *ngIf="packsTreatedListConfig"
+                    [header]="packsTreatedListConfig.header"
+                    [body]="packsTreatedListConfig.body"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+    <wii-list-panel *ngIf="packsToTreatListConfig"
+                    [header]="packsToTreatListConfig.header"
+                    [body]="packsToTreatListConfig.body"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
+</div>
+
+<div class="page-footer persisted-page-footer">
+    <wii-barcode-scanner #footerScannerComponent
+                         [hidden]="loading"
+                         buttonSubtitle="Colis"
+                         [mode]="scannerModeManual"
+                         (add)="takePack($event[0])">
+    </wii-barcode-scanner>
+</div>
+
+

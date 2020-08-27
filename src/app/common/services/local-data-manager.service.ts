@@ -16,7 +16,7 @@ import {DemandeLivraison} from '@entities/demande-livraison';
 import {DemandeLivraisonArticleSelected} from '@entities/demande-livraison-article-selected';
 
 
-type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies';
+type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies'|'dispatch';
 interface ApiProccessConfig {
     service: string;
     createApiParams: () => Observable<{paramName: string, [name: string]: any}>
@@ -234,6 +234,14 @@ export class LocalDataManagerService {
                     `treated = '1'`,
                     ...(errors && errors.length ? [`id NOT IN (${errors.join(',')})`] : [])
                 ])
+            },
+            dispatch: {
+                service: ApiService.PATCH_DISPATCH,
+                createApiParams: () => this.sqliteService.findBy('dispatch', ['treatedStatusId IS NOT NULL']).pipe(map((dispatches) => ({
+                    paramName: 'dispatches',
+                    dispatches: dispatches.map(({id, treatedStatusId}) => ({id, treatedStatusId}))
+                }))),
+                deleteSucceed: () => this.sqliteService.deleteBy('dispatch', [`treatedStatusId IS NOT NULL`])
             }
         }
     }
@@ -271,6 +279,10 @@ export class LocalDataManagerService {
                 flatMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des anomalies d\'inventaire'});
                     return this.sendFinishedProcess('inventoryAnomalies').pipe(map(() => needAnotherSynchronise));
+                }),
+                flatMap((needAnotherSynchronise) => {
+                    synchronise$.next({finished: false, message: 'Envoi des acheminements'});
+                    return this.sendFinishedProcess('dispatch').pipe(map(() => needAnotherSynchronise));
                 }),
                 // we reload data from API if we have save data in previous requests
                 flatMap((needAnotherSynchronise) => {

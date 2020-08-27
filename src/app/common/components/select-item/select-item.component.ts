@@ -62,6 +62,10 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
             invalidMessage: 'L\'article scanné n\'est pas présent dans la liste',
             buttonSubtitle: 'Article'
         },
+        [SelectItemTypeEnum.STATUS]: {
+            invalidMessage: 'Le statut scanné n\'est pas présent dans la liste',
+            buttonSubtitle: 'Statut'
+        },
         [SelectItemTypeEnum.ARTICLE_TO_PICK]: {
             invalidMessage: 'L\'article scanné n\'est pas présent dans la liste',
             buttonSubtitle: 'Article'

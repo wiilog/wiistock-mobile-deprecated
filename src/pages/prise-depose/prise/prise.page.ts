@@ -100,12 +100,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                 ? this.apiService.requestApi('get', ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})
                 : of({trackingDrops: []})),
             !this.fromStock ? this.sqliteService.findAll('nature') : of(undefined),
-            this.sqliteService.findBy(
-                'translations',
-                [
-                    `menu LIKE 'natures'`,
-                ]
-            )
+            this.sqliteService.findBy('translations', [`menu LIKE 'natures'`])
         )
             .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures, natureTranslations]) => {
                 this.operator = operator;

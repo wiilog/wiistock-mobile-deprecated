@@ -4,15 +4,13 @@ import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {map, take, tap} from 'rxjs/operators';
 import {ArticleInventaire} from '@entities/article-inventaire';
-import {Observable, of, Subscription} from 'rxjs';
+import {Observable, of, ReplaySubject, Subscription} from 'rxjs';
 
 
 @Component({
     selector: 'wii-search-item',
     templateUrl: 'search-item.component.html',
-    styleUrls: [
-        './search-item.component.scss'
-    ]
+    styleUrls: ['./search-item.component.scss']
 })
 export class SearchItemComponent implements OnInit, OnDestroy {
 
@@ -94,6 +92,13 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             templateIndex: 'article-demande',
             databaseTable: 'demande_livraison_article',
             placeholder: 'Sélectionner un article'
+        },
+        [SelectItemTypeEnum.STATUS]: {
+            label: 'label',
+            valueField: 'id',
+            templateIndex: 'default',
+            databaseTable: 'status',
+            placeholder: 'Sélectionner un statut'
         }
     }
 
@@ -168,7 +173,8 @@ export class SearchItemComponent implements OnInit, OnDestroy {
     }
 
     public reload(): Observable<Array<any>> {
-        return (this.elements ? of(this.elements) : this.sqliteService.findBy(this.config[this.type].databaseTable, this.requestParams))
+        const $res = new ReplaySubject<Array<any>>(1);
+        (this.elements ? of(this.elements) : this.sqliteService.findBy(this.config[this.type].databaseTable, this.requestParams))
             .pipe(
                 take(1),
                 map((list) => {
@@ -181,7 +187,14 @@ export class SearchItemComponent implements OnInit, OnDestroy {
                     this.dbItems = list;
                     this.loadFirstItems();
                 })
+            )
+            // fix reload call withoyt subscribing
+            .subscribe(
+                (list) => { $res.next(list); },
+                (error) => { $res.error(error); },
+                () => { $res.complete(); }
             );
+        return $res;
     }
 
     public ngOnDestroy(): void {
@@ -205,7 +218,6 @@ export class SearchItemComponent implements OnInit, OnDestroy {
     }
 
     public onItemChange(value: { value: any }): void {
-        console.log(value)
         this.item = value.value;
         this.itemChange.emit(this.item);
     }
@@ -235,7 +247,6 @@ export class SearchItemComponent implements OnInit, OnDestroy {
     }
 
     public findItem(search: string|number, searchAttribute: string = this.config[this.type].label): any {
-        console.log(this.dbItems, searchAttribute, search);
         return this.dbItems
             ? this.dbItems.find((element) => (
                 (Number.isInteger(element[searchAttribute])

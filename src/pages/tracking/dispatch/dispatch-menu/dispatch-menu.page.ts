@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {Subscription, zip} from 'rxjs';
+import {Subscription} from 'rxjs';
 import {NavService} from '@app/common/services/nav.service';
 import {PageComponent} from '@pages/page.component';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
@@ -9,6 +9,7 @@ import {Dispatch} from '@entities/dispatch';
 import {CardListConfig} from '@app/common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
 import {MainHeaderService} from '@app/common/services/main-header.service';
+import {DispatchPacksPageRoutingModule} from '@pages/tracking/dispatch/dispatch-packs/dispatch-packs-routing.module';
 
 @Component({
     selector: 'wii-dispatch-menu',
@@ -43,10 +44,10 @@ export class DispatchMenuPage extends PageComponent {
                 tap((loader) => {
                     loaderElement = loader;
                 }),
-                flatMap(() => this.sqliteService.findAll('dispatch'))
+                flatMap(() => this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL']))
             )
             .subscribe((dispatches: Array<Dispatch>) => {
-                this.dispatchesListConfig = dispatches.map(({requester,  number, startDate, endDate, locationFromLabel, locationToLabel, statusLabel, typeLabel, urgent}) => ({
+                this.dispatchesListConfig = dispatches.map(({id, requester,  number, startDate, endDate, locationFromLabel, locationToLabel, statusLabel, typeLabel, urgent}) => ({
                     title: { label: 'Demandeur', value: requester },
                     content: [
                         { label: 'Numéro', value: number || '' },
@@ -65,7 +66,9 @@ export class DispatchMenuPage extends PageComponent {
                         }
                         : {}),
                     action: () => {
-                        // this.navService.push(ManutentionValidatePageRoutingModule.PATH, {manutention});
+                        this.navService.push(DispatchPacksPageRoutingModule.PATH, {
+                            dispatchId: id
+                        });
                     }
                 }));
 
