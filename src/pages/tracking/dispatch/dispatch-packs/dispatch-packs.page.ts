@@ -19,6 +19,8 @@ import {Translation} from '@entities/translation';
 import {ToastService} from '@app/common/services/toast.service';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {DispatchValidatePageRoutingModule} from '@pages/tracking/dispatch/dispatch-validate/dispatch-validate-routing.module';
+import {DispatchPackConfirmPageRoutingModule} from '@pages/tracking/dispatch/dispatch-pack-confirm/dispatch-pack-confirm-routing.module';
+
 
 @Component({
     selector: 'wii-dispatch-packs',
@@ -72,56 +74,57 @@ export class DispatchPacksPage extends PageComponent {
         super(navService);
         this.loading = true;
         this.natureIdsToColors = {};
+        this.natureIdsToLabels = {};
         this.dispatchPacks = [];
     }
 
-
     public ionViewWillEnter(): void {
-        this.loading = true;
-        this.unsubscribeLoading();
-        const dispatchId = this.currentNavParams.get('dispatchId');
+        if (!this.packsToTreatListConfig || !this.packsTreatedListConfig) {
+            this.loading = true;
+            this.unsubscribeLoading();
+            const dispatchId = this.currentNavParams.get('dispatchId');
+            this.loadingSubscription = this.loadingService.presentLoading()
+                .pipe(
+                    tap((loader) => {
+                        this.loadingElement = loader;
+                    }),
+                    flatMap(() => zip(
+                        this.sqliteService.findOneBy('dispatch', {id: dispatchId}),
+                        this.sqliteService.findBy('dispatch_pack', [`dispatchId = ${dispatchId}`]),
+                        this.sqliteService.findAll('nature'),
+                        this.sqliteService.findBy('translations', [`menu LIKE 'natures'`])
+                    )),
+                    filter(([dispatch]) => Boolean(dispatch))
+                )
+                .subscribe(([dispatch, packs, natures, natureTranslations]: [Dispatch, Array<DispatchPack>, Array<Nature>, Array<Translation>]) => {
+                    this.natureIdsToColors = natures.reduce((acc, {id, color}) => ({
+                        ...acc,
+                        [Number(id)]: color
+                    }), {});
+                    this.natureIdsToLabels = natures.reduce((acc, {id, label}) => ({
+                        ...acc,
+                        [Number(id)]: label
+                    }), {});
+                    this.natureTranslations = natureTranslations.reduce((acc, {label, translation}) => ({
+                        ...acc,
+                        [label]: translation
+                    }), {});
+                    this.dispatchPacks = packs.map((pack) => ({
+                        ...pack,
+                        treated: false
+                    }));
+                    this.dispatch = dispatch;
 
-        this.loadingSubscription = this.loadingService.presentLoading()
-            .pipe(
-                tap((loader) => {
-                    this.loadingElement = loader;
-                }),
-                flatMap(() => zip(
-                    this.sqliteService.findOneBy('dispatch', {id: dispatchId}),
-                    this.sqliteService.findBy('dispatch_pack', [`dispatchId = ${dispatchId}`]),
-                    this.sqliteService.findAll('nature'),
-                    this.sqliteService.findBy('translations', [`menu LIKE 'natures'`])
-                )),
-                filter(([dispatch]) => Boolean(dispatch))
-            )
-            .subscribe(([dispatch, packs, natures, natureTranslations]: [Dispatch, Array<DispatchPack>, Array<Nature>, Array<Translation>]) => {
-                this.natureIdsToColors = natures.reduce((acc, {id, color}) => ({
-                    ...acc,
-                    [Number(id)]: color
-                }), {});
-                this.natureIdsToLabels = natures.reduce((acc, {id, label}) => ({
-                    ...acc,
-                    [Number(id)]: label
-                }), {});
-                this.natureTranslations = natureTranslations.reduce((acc, {label, translation}) => ({
-                    ...acc,
-                    [label]: translation
-                }), {});
-                this.dispatchPacks = packs.map((pack) => ({
-                    ...pack,
-                    treated: false
-                }));
-                this.dispatch = dispatch;
+                    this.refreshListToTreatConfig();
+                    this.refreshListTreatedConfig();
+                    this.refreshHeaderPanelConfigFromDispatch();
 
-                this.refreshListToTreatConfig();
-                this.refreshListTreatedConfig();
-                this.refreshHeaderPanelConfigFromDispatch();
+                    this.unsubscribeLoading();
+                    this.loading = false;
 
-                this.unsubscribeLoading();
-                this.loading = false;
-
-                this.footerScannerComponent.fireZebraScan();
-            });
+                    this.footerScannerComponent.fireZebraScan();
+                });
+        }
     }
 
 
@@ -180,7 +183,6 @@ export class DispatchPacksPage extends PageComponent {
                         }
                     }
                     : {})
-            // TODO CHECK
         };
     }
 
@@ -200,7 +202,7 @@ export class DispatchPacksPage extends PageComponent {
                 }
             },
             body: packsToTreat.map((pack) => ({
-                ...(this.packToListConfig(pack, natureTranslationCapitalized)),
+                ...(this.packToListItemConfig(pack, natureTranslationCapitalized)),
                 rightIcon: {
                     color: 'grey' as IconColor,
                     name: 'up.svg',
@@ -226,14 +228,21 @@ export class DispatchPacksPage extends PageComponent {
                 }
             },
             body: packsTreated.map((pack) => ({
-                ...(this.packToListConfig(pack, natureTranslationCapitalized)),
+                ...(this.packToListItemConfig(pack, natureTranslationCapitalized)),
+                pressAction: () => {
+                    this.navService.push(DispatchPackConfirmPageRoutingModule.PATH, {
+                        pack,
+                        dispatch: this.dispatch,
+                        natureTranslationLabel: natureTranslationCapitalized,
+                        confirmPack: (pack: DispatchPack) => this.confirmPack(pack)
+                    })
+                },
                 longPressAction: () => this.revertPack(pack.code)
-                // TODO pressAction
             }))
         };
     }
 
-    private packToListConfig({code, quantity, natureId}: DispatchPack, natureTranslation: string) {
+    private packToListItemConfig({code, quantity, natureId}: DispatchPack, natureTranslation: string) {
         return {
             infos: {
                 code: {
@@ -268,9 +277,19 @@ export class DispatchPacksPage extends PageComponent {
     private validate(): void {
         this.navService.push(DispatchValidatePageRoutingModule.PATH, {
             dispatchId: this.dispatch.id,
+            dispatchPacks: this.dispatchPacks,
             afterValidate: () => {
                 this.navService.pop();
             }
         });
+    }
+
+    private confirmPack({id: packIdToConfirm, natureId, quantity}: DispatchPack): void {
+        const packIndexToConfirm = this.dispatchPacks.findIndex(({id}) => (id === packIdToConfirm));
+        if (packIndexToConfirm > -1) {
+            this.dispatchPacks[packIndexToConfirm].natureId = Number(natureId);
+            this.dispatchPacks[packIndexToConfirm].quantity = Number(quantity);
+            this.refreshListTreatedConfig();
+        }
     }
 }

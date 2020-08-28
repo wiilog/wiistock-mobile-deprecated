@@ -237,9 +237,18 @@ export class LocalDataManagerService {
             },
             dispatch: {
                 service: ApiService.PATCH_DISPATCH,
-                createApiParams: () => this.sqliteService.findBy('dispatch', ['treatedStatusId IS NOT NULL']).pipe(map((dispatches) => ({
+                createApiParams: () => this.sqliteService.findBy('dispatch', ['treatedStatusId IS NOT NULL']).pipe(
+                    flatMap((dispatches) => zip(
+                        of(dispatches),
+                        dispatches.length > 0
+                            ? this.sqliteService.findBy('dispatch_pack', [`dispatchId IN (${dispatches.map(({id}) => id).join(',')})`])
+                            : of([])
+                    )),
+
+                    map(([dispatches, dispatchPacks]) => ({
                     paramName: 'dispatches',
-                    dispatches: dispatches.map(({id, treatedStatusId}) => ({id, treatedStatusId}))
+                    dispatches: dispatches.map(({id, treatedStatusId}) => ({id, treatedStatusId})),
+                    dispatchPacks: dispatchPacks.map(({id, natureId, quantity, dispatchId}) => ({id, natureId, quantity, dispatchId}))
                 }))),
                 deleteSucceed: () => this.sqliteService.deleteBy('dispatch', [`treatedStatusId IS NOT NULL`])
             }

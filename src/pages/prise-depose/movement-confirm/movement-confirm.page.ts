@@ -15,6 +15,7 @@ import {FormPanelInputComponent} from '@app/common/components/panel/form-panel/f
 import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 import {FormPanelSigningComponent} from '@app/common/components/panel/form-panel/form-panel-signing/form-panel-signing.component';
 import {FormPanelCameraComponent} from '@app/common/components/panel/form-panel/form-panel-camera/form-panel-camera.component';
+import {Nature} from '@entities/nature';
 
 
 @Component({
@@ -63,90 +64,89 @@ export class MovementConfirmPage extends PageComponent {
        this.sqliteService.findAll('nature').subscribe((natures) => {
            const needsToShowNatures = natures.filter(nature => nature.hide !== 1).length > 0;
            const selectedNature = needsToShowNatures && natureId
-               ? natures.find((nature) => ((Number.isInteger(nature.id)
-                   ? nature.id.toString()
-                   : nature.id)  === natureId.toString()))
+               ? natures.find(({id}) => ((Number(id)) === Number(natureId)))
                : null;
            this.savedNatureId = selectedNature ? selectedNature.id : null;
-            this.sqliteService
-                .findBy('free_field', [`type = '${FreeFieldType.TRACKING}'`])
-                .subscribe((freeFields: Array<FreeField>) => {
-                    this.bodyConfig = [];
-                    if (selectedNature) {
-                        this.bodyConfig.push({
-                            item: FormPanelInputComponent,
-                            config: {
-                                label: natureTranslationLabel,
-                                name: 'natureId',
-                                value: selectedNature.label,
-                                inputConfig: {
-                                    type: 'text',
-                                    disabled: true
-                                }
-                            }
-                        });
-                    } else if (needsToShowNatures) {
-                        this.bodyConfig.push({
-                            item: FormPanelSelectComponent,
-                            config: {
-                                label: natureTranslationLabel,
-                                name: 'natureId',
-                                value: natureId,
-                                inputConfig: {
-                                    required: false,
-                                    searchType: SelectItemTypeEnum.TRACKING_NATURES,
-                                    requestParams: ['hide <> 1']
-                                }
-                            }
-                        });
-                    }
-                    this.bodyConfig = this.bodyConfig.concat([
-                        {
-                            item: FormPanelInputComponent,
-                            config: {
-                                label: 'Commentaire',
-                                name: 'comment',
-                                value: comment,
-                                inputConfig: {
-                                    type: 'text',
-                                    maxLength: '255'
-                                },
-                                errors: {
-                                    required: 'Votre commentaire est requis',
-                                    maxlength: 'Votre commentaire est trop long'
-                                }
-                            }
-                        },
-                        {
-                            item: FormPanelSigningComponent,
-                            config: {
-                                label: 'Signature',
-                                name: 'signature',
-                                value: signature,
-                                inputConfig: {}
-                            }
-                        },
-                        {
-                            item: FormPanelCameraComponent,
-                            config: {
-                                label: 'Photo',
-                                name: 'photo',
-                                value: photo,
-                                inputConfig: {}
-                            }
-                        },
-                        ...freeFields
-                            .map(({id, ...freeField}) => (
-                                this.formPanelService.createFromFreeField(
-                                    {id, ...freeField},
-                                    freeFieldsValues[id],
-                                    'freeFields'
-                                )
-                            ))
-                            .filter(Boolean)
-                    ]);
-                });
-        })
+           this.sqliteService
+               .findBy('free_field', [`type = '${FreeFieldType.TRACKING}'`])
+               .subscribe((freeFields: Array<FreeField>) => {
+                   this.bodyConfig = [];
+                   if (selectedNature) {
+                       this.bodyConfig.push({
+                           item: FormPanelInputComponent,
+                           config: {
+                               label: natureTranslationLabel,
+                               name: 'natureId',
+                               value: selectedNature.label,
+                               inputConfig: {
+                                   type: 'text',
+                                   disabled: true
+                               }
+                           }
+                       });
+                   }
+                   else if (needsToShowNatures) {
+                       this.bodyConfig.push({
+                           item: FormPanelSelectComponent,
+                           config: {
+                               label: natureTranslationLabel,
+                               name: 'natureId',
+                               value: natureId,
+                               inputConfig: {
+                                   required: false,
+                                   searchType: SelectItemTypeEnum.TRACKING_NATURES,
+                                   filterItem: (nature: Nature) => (!nature.hide)
+                               }
+                           }
+                       });
+                   }
+                   this.bodyConfig = this.bodyConfig.concat([
+                       {
+                           item: FormPanelInputComponent,
+                           config: {
+                               label: 'Commentaire',
+                               name: 'comment',
+                               value: comment,
+                               inputConfig: {
+                                   type: 'text',
+                                   maxLength: '255'
+                               },
+                               errors: {
+                                   required: 'Votre commentaire est requis',
+                                   maxlength: 'Votre commentaire est trop long'
+                               }
+                           }
+                       },
+                       {
+                           item: FormPanelSigningComponent,
+                           config: {
+                               label: 'Signature',
+                               name: 'signature',
+                               value: signature,
+                               inputConfig: {}
+                           }
+                       },
+                       {
+                           item: FormPanelCameraComponent,
+                           config: {
+                               label: 'Photo',
+                               name: 'photo',
+                               value: photo,
+                               inputConfig: {}
+                           }
+                       },
+                       ...freeFields
+                           .map(({id, ...freeField}) => (
+                               this.formPanelService.createFromFreeField(
+                                   {id, ...freeField},
+                                   freeFieldsValues[id],
+                                   'freeFields'
+                               )
+                           ))
+                           .filter(Boolean)
+                   ]);
+               });
+       });
     }
 
     public onFormSubmit(): void {

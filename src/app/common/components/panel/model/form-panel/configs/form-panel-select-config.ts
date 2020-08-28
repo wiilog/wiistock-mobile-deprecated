@@ -6,5 +6,6 @@ export interface FormPanelSelectConfig {
     searchType?: SelectItemTypeEnum;
     requestParams?: Array<string>;
     elements?: Array<{id: number; label: string;}>;
-    isMultiple?: boolean
+    isMultiple?: boolean;
+    filterItem?: (item: any) => boolean;
 }

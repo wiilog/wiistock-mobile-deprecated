@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {Subscription} from 'rxjs';
+import {Subscription, zip} from 'rxjs';
 import {NavService} from '@app/common/services/nav.service';
 import {PageComponent} from '@pages/page.component';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
@@ -16,6 +16,7 @@ import {Status} from '@entities/status';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
+import {DispatchPack} from '@entities/dispatch-pack';
 
 enum Page {
     LOCATION,
@@ -71,6 +72,7 @@ export class DispatchValidatePage extends PageComponent {
     private selectedLocation: Emplacement;
     private selectedStatus: Status;
     private dispatch: Dispatch;
+    private dispatchPacks: Array<DispatchPack>;
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
@@ -86,6 +88,7 @@ export class DispatchValidatePage extends PageComponent {
         this.loading = true;
         this.unsubscribeLoading();
         const dispatchId = this.currentNavParams.get('dispatchId');
+        this.dispatchPacks = this.currentNavParams.get('dispatchPacks');
         this.afterValidate = this.currentNavParams.get('afterValidate');
 
         this.loadingSubscription = this.loadingService.presentLoading()
@@ -198,7 +201,10 @@ export class DispatchValidatePage extends PageComponent {
                         tap((loader) => {
                             this.loadingElement = loader;
                         }),
-                        flatMap(() => this.sqliteService.update('dispatch', {treatedStatusId: this.selectedStatus.id}, [`id = ${this.dispatch.id}`])),
+                        flatMap(() => zip(
+                            this.sqliteService.update('dispatch', {treatedStatusId: this.selectedStatus.id}, [`id = ${this.dispatch.id}`]),
+                            ...((this.dispatchPacks || []).map(({id, natureId, quantity}) => this.sqliteService.update('dispatch_pack', {natureId, quantity}, [`id = ${id}`])))
+                        )),
                         flatMap(() => this.localDataManagerService.sendFinishedProcess('dispatch')),
                         flatMap(() => this.navService.pop())
                     )

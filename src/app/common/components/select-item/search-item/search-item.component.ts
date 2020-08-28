@@ -30,6 +30,9 @@ export class SearchItemComponent implements OnInit, OnDestroy {
     @Input()
     public isMultiple?: boolean = false;
 
+    @Input()
+    public filterItem?: (item: any) => boolean;
+
     @Output()
     public itemChange: EventEmitter<any>;
 
@@ -248,10 +251,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
 
     public findItem(search: string|number, searchAttribute: string = this.config[this.type].label): any {
         return this.dbItems
-            ? this.dbItems.find((element) => (
-                (Number.isInteger(element[searchAttribute])
-                    ? element[searchAttribute].toString()
-                    : element[searchAttribute])  === search))
+            ? this.dbItems.find((element) => (String(element[searchAttribute]) === String(search)))
             : undefined;
     }
 
@@ -289,8 +289,17 @@ export class SearchItemComponent implements OnInit, OnDestroy {
     }
 
     private itemFiltered(search: string): Array<any> {
-        return search
-            ? this.dbItems.filter((location) => location.label.toLowerCase().includes(search.toLowerCase()))
+        return search || this.filterItem
+            ? this.dbItems.filter((item) => (
+                (
+                    !search
+                    || (item.label || '').toLowerCase().includes(search.toLowerCase())
+                )
+                && (
+                    !this.filterItem
+                    || this.filterItem(item)
+                )
+            ))
             : this.dbItems;
     }
 }

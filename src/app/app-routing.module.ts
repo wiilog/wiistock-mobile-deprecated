@@ -39,6 +39,7 @@ import {TrackingMenuPageRoutingModule} from '@pages/tracking/tracking-menu/track
 import {DispatchMenuPageRoutingModule} from '@pages/tracking/dispatch/dispatch-menu/dispatch-menu-routing.module';
 import {DispatchPacksPageRoutingModule} from '@pages/tracking/dispatch/dispatch-packs/dispatch-packs-routing.module';
 import {DispatchValidatePageRoutingModule} from '@pages/tracking/dispatch/dispatch-validate/dispatch-validate-routing.module';
+import {DispatchPackConfirmPageRoutingModule} from '@pages/tracking/dispatch/dispatch-pack-confirm/dispatch-pack-confirm-routing.module';
 
 
 const routes: Routes = [
@@ -76,6 +77,11 @@ const routes: Routes = [
         path: DispatchValidatePageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/tracking/dispatch/dispatch-validate/dispatch-validate.module').then(m => m.DispatchValidatePageModule)
+    },
+    {
+        path: DispatchPackConfirmPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/tracking/dispatch/dispatch-pack-confirm/dispatch-pack-confirm.module').then(m => m.DispatchPackConfirmPageModule)
     },
     {
         path: PriseDeposeMenuPageRoutingModule.PATH,

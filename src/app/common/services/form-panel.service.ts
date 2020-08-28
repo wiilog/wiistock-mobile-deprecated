@@ -21,7 +21,7 @@ export class FormPanelService {
                 required: `Le champ ${freeField.label} est requis`
             }
         };
-        console.log(freeField.label, value);
+
         return (
             freeField.typing === FreeFieldTyping.BOOL ? {
                 item: FormPanelToggleComponent,
