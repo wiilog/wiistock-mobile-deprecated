@@ -17,7 +17,7 @@ import {AlertController} from '@ionic/angular';
 import {NavService} from '@app/common/services/nav.service';
 import {flatMap, map, tap} from 'rxjs/operators';
 import * as moment from 'moment';
-import {ConfirmPageRoutingModule} from '@pages/prise-depose/movement-confirm/movement-confirm-routing.module';
+import {MovementConfirmPageRoutingModule} from '@pages/prise-depose/movement-confirm/movement-confirm-routing.module';
 import {PageComponent} from '@pages/page.component';
 import {Nature} from '@entities/nature';
 import {Translation} from "@entities/translation";
@@ -287,7 +287,7 @@ export class DeposePage extends PageComponent {
                         'nature',
                         this.colisPrise[pickingIndex].nature_id)
                 ).subscribe(([nature_location, nature]) => {
-                    if ((nature_location.length > 0 && nature_location.some(nature_loc => nature_loc.nature_id === this.colisPrise[pickingIndex].nature_id))
+                    if ((nature_location.length > 0 && nature_location.some((nature_loc) => (nature_loc.nature_id === this.colisPrise[pickingIndex].nature_id)))
                         || nature_location.length === 0) {
                         let quantity = this.colisPrise[pickingIndex].quantity;
                         this.prisesToFinish.push(this.colisPrise[pickingIndex].id);
@@ -340,11 +340,14 @@ export class DeposePage extends PageComponent {
     }
 
     private updatePicking(barCode: string,
-                          {comment, signature, photo, natureId, freeFields}: {comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string}): void {
+                          {quantity, comment, signature, photo, natureId, freeFields}: {quantity: number; comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string}): void {
         const dropIndexes = this.findDropIndexes(barCode);
 
         if (dropIndexes.length > 0) {
             for(const dropIndex of dropIndexes) {
+                if (quantity > 0) {
+                    this.colisDepose[dropIndex].quantity = quantity;
+                }
                 this.colisDepose[dropIndex].comment = comment;
                 this.colisDepose[dropIndex].signature = signature;
                 this.colisDepose[dropIndex].photo = photo;
@@ -390,11 +393,13 @@ export class DeposePage extends PageComponent {
                         // we get first
                         const [dropIndex] = this.findDropIndexes(barCode);
                         if (dropIndex !== undefined) {
-                            const {comment, signature, photo, nature_id: natureId, freeFields} = this.colisDepose[dropIndex];
-                            this.navService.push(ConfirmPageRoutingModule.PATH, {
+                            const {quantity, comment, signature, photo, nature_id: natureId, freeFields} = this.colisDepose[dropIndex];
+                            this.navService.push(MovementConfirmPageRoutingModule.PATH, {
+                                fromStock: this.fromStock,
                                 location: this.emplacement,
                                 barCode,
                                 values: {
+                                    quantity,
                                     comment,
                                     signature,
                                     natureId,
