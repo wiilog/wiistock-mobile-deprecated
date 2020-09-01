@@ -22,7 +22,7 @@ import {NavService} from '@app/common/services/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {Nature} from '@entities/nature';
-import {ConfirmPageRoutingModule} from "../movement-confirm/movement-confirm-routing.module";
+import {MovementConfirmPageRoutingModule} from "../movement-confirm/movement-confirm-routing.module";
 import {Translation} from "@entities/translation";
 
 
@@ -221,7 +221,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     public testIfBarcodeEquals(barCode: string, isManualAdd: boolean = false): void {
         if (!this.barcodeCheckLoading) {
             if (!this.fromStock) {
-                this.processTackingBarCode(barCode, isManualAdd);
+                this.processTackingBarCode(barCode, isManualAdd, 1);
             }
             else if (this.network.type !== 'none') {
                 this.barcodeCheckLoading = true;
@@ -270,7 +270,7 @@ export class PrisePage extends PageComponent implements CanLeave {
         return this.currentPacksOnLocation && this.currentPacksOnLocation.filter(({hidden}) => !hidden).length > 0;
     }
 
-    private saveTrackingMovement(barCode: string, quantity: boolean|number, natureId?: number): void {
+    private saveTrackingMovement(barCode: string, quantity: number, natureId?: number): void {
         this.colisPrise.push({
             ref_article: barCode,
             type: PrisePage.MOUVEMENT_TRACA_PRISE,
@@ -279,7 +279,7 @@ export class PrisePage extends PageComponent implements CanLeave {
             finished: 0,
             nature_id: natureId,
             fromStock: Number(this.fromStock),
-            ...(typeof quantity === 'number' ? {quantity} : {}),
+            quantity,
             date: moment().format()
         });
         this.setPackOnLocationHidden(barCode, true);
@@ -304,11 +304,13 @@ export class PrisePage extends PageComponent implements CanLeave {
                         // we get first
                         const [dropIndex] = this.findDropIndexes(barCode);
                         if (dropIndex !== undefined) {
-                            const {comment, signature, photo, nature_id: natureId, freeFields} = this.colisPrise[dropIndex];
-                            this.navService.push(ConfirmPageRoutingModule.PATH, {
+                            const {quantity, comment, signature, photo, nature_id: natureId, freeFields} = this.colisPrise[dropIndex];
+                            this.navService.push(MovementConfirmPageRoutingModule.PATH, {
+                                fromStock: this.fromStock,
                                 location: this.emplacement,
                                 barCode,
                                 values: {
+                                    quantity,
                                     comment,
                                     signature,
                                     natureId,
@@ -362,10 +364,13 @@ export class PrisePage extends PageComponent implements CanLeave {
     }
 
     private updatePicking(barCode: string,
-                          {comment, signature, photo, natureId, freeFields}: {comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string}): void {
+                          {quantity, comment, signature, photo, natureId, freeFields}: {quantity: number; comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string}): void {
         const dropIndexes = this.findDropIndexes(barCode);
         if (dropIndexes.length > 0) {
             for(const dropIndex of dropIndexes) {
+                if (quantity > 0) {
+                    this.colisPrise[dropIndex].quantity = quantity;
+                }
                 this.colisPrise[dropIndex].comment = comment;
                 this.colisPrise[dropIndex].signature = signature;
                 this.colisPrise[dropIndex].photo = photo;
@@ -377,7 +382,7 @@ export class PrisePage extends PageComponent implements CanLeave {
         this.footerScannerComponent.fireZebraScan();
     }
 
-    private checkArticleOnLocation(barCode: string): Observable<number|boolean> {
+    private checkArticleOnLocation(barCode: string): Observable<number> {
         return this.apiService
             .requestApi('get', ApiService.GET_ARTICLES, {
                 params: {
@@ -408,11 +413,14 @@ export class PrisePage extends PageComponent implements CanLeave {
                     }
                 }),
                 map((res) => (
-                    res
-                    && res.success
-                    && res.article
-                    && res.article.quantity
-                    && res.article.can_transfer
+                    (
+                        res
+                        && res.success
+                        && res.article
+                        && res.article.can_transfer
+                        && res.article.quantity
+                    )
+                    || -1
                 )),
             );
     }
@@ -438,9 +446,9 @@ export class PrisePage extends PageComponent implements CanLeave {
         );
     }
 
-    private processTackingBarCode(barCode: string, isManualAdd: boolean, quantity: boolean|number = true) {
+    private processTackingBarCode(barCode: string, isManualAdd: boolean, quantity: number) {
         this.barcodeCheckLoading = false;
-        if (quantity) {
+        if (quantity > 0) {
             if (this.colisPrise &&
                 (
                     this.colisPrise.some((colis) => (colis.ref_article === barCode)) ||

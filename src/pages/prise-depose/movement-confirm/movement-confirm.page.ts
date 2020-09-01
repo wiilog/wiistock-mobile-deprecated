@@ -31,7 +31,7 @@ export class MovementConfirmPage extends PageComponent {
     public bodyConfig: Array<FormPanelParam>;
     private savedNatureId: string;
     private location: Emplacement;
-    private validate: (values: {comment: string; signature: string; photo: string; natureId: number, freeFields: string}) => void;
+    private validate: (values: {quantity: string; comment: string; signature: string; photo: string; natureId: number, freeFields: string}) => void;
 
     public constructor(private activatedRoute: ActivatedRoute,
                        private toastService: ToastService,
@@ -49,7 +49,8 @@ export class MovementConfirmPage extends PageComponent {
         const barCode = this.currentNavParams.get('barCode');
         const movementType = this.currentNavParams.get('movementType');
         const natureTranslationLabel = this.currentNavParams.get('natureTranslationLabel');
-        const {comment, signature, photo, natureId, freeFields: freeFieldsValuesStr} = this.currentNavParams.get('values');
+        const fromStock = this.currentNavParams.get('fromStock');
+        const {quantity, comment, signature, photo, natureId, freeFields: freeFieldsValuesStr} = this.currentNavParams.get('values');
         const freeFieldsValues = freeFieldsValuesStr ? JSON.parse(freeFieldsValuesStr) : {};
 
         this.headerConfig = {
@@ -100,6 +101,26 @@ export class MovementConfirmPage extends PageComponent {
                            }
                        });
                    }
+
+                   if (!fromStock) {
+                       this.bodyConfig.push({
+                           item: FormPanelInputComponent,
+                           config: {
+                               label: 'Quantité',
+                               name: 'quantity',
+                               value: quantity,
+                               inputConfig: {
+                                   type: 'number',
+                                   min: 1
+                               },
+                               errors: {
+                                   required: 'La quantité est requise',
+                                   min: 'La quantité doit être supérieure à 1'
+                               }
+                           }
+                       });
+                   }
+
                    this.bodyConfig = this.bodyConfig.concat([
                        {
                            item: FormPanelInputComponent,
@@ -155,7 +176,7 @@ export class MovementConfirmPage extends PageComponent {
             this.toastService.presentToast(formError);
         }
         else {
-            let {comment, signature, photo, natureId, freeFields} = this.formPanelComponent.values;
+            let {quantity, comment, signature, photo, natureId, freeFields} = this.formPanelComponent.values;
             natureId = this.savedNatureId ? this.savedNatureId : natureId
             if (freeFields) {
                 Object.keys(freeFields).forEach((freeFieldId) => {
@@ -171,6 +192,7 @@ export class MovementConfirmPage extends PageComponent {
                 });
             }
             this.validate({
+                quantity,
                 comment,
                 signature,
                 photo,
