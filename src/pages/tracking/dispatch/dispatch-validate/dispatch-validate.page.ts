@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {Subscription, zip} from 'rxjs';
+import {of, Subscription, zip} from 'rxjs';
 import {NavService} from '@app/common/services/nav.service';
 import {PageComponent} from '@pages/page.component';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
@@ -17,6 +17,7 @@ import {SelectItemComponent} from '@app/common/components/select-item/select-ite
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {DispatchPack} from '@entities/dispatch-pack';
+import {Network} from "@ionic-native/network/ngx";
 
 enum Page {
     LOCATION,
@@ -77,8 +78,9 @@ export class DispatchValidatePage extends PageComponent {
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
                        private mainHeaderService: MainHeaderService,
-                       private localDataManagerService: LocalDataManagerService,
+                       private localDataManager: LocalDataManagerService,
                        private toastService: ToastService,
+                       private network: Network,
                        navService: NavService) {
         super(navService);
     }
@@ -205,8 +207,17 @@ export class DispatchValidatePage extends PageComponent {
                             this.sqliteService.update('dispatch', {treatedStatusId: this.selectedStatus.id}, [`id = ${this.dispatch.id}`]),
                             ...((this.dispatchPacks || []).map(({id, natureId, quantity}) => this.sqliteService.update('dispatch_pack', {natureId, quantity}, [`id = ${id}`])))
                         )),
-                        flatMap(() => this.localDataManagerService.sendFinishedProcess('dispatch')),
-                        flatMap(() => this.navService.pop())
+                        flatMap((): any => (
+                            this.network.type !== 'none'
+                                ? this.localDataManager.sendFinishedProcess('dispatch')
+                                : of({offline: true})
+                        )),
+                        flatMap(({offline, success}) => {
+                            if (!offline) {
+                                this.toastService.presentToast(success ? "L'acheminement a bien été traité." : "L'acheminement n'a pas pu être traité.");
+                            }
+                            return this.navService.pop();
+                        })
                     )
                     .subscribe(() => {
                         this.afterValidate();

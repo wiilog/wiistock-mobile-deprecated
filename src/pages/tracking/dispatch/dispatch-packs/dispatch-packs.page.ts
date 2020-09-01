@@ -166,8 +166,8 @@ export class DispatchPacksPage extends PageComponent {
 
     private refreshHeaderPanelConfigFromDispatch(): void {
         this.dispatchHeaderConfig = {
-            title: `Demande ${this.dispatch.number}`,
-            subtitle: `Lieu départ ${this.dispatch.locationFromLabel}`,
+            title: `Demande N°${this.dispatch.number}`,
+            subtitle: `Lieu départ : ${this.dispatch.locationFromLabel}`,
             info: `Type ${this.dispatch.typeLabel}`,
             transparent: true,
             leftIcon: {
