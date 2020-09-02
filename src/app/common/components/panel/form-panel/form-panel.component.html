@@ -1,13 +1,14 @@
 <div class="wrapper"
      scroll-y="true">
     <wii-panel-header *ngIf="header"
+                      class="form-header"
                       [leftIcon]="header.leftIcon"
                       [title]="header.title"
                       [subtitle]="header.subtitle"
                       [info]="header.info"
                       [rightIcons]="header.rightIcon">
     </wii-panel-header>
-    <div>
+    <div class="list-wrapper">
         <ng-template #formElements
                      *ngFor="let param of body"
                      [wiiFormPanel]
