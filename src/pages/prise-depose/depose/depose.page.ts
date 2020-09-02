@@ -22,6 +22,7 @@ import {PageComponent} from '@pages/page.component';
 import {Nature} from '@entities/nature';
 import {Translation} from "@entities/translation";
 import {AlertManagerService} from "@app/common/services/alert-manager.service";
+import {AllowedNatureLocation} from '@entities/allowed-nature-location';
 
 @Component({
     selector: 'wii-depose',
@@ -67,6 +68,7 @@ export class DeposePage extends PageComponent {
     private operator: string;
 
     private natureTranslation: Array<Translation>;
+    private allowedNatureIdsForLocation: Array<number>;
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
 
@@ -102,24 +104,19 @@ export class DeposePage extends PageComponent {
                     ]
                 ),
                 this.storageService.getOperator(),
-                !this.fromStock ? this.sqliteService.findAll('nature') : of(undefined),
-                this.sqliteService.findBy(
-                    'translations',
-                    [
-                        `menu LIKE 'natures'`,
-                    ]
-                )
+                !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
+                !this.fromStock ? this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + this.emplacement.id]) : of([]),
+                this.sqliteService.findBy('translations', [ `menu LIKE 'natures'`])
             )
-                .subscribe(([colisPrise, operator, natures, natureTranslation]) => {
+                .subscribe(([colisPrise, operator, natures, allowedNatureLocationArray, natureTranslation]) => {
                     this.colisPrise = colisPrise;
                     this.operator = operator;
                     this.natureTranslation = natureTranslation;
-                    if (natures) {
-                        this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
-                            [id]: {label, color},
-                            ...acc
-                        }), {})
-                    }
+                    this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
+                        [id]: {label, color},
+                        ...acc
+                    }), {});
+                    this.allowedNatureIdsForLocation = allowedNatureLocationArray.map((acc, {nature_id}) => nature_id);
 
                     this.footerScannerComponent.fireZebraScan();
 
@@ -278,62 +275,69 @@ export class DeposePage extends PageComponent {
 
     private saveMouvementTraca(pickingIndexes: Array<number>): void {
         if (pickingIndexes.length > 0) {
-            for (const pickingIndex of pickingIndexes) {
-                zip(
-                    this.sqliteService.findBy(
-                        'allowed_nature_location',
-                        ['location_id = ' + this.emplacement.id]),
-                    this.sqliteService.findOneById(
-                        'nature',
-                        this.colisPrise[pickingIndex].nature_id)
-                ).subscribe(([nature_location, nature]) => {
-                    if ((nature_location.length > 0 && nature_location.some(nature_loc => nature_loc.nature_id === this.colisPrise[pickingIndex].nature_id))
-                        || nature_location.length === 0) {
-                        let quantity = this.colisPrise[pickingIndex].quantity;
-                        this.prisesToFinish.push(this.colisPrise[pickingIndex].id);
-                        this.colisPrise[pickingIndex].hidden = true;
+            const pickedNatures: Array<number> = pickingIndexes.reduce((acc: Array<number>, pickingIndex) => {
+                const natureId = this.colisPrise[pickingIndex].nature_id;
+                if (acc.indexOf(natureId) === -1) {
+                    acc.push(natureId);
+                }
+                return acc;
+            }, []);
 
-                        this.colisDepose.push({
-                            ref_article: this.colisPrise[pickingIndex].ref_article,
-                            nature_id: this.colisPrise[pickingIndex].nature_id,
-                            comment: this.colisPrise[pickingIndex].comment,
-                            signature: this.colisPrise[pickingIndex].signature,
-                            fromStock: Number(this.fromStock),
-                            quantity,
-                            type: DeposePage.MOUVEMENT_TRACA_DEPOSE,
-                            operateur: this.operator,
-                            photo: this.colisPrise[pickingIndex].photo,
-                            ref_emplacement: this.emplacement.label,
-                            date: moment().format(),
-                            freeFields: this.colisPrise[pickingIndex].freeFields
-                        });
-                    } else {
-                        const natureTranslation = this.natureTranslation.filter((translation) => translation.label === 'nature')[0];
-                        from(this.alertController
-                            .create({
-                                header: 'Erreur',
-                                cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
-                                message: 'Le colis '
-                                    + '<strong>' + this.colisPrise[pickingIndex].ref_article + '</strong>'
-                                    + ' de ' + (natureTranslation.translation || natureTranslation.label)
-                                    + ' ' + '<strong>' + (nature ? nature.label : 'non défini') + '</strong>'
-                                    + ' ne peut pas être déposé sur l\'emplacement '
-                                    + '<strong>' +this.emplacement.label + '</strong>.',
-                                buttons: [{
-                                    text: 'Confirmer',
-                                    cssClass: 'alert-danger'
-                                }]
-                            })
-                        ).subscribe((alert: HTMLIonAlertElement) => {
-                            let audio = new Audio('../../../assets/sounds/Error-sound.mp3');
-                            audio.load();
-                            audio.play();
-                            alert.present();
-                        })
-                    }
+            const allowedMovement = (
+                this.fromStock
+                || this.allowedNatureIdsForLocation.length === 0
+                || pickedNatures.every((pickedNatureId) => (this.allowedNatureIdsForLocation.some((nature_id) => (nature_id === pickedNatureId))))
+            );
+
+            if (allowedMovement) {
+                for (const pickingIndex of pickingIndexes) {
+                    let quantity = this.colisPrise[pickingIndex].quantity;
+                    this.prisesToFinish.push(this.colisPrise[pickingIndex].id);
+                    this.colisPrise[pickingIndex].hidden = true;
+
+                    this.colisDepose.push({
+                        ref_article: this.colisPrise[pickingIndex].ref_article,
+                        nature_id: this.colisPrise[pickingIndex].nature_id,
+                        comment: this.colisPrise[pickingIndex].comment,
+                        signature: this.colisPrise[pickingIndex].signature,
+                        fromStock: Number(this.fromStock),
+                        quantity,
+                        type: DeposePage.MOUVEMENT_TRACA_DEPOSE,
+                        operateur: this.operator,
+                        photo: this.colisPrise[pickingIndex].photo,
+                        ref_emplacement: this.emplacement.label,
+                        date: moment().format(),
+                        freeFields: this.colisPrise[pickingIndex].freeFields
+                    });
                     this.refreshPriseListComponent();
                     this.refreshDeposeListComponent();
                     this.footerScannerComponent.fireZebraScan();
+                }
+            }
+            else {
+                const natureLabel = 'nature';
+                const natureTranslation = this.natureTranslation.find((translation) => (translation.label === natureLabel));
+                const translatedNatureLabel = (natureTranslation ? (natureTranslation.translation || natureTranslation.label) : natureLabel);
+                const {ref_article, nature_id} = this.colisPrise[pickingIndexes[0]] || {};
+                const nature = this.natureIdsToConfig[nature_id];
+                const natureValue = (nature ? nature.label : 'non défini');
+                from(this.alertController
+                    .create({
+                        header: 'Erreur',
+                        cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
+                        message: `Le colis <strong>${ref_article}</strong>`
+                            + ` de ${translatedNatureLabel} <strong>${natureValue}</strong>`
+                            + ` ne peut pas être déposé sur l'emplacement <strong>${this.emplacement.label}</strong>.`,
+                        buttons: [{
+                            text: 'Confirmer',
+                            cssClass: 'alert-danger'
+                        }]
+                    })
+                ).subscribe((alert: HTMLIonAlertElement) => {
+                    let audio = new Audio('../../../assets/sounds/Error-sound.mp3');
+                    audio.load();
+                    audio.play();
+                    alert.present();
                 })
             }
         }
