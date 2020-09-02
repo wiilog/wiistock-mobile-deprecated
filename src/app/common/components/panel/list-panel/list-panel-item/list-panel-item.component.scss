@@ -33,9 +33,13 @@
 
         .list-element-icon {
             padding-left: .5rem;
+            display: flex;
             wii-icon {
                 height: 1.7rem;
                 width: 1.7rem;
+            }
+            ion-spinner * {
+                width: 25px;
             }
         }
     }

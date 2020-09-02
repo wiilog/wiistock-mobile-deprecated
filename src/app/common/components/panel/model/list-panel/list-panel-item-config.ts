@@ -8,6 +8,7 @@ export interface ListPanelItemConfig {
             value: string;
         };
     };
+    loading?: boolean;
     color?: string;
     longPressAction?: (infos: {[name: string]: {label: string; value: string;};}) => void;
     pressAction?: (infos: {[name: string]: {label: string; value: string;};}) => void;

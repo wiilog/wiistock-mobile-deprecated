@@ -115,7 +115,7 @@ export class TracaListFactoryService {
         }
     }
 
-    public createListConfig(articles: Array<MouvementTraca>,
+    public createListConfig(articles: Array<MouvementTraca & {loading?: boolean}>,
                             listType: number,
                             {location, objectLabel,  validate, uploadItem, confirmItem, removeItem, removeConfirmationMessage, natureIdsToConfig, natureTranslation}: {
                                 location?: Emplacement;
@@ -178,7 +178,7 @@ export class TracaListFactoryService {
                         : {}
                 )
             },
-            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id}) => {
+            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, loading}) => {
                 const natureConfig = (natureIdsToConfig && nature_id && natureIdsToConfig[nature_id]);
                 const infos = {
                     object: {
@@ -217,6 +217,7 @@ export class TracaListFactoryService {
                             : removeItem
                     ),
                     pressAction: confirmItem,
+                    loading,
                     ...(uploadItem
                         ? {
                             rightIcon: {
