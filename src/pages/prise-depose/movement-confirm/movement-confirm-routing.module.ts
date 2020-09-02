@@ -16,6 +16,6 @@ const routes: Routes = [
     imports: [RouterModule.forChild(routes)],
     exports: [RouterModule],
 })
-export class ConfirmPageRoutingModule {
+export class MovementConfirmPageRoutingModule {
     public static readonly PATH: string = 'movement-confirm';
 }

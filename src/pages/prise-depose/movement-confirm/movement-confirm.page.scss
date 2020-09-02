@@ -3,6 +3,10 @@
 .page-content {
     overflow: hidden;
 
+    wii-panel-header {
+        margin: $spacerMin;
+    }
+
     &,
     & > wii-form-panel {
         flex: 1;
