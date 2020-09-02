@@ -115,7 +115,7 @@ export class MovementConfirmPage extends PageComponent {
                                },
                                errors: {
                                    required: 'La quantité est requise',
-                                   min: 'La quantité doit être supérieur à 1'
+                                   min: 'La quantité doit être supérieure à 1'
                                }
                            }
                        });
