@@ -39,7 +39,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     public footerScannerComponent: BarcodeScannerComponent;
 
     public emplacement: Emplacement;
-    public colisPrise: Array<MouvementTraca>;
+    public colisPrise: Array<MouvementTraca&{loading?: boolean}>;
     public currentPacksOnLocation: Array<MouvementTraca&{hidden?: boolean}>;
     public colisPriseAlreadySaved: Array<MouvementTraca>;
 
@@ -99,13 +99,8 @@ export class PrisePage extends PageComponent implements CanLeave {
             (this.network.type !== 'none' && this.emplacement && !this.fromStock
                 ? this.apiService.requestApi('get', ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})
                 : of({trackingDrops: []})),
-            !this.fromStock ? this.sqliteService.findAll('nature') : of(undefined),
-            this.sqliteService.findBy(
-                'translations',
-                [
-                    `menu LIKE 'natures'`,
-                ]
-            )
+            !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
+            this.sqliteService.findBy('translations', [`menu LIKE 'natures'`])
         )
             .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures, natureTranslations]) => {
                 this.operator = operator;
@@ -275,19 +270,26 @@ export class PrisePage extends PageComponent implements CanLeave {
         return this.currentPacksOnLocation && this.currentPacksOnLocation.filter(({hidden}) => !hidden).length > 0;
     }
 
-    private saveTrackingMovement(barCode: string, quantity: boolean|number, natureId?: number): void {
+    private saveTrackingMovement(barCode: string, quantity: boolean|number, loading: boolean = false): void {
         this.colisPrise.push({
             ref_article: barCode,
             type: PrisePage.MOUVEMENT_TRACA_PRISE,
             operateur: this.operator,
             ref_emplacement: this.emplacement.label,
             finished: 0,
-            nature_id: natureId,
+            loading,
             fromStock: Number(this.fromStock),
             ...(typeof quantity === 'number' ? {quantity} : {}),
             date: moment().format()
         });
         this.setPackOnLocationHidden(barCode, true);
+        this.refreshListComponent();
+        this.changeDetectorRef.detectChanges();
+    }
+
+    private updateTrackingMovementNature(index: number, natureId?: number): void {
+        this.colisPrise[index].nature_id = natureId;
+        this.colisPrise[index].loading = false;
         this.refreshListComponent();
         this.changeDetectorRef.detectChanges();
         this.footerScannerComponent.fireZebraScan();
@@ -454,49 +456,37 @@ export class PrisePage extends PageComponent implements CanLeave {
                 this.toastService.presentToast('Cette prise a déjà été effectuée');
             }
             else {
-                this.footerScannerComponent.unsubscribeZebraScan();
                 if (isManualAdd || !this.fromStock) {
-                    let loader: HTMLIonLoadingElement;
+                    const currentIndex = this.colisPrise.length;
+                    this.saveTrackingMovement(barCode, quantity, (!this.fromStock && this.network.type !== 'none'));
 
-                    if (this.saveMovementSubscription) {
-                        this.saveMovementSubscription.unsubscribe();
-                    }
-
-                    this.saveMovementSubscription = (
-                        (!this.fromStock && this.network.type !== 'none')
-                            ? this.loadingService.presentLoading().pipe(
-                                tap((createdLoader) => { loader = createdLoader; }),
-                                flatMap(() => this.apiService.requestApi('get', ApiService.GET_PACK_NATURE, {pathParams: {code: barCode}}))
+                    if ((!this.fromStock && this.network.type !== 'none')) {
+                        if (this.saveMovementSubscription) {
+                            this.saveMovementSubscription.unsubscribe();
+                        }
+                        this.saveMovementSubscription = this.apiService
+                            .requestApi('get', ApiService.GET_PACK_NATURE, {pathParams: {code: barCode}})
+                            .pipe(
+                                flatMap(({nature}) => (
+                                    nature
+                                        ? this.sqliteService.importNaturesData({natures: [nature]}, false).pipe(map(() => nature))
+                                        : of(undefined)
+                                )),
+                                tap((nature) => {
+                                    if (nature) {
+                                        const {id, color, label} = nature;
+                                        this.natureIdsToConfig[id] = {label, color};
+                                    }
+                                })
                             )
-                            : of(undefined)
-                    )
-                        .pipe(
-                            flatMap(({nature}) => this.sqliteService.importNaturesData({natures: [nature]}, false).pipe(map(() => nature))),
-                            tap((nature) => {
-                                if (nature) {
-                                    const {id, color, label} = nature;
-                                    this.natureIdsToConfig[id] = {label, color};
-                                }
-                            })
-                        )
-                        .subscribe(
-                            ({id}) => {
-                                this.saveTrackingMovement(barCode, quantity, id);
-                                if (loader) {
-                                    loader.dismiss();
-                                }
-                            },
-                            () => {
-                                this.saveTrackingMovement(barCode, quantity);
-                                if (loader) {
-                                    loader.dismiss();
-                                }
-                            }
-                        );
-
-
+                            .subscribe(
+                                (nature) => this.updateTrackingMovementNature(currentIndex, nature && nature.id),
+                                () => this.updateTrackingMovementNature(currentIndex)
+                            );
+                    }
                 }
                 else {
+                    this.footerScannerComponent.unsubscribeZebraScan();
                     const quantitySuffix = (typeof quantity === 'number')
                         ? ` en quantité de ${quantity}`
                         : '';
@@ -514,6 +504,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                                     text: 'Confirmer',
                                     handler: () => {
                                         this.saveTrackingMovement(barCode, quantity);
+                                        this.footerScannerComponent.fireZebraScan();
                                     },
                                     cssClass: 'alert-success'
                                 }

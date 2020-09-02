@@ -11,6 +11,7 @@
 <wii-list-panel-item *ngFor="let object of body"
                      [infos]="object.infos"
                      [color]="object.color"
+                     [loading]="object.loading"
                      [longPressAction]="object.longPressAction"
                      [pressAction]="object.pressAction"
                      [rightIcon]="object.rightIcon"

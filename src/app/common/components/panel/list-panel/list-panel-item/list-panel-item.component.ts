@@ -23,6 +23,9 @@ export class ListPanelItemComponent {
     public color?: string;
 
     @Input()
+    public loading?: boolean;
+
+    @Input()
     public boldValues?: Array<string>;
 
     @Input()
@@ -52,7 +55,7 @@ export class ListPanelItemComponent {
     }
 
     public onPress(): void {
-        if (this.pressAction) {
+        if (!this.loading && this.pressAction) {
             this.pressAction(this.infos);
         }
     }

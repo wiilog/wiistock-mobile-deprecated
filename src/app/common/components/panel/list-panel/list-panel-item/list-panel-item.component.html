@@ -15,10 +15,14 @@
         </div>
     </div>
     <div class="list-element-icon"
-         *ngIf="rightIcon">
-        <wii-icon [name]="rightIcon.name"
+         *ngIf="loading || rightIcon">
+        <wii-icon *ngIf="!loading"
+                  [name]="rightIcon.name"
                   [color]="rightIcon.color"
                   (action)="rightIcon.action()">
         </wii-icon>
+        <ion-spinner *ngIf="loading"
+                     name="dots">
+        </ion-spinner>
     </div>
 </div>
