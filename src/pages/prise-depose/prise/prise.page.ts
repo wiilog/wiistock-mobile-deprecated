@@ -14,7 +14,7 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {TracaListFactoryService} from '@app/common/services/traca-list-factory.service';
 import {StorageService} from '@app/common/services/storage.service';
 import {AlertController} from '@ionic/angular';
-import {flatMap, map, tap} from 'rxjs/operators';
+import {filter, flatMap, map, tap} from 'rxjs/operators';
 import * as moment from 'moment';
 import {Network} from '@ionic-native/network/ngx';
 import {ActivatedRoute} from '@angular/router';
@@ -59,7 +59,6 @@ export class PrisePage extends PageComponent implements CanLeave {
 
     private barcodeCheckSubscription: Subscription;
     private saveSubscription: Subscription;
-    private saveMovementSubscription: Subscription;
 
     private finishAction: () => void;
     private operator: string;
@@ -67,6 +66,8 @@ export class PrisePage extends PageComponent implements CanLeave {
     private natureTranslation: Array<Translation>;
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
+
+    private isIonEnter: boolean;
 
     public constructor(private network: Network,
                        private apiService: ApiService,
@@ -122,6 +123,7 @@ export class PrisePage extends PageComponent implements CanLeave {
 
     public ionViewWillLeave(): void {
         this.barcodeCheckLoading = false;
+        this.isIonEnter = false;
         this.footerScannerComponent.unsubscribeZebraScan();
         if (this.barcodeCheckSubscription) {
             this.barcodeCheckSubscription.unsubscribe();
@@ -130,10 +132,6 @@ export class PrisePage extends PageComponent implements CanLeave {
         if (this.saveSubscription) {
             this.saveSubscription.unsubscribe();
             this.saveSubscription = undefined;
-        }
-        if (this.saveMovementSubscription) {
-            this.saveMovementSubscription.unsubscribe();
-            this.saveMovementSubscription = undefined;
         }
     }
 
@@ -360,6 +358,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     }
 
     private init(fromStart: boolean = true): void {
+        this.isIonEnter = true;
         this.loading = true;
         this.apiLoading = false;
         this.listTakingBody = [];
@@ -469,10 +468,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                     this.saveTrackingMovement(barCode, quantity, (!this.fromStock && this.network.type !== 'none'));
 
                     if ((!this.fromStock && this.network.type !== 'none')) {
-                        if (this.saveMovementSubscription) {
-                            this.saveMovementSubscription.unsubscribe();
-                        }
-                        this.saveMovementSubscription = this.apiService
+                        this.apiService
                             .requestApi('get', ApiService.GET_PACK_NATURE, {pathParams: {code: barCode}})
                             .pipe(
                                 flatMap(({nature}) => (
@@ -485,7 +481,8 @@ export class PrisePage extends PageComponent implements CanLeave {
                                         const {id, color, label} = nature;
                                         this.natureIdsToConfig[id] = {label, color};
                                     }
-                                })
+                                }),
+                                filter(() => this.isIonEnter)
                             )
                             .subscribe(
                                 (nature) => this.updateTrackingMovementNature(currentIndex, nature && nature.id),
