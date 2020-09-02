@@ -457,9 +457,10 @@ export class PrisePage extends PageComponent implements CanLeave {
             else {
                 if (isManualAdd || !this.fromStock) {
                     const currentIndex = this.colisPrise.length;
-                    this.saveTrackingMovement(barCode, quantity, (!this.fromStock && this.network.type !== 'none'));
+                    const needNatureChecks = (!this.fromStock && this.network.type !== 'none');
+                    this.saveTrackingMovement(barCode, quantity, needNatureChecks);
 
-                    if ((!this.fromStock && this.network.type !== 'none')) {
+                    if (needNatureChecks) {
                         this.apiService
                             .requestApi('get', ApiService.GET_PACK_NATURE, {pathParams: {code: barCode}})
                             .pipe(
