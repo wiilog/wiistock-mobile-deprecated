@@ -90,7 +90,7 @@ export class DispatchValidatePage extends PageComponent {
         this.loading = true;
         this.unsubscribeLoading();
         const dispatchId = this.currentNavParams.get('dispatchId');
-        this.dispatchPacks = this.currentNavParams.get('dispatchPacks');
+        this.dispatchPacks = this.currentNavParams.get('dispatchPacks') || [];
         this.afterValidate = this.currentNavParams.get('afterValidate');
 
         this.loadingSubscription = this.loadingService.presentLoading()
@@ -205,7 +205,7 @@ export class DispatchValidatePage extends PageComponent {
                         }),
                         flatMap(() => zip(
                             this.sqliteService.update('dispatch', {treatedStatusId: this.selectedStatus.id}, [`id = ${this.dispatch.id}`]),
-                            ...((this.dispatchPacks || []).map(({id, natureId, quantity}) => this.sqliteService.update('dispatch_pack', {natureId, quantity}, [`id = ${id}`])))
+                            ...(this.dispatchPacks.map(({id, natureId, quantity}) => this.sqliteService.update('dispatch_pack', {natureId, quantity}, [`id = ${id}`])))
                         )),
                         flatMap((): any => (
                             this.network.type !== 'none'

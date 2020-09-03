@@ -33,6 +33,7 @@ export class DispatchPackConfirmPage extends PageComponent {
     private confirmPack: (pack: DispatchPack) => void;
     private natureTranslationLabel: string;
     private pack: DispatchPack;
+    private dispatch: Dispatch;
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
@@ -52,7 +53,10 @@ export class DispatchPackConfirmPage extends PageComponent {
 
         this.headerConfig = {
             title: `Colis ${this.pack.code}`,
-            subtitle: `Demande ${dispatch.number}`,
+            subtitle: [
+                `Demande ${dispatch.number}`,
+                `Emplacement de dépose : ${dispatch.locationToLabel}`
+            ],
             leftIcon: {
                 color: CardListColorEnum.GREEN,
                 name: 'stock-transfer.svg'

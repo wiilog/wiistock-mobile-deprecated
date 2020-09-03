@@ -302,7 +302,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             code: 'VARCHAR(255)',
             natureId: 'INTEGER',
             quantity: 'INTEGER',
-            dispatchId: 'INTEGER'
+            dispatchId: 'INTEGER',
+            lastLocation: 'VARCHAR(255)'
         }
     },
     {

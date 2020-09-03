@@ -52,8 +52,8 @@ export class DispatchMenuPage extends PageComponent {
                     content: [
                         { label: 'Numéro', value: number || '' },
                         { label: 'Date d\'échéance', value: startDate && endDate ? `Du ${startDate} au ${endDate}` : '' },
-                        { label: 'Lieu départ', value: locationFromLabel || '' },
-                        { label: 'Lieu arrivée', value: locationToLabel || '' },
+                        { label: 'Emplacement prise', value: locationFromLabel || '' },
+                        { label: 'Emplacement dépose', value: locationToLabel || '' },
                         { label: 'Type', value: typeLabel || '' },
                         { label: 'Statut', value: statusLabel || '' }
                     ],

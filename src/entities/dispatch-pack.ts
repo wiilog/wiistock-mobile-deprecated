@@ -4,4 +4,5 @@ export interface DispatchPack {
     natureId: number;
     quantity: number;
     dispatchId: number;
+    lastLocation?: string;
 }

@@ -167,7 +167,7 @@ export class DispatchPacksPage extends PageComponent {
     private refreshHeaderPanelConfigFromDispatch(): void {
         this.dispatchHeaderConfig = {
             title: `Demande N°${this.dispatch.number}`,
-            subtitle: `Lieu départ : ${this.dispatch.locationFromLabel}`,
+            subtitle: `Emplacement prise : ${this.dispatch.locationFromLabel}`,
             info: `Type ${this.dispatch.typeLabel}`,
             transparent: true,
             leftIcon: {
@@ -242,7 +242,7 @@ export class DispatchPacksPage extends PageComponent {
         };
     }
 
-    private packToListItemConfig({code, quantity, natureId}: DispatchPack, natureTranslation: string) {
+    private packToListItemConfig({code, quantity, natureId, lastLocation}: DispatchPack, natureTranslation: string) {
         return {
             infos: {
                 code: {
@@ -256,6 +256,10 @@ export class DispatchPacksPage extends PageComponent {
                 nature: {
                     label: natureTranslation,
                     value: this.natureIdsToLabels[Number(natureId)]
+                },
+                lastLocation: {
+                    label: 'Dernier emplacement',
+                    value: lastLocation
                 }
             },
             color: this.natureIdsToColors[Number(natureId)],
