@@ -906,13 +906,22 @@ export class SqliteService {
      * find all elements in the given table which correspond to the given where clauses.
      * @param {string} table name of the table to do the search
      * @param {string[]} where boolean clauses to apply with AND separator
+     * @param {Object.<string,'ASC'|'DESC'>} order
      */
-    public findBy(table: string, where: Array<string> = []): Observable<any> {
+    public findBy(table: string, where: Array<string> = [], order: {[column: string]: 'ASC'|'DESC'} = {}): Observable<any> {
         const sqlWhereClauses = (where && where.length > 0)
             ? ` WHERE ${SqliteService.JoinWhereClauses(where)}`
             : undefined;
 
-        const sqlQuery = 'SELECT * FROM ' + table + (sqlWhereClauses ? sqlWhereClauses : '');
+        const orderByArray = Object
+            .keys(order || {})
+            .map((column: string) => `${column} ${order[column]}`)
+
+        const sqlOrderByClauses = (orderByArray && orderByArray.length > 0)
+            ? ` ORDER BY ${orderByArray.join(',')}`
+            : undefined;
+
+        const sqlQuery = 'SELECT * FROM ' + table + (sqlWhereClauses || '') + (sqlOrderByClauses || '');
         return this.executeQuery(sqlQuery).pipe(
             map((data) => SqliteService.MultiSelectQueryMapper<any>(data)),
             take(1)
