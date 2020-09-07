@@ -146,7 +146,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                 this.apiLoading = true;
                 let loader: HTMLIonLoadingElement;
                 this.saveSubscription = this.localDataManager
-                    .saveMouvementsTraca(this.colisPrise)
+                    .saveMouvementsTraca(this.colisPrise.map(({loading, ...tracking}) => tracking))
                     .pipe(
                         flatMap(() => {
                             const online = (this.network.type !== 'none');
