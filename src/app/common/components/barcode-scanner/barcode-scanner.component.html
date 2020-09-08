@@ -13,7 +13,7 @@
     </ion-item>
 </div>
 <div class="tools"
-     *ngIf="mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE">
+     *ngIf="mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE || mode === ONLY_SEARCH_MODE">
     <wii-icon name="search.svg"
               color="black"
               class="tools-icon"
@@ -26,7 +26,8 @@
               (action)="onPenClick()">
     </wii-icon>
 </div>
-<ion-button class="scanner-button larger"
+<ion-button *ngIf="mode === ONLY_SCAN_MODE || mode === WITH_MANUAL_MODE || mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE"
+            class="scanner-button larger"
             size="large"
             expand="full"
             color="primary"

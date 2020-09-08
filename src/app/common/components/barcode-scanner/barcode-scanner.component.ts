@@ -13,8 +13,10 @@ import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/bar
 export class BarcodeScannerComponent implements OnInit, OnDestroy {
 
     public readonly WITH_MANUAL_MODE = BarcodeScannerModeEnum.WITH_MANUAL;
+    public readonly ONLY_SCAN_MODE = BarcodeScannerModeEnum.ONLY_SCAN;
     public readonly TOOL_SEARCH_MODE = BarcodeScannerModeEnum.TOOL_SEARCH;
     public readonly TOOLS_FULL_MODE = BarcodeScannerModeEnum.TOOLS_FULL;
+    public readonly ONLY_SEARCH_MODE = BarcodeScannerModeEnum.ONLY_SEARCH;
 
     public input: string;
 
@@ -71,9 +73,13 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
 
     public fireZebraScan(): void {
         this.unsubscribeZebraScan();
-        this.zebraScanSubscription = this.barcodeScannerManager.zebraScan$.subscribe((barcode) => {
-            this.triggerAdd(barcode, false);
-        });
+        if (this.mode !== BarcodeScannerModeEnum.ONLY_SEARCH) {
+            this.zebraScanSubscription = this.barcodeScannerManager
+                .zebraScan$
+                .subscribe((barcode) => {
+                    this.triggerAdd(barcode, false);
+                });
+        }
     }
 
     public unsubscribeZebraScan(): void {

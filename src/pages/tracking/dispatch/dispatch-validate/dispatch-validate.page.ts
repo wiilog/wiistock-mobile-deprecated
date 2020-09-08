@@ -37,7 +37,8 @@ export class DispatchValidatePage extends PageComponent {
 
     public readonly selectItemStatus = SelectItemTypeEnum.STATUS;
     public readonly selectItemLocation = SelectItemTypeEnum.LOCATION;
-    public readonly barcodeScannerSearchMode = BarcodeScannerModeEnum.TOOL_SEARCH;
+    public readonly barcodeScannerLocationMode = BarcodeScannerModeEnum.TOOL_SEARCH;
+    public readonly barcodeScannerStatusMode = BarcodeScannerModeEnum.ONLY_SEARCH;
 
     public statusRequestParams;
 
@@ -113,7 +114,6 @@ export class DispatchValidatePage extends PageComponent {
                 this.loading = false;
 
                 this.locationSelectItemComponent.fireZebraScan();
-                this.statusSelectItemComponent.unsubscribeZebraScan();
 
                 setTimeout(() => {
                     this.statusSelectItemComponent.searchComponent.reload();
@@ -125,7 +125,6 @@ export class DispatchValidatePage extends PageComponent {
     public ionViewWillLeave(): void {
         this.unsubscribeLoading();
         this.locationSelectItemComponent.unsubscribeZebraScan();
-        this.statusSelectItemComponent.unsubscribeZebraScan();
     }
 
     public selectLocation(location: Emplacement): void {
@@ -190,7 +189,6 @@ export class DispatchValidatePage extends PageComponent {
             if (this.selectedLocation) {
                 this.currentPage = this.PageStatus;
                 this.locationSelectItemComponent.unsubscribeZebraScan();
-                this.statusSelectItemComponent.fireZebraScan();
             }
             else {
                 this.toastService.presentToast('Vous devez sélectionner un emplacement.');

@@ -174,11 +174,15 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
     }
 
     public fireZebraScan(): void {
-        return this.barcodeScanner.fireZebraScan();
+        if (this.barcodeScanner) {
+            this.barcodeScanner.fireZebraScan();
+        }
     }
 
     public unsubscribeZebraScan(): void {
-        return this.barcodeScanner.unsubscribeZebraScan();
+        if (this.barcodeScanner) {
+            this.barcodeScanner.unsubscribeZebraScan();
+        }
     }
 
     private presentInvalidItemToast(): void {

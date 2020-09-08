@@ -21,7 +21,7 @@
                      [type]="selectItemLocation"
                      (itemChange)="selectLocation($event)"
                      [checkBarcodeValidity]="true"
-                     [scanMode]="barcodeScannerSearchMode"
+                     [scanMode]="barcodeScannerLocationMode"
                      [hidden]="currentPage !== PageLocation">
     </wii-select-item>
     <wii-select-item #statusSelectItemComponent
@@ -29,7 +29,7 @@
                      [requestParams]="statusRequestParams"
                      (itemChange)="selectStatus($event)"
                      [checkBarcodeValidity]="true"
-                     [scanMode]="barcodeScannerSearchMode"
+                     [scanMode]="barcodeScannerStatusMode"
                      [hidden]="currentPage !== PageStatus">
     </wii-select-item>
 </div>
