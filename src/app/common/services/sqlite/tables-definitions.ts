@@ -313,7 +313,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             label: 'VARCHAR(255)',
             typeId: 'INTEGER',
             treated: 'INTEGER',
-            category: 'VARCHAR(255)'
+            category: 'VARCHAR(255)',
+            displayOrder: 'INTEGER'
         }
     }
 ];

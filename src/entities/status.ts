@@ -3,5 +3,6 @@ export interface Status {
     label: string;
     typeId: number;
     treated: number;
+    displayOrder: number;
     page: string;
 }

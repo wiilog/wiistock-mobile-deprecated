@@ -101,7 +101,10 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             valueField: 'id',
             templateIndex: 'default',
             databaseTable: 'status',
-            placeholder: 'Sélectionner un statut'
+            placeholder: 'Sélectionner un statut',
+            requestOrder: {
+                'displayOrder': 'ASC'
+            }
         }
     }
 
@@ -177,7 +180,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
 
     public reload(): Observable<Array<any>> {
         const $res = new ReplaySubject<Array<any>>(1);
-        (this.elements ? of(this.elements) : this.sqliteService.findBy(this.config[this.type].databaseTable, this.requestParams))
+        (this.elements ? of(this.elements) : this.sqliteService.findBy(this.config[this.type].databaseTable, this.requestParams, (this.config[this.type] as any).requestOrder || {}))
             .pipe(
                 take(1),
                 map((list) => {
