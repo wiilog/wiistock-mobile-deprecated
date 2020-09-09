@@ -11,8 +11,6 @@ import {PrisePageRoutingModule} from '@pages/prise-depose/prise/prise-routing.mo
 import {DeposePageRoutingModule} from '@pages/prise-depose/depose/depose-routing.module';
 import {MovementConfirmPageRoutingModule} from '@pages/prise-depose/movement-confirm/movement-confirm-routing.module';
 import {NewEmplacementPageRoutingModule} from '@pages/new-emplacement/new-emplacement-routing.module';
-import {ManutentionMenuPageRoutingModule} from '@pages/demande/manutention/manutention-menu/manutention-menu-routing.module';
-import {ManutentionValidatePageRoutingModule} from '@pages/demande/manutention/manutention-validate/manutention-validate-routing.module';
 import {StockMenuPageRoutingModule} from '@pages/stock/stock-menu/stock-menu-routing.module';
 import {CollecteMenuPageRoutingModule} from '@pages/stock/collecte/collecte-menu/collecte-menu-routing.module';
 import {CollecteArticlesPageRoutingModule} from '@pages/stock/collecte/collecte-articles/collecte-articles-routing.module';
@@ -40,6 +38,8 @@ import {DispatchMenuPageRoutingModule} from '@pages/tracking/dispatch/dispatch-m
 import {DispatchPacksPageRoutingModule} from '@pages/tracking/dispatch/dispatch-packs/dispatch-packs-routing.module';
 import {DispatchValidatePageRoutingModule} from '@pages/tracking/dispatch/dispatch-validate/dispatch-validate-routing.module';
 import {DispatchPackConfirmPageRoutingModule} from '@pages/tracking/dispatch/dispatch-pack-confirm/dispatch-pack-confirm-routing.module';
+import {HandlingMenuPageRoutingModule} from '@pages/demande/handling/handling-menu/handling-menu-routing.module';
+import {HandlingValidatePageRoutingModule} from '@pages/demande/handling/handling-validate/handling-validate-routing.module';
 
 
 const routes: Routes = [
@@ -114,9 +114,9 @@ const routes: Routes = [
         loadChildren: () => import('../pages/new-emplacement/new-emplacement.module').then(m => m.NewEmplacementPageModule)
     },
     {
-        path: ManutentionMenuPageRoutingModule.PATH,
+        path: HandlingMenuPageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('../pages/demande/manutention/manutention-menu/manutention-menu.module').then(m => m.ManutentionMenuPageModule)
+        loadChildren: () => import('../pages/demande/handling/handling-menu/handling-menu.module').then(m => m.HandlingMenuPageModule)
     },
     {
         path: DemandeMenuPageRoutingModule.PATH,
@@ -144,9 +144,9 @@ const routes: Routes = [
         loadChildren: () => import('../pages/demande/demande-livraison/demande-livraison-header/demande-livraison-header.module').then(m => m.DemandeLivraisonHeaderPageModule)
     },
     {
-        path: ManutentionValidatePageRoutingModule.PATH,
+        path: HandlingValidatePageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('../pages/demande/manutention/manutention-validate/manutention-validate.module').then(m => m.ManutentionValidatePageModule)
+        loadChildren: () => import('../pages/demande/handling/handling-validate/handling-validate.module').then(m => m.HandlingValidatePageModule)
     },
     {
         path: StockMenuPageRoutingModule.PATH,

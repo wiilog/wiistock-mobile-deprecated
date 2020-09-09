@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {Manutention} from '@entities/manutention';
+import {Handling} from '@entities/handling';
 import {ToastService} from '@app/common/services/toast.service';
 import {ApiService} from '@app/common/services/api.service';
 import {Network} from '@ionic-native/network/ngx';
@@ -13,12 +13,12 @@ import {PageComponent} from '@pages/page.component';
 
 
 @Component({
-    selector: 'wii-manutention-validate',
-    templateUrl: './manutention-validate.page.html',
-    styleUrls: ['./manutention-validate.page.scss'],
+    selector: 'wii-handling-validate',
+    templateUrl: './handling-validate.page.html',
+    styleUrls: ['./handling-validate.page.scss'],
 })
-export class ManutentionValidatePage extends PageComponent implements CanLeave {
-    public manutention: Manutention;
+export class HandlingValidatePage extends PageComponent implements CanLeave {
+    public handling: Handling;
     public commentaire: string;
     public hasLoaded: boolean;
     public showCom: boolean = false;
@@ -36,8 +36,8 @@ export class ManutentionValidatePage extends PageComponent implements CanLeave {
     }
 
     public ionViewWillEnter(): void {
-        if (this.currentNavParams.get('manutention') !== undefined) {
-            this.manutention = this.currentNavParams.get('manutention');
+        if (this.currentNavParams.get('handling') !== undefined) {
+            this.handling = this.currentNavParams.get('handling');
         }
         this.synchronise();
     }
@@ -46,7 +46,7 @@ export class ManutentionValidatePage extends PageComponent implements CanLeave {
         return !this.sendCommentToApiLoading;
     }
 
-    public validateManut(): void {
+    public validateHandling(): void {
         if (this.network.type !== 'none') {
             from(this.alertController.create({
                 header: 'Commentez la validation',
@@ -75,19 +75,19 @@ export class ManutentionValidatePage extends PageComponent implements CanLeave {
         if (!this.sendCommentToApiLoading) {
             this.sendCommentToApiLoading = true;
             let params = {
-                id: this.manutention.id,
+                id: this.handling.id,
                 commentaire: this.commentaire
             };
             this.loadingService
-                .presentLoading('Sauvegarde de la manutention...')
+                .presentLoading('Sauvegarde de la demande de service...')
                 .subscribe((loading: HTMLIonLoadingElement) => {
-                    this.apiService.requestApi('post', ApiService.VALIDATE_MANUT, {params}).subscribe(
+                    this.apiService.requestApi('post', ApiService.POST_HANDLING, {params}).subscribe(
                         (response) => {
                             this.sendCommentToApiLoading = false;
                             loading.dismiss();
                             if (response.success) {
                                 this.sqliteService
-                                    .deleteBy('`manutention`', [`id = ${this.manutention.id}`])
+                                    .deleteBy('handling', [`id = ${this.handling.id}`])
                                     .subscribe(() => {
                                         this.navService.pop();
                                     });
@@ -106,8 +106,8 @@ export class ManutentionValidatePage extends PageComponent implements CanLeave {
 
     public synchronise(): void {
         this.hasLoaded = false;
-        this.sqliteService.findOneById('`manutention`', this.manutention.id).subscribe((manutention) => {
-            this.manutention = manutention;
+        this.sqliteService.findOneById('handling', this.handling.id).subscribe((handling) => {
+            this.handling = handling;
             this.hasLoaded = true;
         })
     }

@@ -7,10 +7,9 @@ import {MainHeaderService} from '@app/common/services/main-header.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
-import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
-import {ManutentionMenuPageRoutingModule} from '@pages/demande/manutention/manutention-menu/manutention-menu-routing.module';
 import {DemandeLivraisonMenuPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu-routing.module';
 import {PageComponent} from '@pages/page.component';
+import {HandlingMenuPageRoutingModule} from '@pages/demande/handling/handling-menu/handling-menu-routing.module';
 
 
 @Component({
@@ -41,9 +40,9 @@ export class DemandeMenuPage extends PageComponent {
         this.menuConfig = [
             {
                 icon: 'people.svg',
-                label: 'Manutention',
+                label: 'Service',
                 action: () => {
-                    self.navService.push(ManutentionMenuPageRoutingModule.PATH);
+                    self.navService.push(HandlingMenuPageRoutingModule.PATH);
                 }
             },
             {

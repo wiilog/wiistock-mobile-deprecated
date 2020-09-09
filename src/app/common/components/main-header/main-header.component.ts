@@ -14,8 +14,6 @@ import {NavService} from '@app/common/services/nav.service';
 import {NavController} from '@ionic/angular';
 import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
 import {EmplacementScanPageRoutingModule} from '@pages/prise-depose/emplacement-scan/emplacement-scan-routing.module';
-import {ManutentionMenuPageRoutingModule} from '@pages/demande/manutention/manutention-menu/manutention-menu-routing.module';
-import {ManutentionValidatePageRoutingModule} from '@pages/demande/manutention/manutention-validate/manutention-validate-routing.module';
 import {PreparationMenuPageRoutingModule} from '@pages/stock/preparation/preparation-menu/preparation-menu-routing.module';
 import {LivraisonMenuPageRoutingModule} from '@pages/stock/livraison/livraison-menu/livraison-menu-routing.module';
 import {CollecteMenuPageRoutingModule} from '@pages/stock/collecte/collecte-menu/collecte-menu-routing.module';
@@ -25,6 +23,8 @@ import {DemandeLivraisonMenuPageRoutingModule} from '@pages/demande/demande-livr
 import {InventoryLocationsAnomaliesPageRoutingModule} from '@pages/stock/inventory/inventory-locations-anomalies/inventory-locations-anomalies-routing.module';
 import {TrackingMenuPageRoutingModule} from '@pages/tracking/tracking-menu/tracking-menu-routing.module';
 import {DispatchMenuPageRoutingModule} from '@pages/tracking/dispatch/dispatch-menu/dispatch-menu-routing.module';
+import {HandlingMenuPageRoutingModule} from '@pages/demande/handling/handling-menu/handling-menu-routing.module';
+import {HandlingValidatePageRoutingModule} from '@pages/demande/handling/handling-validate/handling-validate-routing.module';
 
 
 @Component({
@@ -145,9 +145,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: InventoryLocationsPageRoutingModule.PATH, label: 'Inventaire'},
             {pagePath: InventoryLocationsAnomaliesPageRoutingModule.PATH, label: 'Anomalies'},
             {pagePath: DemandeMenuPageRoutingModule.PATH, label: 'Demande'},
-            {pagePath: ManutentionMenuPageRoutingModule.PATH, label: 'Manutention'},
+            {pagePath: HandlingMenuPageRoutingModule.PATH, label: 'Service'},
             {pagePath: DemandeLivraisonMenuPageRoutingModule.PATH, label: 'Livraison'},
-            {pagePath: ManutentionValidatePageRoutingModule.name, label: 'Détails'}
+            {pagePath: HandlingValidatePageRoutingModule.name, label: 'Détails'}
         ];
     }
 

@@ -1,24 +1,24 @@
 import {Component} from '@angular/core';
-import {Manutention} from '@entities/manutention';
+import {Handling} from '@entities/handling';
 import {CardListConfig} from '@app/common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {NavService} from '@app/common/services/nav.service';
-import {ManutentionValidatePageRoutingModule} from '@pages/demande/manutention/manutention-validate/manutention-validate-routing.module';
 import {PageComponent} from '@pages/page.component';
+import {HandlingValidatePageRoutingModule} from '@pages/demande/handling/handling-validate/handling-validate-routing.module';
 
 
 @Component({
-    selector: 'wii-manutention-menu',
-    templateUrl: './manutention-menu.page.html',
-    styleUrls: ['./manutention-menu.page.scss'],
+    selector: 'wii-handling-menu',
+    templateUrl: './handling-menu.page.html',
+    styleUrls: ['./handling-menu.page.scss'],
 })
-export class ManutentionMenuPage extends PageComponent {
-    public manutentions: Array<Manutention>;
-    public manutentionsListConfig: Array<CardListConfig>;
-    public readonly manutentionsListColor = CardListColorEnum.GREEN;
-    public readonly manutentionsIconName = 'people.svg';
+export class HandlingMenuPage extends PageComponent {
+    public handlings: Array<Handling>;
+    public handlingsListConfig: Array<CardListConfig>;
+    public readonly handlingsListColor = CardListColorEnum.GREEN;
+    public readonly handlingsIconName = 'people.svg';
 
     public hasLoaded: boolean;
 
@@ -30,25 +30,25 @@ export class ManutentionMenuPage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
-        this.sqliteService.findAll('`manutention`').subscribe((manutentions) => {
-            this.manutentions = manutentions;
-            this.manutentionsListConfig = this.manutentions.map((manutention) => ({
+        this.sqliteService.findAll('handling').subscribe((handlings: Array<Handling>) => {
+            this.handlings = handlings;
+            this.handlingsListConfig = this.handlings.map((handling) => ({
                 title: {
                     label: 'Demandeur',
-                    value: manutention.demandeur
+                    value: handling.requester
                 },
                 content: [
                     {
                         label: 'Date attendue',
-                        value: manutention.date_attendue || ''
+                        value: handling.desiredDate || ''
                     },
                     {
                         label: 'Objet',
-                        value: manutention.objet
+                        value: handling.subject
                     }
                 ],
                 action: () => {
-                    this.navService.push(ManutentionValidatePageRoutingModule.PATH, {manutention});
+                    this.navService.push(HandlingValidatePageRoutingModule.PATH, {handling});
                 }
             }));
             this.refreshSubTitle();
@@ -57,7 +57,7 @@ export class ManutentionMenuPage extends PageComponent {
     }
 
     public refreshSubTitle(): void {
-        const manutentionLength = this.manutentions.length;
-        this.mainHeaderService.emitSubTitle(`${manutentionLength === 0 ? 'Aucune' : manutentionLength} demande${manutentionLength > 1 ? 's' : ''}`)
+        const handlingsLength = this.handlings.length;
+        this.mainHeaderService.emitSubTitle(`${handlingsLength === 0 ? 'Aucune' : handlingsLength} demande${handlingsLength > 1 ? 's' : ''}`)
     }
 }

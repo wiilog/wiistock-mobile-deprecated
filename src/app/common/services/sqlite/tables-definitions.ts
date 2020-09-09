@@ -186,15 +186,16 @@ export const TablesDefinitions: Array<TableDefinition> = [
         }
     },
     {
-        name: 'manutention',
+        name: 'handling',
         attributes: {
-            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-            demandeur: 'TEXT',
-            date_attendue: 'TEXT',
-            commentaire: 'TEXT',
+            id: 'INTEGER PRIMARY KEY',
+            requester: 'VARCHAR(255)',
+            desiredDate: 'VARCHAR(255)',
+            comment: 'TEXT',
             destination: 'TEXT',
             source: 'TEXT',
-            objet: 'TEXT',
+            subject: 'VARCHAR(255)',
+            statusId: 'INTEGER'
         }
     },
     {
