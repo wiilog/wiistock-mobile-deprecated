@@ -191,16 +191,20 @@ export class SqliteService {
                     const alreadyInsertedIds = alreadyInserted.map(({id}) => Number(id));
                     const handlingsToInsert = handlings.filter(({id}) => (alreadyInsertedIds.indexOf(Number(id)) === -1));
                     const handlingsToUpdate = handlings.filter(({id}) => (alreadyInsertedIds.indexOf(Number(id)) > -1));
-                    return zip(
-                        this.insert('handling', handlingsToInsert),
-                        handlingsToUpdate.length > 0
-                            ? zip(
-                                ...handlingsToUpdate.map(({id, ...handling}) => (
-                                    this.update('handling', handling, [`where id = ${id}`])
-                                ))
-                            )
-                            : of(undefined)
-                    );
+                    return handlingsToInsert.length > 0 || handlingsToUpdate.length > 0
+                        ? zip(
+                            handlingsToInsert.length > 0
+                                ? this.insert('handling', handlingsToInsert)
+                                : of(undefined),
+                            handlingsToUpdate.length > 0
+                                ? zip(
+                                    ...handlingsToUpdate.map(({id, ...handling}) => (
+                                        this.update('handling', handling, [`where id = ${id}`])
+                                    ))
+                                )
+                                : of(undefined)
+                        )
+                        : of(undefined);
                 }),
                 map(() => undefined)
             );
