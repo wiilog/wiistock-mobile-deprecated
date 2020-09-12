@@ -3,6 +3,7 @@ import {HeaderConfig} from '@app/common/components/panel/model/header-config';
 import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 import {FormPanelParam} from '@app/common/directives/form-panel/form-panel-param';
 import {FormPanelDirective} from '@app/common/directives/form-panel/form-panel.directive';
+import {FormViewerParam} from '@app/common/directives/form-viewer/form-viewer-param';
 
 
 @Component({
@@ -11,11 +12,15 @@ import {FormPanelDirective} from '@app/common/directives/form-panel/form-panel.d
     styleUrls: ['./form-panel.component.scss']
 })
 export class FormPanelComponent implements AfterViewInit {
+
     @Input()
     public header?: HeaderConfig;
 
     @Input()
     public body: Array<FormPanelParam>;
+
+    @Input()
+    public details?: Array<FormViewerParam>;
 
     @ViewChildren('formElements', {read: FormPanelDirective})
     public formElements: QueryList<FormPanelDirective>;

@@ -1,58 +1,15 @@
 @import "~theme/variables";
 
-.commentaire_button {
-    margin: auto;
-    display: block;
-    background-color: transparent;
-    text-align: center;
-    height: 70px;
-    width: 100%;
-    color: $dark;
-
-    wii-icon {
-        width: 15px;
-        height: 15px;
-        margin-left: 5px;
-        display: inline-block;
-    }
-}
-
-.handling-details {
-    background-color: $white;
-    margin: 0;
-
-    ion-row {
-        &:not(:last-child) {
-            border-bottom: 1px solid #dedede;
-        }
-        ion-col {
-            padding: 15px;
-            flex: inherit;
-
-            &.label {
-                font-size: 14px;
-                width: 40% !important;
-            }
-
-            &.value {
-                flex: 1;
-                font-size: 15px;
-                color: black;
-            }
-        }
-    }
-}
-
-.commentaire {
-    margin-bottom: 7%;
-    padding: 5px;
-}
-
 .page-content {
-    background-color: $lightGrey !important;
-    flex: 1;
+    overflow: hidden;
 
-    .item-inner {
-        padding-left: 8px;
+    wii-panel-header {
+        margin: $spacerMin;
+    }
+
+    &,
+    & > wii-form-panel {
+        flex: 1;
+        display: flex;
     }
 }

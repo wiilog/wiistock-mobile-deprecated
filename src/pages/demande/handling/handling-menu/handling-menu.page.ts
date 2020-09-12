@@ -39,13 +39,29 @@ export class HandlingMenuPage extends PageComponent {
                 },
                 content: [
                     {
+                        label: 'Numéro',
+                        value: handling.number
+                    },
+                    {
                         label: 'Date attendue',
                         value: handling.desiredDate || ''
                     },
                     {
+                        label: 'Chargement',
+                        value: handling.source || ''
+                    },
+                    {
+                        label: 'Déchargement',
+                        value: handling.destination || ''
+                    },
+                    {
                         label: 'Objet',
                         value: handling.subject
-                    }
+                    },
+                    {
+                        label: 'Type',
+                        value: handling.typeLabel
+                    },
                 ],
                 action: () => {
                     this.navService.push(HandlingValidatePageRoutingModule.PATH, {handling});

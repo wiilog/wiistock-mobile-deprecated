@@ -9,6 +9,12 @@
                       [rightIcons]="header.rightIcon">
     </wii-panel-header>
     <div class="list-wrapper">
+        <ng-container *ngIf="details">
+            <ng-template *ngFor="let detailsRow of details"
+                         [wiiFormViewer]
+                         [param]="detailsRow">
+            </ng-template>
+        </ng-container>
         <ng-template #formElements
                      *ngFor="let param of body"
                      [wiiFormPanel]

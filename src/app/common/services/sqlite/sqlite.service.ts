@@ -183,8 +183,12 @@ export class SqliteService {
 
     public importHandlings(data): Observable<any> {
         let handlings = data['handlings'];
+        let handlingAttachments = data['handlingAttachments'];
 
-        return this.deleteBy('handling', ['statusId IS NULL'])
+        return zip(
+            this.deleteBy('handling'),
+            this.deleteBy('handling_attachment')
+        )
             .pipe(
                 flatMap(() => this.findAll('handling')),
                 flatMap((alreadyInserted: Array<Handling>) => {
@@ -193,6 +197,9 @@ export class SqliteService {
                     const handlingsToUpdate = handlings.filter(({id}) => (alreadyInsertedIds.indexOf(Number(id)) > -1));
                     return handlingsToInsert.length > 0 || handlingsToUpdate.length > 0
                         ? zip(
+                            handlingAttachments.length > 0
+                                ? this.insert('handling_attachment', handlingAttachments)
+                                : of(undefined),
                             handlingsToInsert.length > 0
                                 ? this.insert('handling', handlingsToInsert)
                                 : of(undefined),
