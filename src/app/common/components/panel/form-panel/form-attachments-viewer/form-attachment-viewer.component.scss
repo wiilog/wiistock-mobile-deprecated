@@ -8,9 +8,17 @@
 
     ion-label {
         font-size: $normalFontSize;
+        flex: 1;
     }
 
     .files-wrapper {
-        width: 100%;
+        overflow: hidden;
+        flex: 1;
+        a {
+            display: block;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
     }
 }

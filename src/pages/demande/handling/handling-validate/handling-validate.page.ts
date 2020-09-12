@@ -66,21 +66,7 @@ export class HandlingValidatePage extends PageComponent {
             .subscribe((handlingAttachment: Array<HandlingAttachment>) => {
                 this.dismissLoading();
 
-                this.headerConfig = {
-                    title: `Demande de service ${this.handling.number}`,
-                    leftIcon: {
-                        color: 'success',
-                        name: 'people.svg'
-                    },
-                    subtitle: [
-                        `Demandeur : ${this.handling.requester || ''}`,
-                        `Date attendue : ${this.handling.desiredDate || ''}`,
-                        `Objet : ${this.handling.subject || ''}`,
-                        `Source : ${this.handling.source || ''}`,
-                        `Destination : ${this.handling.destination || ''}`,
-                        `Type : ${this.handling.typeLabel || ''}`
-                    ]
-                };
+                this.refreshHeader(false);
 
                 this.detailsConfig = handlingAttachment.length > 0
                     ? [
@@ -101,7 +87,7 @@ export class HandlingValidatePage extends PageComponent {
                     {
                         item: FormPanelSelectComponent,
                         config: {
-                            label: 'Status',
+                            label: 'Statut',
                             name: 'statusId',
                             inputConfig: {
                                 required: true,
@@ -208,5 +194,34 @@ export class HandlingValidatePage extends PageComponent {
                 this.loadingElement = undefined;
             }))
             : of(undefined);
+    }
+
+    public refreshHeader(opened: boolean = false) {
+        this.headerConfig = {
+            title: `Service ${this.handling.number}`,
+            collapsed: true,
+            onToggle: (opened) => {
+                this.refreshHeader(opened);
+            },
+            leftIcon: {
+                color: 'success',
+                name: 'people.svg'
+            },
+            rightIcon: {
+                name: opened ? 'eye-slash.svg' : 'eye.svg',
+                color: 'medium',
+                action: () => {
+                    this.formPanelComponent.formHeaderComponent.toggleTitle();
+                }
+            },
+            subtitle: [
+                `Demandeur : ${this.handling.requester || ''}`,
+                `Date attendue : ${this.handling.desiredDate || ''}`,
+                `Objet : ${this.handling.subject || ''}`,
+                `Source : ${this.handling.source || ''}`,
+                `Destination : ${this.handling.destination || ''}`,
+                `Type : ${this.handling.typeLabel || ''}`
+            ]
+        };
     }
 }

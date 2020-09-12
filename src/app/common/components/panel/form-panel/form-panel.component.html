@@ -1,10 +1,13 @@
 <div class="wrapper"
      scroll-y="true">
     <wii-panel-header *ngIf="header"
+                      #formHeaderComponent
                       class="form-header"
+                      (toggle)="header.onToggle && header.onToggle($event)"
                       [leftIcon]="header.leftIcon"
                       [title]="header.title"
                       [subtitle]="header.subtitle"
+                      [collapsed]="header.collapsed"
                       [info]="header.info"
                       [rightIcons]="header.rightIcon">
     </wii-panel-header>

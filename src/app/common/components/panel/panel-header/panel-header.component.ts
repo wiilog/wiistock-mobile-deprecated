@@ -1,4 +1,4 @@
-import {Component, EventEmitter, HostBinding, HostListener, Input, Output} from '@angular/core';
+import {Component, ElementRef, EventEmitter, HostBinding, HostListener, Input, Output, ViewChild} from '@angular/core';
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
 
 
@@ -9,6 +9,11 @@ import {IconConfig} from '@app/common/components/panel/model/icon-config';
 })
 export class PanelHeaderComponent {
 
+    private static readonly INIT_COLLAPSED_HEADER_BODY = 65;
+
+    @ViewChild('headerBodyWrapper')
+    public headerBodyWrapper: ElementRef;
+
     @Input()
     public leftIcon: IconConfig;
 
@@ -18,9 +23,8 @@ export class PanelHeaderComponent {
     @Input()
     public info: string;
 
-    public _rightIcons: Array<IconConfig>;
-
-    public _subtitle: Array<string>;
+    @Input()
+    public collapsed: boolean;
 
     @Input()
     @HostBinding('class.transparent-panel-header')
@@ -32,9 +36,23 @@ export class PanelHeaderComponent {
     @Output()
     public action: EventEmitter<Event>;
 
+    @Output()
+    public toggle: EventEmitter<boolean>;
+
+    public open: boolean;
+
+    public bodyMaxHeight: number;
+
+    public _rightIcons: Array<IconConfig>;
+
+    public _subtitle: Array<string>;
+
     public constructor() {
         this._subtitle = [];
+        this.open = false;
         this.action = new EventEmitter<Event>();
+        this.toggle = new EventEmitter<boolean>();
+        this.bodyMaxHeight = PanelHeaderComponent.INIT_COLLAPSED_HEADER_BODY
     }
 
     @HostBinding('class.ion-activatable')
@@ -92,5 +110,22 @@ export class PanelHeaderComponent {
 
     public rightIconHasAction(index: number): boolean {
         return Boolean(this.rightIcons && this.rightIcons[index] && this.rightIcons[index].action);
+    }
+
+    public toggleTitle() {
+        if (this.collapsed) {
+            this.open = !this.open;
+            if (this.open) {
+                const {height = 0} = this.headerBodyWrapper.nativeElement.getBoundingClientRect() || {};
+                if (height) {
+                    this.bodyMaxHeight = height;
+                    this.toggle.emit(this.open);
+                }
+            }
+            else {
+                this.toggle.emit(this.open);
+                this.bodyMaxHeight = PanelHeaderComponent.INIT_COLLAPSED_HEADER_BODY;
+            }
+        }
     }
 }

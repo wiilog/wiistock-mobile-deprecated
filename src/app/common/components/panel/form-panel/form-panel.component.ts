@@ -1,9 +1,10 @@
-import {AfterViewInit, Component, Input, QueryList, ViewChildren} from '@angular/core';
+import {AfterViewInit, Component, Input, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {HeaderConfig} from '@app/common/components/panel/model/header-config';
 import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 import {FormPanelParam} from '@app/common/directives/form-panel/form-panel-param';
 import {FormPanelDirective} from '@app/common/directives/form-panel/form-panel.directive';
 import {FormViewerParam} from '@app/common/directives/form-viewer/form-viewer-param';
+import {PanelHeaderComponent} from '@app/common/components/panel/panel-header/panel-header.component';
 
 
 @Component({
@@ -24,6 +25,9 @@ export class FormPanelComponent implements AfterViewInit {
 
     @ViewChildren('formElements', {read: FormPanelDirective})
     public formElements: QueryList<FormPanelDirective>;
+
+    @ViewChild('formHeaderComponent', {static: false})
+    public formHeaderComponent: PanelHeaderComponent;
 
     private afterViewInit: boolean;
     private fireZebraRequested: boolean;
