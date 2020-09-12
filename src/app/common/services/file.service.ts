@@ -10,7 +10,7 @@ export class FileService {
     public static readonly SIGNATURE_IMAGE_EXTENSION = 'jpeg';
     public static readonly SIGNATURE_IMAGE_TYPE = 'image/jpeg';
 
-    public createFile(dataURL: string, extension: string, type: string, fileName: 'signature'|'photo'): File {
+    public createFile(dataURL: string, extension: string, type: string, fileName: string): File {
         // Split the base64 string in data and contentType
         const block = dataURL.split(";");
 

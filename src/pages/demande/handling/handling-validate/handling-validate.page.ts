@@ -6,7 +6,7 @@ import {Network} from '@ionic-native/network/ngx';
 import {LoadingService} from '@app/common/services/loading.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {NavService} from '@app/common/services/nav.service';
-import {from, Observable, of, Subscription} from 'rxjs';
+import {from, Observable, of, Subscription, zip} from 'rxjs';
 import {PageComponent} from '@pages/page.component';
 import {HeaderConfig} from '@app/common/components/panel/model/header-config';
 import {FormPanelParam} from '@app/common/directives/form-panel/form-panel-param';
@@ -94,8 +94,12 @@ export class HandlingValidatePage extends PageComponent {
                                 searchType: SelectItemTypeEnum.STATUS,
                                 requestParams: [
                                     `category = 'service'`,
+                                    `treated = 1`,
                                     `typeId = ${this.handling.typeId}`
                                 ]
+                            },
+                            errors: {
+                                required: 'Le statut de la demande est requis',
                             }
                         }
                     },
@@ -118,9 +122,11 @@ export class HandlingValidatePage extends PageComponent {
                     {
                         item: FormPanelCameraComponent,
                         config: {
-                            label: 'Photo',
-                            name: 'photo',
-                            inputConfig: {}
+                            label: 'Photo(s)',
+                            name: 'photos',
+                            inputConfig: {
+                                multiple: true
+                            }
                         }
                     },
                 ];
@@ -139,21 +145,29 @@ export class HandlingValidatePage extends PageComponent {
             if (this.formPanelComponent.firstError) {
                 this.toastService.presentToast(this.formPanelComponent.firstError);
             }
-            else {
-                const {statusId, comment, photo} = this.formPanelComponent.values
+            else if (!this.apiSubscription) {
+                const {statusId, comment, photos} = this.formPanelComponent.values
 
                 const params = {
                     id: this.handling.id,
                     statusId,
                     comment,
-                    photo: photo
-                        ? this.fileService.createFile(
-                            photo,
-                            FileService.SIGNATURE_IMAGE_EXTENSION,
-                            FileService.SIGNATURE_IMAGE_TYPE,
-                            'photo'
-                        )
-                        : undefined,
+                    ...(
+                        photos && photos.length
+                            ? photos.reduce((acc: { [name: string]: File}, photoBase64: string, index: number) => {
+                                const name = `photo_${index + 1}`;
+                                return ({
+                                    ...acc,
+                                    [name]: this.fileService.createFile(
+                                        photoBase64,
+                                        FileService.SIGNATURE_IMAGE_EXTENSION,
+                                        FileService.SIGNATURE_IMAGE_TYPE,
+                                        name
+                                    )
+                                })
+                            }, {})
+                            : {}
+                    )
                 };
 
                 this.apiSubscription = this.dismissLoading()
@@ -163,11 +177,21 @@ export class HandlingValidatePage extends PageComponent {
                             this.loadingElement = loading;
                         }),
                         flatMap(() => this.apiService.requestApi('post', ApiService.POST_HANDLING, {params})),
+                        flatMap((res) => (
+                            res && res.success
+                                ? zip(
+                                    this.sqliteService.deleteBy('handling', [`id = ${this.handling.id}`]),
+                                    this.sqliteService.deleteBy('handling_attachment', [`handlingId = ${this.handling.id}`])
+                                )
+                                    .pipe(map(() => res))
+                                : of(res)
+                        )),
                         flatMap((res) => this.dismissLoading().pipe(map(() => res))),
 
                     )
                     .subscribe(
                         ({success, message}) => {
+                            this.unsubscribeApi();
                             if (success) {
                                 this.navService.pop();
                                 this.toastService.presentToast("La demande de service a bien été traitée.");
@@ -177,6 +201,7 @@ export class HandlingValidatePage extends PageComponent {
                             }
                         },
                         () => {
+                            this.unsubscribeApi();
                             this.dismissLoading();
                             this.toastService.presentToast("Une erreur s'est produite.");
                         }
@@ -198,7 +223,7 @@ export class HandlingValidatePage extends PageComponent {
 
     public refreshHeader(opened: boolean = false) {
         this.headerConfig = {
-            title: `Service ${this.handling.number}`,
+            title: `Demande ${this.handling.number}`,
             collapsed: true,
             onToggle: (opened) => {
                 this.refreshHeader(opened);
@@ -223,5 +248,12 @@ export class HandlingValidatePage extends PageComponent {
                 `Type : ${this.handling.typeLabel || ''}`
             ]
         };
+    }
+
+    private unsubscribeApi(): void {
+        if (this.apiSubscription) {
+            this.apiSubscription.unsubscribe();
+            this.apiSubscription = undefined;
+        }
     }
 }

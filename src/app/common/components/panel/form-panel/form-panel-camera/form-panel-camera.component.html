@@ -1,12 +1,31 @@
 <ion-item lines="none">
     <ion-label color="medium">{{label}}</ion-label>
-    <img *ngIf="value else noValue"
-         class="camera-image"
-         alt="photo"
-         [src]="value"
-         (click)="onItemClicked()"/>
-    <ng-template #noValue>
-        <wii-icon class="add-camera" color="success" name="camera.svg" (action)="onItemClicked()"></wii-icon>
-    </ng-template>
+    <div class="camera-image-container">
+        <ng-container *ngIf="!inputConfig.multiple">
+            <ng-container [ngTemplateOutlet]="photoTemplate"
+                          [ngTemplateOutletContext]="{src: value}">
+            </ng-container>
+        </ng-container>
+        <ng-container *ngIf="inputConfig.multiple">
+            <ng-container *ngFor="let src of value; let index = index"
+                          [ngTemplateOutlet]="photoTemplate"
+                          [ngTemplateOutletContext]="{src: src, index: index}">
+            </ng-container>
+        </ng-container>
+    </div>
+    <wii-icon *ngIf="displayCameraButton"
+              class="add-camera"
+              color="success"
+              name="camera.svg"
+              (action)="onItemClicked()">
+    </wii-icon>
 </ion-item>
 
+<ng-template #photoTemplate
+             let-src="src"
+             let-index="index">
+    <img class="camera-image"
+         alt="photo"
+         [src]="src"
+         (click)="onPhotoClicked(index)"/>
+</ng-template>
