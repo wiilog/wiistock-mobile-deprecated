@@ -1,8 +1,8 @@
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {IonicModule} from '@ionic/angular';
-import {ManutentionValidatePageRoutingModule} from './manutention-validate-routing.module';
-import {ManutentionValidatePage} from './manutention-validate.page';
+import {HandlingMenuPageRoutingModule} from './handling-menu-routing.module';
+import {HandlingMenuPage} from './handling-menu.page';
 import {CommonModule as AngularCommonModule} from '@angular/common';
 import {CommonModule} from '@app/common/common.module';
 
@@ -11,10 +11,10 @@ import {CommonModule} from '@app/common/common.module';
         AngularCommonModule,
         FormsModule,
         IonicModule,
-        ManutentionValidatePageRoutingModule,
+        HandlingMenuPageRoutingModule,
         CommonModule
     ],
-    declarations: [ManutentionValidatePage]
+    declarations: [HandlingMenuPage]
 })
-export class ManutentionValidatePageModule {
+export class HandlingMenuPageModule {
 }

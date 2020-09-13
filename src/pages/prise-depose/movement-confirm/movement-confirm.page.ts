@@ -185,7 +185,7 @@ export class MovementConfirmPage extends PageComponent {
                         if (freeField[0].id === "") {
                             freeField = null;
                         } else {
-                            freeField = freeField.map(ff => ff.id).join(',')
+                            freeField = freeField.map(({id}) => id).join(',')
                         }
                     }
                     freeFields[freeFieldId] = freeField;

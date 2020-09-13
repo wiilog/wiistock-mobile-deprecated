@@ -1,14 +1,23 @@
 <div class="wrapper"
      scroll-y="true">
     <wii-panel-header *ngIf="header"
+                      #formHeaderComponent
                       class="form-header"
+                      (toggle)="header.onToggle && header.onToggle($event)"
                       [leftIcon]="header.leftIcon"
                       [title]="header.title"
                       [subtitle]="header.subtitle"
+                      [collapsed]="header.collapsed"
                       [info]="header.info"
                       [rightIcons]="header.rightIcon">
     </wii-panel-header>
     <div class="list-wrapper">
+        <ng-container *ngIf="details">
+            <ng-template *ngFor="let detailsRow of details"
+                         [wiiFormViewer]
+                         [param]="detailsRow">
+            </ng-template>
+        </ng-container>
         <ng-template #formElements
                      *ngFor="let param of body"
                      [wiiFormPanel]

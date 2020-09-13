@@ -13,13 +13,15 @@ import {FormPanelCameraConfig} from '@app/common/components/panel/model/form-pan
 })
 export class FormPanelCameraComponent implements FormPanelItemComponent<FormPanelCameraConfig> {
 
+    private static readonly MAX_MULTIPLE_PHOTO = 10;
+
     private readonly cameraOptions: CameraOptions;
 
     @Input()
     public inputConfig: FormPanelCameraConfig;
 
     @Input()
-    public value?: string;
+    public value?: string|Array<string>;
 
     @Input()
     public label: string;
@@ -31,7 +33,7 @@ export class FormPanelCameraComponent implements FormPanelItemComponent<FormPane
     public errors?: { [errorName: string]: string };
 
     @Output()
-    public valueChange: EventEmitter<string>;
+    public valueChange: EventEmitter<string|Array<string>>;
 
     public constructor(private camera: Camera) {
         this.valueChange = new EventEmitter<string>();
@@ -50,17 +52,51 @@ export class FormPanelCameraComponent implements FormPanelItemComponent<FormPane
             : undefined;
     }
 
+    public onPhotoClicked(index: number): void {
+        if (this.inputConfig.multiple) {
+            (this.value as Array<string>).splice(index, 1);
+        }
+        else {
+            this.value = undefined;
+        }
+    }
+
     public onItemClicked(): void {
         from(this.camera.getPicture(this.cameraOptions))
             .pipe(take(1))
             .subscribe(
                 (imageData: string) => {
-                    this.value = imageData ? `data:image/jpeg;base64,${imageData}` : undefined;
+                    const value = imageData ? `data:image/jpeg;base64,${imageData}` : undefined;
+                    if (this.inputConfig.multiple && imageData) {
+                        if (!Array.isArray(this.value)) {
+                            if (this.value) {
+                                this.value = [this.value];
+                            }
+                            else {
+                                this.value = [];
+                            }
+                        }
+                        this.value.push(value);
+                    }
+                    else {
+                        this.value = imageData ? value : undefined;
+                    }
                     this.valueChange.emit(this.value);
                 },
                 () => {
                     this.valueChange.emit(undefined);
                 }
             );
+    }
+
+    public get displayCameraButton(): boolean {
+        return (
+            (
+                this.inputConfig.multiple
+                && this.value
+                && (this.value as Array<string>).length < FormPanelCameraComponent.MAX_MULTIPLE_PHOTO
+            )
+            || !this.value
+        );
     }
 }

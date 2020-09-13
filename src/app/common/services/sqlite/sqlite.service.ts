@@ -4,7 +4,7 @@ import {Livraison} from '@entities/livraison';
 import {from, Observable, of, ReplaySubject, Subject, zip} from 'rxjs';
 import {flatMap, map, take, tap} from 'rxjs/operators';
 import {Collecte} from '@entities/collecte';
-import {Manutention} from '@entities/manutention';
+import {Handling} from '@entities/handling';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {Anomalie} from "@entities/anomalie";
 import {ArticlePrepaByRefArticle} from "@entities/article-prepa-by-ref-article";
@@ -181,66 +181,40 @@ export class SqliteService {
         );
     }
 
-    public importManutentions(data): Observable<any> {
-        const ret$ = new ReplaySubject<any>(1);
+    public importHandlings(data): Observable<any> {
+        let handlings = data['handlings'];
+        let handlingAttachments = data['handlingAttachments'];
 
-        let manutentions = data['manutentions'];
-        let manutValues = [];
-        if (manutentions.length === 0) {
-            this.findAll('`manutention`').subscribe((manutentionsDB) => {
-                this.deleteManutentions(manutentionsDB).then(() => {
-                    ret$.next(undefined);
-                });
-            });
-        }
-        for (let manut of manutentions) {
-            this.findOneById('manutention', manut.id).subscribe((manutInserted) => {
-                if (manutInserted === null) {
-                    let comment = manut.commentaire === null ? '' : this.escapeQuotes(manut.commentaire);
-                    let date = manut.date_attendue ? manut.date_attendue : null;
-                    manutValues.push(
-                        "(" +
-                        manut.id + ", " +
-                        "'" + date + "'" +
-                        ", '" + this.escapeQuotes(manut.demandeur) + "'" +
-                        ", '" + this.escapeQuotes(comment) + "'" +
-                        ", '" + this.escapeQuotes(manut.source) + "'" +
-                        ", '" + this.escapeQuotes(manut.objet) + "'" +
-                        ", '" + this.escapeQuotes(manut.destination) + "'" +
-                        ")"
-                    );
-                }
-                if (manutentions.indexOf(manut) === manutentions.length - 1) {
-                    this.findAll('`manutention`').subscribe((manutentionsDB) => {
-                        let manutValuesStr = manutValues.join(', ');
-                        let sqlManut = 'INSERT INTO `manutention` (`id`, `date_attendue`, `demandeur`, `commentaire`, `source`, `objet`, `destination`) VALUES ' + manutValuesStr + ';';
-
-                        if (manutentionsDB.length === 0) {
-                            if (manutValues.length > 0) {
-                                this.executeQuery(sqlManut).subscribe(() => {
-                                    ret$.next(true);
-                                });
-                            }
-                            else {
-                                ret$.next(undefined);
-                            }
-                        } else {
-                            this.deleteManutentions(manutentionsDB.filter(m => manutentions.find(manut => manut.id === m.id) === undefined)).then(() => {
-                                if (manutValues.length > 0) {
-                                    this.executeQuery(sqlManut).subscribe(() => {
-                                        ret$.next(true);
-                                    });
-                                }
-                                else {
-                                    ret$.next(undefined);
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        }
-        return ret$;
+        return zip(
+            this.deleteBy('handling'),
+            this.deleteBy('handling_attachment')
+        )
+            .pipe(
+                flatMap(() => this.findAll('handling')),
+                flatMap((alreadyInserted: Array<Handling>) => {
+                    const alreadyInsertedIds = alreadyInserted.map(({id}) => Number(id));
+                    const handlingsToInsert = handlings.filter(({id}) => (alreadyInsertedIds.indexOf(Number(id)) === -1));
+                    const handlingsToUpdate = handlings.filter(({id}) => (alreadyInsertedIds.indexOf(Number(id)) > -1));
+                    return handlingsToInsert.length > 0 || handlingsToUpdate.length > 0
+                        ? zip(
+                            handlingAttachments.length > 0
+                                ? this.insert('handling_attachment', handlingAttachments)
+                                : of(undefined),
+                            handlingsToInsert.length > 0
+                                ? this.insert('handling', handlingsToInsert)
+                                : of(undefined),
+                            handlingsToUpdate.length > 0
+                                ? zip(
+                                    ...handlingsToUpdate.map(({id, ...handling}) => (
+                                        this.update('handling', handling, [`where id = ${id}`])
+                                    ))
+                                )
+                                : of(undefined)
+                        )
+                        : of(undefined);
+                }),
+                map(() => undefined)
+            );
     }
 
     public importMouvementTraca(data): Observable<any> {
@@ -809,7 +783,7 @@ export class SqliteService {
             flatMap(() => this.importLivraisons(data).pipe(tap(() => {console.log('--- > importLivraisons')}))),
             flatMap(() => this.importArticlesLivraison(data).pipe(tap(() => {console.log('--- > importArticlesLivraison')}))),
             flatMap(() => this.importArticlesInventaire(data).pipe(tap(() => {console.log('--- > importArticlesInventaire')}))),
-            flatMap(() => this.importManutentions(data).pipe(tap(() => {console.log('--- > importManutentions')}))),
+            flatMap(() => this.importHandlings(data).pipe(tap(() => {console.log('--- > importHandlings')}))),
             flatMap(() => this.importCollectes(data).pipe(tap(() => {console.log('--- > importCollectes')}))),
             flatMap(() => this.importMouvementTraca(data).pipe(tap(() => {console.log('--- > importMouvementTraca')}))),
             flatMap(() => this.importDemandesLivraisonData(data).pipe(tap(() => {console.log('--- > importDemandeLivraisonData')}))),
@@ -1134,23 +1108,6 @@ export class SqliteService {
                 this.executeQuery(`DELETE FROM \`article_prepa\` WHERE id_prepa IN (${joinedPreparations})`, false)
             )
             : of(undefined);
-    }
-
-    public deleteManutentions(manutentions: Array<Manutention>) {
-        let resp = new Promise<any>((resolve) => {
-            if (manutentions.length === 0) {
-                resolve();
-            }
-            else {
-                this.db$.subscribe((db) => {
-                    const manutentionIds = manutentions.map(({id}) => id).join(', ');
-                    db.executeSql(`DELETE FROM \`manutention\` WHERE id IN (${manutentionIds})`, []).then(() => {
-                        resolve();
-                    }).catch(err => console.log(err));
-                });
-            }
-        });
-        return resp;
     }
 
     public deleteLivraisons(livraisons: Array<Livraison>) {

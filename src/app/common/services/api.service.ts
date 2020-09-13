@@ -22,7 +22,7 @@ export class ApiService {
     public static readonly POST_API_KEY: string = '/api-key';
     public static readonly ADD_INVENTORY_ENTRIES: string = '/addInventoryEntries';
     public static readonly POST_MOUVEMENT_TRACA: string = '/mouvements-traca';
-    public static readonly VALIDATE_MANUT: string = '/validateManut';
+    public static readonly POST_HANDLING: string = '/handlings';
     public static readonly GET_DATA: string = '/getData';
     public static readonly NEW_EMP: string = '/emplacement';
     public static readonly GET_ARTICLES: string = '/articles';

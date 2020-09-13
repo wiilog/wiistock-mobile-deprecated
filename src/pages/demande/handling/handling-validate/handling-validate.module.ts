@@ -1,20 +1,20 @@
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {IonicModule} from '@ionic/angular';
-import {ManutentionMenuPageRoutingModule} from './manutention-menu-routing.module';
-import {ManutentionMenuPage} from './manutention-menu.page';
 import {CommonModule as AngularCommonModule} from '@angular/common';
 import {CommonModule} from '@app/common/common.module';
+import {HandlingValidatePageRoutingModule} from '@pages/demande/handling/handling-validate/handling-validate-routing.module';
+import {HandlingValidatePage} from '@pages/demande/handling/handling-validate/handling-validate.page';
 
 @NgModule({
     imports: [
         AngularCommonModule,
         FormsModule,
         IonicModule,
-        ManutentionMenuPageRoutingModule,
+        HandlingValidatePageRoutingModule,
         CommonModule
     ],
-    declarations: [ManutentionMenuPage]
+    declarations: [HandlingValidatePage]
 })
-export class ManutentionMenuPageModule {
+export class HandlingValidatePageModule {
 }

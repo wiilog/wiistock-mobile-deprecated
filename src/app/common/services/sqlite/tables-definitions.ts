@@ -186,15 +186,27 @@ export const TablesDefinitions: Array<TableDefinition> = [
         }
     },
     {
-        name: 'manutention',
+        name: 'handling',
         attributes: {
-            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
-            demandeur: 'TEXT',
-            date_attendue: 'TEXT',
-            commentaire: 'TEXT',
+            id: 'INTEGER PRIMARY KEY',
+            number: 'VARCHAR(255)',
+            typeId: 'INTEGER',
+            typeLabel: 'VARCHAR(255)',
+            requester: 'VARCHAR(255)',
+            desiredDate: 'VARCHAR(255)',
+            comment: 'TEXT',
             destination: 'TEXT',
             source: 'TEXT',
-            objet: 'TEXT',
+            subject: 'VARCHAR(255)'
+        }
+    },
+    {
+        name: 'handling_attachment',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
+            fileName: 'VARCHAR(255)',
+            href: 'VARCHAR(255)',
+            handlingId: 'INTEGER'
         }
     },
     {

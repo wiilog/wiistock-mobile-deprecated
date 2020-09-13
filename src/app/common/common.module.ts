@@ -32,9 +32,11 @@ import {StatsSlidersComponent} from '@app/common/components/stats-sliders/stats-
 import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 import {FormPanelCameraComponent} from '@app/common/components/panel/form-panel/form-panel-camera/form-panel-camera.component';
 import {FormPanelToggleComponent} from '@app/common/components/panel/form-panel/form-panel-toggle/form-panel-toggle.component';
-import { FormPanelDirective } from './directives/form-panel/form-panel.directive';
+import {FormPanelDirective} from './directives/form-panel/form-panel.directive';
 import {FormPanelCalendarComponent} from '@app/common/components/panel/form-panel/form-panel-calendar/form-panel-calendar.component';
 import {DatePicker} from '@ionic-native/date-picker/ngx';
+import {FormViewerAttachmentsComponent} from '@app/common/components/panel/form-panel/form-viewer-attachments/form-viewer-attachments.component';
+import {FormViewerDirective} from '@app/common/directives/form-viewer/form-viewer.directive';
 
 
 @NgModule({
@@ -52,6 +54,7 @@ import {DatePicker} from '@ionic-native/date-picker/ngx';
         FormPanelCalendarComponent,
         FormPanelSelectComponent,
         FormPanelComponent,
+        FormViewerAttachmentsComponent,
         ListPanelItemComponent,
         ListPanelComponent,
         PanelHeaderComponent,
@@ -60,7 +63,8 @@ import {DatePicker} from '@ionic-native/date-picker/ngx';
         SignaturePadComponent,
         SimpleFormComponent,
         StatsSlidersComponent,
-        FormPanelDirective
+        FormPanelDirective,
+        FormViewerDirective
     ],
     imports: [
         AngularCommonModule,
@@ -104,6 +108,7 @@ import {DatePicker} from '@ionic-native/date-picker/ngx';
         FormPanelToggleComponent,
         FormPanelCalendarComponent,
         FormPanelSelectComponent,
+        FormViewerAttachmentsComponent
     ]
 })
 export class CommonModule {
