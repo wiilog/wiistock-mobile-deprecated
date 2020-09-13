@@ -24,6 +24,7 @@ export class PanelHeaderComponent {
     public info: string;
 
     @Input()
+    @HostBinding('class.collapse')
     public collapsed: boolean;
 
     @Input()
@@ -39,6 +40,7 @@ export class PanelHeaderComponent {
     @Output()
     public toggle: EventEmitter<boolean>;
 
+    @HostBinding('class.open')
     public open: boolean;
 
     public bodyMaxHeight: number;

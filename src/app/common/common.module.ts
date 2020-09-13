@@ -35,7 +35,7 @@ import {FormPanelToggleComponent} from '@app/common/components/panel/form-panel/
 import {FormPanelDirective} from './directives/form-panel/form-panel.directive';
 import {FormPanelCalendarComponent} from '@app/common/components/panel/form-panel/form-panel-calendar/form-panel-calendar.component';
 import {DatePicker} from '@ionic-native/date-picker/ngx';
-import {FormAttachmentViewerComponent} from '@app/common/components/panel/form-panel/form-attachments-viewer/form-attachment-viewer.component';
+import {FormViewerAttachmentsComponent} from '@app/common/components/panel/form-panel/form-viewer-attachments/form-viewer-attachments.component';
 import {FormViewerDirective} from '@app/common/directives/form-viewer/form-viewer.directive';
 
 
@@ -54,7 +54,7 @@ import {FormViewerDirective} from '@app/common/directives/form-viewer/form-viewe
         FormPanelCalendarComponent,
         FormPanelSelectComponent,
         FormPanelComponent,
-        FormAttachmentViewerComponent,
+        FormViewerAttachmentsComponent,
         ListPanelItemComponent,
         ListPanelComponent,
         PanelHeaderComponent,
@@ -108,7 +108,7 @@ import {FormViewerDirective} from '@app/common/directives/form-viewer/form-viewe
         FormPanelToggleComponent,
         FormPanelCalendarComponent,
         FormPanelSelectComponent,
-        FormAttachmentViewerComponent
+        FormViewerAttachmentsComponent
     ]
 })
 export class CommonModule {

@@ -1,10 +1,10 @@
 import {Type} from '@angular/core';
-import {FormAttachmentViewerComponent} from '@app/common/components/panel/form-panel/form-attachments-viewer/form-attachment-viewer.component';
-import {AttachmentsViewerParam} from '@app/common/components/panel/model/details-viewer/attachments-viewer-param';
+import {FormViewerAttachmentConfig} from '@app/common/components/panel/model/form-viewer/form-viewer-attachment-config';
+import {FormViewerAttachmentsComponent} from '@app/common/components/panel/form-panel/form-viewer-attachments/form-viewer-attachments.component';
 
-interface FormAttachmentViewerParam {
-    item: Type<FormAttachmentViewerComponent>;
-    config: AttachmentsViewerParam;
+interface FormViewerAttachmentsParam {
+    item: Type<FormViewerAttachmentsComponent>;
+    config: FormViewerAttachmentConfig;
 }
 
-export type FormViewerParam = FormAttachmentViewerParam;
+export type FormViewerParam = FormViewerAttachmentsParam;

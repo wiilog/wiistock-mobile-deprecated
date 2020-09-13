@@ -15,12 +15,11 @@ import {FormPanelInputComponent} from '@app/common/components/panel/form-panel/f
 import {FormPanelCameraComponent} from '@app/common/components/panel/form-panel/form-panel-camera/form-panel-camera.component';
 import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
-import {Status} from '@entities/status';
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
 import {FileService} from '@app/common/services/file.service';
 import {flatMap, map, tap} from 'rxjs/operators';
-import {FormAttachmentViewerComponent} from '@app/common/components/panel/form-panel/form-attachments-viewer/form-attachment-viewer.component';
 import {FormViewerParam} from '@app/common/directives/form-viewer/form-viewer-param';
+import {FormViewerAttachmentsComponent} from '@app/common/components/panel/form-panel/form-viewer-attachments/form-viewer-attachments.component';
 
 
 @Component({
@@ -68,12 +67,13 @@ export class HandlingValidatePage extends PageComponent {
 
                 this.refreshHeader(false);
 
+                const sAttachmentLabel = handlingAttachment.length > 1 ? 's' : '';
                 this.detailsConfig = handlingAttachment.length > 0
                     ? [
                         {
-                            item: FormAttachmentViewerComponent,
+                            item: FormViewerAttachmentsComponent,
                             config: {
-                                label: `Pièces jointes`,
+                                label: `Pièce${sAttachmentLabel} jointe${sAttachmentLabel}`,
                                 values: handlingAttachment.map(({fileName, href}) => ({
                                     label: fileName,
                                     href

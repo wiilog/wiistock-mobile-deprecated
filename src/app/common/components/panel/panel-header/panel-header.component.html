@@ -9,18 +9,14 @@
         </wii-icon>
     </div>
 
-    <div class="header-body-container">
-        <div class="header-body"
-             [style.maxHeight.px]="bodyMaxHeight"
-             [class.collapse]="collapsed"
-             [class.open]="open"
-             (click)="toggleTitle()">
-            <div #headerBodyWrapper
-                 class="header-body-wrapper">
-                <div class="header-title">{{title}}</div>
-                <div *ngFor="let partSubTitle of _subtitle" class="header-subtitle">{{partSubTitle}}</div>
-                <div *ngIf="info" class="header-info">{{info}}</div>
-            </div>
+    <div class="header-body"
+         [style.maxHeight.px]="bodyMaxHeight"
+         (click)="toggleTitle()">
+        <div #headerBodyWrapper
+             class="header-body-wrapper">
+            <div class="header-title">{{title}}</div>
+            <div *ngFor="let partSubTitle of _subtitle" class="header-subtitle">{{partSubTitle}}</div>
+            <div *ngIf="info" class="header-info">{{info}}</div>
         </div>
     </div>
 

@@ -1,7 +1,7 @@
 <ion-item lines="none">
     <ion-label color="medium">{{label}}</ion-label>
     <div class="camera-image-container">
-        <ng-container *ngIf="!inputConfig.multiple">
+        <ng-container *ngIf="!inputConfig.multiple && value">
             <ng-container [ngTemplateOutlet]="photoTemplate"
                           [ngTemplateOutletContext]="{src: value}">
             </ng-container>
