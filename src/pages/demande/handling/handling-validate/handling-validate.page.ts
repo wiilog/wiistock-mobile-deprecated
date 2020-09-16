@@ -245,7 +245,8 @@ export class HandlingValidatePage extends PageComponent {
                 `Objet : ${this.handling.subject || ''}`,
                 `Source : ${this.handling.source || ''}`,
                 `Destination : ${this.handling.destination || ''}`,
-                `Type : ${this.handling.typeLabel || ''}`
+                `Type : ${this.handling.typeLabel || ''}`,
+                `Commentaire : ${this.handling.comment || ''}`
             ]
         };
     }
