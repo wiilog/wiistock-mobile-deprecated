@@ -116,8 +116,8 @@ export class DeposePage extends PageComponent {
                         [id]: {label, color},
                         ...acc
                     }), {});
-                    this.allowedNatureIdsForLocation = allowedNatureLocationArray.map((acc, {nature_id}) => nature_id);
 
+                    this.allowedNatureIdsForLocation = allowedNatureLocationArray.map(({nature_id}) => nature_id);
                     this.footerScannerComponent.fireZebraScan();
 
                     this.refreshDeposeListComponent();
@@ -282,13 +282,12 @@ export class DeposePage extends PageComponent {
                 }
                 return acc;
             }, []);
-
+            console.log(this.allowedNatureIdsForLocation, pickedNatures);
             const allowedMovement = (
                 this.fromStock
                 || this.allowedNatureIdsForLocation.length === 0
                 || pickedNatures.every((pickedNatureId) => (this.allowedNatureIdsForLocation.some((nature_id) => (nature_id === pickedNatureId))))
             );
-
             if (allowedMovement) {
                 for (const pickingIndex of pickingIndexes) {
                     let quantity = this.colisPrise[pickingIndex].quantity;
