@@ -47,7 +47,7 @@ export class DispatchMenuPage extends PageComponent {
                 flatMap(() => this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL']))
             )
             .subscribe((dispatches: Array<Dispatch>) => {
-                this.dispatchesListConfig = dispatches.map(({id, requester,  number, startDate, endDate, locationFromLabel, locationToLabel, statusLabel, typeLabel, urgent}) => ({
+                this.dispatchesListConfig = dispatches.map(({id, requester,  number, startDate, endDate, locationFromLabel, locationToLabel, statusLabel, typeLabel, emergency}) => ({
                     title: { label: 'Demandeur', value: requester },
                     content: [
                         { label: 'Numéro', value: number || '' },
@@ -55,9 +55,10 @@ export class DispatchMenuPage extends PageComponent {
                         { label: 'Emplacement prise', value: locationFromLabel || '' },
                         { label: 'Emplacement dépose', value: locationToLabel || '' },
                         { label: 'Type', value: typeLabel || '' },
-                        { label: 'Statut', value: statusLabel || '' }
+                        { label: 'Statut', value: statusLabel || '' },
+                        { label: 'Urgence', value: emergency || '' }
                     ],
-                    ...(urgent
+                    ...(emergency
                         ? {
                             rightIcon: {
                                 name: 'exclamation-triangle.svg',

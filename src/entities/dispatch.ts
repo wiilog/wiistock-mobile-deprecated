@@ -4,7 +4,7 @@ export interface Dispatch {
     number: string;
     startDate: string;
     endDate: string;
-    urgent: number;
+    emergency: string;
     locationFromLabel: string;
     locationToLabel: string;
     typeLabel: string;

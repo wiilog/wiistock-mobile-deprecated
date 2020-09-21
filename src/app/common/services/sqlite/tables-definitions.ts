@@ -298,7 +298,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             number: 'VARCHAR(255)',
             startDate: 'VARCHAR(255)',
             endDate: 'VARCHAR(255)',
-            urgent: 'INTEGER',
+            emergency: 'VARCHAR(255)',
             locationFromLabel: 'VARCHAR(255)',
             locationToLabel: 'VARCHAR(255)',
             typeId: 'INTEGER',
