@@ -197,7 +197,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             comment: 'TEXT',
             destination: 'TEXT',
             source: 'TEXT',
-            subject: 'VARCHAR(255)'
+            subject: 'VARCHAR(255)',
+            emergency: 'VARCHAR(255)',
         }
     },
     {

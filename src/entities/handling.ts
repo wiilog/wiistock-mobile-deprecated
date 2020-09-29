@@ -9,4 +9,5 @@ export interface Handling {
     destination: string;
     source: string;
     subject: string;
+    emergency: string;
 }

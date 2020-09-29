@@ -62,7 +62,19 @@ export class HandlingMenuPage extends PageComponent {
                         label: 'Type',
                         value: handling.typeLabel
                     },
+                    {
+                        label: 'Urgence',
+                        value: handling.emergency || ''
+                    },
                 ],
+                ...(handling.emergency
+                    ? {
+                        rightIcon: {
+                            name: 'exclamation-triangle.svg',
+                            color: 'danger'
+                        }
+                    }
+                    : {}),
                 action: () => {
                     this.navService.push(HandlingValidatePageRoutingModule.PATH, {handling});
                 }
