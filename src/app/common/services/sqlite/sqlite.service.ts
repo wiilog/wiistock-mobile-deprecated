@@ -953,7 +953,12 @@ export class SqliteService {
     public executeQuery(query: string, getRes: boolean = true, params: Array<any> = []): Observable<any> {
         return this.db$.pipe(
             flatMap((db) => SqliteService.ExecuteQueryStatic(db, query, getRes, params)),
-            tap(() => {}, () => {console.error(query);}),
+            tap(
+                () => {},
+                (error) => {
+                    console.error(query, error);
+                }
+            ),
             map((res) => (getRes ? res : undefined))
         );
     }

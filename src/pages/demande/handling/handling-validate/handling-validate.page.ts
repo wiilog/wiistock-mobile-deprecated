@@ -222,8 +222,19 @@ export class HandlingValidatePage extends PageComponent {
     }
 
     public refreshHeader(opened: boolean = false) {
+        const {
+            number,
+            requester,
+            desiredDate,
+            subject,
+            source,
+            destination,
+            typeLabel,
+            comment,
+            emergency
+        } = this.handling;
         this.headerConfig = {
-            title: `Demande ${this.handling.number}`,
+            title: `Demande ${number}`,
             collapsed: true,
             onToggle: (opened) => {
                 this.refreshHeader(opened);
@@ -240,14 +251,15 @@ export class HandlingValidatePage extends PageComponent {
                 }
             },
             subtitle: [
-                `Demandeur : ${this.handling.requester || ''}`,
-                `Date attendue : ${this.handling.desiredDate || ''}`,
-                `Objet : ${this.handling.subject || ''}`,
-                `Source : ${this.handling.source || ''}`,
-                `Destination : ${this.handling.destination || ''}`,
-                `Type : ${this.handling.typeLabel || ''}`,
-                `Commentaire : ${this.handling.comment || ''}`
-            ]
+                `Demandeur : ${requester || ''}`,
+                `Date attendue : ${desiredDate || ''}`,
+                `Objet : ${subject || ''}`,
+                `Source : ${source || ''}`,
+                `Destination : ${destination || ''}`,
+                `Type : ${typeLabel || ''}`,
+                `Commentaire : ${comment || ''}`,
+                emergency ? `Urgence : ${emergency || ''}` : undefined
+            ].filter((item) => item)
         };
     }
 

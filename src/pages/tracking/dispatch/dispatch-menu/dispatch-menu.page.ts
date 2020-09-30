@@ -50,14 +50,16 @@ export class DispatchMenuPage extends PageComponent {
                 this.dispatchesListConfig = dispatches.map(({id, requester,  number, startDate, endDate, locationFromLabel, locationToLabel, statusLabel, typeLabel, emergency}) => ({
                     title: { label: 'Demandeur', value: requester },
                     content: [
-                        { label: 'Numéro', value: number || '' },
-                        { label: 'Date d\'échéance', value: startDate && endDate ? `Du ${startDate} au ${endDate}` : '' },
-                        { label: 'Emplacement prise', value: locationFromLabel || '' },
-                        { label: 'Emplacement dépose', value: locationToLabel || '' },
-                        { label: 'Type', value: typeLabel || '' },
-                        { label: 'Statut', value: statusLabel || '' },
-                        { label: 'Urgence', value: emergency || '' }
-                    ],
+                        {label: 'Numéro', value: number || ''},
+                        {label: 'Date d\'échéance', value: startDate && endDate ? `Du ${startDate} au ${endDate}` : ''},
+                        {label: 'Emplacement prise', value: locationFromLabel || ''},
+                        {label: 'Emplacement dépose', value: locationToLabel || ''},
+                        {label: 'Type', value: typeLabel || ''},
+                        {label: 'Statut', value: statusLabel || ''},
+                        (emergency
+                            ? {label: 'Urgence', value: emergency || ''}
+                            : undefined)
+                    ].filter((item) => item),
                     ...(emergency
                         ? {
                             rightIcon: {

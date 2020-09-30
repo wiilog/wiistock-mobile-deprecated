@@ -38,35 +38,16 @@ export class HandlingMenuPage extends PageComponent {
                     value: handling.requester
                 },
                 content: [
-                    {
-                        label: 'Numéro',
-                        value: handling.number
-                    },
-                    {
-                        label: 'Date attendue',
-                        value: handling.desiredDate || ''
-                    },
-                    {
-                        label: 'Chargement',
-                        value: handling.source || ''
-                    },
-                    {
-                        label: 'Déchargement',
-                        value: handling.destination || ''
-                    },
-                    {
-                        label: 'Objet',
-                        value: handling.subject
-                    },
-                    {
-                        label: 'Type',
-                        value: handling.typeLabel
-                    },
-                    {
-                        label: 'Urgence',
-                        value: handling.emergency || ''
-                    },
-                ],
+                    {label: 'Numéro', value: handling.number},
+                    {label: 'Date attendue', value: handling.desiredDate || ''},
+                    {label: 'Chargement', value: handling.source || ''},
+                    {label: 'Déchargement', value: handling.destination || ''},
+                    {label: 'Objet', value: handling.subject},
+                    {label: 'Type', value: handling.typeLabel},
+                    (handling.emergency
+                        ? {label: 'Urgence', value: handling.emergency || ''}
+                        : undefined)
+                ].filter((item) => item),
                 ...(handling.emergency
                     ? {
                         rightIcon: {
