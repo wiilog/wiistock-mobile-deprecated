@@ -133,7 +133,7 @@ export class DispatchValidatePage extends PageComponent {
             this.refreshLocationHeaderConfig();
         }
         else {
-            this.toastService.presentToast("Vous n'avez pas scanné le bon emplacement.")
+            this.toastService.presentToast(`Erreur : l'emplacement de dépose doit être : ${this.dispatch.locationToLabel}.`);
         }
     }
 
