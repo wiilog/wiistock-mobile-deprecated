@@ -69,7 +69,10 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             valueField: 'id',
             templateIndex: 'default',
             databaseTable: 'emplacement',
-            placeholder: 'Sélectionner un emplacement'
+            placeholder: 'Sélectionner un emplacement',
+            requestOrder: {
+                'label': 'ASC'
+            }
         },
         [SelectItemTypeEnum.TRACKING_NATURES]: {
             label: 'label',
