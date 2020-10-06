@@ -31,8 +31,12 @@ export class HandlingMenuPage extends PageComponent {
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
         this.sqliteService.findAll('handling').subscribe((handlings: Array<Handling>) => {
-            this.handlings = handlings;
-            this.handlingsListConfig = this.handlings.map((handling) => ({
+            this.handlings = handlings
+            this.handlingsListConfig = this.handlings.sort((a, b) => {
+                return (new Date (a.desiredDate) < new Date (b.desiredDate) ? -1
+                    : (new Date (a.desiredDate) > new Date (b.desiredDate) ? 1
+                        : 0))
+            }).map((handling) => ({
                 title: {
                     label: 'Demandeur',
                     value: handling.requester
