@@ -155,7 +155,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             quantite: 'INTEGER',
             is_ref: 'INTEGER',
             id_collecte: 'INTEGER',
-            has_moved: 'INTEGER'
+            has_moved: 'INTEGER',
+            reference_label: 'VARCHAR(255)'
         }
     },
     {

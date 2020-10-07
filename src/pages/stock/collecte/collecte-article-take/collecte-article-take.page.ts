@@ -34,6 +34,8 @@ export class CollecteArticleTakePage extends PageComponent {
             title: 'Confirmation quantité',
             info: [
                 {label: 'Article', value: this.article.reference},
+                {label: 'Libellé référence', value: this.article.reference_label},
+                {label: 'Code barre', value: this.article.barcode},
                 {label: 'Quantité à collecter', value: `${this.article.quantite}`}
             ],
             fields: [
