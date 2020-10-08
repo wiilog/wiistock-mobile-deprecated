@@ -7,6 +7,7 @@ import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {NavService} from '@app/common/services/nav.service';
 import {PageComponent} from '@pages/page.component';
 import {HandlingValidatePageRoutingModule} from '@pages/demande/handling/handling-validate/handling-validate-routing.module';
+import * as moment from 'moment';
 
 
 @Component({
@@ -32,38 +33,45 @@ export class HandlingMenuPage extends PageComponent {
         this.hasLoaded = false;
         this.sqliteService.findAll('handling').subscribe((handlings: Array<Handling>) => {
             this.handlings = handlings
-            this.handlingsListConfig = this.handlings.sort((a, b) => {
-                return (new Date (a.desiredDate) < new Date (b.desiredDate) ? -1
-                    : (new Date (a.desiredDate) > new Date (b.desiredDate) ? 1
-                        : 0))
-            }).map((handling) => ({
-                title: {
-                    label: 'Demandeur',
-                    value: handling.requester
-                },
-                content: [
-                    {label: 'Numéro', value: handling.number},
-                    {label: 'Date attendue', value: handling.desiredDate || ''},
-                    {label: 'Chargement', value: handling.source || ''},
-                    {label: 'Déchargement', value: handling.destination || ''},
-                    {label: 'Objet', value: handling.subject},
-                    {label: 'Type', value: handling.typeLabel},
-                    (handling.emergency
-                        ? {label: 'Urgence', value: handling.emergency || ''}
-                        : undefined)
-                ].filter((item) => item),
-                ...(handling.emergency
-                    ? {
-                        rightIcon: {
-                            name: 'exclamation-triangle.svg',
-                            color: 'danger'
+            this.handlingsListConfig = this.handlings
+                .sort(({desiredDate: desiredDate1}, {desiredDate: desiredDate2}) => {
+                    const momentDesiredDate1 = moment(desiredDate1, 'DD/MM/YYYY HH:mm:ss')
+                    const momentDesiredDate2 = moment(desiredDate2, 'DD/MM/YYYY HH:mm:ss')
+                    return (
+                        momentDesiredDate1.isBefore(momentDesiredDate2) ? -1 :
+                        momentDesiredDate1.isAfter(momentDesiredDate2) ? 1 :
+                        0
+                    );
+                })
+                .map((handling) => ({
+                    title: {
+                        label: 'Demandeur',
+                        value: handling.requester
+                    },
+                    content: [
+                        {label: 'Numéro', value: handling.number},
+                        {label: 'Date attendue', value: handling.desiredDate || ''},
+                        {label: 'Chargement', value: handling.source || ''},
+                        {label: 'Déchargement', value: handling.destination || ''},
+                        {label: 'Objet', value: handling.subject},
+                        {label: 'Type', value: handling.typeLabel},
+                        (handling.emergency
+                            ? {label: 'Urgence', value: handling.emergency || ''}
+                            : undefined)
+                    ].filter((item) => item),
+                    ...(handling.emergency
+                        ? {
+                            rightIcon: {
+                                name: 'exclamation-triangle.svg',
+                                color: 'danger'
+                            }
                         }
+                        : {}),
+                    action: () => {
+                        this.navService.push(HandlingValidatePageRoutingModule.PATH, {handling});
                     }
-                    : {}),
-                action: () => {
-                    this.navService.push(HandlingValidatePageRoutingModule.PATH, {handling});
-                }
-            }));
+                }));
+
             this.refreshSubTitle();
             this.hasLoaded = true;
         });
