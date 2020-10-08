@@ -8,4 +8,5 @@ export interface ArticleCollecte {
     has_moved: number;
     emplacement: string;
     barcode?: string;
+    reference_label?: string;
 }

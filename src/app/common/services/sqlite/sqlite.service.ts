@@ -537,7 +537,8 @@ export class SqliteService {
                         articleCollecte.id_collecte + ", " +
                         "0, " +
                         "'" + this.escapeQuotes(articleCollecte.location) + "', " +
-                        "'" + articleCollecte.barCode + "')"
+                        "'" + articleCollecte.barCode + "', " +
+                        "'" + this.escapeQuotes(articleCollecte.reference_label) + "')"
                     ))
                     : []
             )),
@@ -553,7 +554,8 @@ export class SqliteService {
                         '`id_collecte`, ' +
                         '`has_moved`, ' +
                         '`emplacement`, ' +
-                        '`barcode`' +
+                        '`barcode`, ' +
+                        '`reference_label`' +
                         ') ' +
                         'VALUES ' + articlesCollecteValues.join(',') + ';'
                     )
@@ -598,7 +600,8 @@ export class SqliteService {
             articleCollecte.id_collecte + ", " +
             "0, " +
             "'" + this.escapeQuotes(articleCollecte.location) + "', " +
-            "'" + articleCollecte.barCode + "')"
+            "'" + articleCollecte.barCode + "', " +
+            "'" + articleCollecte.reference_label + "')"
         );
     }
 
@@ -616,7 +619,8 @@ export class SqliteService {
                 '`id_collecte`, ' +
                 '`has_moved`, ' +
                 '`emplacement`, ' +
-                '`barcode`' +
+                '`barcode`, ' +
+                '`reference_label`' +
             ') ' +
             'VALUES ' + articlesCollecteValues.join(',') + ';'
         );
