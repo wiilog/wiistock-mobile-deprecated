@@ -88,7 +88,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
             info: this.collecte.forStock ? 'Mise en stock' : 'Destruction'
         };
 
-        this.listBoldValues = ['reference', 'barCode', 'location', 'quantity'];
+        this.listBoldValues = ['reference', 'label', 'barCode', 'location', 'quantity'];
 
         if (this.footerScannerComponent) {
             this.footerScannerComponent.fireZebraScan();
@@ -479,11 +479,15 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
         };
     }
 
-    private createArticleInfo({reference, barcode, emplacement, quantite}: ArticleCollecte): {[name: string]: { label: string; value: string; }} {
+    private createArticleInfo({reference, reference_label, barcode, emplacement, quantite}: ArticleCollecte): {[name: string]: { label: string; value: string; }} {
         return {
             reference: {
                 label: 'Référence',
                 value: reference
+            },
+            label: {
+                label: 'Libellé',
+                value: reference_label
             },
             barCode: {
                 label: 'Code barre',

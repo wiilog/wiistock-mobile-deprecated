@@ -538,7 +538,7 @@ export class SqliteService {
                         "0, " +
                         "'" + this.escapeQuotes(articleCollecte.location) + "', " +
                         "'" + articleCollecte.barCode + "', " +
-                        "'" + articleCollecte.reference_label + "')"
+                        "'" + this.escapeQuotes(articleCollecte.reference_label) + "')"
                     ))
                     : []
             )),

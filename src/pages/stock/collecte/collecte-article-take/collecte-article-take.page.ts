@@ -33,7 +33,7 @@ export class CollecteArticleTakePage extends PageComponent {
         this.simpleFormConfig = {
             title: 'Confirmation quantité',
             info: [
-                {label: 'Article', value: this.article.reference},
+                {label: 'Référence', value: this.article.reference},
                 {label: 'Libellé référence', value: this.article.reference_label},
                 {label: 'Code barre', value: this.article.barcode},
                 {label: 'Quantité à collecter', value: `${this.article.quantite}`}
