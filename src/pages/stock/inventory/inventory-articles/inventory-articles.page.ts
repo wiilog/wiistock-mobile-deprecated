@@ -138,7 +138,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
                             });
                     }
                     else {
-                        this.toastService.presentToast('Impossible : un ordre de livraison est en cours sur cet article ou il n\'est pas disponible');
+                        this.toastService.presentToast('Du stock en transit existe sur ' + (selectedArticle.is_ref ? 'la référence ' : 'l\'article ') + selectedArticle.barcode + ', l\'anomalie ne peut être validée.', 5000);
                     }
                 }
             }
