@@ -241,16 +241,24 @@ export class LocalDataManagerService {
                     flatMap((dispatches) => zip(
                         of(dispatches),
                         dispatches.length > 0
-                            ? this.sqliteService.findBy('dispatch_pack', [`dispatchId IN (${dispatches.map(({id}) => id).join(',')})`])
+                            ? this.sqliteService.findBy('dispatch_pack', [`dispatchId IN (${dispatches.map(({id}) => id).join(',')})`, 'treated = 1'])
                             : of([])
                     )),
 
                     map(([dispatches, dispatchPacks]) => ({
-                    paramName: 'dispatches',
-                    dispatches: dispatches.map(({id, treatedStatusId}) => ({id, treatedStatusId})),
-                    dispatchPacks: dispatchPacks.map(({id, natureId, quantity, dispatchId}) => ({id, natureId, quantity, dispatchId}))
-                }))),
-                deleteSucceed: () => this.sqliteService.deleteBy('dispatch', [`treatedStatusId IS NOT NULL`])
+                        paramName: 'dispatches',
+                        dispatches: dispatches.map(({id, treatedStatusId}) => ({id, treatedStatusId})),
+                        dispatchPacks: dispatchPacks.map(({id, natureId, quantity, dispatchId}) => ({id, natureId, quantity, dispatchId}))
+                    }))),
+                deleteSucceed: ({entireTreatedDispatch}) => zip(
+                    (entireTreatedDispatch && entireTreatedDispatch.length > 0)
+                        ? this.sqliteService.deleteBy('dispatch', [
+                            `treatedStatusId IS NOT NULL`,
+                            `id IN (${entireTreatedDispatch.join(',')})`
+                        ])
+                        : of(undefined),
+                    this.sqliteService.deleteBy('dispatch_pack', [`treated = 1`])
+                )
             }
         }
     }

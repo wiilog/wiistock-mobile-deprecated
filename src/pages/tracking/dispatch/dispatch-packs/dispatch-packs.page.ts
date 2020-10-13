@@ -4,7 +4,7 @@ import {NavService} from '@app/common/services/nav.service';
 import {PageComponent} from '@pages/page.component';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {LoadingService} from '@app/common/services/loading.service';
-import {filter, flatMap, tap} from 'rxjs/operators';
+import {filter, flatMap, map, tap} from 'rxjs/operators';
 import {Dispatch} from '@entities/dispatch';
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
 import {MainHeaderService} from '@app/common/services/main-header.service';
@@ -57,7 +57,9 @@ export class DispatchPacksPage extends PageComponent {
     public readonly listBoldValues = ['code'];
 
     private dispatch: Dispatch;
-    private dispatchPacks: Array<DispatchPack&{treated: boolean}>;
+    private dispatchPacks: Array<DispatchPack>;
+
+    private typeHasNoPartialStatuses: boolean;
 
     private natureIdsToColors: {[natureId: number]: string};
     private natureIdsToLabels: {[natureId: number]: string};
@@ -90,13 +92,19 @@ export class DispatchPacksPage extends PageComponent {
                     }),
                     flatMap(() => zip(
                         this.sqliteService.findOneBy('dispatch', {id: dispatchId}),
-                        this.sqliteService.findBy('dispatch_pack', [`dispatchId = ${dispatchId}`]),
+                        this.sqliteService.findBy('dispatch_pack', [`dispatchId = ${dispatchId}`, 'treated = 0 OR treated IS NULL']),
                         this.sqliteService.findAll('nature'),
-                        this.sqliteService.findBy('translations', [`menu LIKE 'natures'`])
-                    )),
+                        this.sqliteService.findBy('translations', [`menu LIKE 'natures'`]),
+                    ).pipe(
+                        flatMap((data) => this.sqliteService
+                            .findBy('status', [`category = 'acheminement'`, `state = 'partial'`, `typeId = ${data[0].typeId}`])
+                            .pipe(map((partialStatuses) => ([...data, partialStatuses]))))
+                        )
+                    ),
                     filter(([dispatch]) => Boolean(dispatch))
                 )
-                .subscribe(([dispatch, packs, natures, natureTranslations]: [Dispatch, Array<DispatchPack>, Array<Nature>, Array<Translation>]) => {
+                .subscribe(([dispatch, packs, natures, natureTranslations, partialStatuses]: [Dispatch, Array<DispatchPack>, Array<Nature>, Array<Translation>, Array<any>]) => {
+                    this.typeHasNoPartialStatuses = partialStatuses.length === 0;
                     this.natureIdsToColors = natures.reduce((acc, {id, color}) => ({
                         ...acc,
                         [Number(id)]: color
@@ -111,7 +119,7 @@ export class DispatchPacksPage extends PageComponent {
                     }), {});
                     this.dispatchPacks = packs.map((pack) => ({
                         ...pack,
-                        treated: false
+                        treated: 0
                     }));
                     this.dispatch = dispatch;
 
@@ -140,7 +148,7 @@ export class DispatchPacksPage extends PageComponent {
                 this.toastService.presentToast(`Vous avez déjà traité ce colis.`);
             }
             else {
-                this.dispatchPacks[selectedIndex].treated = true;
+                this.dispatchPacks[selectedIndex].treated = 1;
 
                 this.refreshListToTreatConfig();
                 this.refreshListTreatedConfig();
@@ -174,7 +182,7 @@ export class DispatchPacksPage extends PageComponent {
                 color: CardListColorEnum.GREEN,
                 name: 'stock-transfer.svg'
             },
-            ...((this.packsToTreatListConfig && this.packsToTreatListConfig.body.length === 0)
+            ...((this.packsTreatedListConfig && this.packsTreatedListConfig.body.length > 0)
                     ? {
                         rightIcon: {
                             name: 'check.svg',
@@ -270,7 +278,7 @@ export class DispatchPacksPage extends PageComponent {
         const selectedIndex = this.dispatchPacks.findIndex(({code}) => (code === barCode));
         if (selectedIndex > -1
             && this.dispatchPacks[selectedIndex].treated) {
-            this.dispatchPacks[selectedIndex].treated = false;
+            this.dispatchPacks[selectedIndex].treated = 0;
 
             this.refreshListToTreatConfig();
             this.refreshListTreatedConfig();
@@ -279,13 +287,19 @@ export class DispatchPacksPage extends PageComponent {
     }
 
     private validate(): void {
-        this.navService.push(DispatchValidatePageRoutingModule.PATH, {
-            dispatchId: this.dispatch.id,
-            dispatchPacks: this.dispatchPacks,
-            afterValidate: () => {
-                this.navService.pop();
-            }
-        });
+        const partialDispatch = this.dispatchPacks.filter(({treated}) => treated != 1).length > 0
+        if (!partialDispatch || !this.typeHasNoPartialStatuses) {
+            this.navService.push(DispatchValidatePageRoutingModule.PATH, {
+                dispatchId: this.dispatch.id,
+                dispatchPacks: this.dispatchPacks,
+                afterValidate: () => {
+                    this.navService.pop();
+                }
+            });
+        }
+        else {
+            this.toastService.presentToast("Vous ne pouvez pas valider d'acheminement partiel.")
+        }
     }
 
     private confirmPack({id: packIdToConfirm, natureId, quantity}: DispatchPack): void {

@@ -92,6 +92,7 @@ export class DispatchValidatePage extends PageComponent {
         this.unsubscribeLoading();
         const dispatchId = this.currentNavParams.get('dispatchId');
         this.dispatchPacks = this.currentNavParams.get('dispatchPacks') || [];
+        const partial = this.dispatchPacks.filter(({treated}) => !treated).length > 0;
         this.afterValidate = this.currentNavParams.get('afterValidate');
 
         this.loadingSubscription = this.loadingService.presentLoading()
@@ -104,8 +105,11 @@ export class DispatchValidatePage extends PageComponent {
             )
             .subscribe((dispatch: Dispatch) => {
                 this.dispatch = dispatch;
-
-                this.statusRequestParams = [`treated = 1`, `category = 'acheminement'`, `typeId = ${this.dispatch.typeId}`]
+                this.statusRequestParams = [
+                    `state = '${partial ? 'partial' : 'treated'}'`,
+                    `category = 'acheminement'`,
+                    `typeId = ${this.dispatch.typeId}`
+                ];
 
                 this.refreshLocationHeaderConfig();
                 this.refreshStatusHeaderConfig();
@@ -196,14 +200,24 @@ export class DispatchValidatePage extends PageComponent {
         }
         else { // (this.currentPage === this.PageStatus)
             if (this.selectedStatus) {
+                const treatedDispatchPacks = this.dispatchPacks.filter(({treated}) => treated);
                 this.loadingSubscription = this.loadingService.presentLoading()
                     .pipe(
                         tap((loader) => {
                             this.loadingElement = loader;
                         }),
                         flatMap(() => zip(
-                            this.sqliteService.update('dispatch', {treatedStatusId: this.selectedStatus.id}, [`id = ${this.dispatch.id}`]),
-                            ...(this.dispatchPacks.map(({id, natureId, quantity}) => this.sqliteService.update('dispatch_pack', {natureId, quantity}, [`id = ${id}`])))
+                            this.sqliteService.update(
+                                'dispatch',
+                                {treatedStatusId: this.selectedStatus.id, partial: Number(treatedDispatchPacks.length < this.dispatchPacks.length)},
+                                [`id = ${this.dispatch.id}`]
+                            ),
+                            ...(treatedDispatchPacks
+                                .map(({id, natureId, quantity, treated}) => this.sqliteService.update(
+                                    'dispatch_pack',
+                                    {natureId, quantity, treated},
+                                    [`id = ${id}`]
+                                )))
                         )),
                         flatMap((): any => (
                             this.network.type !== 'none'

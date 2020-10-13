@@ -94,7 +94,7 @@ export class HandlingValidatePage extends PageComponent {
                                 searchType: SelectItemTypeEnum.STATUS,
                                 requestParams: [
                                     `category = 'service'`,
-                                    `treated = 1`,
+                                    `state = 'treated'`,
                                     `typeId = ${this.handling.typeId}`
                                 ]
                             },

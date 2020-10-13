@@ -306,7 +306,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             typeId: 'INTEGER',
             typeLabel: 'VARCHAR(255)',
             statusLabel: 'VARCHAR(255)',
-            treatedStatusId: 'INTEGER'
+            treatedStatusId: 'INTEGER',
+            partial: 'INTEGER'
         }
     },
     {
@@ -317,7 +318,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             natureId: 'INTEGER',
             quantity: 'INTEGER',
             dispatchId: 'INTEGER',
-            lastLocation: 'VARCHAR(255)'
+            lastLocation: 'VARCHAR(255)',
+            treated: 'INTEGER'
         }
     },
     {
@@ -326,7 +328,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             id: 'INTEGER PRIMARY KEY',
             label: 'VARCHAR(255)',
             typeId: 'INTEGER',
-            treated: 'INTEGER',
+            state: 'VARCHAR(255)',
             category: 'VARCHAR(255)',
             displayOrder: 'INTEGER'
         }

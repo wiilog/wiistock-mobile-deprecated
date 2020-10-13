@@ -5,4 +5,5 @@ export interface DispatchPack {
     quantity: number;
     dispatchId: number;
     lastLocation?: string;
+    treated?: number;
 }

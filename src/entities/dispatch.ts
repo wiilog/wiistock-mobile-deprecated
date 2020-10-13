@@ -10,5 +10,6 @@ export interface Dispatch {
     typeLabel: string;
     typeId: number;
     treatedStatusId: number;
+    partial: number;
     statusLabel: string;
 }

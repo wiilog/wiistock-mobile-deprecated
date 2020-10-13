@@ -44,7 +44,7 @@ export class DispatchMenuPage extends PageComponent {
                 tap((loader) => {
                     loaderElement = loader;
                 }),
-                flatMap(() => this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL']))
+                flatMap(() => this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL OR partial = 1']))
             )
             .subscribe((dispatches: Array<Dispatch>) => {
                 this.dispatchesListConfig = dispatches.map(({id, requester,  number, startDate, endDate, locationFromLabel, locationToLabel, statusLabel, typeLabel, emergency}) => ({

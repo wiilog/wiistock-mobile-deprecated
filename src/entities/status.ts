@@ -2,7 +2,7 @@ export interface Status {
     id: number;
     label: string;
     typeId: number;
-    treated: number;
+    state: string;
     displayOrder: number;
     page: string;
 }
