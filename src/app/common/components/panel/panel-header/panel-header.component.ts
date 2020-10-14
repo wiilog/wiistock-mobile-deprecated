@@ -43,7 +43,7 @@ export class PanelHeaderComponent {
     @HostBinding('class.open')
     public open: boolean;
 
-    public bodyMaxHeight: number;
+    public _bodyMaxHeight: number;
 
     public _rightIcons: Array<IconConfig>;
 
@@ -54,7 +54,7 @@ export class PanelHeaderComponent {
         this.open = false;
         this.action = new EventEmitter<Event>();
         this.toggle = new EventEmitter<boolean>();
-        this.bodyMaxHeight = PanelHeaderComponent.INIT_COLLAPSED_HEADER_BODY
+        this._bodyMaxHeight = PanelHeaderComponent.INIT_COLLAPSED_HEADER_BODY
     }
 
     @HostBinding('class.ion-activatable')
@@ -114,20 +114,24 @@ export class PanelHeaderComponent {
         return Boolean(this.rightIcons && this.rightIcons[index] && this.rightIcons[index].action);
     }
 
-    public toggleTitle() {
+    public toggleTitle(): void {
         if (this.collapsed) {
             this.open = !this.open;
             if (this.open) {
                 const {height = 0} = this.headerBodyWrapper.nativeElement.getBoundingClientRect() || {};
                 if (height) {
-                    this.bodyMaxHeight = height;
+                    this._bodyMaxHeight = height;
                     this.toggle.emit(this.open);
                 }
             }
             else {
                 this.toggle.emit(this.open);
-                this.bodyMaxHeight = PanelHeaderComponent.INIT_COLLAPSED_HEADER_BODY;
+                this._bodyMaxHeight = PanelHeaderComponent.INIT_COLLAPSED_HEADER_BODY;
             }
         }
+    }
+
+    public get bodyMaxHeight(): number {
+        return this.collapsed ? this._bodyMaxHeight : undefined;
     }
 }
