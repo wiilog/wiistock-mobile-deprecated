@@ -41,6 +41,8 @@ export class HandlingValidatePage extends PageComponent {
     private apiSubscription: Subscription;
     private dataSubscription: Subscription;
 
+    private beginDate: Date;
+
     public constructor(private loadingService: LoadingService,
                        private network: Network,
                        private apiService: ApiService,
@@ -53,10 +55,11 @@ export class HandlingValidatePage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.handling = this.currentNavParams.get('handling');
+        this.beginDate = new Date();
 
         this.dataSubscription = this.dismissLoading()
             .pipe(
-                flatMap(() => this.loadingService.presentLoading('Sauvegarde de la demande de service...')),
+                flatMap(() => this.loadingService.presentLoading()),
                 tap((loading) => {
                     this.loadingElement = loading;
                 }),
@@ -148,10 +151,13 @@ export class HandlingValidatePage extends PageComponent {
             else if (!this.apiSubscription) {
                 const {statusId, comment, photos} = this.formPanelComponent.values
 
+                const endDate = new Date();
+
                 const params = {
                     id: this.handling.id,
                     statusId,
                     comment,
+                    treatmentDelay: Math.floor((endDate.getTime() - this.beginDate.getTime()) / 1000),
                     ...(
                         photos && photos.length
                             ? photos.reduce((acc: { [name: string]: File}, photoBase64: string, index: number) => {
