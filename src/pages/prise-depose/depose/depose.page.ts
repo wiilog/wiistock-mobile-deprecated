@@ -294,7 +294,7 @@ export class DeposePage extends PageComponent {
                     this.prisesToFinish.push(this.colisPrise[pickingIndex].id);
                     this.colisPrise[pickingIndex].hidden = true;
 
-                    this.colisDepose.push({
+                    this.colisDepose.unshift({
                         ref_article: this.colisPrise[pickingIndex].ref_article,
                         nature_id: this.colisPrise[pickingIndex].nature_id,
                         comment: this.colisPrise[pickingIndex].comment,

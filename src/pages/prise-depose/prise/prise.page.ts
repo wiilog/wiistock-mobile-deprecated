@@ -269,7 +269,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     }
 
     private saveTrackingMovement(barCode: string, quantity: number, loading: boolean = false): void {
-        this.colisPrise.push({
+        this.colisPrise.unshift({
             ref_article: barCode,
             type: PrisePage.MOUVEMENT_TRACA_PRISE,
             operateur: this.operator,
@@ -285,9 +285,12 @@ export class PrisePage extends PageComponent implements CanLeave {
         this.changeDetectorRef.detectChanges();
     }
 
-    private updateTrackingMovementNature(index: number, natureId?: number): void {
-        this.colisPrise[index].nature_id = natureId;
-        this.colisPrise[index].loading = false;
+    private updateTrackingMovementNature(barCode: string, natureId?: number): void {
+        const indexesToUpdate = this.findTakingIndexes(barCode);
+        for(const index of indexesToUpdate) {
+            this.colisPrise[index].nature_id = natureId;
+            this.colisPrise[index].loading = false;
+        }
         this.refreshListComponent();
         this.changeDetectorRef.detectChanges();
         this.footerScannerComponent.fireZebraScan();
@@ -307,7 +310,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                 confirmItem: !this.fromStock
                     ? ({object: {value: barCode}}: { object?: { value?: string } }) => {
                         // we get first
-                        const [dropIndex] = this.findDropIndexes(barCode);
+                        const [dropIndex] = this.findTakingIndexes(barCode);
                         if (dropIndex !== undefined) {
                             const {quantity, comment, signature, photo, nature_id: natureId, freeFields} = this.colisPrise[dropIndex];
                             this.navService.push(MovementConfirmPageRoutingModule.PATH, {
@@ -371,7 +374,7 @@ export class PrisePage extends PageComponent implements CanLeave {
 
     private updatePicking(barCode: string,
                           {quantity, comment, signature, photo, natureId, freeFields}: {quantity: number; comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string}): void {
-        const dropIndexes = this.findDropIndexes(barCode);
+        const dropIndexes = this.findTakingIndexes(barCode);
         if (dropIndexes.length > 0) {
             for(const dropIndex of dropIndexes) {
                 if (quantity > 0) {
@@ -440,7 +443,7 @@ export class PrisePage extends PageComponent implements CanLeave {
         }
     }
 
-    private findDropIndexes(barCode: string): Array<number> {
+    private findTakingIndexes(barCode: string): Array<number> {
         return this.colisPrise.reduce(
             (acc: Array<number>, {ref_article}, currentIndex) => {
                 if (ref_article === barCode) {
@@ -464,7 +467,6 @@ export class PrisePage extends PageComponent implements CanLeave {
             }
             else {
                 if (isManualAdd || !this.fromStock) {
-                    const currentIndex = this.colisPrise.length;
                     const needNatureChecks = (!this.fromStock && this.network.type !== 'none');
                     this.saveTrackingMovement(barCode, quantity, needNatureChecks);
 
@@ -486,8 +488,8 @@ export class PrisePage extends PageComponent implements CanLeave {
                                 filter(() => this.isIonEnter)
                             )
                             .subscribe(
-                                (nature) => this.updateTrackingMovementNature(currentIndex, nature && nature.id),
-                                () => this.updateTrackingMovementNature(currentIndex)
+                                (nature) => this.updateTrackingMovementNature(barCode, nature && nature.id),
+                                () => this.updateTrackingMovementNature(barCode)
                             );
                     }
                 }
