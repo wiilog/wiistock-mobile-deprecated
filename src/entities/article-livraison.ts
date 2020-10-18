@@ -2,10 +2,10 @@ export interface ArticleLivraison {
     id: number;
     label: string;
     reference: string;
-    quantite: number;
+    quantity: number;
     is_ref: number;
     id_livraison: number;
     has_moved: number;
-    emplacement: string;
+    location: string;
     barcode?: string;
 }

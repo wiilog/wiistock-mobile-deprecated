@@ -13,6 +13,7 @@ import {NavService} from '@app/common/services/nav.service';
 import {of, zip} from 'rxjs';
 import {flatMap} from 'rxjs/operators';
 import {PageComponent} from '@pages/page.component';
+import * as moment from 'moment';
 
 @Component({
     selector: 'wii-livraison-emplacement',
@@ -73,12 +74,12 @@ export class LivraisonEmplacementPage extends PageComponent {
     }
 
     public selectLocation(locationToTest: Emplacement): void {
-        if (this.livraison.emplacement === locationToTest.label) {
+        if (this.livraison.location === locationToTest.label) {
             this.location = locationToTest;
             this.panelHeaderConfig = this.createPanelHeaderConfig();
         }
         else {
-            this.toastService.presentToast("Vous n'avez pas scanné le bon emplacement (destination demandée : " + this.livraison.emplacement + ")")
+            this.toastService.presentToast("Vous n'avez pas scanné le bon emplacement (destination demandée : " + this.livraison.location + ")")
         }
     }
 
@@ -87,7 +88,7 @@ export class LivraisonEmplacementPage extends PageComponent {
             if (this.location && this.location.label) {
                 this.validateIsLoading = true;
                 this.sqliteService
-                    .findArticlesByLivraison(this.livraison.id)
+                    .findBy('article_livraison', [`id_livraison = ${this.livraison.id}`])
                     .pipe(
                         flatMap((articles) => zip(
                             ...articles.map((article) => (
@@ -96,7 +97,14 @@ export class LivraisonEmplacementPage extends PageComponent {
                                     .pipe(flatMap((mvt) => this.sqliteService.finishMvt(mvt.id, this.location.label)))
                             ))
                         )),
-                        flatMap(() => this.sqliteService.finishLivraison(this.livraison.id, this.location.label)),
+                        flatMap(() => this.sqliteService.update(
+                            'livraison',
+                            {
+                                date_end: moment().format(),
+                                location: this.location.label
+                            },
+                            [`id = ${this.livraison.id}`]
+                        )),
                         flatMap((): any => (
                             (this.network.type !== 'none')
                                 ? this.localDataManager.sendFinishedProcess('livraison')

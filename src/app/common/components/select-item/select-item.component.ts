@@ -13,7 +13,7 @@ import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {SearchItemComponent} from '@app/common/components/select-item/search-item/search-item.component';
 import {BarcodeScannerComponent} from '@app/common/components/barcode-scanner/barcode-scanner.component';
-import {Observable, Subscription} from 'rxjs';
+import {Observable, Subject, Subscription} from 'rxjs';
 import {filter} from 'rxjs/operators';
 
 
@@ -50,6 +50,8 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
 
     @ViewChild('barcodeScanner', {static: false})
     public barcodeScanner: BarcodeScannerComponent;
+
+    public selectedLabel$: Subject<string>;
 
     private resetEmitterSubscription: Subscription;
 
@@ -96,6 +98,7 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
                        private changeDetector: ChangeDetectorRef) {
         this.itemChange = new EventEmitter<any>();
         this.createItem = new EventEmitter<boolean>();
+        this.selectedLabel$ = new Subject<string>();
     }
 
     public ngAfterViewInit() {
@@ -103,8 +106,7 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
             this.resetEmitterSubscription = this.resetEmitter
                 .pipe(filter(() => Boolean(this.searchComponent)))
                 .subscribe(() => {
-                    this.searchComponent.clear();
-                    this.changeDetector.detectChanges();
+                    this.resetSearchComponent();
                 });
         }
     }
@@ -122,6 +124,11 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
 
     public onItemSelect(item: any) {
         this.itemChange.emit(item);
+        const labelName = this.searchComponent.config[this.type].label;
+        this.selectedLabel$.next((item && labelName) ? item[labelName] : undefined);
+        if (!item) {
+            this.resetSearchComponent();
+        }
     }
 
     public onPenClick(): void {
@@ -189,5 +196,10 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
         this.toastService.presentToast(
             this.config[this.type].invalidMessage
         );
+    }
+
+    private resetSearchComponent(): void {
+        this.searchComponent.clear();
+        this.changeDetector.detectChanges();
     }
 }

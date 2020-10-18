@@ -15,6 +15,7 @@ import {SQLite, SQLiteObject} from '@ionic-native/sqlite/ngx';
 import {Platform} from '@ionic/angular';
 import * as moment from 'moment';
 import {TablesDefinitions} from '@app/common/services/sqlite/tables-definitions';
+import {TableName} from '@app/common/services/sqlite/table-definition';
 
 
 @Injectable({
@@ -167,7 +168,7 @@ export class SqliteService {
         )`));
 
         return of(undefined).pipe(
-            flatMap(() => deleteOld ? this.deleteBy('`preparation`') : of(undefined)),
+            flatMap(() => deleteOld ? this.deleteBy('preparation') : of(undefined)),
             flatMap(() => {
                 if (prepasValues.length > 0) {
                     const prepasValuesStr = prepasValues.join(', ');
@@ -417,102 +418,37 @@ export class SqliteService {
     }
 
     public importLivraisons(data): Observable<any> {
-        const ret$ = new ReplaySubject<any>(1);
-        let livraisons = data['livraisons'];
-        let livraisonsValues = [];
-        if (livraisons.length === 0) {
-            this.findAll('`livraison`').subscribe((livraisonsDB) => {
-                this.deleteLivraisons(livraisonsDB).then(() => {
-                    ret$.next(undefined);
-                });
-            });
-        }
-        for (let livraison of livraisons) {
-            this.findOneById('livraison', livraison.id).subscribe((livraisonInserted) => {
-                if (livraisonInserted === null) {
-                    livraisonsValues.push("(" +
-                        livraison.id + ", " +
-                        "'" + livraison.number + "', " +
-                        "'" + this.escapeQuotes(livraison.location) + "', " +
-                        "NULL, " +
-                        "'" + this.escapeQuotes(livraison.requester) + "', " +
-                        "'" + this.escapeQuotes(livraison.type) + "'" +
-                    ")");
-                }
-                if (livraisons.indexOf(livraison) === livraisons.length - 1) {
-                    this.findAll('`livraison`').subscribe((livraisonsDB) => {
-                        let livraisonsValuesStr = livraisonsValues.join(', ');
-                        let sqlLivraisons = 'INSERT INTO `livraison` (`id`, `numero`, `emplacement`, `date_end`, `requester`, `type`) VALUES ' + livraisonsValuesStr + ';';
-                        if (livraisonsDB.length === 0) {
-                            if(livraisonsValues.length > 0) {
-                                this.executeQuery(sqlLivraisons).subscribe(() => {
-                                    ret$.next(true);
-                                });
-                            }
-                            else {
-                                ret$.next(undefined);
-                            }
-                        } else {
-                            this.deleteLivraisons(livraisonsDB.filter(l => livraisons.find(livr => livr.id === l.id) === undefined)).then(() => {
-                                if(livraisonsValues.length > 0) {
-                                    this.executeQuery(sqlLivraisons).subscribe(() => {
-                                        ret$.next(true);
-                                    });
-                                }
-                                else {
-                                    ret$.next(undefined);
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        }
-        return ret$;
-    }
+        const apiDeliveryOrder: Array<Livraison> = data['livraisons'];
+        const apiDeliveryOrderArticle: Array<ArticleLivraison> = data['articlesLivraison'];
 
-    public importArticlesLivraison(data): Observable<any> {
-        const ret$ = new ReplaySubject<any>(1);
-        let articlesLivrs = data['articlesLivraison'];
-        let articlesLivraisonValues = [];
-        if (articlesLivrs.length === 0) {
-            ret$.next(undefined);
-        }
-        for (let article of articlesLivrs) {
-            this.findArticlesByLivraison(article.id_livraison).subscribe((articles) => {
-                // TODO '=='
-                const found = articles.some((articleLivr) => (
-                    (articleLivr.reference === article.reference) &&
-                    (articleLivr.is_ref == article.is_ref))
-                );
-                if (!found) {
-                    articlesLivraisonValues.push(
-                        "(" +
-                        "NULL, " +
-                        "'" + this.escapeQuotes(article.label) + "', " +
-                        "'" + this.escapeQuotes(article.reference) + "'," +
-                        article.quantity + ", " +
-                        article.is_ref + ", " +
-                        "" + article.id_livraison + ", " +
-                        "0, " +
-                        "'" + this.escapeQuotes(article.location) + "'," +
-                        "'" + article.barCode + "'" +
-                        ")");
-                }
-                if (articlesLivrs.indexOf(article) === articlesLivrs.length - 1) {
-                    if (articlesLivraisonValues.length > 0) {
-                        let articlesLivraisonValuesStr = articlesLivraisonValues.join(', ');
-                        let sqlArticlesLivraison = 'INSERT INTO `article_livraison` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_livraison`, `has_moved`, `emplacement`, `barcode`) VALUES ' + articlesLivraisonValuesStr + ';';
-                        this.executeQuery(sqlArticlesLivraison).subscribe(() => {
-                            ret$.next(true);
-                        });
-                    } else {
-                        ret$.next(undefined);
-                    }
-                }
-            });
-        }
-        return ret$;
+        return zip(
+            this.findAll('livraison'),
+            this.findAll('article_livraison')
+        )
+            .pipe(
+                flatMap(([existingDeliveryOrder, existingDeliveryOrderArticle]: [Array<Livraison>, Array<ArticleLivraison>]) => {
+                    // if order already exists we do not inset it
+                    const deliveryOrdersToInsert = apiDeliveryOrder.filter((toInsert) => existingDeliveryOrder.every((existing) => (Number(existing.id) !== Number(toInsert.id))));
+
+                    // if article already exists we do not inset it
+                    const deliveryOrderArticlesToInsert = apiDeliveryOrderArticle.filter((toInsert) => existingDeliveryOrderArticle.every((existing) => (
+                        (Number(existing.is_ref) !== Number(toInsert.is_ref))
+                        || (existing.reference !== toInsert.reference)
+                    )));
+
+                    return zip(
+                        // orders insert
+                        deliveryOrdersToInsert && deliveryOrdersToInsert.length > 0
+                            ? zip(...deliveryOrdersToInsert.map((delivery) => this.insert('livraison', delivery)))
+                            : of(undefined),
+
+                        // articles insert
+                        deliveryOrderArticlesToInsert && deliveryOrderArticlesToInsert.length > 0
+                            ? zip(...deliveryOrderArticlesToInsert.map((article) => this.insert('article_livraison', {has_moved: 0, ...article})))
+                            : of(undefined)
+                    );
+                })
+            );
     }
 
     /**
@@ -580,7 +516,7 @@ export class SqliteService {
                     .map(({id, number, location_from, forStock, requester, type, comment}) => ({id, number, location_from, forStock, requester, type, comment}));
 
                 return (collectesValuesToAdd.length > 0
-                    ? this.insert('`collecte`', collectesValuesToAdd)
+                    ? this.insert('collecte', collectesValuesToAdd)
                     : of(undefined));
             }),
             map(() => undefined)
@@ -785,7 +721,6 @@ export class SqliteService {
             flatMap(() => this.importPreparations(data).pipe(tap(() => {console.log('--- > importPreparations')}))),
             flatMap(() => this.importArticlesPrepas(data).pipe(tap(() => {console.log('--- > importArticlesPrepas')}))),
             flatMap(() => this.importLivraisons(data).pipe(tap(() => {console.log('--- > importLivraisons')}))),
-            flatMap(() => this.importArticlesLivraison(data).pipe(tap(() => {console.log('--- > importArticlesLivraison')}))),
             flatMap(() => this.importArticlesInventaire(data).pipe(tap(() => {console.log('--- > importArticlesInventaire')}))),
             flatMap(() => this.importHandlings(data).pipe(tap(() => {console.log('--- > importHandlings')}))),
             flatMap(() => this.importCollectes(data).pipe(tap(() => {console.log('--- > importCollectes')}))),
@@ -807,11 +742,11 @@ export class SqliteService {
         );
     }
 
-    public findOneById(table: string, id: number): Observable<any> {
+    public findOneById(table: TableName, id: number): Observable<any> {
         return this.findOneBy(table, {id});
     }
 
-    public findOneBy(table: string, conditions: {[name: string]: any}, glue: string = 'OR'): Observable<any> {
+    public findOneBy(table: TableName, conditions: {[name: string]: any}, glue: string = 'OR'): Observable<any> {
         const condition = Object
             .keys(conditions)
             .map((name) => `${name} ${this.getComparatorForQuery(conditions[name])} ${this.getValueForQuery(conditions[name])}`)
@@ -827,7 +762,7 @@ export class SqliteService {
         );
     }
 
-    public count(table: string, where: string[] = []): Observable<number> {
+    public count(table: TableName, where: string[] = []): Observable<number> {
         let whereClause = (where && where.length > 0)
             ? ` WHERE ${where.map((condition) => `(${condition})`).join(' AND ')}`
             : '';
@@ -886,7 +821,7 @@ export class SqliteService {
      * @param {string[]} where boolean clauses to apply with AND separator
      * @param {Object.<string,'ASC'|'DESC'>} order
      */
-    public findBy(table: string, where: Array<string> = [], order: {[column: string]: 'ASC'|'DESC'} = {}): Observable<any> {
+    public findBy(table: TableName, where: Array<string> = [], order: {[column: string]: 'ASC'|'DESC'} = {}): Observable<any> {
         const sqlWhereClauses = (where && where.length > 0)
             ? ` WHERE ${SqliteService.JoinWhereClauses(where)}`
             : undefined;
@@ -906,11 +841,11 @@ export class SqliteService {
         );
     }
 
-    public findAll(table: string): Observable<any> {
+    public findAll(table: TableName): Observable<any> {
         return this.findBy(table)
     }
 
-    private createInsertQuery(name: string, objects: any|Array<any>): string {
+    private createInsertQuery(name: TableName, objects: any|Array<any>): string {
         const isMultiple = Array.isArray(objects);
         const objectKeys = Object.keys(isMultiple ? objects[0] : objects);
 
@@ -928,7 +863,7 @@ export class SqliteService {
             valuesMap.join(', ');
     }
 
-    private createUpdateQuery(name: string, values: any, where: Array<string>): string {
+    private createUpdateQuery(name: TableName, values: any, where: Array<string>): string {
         const objectKeys = Object.keys(values);
         const whereClauses = SqliteService.JoinWhereClauses(where);
         const valuesMapped = objectKeys.map((key) => `${key} = ${this.getValueForQuery(values[key])}`);
@@ -942,12 +877,12 @@ export class SqliteService {
             : undefined;
     }
 
-    public insert(name: string, objects: any|Array<any>): Observable<number> {
+    public insert(name: TableName, objects: any|Array<any>): Observable<number> {
         let query = this.createInsertQuery(name, objects);
         return this.executeQuery(query).pipe(map(({insertId}) => insertId));
     }
 
-    public update(name: string, values: any, where: Array<string> = []): Observable<any> {
+    public update(name: TableName, values: any, where: Array<string> = []): Observable<any> {
         let query = this.createUpdateQuery(name, values, where);
         return query
             ? this.executeQuery(query)
@@ -971,13 +906,6 @@ export class SqliteService {
         return this.db$.pipe(
             flatMap((db: SQLiteObject) => from(db.executeSql(`SELECT * FROM \`article_prepa\` WHERE \`id_prepa\` = ${id_prepa} AND deleted <> 1`, []))),
             map((articles) => SqliteService.MultiSelectQueryMapper<ArticlePrepa>(articles))
-        );
-    }
-
-    public findArticlesByLivraison(id_livr: number): Observable<Array<ArticleLivraison>> {
-        return this.db$.pipe(
-            flatMap((db: SQLiteObject) => from(db.executeSql('SELECT * FROM `article_livraison` WHERE `id_livraison` = ' + id_livr, []))),
-            map((articles) => SqliteService.MultiSelectQueryMapper<ArticleLivraison>(articles))
         );
     }
 
@@ -1026,11 +954,6 @@ export class SqliteService {
         return this.executeQuery(`UPDATE \`preparation\` SET date_end = NULL, emplacement = NULL WHERE id IN (${idPrepasJoined})`, false);
     }
 
-    public resetFinishedLivraisons(id_livraisons: Array<number>): Observable<undefined> {
-        const idLivraisonsJoined = id_livraisons.join(',');
-        return this.executeQuery(`UPDATE \`livraison\` SET date_end = NULL, emplacement = NULL WHERE id IN (${idLivraisonsJoined})`, false);
-    }
-
     public resetFinishedCollectes(id_collectes: Array<number>): Observable<any> {
         const idCollectesJoined = id_collectes.join(',');
         return zip(
@@ -1042,13 +965,6 @@ export class SqliteService {
     public startPrepa(id_prepa: number): Observable<undefined> {
         return this.db$.pipe(
             flatMap((db) => from(db.executeSql('UPDATE `preparation` SET started = 1 WHERE id = ' + id_prepa, []))),
-            map(() => undefined)
-        );
-    }
-
-    public finishLivraison(id_livraison: number, emplacement): Observable<undefined> {
-        return this.db$.pipe(
-            flatMap((db) => from(db.executeSql('UPDATE `livraison` SET date_end = \'' + moment().format() + '\', emplacement = \'' + emplacement + '\' WHERE id = ' + id_livraison, []))),
             map(() => undefined)
         );
     }
@@ -1095,13 +1011,6 @@ export class SqliteService {
         );
     }
 
-    public updateArticleLivraisonQuantity(id_article: number, quantite: number): Observable<undefined> {
-        return this.db$.pipe(
-            flatMap((db) => from(db.executeSql('UPDATE `article_livraison` SET quantite = ' + quantite + ' WHERE id = ' + id_article, []))),
-            map(() => undefined)
-        );
-    }
-
     public updateArticleCollecteQuantity(id_article: number, quantite: number): Observable<undefined> {
         return this.db$.pipe(
             flatMap((db) => from(db.executeSql('UPDATE `article_collecte` SET quantite = ' + quantite + ' WHERE id = ' + id_article, []))),
@@ -1119,32 +1028,10 @@ export class SqliteService {
             : of(undefined);
     }
 
-    public deleteLivraisons(livraisons: Array<Livraison>) {
-        let resp = new Promise<any>((resolve) => {
-            if (livraisons.length === 0) {
-                resolve();
-            }
-            else {
-                this.db$.subscribe((db) => {
-                    livraisons.forEach(livraison => {
-                        db.executeSql('DELETE FROM `livraison` WHERE id = ' + livraison.id, []).then(() => {
-                            db.executeSql('DELETE FROM `article_livraison` WHERE id_livraison = ' + livraison.id, []).then(() => {
-                                if (livraisons.indexOf(livraison) === livraisons.length - 1) {
-                                    resolve();
-                                }
-                            }).catch(err => console.log(err));
-                        }).catch(err => console.log(err));
-                    });
-                });
-            }
-        });
-        return resp;
-    }
-
     /**
      * Call sqlite delete command.
      */
-    public deleteBy(table: string,
+    public deleteBy(table: TableName,
                     where: Array<string> = []): Observable<undefined> {
         const sqlWhereClauses = (where && where.length > 0)
             ? `WHERE ${SqliteService.JoinWhereClauses(where)}`

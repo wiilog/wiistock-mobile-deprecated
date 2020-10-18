@@ -53,7 +53,7 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
 
         zip(
             this.storageService.getOperatorId(),
-            this.isUpdate ? this.sqliteService.findOneById('`demande_livraison`', demandeId) : of(this.demandeLivraisonToUpdate),
+            this.isUpdate ? this.sqliteService.findOneById('demande_livraison', demandeId) : of(this.demandeLivraisonToUpdate),
             this.storageService.getOperator()
         )
         .subscribe(([operatorId, demandeLivraison, operator]: [number, DemandeLivraison|undefined, string]) => {

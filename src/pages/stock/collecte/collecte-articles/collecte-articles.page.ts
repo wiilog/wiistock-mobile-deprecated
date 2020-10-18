@@ -149,7 +149,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                             this.updateList(articles);
                         });
                 } else {
-                    this.sqliteService.insert('`article_collecte`', newArticle).subscribe((insertId) => {
+                    this.sqliteService.insert('article_collecte', newArticle).subscribe((insertId) => {
                         let mouvement: Mouvement = {
                             id: null,
                             barcode: newArticle.barcode,
@@ -170,7 +170,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                         };
                         this.sqliteService.updateArticleCollecteQuantity(article.id, article.quantite - Number(quantite))
                             .pipe(
-                                flatMap(() => this.sqliteService.insert('`mouvement`', mouvement)),
+                                flatMap(() => this.sqliteService.insert('mouvement', mouvement)),
                                 flatMap(() => this.sqliteService.findArticlesByCollecte(this.collecte.id)))
                             .subscribe((articles) => {
                                 this.updateList(articles);
@@ -205,7 +205,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                     this.sqliteService
                         .updateArticleCollecteQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite)
                         .pipe(
-                            flatMap(() => this.sqliteService.deleteBy('`article_collecte`', [`id = ${mouvement.id_article_collecte}`])),
+                            flatMap(() => this.sqliteService.deleteBy('article_collecte', [`id = ${mouvement.id_article_collecte}`])),
                             flatMap(() => this.sqliteService.findArticlesByCollecte(this.collecte.id))
                         )
                         .subscribe((articles) => {
@@ -213,7 +213,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                         });
                 } else {
                     this.sqliteService
-                        .insert('`mouvement`', mouvement)
+                        .insert('mouvement', mouvement)
                         .pipe(
                             flatMap(() => this.sqliteService.moveArticleCollecte(article.id)),
                             flatMap(() => this.sqliteService.findArticlesByCollecte(this.collecte.id))

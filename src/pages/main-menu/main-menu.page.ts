@@ -74,9 +74,9 @@ export class MainMenuPage extends PageComponent {
 
     public refreshCounters(): Observable<void> {
         return zip(
-            this.sqliteService.findAll('`preparation`'),
+            this.sqliteService.findAll('preparation'),
             this.storageService.getFinishedPreps(),
-            this.sqliteService.count('`article_inventaire`')
+            this.sqliteService.count('article_inventaire')
         )
             .pipe(
                 take(1),

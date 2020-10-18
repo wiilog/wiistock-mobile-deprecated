@@ -73,7 +73,7 @@ export class DemandeLivraisonMenuPage extends PageComponent implements CanLeave 
         this.hasLoaded = false;
         this.storageService.getOperatorId()
             .pipe(
-                flatMap((userId) => this.sqliteService.findBy('`demande_livraison`', [`user_id = ${userId}`])),
+                flatMap((userId) => this.sqliteService.findBy('demande_livraison', [`user_id = ${userId}`])),
                 flatMap((demandesLivraison: Array<DemandeLivraison>) => this.preloadData(demandesLivraison).pipe(map(() => demandesLivraison)))
             )
             .subscribe((demandesLivraison: Array<DemandeLivraison>) => {
@@ -217,7 +217,7 @@ export class DemandeLivraisonMenuPage extends PageComponent implements CanLeave 
 
     public preloadData(demandesLivraison: Array<DemandeLivraison>): Observable<[{ [id: number]: string }, string, { [id: number]: string }, { [id: number]: number }]> {
         return zip(
-            this.sqliteService.findAll('`demande_livraison_type`'),
+            this.sqliteService.findAll('demande_livraison_type'),
             this.storageService.getOperator()
         )
             .pipe(

@@ -429,7 +429,7 @@ export class PreparationArticlesPage extends PageComponent {
                 id_collecte: null,
                 id_livraison: null
             };
-            return this.sqliteService.insert('`mouvement`', mouvement);
+            return this.sqliteService.insert('mouvement', mouvement);
         } else {
             return of(undefined);
         }

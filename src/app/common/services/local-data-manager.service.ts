@@ -54,8 +54,8 @@ export class LocalDataManagerService {
                 service: ApiService.FINISH_PREPA,
                 createApiParams: () => (
                     zip(
-                        this.sqliteService.findAll('`preparation`'),
-                        this.sqliteService.findAll('`mouvement`')
+                        this.sqliteService.findAll('preparation'),
+                        this.sqliteService.findAll('mouvement')
                     )
                         .pipe(
                             map(([preparations, mouvements]: [Array<Preparation>, Array<Mouvement>]) => ([
@@ -105,8 +105,8 @@ export class LocalDataManagerService {
                 service: ApiService.FINISH_LIVRAISON,
                 createApiParams: () => (
                     zip(
-                        this.sqliteService.findAll('`livraison`'),
-                        this.sqliteService.findAll('`mouvement`')
+                        this.sqliteService.findAll('livraison'),
+                        this.sqliteService.findAll('mouvement')
                     )
                         .pipe(
                             map(([livraisons, mouvements]: [Array<Livraison>, Array<Mouvement>]) => ([
@@ -136,7 +136,9 @@ export class LocalDataManagerService {
                 resetFailed: (resError) => {
                     const idsToDelete = resError.map(({id_livraison}) => id_livraison);
                     return zip(
-                        this.sqliteService.resetFinishedLivraisons(idsToDelete),
+                        idsToDelete.length > 0
+                            ? this.sqliteService.update('livraison', {date_end: null, location: null}, [`id IN (${idsToDelete.join(',')})`])
+                            : of(undefined),
                         this.sqliteService.deleteMouvementsBy('id_livraison', idsToDelete)
                     );
                 }
@@ -145,8 +147,8 @@ export class LocalDataManagerService {
                 service: ApiService.FINISH_COLLECTE,
                 createApiParams: () => (
                     zip(
-                        this.sqliteService.findAll('`collecte`'),
-                        this.sqliteService.findAll('`mouvement`')
+                        this.sqliteService.findAll('collecte'),
+                        this.sqliteService.findAll('mouvement')
                     )
                         .pipe(
                             map(([collectes, mouvements]: [Array<Collecte>, Array<Mouvement>]) => ([
@@ -213,7 +215,7 @@ export class LocalDataManagerService {
             },
             inventory: {
                 service: ApiService.ADD_INVENTORY_ENTRIES,
-                createApiParams: () => this.sqliteService.findAll('`saisie_inventaire`').pipe(map((entries) => ({
+                createApiParams: () => this.sqliteService.findAll('saisie_inventaire').pipe(map((entries) => ({
                     paramName: 'entries',
                     entries
                 }))),
@@ -226,7 +228,7 @@ export class LocalDataManagerService {
             },
             inventoryAnomalies: {
                 service: ApiService.TREAT_ANOMALIES,
-                createApiParams: () => this.sqliteService.findBy('`anomalie_inventaire`', [`treated = '1'`]).pipe(map((anomalies) => ({
+                createApiParams: () => this.sqliteService.findBy('anomalie_inventaire', [`treated = '1'`]).pipe(map((anomalies) => ({
                     paramName: 'anomalies',
                     anomalies
                 }))),
@@ -434,7 +436,7 @@ export class LocalDataManagerService {
                     ...mouvement,
                     date: mouvement.date + '_' + Math.random().toString(36).substr(2, 9)
                 }))
-                .map((mouvement) => this.sqliteService.insert('`mouvement_traca`', mouvement)),
+                .map((mouvement) => this.sqliteService.insert('mouvement_traca', mouvement)),
             this.sqliteService.finishPrises(prisesToFinish)
         )
             .pipe(map(() => undefined))

@@ -19,7 +19,9 @@
     }
 
     .tools {
-        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         margin-bottom: $spacer;
 
         .tools-icon {
@@ -30,6 +32,29 @@
             width: 2.4rem;
             height: 2.4rem;
             display: inline-block;
+        }
+
+        .tools-selected-label {
+            display: flex;
+            max-width: 60%;
+            align-items: center;
+            background-color: $medium;
+            color: $lightGrey;
+            padding: $spacer / 2;
+            border-radius: 25px;
+            margin-left: $spacer / 2;
+
+            .selected-label-content {
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .selected-label-remove {
+                padding: 0 $spacerMin;
+                font-size: 18px;
+                line-height: 1;
+            }
         }
     }
 

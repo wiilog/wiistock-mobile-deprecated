@@ -5,6 +5,7 @@ import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {map, take, tap} from 'rxjs/operators';
 import {ArticleInventaire} from '@entities/article-inventaire';
 import {Observable, of, ReplaySubject, Subscription} from 'rxjs';
+import {TableName} from '@app/common/services/sqlite/table-definition';
 
 
 @Component({
@@ -50,7 +51,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
 
     private itemsSubscription: Subscription;
 
-    public readonly config = {
+    public readonly config: {[type: string]: {[conf: string]: any; databaseTable?: TableName}} = {
         default: {
             label: 'label',
             valueField: 'id',
@@ -120,12 +121,12 @@ export class SearchItemComponent implements OnInit, OnDestroy {
         this.lastSearch = '';
     }
 
-    private static MakeMapForInventoryLocations(anomalyMode: boolean) {
+    private static MakeMapForInventoryLocations(anomalyMode: boolean): {[conf: string]: any; databaseTable: TableName} {
         return {
             label: 'label',
             valueField: 'id',
             templateIndex: 'default',
-            databaseTable: anomalyMode ? '`anomalie_inventaire`' : '`article_inventaire`',
+            databaseTable: anomalyMode ? 'anomalie_inventaire' : 'article_inventaire',
             placeholder: 'Sélectionner un emplacement',
             map: (list: Array<ArticleInventaire>) => {
                 return list
@@ -139,12 +140,12 @@ export class SearchItemComponent implements OnInit, OnDestroy {
         };
     }
 
-    private static MakeMapForInventoryArticles(anomalyMode: boolean) {
+    private static MakeMapForInventoryArticles(anomalyMode: boolean): {[conf: string]: any; databaseTable: TableName} {
         return {
             label: 'barcode',
             valueField: 'barcode',
             templateIndex: 'article-inventory',
-            databaseTable: anomalyMode ? '`anomalie_inventaire`' : '`article_inventaire`',
+            databaseTable: anomalyMode ? 'anomalie_inventaire' : 'article_inventaire',
             placeholder: 'Sélectionner un article'
         };
     }

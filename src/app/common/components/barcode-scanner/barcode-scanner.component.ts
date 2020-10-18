@@ -1,7 +1,7 @@
 import {Component, EventEmitter, HostBinding, Input, OnDestroy, OnInit, Output} from '@angular/core';
 import {BarcodeScannerManagerService} from '@app/common/services/barcode-scanner-manager.service';
 import {ToastService} from '@app/common/services/toast.service';
-import {Subscription} from 'rxjs';
+import {Observable, Subscription} from 'rxjs';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 
 
@@ -17,8 +17,12 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
     public readonly TOOL_SEARCH_MODE = BarcodeScannerModeEnum.TOOL_SEARCH;
     public readonly TOOLS_FULL_MODE = BarcodeScannerModeEnum.TOOLS_FULL;
     public readonly ONLY_SEARCH_MODE = BarcodeScannerModeEnum.ONLY_SEARCH;
+    public readonly TOOL_SEARCH_AND_LABEL = BarcodeScannerModeEnum.TOOL_SEARCH_AND_LABEL;
 
     public input: string;
+
+    @Input()
+    public selectedLabel$?: Observable<string>;
 
     @Input()
     public hidden?: boolean;
@@ -36,6 +40,9 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
     public search: EventEmitter<undefined>;
 
     @Output()
+    public clear: EventEmitter<undefined>;
+
+    @Output()
     public createForm: EventEmitter<undefined>;
 
     private zebraScanSubscription: Subscription;
@@ -45,6 +52,7 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
         this.add = new EventEmitter<[string, boolean]>();
         this.search = new EventEmitter<undefined>();
         this.createForm = new EventEmitter<undefined>();
+        this.clear = new EventEmitter<undefined>();
     }
 
     public ngOnInit(): void {
@@ -64,7 +72,7 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
     public addManually() {
         if (this.input) {
             this.triggerAdd(this.input, true);
-            this.clear();
+            this.clearInput();
         }
         else {
             this.toastService.presentToast('Aucune donnée saisie');
@@ -97,7 +105,7 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
         this.createForm.emit();
     }
 
-    private clear(): void {
+    private clearInput(): void {
         this.input = '';
     }
 
@@ -110,5 +118,9 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
     @HostBinding('attr.hidden')
     public get attrHidden(): string {
         return this.hidden ? '' : undefined;
+    }
+
+    public onSelectedLabelClick(): void {
+        this.clear.emit();
     }
 }

@@ -34,14 +34,14 @@ export class LivraisonArticleTakePage extends PageComponent {
             title: 'Confirmation quantité',
             info: [
                 {label: 'Article', value: this.article.reference},
-                {label: 'Quantité à livrer', value: `${this.article.quantite}`}
+                {label: 'Quantité à livrer', value: `${this.article.quantity}`}
             ],
             fields: [
                 {
                     label: 'Quantité souhaitée',
                     name: 'quantity',
                     type: 'number',
-                    value: this.article.quantite
+                    value: this.article.quantity
                 }
             ]
         }
@@ -49,7 +49,7 @@ export class LivraisonArticleTakePage extends PageComponent {
 
     public addArticle(data): void {
         const {quantity} = data;
-        if (quantity && quantity <= this.article.quantite && quantity > 0) {
+        if (quantity && quantity <= this.article.quantity && quantity > 0) {
             this.selectArticle(quantity);
             this.navService.pop();
         }

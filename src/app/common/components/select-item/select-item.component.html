@@ -6,10 +6,12 @@
 </wii-search-item>
 <div class="select-location-footer">
     <wii-barcode-scanner #barcodeScanner
+                         [selectedLabel$]="selectedLabel$"
                          [buttonSubtitle]="config[type].buttonSubtitle"
                          [mode]="scanMode"
                          (search)="openSearch()"
                          (createForm)="onPenClick()"
-                         (add)="testIfBarcodeValid($event[0])">
+                         (add)="testIfBarcodeValid($event[0])"
+                         (clear)="onItemSelect(undefined)">
     </wii-barcode-scanner>
 </div>

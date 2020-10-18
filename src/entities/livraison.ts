@@ -1,7 +1,8 @@
 export interface Livraison {
     id: number;
-    numero: string;
-    emplacement: string;
+    number: string;
+    preparationLocation: string;
+    location: string;
     date_end: string;
     requester: string;
     type: string;

@@ -36,7 +36,7 @@ export class CollecteMenuPage extends PageComponent {
         this.hasLoaded = false;
         this.goToDepose = this.currentNavParams.get('goToDepose');
         this.avoidSync = this.currentNavParams.get('avoidSync');
-        this.sqliteService.findAll('`collecte`').subscribe((collectes: Array<Collecte>) => {
+        this.sqliteService.findAll('collecte').subscribe((collectes: Array<Collecte>) => {
             this.collectes = collectes
                 .filter(({date_end, location_to}) => (!date_end && !location_to))
                 .sort(({location_from: location_from_1}, {location_from: location_from_2}) => ((location_from_1 < location_from_2) ? -1 : 1));

@@ -98,11 +98,12 @@ export const TablesDefinitions: Array<TableDefinition> = [
         name: 'livraison',
         attributes: {
             id: 'INTEGER PRIMARY KEY',
-            numero: 'TEXT',
-            emplacement: 'TEXT',
+            number: 'TEXT',
+            location: 'TEXT',
             date_end: 'TEXT',
             requester: 'VARCHAR(255)',
-            type: 'VARCHAR(255)'
+            type: 'VARCHAR(255)',
+            preparationLocation: 'VARCHAR(255)',
         }
     },
     {
@@ -125,9 +126,9 @@ export const TablesDefinitions: Array<TableDefinition> = [
             id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
             label: 'TEXT',
             reference: 'TEXT',
-            emplacement: 'TEXT',
+            location: 'TEXT',
             barcode: 'TEXT',
-            quantite: 'INTEGER',
+            quantity: 'INTEGER',
             is_ref: 'INTEGER',
             id_livraison: 'INTEGER',
             has_moved: 'INTEGER'

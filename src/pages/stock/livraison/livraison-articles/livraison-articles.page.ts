@@ -62,8 +62,8 @@ export class LivraisonArticlesPage extends PageComponent {
 
         this.livraisonsHeaderConfig = {
             leftIcon: {name: 'delivery.svg'},
-            title: `Livraison ${this.livraison.numero}`,
-            subtitle: `Destination : ${this.livraison.emplacement}`
+            title: `Livraison ${this.livraison.number}`,
+            subtitle: `Destination : ${this.livraison.location}`
         };
 
         this.listBoldValues = ['label', 'barCode', 'location', 'quantity'];
@@ -72,13 +72,15 @@ export class LivraisonArticlesPage extends PageComponent {
             this.footerScannerComponent.fireZebraScan();
         }
 
-        this.sqliteService.findArticlesByLivraison(this.livraison.id).subscribe((articles) => {
-            this.updateList(articles, true);
+        this.sqliteService
+            .findBy('article_livraison', [`id_livraison = ${this.livraison.id}`])
+            .subscribe((articles) => {
+                this.updateList(articles, true);
 
-            if (this.articlesT.length > 0) {
-                this.started = true;
-            }
-        });
+                if (this.articlesT.length > 0) {
+                    this.started = true;
+                }
+            });
     }
 
     public ionViewWillLeave(): void {
@@ -125,37 +127,37 @@ export class LivraisonArticlesPage extends PageComponent {
 
     public registerMvt(article, quantity): void {
         if (this.isValid) {
-            if (article.quantite !== Number(quantity)) {
+            if (article.quantity !== Number(quantity)) {
                 let newArticle: ArticleLivraison = {
                     id: null,
                     label: article.label,
                     reference: article.reference,
-                    quantite: Number(quantity),
+                    quantity: Number(quantity),
                     is_ref: article.is_ref,
                     id_livraison: article.id_livraison,
                     has_moved: 1,
-                    emplacement: article.emplacement,
+                    location: article.location,
                     barcode: article.barcode
                 };
                 let articleAlready = this.articlesT.find(art => art.id_livraison === newArticle.id_livraison && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
                 if (articleAlready !== undefined) {
                     this.sqliteService
-                        .updateArticleLivraisonQuantity(articleAlready.id, newArticle.quantite + articleAlready.quantite)
+                        .update('article_livraison', {quantity: newArticle.quantity + articleAlready.quantity}, [`id = ${articleAlready.id}`])
                         .pipe(
-                            flatMap(() => this.sqliteService.updateArticleLivraisonQuantity(article.id, article.quantite - newArticle.quantite)),
-                            flatMap(() => this.sqliteService.findArticlesByLivraison(this.livraison.id))
+                            flatMap(() => this.sqliteService.update('article_livraison', {quantity: article.quantity - newArticle.quantity}, [`id = ${article.id}`])),
+                            flatMap(() => this.sqliteService.findBy('article_livraison', [`id_livraison = ${this.livraison.id}`]))
                         )
                         .subscribe((articles) => {
                             this.updateList(articles);
                         });
                 } else {
-                    this.sqliteService.insert('`article_livraison`', newArticle).subscribe((insertId) => {
+                    this.sqliteService.insert('article_livraison', newArticle).subscribe((insertId) => {
                         let mouvement: Mouvement = {
                             id: null,
                             reference: newArticle.reference,
-                            quantity: article.quantite,
+                            quantity: article.quantity,
                             date_pickup: moment().format(),
-                            location_from: newArticle.emplacement,
+                            location_from: newArticle.location,
                             date_drop: null,
                             location: null,
                             type: 'prise-dépose',
@@ -168,10 +170,10 @@ export class LivraisonArticlesPage extends PageComponent {
                             id_collecte: null,
                         };
                         this.sqliteService
-                            .updateArticleLivraisonQuantity(article.id, article.quantite - Number(quantity))
+                            .update('article_livraison', {quantity: article.quantity - Number(quantity)}, [`id = ${article.id}`])
                             .pipe(
-                                flatMap(() => this.sqliteService.insert('`mouvement`', mouvement)),
-                                flatMap(() => this.sqliteService.findArticlesByLivraison(this.livraison.id)))
+                                flatMap(() => this.sqliteService.insert('mouvement', mouvement)),
+                                flatMap(() => this.sqliteService.findBy('article_livraison', [`id_livraison = ${this.livraison.id}`])))
                             .subscribe((articles) => {
                                 this.updateList(articles);
                             });
@@ -181,9 +183,9 @@ export class LivraisonArticlesPage extends PageComponent {
                 let mouvement: Mouvement = {
                     id: null,
                     reference: article.reference,
-                    quantity: article.quantite,
+                    quantity: article.quantity,
                     date_pickup: moment().format(),
-                    location_from: article.emplacement,
+                    location_from: article.location,
                     date_drop: null,
                     location: null,
                     type: 'prise-dépose',
@@ -198,20 +200,20 @@ export class LivraisonArticlesPage extends PageComponent {
                 let articleAlready = this.articlesT.find(art => art.id_livraison === mouvement.id_livraison && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
                 if (articleAlready !== undefined) {
                     this.sqliteService
-                        .updateArticleLivraisonQuantity(articleAlready.id, mouvement.quantity + articleAlready.quantite)
+                        .update('article_livraison', {quantity: mouvement.quantity + articleAlready.quantity}, [`id = ${articleAlready.id}`])
                         .pipe(
-                            flatMap(() => this.sqliteService.deleteBy('`article_livraison`', [`id = ${mouvement.id_article_livraison}`])),
-                            flatMap(() => this.sqliteService.findArticlesByLivraison(this.livraison.id))
+                            flatMap(() => this.sqliteService.deleteBy('article_livraison', [`id = ${mouvement.id_article_livraison}`])),
+                            flatMap(() => this.sqliteService.findBy('article_livraison', [`id_livraison = ${this.livraison.id}`]))
                         )
                         .subscribe((articles) => {
                             this.updateList(articles);
                         });
                 } else {
                     this.sqliteService
-                        .insert('`mouvement`', mouvement)
+                        .insert('mouvement', mouvement)
                         .pipe(
                             flatMap(() => this.sqliteService.moveArticleLivraison(article.id)),
-                            flatMap(() => this.sqliteService.findArticlesByLivraison(this.livraison.id))
+                            flatMap(() => this.sqliteService.findBy('article_livraison', [`id_livraison = ${this.livraison.id}`]))
                         )
                         .subscribe((articles) => {
                             this.updateList(articles);
@@ -307,7 +309,7 @@ export class LivraisonArticlesPage extends PageComponent {
         };
     }
 
-    private createArticleInfo({label, barcode, emplacement, quantite}: ArticleLivraison): {[name: string]: { label: string; value: string; }} {
+    private createArticleInfo({label, barcode, location, quantity}: ArticleLivraison): {[name: string]: { label: string; value: string; }} {
         return {
             label: {
                 label: 'Label',
@@ -324,21 +326,21 @@ export class LivraisonArticlesPage extends PageComponent {
                     : {}
             ),
             ...(
-                emplacement && emplacement !== 'null'
+                location && location !== 'null'
                     ? {
                         location: {
                             label: 'Emplacement',
-                            value: emplacement
+                            value: location
                         }
                     }
                     : {}
             ),
             ...(
-                quantite
+                quantity
                     ? {
                         quantity: {
                             label: 'Quantité',
-                            value: `${quantite}`
+                            value: `${quantity}`
                         }
                     }
                     : {}
