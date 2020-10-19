@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, HostBinding, Input} from '@angular/core';
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
 
 
@@ -21,6 +21,9 @@ export class ListPanelItemComponent {
 
     @Input()
     public color?: string;
+
+    @Input()
+    public disabled?: boolean;
 
     @Input()
     public loading?: boolean;
