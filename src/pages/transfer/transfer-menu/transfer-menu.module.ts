@@ -1,20 +1,20 @@
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {IonicModule} from '@ionic/angular';
-import {PriseDeposeMenuPageRoutingModule} from './prise-depose-menu-routing.module';
-import {PriseDeposeMenuPage} from './prise-depose-menu.page';
+import {TransferMenuPageRoutingModule} from './transfer-menu-routing.module';
 import {CommonModule as AngularCommonModule} from '@angular/common';
 import {CommonModule} from '@app/common/common.module';
+import {TransferMenuPage} from "@pages/transfer/transfer-menu/transfer-menu.page";
 
 @NgModule({
     imports: [
         AngularCommonModule,
         FormsModule,
         IonicModule,
-        PriseDeposeMenuPageRoutingModule,
+        TransferMenuPageRoutingModule,
         CommonModule
     ],
-    declarations: [PriseDeposeMenuPage]
+    declarations: [TransferMenuPage]
 })
-export class PriseDeposeMenuPageModule {
+export class TransferMenuPageModule {
 }

@@ -5,7 +5,6 @@ import {UserConnectedGuard} from '@app/guards/user-connected.guard';
 import {LoginPageRoutingModule} from '@pages/login/login-routing.module';
 import {ParamsPageRoutingModule} from '@pages/params/params-routing.module';
 import {MainMenuPageRoutingModule} from '@pages/main-menu/main-menu-routing.module';
-import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
 import {EmplacementScanPageRoutingModule} from '@pages/prise-depose/emplacement-scan/emplacement-scan-routing.module';
 import {PrisePageRoutingModule} from '@pages/prise-depose/prise/prise-routing.module';
 import {DeposePageRoutingModule} from '@pages/prise-depose/depose/depose-routing.module';
@@ -40,7 +39,8 @@ import {DispatchValidatePageRoutingModule} from '@pages/tracking/dispatch/dispat
 import {DispatchPackConfirmPageRoutingModule} from '@pages/tracking/dispatch/dispatch-pack-confirm/dispatch-pack-confirm-routing.module';
 import {HandlingMenuPageRoutingModule} from '@pages/demande/handling/handling-menu/handling-menu-routing.module';
 import {HandlingValidatePageRoutingModule} from '@pages/demande/handling/handling-validate/handling-validate-routing.module';
-
+import {TransferMenuPageRoutingModule} from '@pages/transfer/transfer-menu/transfer-menu-routing.module';
+import {ManualTransferMenuPageRoutingModule} from  '@pages/transfer/manual-transfer/manual-transfer-menu-routing.module';
 
 const routes: Routes = [
     {
@@ -82,11 +82,6 @@ const routes: Routes = [
         path: DispatchPackConfirmPageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/tracking/dispatch/dispatch-pack-confirm/dispatch-pack-confirm.module').then(m => m.DispatchPackConfirmPageModule)
-    },
-    {
-        path: PriseDeposeMenuPageRoutingModule.PATH,
-        canActivate: [UserConnectedGuard],
-        loadChildren: () => import('../pages/prise-depose/prise-depose-menu/prise-depose-menu.module').then(m => m.PriseDeposeMenuPageModule)
     },
     {
         path: EmplacementScanPageRoutingModule.PATH,
@@ -240,6 +235,16 @@ const routes: Routes = [
         path: InventoryValidatePageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/inventory/inventory-validate/inventory-validate.module').then(m => m.InventoryValidatePageModule)
+    },
+    {
+        path: TransferMenuPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/transfer/transfer-menu/transfer-menu.module').then(m => m.TransferMenuPageModule)
+    },
+    {
+        path: ManualTransferMenuPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/transfer/manual-transfer/manual-transfer-menu.module').then(m => m.ManualTransferMenuPageModule)
     },
 
     {
