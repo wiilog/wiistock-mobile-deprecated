@@ -12,7 +12,7 @@ import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {RouterDirection} from '@ionic/core';
 import {NavService} from '@app/common/services/nav.service';
 import {NavController} from '@ionic/angular';
-import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
+import {ManualTransferMenuPageRoutingModule} from '@pages/transfer/manual-transfer/manual-transfer-menu-routing.module';
 import {EmplacementScanPageRoutingModule} from '@pages/prise-depose/emplacement-scan/emplacement-scan-routing.module';
 import {PreparationMenuPageRoutingModule} from '@pages/stock/preparation/preparation-menu/preparation-menu-routing.module';
 import {LivraisonMenuPageRoutingModule} from '@pages/stock/livraison/livraison-menu/livraison-menu-routing.module';
@@ -116,7 +116,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: TrackingMenuPageRoutingModule.PATH, label: 'Traçabilité'},
             {pagePath: DispatchMenuPageRoutingModule.PATH, label: 'Acheminements'},
             {
-                pagePath: PriseDeposeMenuPageRoutingModule.PATH,
+                pagePath: ManualTransferMenuPageRoutingModule.PATH,
                 label: 'Transfert',
                 filter: (params) => (
                     (typeof params.get('fromStock') === 'boolean') &&

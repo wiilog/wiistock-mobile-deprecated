@@ -320,7 +320,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             quantity: 'INTEGER',
             dispatchId: 'INTEGER',
             lastLocation: 'VARCHAR(255)',
-            treated: 'INTEGER'
+            treated: 'INTEGER',
+            already_treated: 'INTEGER'
         }
     },
     {

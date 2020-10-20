@@ -6,4 +6,5 @@ export interface DispatchPack {
     dispatchId: number;
     lastLocation?: string;
     treated?: number;
+    already_treated?: number;
 }

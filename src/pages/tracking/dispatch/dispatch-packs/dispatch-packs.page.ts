@@ -92,7 +92,7 @@ export class DispatchPacksPage extends PageComponent {
                     }),
                     flatMap(() => zip(
                         this.sqliteService.findOneBy('dispatch', {id: dispatchId}),
-                        this.sqliteService.findBy('dispatch_pack', [`dispatchId = ${dispatchId}`, 'treated = 0 OR treated IS NULL']),
+                        this.sqliteService.findBy('dispatch_pack', [`dispatchId = ${dispatchId}`]),
                         this.sqliteService.findAll('nature'),
                         this.sqliteService.findBy('translations', [`menu LIKE 'natures'`]),
                     ).pipe(
@@ -144,12 +144,14 @@ export class DispatchPacksPage extends PageComponent {
     public takePack(barCode: string): void {
         const selectedIndex = this.dispatchPacks.findIndex(({code}) => (code === barCode));
         if (selectedIndex > -1) {
-            if (this.dispatchPacks[selectedIndex].treated) {
+            const selectedItem = this.dispatchPacks[selectedIndex];
+            if (selectedItem.treated) {
                 this.toastService.presentToast(`Vous avez déjà traité ce colis.`);
             }
             else {
-                this.dispatchPacks[selectedIndex].treated = 1;
-
+                this.dispatchPacks.splice(selectedIndex, 1);
+                this.dispatchPacks.unshift(selectedItem);
+                selectedItem.treated = 1;
                 this.refreshListToTreatConfig();
                 this.refreshListTreatedConfig();
                 this.refreshHeaderPanelConfigFromDispatch();
@@ -195,7 +197,7 @@ export class DispatchPacksPage extends PageComponent {
     }
 
     private refreshListToTreatConfig(): void {
-        const packsToTreat = this.dispatchPacks.filter(({treated}) => !treated);
+        const packsToTreat = this.dispatchPacks.filter(({treated, already_treated}) => (!already_treated && !treated));
         const natureTranslation = (this.natureTranslations['nature'] || 'nature');
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
@@ -221,7 +223,7 @@ export class DispatchPacksPage extends PageComponent {
     }
 
     private refreshListTreatedConfig(): void {
-        const packsTreated = this.dispatchPacks.filter(({treated}) => treated);
+        const packsTreated = this.dispatchPacks.filter(({treated, already_treated}) => (already_treated || treated));
         const natureTranslation = (this.natureTranslations['nature'] || 'nature');
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
@@ -237,20 +239,26 @@ export class DispatchPacksPage extends PageComponent {
             },
             body: packsTreated.map((pack) => ({
                 ...(this.packToListItemConfig(pack, natureTranslationCapitalized)),
-                pressAction: () => {
-                    this.navService.push(DispatchPackConfirmPageRoutingModule.PATH, {
-                        pack,
-                        dispatch: this.dispatch,
-                        natureTranslationLabel: natureTranslationCapitalized,
-                        confirmPack: (pack: DispatchPack) => this.confirmPack(pack)
-                    })
-                },
-                longPressAction: () => this.revertPack(pack.code)
+                ...(
+                    !pack.already_treated
+                        ? {
+                            pressAction: () => {
+                                this.navService.push(DispatchPackConfirmPageRoutingModule.PATH, {
+                                    pack,
+                                    dispatch: this.dispatch,
+                                    natureTranslationLabel: natureTranslationCapitalized,
+                                    confirmPack: (pack: DispatchPack) => this.confirmPack(pack)
+                                })
+                            },
+                            longPressAction: () => this.revertPack(pack.code)
+                        }
+                        : {}
+                )
             }))
         };
     }
 
-    private packToListItemConfig({code, quantity, natureId, lastLocation}: DispatchPack, natureTranslation: string) {
+    private packToListItemConfig({code, quantity, natureId, lastLocation, already_treated}: DispatchPack, natureTranslation: string) {
         return {
             infos: {
                 code: {
@@ -271,6 +279,7 @@ export class DispatchPacksPage extends PageComponent {
                 }
             },
             color: this.natureIdsToColors[Number(natureId)],
+            disabled: Boolean(already_treated)
         }
     }
 
@@ -287,7 +296,7 @@ export class DispatchPacksPage extends PageComponent {
     }
 
     private validate(): void {
-        const partialDispatch = this.dispatchPacks.filter(({treated}) => treated != 1).length > 0
+        const partialDispatch = this.dispatchPacks.filter(({treated, already_treated}) => (treated != 1 && already_treated != 1)).length > 0
         if (!partialDispatch || !this.typeHasNoPartialStatuses) {
             this.navService.push(DispatchValidatePageRoutingModule.PATH, {
                 dispatchId: this.dispatch.id,

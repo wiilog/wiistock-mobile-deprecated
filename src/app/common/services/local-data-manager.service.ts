@@ -243,7 +243,11 @@ export class LocalDataManagerService {
                     flatMap((dispatches) => zip(
                         of(dispatches),
                         dispatches.length > 0
-                            ? this.sqliteService.findBy('dispatch_pack', [`dispatchId IN (${dispatches.map(({id}) => id).join(',')})`, 'treated = 1'])
+                            ? this.sqliteService.findBy('dispatch_pack', [
+                                `dispatchId IN (${dispatches.map(({id}) => id).join(',')})`,
+                                `already_treated = 0`,
+                                'treated = 1'
+                            ])
                             : of([])
                     )),
 
@@ -259,7 +263,16 @@ export class LocalDataManagerService {
                             `id IN (${entireTreatedDispatch.join(',')})`
                         ])
                         : of(undefined),
-                    this.sqliteService.deleteBy('dispatch_pack', [`treated = 1`])
+                    (entireTreatedDispatch && entireTreatedDispatch.length > 0)
+                        ? this.sqliteService.deleteBy('dispatch_pack', [
+                            `treated = 1`,
+                            `dispatchId IN (${entireTreatedDispatch.map(({id}) => id).join(',')})`
+                        ])
+                        : of(undefined),
+                    this.sqliteService.update('dispatch_pack', {already_treated: 1, treated: 0}, [
+                        `treated = 1`,
+                        ...((entireTreatedDispatch && entireTreatedDispatch.length > 0) ? [`dispatchId NOT IN (${entireTreatedDispatch.map(({id}) => id).join(',')})`] : [])
+                    ])
                 )
             }
         }

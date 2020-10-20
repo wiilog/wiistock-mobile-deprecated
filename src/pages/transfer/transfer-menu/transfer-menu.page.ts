@@ -8,19 +8,14 @@ import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav.service';
 import {ManualTransferMenuPageRoutingModule} from '@pages/transfer/manual-transfer/manual-transfer-menu-routing.module';
-import {PreparationMenuPageRoutingModule} from '@pages/stock/preparation/preparation-menu/preparation-menu-routing.module';
-import {LivraisonMenuPageRoutingModule} from '@pages/stock/livraison/livraison-menu/livraison-menu-routing.module';
-import {CollecteMenuPageRoutingModule} from '@pages/stock/collecte/collecte-menu/collecte-menu-routing.module';
-import {InventoryLocationsPageRoutingModule} from '@pages/stock/inventory/inventory-locations/inventory-locations-routing.module';
 import {PageComponent} from '@pages/page.component';
-import {TransferMenuPageRoutingModule} from "@pages/transfer/transfer-menu/transfer-menu-routing.module";
 
 @Component({
     selector: 'wii-stock-menu',
-    templateUrl: './stock-menu.page.html',
-    styleUrls: ['./stock-menu.page.scss'],
+    templateUrl: './transfer-menu.page.html',
+    styleUrls: ['./transfer-menu.page.scss'],
 })
-export class StockMenuPage extends PageComponent {
+export class TransferMenuPage extends PageComponent {
 
     public readonly menuConfig: Array<MenuConfig>;
 
@@ -42,31 +37,19 @@ export class StockMenuPage extends PageComponent {
         const self = this;
         this.menuConfig = [
             {
+                icon: 'transfer.svg',
+                iconColor: 'tertiary',
+                label: 'Transfert à traiter',
+                action: () => {
+                    //TODO: add transfer module
+                }
+            },
+            {
                 icon: 'stock-transfer.svg',
-                label: 'Transfert',
+                iconColor: 'success',
+                label: 'Transfert manuel',
                 action: () => {
-                    self.navService.push(TransferMenuPageRoutingModule.PATH, {fromStock: true});
-                }
-            },
-            {
-                icon: 'preparation.svg',
-                label: 'Préparation',
-                action: () => {
-                    self.navService.push(PreparationMenuPageRoutingModule.PATH);
-                }
-            },
-            {
-                icon: 'delivery.svg',
-                label: 'Livraison',
-                action: () => {
-                    self.navService.push(LivraisonMenuPageRoutingModule.PATH);
-                }
-            },
-            {
-                icon: 'collecte.svg',
-                label: 'Collecte',
-                action: () => {
-                    this.navService.push(CollecteMenuPageRoutingModule.PATH, {
+                    this.navService.push(ManualTransferMenuPageRoutingModule.PATH, {
                         avoidSync: () => {
                             self.setAvoidSync(true);
                         },
@@ -76,13 +59,6 @@ export class StockMenuPage extends PageComponent {
                     });
                 }
             },
-            {
-                icon: 'inventory.svg',
-                label: 'Inventaire',
-                action: () => {
-                    self.navService.push(InventoryLocationsPageRoutingModule.PATH);
-                }
-            }
         ];
     }
 

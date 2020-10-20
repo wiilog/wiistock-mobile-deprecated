@@ -16,10 +16,10 @@ import {PageComponent} from '@pages/page.component';
 
 @Component({
     selector: 'wii-prise-depose-menu',
-    templateUrl: './prise-depose-menu.page.html',
-    styleUrls: ['./prise-depose-menu.page.scss'],
+    templateUrl: './manual-transfer-menu-page.component.html',
+    styleUrls: ['./manual-transfer-menu-page.component.scss'],
 })
-export class PriseDeposeMenuPage extends PageComponent implements CanLeave {
+export class ManualTransferMenuPage extends PageComponent implements CanLeave {
 
     public nbDrop: number;
     public statsSlidersData: Array<StatsSlidersData>;
