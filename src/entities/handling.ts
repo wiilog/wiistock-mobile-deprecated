@@ -10,4 +10,5 @@ export interface Handling {
     source: string;
     subject: string;
     emergency: string;
+    freeFields: string;
 }
