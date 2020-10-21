@@ -185,14 +185,14 @@ export class DispatchPacksPage extends PageComponent {
                 name: 'stock-transfer.svg'
             },
             ...((this.packsTreatedListConfig && this.packsTreatedListConfig.body.length > 0)
-                    ? {
-                        rightIcon: {
-                            name: 'check.svg',
-                            color: 'success',
-                            action: () => this.validate()
-                        }
+                ? {
+                    rightIcon: {
+                        name: 'check.svg',
+                        color: 'success',
+                        action: () => this.validate()
                     }
-                    : {})
+                }
+                : {})
         };
     }
 

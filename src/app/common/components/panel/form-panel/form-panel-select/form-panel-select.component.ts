@@ -12,6 +12,8 @@ import {FormPanelSelectConfig} from '@app/common/components/panel/model/form-pan
 })
 export class FormPanelSelectComponent implements FormPanelItemComponent<FormPanelSelectConfig> {
 
+    private static readonly MULTIPLE_SEPARATOR: string = ';'
+
     @ViewChild('searchComponent', {static: false})
     public searchComponent: SearchItemComponent;
 
@@ -44,7 +46,7 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
 
     private static ValueToText(value: any) {
         return Array.isArray(value)
-            ? value.map(({label}) => label).join(', ')
+            ? value.map(({label}) => label).join(FormPanelSelectComponent.MULTIPLE_SEPARATOR)
             : value.label
     }
 
@@ -78,7 +80,7 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
             && (!Array.isArray(itemSelected) || itemSelected.length > 0)) {
             const value: Array<any> = !Array.isArray(itemSelected) ? [itemSelected] : itemSelected;
             this.text = FormPanelSelectComponent.ValueToText(itemSelected);
-            this.value = value.map(({id}) => id).join(',');
+            this.value = value.map(({id}) => id).join(FormPanelSelectComponent.MULTIPLE_SEPARATOR);
         }
         else {
             this.text = undefined;
