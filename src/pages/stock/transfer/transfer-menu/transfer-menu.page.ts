@@ -7,11 +7,11 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav.service';
-import {ManualTransferMenuPageRoutingModule} from '@pages/transfer/manual-transfer/manual-transfer-menu-routing.module';
+import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
 import {PageComponent} from '@pages/page.component';
 
 @Component({
-    selector: 'wii-stock-menu',
+    selector: 'wii-transfer-menu',
     templateUrl: './transfer-menu.page.html',
     styleUrls: ['./transfer-menu.page.scss'],
 })
@@ -22,9 +22,9 @@ export class TransferMenuPage extends PageComponent {
     public messageLoading: string;
     public loading: boolean;
 
-    private avoidSync: boolean;
     private synchronisationSubscription: Subscription;
     private navigationSubscription: Subscription;
+    private deposeAlreadyNavigate: boolean;
 
     public constructor(private platform: Platform,
                        private mainHeaderService: MainHeaderService,
@@ -33,8 +33,6 @@ export class TransferMenuPage extends PageComponent {
                        private toastService: ToastService,
                        navService: NavService) {
         super(navService);
-        this.avoidSync = true;
-        const self = this;
         this.menuConfig = [
             {
                 icon: 'transfer.svg',
@@ -49,33 +47,18 @@ export class TransferMenuPage extends PageComponent {
                 iconColor: 'success',
                 label: 'Transfert manuel',
                 action: () => {
-                    this.navService.push(ManualTransferMenuPageRoutingModule.PATH, {
-                        avoidSync: () => {
-                            self.setAvoidSync(true);
-                        },
-                        goToDepose: () => {
-                            self.goToDepose();
-                        }
-                    });
+                    this.navigateToPriseDeposePage();
                 }
             },
         ];
     }
 
     public ionViewWillEnter(): void {
-        this.navigationSubscription = merge(
-            this.mainHeaderService.navigationChange$,
-            this.platform.backButton
-        )
-            .subscribe(() => {
-                this.setAvoidSync(true);
-            });
+        const goToDropDirectly = (!this.deposeAlreadyNavigate && Boolean(this.currentNavParams.get('goToDropDirectly')));
 
-        if (!this.avoidSync) {
-            this.synchronise();
-        }
-        else {
-            this.setAvoidSync(false);
+        if (goToDropDirectly) {
+            this.deposeAlreadyNavigate = true;
+            this.navigateToPriseDeposePage(true);
         }
     }
 
@@ -90,39 +73,11 @@ export class TransferMenuPage extends PageComponent {
         }
     }
 
-    public synchronise(): void {
-        if (this.network.type !== 'none') {
-            this.loading = true;
-
-            this.synchronisationSubscription = this.localDataManager.synchroniseData().subscribe(
-                ({finished, message}) => {
-                    this.messageLoading = message;
-                    this.loading = !finished;
-                },
-                (error) => {
-                    const {api, message} = error;
-                    this.loading = false;
-                    if (api && message) {
-                        this.toastService.presentToast(message);
-                    }
-                    throw error;
-                });
-        }
-        else {
-            this.loading = false;
-            this.toastService.presentToast('Veuillez vous connecter à internet afin de synchroniser vos données');
-        }
-    }
-
-    public goToDepose() {
+    public navigateToPriseDeposePage(goToDropDirectly: boolean = false): void {
         this.navService
-            .push(ManualTransferMenuPageRoutingModule.PATH, {
+            .push(PriseDeposeMenuPageRoutingModule.PATH, {
                 fromStock: true,
-                goToDeposeDirectly: true
+                goToDropDirectly
             });
-    }
-
-    public setAvoidSync(avoidSync: boolean) {
-        this.avoidSync = avoidSync;
     }
 }

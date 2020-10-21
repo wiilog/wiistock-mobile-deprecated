@@ -1,13 +1,12 @@
 import {NgModule} from '@angular/core';
 import {Routes, RouterModule} from '@angular/router';
-
-import {ManualTransferMenuPage} from './manual-transfer-menu-page.component';
 import {CanLeaveGuard} from '@app/guards/can-leave/can-leave.guard';
+import {TransferMenuPage} from "@pages/stock/transfer/transfer-menu/transfer-menu.page";
 
 const routes: Routes = [
     {
         path: '',
-        component: ManualTransferMenuPage,
+        component: TransferMenuPage,
         canDeactivate: [CanLeaveGuard]
     }
 ];
@@ -16,6 +15,6 @@ const routes: Routes = [
     imports: [RouterModule.forChild(routes)],
     exports: [RouterModule],
 })
-export class ManualTransferMenuPageRoutingModule {
-    public static readonly PATH: string = 'manual-transfer';
+export class TransferMenuPageRoutingModule {
+    public static readonly PATH: string = 'transfer-menu';
 }

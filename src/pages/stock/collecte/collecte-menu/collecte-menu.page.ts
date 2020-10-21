@@ -23,7 +23,7 @@ export class CollecteMenuPage extends PageComponent {
     public readonly collectesListColor = CardListColorEnum.ORANGE;
     public readonly collectesIconName = 'collecte.svg';
 
-    private goToDepose: () => void;
+    private goToDrop: () => void;
     private avoidSync: () => void;
 
     public constructor(private mainHeaderService: MainHeaderService,
@@ -34,7 +34,7 @@ export class CollecteMenuPage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
-        this.goToDepose = this.currentNavParams.get('goToDepose');
+        this.goToDrop = this.currentNavParams.get('goToDrop');
         this.avoidSync = this.currentNavParams.get('avoidSync');
         this.sqliteService.findAll('collecte').subscribe((collectes: Array<Collecte>) => {
             this.collectes = collectes
@@ -67,10 +67,10 @@ export class CollecteMenuPage extends PageComponent {
                 action: () => {
                     this.navService.push(CollecteArticlesPageRoutingModule.PATH, {
                         collecte,
-                        goToDepose: () => {
+                        goToDrop: () => {
                             this.avoidSync();
                             this.navService.pop().subscribe(() => {
-                                this.goToDepose();
+                                this.goToDrop();
                             });
                         }
                     });

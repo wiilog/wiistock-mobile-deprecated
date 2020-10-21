@@ -39,8 +39,8 @@ import {DispatchValidatePageRoutingModule} from '@pages/tracking/dispatch/dispat
 import {DispatchPackConfirmPageRoutingModule} from '@pages/tracking/dispatch/dispatch-pack-confirm/dispatch-pack-confirm-routing.module';
 import {HandlingMenuPageRoutingModule} from '@pages/demande/handling/handling-menu/handling-menu-routing.module';
 import {HandlingValidatePageRoutingModule} from '@pages/demande/handling/handling-validate/handling-validate-routing.module';
-import {TransferMenuPageRoutingModule} from '@pages/transfer/transfer-menu/transfer-menu-routing.module';
-import {ManualTransferMenuPageRoutingModule} from  '@pages/transfer/manual-transfer/manual-transfer-menu-routing.module';
+import {TransferMenuPageRoutingModule} from '@pages/stock/transfer/transfer-menu/transfer-menu-routing.module';
+import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
 
 const routes: Routes = [
     {
@@ -239,12 +239,12 @@ const routes: Routes = [
     {
         path: TransferMenuPageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('@pages/transfer/transfer-menu/transfer-menu.module').then(m => m.TransferMenuPageModule)
+        loadChildren: () => import('@pages/stock/transfer/transfer-menu/transfer-menu.module').then(m => m.TransferMenuPageModule)
     },
     {
-        path: ManualTransferMenuPageRoutingModule.PATH,
+        path: PriseDeposeMenuPageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('@pages/transfer/manual-transfer/manual-transfer-menu.module').then(m => m.ManualTransferMenuPageModule)
+        loadChildren: () => import('@pages/prise-depose/prise-depose-menu/prise-depose-menu.module').then(m => m.PriseDeposeMenuPageModule)
     },
 
     {
