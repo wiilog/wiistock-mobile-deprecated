@@ -164,7 +164,8 @@ export class SqliteService {
             0,
             '${this.escapeQuotes(prepa.destination)}',
             '${this.escapeQuotes(prepa.type)}',
-            ${prepa.requester ? `'${this.escapeQuotes(prepa.requester)}'` : 'NULL'}
+            ${prepa.requester ? `'${this.escapeQuotes(prepa.requester)}'` : 'NULL'},
+            '${prepa.comment}'
         )`));
 
         return of(undefined).pipe(
@@ -172,7 +173,7 @@ export class SqliteService {
             flatMap(() => {
                 if (prepasValues.length > 0) {
                     const prepasValuesStr = prepasValues.join(', ');
-                    const sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`, `destination`, `type`, `requester`) VALUES ' + prepasValuesStr + ';';
+                    const sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`, `destination`, `type`, `requester`, `comment`) VALUES ' + prepasValuesStr + ';';
                     return this.executeQuery(sqlPrepas).pipe(map(() => true));
                 }
                 else {

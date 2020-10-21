@@ -9,4 +9,6 @@ export interface Preparation {
     date_end: string;
     started: number;
     type: string;
+
+    comment: string; // Commentaire de la demande de livraison
 }
