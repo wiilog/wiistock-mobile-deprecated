@@ -282,7 +282,7 @@ export class DeposePage extends PageComponent {
                 }
                 return acc;
             }, []);
-            console.log(this.allowedNatureIdsForLocation, pickedNatures);
+
             const allowedMovement = (
                 this.fromStock
                 || this.allowedNatureIdsForLocation.length === 0

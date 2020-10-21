@@ -1,15 +1,18 @@
 export interface FreeField {
     id: number;
     label: string;
-    type: string;
+    typeId: number;
+    categoryType: string;
     typing: string;
-    required: number;
+    requiredCreate: number;
+    requiredEdit: number;
     elements: string;
     defaultValue: string;
 }
 
 export enum FreeFieldType {
-    TRACKING = 'mouvement traca'
+    TRACKING = 'mouvement traca',
+    HANDLING = 'services',
 }
 
 export enum FreeFieldTyping {

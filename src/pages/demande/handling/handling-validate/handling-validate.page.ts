@@ -20,6 +20,8 @@ import {FileService} from '@app/common/services/file.service';
 import {flatMap, map, tap} from 'rxjs/operators';
 import {FormViewerParam} from '@app/common/directives/form-viewer/form-viewer-param';
 import {FormViewerAttachmentsComponent} from '@app/common/components/panel/form-panel/form-viewer-attachments/form-viewer-attachments.component';
+import {FormPanelService} from '@app/common/services/form-panel.service';
+import {FreeField, FreeFieldType} from '@entities/free-field';
 
 
 @Component({
@@ -49,6 +51,7 @@ export class HandlingValidatePage extends PageComponent {
                        private toastService: ToastService,
                        private sqliteService: SqliteService,
                        private fileService: FileService,
+                       private formPanelService: FormPanelService,
                        navService: NavService) {
         super(navService);
     }
@@ -63,12 +66,17 @@ export class HandlingValidatePage extends PageComponent {
                 tap((loading) => {
                     this.loadingElement = loading;
                 }),
-                flatMap(() => this.sqliteService.findBy('handling_attachment', [`handlingId = ${this.handling.id}`]))
+                flatMap(() => zip(
+                    this.sqliteService.findBy('handling_attachment', [`handlingId = ${this.handling.id}`]),
+                    this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.HANDLING}'`])
+                )),
             )
-            .subscribe((handlingAttachment: Array<HandlingAttachment>) => {
+            .subscribe(([handlingAttachment, freeFields]: [Array<HandlingAttachment>, Array<FreeField>]) => {
                 this.dismissLoading();
 
                 this.refreshHeader(false);
+
+                let freeFieldsValues = JSON.parse(this.handling.freeFields || '{}') || {};
 
                 const sAttachmentLabel = handlingAttachment.length > 1 ? 's' : '';
                 this.detailsConfig = handlingAttachment.length > 0
@@ -132,6 +140,18 @@ export class HandlingValidatePage extends PageComponent {
                             }
                         }
                     },
+
+                    ...(freeFields
+                        .filter(({typeId}) => (typeId === this.handling.typeId))
+                        .map(({id, ...freeField}) => (
+                            this.formPanelService.createFromFreeField(
+                                {id, ...freeField},
+                                freeFieldsValues[id],
+                                'freeFields',
+                                'edit'
+                            )
+                        ))
+                        .filter(Boolean))
                 ];
             });
     }
@@ -149,7 +169,7 @@ export class HandlingValidatePage extends PageComponent {
                 this.toastService.presentToast(this.formPanelComponent.firstError);
             }
             else if (!this.apiSubscription) {
-                const {statusId, comment, photos} = this.formPanelComponent.values
+                const {statusId, comment, photos, freeFields} = this.formPanelComponent.values
 
                 const endDate = new Date();
 
@@ -157,6 +177,7 @@ export class HandlingValidatePage extends PageComponent {
                     id: this.handling.id,
                     statusId,
                     comment,
+                    freeFields: JSON.stringify(freeFields || {}),
                     treatmentDelay: Math.floor((endDate.getTime() - this.beginDate.getTime()) / 1000),
                     ...(
                         photos && photos.length

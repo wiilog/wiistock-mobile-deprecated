@@ -201,6 +201,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             source: 'TEXT',
             subject: 'VARCHAR(255)',
             emergency: 'VARCHAR(255)',
+            freeFields: 'TEXT'
         }
     },
     {
@@ -261,9 +262,11 @@ export const TablesDefinitions: Array<TableDefinition> = [
         attributes: {
             id: 'INTEGER PRIMARY KEY',
             label: 'VARCHAR(255)',
-            type: 'VARCHAR(255)',
+            typeId: 'INTEGER',
+            categoryType: 'VARCHAR(255)',
             typing: 'VARCHAR(255)',
-            required: 'INTEGER',
+            requiredCreate: 'INTEGER',
+            requiredEdit: 'INTEGER',
             elements: 'TEXT',
             defaultValue: 'TEXT'
         }
