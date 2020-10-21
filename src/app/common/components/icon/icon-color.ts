@@ -1,6 +1,7 @@
 export type IconColor = 'primary'
                       | 'secondary'
                       | 'tertiary'
+                      | 'tertiary-light'
                       | 'success'
                       | 'warning'
                       | 'danger'

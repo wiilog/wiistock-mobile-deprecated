@@ -3,4 +3,5 @@ export interface TransferOrder {
     number: string;
     requester: string;
     destination: string;
+    treated: number;
 }

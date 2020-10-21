@@ -220,14 +220,21 @@ export class SqliteService {
 
     public importTransferOrderData(data): Observable<any> {
         const transferOrders = data['transferOrders'];
+        const transferOrderArticles = data['transferOrderArticles'];
 
         return zip(
-            this.deleteBy('transfer_order')
+            this.deleteBy('transfer_order'),
+            this.deleteBy('transfer_order_article')
         )
             .pipe(
                 flatMap(() => (
                     transferOrders && transferOrders.length > 0
-                        ? zip(...(transferOrders.map((transferOrder) => this.insert('transfer_order', transferOrder))))
+                        ? zip(...(transferOrders.map((transferOrder) => this.insert('transfer_order', {treated: 0, ...transferOrder}))))
+                        : of(undefined)
+                )),
+                flatMap(() => (
+                    transferOrderArticles && transferOrderArticles.length > 0
+                        ? zip(...(transferOrderArticles.map((transferOrderArticle) => this.insert('transfer_order_article', transferOrderArticle))))
                         : of(undefined)
                 )),
                 map(() => undefined)

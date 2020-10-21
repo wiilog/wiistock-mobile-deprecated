@@ -1,0 +1,18 @@
+<wii-panel-header *ngIf="panelHeaderConfig"
+                  class="page-header"
+                  [transparent]="panelHeaderConfig.transparent"
+                  [title]="panelHeaderConfig.title"
+                  [subtitle]="panelHeaderConfig.subtitle"
+                  [leftIcon]="panelHeaderConfig.leftIcon"
+                  [rightIcons]="panelHeaderConfig.rightIcon">
+</wii-panel-header>
+
+<div class="page-footer">
+    <wii-select-item #selectItemComponent
+                     [type]="selectItemType"
+                     (itemChange)="selectLocation($event)"
+                     [checkBarcodeValidity]="true"
+                     [resetEmitter]="resetEmitter$"
+                     [scanMode]="barcodeScannerSearchMode">
+    </wii-select-item>
+</div>
