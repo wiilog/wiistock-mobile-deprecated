@@ -32,4 +32,5 @@ export type TableName = 'emplacement'
                       | 'translations'
                       | 'dispatch'
                       | 'dispatch_pack'
-                      | 'status';
+                      | 'status'
+                      | 'transfer_order';

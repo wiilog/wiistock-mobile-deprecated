@@ -41,6 +41,7 @@ import {HandlingMenuPageRoutingModule} from '@pages/demande/handling/handling-me
 import {HandlingValidatePageRoutingModule} from '@pages/demande/handling/handling-validate/handling-validate-routing.module';
 import {TransferMenuPageRoutingModule} from '@pages/stock/transfer/transfer-menu/transfer-menu-routing.module';
 import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
+import {TransferListPageRoutingModule} from '@pages/stock/transfer/transfer-list/transfer-list-routing.module';
 
 const routes: Routes = [
     {
@@ -240,6 +241,11 @@ const routes: Routes = [
         path: TransferMenuPageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/transfer/transfer-menu/transfer-menu.module').then(m => m.TransferMenuPageModule)
+    },
+    {
+        path: TransferListPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/transfer/transfer-list/transfer-list.module').then(m => m.TransferListPageModule)
     },
     {
         path: PriseDeposeMenuPageRoutingModule.PATH,

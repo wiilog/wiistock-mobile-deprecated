@@ -218,6 +218,22 @@ export class SqliteService {
             );
     }
 
+    public importTransferOrderData(data): Observable<any> {
+        const transferOrders = data['transferOrders'];
+
+        return zip(
+            this.deleteBy('transfer_order')
+        )
+            .pipe(
+                flatMap(() => (
+                    transferOrders && transferOrders.length > 0
+                        ? zip(...(transferOrders.map((transferOrder) => this.insert('transfer_order', transferOrder))))
+                        : of(undefined)
+                )),
+                map(() => undefined)
+            );
+    }
+
     public importMouvementTraca(data): Observable<any> {
         const apiTaking = [
             ...(data['trackingTaking'] || []),
@@ -732,6 +748,7 @@ export class SqliteService {
             flatMap(() => this.importTranslations(data).pipe(tap(() => {console.log('--- > importTranslations')}))),
             flatMap(() => this.importDispatchesData(data).pipe(tap(() => {console.log('--- > importDispatchesData')}))),
             flatMap(() => this.importStatusData(data).pipe(tap(() => {console.log('--- > importStatusData')}))),
+            flatMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),
             flatMap(() => (
                 this.storageService.getInventoryManagerRight().pipe(
                     flatMap((res) => (res

@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {merge, Subscription} from 'rxjs';
+import {Subscription} from 'rxjs';
 import {MenuConfig} from '@app/common/components/menu/menu-config';
 import {Platform} from '@ionic/angular';
 import {MainHeaderService} from '@app/common/services/main-header.service';
@@ -9,6 +9,7 @@ import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav.service';
 import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
 import {PageComponent} from '@pages/page.component';
+import {TransferListPageRoutingModule} from '@pages/stock/transfer/transfer-list/transfer-list-routing.module';
 
 @Component({
     selector: 'wii-transfer-menu',
@@ -18,9 +19,6 @@ import {PageComponent} from '@pages/page.component';
 export class TransferMenuPage extends PageComponent {
 
     public readonly menuConfig: Array<MenuConfig>;
-
-    public messageLoading: string;
-    public loading: boolean;
 
     private synchronisationSubscription: Subscription;
     private navigationSubscription: Subscription;
@@ -39,7 +37,7 @@ export class TransferMenuPage extends PageComponent {
                 iconColor: 'tertiary',
                 label: 'Transfert à traiter',
                 action: () => {
-                    //TODO: add transfer module
+                    this.navService.push(TransferListPageRoutingModule.PATH);
                 }
             },
             {

@@ -1,11 +1,5 @@
 @import "~theme/variables";
 
-$cardListColors: (
-    "list-blue": $list-blue,
-    "list-orange": $list-orange,
-    "list-yellow": $list-yellow,
-    "list-green": $list-green
-);
 
 $card-padding: 4px 12px !important;
 
@@ -32,7 +26,7 @@ $card-padding: 4px 12px !important;
         }
     }
 
-    @each $name, $color in $cardListColors {
+    @each $name, $color in $colors {
         &.#{$name} ion-card-header {
             background-color: #{$color};
         }
