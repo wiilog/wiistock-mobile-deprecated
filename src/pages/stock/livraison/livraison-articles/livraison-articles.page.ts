@@ -39,7 +39,7 @@ export class LivraisonArticlesPage extends PageComponent {
     public livraisonsHeaderConfig?: {
         leftIcon: IconConfig;
         title: string;
-        subtitle?: string;
+        subtitle?: Array<string>;
         info?: string;
     };
 
@@ -63,7 +63,10 @@ export class LivraisonArticlesPage extends PageComponent {
         this.livraisonsHeaderConfig = {
             leftIcon: {name: 'delivery.svg'},
             title: `Livraison ${this.livraison.number}`,
-            subtitle: `Destination : ${this.livraison.location}`
+            subtitle: [
+                `Destination : ${this.livraison.location}`,
+                this.livraison.comment ? `Commentaire : ${this.livraison.comment}` : undefined
+                ]
         };
 
         this.listBoldValues = ['label', 'barCode', 'location', 'quantity'];

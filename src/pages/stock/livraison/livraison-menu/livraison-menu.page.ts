@@ -97,6 +97,10 @@ export class LivraisonMenuPage extends PageComponent {
                         label: 'Destination',
                         value: livraison.location
                     },
+                    {
+                        label: 'Commentaire',
+                        value: livraison.comment
+                    },
                     ...(
                         livraison.preparationLocation
                             ? [{

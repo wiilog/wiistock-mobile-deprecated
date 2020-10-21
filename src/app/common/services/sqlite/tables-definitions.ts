@@ -104,6 +104,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             requester: 'VARCHAR(255)',
             type: 'VARCHAR(255)',
             preparationLocation: 'VARCHAR(255)',
+            comment: 'TEXT'
         }
     },
     {
