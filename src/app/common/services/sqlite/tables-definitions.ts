@@ -129,6 +129,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             number: 'TEXT',
             requester: 'VARCHAR(255)',
             destination: 'VARCHAR(255)',
+            origin: 'VARCHAR(255)',
             treated: 'INTEGER'
         }
     },

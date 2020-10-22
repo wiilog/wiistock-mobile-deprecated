@@ -3,5 +3,6 @@ export interface TransferOrder {
     number: string;
     requester: string;
     destination: string;
+    origin: string;
     treated: number;
 }
