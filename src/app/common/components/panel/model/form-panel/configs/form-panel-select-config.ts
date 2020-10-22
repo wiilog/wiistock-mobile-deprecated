@@ -8,4 +8,5 @@ export interface FormPanelSelectConfig {
     elements?: Array<{id: number; label: string;}>;
     isMultiple?: boolean;
     filterItem?: (item: any) => boolean;
+    onChange?: (item: any) => void;
 }

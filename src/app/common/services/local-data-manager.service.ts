@@ -35,6 +35,7 @@ type DemandeForApi = {
     destination: number;
     commentaire: string;
     references: Array<{barCode: string; 'quantity-to-pick': number}>;
+    freeFields: string;
 };
 
 @Injectable({
@@ -568,6 +569,7 @@ export class LocalDataManagerService {
                                     barCode,
                                     'quantity-to-pick': quantity_to_pick
                                 })),
+                                freeFields: demande.free_fields
                             },
                             demande
                         });

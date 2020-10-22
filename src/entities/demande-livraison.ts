@@ -5,4 +5,5 @@ export interface DemandeLivraison {
     location_id: number;
     comment?: string;
     last_error?: string;
+    free_fields: string;
 }

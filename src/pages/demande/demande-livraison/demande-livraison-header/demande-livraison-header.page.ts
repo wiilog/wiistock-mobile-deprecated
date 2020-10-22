@@ -14,6 +14,8 @@ import {PageComponent} from '@pages/page.component';
 import {FormPanelParam} from '@app/common/directives/form-panel/form-panel-param';
 import {FormPanelInputComponent} from '@app/common/components/panel/form-panel/form-panel-input/form-panel-input.component';
 import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
+import {FormPanelService} from "@app/common/services/form-panel.service";
+import {FreeField, FreeFieldType} from "@entities/free-field";
 
 
 @Component({
@@ -38,6 +40,7 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
                        private toastService: ToastService,
                        private mainHeaderService: MainHeaderService,
                        private storageService: StorageService,
+                       private formPanelService: FormPanelService,
                        navService: NavService) {
         super(navService);
         this.hasLoaded = false;
@@ -54,80 +57,109 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
         zip(
             this.storageService.getOperatorId(),
             this.isUpdate ? this.sqliteService.findOneById('demande_livraison', demandeId) : of(this.demandeLivraisonToUpdate),
-            this.storageService.getOperator()
+            this.storageService.getOperator(),
+            this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.DELIVERY_REQUEST}'`])
         )
-        .subscribe(([operatorId, demandeLivraison, operator]: [number, DemandeLivraison|undefined, string]) => {
+        .subscribe(([operatorId, demandeLivraison, operator, freeFields]: [number, DemandeLivraison|undefined, string, Array<FreeField>]) => {
             this.demandeLivraisonToUpdate = demandeLivraison;
             this.operatorId = operatorId;
-            const {type_id: type, location_id: location, comment} = (demandeLivraison || {});
-            this.formBodyConfig = [
-                {
-                    item: FormPanelInputComponent,
-                    config: {
-                        label: 'Demandeur',
-                        name: 'requester',
-                        value: operator,
-                        inputConfig: {
-                            type: 'text',
-                            disabled: true
-                        }
-                    }
-                },
-                {
-                    item: FormPanelSelectComponent,
-                    config: {
-                        label: 'Type',
-                        name: 'type_id',
-                        value: type,
-                        inputConfig: {
-                            required: true,
-                            searchType: SelectItemTypeEnum.DEMANDE_LIVRAISON_TYPE,
-                            requestParams: ['to_delete IS NULL']
-                        },
-                        errors: {
-                            required: 'Vous devez sélectionner un type'
-                        }
-                    }
-                },
-                {
-                    item: FormPanelInputComponent,
-                    config: {
-                        label: 'Commentaire',
-                        name: 'comment',
-                        value: comment,
-                        inputConfig: {
-                            type: 'text',
-                            maxLength: '255'
-                        },
-                        errors: {
-                            maxlength: 'Votre commentaire est trop long'
-                        }
-                    }
-                },
-                {
-                    item: FormPanelSelectComponent,
-                    config: {
-                        label: 'Destination',
-                        name: 'location_id',
-                        value: location,
-                        inputConfig: {
-                            required: true,
-                            barcodeScanner: true,
-                            searchType: SelectItemTypeEnum.LOCATION
-                        },
-                        errors: {
-                            required: 'Vous devez sélectionner une destination'
-                        }
-                    }
-                }
-            ]
 
-            this.hasLoaded = true;
+            this.createFormBodyConfig(operator, freeFields);
         });
     }
 
     public ionViewWillLeave(): void {
         this.formPanelComponent.unsubscribeZebraScan();
+    }
+
+    public createFormBodyConfig(operator: string, freeFields: Array<FreeField>, typeId?: number) {
+        const {location_id: location, comment, free_fields} = (this.demandeLivraisonToUpdate || {});
+        const type = typeId
+            ? typeId
+            : (this.demandeLivraisonToUpdate
+                ? this.demandeLivraisonToUpdate.type_id
+                : undefined);
+
+        let freeFieldsValues = JSON.parse(free_fields || '{}') || {};
+        console.log("for type " + type);
+
+        this.formBodyConfig = [
+            {
+                item: FormPanelInputComponent,
+                config: {
+                    label: 'Demandeur',
+                    name: 'requester',
+                    value: operator,
+                    inputConfig: {
+                        type: 'text',
+                        disabled: true
+                    }
+                }
+            },
+            {
+                item: FormPanelSelectComponent,
+                config: {
+                    label: 'Type',
+                    name: 'type_id',
+                    value: type,
+                    inputConfig: {
+                        required: true,
+                        searchType: SelectItemTypeEnum.DEMANDE_LIVRAISON_TYPE,
+                        requestParams: ['to_delete IS NULL'],
+                        onChange: (typeId) => {
+                            this.createFormBodyConfig(operator, freeFields, Number(typeId))
+                        }
+                    },
+                    errors: {
+                        required: 'Vous devez sélectionner un type'
+                    }
+                }
+            },
+            {
+                item: FormPanelInputComponent,
+                config: {
+                    label: 'Commentaire',
+                    name: 'comment',
+                    value: comment,
+                    inputConfig: {
+                        type: 'text',
+                        maxLength: '255'
+                    },
+                    errors: {
+                        maxlength: 'Votre commentaire est trop long'
+                    }
+                }
+            },
+            ...(freeFields
+                .filter(({typeId}) => (typeId === type))
+                .map(({id, ...freeField}) => (
+                    this.formPanelService.createFromFreeField(
+                        {id, ...freeField},
+                        freeFieldsValues[id],
+                        'free_fields',
+                        'edit'
+                    )
+                ))
+                .filter(Boolean)),
+            {
+                item: FormPanelSelectComponent,
+                config: {
+                    label: 'Destination',
+                    name: 'location_id',
+                    value: location,
+                    inputConfig: {
+                        required: true,
+                        barcodeScanner: true,
+                        searchType: SelectItemTypeEnum.LOCATION
+                    },
+                    errors: {
+                        required: 'Vous devez sélectionner une destination'
+                    }
+                }
+            }
+        ];
+
+        this.hasLoaded = true;
     }
 
     public onFormSubmit(): void {
@@ -136,9 +168,12 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
             this.toastService.presentToast(error)
         }
         else {
-            const {type_id, location_id, comment} = this.formPanelComponent.values;
+            let {type_id, location_id, comment, free_fields} = this.formPanelComponent.values;
+            console.log(free_fields);
+            free_fields = JSON.stringify(free_fields || {});
+
             const user_id = this.operatorId;
-            const values = {type_id, location_id, comment, user_id};
+            const values = {type_id, location_id, comment, user_id, free_fields};
             (
                 this.isUpdate
                     ? this.sqliteService

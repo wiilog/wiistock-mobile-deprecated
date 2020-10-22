@@ -64,6 +64,10 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
 
     public onValueChange(value: any) {
         this.valueChange.emit(value);
+
+        if(this.inputConfig.onChange) {
+            this.inputConfig.onChange(value);
+        }
     }
 
     public get error(): string {

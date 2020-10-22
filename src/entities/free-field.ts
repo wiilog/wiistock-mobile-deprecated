@@ -13,6 +13,7 @@ export interface FreeField {
 export enum FreeFieldType {
     TRACKING = 'mouvement traca',
     HANDLING = 'services',
+    DELIVERY_REQUEST = 'demande livraison',
 }
 
 export enum FreeFieldTyping {

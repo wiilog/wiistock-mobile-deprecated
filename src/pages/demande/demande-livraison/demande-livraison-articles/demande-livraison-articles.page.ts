@@ -21,6 +21,7 @@ import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {PageComponent} from '@pages/page.component';
+import {FreeField, FreeFieldType, FreeFieldTyping} from "@entities/free-field";
 
 
 @Component({
@@ -96,15 +97,16 @@ export class DemandeLivraisonArticlesPage extends PageComponent implements CanLe
                             this.sqliteService.findOneById('demande_livraison_type', demandeLivraison.type_id),
                             this.sqliteService.findOneById('emplacement', demandeLivraison.location_id),
                             this.sqliteService.findArticlesInDemandeLivraison(demandeLivraison.id),
-                            this.storageService.getOperator()
+                            this.storageService.getOperator(),
+                            this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.DELIVERY_REQUEST}'`])
                         )
-                            .pipe((map(([type, location, articles, operator]) => ([demandeLivraison, type, location, articles, operator]))))
+                            .pipe((map(([type, location, articles, operator, freeFields]) => ([demandeLivraison, type, location, articles, operator, freeFields]))))
                     ))
                 )
-                .subscribe(([demandeLivraison, type, location, articles, operator]: [DemandeLivraison, DemandeLivraisonType, Emplacement, Array<DemandeLivraisonArticle>, string]) => {
+                .subscribe(([demandeLivraison, type, location, articles, operator, freeFields]: [DemandeLivraison, DemandeLivraisonType, Emplacement, Array<DemandeLivraisonArticle>, string, Array<FreeField>]) => {
                     this.loading = false;
                     this.selectedArticles = articles;
-                    this.headerConfig = this.createHeaderConfig(demandeLivraison, type, location, operator, articles.length);
+                    this.headerConfig = this.createHeaderConfig(demandeLivraison, type, location, operator, articles.length, freeFields);
                     this.bodyConfig = this.createBodyConfig(articles);
                 });
         }
@@ -142,11 +144,25 @@ export class DemandeLivraisonArticlesPage extends PageComponent implements CanLe
                                type: DemandeLivraisonType,
                                location: Emplacement,
                                operator: string,
-                               articlesCounter: number): HeaderConfig {
+                               articlesCounter: number,
+                               freeFields: Array<FreeField>): HeaderConfig {
+        const freeFieldsValues = JSON.parse(demandeLivraison.free_fields);
+
         const subtitle = [
             `Demandeur : ${operator || ''}`,
             `Emplacement : ${location ? location.label : ''}`,
-            `Type : ${type ? type.label : ''}`
+            `Type : ${type ? type.label : ''}`,
+            ...freeFields
+                .filter(({typeId}) => demandeLivraison.type_id == typeId)
+                .map(({id, label, typing}) => {
+                    if(typing == FreeFieldTyping.BOOL) {
+                        return `${label} : ${freeFieldsValues[id] ? "Oui" : "Non"}`;
+                    } else if(typing == FreeFieldTyping.LIST || typing == FreeFieldTyping.MULTI_LIST) {
+                        return `${label} : ${freeFieldsValues[id].replaceAll(';', ', ')}`;
+                    } else {
+                        return `${label} : ${freeFieldsValues[id] ?? "Non défini"}`;
+                    }
+                })
         ];
 
         if (demandeLivraison.comment) {

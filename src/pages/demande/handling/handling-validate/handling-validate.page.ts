@@ -107,7 +107,7 @@ export class HandlingValidatePage extends PageComponent {
                                     `category = 'service'`,
                                     `state = 'treated'`,
                                     `typeId = ${this.handling.typeId}`
-                                ]
+                                ],
                             },
                             errors: {
                                 required: 'Le statut de la demande est requis',

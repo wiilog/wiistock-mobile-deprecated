@@ -73,21 +73,25 @@ export class FormPanelComponent implements AfterViewInit {
 
     private doFireZebraScan(): void {
         this.fireZebraRequested = false;
-        this.getElementForZebraInit().forEach((element) => {
+        this.getInstanceForZebraInit().forEach((element) => {
             element.fireZebraScan();
         });
     }
 
     public unsubscribeZebraScan() {
         this.fireZebraRequested = false;
-        this.getElementForZebraInit().forEach((element) => {
+        this.getInstanceForZebraInit().forEach((element) => {
             element.unsubscribeZebraScan();
         });
     }
 
-    private getElementForZebraInit(): Array<FormPanelSelectComponent> {
-        return (this.formElements
-            ? this.formElements.filter(({instance}) => (instance instanceof FormPanelSelectComponent))
-            : []) as unknown as Array<FormPanelSelectComponent>;
+    private getInstanceForZebraInit(): Array<FormPanelSelectComponent> {
+        if(this.formElements) {
+            return this.formElements
+                .filter(({instance}) => instance instanceof FormPanelSelectComponent)
+                .map(({instance}) => instance) as unknown as Array<FormPanelSelectComponent>;
+        } else {
+            return [];
+        }
     }
 }
