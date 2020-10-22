@@ -66,7 +66,7 @@ export class LivraisonArticlesPage extends PageComponent {
             subtitle: [
                 `Destination : ${this.livraison.location}`,
                 this.livraison.comment ? `Commentaire : ${this.livraison.comment}` : undefined
-                ]
+            ]
         };
 
         this.listBoldValues = ['label', 'barCode', 'location', 'quantity'];
