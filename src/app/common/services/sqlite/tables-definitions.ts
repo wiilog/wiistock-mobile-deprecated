@@ -122,6 +122,28 @@ export const TablesDefinitions: Array<TableDefinition> = [
         }
     },
     {
+        name: 'transfer_order',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            number: 'TEXT',
+            requester: 'VARCHAR(255)',
+            destination: 'VARCHAR(255)',
+            treated: 'INTEGER'
+        }
+    },
+    {
+        name: 'transfer_order_article',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
+            barcode: 'VARCHAR(255)',
+            label: 'VARCHAR(255)',
+            reference: 'VARCHAR(255)',
+            location: 'VARCHAR(255)',
+            quantity: 'INTEGER',
+            transfer_order_id: 'INTEGER'
+        }
+    },
+    {
         name: 'article_livraison',
         attributes: {
             id: 'INTEGER PRIMARY KEY AUTOINCREMENT',

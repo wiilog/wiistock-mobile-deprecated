@@ -39,8 +39,11 @@ import {DispatchValidatePageRoutingModule} from '@pages/tracking/dispatch/dispat
 import {DispatchPackConfirmPageRoutingModule} from '@pages/tracking/dispatch/dispatch-pack-confirm/dispatch-pack-confirm-routing.module';
 import {HandlingMenuPageRoutingModule} from '@pages/demande/handling/handling-menu/handling-menu-routing.module';
 import {HandlingValidatePageRoutingModule} from '@pages/demande/handling/handling-validate/handling-validate-routing.module';
-import {TransferMenuPageRoutingModule} from '@pages/transfer/transfer-menu/transfer-menu-routing.module';
-import {ManualTransferMenuPageRoutingModule} from  '@pages/transfer/manual-transfer/manual-transfer-menu-routing.module';
+import {TransferMenuPageRoutingModule} from '@pages/stock/transfer/transfer-menu/transfer-menu-routing.module';
+import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
+import {TransferListPageRoutingModule} from '@pages/stock/transfer/transfer-list/transfer-list-routing.module';
+import {TransferArticlesPageRoutingModule} from '@pages/stock/transfer/transfer-articles/transfer-articles-routing.module';
+import {TransferValidatePageRoutingModule} from '@pages/stock/transfer/transfer-validate/transfer-validate-routing.module';
 
 const routes: Routes = [
     {
@@ -239,12 +242,27 @@ const routes: Routes = [
     {
         path: TransferMenuPageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('@pages/transfer/transfer-menu/transfer-menu.module').then(m => m.TransferMenuPageModule)
+        loadChildren: () => import('@pages/stock/transfer/transfer-menu/transfer-menu.module').then(m => m.TransferMenuPageModule)
     },
     {
-        path: ManualTransferMenuPageRoutingModule.PATH,
+        path: TransferListPageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('@pages/transfer/manual-transfer/manual-transfer-menu.module').then(m => m.ManualTransferMenuPageModule)
+        loadChildren: () => import('@pages/stock/transfer/transfer-list/transfer-list.module').then(m => m.TransferListPageModule)
+    },
+    {
+        path: TransferArticlesPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/transfer/transfer-articles/transfer-articles.module').then(m => m.TransferArticlesPageModule)
+    },
+    {
+        path: TransferValidatePageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/transfer/transfer-validate/transfer-validate.module').then(m => m.TransferValidatePageModule)
+    },
+    {
+        path: PriseDeposeMenuPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/prise-depose/prise-depose-menu/prise-depose-menu.module').then(m => m.PriseDeposeMenuPageModule)
     },
 
     {

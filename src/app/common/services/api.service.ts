@@ -18,6 +18,7 @@ export class ApiService {
     public static readonly FINISH_LIVRAISON: string = '/finishLivraison';
     public static readonly BEGIN_COLLECTE: string = '/beginCollecte';
     public static readonly FINISH_COLLECTE: string = '/finishCollecte';
+    public static readonly FINISH_TRANSFER: string = '/transfer/finish';
     public static readonly TREAT_ANOMALIES: string = '/treatAnomalies';
     public static readonly POST_API_KEY: string = '/api-key';
     public static readonly ADD_INVENTORY_ENTRIES: string = '/addInventoryEntries';
