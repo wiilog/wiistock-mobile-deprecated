@@ -81,7 +81,6 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
                 : undefined);
 
         let freeFieldsValues = JSON.parse(free_fields || '{}') || {};
-        console.log("for type " + type);
 
         this.formBodyConfig = [
             {
@@ -169,7 +168,6 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
         }
         else {
             let {type_id, location_id, comment, free_fields} = this.formPanelComponent.values;
-            console.log(free_fields);
             free_fields = JSON.stringify(free_fields || {});
 
             const user_id = this.operatorId;

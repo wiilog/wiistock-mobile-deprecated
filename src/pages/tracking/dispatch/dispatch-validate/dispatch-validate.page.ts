@@ -202,7 +202,7 @@ export class DispatchValidatePage extends PageComponent {
         else { // (this.currentPage === this.PageStatus)
             if (this.selectedStatus) {
                 const treatedDispatchPacks = this.dispatchPacks.filter(({treated, already_treated}) => (treated || already_treated));
-                console.log(treatedDispatchPacks);
+
                 this.loadingSubscription = this.loadingService.presentLoading()
                     .pipe(
                         tap((loader) => {
