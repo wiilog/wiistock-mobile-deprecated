@@ -105,6 +105,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             requester: 'VARCHAR(255)',
             type: 'VARCHAR(255)',
             preparationLocation: 'VARCHAR(255)',
+            comment: 'TEXT'
         }
     },
     {
@@ -119,6 +120,28 @@ export const TablesDefinitions: Array<TableDefinition> = [
             type: 'VARCHAR(255)',
             forStock: 'INTEGER',
             comment: 'VARCHAR(255)'
+        }
+    },
+    {
+        name: 'transfer_order',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            number: 'TEXT',
+            requester: 'VARCHAR(255)',
+            destination: 'VARCHAR(255)',
+            treated: 'INTEGER'
+        }
+    },
+    {
+        name: 'transfer_order_article',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
+            barcode: 'VARCHAR(255)',
+            label: 'VARCHAR(255)',
+            reference: 'VARCHAR(255)',
+            location: 'VARCHAR(255)',
+            quantity: 'INTEGER',
+            transfer_order_id: 'INTEGER'
         }
     },
     {
@@ -202,6 +225,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             source: 'TEXT',
             subject: 'VARCHAR(255)',
             emergency: 'VARCHAR(255)',
+            freeFields: 'TEXT'
         }
     },
     {
@@ -262,9 +286,11 @@ export const TablesDefinitions: Array<TableDefinition> = [
         attributes: {
             id: 'INTEGER PRIMARY KEY',
             label: 'VARCHAR(255)',
-            type: 'VARCHAR(255)',
+            typeId: 'INTEGER',
+            categoryType: 'VARCHAR(255)',
             typing: 'VARCHAR(255)',
-            required: 'INTEGER',
+            requiredCreate: 'INTEGER',
+            requiredEdit: 'INTEGER',
             elements: 'TEXT',
             defaultValue: 'TEXT'
         }

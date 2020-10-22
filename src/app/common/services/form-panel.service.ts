@@ -12,7 +12,10 @@ import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/
     providedIn: 'root'
 })
 export class FormPanelService {
-    public createFromFreeField(freeField: FreeField, value: any, formPanelItemGroup: string): FormPanelParam|undefined {
+    public createFromFreeField(freeField: FreeField,
+                               value: any,
+                               formPanelItemGroup: string,
+                               mode: 'create'|'edit'): FormPanelParam|undefined {
         const common = {
             label: freeField.label,
             name: freeField.id,
@@ -21,6 +24,13 @@ export class FormPanelService {
                 required: `Le champ ${freeField.label} est requis`
             }
         };
+
+        const requiredFields = {
+            create: 'requiredCreate',
+            edit: 'requiredEdit'
+        };
+        const requiredField = requiredFields[mode];
+        const required = requiredField && Boolean(freeField[requiredField]);
 
         return (
             freeField.typing === FreeFieldTyping.BOOL ? {
@@ -41,7 +51,7 @@ export class FormPanelService {
                             : undefined)
                         : value,
                     inputConfig: {
-                        required: Boolean(freeField.required),
+                        required,
                         mode: (freeField.typing === FreeFieldTyping.DATE ? FormPanelCalendarMode.DATE : FormPanelCalendarMode.DATETIME)
                     } as any
                 }
@@ -52,7 +62,7 @@ export class FormPanelService {
                     ...common,
                     value: value || freeField.defaultValue,
                     inputConfig: {
-                        required: Boolean(freeField.required),
+                        required,
                         type: freeField.typing
                     } as any
                 }
@@ -66,7 +76,7 @@ export class FormPanelService {
                         ? (value || freeField.defaultValue)
                         : (value || freeField.defaultValue || '').split(',').map((id) => ({id, label: id})),
                     inputConfig: {
-                        required: Boolean(freeField.required),
+                        required,
                         barcodeScanner: false,
                         isMultiple: freeField.typing === FreeFieldTyping.MULTI_LIST,
                         elements: freeField.elements

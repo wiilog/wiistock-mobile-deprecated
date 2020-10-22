@@ -16,10 +16,10 @@ import {PageComponent} from '@pages/page.component';
 
 @Component({
     selector: 'wii-prise-depose-menu',
-    templateUrl: './manual-transfer-menu-page.component.html',
-    styleUrls: ['./manual-transfer-menu-page.component.scss'],
+    templateUrl: './prise-depose-menu.page.html',
+    styleUrls: ['./prise-depose-menu.page.scss'],
 })
-export class ManualTransferMenuPage extends PageComponent implements CanLeave {
+export class PriseDeposeMenuPage extends PageComponent implements CanLeave {
 
     public nbDrop: number;
     public statsSlidersData: Array<StatsSlidersData>;
@@ -50,7 +50,7 @@ export class ManualTransferMenuPage extends PageComponent implements CanLeave {
             {
                 icon: 'download.svg',
                 label: 'Dépose',
-                action: () => this.goToDepose()
+                action: () => this.goToDrop()
             }
         ];
     }
@@ -61,7 +61,7 @@ export class ManualTransferMenuPage extends PageComponent implements CanLeave {
 
     public ionViewWillEnter(): void {
         this.fromStock = Boolean(this.currentNavParams.get('fromStock'));
-        const goToDeposeDirectly = (!this.deposeAlreadyNavigate && Boolean(this.currentNavParams.get('goToDeposeDirectly')));
+        const goToDropDirectly = (!this.deposeAlreadyNavigate && Boolean(this.currentNavParams.get('goToDropDirectly')));
         this.canLeave = false;
 
         zip(
@@ -86,9 +86,9 @@ export class ManualTransferMenuPage extends PageComponent implements CanLeave {
                 loading.dismiss();
                 this.canLeave = true;
 
-                if (goToDeposeDirectly) {
+                if (goToDropDirectly) {
                     this.deposeAlreadyNavigate = true;
-                    this.goToDepose();
+                    this.goToDrop();
                 }
             });
     }
@@ -105,7 +105,7 @@ export class ManualTransferMenuPage extends PageComponent implements CanLeave {
         }
     }
 
-    public goToDepose(): void {
+    public goToDrop(): void {
         if (!this.fromStock || this.network.type !== 'none') {
             if (this.canNavigateToDepose) {
                 this.navService.push(EmplacementScanPageRoutingModule.PATH, {

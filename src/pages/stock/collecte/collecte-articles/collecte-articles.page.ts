@@ -55,7 +55,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
 
     private isLoading: boolean;
 
-    private goToDepose: () => void;
+    private goToDrop: () => void;
     private canLeave: boolean;
 
     private screenAlreadyClosed: boolean;
@@ -76,7 +76,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
     public ionViewWillEnter(): void {
         this.isLoading = false;
         this.collecte = this.currentNavParams.get('collecte');
-        this.goToDepose = this.currentNavParams.get('goToDepose');
+        this.goToDrop = this.currentNavParams.get('goToDrop');
 
         this.collecteHeaderConfig = {
             leftIcon: {name: 'collecte.svg'},
@@ -375,7 +375,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                                             this.closeScreen(offline ? [] : success, offline)
                                                 .pipe(filter((screenClosed) => screenClosed))
                                                 .subscribe(() => {
-                                                    this.goToDepose();
+                                                    this.goToDrop();
                                                 });
                                         }
                                     }]

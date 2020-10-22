@@ -6,4 +6,5 @@ export interface Livraison {
     date_end: string;
     requester: string;
     type: string;
+    comment: string
 }

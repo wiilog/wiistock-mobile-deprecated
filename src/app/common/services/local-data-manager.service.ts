@@ -14,9 +14,10 @@ import {catchError, flatMap, map} from 'rxjs/operators';
 import {AlertManagerService} from '@app/common/services/alert-manager.service';
 import {DemandeLivraison} from '@entities/demande-livraison';
 import {DemandeLivraisonArticleSelected} from '@entities/demande-livraison-article-selected';
+import {TransferOrder} from '@entities/transfer-order';
 
 
-type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies'|'dispatch';
+type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies' | 'dispatch' | 'transfer';
 interface ApiProccessConfig {
     service: string;
     createApiParams: () => Observable<{paramName: string, [name: string]: any}>
@@ -213,6 +214,34 @@ export class LocalDataManagerService {
                     );
                 }
             },
+            transfer: {
+                service: ApiService.FINISH_TRANSFER,
+                createApiParams: () => (
+                    this.sqliteService
+                        .findBy('transfer_order', ['treated = 1'])
+                        .pipe(
+                            map((transfers: Array<TransferOrder>) => ({
+                                paramName: 'transfers',
+                                transfers: transfers
+                                    .map(({id}) => id)
+                            }))
+                        )
+                ),
+                titleErrorAlert: `Des transferts n'ont pas pu être synchronisées`,
+                deleteSucceed: (resSuccess) => {
+                    return (resSuccess && resSuccess.length > 0)
+                        ? zip(
+                            this.sqliteService.deleteBy('transfer_order', [`id IN (${resSuccess.join(',')})`]),
+                            this.sqliteService.deleteBy('transfer_order_article', [`transfer_order_id IN (${resSuccess.join(',')})`])
+                        )
+                        : of(undefined);
+                },
+                resetFailed: (resError) => {
+                    return (resError && resError.length > 0)
+                        ? this.sqliteService.update('transfer_order', {treated: 0}, [`id IN (${resError.join(',')})`])
+                        : of(undefined);
+                }
+            },
             inventory: {
                 service: ApiService.ADD_INVENTORY_ENTRIES,
                 createApiParams: () => this.sqliteService.findAll('saisie_inventaire').pipe(map((entries) => ({
@@ -315,6 +344,10 @@ export class LocalDataManagerService {
                 flatMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des acheminements'});
                     return this.sendFinishedProcess('dispatch').pipe(map(() => needAnotherSynchronise));
+                }),
+                flatMap((needAnotherSynchronise) => {
+                    synchronise$.next({finished: false, message: 'Envoi des transferts'});
+                    return this.sendFinishedProcess('transfer').pipe(map(() => needAnotherSynchronise));
                 }),
                 // we reload data from API if we have save data in previous requests
                 flatMap((needAnotherSynchronise) => {

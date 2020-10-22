@@ -7,13 +7,12 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav.service';
-import {ManualTransferMenuPageRoutingModule} from '@pages/transfer/manual-transfer/manual-transfer-menu-routing.module';
 import {PreparationMenuPageRoutingModule} from '@pages/stock/preparation/preparation-menu/preparation-menu-routing.module';
 import {LivraisonMenuPageRoutingModule} from '@pages/stock/livraison/livraison-menu/livraison-menu-routing.module';
 import {CollecteMenuPageRoutingModule} from '@pages/stock/collecte/collecte-menu/collecte-menu-routing.module';
 import {InventoryLocationsPageRoutingModule} from '@pages/stock/inventory/inventory-locations/inventory-locations-routing.module';
 import {PageComponent} from '@pages/page.component';
-import {TransferMenuPageRoutingModule} from "@pages/transfer/transfer-menu/transfer-menu-routing.module";
+import {TransferMenuPageRoutingModule} from "@pages/stock/transfer/transfer-menu/transfer-menu-routing.module";
 
 @Component({
     selector: 'wii-stock-menu',
@@ -45,7 +44,7 @@ export class StockMenuPage extends PageComponent {
                 icon: 'stock-transfer.svg',
                 label: 'Transfert',
                 action: () => {
-                    self.navService.push(TransferMenuPageRoutingModule.PATH, {fromStock: true});
+                    self.navService.push(TransferMenuPageRoutingModule.PATH);
                 }
             },
             {
@@ -70,8 +69,8 @@ export class StockMenuPage extends PageComponent {
                         avoidSync: () => {
                             self.setAvoidSync(true);
                         },
-                        goToDepose: () => {
-                            self.goToDepose();
+                        goToDrop: () => {
+                            self.goToDrop();
                         }
                     });
                 }
@@ -138,11 +137,10 @@ export class StockMenuPage extends PageComponent {
         }
     }
 
-    public goToDepose() {
+    public goToDrop() {
         this.navService
-            .push(ManualTransferMenuPageRoutingModule.PATH, {
-                fromStock: true,
-                goToDeposeDirectly: true
+            .push(TransferMenuPageRoutingModule.PATH, {
+                goToDropDirectly: true
             });
     }
 
