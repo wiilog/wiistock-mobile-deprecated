@@ -1,5 +1,3 @@
-<wii-main-loader [loading]="!hasLoaded"></wii-main-loader>
-
 <div *ngIf="hasLoaded"
      scroll-y="true"
      class="page-content">
@@ -10,10 +8,11 @@
     </wii-card-list>
 </div>
 <wii-select-item #selectItemComponent
-                 [hidden]="!hasLoaded || !deliveryOrders || deliveryOrders.length === 0"
+                 *ngIf="hasLoaded && deliveryOrders && deliveryOrders.length > 0"
                  [type]="selectItemType"
                  (itemChange)="filterByLocation($event)"
                  [checkBarcodeValidity]="true"
+                 [requestParams]="locationFilterRequestParams"
                  [resetEmitter]="resetEmitter$"
                  [scanMode]="barcodeScannerSearchMode">
 </wii-select-item>
