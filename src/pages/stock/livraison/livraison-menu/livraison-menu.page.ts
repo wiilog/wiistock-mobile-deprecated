@@ -11,6 +11,10 @@ import {SelectItemComponent} from '@app/common/components/select-item/select-ite
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {Emplacement} from '@entities/emplacement';
+import {Subscription} from 'rxjs';
+import {flatMap, map} from 'rxjs/operators';
+import {LoadingService} from '@app/common/services/loading.service';
+
 
 @Component({
     selector: 'wii-livraison-menu',
@@ -33,29 +37,57 @@ export class LivraisonMenuPage extends PageComponent {
     public hasLoaded: boolean;
 
     public resetEmitter$: EventEmitter<void>;
+    public locationFilterRequestParams: Array<string>;
+
+    public loader: HTMLIonLoadingElement;
+
+    private loadingSubscription: Subscription;
 
     public constructor(private mainHeaderService: MainHeaderService,
                        private sqliteService: SqliteService,
+                       private loadingService: LoadingService,
                        navService: NavService) {
         super(navService);
         this.resetEmitter$ = new EventEmitter<void>();
+        this.locationFilterRequestParams = [];
     }
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
         this.resetEmitter$.emit();
 
-        this.sqliteService.findAll('livraison').subscribe((livraisons) => {
-            this.deliveryOrders = livraisons.filter(({date_end}) => (date_end === null));
-            this.refreshListConfig(this.deliveryOrders);
+        this.unsubscribeLoading();
+        this.loadingSubscription = this.loadingService.presentLoading()
+            .pipe(
+                flatMap((loader) => (
+                    this.sqliteService
+                        .findAll('livraison')
+                        .pipe(map((articles) => [loader, articles]))
+                ))
+            )
+            .subscribe(([loader, deliveries]: [HTMLIonLoadingElement, Array<Livraison>]) => {
+                this.loader = loader;
+                this.deliveryOrders = deliveries.filter(({date_end}) => (date_end === null));
+                const preparationLocationsStr = deliveries
+                    .reduce((acc: Array<string>, {preparationLocation}) => {
+                        if (preparationLocation && acc.indexOf(preparationLocation) === -1) {
+                            acc.push(preparationLocation);
+                        }
+                        return acc;
 
-            if (this.selectItemComponent) {
-                this.selectItemComponent.fireZebraScan();
-            }
+                    }, [])
+                    .map((label) => `'${label.replace("'", "''")}'`);
 
-            this.hasLoaded = true;
-            this.refreshSubTitle(this.deliveryOrders);
-        });
+                this.locationFilterRequestParams = preparationLocationsStr.length > 0
+                    ? [`label IN (${preparationLocationsStr.join(',')})`]
+                    : [];
+
+                this.refreshListConfig(this.deliveryOrders);
+                this.refreshSubTitle(this.deliveryOrders);
+
+                this.hasLoaded = true;
+                this.unsubscribeLoading();
+            });
     }
 
     public refreshSubTitle(deliveryOrders: Array<Livraison>): void {
@@ -114,5 +146,17 @@ export class LivraisonMenuPage extends PageComponent {
                     this.navService.push(LivraisonArticlesPageRoutingModule.PATH, {livraison});
                 }
             }));
+    }
+
+    private unsubscribeLoading(): void {
+        if (this.loadingSubscription) {
+            this.loadingSubscription.unsubscribe();
+            this.loadingSubscription = undefined;
+        }
+
+        if (this.loader) {
+            this.loader.dismiss();
+            this.loader = undefined;
+        }
     }
 }
