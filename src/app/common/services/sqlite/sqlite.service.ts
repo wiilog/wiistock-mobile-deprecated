@@ -155,31 +155,16 @@ export class SqliteService {
     }
 
     public importPreparations(data, deleteOld: boolean = true): Observable<any> {
-        const prepas = data['preparations'];
-        let prepasValues = (prepas || []).map((prepa) => (`(
-            ${prepa.id},
-            '${prepa.number}',
-            NULL,
-            NULL,
-            0,
-            '${this.escapeQuotes(prepa.destination)}',
-            '${this.escapeQuotes(prepa.type)}',
-            ${prepa.requester ? `'${this.escapeQuotes(prepa.requester)}'` : 'NULL'},
-            '${prepa.comment}'
-        )`));
-
+        const preparations = (data['preparations'] || []);
         return of(undefined).pipe(
             flatMap(() => deleteOld ? this.deleteBy('preparation') : of(undefined)),
-            flatMap(() => {
-                if (prepasValues.length > 0) {
-                    const prepasValuesStr = prepasValues.join(', ');
-                    const sqlPrepas = 'INSERT INTO `preparation` (`id`, `numero`, `emplacement`, `date_end`, `started`, `destination`, `type`, `requester`, `comment`) VALUES ' + prepasValuesStr + ';';
-                    return this.executeQuery(sqlPrepas).pipe(map(() => true));
-                }
-                else {
-                    return of(undefined);
-                }
-            })
+            flatMap(() => (
+                (preparations.length > 0)
+                    ? zip(...(preparations.map(({number, ...preparation}) => (
+                        this.insert('preparation', {started: 0, numero: number, ...preparation})
+                    ))))
+                    : of(undefined)
+            ))
         );
     }
 
