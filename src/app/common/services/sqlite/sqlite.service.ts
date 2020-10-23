@@ -862,11 +862,11 @@ export class SqliteService {
         if (!isMultiple) {
             objects = [objects];
         }
-        const valuesMap = objects.map((values) =>
-            '(' +
-            objectKeys.map((key) => this.getValueForQuery(values[key])).join((', ')) +
-            ')'
-        );
+        const valuesMap = objects.map((values) => (
+            '('
+            + objectKeys.map((key) => this.getValueForQuery(values[key])).join((', '))
+            + ')'
+        ));
         return "INSERT INTO " + name +
             ' (' + objectKeys.join(', ') + ') ' +
             "VALUES " +
@@ -1071,7 +1071,7 @@ export class SqliteService {
             (typeof value === 'string') ? `'${this.escapeQuotes(value)}'` :
             (typeof value === 'boolean') ? `${Number(value)}` :
             ((value === null) || (value === undefined)) ? 'null' :
-            (Array.isArray(value) || typeof value === 'object') ? `'${JSON.stringify(value)}'` :
+            (Array.isArray(value) || typeof value === 'object') ? `'${this.escapeQuotes(JSON.stringify(value))}'` :
             `${value}`
         );
     }
