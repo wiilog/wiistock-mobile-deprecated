@@ -262,10 +262,13 @@ export class LocalDataManagerService {
                     paramName: 'anomalies',
                     anomalies
                 }))),
-                deleteSucceed: ({errors}) => this.sqliteService.deleteBy('anomalie_inventaire', [
-                    `treated = '1'`,
-                    ...(errors && errors.length ? [`id NOT IN (${errors.join(',')})`] : [])
-                ])
+                deleteSucceed: (success) => (
+                    (success && success.length > 0)
+                        ? this.sqliteService.deleteBy('anomalie_inventaire', [
+                            `id IN (${success.join(',')})`
+                        ])
+                        : of(undefined)
+                )
             },
             dispatch: {
                 service: ApiService.PATCH_DISPATCH,
@@ -514,7 +517,7 @@ export class LocalDataManagerService {
                                         apiProccessConfig.numeroProccessFailed,
                                         errors
                                     );
-                                }
+                                }console.log(success)
                                 return of(undefined)
                                     .pipe(
                                         flatMap(() => apiProccessConfig.deleteSucceed(success)),

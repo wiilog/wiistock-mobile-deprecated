@@ -66,7 +66,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
 
         this.selectItemType = this.anomalyMode
             ? SelectItemTypeEnum.INVENTORY_ANOMALIES_ARTICLE
-            : SelectItemTypeEnum.INVENTORY_ARTICLE
+            : SelectItemTypeEnum.INVENTORY_ARTICLE;
 
         if (!this.alreadyInitialized && !this.dataSubscription) {
             this.dataSubscription = this.loadingService

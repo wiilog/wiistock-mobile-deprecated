@@ -146,7 +146,17 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             valueField: 'barcode',
             templateIndex: 'article-inventory',
             databaseTable: anomalyMode ? 'anomalie_inventaire' : 'article_inventaire',
-            placeholder: 'Sélectionner un article'
+            placeholder: 'Sélectionner un article',
+            reducer: anomalyMode
+                ? (acc: Array<any>, current: any) => {
+                    const {barcode: currentBarcode} = current;
+                    const alreadyInsertedIndex = acc.findIndex(({barcode}) => (barcode === currentBarcode))
+                    if (alreadyInsertedIndex === -1) {
+                        acc.push(current);
+                    }
+                    return acc;
+                }
+                : undefined
         };
     }
 
@@ -184,7 +194,9 @@ export class SearchItemComponent implements OnInit, OnDestroy {
 
     public reload(): Observable<Array<any>> {
         const $res = new ReplaySubject<Array<any>>(1);
-        (this.elements ? of(this.elements) : this.sqliteService.findBy(this.config[this.type].databaseTable, this.requestParams, (this.config[this.type] as any).requestOrder || {}))
+        (this.elements
+            ? of(this.elements)
+            : this.sqliteService.findBy(this.config[this.type].databaseTable, this.requestParams, (this.config[this.type] as any).requestOrder || {}))
             .pipe(
                 take(1),
                 map((list) => {
@@ -194,7 +206,12 @@ export class SearchItemComponent implements OnInit, OnDestroy {
                         : list;
                 }),
                 tap((list) => {
+                    if (this.config[this.type].reducer) {
+                        list = list.reduce(this.config[this.type].reducer, []);
+                    }
+
                     this.dbItems = list;
+
                     this.loadFirstItems();
                 })
             )
