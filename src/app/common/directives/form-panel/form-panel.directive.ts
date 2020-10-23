@@ -1,6 +1,6 @@
 import {
     ComponentFactoryResolver,
-    Directive, HostBinding,
+    Directive,
     Input,
     OnInit, Type,
     ViewContainerRef

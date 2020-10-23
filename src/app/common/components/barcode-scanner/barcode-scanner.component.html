@@ -36,8 +36,9 @@
     </ng-container>
 </div>
 <ion-button *ngIf="mode === ONLY_SCAN_MODE || mode === WITH_MANUAL_MODE || mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE || mode === TOOL_SEARCH_AND_LABEL"
-            class="scanner-button larger"
-            size="large"
+            class="scanner-button"
+            [class.larger]="!small"
+            [size]="small ? 'default' : 'large'"
             expand="full"
             color="primary"
             (click)="scan()">
@@ -48,6 +49,7 @@
     </span>
     <wii-icon name="scan.svg"
               color="white"
-              class="button-icon big">
+              class="button-icon big"
+              [class.big]="!small">
     </wii-icon>
 </ion-button>

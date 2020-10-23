@@ -21,6 +21,7 @@
 </ion-item>
 
 <wii-barcode-scanner #barcodeScanner
+                     [small]="true"
                      *ngIf="inputConfig.barcodeScanner"
                      buttonSubtitle="Destination"
                      (add)="onBarcodeScanned($event[0])">

@@ -65,6 +65,8 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
             this.operatorId = operatorId;
 
             this.createFormBodyConfig(operator, freeFields);
+
+            this.hasLoaded = true;
         });
     }
 
@@ -132,7 +134,7 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
             ...(freeFields
                 .filter(({typeId}) => (typeId === type))
                 .map(({id, ...freeField}) => (
-                    this.formPanelService.createFromFreeField(
+                    this.formPanelService.createConfigFromFreeField(
                         {id, ...freeField},
                         freeFieldsValues[id],
                         'free_fields',
@@ -157,8 +159,6 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
                 }
             }
         ];
-
-        this.hasLoaded = true;
     }
 
     public onFormSubmit(): void {

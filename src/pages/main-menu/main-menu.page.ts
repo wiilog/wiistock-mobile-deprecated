@@ -10,12 +10,10 @@ import {Network} from '@ionic-native/network/ngx';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav.service';
-import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
 import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
 import {StockMenuPageRoutingModule} from '@pages/stock/stock-menu/stock-menu-routing.module';
 import {DemandeMenuPageRoutingModule} from '@pages/demande/demande-menu/demande-menu-routing.module';
 import {PageComponent} from '@pages/page.component';
-import {TrackingMenuPage} from '@pages/tracking/tracking-menu/tracking-menu.page';
 import {TrackingMenuPageRoutingModule} from '@pages/tracking/tracking-menu/tracking-menu-routing.module';
 
 

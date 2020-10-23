@@ -160,7 +160,7 @@ export class MovementConfirmPage extends PageComponent {
                     },
                     ...(freeFields
                         .map(({id, ...freeField}) => (
-                            this.formPanelService.createFromFreeField(
+                            this.formPanelService.createConfigFromFreeField(
                                 {id, ...freeField},
                                 freeFieldsValues[id],
                                 'freeFields',

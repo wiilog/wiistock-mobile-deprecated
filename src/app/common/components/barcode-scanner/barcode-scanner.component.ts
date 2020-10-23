@@ -25,6 +25,10 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
     public selectedLabel$?: Observable<string>;
 
     @Input()
+    @HostBinding('class.button-small')
+    public small?: boolean;
+
+    @Input()
     public hidden?: boolean;
 
     @Input()

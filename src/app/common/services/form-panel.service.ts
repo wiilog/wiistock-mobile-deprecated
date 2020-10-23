@@ -12,10 +12,10 @@ import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/
     providedIn: 'root'
 })
 export class FormPanelService {
-    public createFromFreeField(freeField: FreeField,
-                               value: any,
-                               formPanelItemGroup: string,
-                               mode: 'create'|'edit'): FormPanelParam|undefined {
+    public createConfigFromFreeField(freeField: FreeField,
+                                     value: any,
+                                     formPanelItemGroup: string,
+                                     mode: 'create'|'edit'): FormPanelParam|undefined {
         const common = {
             label: freeField.label,
             name: freeField.id,
@@ -87,5 +87,19 @@ export class FormPanelService {
             } :
             undefined
         )
+    }
+
+    public formatFreeField({typing, label}: FreeField,
+                           value: any): string {
+        const prefixLabel = `${label} : `;
+        let formattedValue: string;
+        if(typing == FreeFieldTyping.BOOL) {
+            formattedValue = value ? "Oui" : "Non";
+        } else if(typing == FreeFieldTyping.LIST || typing == FreeFieldTyping.MULTI_LIST) {
+            formattedValue = (value || '').replaceAll(';', ', ');
+        } else {
+            formattedValue = value || "Non défini";
+        }
+        return `${prefixLabel}${formattedValue}`;
     }
 }

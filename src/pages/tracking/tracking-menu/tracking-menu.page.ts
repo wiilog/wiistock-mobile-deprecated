@@ -1,5 +1,4 @@
 import {Component} from '@angular/core';
-import {merge, Subscription} from 'rxjs';
 import {MenuConfig} from '@app/common/components/menu/menu-config';
 import {Platform} from '@ionic/angular';
 import {MainHeaderService} from '@app/common/services/main-header.service';

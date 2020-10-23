@@ -1,4 +1,4 @@
-import {Component, HostBinding, Input} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
 
 

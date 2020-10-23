@@ -22,7 +22,6 @@ import {PageComponent} from '@pages/page.component';
 import {Nature} from '@entities/nature';
 import {Translation} from "@entities/translation";
 import {AlertManagerService} from "@app/common/services/alert-manager.service";
-import {AllowedNatureLocation} from '@entities/allowed-nature-location';
 
 @Component({
     selector: 'wii-depose',

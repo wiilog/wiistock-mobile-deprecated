@@ -4,7 +4,7 @@
     padding: $spacerMin;
     display: block;
 
-    ion-item {
+    &:not(.button-small) ion-item {
         margin-bottom: .5rem !important;
         ion-input {
             font-size: $normalFontSize;

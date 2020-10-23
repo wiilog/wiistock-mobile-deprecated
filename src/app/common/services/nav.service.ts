@@ -3,7 +3,7 @@ import {Injectable} from '@angular/core';
 import {NavController} from '@ionic/angular';
 import {from, Observable} from 'rxjs';
 import {environment} from '@environments/environment';
-import {flatMap, map, tap} from 'rxjs/operators';
+import {tap} from 'rxjs/operators';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 
 

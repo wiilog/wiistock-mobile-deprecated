@@ -11,7 +11,7 @@ import {Emplacement} from '@entities/emplacement';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {flatMap, tap} from 'rxjs/operators';
-import {of, Subscription, zip} from 'rxjs';
+import {of, Subscription} from 'rxjs';
 import {PageComponent} from '@pages/page.component';
 import {LoadingService} from '@app/common/services/loading.service';
 import {TransferOrder} from '@entities/transfer-order';

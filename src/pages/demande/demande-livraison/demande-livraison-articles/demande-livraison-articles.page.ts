@@ -21,7 +21,8 @@ import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {PageComponent} from '@pages/page.component';
-import {FreeField, FreeFieldType, FreeFieldTyping} from "@entities/free-field";
+import {FreeField, FreeFieldType} from "@entities/free-field";
+import {FormPanelService} from '@app/common/services/form-panel.service';
 
 
 @Component({
@@ -58,6 +59,7 @@ export class DemandeLivraisonArticlesPage extends PageComponent implements CanLe
     private pageAlreadyInit: boolean;
 
     public constructor(private sqliteService: SqliteService,
+                       private formPanelService: FormPanelService,
                        private storageService: StorageService,
                        private alertController: AlertController,
                        private toastService: ToastService,
@@ -153,16 +155,8 @@ export class DemandeLivraisonArticlesPage extends PageComponent implements CanLe
             `Emplacement : ${location ? location.label : ''}`,
             `Type : ${type ? type.label : ''}`,
             ...freeFields
-                .filter(({typeId}) => demandeLivraison.type_id == typeId)
-                .map(({id, label, typing}) => {
-                    if(typing == FreeFieldTyping.BOOL) {
-                        return `${label} : ${freeFieldsValues[id] ? "Oui" : "Non"}`;
-                    } else if(typing == FreeFieldTyping.LIST || typing == FreeFieldTyping.MULTI_LIST) {
-                        return `${label} : ${freeFieldsValues[id].replaceAll(';', ', ')}`;
-                    } else {
-                        return `${label} : ${freeFieldsValues[id] ?? "Non défini"}`;
-                    }
-                })
+                .filter(({typeId}) => (demandeLivraison.type_id == typeId))
+                .map((freeField: FreeField) => this.formPanelService.formatFreeField(freeField, freeFieldsValues[freeField.id]))
         ];
 
         if (demandeLivraison.comment) {
