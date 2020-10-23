@@ -59,6 +59,10 @@ export class TransferListPage extends PageComponent {
                             value: transferOrder.number
                         },
                         {
+                            label: 'Origine',
+                            value: transferOrder.origin
+                        },
+                        {
                             label: 'Destination',
                             value: transferOrder.destination
                         }

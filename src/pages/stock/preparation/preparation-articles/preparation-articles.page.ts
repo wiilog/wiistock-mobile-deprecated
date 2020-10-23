@@ -42,7 +42,7 @@ export class PreparationArticlesPage extends PageComponent {
     public preparationsHeaderConfig?: {
         leftIcon: IconConfig;
         title: string;
-        subtitle?: string;
+        subtitle?: Array<string>;
         info?: string;
     };
 
@@ -65,7 +65,10 @@ export class PreparationArticlesPage extends PageComponent {
         this.preparationsHeaderConfig = {
             leftIcon: {name: 'preparation.svg'},
             title: `Préparation ${this.preparation.numero}`,
-            subtitle: `Destination : ${this.preparation.destination ? this.preparation.destination : ''}`,
+            subtitle: [
+                `Destination : ${this.preparation.destination ? this.preparation.destination : ''}`,
+                this.preparation.comment ? `Commentaire : ${this.preparation.comment}` : undefined
+            ],
             info: `Flux : ${this.preparation.type}`
         };
 

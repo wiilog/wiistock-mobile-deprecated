@@ -78,6 +78,7 @@ export class TransferArticlesPage extends PageComponent {
                         },
                         title: `Ordre de transfert ${this.transferOrder.number}`,
                         subtitle: [
+                            `Origine : ${this.transferOrder.origin ? this.transferOrder.origin : ''}`,
                             `Destination : ${this.transferOrder.destination ? this.transferOrder.destination : ''}`,
                             `Demandeur : ${this.transferOrder.requester ? this.transferOrder.requester : ''}`
                         ]

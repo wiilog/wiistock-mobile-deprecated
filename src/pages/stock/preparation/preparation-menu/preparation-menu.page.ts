@@ -52,6 +52,10 @@ export class PreparationMenuPage extends PageComponent {
                     {
                         label: 'Destination',
                         value: preparation.destination
+                    },
+                    {
+                        label: 'Commentaire',
+                        value: preparation.comment
                     }
                 ],
                 action: () => {

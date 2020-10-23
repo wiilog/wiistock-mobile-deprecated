@@ -59,7 +59,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             destination: 'TEXT',
             started: 'INTEGER',
             requester: 'VARCHAR(255)',
-            type: 'VARCHAR(255)'
+            type: 'VARCHAR(255)',
+            comment: 'TEXT'
         }
     },
     {
@@ -104,6 +105,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             requester: 'VARCHAR(255)',
             type: 'VARCHAR(255)',
             preparationLocation: 'VARCHAR(255)',
+            comment: 'TEXT'
         }
     },
     {
@@ -127,6 +129,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             number: 'TEXT',
             requester: 'VARCHAR(255)',
             destination: 'VARCHAR(255)',
+            origin: 'VARCHAR(255)',
             treated: 'INTEGER'
         }
     },
