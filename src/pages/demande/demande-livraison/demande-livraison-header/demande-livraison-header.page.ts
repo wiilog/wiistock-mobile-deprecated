@@ -1,5 +1,5 @@
 import {Component, ViewChild} from '@angular/core';
-import {of, zip} from 'rxjs';
+import {of, Subscription, zip} from 'rxjs';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {DemandeLivraison} from '@entities/demande-livraison';
 import {StorageService} from '@app/common/services/storage.service';
@@ -9,13 +9,14 @@ import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
 import {ToastService} from '@app/common/services/toast.service';
 import {DemandeLivraisonArticlesPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-articles/demande-livraison-articles-routing.module';
-import {map} from 'rxjs/operators';
+import {flatMap, map, tap} from 'rxjs/operators';
 import {PageComponent} from '@pages/page.component';
 import {FormPanelParam} from '@app/common/directives/form-panel/form-panel-param';
 import {FormPanelInputComponent} from '@app/common/components/panel/form-panel/form-panel-input/form-panel-input.component';
 import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 import {FormPanelService} from "@app/common/services/form-panel.service";
 import {FreeField, FreeFieldType} from "@entities/free-field";
+import {LoadingService} from '@app/common/services/loading.service';
 
 
 @Component({
@@ -36,11 +37,14 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
 
     private operatorId: number;
 
+    private validationSubscription: Subscription;
+
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
                        private mainHeaderService: MainHeaderService,
                        private storageService: StorageService,
                        private formPanelService: FormPanelService,
+                       private loadingService: LoadingService,
                        navService: NavService) {
         super(navService);
         this.hasLoaded = false;
@@ -82,7 +86,7 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
                 ? this.demandeLivraisonToUpdate.type_id
                 : undefined);
 
-        let freeFieldsValues = JSON.parse(free_fields || '{}') || {};
+        const freeFieldsValues = JSON.parse(free_fields || '{}') || {};
 
         this.formBodyConfig = [
             {
@@ -138,7 +142,7 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
                         {id, ...freeField},
                         freeFieldsValues[id],
                         'free_fields',
-                        'edit'
+                        'create'
                     )
                 ))
                 .filter(Boolean)),
@@ -172,23 +176,54 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
 
             const user_id = this.operatorId;
             const values = {type_id, location_id, comment, user_id, free_fields};
-            (
-                this.isUpdate
-                    ? this.sqliteService
-                        .update('demande_livraison', values, [`id = ${this.demandeLivraisonToUpdate.id}`])
-                        .pipe(map(() => this.demandeLivraisonToUpdate.id))
-                    : this.sqliteService.insert('demande_livraison', values)
-            )
-                .subscribe((insertId) => {
-                    this.demandeLivraisonToUpdate = {
-                        id: insertId,
-                        ...values
-                    };
-                    this.navService.push(DemandeLivraisonArticlesPageRoutingModule.PATH, {
-                        demandeId: insertId,
-                        isUpdate: this.isUpdate
-                    });
-                });
+
+            if (!this.validationSubscription) {
+                let loader: HTMLIonLoadingElement;
+                this.validationSubscription = this.loadingService.presentLoading()
+                    .pipe(
+                        tap((loadingElement) => {
+                            loader = loadingElement;
+                        }),
+                        flatMap(() => (
+                            this.isUpdate
+                                ? this.sqliteService
+                                    .update('demande_livraison', values, [`id = ${this.demandeLivraisonToUpdate.id}`])
+                                    .pipe(map(() => this.demandeLivraisonToUpdate.id))
+                                : this.sqliteService.insert('demande_livraison', values)
+                        ))
+                    )
+                    .subscribe(
+                        (insertId) => {
+                            this.demandeLivraisonToUpdate = {
+                                id: insertId,
+                                ...values
+                            };
+                            this.navService.push(DemandeLivraisonArticlesPageRoutingModule.PATH, {
+                                demandeId: insertId,
+                                isUpdate: this.isUpdate
+                            });
+
+                            this.unsubscribeValidate(loader);
+                        },
+                        () => {
+                            this.unsubscribeValidate(loader);
+                        }
+                    );
+            }
+            else {
+                this.toastService.presentToast('Sauvegarde du brouillon en cours...');
+            }
+        }
+    }
+
+    private unsubscribeValidate(loader: HTMLIonLoadingElement): void {
+        if (loader) {
+            loader.dismiss();
+        }
+
+        if (this.validationSubscription) {
+            this.validationSubscription.unsubscribe();
+            this.validationSubscription = undefined;
         }
     }
 }

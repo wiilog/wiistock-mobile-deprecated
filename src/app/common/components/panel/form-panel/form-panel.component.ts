@@ -34,11 +34,18 @@ export class FormPanelComponent implements AfterViewInit {
 
     public get values(): {[name: string]: any} {
         return this.formElements
-            ? this.formElements.reduce((acc, {instance: {group, name, value}}: FormPanelDirective) => ({
+            ? this.formElements.reduce((acc, {instance: {group, name, value}, param: {config}}: FormPanelDirective) => ({
                 ...acc,
-                [group || name]: group
-                    ? { ...(acc[group] || {}), [name]: value}
-                    : value
+                ...((!config.ignoreEmpty
+                    || typeof value === 'boolean'
+                    || (Array.isArray(value) && value.length > 0)
+                    || (!Array.isArray(value) && value)) ?
+                    {
+                        [group || name]: group
+                            ? { ...(acc[group] || {}), [name]: value}
+                            : value
+                    }
+                    : {})
             }), {})
             : {};
     }

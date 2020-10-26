@@ -112,16 +112,18 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
             if (selected.length > 0) {
                 this.text = FormPanelSelectComponent.ValueToText(selected);
             } else if (!this.searchComponent) {
-                let valueArray = value.map((arrayValue) => {
-                    if (typeof arrayValue !== 'object') {
-                        return {
-                            id: arrayValue,
-                            label: arrayValue
-                        };
-                    } else {
-                        return arrayValue;
-                    }
-                })
+                let valueArray = value
+                    .filter((arrayValue) => arrayValue)
+                    .map((arrayValue) => {
+                        if (typeof arrayValue !== 'object') {
+                            return {
+                                id: arrayValue,
+                                label: arrayValue
+                            };
+                        } else {
+                            return arrayValue;
+                        }
+                    })
                 this.onItemSelect(<any>valueArray);
             }
         }

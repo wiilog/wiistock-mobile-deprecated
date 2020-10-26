@@ -20,6 +20,7 @@ export class FormPanelService {
             label: freeField.label,
             name: freeField.id,
             group: formPanelItemGroup,
+            ignoreEmpty: true,
             errors: {
                 required: `Le champ ${freeField.label} est requis`
             }
@@ -72,9 +73,11 @@ export class FormPanelService {
                 config: {
                     ...common,
                     value: (freeField.typing === FreeFieldTyping.LIST)
-
                         ? (value || freeField.defaultValue)
-                        : (value || freeField.defaultValue || '').split(',').map((id) => ({id, label: id})),
+                        : (value || freeField.defaultValue || '')
+                            .split(',')
+                            .filter((id) => id)
+                            .map((id) => ({id, label: id})),
                     inputConfig: {
                         required,
                         barcodeScanner: false,

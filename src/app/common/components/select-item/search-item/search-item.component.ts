@@ -2,7 +2,7 @@ import {ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Ou
 import {IonicSelectableComponent} from 'ionic-selectable';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {map, take, tap} from 'rxjs/operators';
+import {filter, map, take, tap} from 'rxjs/operators';
 import {ArticleInventaire} from '@entities/article-inventaire';
 import {Observable, of, ReplaySubject, Subscription} from 'rxjs';
 import {TableName} from '@app/common/services/sqlite/table-definition';
@@ -194,10 +194,12 @@ export class SearchItemComponent implements OnInit, OnDestroy {
 
     public reload(): Observable<Array<any>> {
         const $res = new ReplaySubject<Array<any>>(1);
+
         (this.elements
             ? of(this.elements)
             : this.sqliteService.findBy(this.config[this.type].databaseTable, this.requestParams, (this.config[this.type] as any).requestOrder || {}))
             .pipe(
+                filter(() => Boolean(this.type !== undefined && this.config && this.config[this.type])),
                 take(1),
                 map((list) => {
                     const {map} = this.config[this.smartType] as {map: any};
