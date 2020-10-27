@@ -81,7 +81,7 @@ export class FormPanelService {
                     inputConfig: {
                         required,
                         barcodeScanner: false,
-                        isMultiple: freeField.typing === FreeFieldTyping.MULTI_LIST,
+                        isMultiple: (freeField.typing === FreeFieldTyping.MULTI_LIST),
                         elements: freeField.elements
                             ? JSON.parse(freeField.elements).map((label) => ({id: label, label}))
                             : []

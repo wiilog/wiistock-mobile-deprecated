@@ -123,7 +123,7 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
                         } else {
                             return arrayValue;
                         }
-                    })
+                    });
                 this.onItemSelect(<any>valueArray);
             }
         }

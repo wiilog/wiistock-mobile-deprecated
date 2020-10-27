@@ -199,7 +199,6 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             ? of(this.elements)
             : this.sqliteService.findBy(this.config[this.type].databaseTable, this.requestParams, (this.config[this.type] as any).requestOrder || {}))
             .pipe(
-                filter(() => Boolean(this.type !== undefined && this.config && this.config[this.type])),
                 take(1),
                 map((list) => {
                     const {map} = this.config[this.smartType] as {map: any};
@@ -208,8 +207,8 @@ export class SearchItemComponent implements OnInit, OnDestroy {
                         : list;
                 }),
                 tap((list) => {
-                    if (this.config[this.type].reducer) {
-                        list = list.reduce(this.config[this.type].reducer, []);
+                    if (this.config[this.smartType].reducer) {
+                        list = list.reduce(this.config[this.smartType].reducer, []);
                     }
 
                     this.dbItems = list;
