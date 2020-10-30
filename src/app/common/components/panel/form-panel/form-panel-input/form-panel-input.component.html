@@ -1,5 +1,5 @@
 <ion-item lines="none">
-    <ion-label color="medium">{{label}}</ion-label>
+    <ion-label color="medium">{{label && inputConfig.required ? label + '*' : label}}</ion-label>
     <ion-input #inputComponent="ngModel"
                [name]="name"
                [(ngModel)]="value"
