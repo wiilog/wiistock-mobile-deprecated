@@ -37,6 +37,7 @@ import {FormPanelCalendarComponent} from '@app/common/components/panel/form-pane
 import {DatePicker} from '@ionic-native/date-picker/ngx';
 import {FormViewerAttachmentsComponent} from '@app/common/components/panel/form-panel/form-viewer-attachments/form-viewer-attachments.component';
 import {FormViewerDirective} from '@app/common/directives/form-viewer/form-viewer.directive';
+import {FormPanelFieldComponent} from '@app/common/components/panel/form-panel/form-panel-field/form-panel-field.component';
 
 
 @NgModule({
@@ -49,6 +50,7 @@ import {FormViewerDirective} from '@app/common/directives/form-viewer/form-viewe
         MenuComponent,
         FormPanelInputComponent,
         FormPanelSigningComponent,
+        FormPanelFieldComponent,
         FormPanelCameraComponent,
         FormPanelToggleComponent,
         FormPanelCalendarComponent,

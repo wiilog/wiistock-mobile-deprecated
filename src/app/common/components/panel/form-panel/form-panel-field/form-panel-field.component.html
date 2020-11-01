@@ -1,0 +1,9 @@
+<ion-item lines="none">
+    <ion-label color="medium">
+        {{label}}
+        <ng-container *ngIf="required">*</ng-container>
+    </ion-label>
+    <ng-content select="[field]"></ng-content>
+</ion-item>
+<ng-content select="[add-on]"></ng-content>
+

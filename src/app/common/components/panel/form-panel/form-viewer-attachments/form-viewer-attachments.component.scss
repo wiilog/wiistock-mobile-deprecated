@@ -1,16 +1,6 @@
 @import "~theme/variables";
 
 :host {
-    display: block;
-    background-color: $white;
-    border: 1px solid $lightBlue;
-    font-size: $normalFontSize;
-
-    ion-label {
-        font-size: $normalFontSize;
-        flex: 1;
-    }
-
     .files-wrapper {
         overflow: hidden;
         flex: 1;

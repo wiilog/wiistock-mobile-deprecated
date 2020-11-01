@@ -1,9 +1,11 @@
-<ion-item lines="none">
-    <ion-label color="medium">{{label}}</ion-label>
-    <ion-toggle #inputComponent="ngModel"
-               [name]="name"
-               [(ngModel)]="value"
-               (ngModelChange)="onValueChange($event)"
-               [required]="inputConfig.required">
-    </ion-toggle>
-</ion-item>
+<wii-form-field [label]="label"
+                [required]="inputConfig.required">
+    <ng-container field>
+        <ion-toggle #inputComponent="ngModel"
+                    [name]="name"
+                    [(ngModel)]="value"
+                    (ngModelChange)="onValueChange($event)"
+                    [required]="inputConfig.required">
+        </ion-toggle>
+    </ng-container>
+</wii-form-field>

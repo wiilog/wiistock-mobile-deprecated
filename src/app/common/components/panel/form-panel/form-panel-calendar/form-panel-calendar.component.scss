@@ -1,21 +1,9 @@
 @import "~theme/variables";
 
 :host {
-    display: block;
-    background-color: $white;
-    border: 1px solid $lightBlue;
-    font-size: $normalFontSize;
-
-    ion-label {
-        font-size: $normalFontSize;
-    }
-
-    .add-camera {
+    .calendar-icon {
+        display: inline-block;
         width: 30px;
         height: 30px;
-    }
-
-    .camera-image {
-        width: 30%;
     }
 }

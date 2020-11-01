@@ -1,6 +1,5 @@
-<ion-item lines="none">
-    <ion-label color="medium">{{ label }}</ion-label>
-    <div class="files-wrapper">
+<wii-form-field [label]="label">
+    <div class="files-wrapper" field>
         <ng-container *ngIf="values.length === 0">Aucune pièce jointe</ng-container>
         <ng-container *ngFor="let fileLink of values">
             <a [href]="fileLink.href">
@@ -11,4 +10,4 @@
             </a>
         </ng-container>
     </div>
-</ion-item>
+</wii-form-field>

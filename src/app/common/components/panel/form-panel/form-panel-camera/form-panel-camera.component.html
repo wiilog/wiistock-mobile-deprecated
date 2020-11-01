@@ -1,25 +1,27 @@
-<ion-item lines="none">
-    <ion-label color="medium">{{label}}</ion-label>
-    <div class="camera-image-container">
-        <ng-container *ngIf="!inputConfig.multiple && value">
-            <ng-container [ngTemplateOutlet]="photoTemplate"
-                          [ngTemplateOutletContext]="{src: value}">
+<wii-form-field [label]="label"
+                [required]="inputConfig.required">
+    <ng-container field>
+        <div class="camera-image-container">
+            <ng-container *ngIf="!inputConfig.multiple && value">
+                <ng-container [ngTemplateOutlet]="photoTemplate"
+                              [ngTemplateOutletContext]="{src: value}">
+                </ng-container>
             </ng-container>
-        </ng-container>
-        <ng-container *ngIf="inputConfig.multiple">
-            <ng-container *ngFor="let src of value; let index = index"
-                          [ngTemplateOutlet]="photoTemplate"
-                          [ngTemplateOutletContext]="{src: src, index: index}">
+            <ng-container *ngIf="inputConfig.multiple">
+                <ng-container *ngFor="let src of value; let index = index"
+                              [ngTemplateOutlet]="photoTemplate"
+                              [ngTemplateOutletContext]="{src: src, index: index}">
+                </ng-container>
             </ng-container>
-        </ng-container>
-    </div>
-    <wii-icon *ngIf="displayCameraButton"
-              class="add-camera"
-              color="success"
-              name="camera.svg"
-              (action)="onItemClicked()">
-    </wii-icon>
-</ion-item>
+        </div>
+        <wii-icon *ngIf="displayCameraButton"
+                  class="add-camera"
+                  color="success"
+                  name="camera.svg"
+                  (action)="onItemClicked()">
+        </wii-icon>
+    </ng-container>
+</wii-form-field>
 
 <ng-template #photoTemplate
              let-src="src"

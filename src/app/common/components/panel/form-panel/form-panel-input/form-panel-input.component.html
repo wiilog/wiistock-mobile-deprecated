@@ -1,14 +1,16 @@
-<ion-item lines="none">
-    <ion-label color="medium">{{label && inputConfig.required ? label + '*' : label}}</ion-label>
-    <ion-input #inputComponent="ngModel"
-               [name]="name"
-               [(ngModel)]="value"
-               (ngModelChange)="onValueChange($event)"
-               [type]="inputConfig.type"
-               [required]="inputConfig.required"
-               [disabled]="inputConfig.disabled"
-               [maxlength]="inputConfig.maxLength"
-               [min]="inputConfig.min"
-               [max]="inputConfig.max">
-    </ion-input>
-</ion-item>
+<wii-form-field [label]="label"
+                [required]="inputConfig.required">
+    <ng-container field>
+        <ion-input #inputComponent="ngModel"
+                   [name]="name"
+                   [(ngModel)]="value"
+                   (ngModelChange)="onValueChange($event)"
+                   [type]="inputConfig.type"
+                   [required]="inputConfig.required"
+                   [disabled]="inputConfig.disabled"
+                   [maxlength]="inputConfig.maxLength"
+                   [min]="inputConfig.min"
+                   [max]="inputConfig.max">
+        </ion-input>
+    </ng-container>
+</wii-form-field>

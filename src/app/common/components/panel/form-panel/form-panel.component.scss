@@ -13,7 +13,7 @@
 
         & > .list-wrapper {
             & > ::ng-deep * {
-
+                display: block;
                 margin-right: $spacer;
                 margin-left: $spacer;
 

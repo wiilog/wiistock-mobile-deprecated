@@ -14,13 +14,13 @@
     <div class="list-wrapper">
         <ng-container *ngIf="details">
             <ng-template *ngFor="let detailsRow of details"
-                         [wiiFormViewer]
+                         wiiFormViewer
                          [param]="detailsRow">
             </ng-template>
         </ng-container>
         <ng-template #formElements
                      *ngFor="let param of body"
-                     [wiiFormPanel]
+                     wiiFormPanel
                      [param]="param">
         </ng-template>
     </div>

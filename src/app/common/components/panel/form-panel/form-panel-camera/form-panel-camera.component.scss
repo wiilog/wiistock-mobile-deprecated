@@ -1,15 +1,6 @@
 @import "~theme/variables";
 
 :host {
-    display: block;
-    background-color: $white;
-    border: 1px solid $lightBlue;
-    font-size: $normalFontSize;
-
-    ion-label {
-        font-size: $normalFontSize;
-    }
-
     .add-camera {
         width: 30px;
         height: 30px;
