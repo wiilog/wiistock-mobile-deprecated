@@ -8,7 +8,7 @@
                   (action)="onHeaderClicked($event)">
 </wii-panel-header>
 
-<wii-list-panel-item *ngFor="let object of body"
+<wii-list-panel-item *ngFor="let object of body; trackBy: trackByGenerator"
                      [infos]="object.infos"
                      [color]="object.color"
                      [loading]="object.loading"

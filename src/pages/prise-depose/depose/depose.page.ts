@@ -11,7 +11,7 @@ import {ToastService} from '@app/common/services/toast.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
-import {TracaListFactoryService} from '@app/common/services/traca-list-factory.service';
+import {TrackingListFactoryService} from '@app/common/services/tracking-list-factory.service';
 import {StorageService} from '@app/common/services/storage.service';
 import {AlertController} from '@ionic/angular';
 import {NavService} from '@app/common/services/nav.service';
@@ -31,6 +31,8 @@ import {AlertManagerService} from "@app/common/services/alert-manager.service";
 export class DeposePage extends PageComponent {
 
     private static readonly MOUVEMENT_TRACA_DEPOSE = 'depose';
+
+    public readonly listIdentifierName;
 
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
@@ -77,10 +79,11 @@ export class DeposePage extends PageComponent {
                        private loadingService: LoadingService,
                        private sqliteService: SqliteService,
                        private localDataManager: LocalDataManagerService,
-                       private tracaListFactory: TracaListFactoryService,
+                       private trackingListFactory: TrackingListFactoryService,
                        private storageService: StorageService,
                        navService: NavService) {
         super(navService);
+        this.listIdentifierName = TrackingListFactoryService.TRACKING_IDENTIFIER_NAME;
         this.init();
         this.listBoldValues = [
             'object'
@@ -265,7 +268,7 @@ export class DeposePage extends PageComponent {
     }
 
     public get objectLabel(): string {
-        return TracaListFactoryService.GetObjectLabel(this.fromStock);
+        return TrackingListFactoryService.GetObjectLabel(this.fromStock);
     }
 
     public get displayPrisesList(): boolean {
@@ -365,9 +368,9 @@ export class DeposePage extends PageComponent {
 
     private refreshPriseListComponent(): void {
         const natureLabel = this.natureTranslation.filter((translation) => translation.label === 'nature')[0];
-        this.priseListConfig = this.tracaListFactory.createListConfig(
+        this.priseListConfig = this.trackingListFactory.createListConfig(
             this.colisPrise.filter(({hidden}) => !hidden),
-            TracaListFactoryService.LIST_TYPE_DROP_SUB,
+            TrackingListFactoryService.LIST_TYPE_DROP_SUB,
             {
                 objectLabel: this.objectLabel,
                 uploadItem: ({object}) => {
@@ -381,9 +384,9 @@ export class DeposePage extends PageComponent {
 
     private refreshDeposeListComponent(): void {
         const natureLabel = this.natureTranslation.filter((translation) => translation.label === 'nature')[0];
-        this.deposeListConfig = this.tracaListFactory.createListConfig(
+        this.deposeListConfig = this.trackingListFactory.createListConfig(
             this.colisDepose,
-            TracaListFactoryService.LIST_TYPE_DROP_MAIN,
+            TrackingListFactoryService.LIST_TYPE_DROP_MAIN,
             {
                 natureIdsToConfig: this.natureIdsToConfig,
                 natureTranslation: natureLabel.translation || natureLabel.label,
@@ -417,7 +420,7 @@ export class DeposePage extends PageComponent {
                         }
                     }
                     : undefined,
-                removeItem: TracaListFactoryService.CreateRemoveItemFromListHandler(
+                removeItem: TrackingListFactoryService.CreateRemoveItemFromListHandler(
                     this.colisDepose,
                     this.colisPrise,
                     () => {

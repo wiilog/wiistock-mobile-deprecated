@@ -6,12 +6,14 @@
     <wii-list-panel *ngIf="deposeListConfig"
                     [header]="deposeListConfig.header"
                     [body]="deposeListConfig.body"
+                    [identifierName]="listIdentifierName"
                     [boldValues]="listBoldValues">
     </wii-list-panel>
 
     <wii-list-panel *ngIf="displayPrisesList && priseListConfig"
                     [header]="priseListConfig.header"
                     [body]="priseListConfig.body"
+                    [identifierName]="listIdentifierName"
                     [boldValues]="listBoldValues">
     </wii-list-panel>
 </div>

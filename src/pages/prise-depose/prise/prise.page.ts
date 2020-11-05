@@ -11,7 +11,7 @@ import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
-import {TracaListFactoryService} from '@app/common/services/traca-list-factory.service';
+import {TrackingListFactoryService} from '@app/common/services/tracking-list-factory.service';
 import {StorageService} from '@app/common/services/storage.service';
 import {AlertController} from '@ionic/angular';
 import {filter, flatMap, map, tap} from 'rxjs/operators';
@@ -46,6 +46,8 @@ export class PrisePage extends PageComponent implements CanLeave {
     public listPacksOnLocationHeader: HeaderConfig;
     public listPacksOnLocationBody: Array<ListPanelItemConfig>;
 
+    public readonly listIdentifierName = TrackingListFactoryService.TRACKING_IDENTIFIER_NAME;
+
     public listTakingHeader: HeaderConfig;
     public listTakingBody: Array<ListPanelItemConfig>;
     public listBoldValues: Array<string>;
@@ -77,7 +79,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                        private loadingService: LoadingService,
                        private changeDetectorRef: ChangeDetectorRef,
                        private localDataManager: LocalDataManagerService,
-                       private tracaListFactory: TracaListFactoryService,
+                       private trackingListFactory: TrackingListFactoryService,
                        private activatedRoute: ActivatedRoute,
                        private storageService: StorageService,
                        navService: NavService) {
@@ -261,7 +263,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     }
 
     public get objectLabel(): string {
-        return TracaListFactoryService.GetObjectLabel(this.fromStock);
+        return TrackingListFactoryService.GetObjectLabel(this.fromStock);
     }
 
     public get displayPacksOnLocationsList(): boolean {
@@ -298,9 +300,9 @@ export class PrisePage extends PageComponent implements CanLeave {
 
     private refreshListComponent(): void {
         const natureLabel = this.natureTranslation.filter((translation) => translation.label === 'nature')[0];
-        const {header: listTakingHeader, body: listTakingBody} = this.tracaListFactory.createListConfig(
+        const {header: listTakingHeader, body: listTakingBody} = this.trackingListFactory.createListConfig(
             this.colisPrise,
-            TracaListFactoryService.LIST_TYPE_TAKING_MAIN,
+            TrackingListFactoryService.LIST_TYPE_TAKING_MAIN,
             {
                 objectLabel: this.objectLabel,
                 natureIdsToConfig: this.natureIdsToConfig,
@@ -334,7 +336,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                         }
                     }
                     : undefined,
-                removeItem: TracaListFactoryService.CreateRemoveItemFromListHandler(this.colisPrise, undefined, (barCode) => {
+                removeItem: TrackingListFactoryService.CreateRemoveItemFromListHandler(this.colisPrise, undefined, (barCode) => {
                     this.setPackOnLocationHidden(barCode, false);
                     this.refreshListComponent();
                 }),
@@ -344,9 +346,9 @@ export class PrisePage extends PageComponent implements CanLeave {
         this.listTakingHeader = listTakingHeader;
         this.listTakingBody = listTakingBody;
 
-        const {header: listPacksOnLocationHeader, body: listPacksOnLocationBody} = this.tracaListFactory.createListConfig(
+        const {header: listPacksOnLocationHeader, body: listPacksOnLocationBody} = this.trackingListFactory.createListConfig(
             this.currentPacksOnLocation.filter(({hidden}) => !hidden),
-            TracaListFactoryService.LIST_TYPE_TAKING_SUB,
+            TrackingListFactoryService.LIST_TYPE_TAKING_SUB,
             {
                 objectLabel: this.objectLabel,
                 uploadItem: ({object}) => {
@@ -357,7 +359,6 @@ export class PrisePage extends PageComponent implements CanLeave {
 
         this.listPacksOnLocationHeader = listPacksOnLocationHeader;
         this.listPacksOnLocationBody = listPacksOnLocationBody;
-
     }
 
     private init(fromStart: boolean = true): void {

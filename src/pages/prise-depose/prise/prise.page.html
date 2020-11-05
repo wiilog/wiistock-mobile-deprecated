@@ -6,12 +6,14 @@
     <wii-list-panel *ngIf="listTakingHeader && listTakingBody"
                     [header]="listTakingHeader"
                     [body]="listTakingBody"
+                    [identifierName]="listIdentifierName"
                     [boldValues]="listBoldValues">
     </wii-list-panel>
 
     <wii-list-panel *ngIf="displayPacksOnLocationsList && listPacksOnLocationHeader && listPacksOnLocationBody"
                     [header]="listPacksOnLocationHeader"
                     [body]="listPacksOnLocationBody"
+                    [identifierName]="listIdentifierName"
                     [boldValues]="listBoldValues">
     </wii-list-panel>
 </div>

@@ -17,32 +17,34 @@ type ListConfig = {
 @Injectable({
     providedIn: 'root'
 })
-export class TracaListFactoryService {
+export class TrackingListFactoryService {
+
+    public static readonly TRACKING_IDENTIFIER_NAME = 'object';
 
     public static readonly LIST_TYPE_TAKING_MAIN = 0;
     public static readonly LIST_TYPE_TAKING_SUB = 1;
     public static readonly LIST_TYPE_DROP_MAIN = 2;
     public static readonly LIST_TYPE_DROP_SUB = 3;
     private static readonly LIST_TYPE_CONFIG = {
-        [TracaListFactoryService.LIST_TYPE_TAKING_MAIN]: {
+        [TrackingListFactoryService.LIST_TYPE_TAKING_MAIN]: {
             title: 'PRISE',
             hasScanLabel: true,
             iconName: 'upload.svg',
             iconColor: 'primary'
         },
-        [TracaListFactoryService.LIST_TYPE_TAKING_SUB]: {
+        [TrackingListFactoryService.LIST_TYPE_TAKING_SUB]: {
             title: 'ENCOURS',
             hasScanLabel: false,
             iconName: 'download.svg',
             iconColor: 'success'
         },
-        [TracaListFactoryService.LIST_TYPE_DROP_MAIN]: {
+        [TrackingListFactoryService.LIST_TYPE_DROP_MAIN]: {
             title: 'DÉPOSE',
             hasScanLabel: true,
             iconName: 'download.svg',
             iconColor: 'success'
         },
-        [TracaListFactoryService.LIST_TYPE_DROP_SUB]: {
+        [TrackingListFactoryService.LIST_TYPE_DROP_SUB]: {
             title: 'PRISE',
             hasScanLabel: false,
             iconName: 'upload.svg',
@@ -110,7 +112,9 @@ export class TracaListFactoryService {
                 alert.onDidDismiss().then(() => {
                     this.alertPresented = false;
                 });
-                alert.present();
+                if (this.alertPresented) {
+                    alert.present();
+                }
             });
         }
     }
@@ -149,7 +153,7 @@ export class TracaListFactoryService {
         const pickedArticlesNumber = notDuplicateArticles.length;
         const plural = pickedArticlesNumber > 1 ? 's' : '';
 
-        const config = TracaListFactoryService.LIST_TYPE_CONFIG[listType];
+        const config = TrackingListFactoryService.LIST_TYPE_CONFIG[listType];
 
         if (!config) {
             throw new Error(`The parameter listType ${listType} is invalid`);
@@ -181,7 +185,7 @@ export class TracaListFactoryService {
             body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, loading}) => {
                 const natureConfig = (natureIdsToConfig && nature_id && natureIdsToConfig[nature_id]);
                 const infos = {
-                    object: {
+                    [TrackingListFactoryService.TRACKING_IDENTIFIER_NAME]: {
                         label: 'Objet',
                         value: ref_article
                     },

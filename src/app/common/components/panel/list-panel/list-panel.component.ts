@@ -6,9 +6,7 @@ import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel
 @Component({
     selector: 'wii-list-panel',
     templateUrl: 'list-panel.component.html',
-    styleUrls: [
-        './list-panel.component.scss'
-    ]
+    styleUrls: ['./list-panel.component.scss']
 })
 export class ListPanelComponent {
     @Input()
@@ -20,9 +18,23 @@ export class ListPanelComponent {
     @Input()
     public boldValues: Array<string>;
 
+    @Input()
+    public identifierName?: string;
+
     public onHeaderClicked(event: Event): void {
         if (this.header && this.header.action) {
             this.header.action(event);
         }
+    }
+
+    public get trackByGenerator(): (index: number, item: ListPanelItemConfig) => any|undefined {
+        return this.identifierName
+            ? (index: number, item: ListPanelItemConfig) => this.trackBy(index, item)
+            : undefined;
+    }
+
+    private trackBy(_: number, item: ListPanelItemConfig): string|undefined {
+        const info = (this.identifierName && item) ? item.infos[this.identifierName] : undefined;
+        return info && info.value;
     }
 }

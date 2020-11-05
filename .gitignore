@@ -42,3 +42,4 @@ npm-debug.log*
 /src/dev-credentials.json
 /build.json
 /wiistock-key.jks
+/wiistock-key-password.json

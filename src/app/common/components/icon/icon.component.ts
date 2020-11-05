@@ -1,8 +1,8 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
-import {Observable, of} from 'rxjs';
-import {map, tap} from 'rxjs/operators';
+import {Observable, ReplaySubject} from 'rxjs';
+import {map} from 'rxjs/operators';
 import {IconColor} from '@app/common/components/icon/icon-color';
 
 /**
@@ -21,7 +21,7 @@ export class IconComponent {
     private static readonly ICONS_DIRECTORY: string = 'assets/icons';
     private static IconCounter: number = 0;
 
-    private static readonly IconsCache: {[name: string]: SafeHtml} = {};
+    private static readonly IconsCacheObservers: {[name: string]: ReplaySubject<SafeHtml>} = {};
 
     // color declared in variables.scss
     @Input()
@@ -52,11 +52,14 @@ export class IconComponent {
     public set name(name: string) {
         if (this._name !== name) {
             this._name = name;
-            if (IconComponent.IconsCache[this._name]) {
-                this.svgObject$ = of(IconComponent.IconsCache[this._name]);
+            if (IconComponent.IconsCacheObservers[this._name]) {
+                this.svgObject$ = IconComponent.IconsCacheObservers[this._name];
             }
             else {
-                this.svgObject$ = this.httpClient
+                const svgObject$ = new ReplaySubject<SafeHtml>(1);
+                this.svgObject$ = svgObject$
+                IconComponent.IconsCacheObservers[this._name] = svgObject$;
+                this.httpClient
                     .get(this.src, {responseType: "text"})
                     .pipe(
                         map((svgStr: string) => {
@@ -64,10 +67,12 @@ export class IconComponent {
                                 throw Error('IconComponent support svg images only.');
                             }
                             return this.sanitizeSVG(svgStr);
-                        }),
-                        tap((sanitizedSVG: SafeHtml) => {
-                            IconComponent.IconsCache[this._name] = sanitizedSVG;
                         })
+                    )
+                    .subscribe(
+                        (sanitizedSVG: SafeHtml) => svgObject$.next(sanitizedSVG),
+                        (sanitizedSVG: SafeHtml) => svgObject$.error(sanitizedSVG),
+                        () => svgObject$.complete()
                     );
             }
         }

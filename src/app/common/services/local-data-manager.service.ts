@@ -517,7 +517,8 @@ export class LocalDataManagerService {
                                         apiProccessConfig.numeroProccessFailed,
                                         errors
                                     );
-                                }console.log(success)
+                                }
+
                                 return of(undefined)
                                     .pipe(
                                         flatMap(() => apiProccessConfig.deleteSucceed(success)),
