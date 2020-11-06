@@ -80,6 +80,7 @@ export class IconComponent {
 
     public onButtonClick(event: Event) {
         this.action.emit(event)
+        event.stopPropagation();
     }
 
     public get src(): string {

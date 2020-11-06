@@ -2,7 +2,6 @@ import {NgModule} from '@angular/core';
 import {CommonModule as AngularCommonModule} from '@angular/common';
 import {IonicSelectableModule} from 'ionic-selectable';
 import {FormsModule} from '@angular/forms';
-import {LongPressModule} from 'ionic-long-press';
 import {BarcodeScannerComponent} from '@app/common/components/barcode-scanner/barcode-scanner.component';
 import {CardListComponent} from '@app/common/components/card-list/card-list.component';
 import {IconComponent} from '@app/common/components/icon/icon.component';
@@ -19,8 +18,6 @@ import {SearchItemComponent} from '@app/common/components/select-item/search-ite
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {SignaturePadComponent} from '@app/common/components/signature-pad/signature-pad.component';
 import {SimpleFormComponent} from '@app/common/components/simple-form/simple-form.component';
-import {HAMMER_GESTURE_CONFIG} from '@angular/platform-browser';
-import {IonicGestureConfig} from '@app/utils/ionic-gesture-config';
 import {IonicModule} from '@ionic/angular';
 import {HttpClientModule} from '@angular/common/http';
 import {Network} from '@ionic-native/network/ngx';
@@ -73,8 +70,7 @@ import {FormPanelFieldComponent} from '@app/common/components/panel/form-panel/f
         HttpClientModule,
         IonicModule,
         IonicSelectableModule,
-        FormsModule,
-        LongPressModule
+        FormsModule
     ],
     exports: [
         MainLoaderComponent,
@@ -97,10 +93,7 @@ import {FormPanelFieldComponent} from '@app/common/components/panel/form-panel/f
         SQLite,
         AppVersion,
         Camera,
-        DatePicker,
-
-        // ionic-long-press
-        {provide: HAMMER_GESTURE_CONFIG, useClass: IonicGestureConfig},
+        DatePicker
     ],
     entryComponents: [
         SignaturePadComponent,

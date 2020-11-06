@@ -65,5 +65,3 @@ import 'zone.js/dist/zone';  // Included with Angular CLI.
  * APPLICATION IMPORTS
  */
 
-// see https://www.npmjs.com/package/ionic-long-press
-import 'hammerjs';

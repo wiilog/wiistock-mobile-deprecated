@@ -52,10 +52,12 @@ export class TrackingListFactoryService {
         },
     };
 
-    private alertPresented: boolean;
+    private _alertPresented: boolean;
+    private actionsDisabled: boolean;
 
     public constructor(private alertController: AlertController) {
-        this.alertPresented = false;
+        this._alertPresented = false;
+        this.actionsDisabled = true;
     }
 
     public static CreateRemoveItemFromListHandler(listSource: Array<MouvementTraca>,
@@ -86,8 +88,8 @@ export class TrackingListFactoryService {
     }
 
     private createConfirmationBoxAlert(message?: string, removeItem?: (info: { [name: string]: { value?: string } }) => void): void {
-        if (!this.alertPresented) {
-            this.alertPresented = true;
+        if (!this.actionsDisabled && !this._alertPresented) {
+            this._alertPresented = true;
             from(this.alertController.create({
                 header: 'Confirmation',
                 cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
@@ -103,16 +105,16 @@ export class TrackingListFactoryService {
                         cssClass: 'alert-danger',
                         role: 'cancel',
                         handler: () => {
-                            this.alertPresented = false;
+                            this._alertPresented = false;
                             return null;
                         }
                     }
                 ]
             })).subscribe((alert: HTMLIonAlertElement) => {
                 alert.onDidDismiss().then(() => {
-                    this.alertPresented = false;
+                    this._alertPresented = false;
                 });
-                if (this.alertPresented) {
+                if (this._alertPresented) {
                     alert.present();
                 }
             });
@@ -121,14 +123,15 @@ export class TrackingListFactoryService {
 
     public createListConfig(articles: Array<MouvementTraca & {loading?: boolean}>,
                             listType: number,
-                            {location, objectLabel,  validate, uploadItem, confirmItem, removeItem, removeConfirmationMessage, natureIdsToConfig, natureTranslation}: {
+                            {location, objectLabel,  validate, rightIcon, confirmItem, natureIdsToConfig, natureTranslation}: {
                                 location?: Emplacement;
                                 natureIdsToConfig?: {[id: number]: { label: string; color?: string; }};
                                 validate?: () => void;
-                                uploadItem?: (info: { object: { value?: string } }) => void;
-                                removeItem?: (info: { [name: string]: { value?: string } }) => void;
-                                confirmItem?: (info: { [name: string]: { value?: string } }) => void;
-                                removeConfirmationMessage? : string;
+                                rightIcon?: {
+                                    mode: 'upload'|'remove';
+                                    action: (info: { [name: string]: { label: string; value?: string; } }) => void;
+                                };
+                                confirmItem?: (info: { [name: string]: { label: string; value?: string; } }) => void;
                                 objectLabel: string;
                                 natureTranslation?: string;
                             }): ListConfig {
@@ -176,7 +179,11 @@ export class TrackingListFactoryService {
                             rightIcon: {
                                 name: 'check.svg',
                                 color: 'success',
-                                action: validate
+                                action:  () => {
+                                    if (!this._alertPresented && !this.actionsDisabled) {
+                                        validate();
+                                    }
+                                }
                             }
                         }
                         : {}
@@ -213,21 +220,40 @@ export class TrackingListFactoryService {
                 return {
                     infos,
                     color: natureConfig && natureConfig.color,
-                    longPressAction: (
-                        removeConfirmationMessage && removeItem
-                            ? (info: { [name: string]: { value?: string } }) => {
-                                this.createConfirmationBoxAlert(removeConfirmationMessage, () => removeItem(info))
+                    pressAction: confirmItem
+                        ? (info) => {
+                            if (!this._alertPresented && !this.actionsDisabled) {
+                                confirmItem(info);
                             }
-                            : removeItem
-                    ),
-                    pressAction: confirmItem,
+                        }
+                        : undefined,
                     loading,
-                    ...(uploadItem
+                    ...(rightIcon
                         ? {
                             rightIcon: {
-                                color: 'grey' as IconColor,
-                                name: 'up.svg',
-                                action: () => uploadItem(infos)
+                                color: (
+                                    rightIcon.mode === 'upload' ? 'medium'
+                                    /* rightIcon.mode === 'remove' */ : 'danger'
+                                ),
+                                name: (
+                                    rightIcon.mode === 'upload' ? 'up.svg'
+                                    /* rightIcon.mode === 'remove' */ : 'trash.svg'
+                                ),
+                                action: rightIcon.action
+                                    ? () => {
+                                    console.log(!this.actionsDisabled);
+                                        if (!this.actionsDisabled) {
+                                            if (rightIcon.mode === 'upload') {
+                                                if (!this._alertPresented) {
+                                                    rightIcon.action(infos);
+                                                }
+                                            }
+                                            else { /* rightIcon.mode === 'remove' */
+                                                this.createConfirmationBoxAlert('Êtes-vous sur de vouloir supprimer cet élément ?', () => rightIcon.action(infos));
+                                            }
+                                        }
+                                    }
+                                    : undefined
                             }
                         }
                         : {})
@@ -235,4 +261,17 @@ export class TrackingListFactoryService {
             })
         }
     }
+
+    public enableActions(): void {
+        this.actionsDisabled = false;
+    }
+
+    public disableActions(): void {
+        this.actionsDisabled = true;
+    }
+
+    public get alertPresented(): boolean {
+        return this._alertPresented;
+    }
+
 }

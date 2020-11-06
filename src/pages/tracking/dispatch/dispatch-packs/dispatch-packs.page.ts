@@ -250,7 +250,11 @@ export class DispatchPacksPage extends PageComponent {
                                     confirmPack: (pack: DispatchPack) => this.confirmPack(pack)
                                 })
                             },
-                            longPressAction: () => this.revertPack(pack.code)
+                            rightIcon: {
+                                name: 'trash.svg',
+                                color: 'danger',
+                                action: () => this.revertPack(pack.code)
+                            }
                         }
                         : {}
                 )

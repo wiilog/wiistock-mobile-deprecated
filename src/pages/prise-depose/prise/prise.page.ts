@@ -95,6 +95,7 @@ export class PrisePage extends PageComponent implements CanLeave {
         this.finishAction = this.currentNavParams.get('finishAction');
         this.emplacement = this.currentNavParams.get('emplacement');
         this.fromStock = Boolean(this.currentNavParams.get('fromStock'));
+        this.trackingListFactory.enableActions();
 
         zip(
             this.storageService.getOperator(),
@@ -126,6 +127,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     public ionViewWillLeave(): void {
         this.barcodeCheckLoading = false;
         this.isIonEnter = false;
+        this.trackingListFactory.disableActions();
         this.footerScannerComponent.unsubscribeZebraScan();
         if (this.barcodeCheckSubscription) {
             this.barcodeCheckSubscription.unsubscribe();
@@ -138,7 +140,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     }
 
     public wiiCanLeave(): boolean {
-        return !this.barcodeCheckLoading && !this.apiLoading;
+        return !this.barcodeCheckLoading && !this.apiLoading && !this.trackingListFactory.alertPresented;
     }
 
     public finishTaking(): void {
@@ -315,6 +317,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                         const [dropIndex] = this.findTakingIndexes(barCode);
                         if (dropIndex !== undefined) {
                             const {quantity, comment, signature, photo, nature_id: natureId, freeFields} = this.colisPrise[dropIndex];
+                            this.trackingListFactory.disableActions();
                             this.navService.push(MovementConfirmPageRoutingModule.PATH, {
                                 fromStock: this.fromStock,
                                 location: this.emplacement,
@@ -336,11 +339,13 @@ export class PrisePage extends PageComponent implements CanLeave {
                         }
                     }
                     : undefined,
-                removeItem: TrackingListFactoryService.CreateRemoveItemFromListHandler(this.colisPrise, undefined, (barCode) => {
-                    this.setPackOnLocationHidden(barCode, false);
-                    this.refreshListComponent();
-                }),
-                removeConfirmationMessage: 'Êtes-vous sur de vouloir supprimer cet élément ?'
+                rightIcon: {
+                    mode: 'remove',
+                    action: TrackingListFactoryService.CreateRemoveItemFromListHandler(this.colisPrise, undefined, (barCode) => {
+                        this.setPackOnLocationHidden(barCode, false);
+                        this.refreshListComponent();
+                    })
+                }
             }
         );
         this.listTakingHeader = listTakingHeader;
@@ -351,8 +356,11 @@ export class PrisePage extends PageComponent implements CanLeave {
             TrackingListFactoryService.LIST_TYPE_TAKING_SUB,
             {
                 objectLabel: this.objectLabel,
-                uploadItem: ({object}) => {
-                    this.testIfBarcodeEquals(object.value, true);
+                rightIcon: {
+                    mode: 'upload',
+                    action: ({object}) => {
+                        this.testIfBarcodeEquals(object.value, true);
+                    }
                 }
             }
         );

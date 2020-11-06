@@ -4,10 +4,8 @@
 </div>
 
 <div class="list-element-wrapper"
-     ion-long-press
-     [interval]="400"
-     (click)="onPress()"
-     (longPressed)="onLongPress()">
+     
+     (click)="onPress()">
     <div class="list-element-body-wrapper">
         <div class="list-element-item"
              *ngFor="let line of infosArray">

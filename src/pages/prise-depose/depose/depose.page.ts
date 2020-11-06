@@ -22,13 +22,14 @@ import {PageComponent} from '@pages/page.component';
 import {Nature} from '@entities/nature';
 import {Translation} from "@entities/translation";
 import {AlertManagerService} from "@app/common/services/alert-manager.service";
+import {CanLeave} from '@app/guards/can-leave/can-leave';
 
 @Component({
     selector: 'wii-depose',
     templateUrl: './depose.page.html',
     styleUrls: ['./depose.page.scss'],
 })
-export class DeposePage extends PageComponent {
+export class DeposePage extends PageComponent implements CanLeave {
 
     private static readonly MOUVEMENT_TRACA_DEPOSE = 'depose';
 
@@ -91,6 +92,7 @@ export class DeposePage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
+        this.trackingListFactory.enableActions();
         if (!this.operator) {
             this.init();
             this.emplacement = this.currentNavParams.get('emplacement');
@@ -133,11 +135,16 @@ export class DeposePage extends PageComponent {
     }
 
     public ionViewWillLeave(): void {
+        this.trackingListFactory.disableActions();
         this.footerScannerComponent.unsubscribeZebraScan();
         if (this.saveSubscription) {
             this.saveSubscription.unsubscribe();
             this.saveSubscription = undefined;
         }
+    }
+
+    public wiiCanLeave(): boolean {
+        return !this.trackingListFactory.alertPresented;
     }
 
     public finishTaking(): void {
@@ -373,8 +380,11 @@ export class DeposePage extends PageComponent {
             TrackingListFactoryService.LIST_TYPE_DROP_SUB,
             {
                 objectLabel: this.objectLabel,
-                uploadItem: ({object}) => {
-                    this.testColisDepose(object.value, true);
+                rightIcon: {
+                    mode: 'upload',
+                    action: ({object}) => {
+                        this.testColisDepose(object.value, true);
+                    }
                 },
                 natureIdsToConfig: this.natureIdsToConfig,
                 natureTranslation: natureLabel.translation || natureLabel.label,
@@ -399,6 +409,7 @@ export class DeposePage extends PageComponent {
                         const [dropIndex] = this.findDropIndexes(barCode);
                         if (dropIndex !== undefined) {
                             const {quantity, comment, signature, photo, nature_id: natureId, freeFields} = this.colisDepose[dropIndex];
+                            this.trackingListFactory.disableActions();
                             this.navService.push(MovementConfirmPageRoutingModule.PATH, {
                                 fromStock: this.fromStock,
                                 location: this.emplacement,
@@ -420,14 +431,17 @@ export class DeposePage extends PageComponent {
                         }
                     }
                     : undefined,
-                removeItem: TrackingListFactoryService.CreateRemoveItemFromListHandler(
-                    this.colisDepose,
-                    this.colisPrise,
-                    () => {
-                        this.refreshPriseListComponent();
-                        this.refreshDeposeListComponent();
-                    }),
-                removeConfirmationMessage: 'Êtes-vous sur de vouloir supprimer cet élément ?'
+                rightIcon: {
+                    mode: 'remove',
+                    action: TrackingListFactoryService.CreateRemoveItemFromListHandler(
+                        this.colisDepose,
+                        this.colisPrise,
+                        () => {
+                            this.refreshPriseListComponent();
+                            this.refreshDeposeListComponent();
+                        }
+                    )
+                }
             }
         );
     }
