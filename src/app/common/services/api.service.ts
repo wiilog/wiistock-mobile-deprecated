@@ -1,8 +1,9 @@
 import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
+import {HttpClient, HttpResponse} from '@angular/common/http';
 import {Observable, of, zip} from 'rxjs';
 import {StorageService} from '@app/common/services/storage.service';
-import {flatMap, map, tap, timeout} from "rxjs/operators";
+import {filter, flatMap, map, tap, timeout} from "rxjs/operators";
+import {UserService} from "@app/common/services/user.service";
 
 
 @Injectable({
@@ -42,7 +43,8 @@ export class ApiService {
 
 
     public constructor(private storageService: StorageService,
-                       private httpClient: HttpClient) {
+                       private httpClient: HttpClient,
+                       private userService: UserService) {
     }
 
     public pingApi(url: string): Observable<any> {
@@ -76,22 +78,27 @@ export class ApiService {
                         ? 'params'
                         : 'body';
 
-                    const tmpParams = {
-                        ...(secured ? {apiKey} : {}),
-                        ...params
-                    };
                     let smartParams = (method === 'post')
-                        ? ApiService.ObjectToFormData(tmpParams)
-                        : tmpParams;
+                        ? ApiService.ObjectToFormData(params)
+                        : params;
 
                     const options = {
                         [keyParam]: smartParams,
                         responseType: 'json' as 'json',
-                        headers: ApiService.DEFAULT_HEADERS
+                        headers: {
+                            ...(secured && apiKey ? {"X-Authorization": `Bearer ${apiKey}`} : {}),
+                            ...ApiService.DEFAULT_HEADERS
+                        }
                     };
 
                     return this.httpClient.request(method, url, options);
-                })
+                }),
+                tap((response: HttpResponse<any>) => {
+                    if(response.status == 401) {
+                        this.userService.doLogout();
+                    }
+                }),
+                filter((response: HttpResponse<any>) => response.status != 401)
             );
 
         if (requestWithTimeout) {

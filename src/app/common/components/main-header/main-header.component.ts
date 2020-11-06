@@ -25,6 +25,7 @@ import {TrackingMenuPageRoutingModule} from '@pages/tracking/tracking-menu/track
 import {DispatchMenuPageRoutingModule} from '@pages/tracking/dispatch/dispatch-menu/dispatch-menu-routing.module';
 import {HandlingMenuPageRoutingModule} from '@pages/demande/handling/handling-menu/handling-menu-routing.module';
 import {HandlingValidatePageRoutingModule} from '@pages/demande/handling/handling-validate/handling-validate-routing.module';
+import {UserService} from "@app/common/services/user.service";
 
 
 @Component({
@@ -101,6 +102,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                        private navService: NavService,
                        private mainHeaderService: MainHeaderService,
                        private activatedRoute: ActivatedRoute,
+                       private userService: UserService,
                        private router: Router) {
         this.pagesInStack = 0;
         this.loading = true;
@@ -254,14 +256,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     }
 
     private doLogout(): void {
-        this.logoutSubscription = zip(
-            this.sqliteService.resetDataBase(),
-            this.storageService.clearStorage()
-        )
-            .subscribe(() => {
-                this.navService.setRoot(LoginPageRoutingModule.PATH, {autoConnect: false});
-                this.mainHeaderService.emitNavigationChange();
-            });
+        this.userService.doLogout();
     }
 
     private runMultiplePop(popNumber: number): Observable<void> {

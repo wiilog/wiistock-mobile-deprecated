@@ -4,6 +4,8 @@ import {Routes, RouterModule} from '@angular/router';
 import {LoginPage} from './login.page';
 import {CanLeaveGuard} from '@app/guards/can-leave/can-leave.guard';
 
+import LOGIN_PATH from './login-path';
+
 const routes: Routes = [
     {
         path: '',
@@ -17,5 +19,5 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class LoginPageRoutingModule {
-    public static readonly PATH: string = 'login';
+    public static readonly PATH: string = LOGIN_PATH;
 }
