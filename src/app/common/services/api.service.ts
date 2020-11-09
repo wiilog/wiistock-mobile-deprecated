@@ -94,8 +94,7 @@ export class ApiService {
 
                     return this.httpClient.request(method, url, options);
                 }),
-                catchError(
-                    (response: HttpResponse<any>) => {
+                catchError((response: HttpResponse<any>) => {
                         if(response.status == 401) {
                             this.userService.doLogout();
                             return of(response);
@@ -153,5 +152,4 @@ export class ApiService {
             }), {});
     }
 
-    private check
 }
