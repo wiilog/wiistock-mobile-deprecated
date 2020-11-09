@@ -1,8 +1,8 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpResponse} from '@angular/common/http';
-import {Observable, of, zip} from 'rxjs';
+import {Observable, of, throwError, zip} from 'rxjs';
 import {StorageService} from '@app/common/services/storage.service';
-import {filter, flatMap, map, tap, timeout} from "rxjs/operators";
+import {catchError, filter, flatMap, map, tap, timeout} from "rxjs/operators";
 import {UserService} from "@app/common/services/user.service";
 
 
@@ -85,6 +85,7 @@ export class ApiService {
                     const options = {
                         [keyParam]: smartParams,
                         responseType: 'json' as 'json',
+                        observe: 'response' as 'response',
                         headers: {
                             ...(secured && apiKey ? {"X-Authorization": `Bearer ${apiKey}`} : {}),
                             ...ApiService.DEFAULT_HEADERS
@@ -93,12 +94,19 @@ export class ApiService {
 
                     return this.httpClient.request(method, url, options);
                 }),
-                tap((response: HttpResponse<any>) => {
-                    if(response.status == 401) {
-                        this.userService.doLogout();
+                catchError(
+                    (response: HttpResponse<any>) => {
+                        if(response.status == 401) {
+                            this.userService.doLogout();
+                            return of(response);
+                        }
+                        else {
+                            return throwError(response);
+                        }
                     }
-                }),
-                filter((response: HttpResponse<any>) => response.status != 401)
+                ),
+                filter((response: HttpResponse<any>) => (response.status != 401)),
+                map((response: HttpResponse<any>) => response.body)
             );
 
         if (requestWithTimeout) {
@@ -144,4 +152,6 @@ export class ApiService {
                     : object[key]
             }), {});
     }
+
+    private check
 }

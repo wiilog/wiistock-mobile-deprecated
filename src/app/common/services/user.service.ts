@@ -5,6 +5,7 @@ import {NavService} from "@app/common/services/nav.service";
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
 import LOGIN_PATH from "@pages/login/login-path";
 import {MainHeaderService} from "@app/common/services/main-header.service";
+import {flatMap} from 'rxjs/operators';
 
 
 @Injectable({
@@ -12,18 +13,25 @@ import {MainHeaderService} from "@app/common/services/main-header.service";
 })
 export class UserService {
 
+    private logoutOnProgress: boolean;
+
     public constructor(private storageService: StorageService,
                        private sqliteService: SqliteService,
                        private navService: NavService,
                        private mainHeaderService: MainHeaderService) {
+        this.logoutOnProgress = false;
     }
 
     public doLogout(): void {
-        zip(this.sqliteService.resetDataBase(), this.storageService.clearStorage())
-            .subscribe(() => {
-                this.navService.setRoot(LOGIN_PATH, {autoConnect: false});
-                this.mainHeaderService.emitNavigationChange();
-            });
+        if (!this.logoutOnProgress) {
+            this.logoutOnProgress = true;
+            zip(this.sqliteService.resetDataBase(), this.storageService.clearStorage())
+                .pipe(flatMap(() => this.navService.setRoot(LOGIN_PATH, {autoConnect: false})))
+                .subscribe(() => {
+                    this.logoutOnProgress = false;
+                    this.mainHeaderService.emitNavigationChange();
+                });
+        }
     }
 
 }

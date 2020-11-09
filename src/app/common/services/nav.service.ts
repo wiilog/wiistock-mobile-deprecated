@@ -36,10 +36,10 @@ export class NavService {
         }
     }
 
-    public push(path: string, params?: RouteParams): Observable<boolean> {
+    public push(routeName: string, params?: RouteParams): Observable<boolean> {
         const paramsId = this.treatParams(params);
         const navigationExtras = this.createNavigationOption(paramsId);
-        return from(this.navController.navigateForward(path, navigationExtras));
+        return from(this.navController.navigateForward(routeName, navigationExtras));
     }
 
     public setRoot(routeName: string, params?: RouteParams): Observable<boolean> {
