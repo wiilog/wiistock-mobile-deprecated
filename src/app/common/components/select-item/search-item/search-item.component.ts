@@ -80,7 +80,10 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             valueField: 'id',
             templateIndex: 'default',
             databaseTable: 'nature',
-            placeholder: 'Sélectionner une nature'
+            placeholder: 'Sélectionner une nature',
+            requestOrder: {
+                'label': 'ASC'
+            }
         },
         [SelectItemTypeEnum.INVENTORY_LOCATION]: SearchItemComponent.MakeMapForInventoryLocations(false),
         [SelectItemTypeEnum.INVENTORY_ARTICLE]: SearchItemComponent.MakeMapForInventoryArticles(false),
