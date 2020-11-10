@@ -33,6 +33,13 @@ export class FormPanelService {
         const requiredField = requiredFields[mode];
         const required = requiredField && Boolean(freeField[requiredField]);
 
+        const format = (freeField.typing === FreeFieldTyping.DATE
+            ? 'YYYY-MM-DD'
+            : (freeField.typing === FreeFieldTyping.DATETIME
+                ? 'YYYY-MM-DD HH:mm'
+                : '')
+        );
+
         return (
             freeField.typing === FreeFieldTyping.BOOL ? {
                 item: FormPanelToggleComponent,
@@ -48,7 +55,7 @@ export class FormPanelService {
                     ...common,
                     value: value === null || value === undefined
                         ? (freeField.defaultValue
-                            ? moment(freeField.defaultValue, 'DD/MM/YYYY').format('YYYY-MM-DD')
+                            ? moment(freeField.defaultValue, format)
                             : undefined)
                         : value,
                     inputConfig: {
