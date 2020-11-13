@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {from, Observable, of} from 'rxjs';
 import {LoadingController} from '@ionic/angular';
-import {flatMap, map} from 'rxjs/operators';
+import {catchError, flatMap, map, tap} from 'rxjs/operators';
 
 
 @Injectable({
@@ -11,6 +11,8 @@ export class LoadingService {
 
     private static readonly DEFAULT_MESSAGE: string = 'Chargement...';
 
+    private lastLoading?: HTMLIonLoadingElement;
+
     public constructor(public loadingController: LoadingController) {}
 
     public presentLoading(message?: string): Observable<HTMLIonLoadingElement> {
@@ -18,7 +20,19 @@ export class LoadingService {
         return of(undefined)
             .pipe(
                 flatMap(() => from(this.loadingController.create({message: messageToPrint}))),
-                flatMap((loading) => from(loading.present()).pipe(map(() => loading)))
+                flatMap((loading) => from(loading.present()).pipe(map(() => loading))),
+                tap((loading: HTMLIonLoadingElement) => {
+                    this.lastLoading = loading;
+                })
+            );
+    }
+
+    public dismissLastLoading(): Observable<void> {
+        return (this.lastLoading
+            ? from(this.lastLoading.dismiss()).pipe(
+                catchError(() => of(undefined)),
+                map(() => undefined)
             )
+            : of(undefined))
     }
 }
