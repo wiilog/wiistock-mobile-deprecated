@@ -27,7 +27,7 @@ export class BarcodeScannerManagerService {
         if (!this.zebraBroadcastReceiverAlreadyReceived) {
             this.zebraBroadcastReceiverAlreadyReceived = true;
             (<any>window).plugins.intentShim.registerBroadcastReceiver({
-                    filterActions: ['io.ionic.starter.ACTION'],
+                    filterActions: ['com.wiilog.wiistock.ACTION'],
                     filterCategories: ['android.intent.category.DEFAULT']
                 },
                 (intent) => {
