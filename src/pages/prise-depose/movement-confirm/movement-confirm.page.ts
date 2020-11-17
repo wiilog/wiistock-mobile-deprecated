@@ -53,13 +53,16 @@ export class MovementConfirmPage extends PageComponent {
         const fromStock = this.currentNavParams.get('fromStock');
         const {quantity, comment, signature, photo, natureId, freeFields: freeFieldsValuesStr} = this.currentNavParams.get('values');
         const freeFieldsValues = freeFieldsValuesStr ? JSON.parse(freeFieldsValuesStr) : {};
+        const choosenIcon = (movementType == 'Dépose')
+            ? {icon: 'download.svg', color: 'success'}
+            : {icon: 'upload.svg', color: 'primary'};
 
         this.headerConfig = {
             title: `${movementType} de ${barCode}`,
             subtitle: `Emplacement : ${this.location.label}`,
             leftIcon: {
-                name: 'download.svg',
-                color: 'success'
+                name: choosenIcon.icon,
+                color: choosenIcon.color
             }
         };
 
