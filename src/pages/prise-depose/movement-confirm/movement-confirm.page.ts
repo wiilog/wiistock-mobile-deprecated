@@ -17,6 +17,8 @@ import {FormPanelSigningComponent} from '@app/common/components/panel/form-panel
 import {FormPanelCameraComponent} from '@app/common/components/panel/form-panel/form-panel-camera/form-panel-camera.component';
 import {Nature} from '@entities/nature';
 import {zip} from 'rxjs';
+import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
+import {IconColor} from '@app/common/components/icon/icon-color';
 
 
 @Component({
@@ -25,6 +27,16 @@ import {zip} from 'rxjs';
     styleUrls: ['./movement-confirm.page.scss'],
 })
 export class MovementConfirmPage extends PageComponent {
+
+    private static readonly PageIcon = {
+        [MovementConfirmType.DROP]: {icon: 'download.svg', color: 'success' as IconColor},
+        [MovementConfirmType.TACKING]: {icon: 'upload.svg', color: 'primary' as IconColor}
+    }
+    private static readonly PageTitle = {
+        [MovementConfirmType.DROP]: 'Dépose',
+        [MovementConfirmType.TACKING]: 'Prise'
+    }
+
     @ViewChild('formPanelComponent', {static: false})
     public formPanelComponent: FormPanelComponent;
 
@@ -48,21 +60,20 @@ export class MovementConfirmPage extends PageComponent {
         this.validate = this.currentNavParams.get('validate');
 
         const barCode = this.currentNavParams.get('barCode');
-        const movementType = this.currentNavParams.get('movementType');
+        const movementType: MovementConfirmType = this.currentNavParams.get('movementType');
         const natureTranslationLabel = this.currentNavParams.get('natureTranslationLabel');
         const fromStock = this.currentNavParams.get('fromStock');
         const {quantity, comment, signature, photo, natureId, freeFields: freeFieldsValuesStr} = this.currentNavParams.get('values');
         const freeFieldsValues = freeFieldsValuesStr ? JSON.parse(freeFieldsValuesStr) : {};
-        const choosenIcon = (movementType == 'Dépose')
-            ? {icon: 'download.svg', color: 'success'}
-            : {icon: 'upload.svg', color: 'primary'};
+        const chosenIcon = MovementConfirmPage.PageIcon[movementType];
+        const chosenTitle = MovementConfirmPage.PageTitle[movementType];
 
         this.headerConfig = {
-            title: `${movementType} de ${barCode}`,
+            title: `${chosenTitle} de ${barCode}`,
             subtitle: `Emplacement : ${this.location.label}`,
             leftIcon: {
-                name: choosenIcon.icon,
-                color: choosenIcon.color
+                name: chosenIcon.icon,
+                color: chosenIcon.color
             }
         };
 

@@ -23,6 +23,8 @@ import {Nature} from '@entities/nature';
 import {Translation} from "@entities/translation";
 import {AlertManagerService} from "@app/common/services/alert-manager.service";
 import {CanLeave} from '@app/guards/can-leave/can-leave';
+import {MovementConfirmPage} from '@pages/prise-depose/movement-confirm/movement-confirm.page';
+import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
 
 @Component({
     selector: 'wii-depose',
@@ -425,7 +427,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                                 validate: (values) => {
                                     this.updatePicking(barCode, values);
                                 },
-                                movementType: 'Dépose',
+                                movementType: MovementConfirmType.DROP,
                                 natureTranslationLabel: natureLabel.translation || natureLabel.label,
                             });
                         }

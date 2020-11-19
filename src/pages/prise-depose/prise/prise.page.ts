@@ -24,6 +24,7 @@ import {PageComponent} from '@pages/page.component';
 import {Nature} from '@entities/nature';
 import {MovementConfirmPageRoutingModule} from "../movement-confirm/movement-confirm-routing.module";
 import {Translation} from "@entities/translation";
+import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
 
 
 @Component({
@@ -333,7 +334,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                                 validate: (values) => {
                                     this.updatePicking(barCode, values);
                                 },
-                                movementType: 'Prise',
+                                movementType: MovementConfirmType.TACKING,
                                 natureTranslationLabel: natureLabel.translation || natureLabel.label,
                             });
                         }
