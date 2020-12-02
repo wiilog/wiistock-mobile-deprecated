@@ -56,21 +56,21 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             label: 'label',
             valueField: 'id',
             templateIndex: 'default',
-            placeholder: 'Sélectionner un élément'
+            placeholder: 'Sélectionnez un élément'
         },
         [SelectItemTypeEnum.ARTICLE_TO_PICK]: {
             label: 'barcode',
             valueField: 'barcode',
             templateIndex: 'article-prepa',
             databaseTable: 'article_prepa_by_ref_article',
-            placeholder: 'Sélectionner l\'article'
+            placeholder: 'Sélectionnez l\'article'
         },
         [SelectItemTypeEnum.LOCATION]: {
             label: 'label',
             valueField: 'id',
             templateIndex: 'default',
             databaseTable: 'emplacement',
-            placeholder: 'Sélectionner un emplacement',
+            placeholder: 'Sélectionnez un emplacement',
             requestOrder: {
                 'label': 'ASC'
             }
@@ -80,7 +80,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             valueField: 'id',
             templateIndex: 'default',
             databaseTable: 'nature',
-            placeholder: 'Sélectionner une nature',
+            placeholder: 'Sélectionnez une nature',
             requestOrder: {
                 'label': 'ASC'
             }
@@ -94,25 +94,32 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             valueField: 'id',
             templateIndex: 'default',
             databaseTable: 'demande_livraison_type',
-            placeholder: 'Sélectionner un type'
+            placeholder: 'Sélectionnez un type'
         },
         [SelectItemTypeEnum.DEMANDE_LIVRAISON_ARTICLES]: {
             label: 'bar_code',
             valueField: 'bar_code',
             templateIndex: 'article-demande',
             databaseTable: 'demande_livraison_article',
-            placeholder: 'Sélectionner un article'
+            placeholder: 'Sélectionnez un article'
         },
         [SelectItemTypeEnum.STATUS]: {
             label: 'label',
             valueField: 'id',
             templateIndex: 'default',
             databaseTable: 'status',
-            placeholder: 'Sélectionner un statut',
+            placeholder: 'Sélectionnez un statut',
             requestOrder: {
                 'displayOrder': 'ASC'
             }
-        }
+        },
+        [SelectItemTypeEnum.DISPATCH_NUMBER]: {
+            label: 'number',
+            valueField: 'number',
+            templateIndex: 'default',
+            databaseTable: 'dispatch',
+            placeholder: 'Sélectionnez un acheminement',
+        },
     }
 
     public constructor(private sqliteService: SqliteService,
@@ -130,7 +137,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             valueField: 'id',
             templateIndex: 'default',
             databaseTable: anomalyMode ? 'anomalie_inventaire' : 'article_inventaire',
-            placeholder: 'Sélectionner un emplacement',
+            placeholder: 'Sélectionnez un emplacement',
             map: (list: Array<ArticleInventaire>) => {
                 return list
                     .reduce((acc, {location}) => ([
@@ -149,7 +156,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             valueField: 'barcode',
             templateIndex: 'article-inventory',
             databaseTable: anomalyMode ? 'anomalie_inventaire' : 'article_inventaire',
-            placeholder: 'Sélectionner un article',
+            placeholder: 'Sélectionnez un article',
             reducer: anomalyMode
                 ? (acc: Array<any>, current: any) => {
                     const {barcode: currentBarcode} = current;

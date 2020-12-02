@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, EventEmitter, ViewChild} from '@angular/core';
 import {Subscription} from 'rxjs';
 import {NavService} from '@app/common/services/nav.service';
 import {PageComponent} from '@pages/page.component';
@@ -10,6 +10,10 @@ import {CardListConfig} from '@app/common/components/card-list/card-list-config'
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {DispatchPacksPageRoutingModule} from '@pages/tracking/dispatch/dispatch-packs/dispatch-packs-routing.module';
+import {Emplacement} from "@entities/emplacement";
+import {SelectItemTypeEnum} from "@app/common/components/select-item/select-item-type.enum";
+import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
+import {SelectItemComponent} from "@app/common/components/select-item/select-item.component";
 
 @Component({
     selector: 'wii-dispatch-menu',
@@ -17,10 +21,17 @@ import {DispatchPacksPageRoutingModule} from '@pages/tracking/dispatch/dispatch-
     styleUrls: ['./dispatch-menu.page.scss'],
 })
 export class DispatchMenuPage extends PageComponent {
+    public readonly barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SCAN;
+    public readonly selectItemType = SelectItemTypeEnum.DISPATCH_NUMBER;
+
+    @ViewChild('selectItemComponent', {static: false})
+    public selectItemComponent: SelectItemComponent;
 
     private loadingSubscription: Subscription;
 
     public loading: boolean;
+
+    public resetEmitter$: EventEmitter<void>;
 
     public dispatchesListConfig: Array<CardListConfig>;
     public readonly dispatchesListColor = CardListColorEnum.GREEN;
@@ -31,20 +42,37 @@ export class DispatchMenuPage extends PageComponent {
                        private mainHeaderService: MainHeaderService,
                        navService: NavService) {
         super(navService);
+        this.resetEmitter$ = new EventEmitter<void>();
         this.loading = true;
     }
 
 
     public ionViewWillEnter(): void {
+        this.resetEmitter$.emit();
+        this.updateDispatchList();
+    }
+
+    public ionViewWillLeave(): void {
+        this.unsubscribeLoading();
+        if (this.selectItemComponent) {
+            this.selectItemComponent.unsubscribeZebraScan();
+        }
+    }
+
+    private updateDispatchList(dispatches = null): void {
+        if(dispatches === null) {
+            dispatches = () => {
+                return this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL OR partial = 1']);
+            }
+        }
+
         this.loading = true;
         this.unsubscribeLoading();
         let loaderElement;
         this.loadingSubscription = this.loadingService.presentLoading()
             .pipe(
-                tap((loader) => {
-                    loaderElement = loader;
-                }),
-                flatMap(() => this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL OR partial = 1']))
+                tap(loader => loaderElement = loader),
+                flatMap(dispatches)
             )
             .subscribe((dispatches: Array<Dispatch>) => {
                 this.dispatchesListConfig = dispatches.map(({id, requester,  number, startDate, endDate, locationFromLabel, locationToLabel, statusLabel, typeLabel, emergency}) => ({
@@ -85,11 +113,6 @@ export class DispatchMenuPage extends PageComponent {
             });
     }
 
-
-    public ionViewWillLeave(): void {
-        this.unsubscribeLoading();
-    }
-
     private unsubscribeLoading(): void {
         if (this.loadingSubscription) {
             this.loadingSubscription.unsubscribe();
@@ -101,4 +124,11 @@ export class DispatchMenuPage extends PageComponent {
         const dispatchesLength = this.dispatchesListConfig.length;
         this.mainHeaderService.emitSubTitle(`${dispatchesLength === 0 ? 'Aucune' : dispatchesLength} demande${dispatchesLength > 1 ? 's' : ''}`)
     }
+
+    public filterByNumber(number?: string) {
+        this.updateDispatchList(() => {
+            this.sqliteService.findBy('dispatch', [`number LIKE '%${number}%' AND (treatedStatusId IS NULL OR partial = 1)`])
+        });
+    }
+
 }

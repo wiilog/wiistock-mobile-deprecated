@@ -6,3 +6,11 @@
                    [config]="dispatchesListConfig">
     </wii-card-list>
 </div>
+<wii-select-item #selectItemComponent
+                 *ngIf="!loading && dispatchesListConfig && dispatchesListConfig.length > 0"
+                 [type]="selectItemType"
+                 (itemChange)="filterByNumber($event)"
+                 [checkBarcodeValidity]="true"
+                 [resetEmitter]="resetEmitter$"
+                 [scanMode]="barcodeScannerSearchMode">
+</wii-select-item>

@@ -91,7 +91,11 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
         [SelectItemTypeEnum.INVENTORY_ANOMALIES_ARTICLE]: {
             invalidMessage: 'L\'article scanné n\'est pas dans la liste',
             buttonSubtitle: 'Article'
-        }
+        },
+        [SelectItemTypeEnum.DISPATCH_NUMBER]: {
+            invalidMessage: 'L\'acheminement n\'est pas dans la liste',
+            buttonSubtitle: 'Acheminement'
+        },
     }
 
     public constructor(private toastService: ToastService,
