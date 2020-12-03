@@ -10,10 +10,10 @@ import {CardListConfig} from '@app/common/components/card-list/card-list-config'
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {DispatchPacksPageRoutingModule} from '@pages/tracking/dispatch/dispatch-packs/dispatch-packs-routing.module';
-import {Emplacement} from "@entities/emplacement";
 import {SelectItemTypeEnum} from "@app/common/components/select-item/select-item-type.enum";
 import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {SelectItemComponent} from "@app/common/components/select-item/select-item.component";
+import {ToastService} from '@app/common/services/toast.service';
 
 @Component({
     selector: 'wii-dispatch-menu',
@@ -38,6 +38,7 @@ export class DispatchMenuPage extends PageComponent {
     public readonly dispatchesIconName = 'stock-transfer.svg';
 
     public constructor(private sqliteService: SqliteService,
+                       private toastService: ToastService,
                        private loadingService: LoadingService,
                        private mainHeaderService: MainHeaderService,
                        navService: NavService) {
@@ -59,20 +60,15 @@ export class DispatchMenuPage extends PageComponent {
         }
     }
 
-    private updateDispatchList(dispatches = null): void {
-        if(dispatches === null) {
-            dispatches = () => {
-                return this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL OR partial = 1']);
-            }
-        }
-
+    private updateDispatchList(): void {
         this.loading = true;
         this.unsubscribeLoading();
         let loaderElement;
+
         this.loadingSubscription = this.loadingService.presentLoading()
             .pipe(
                 tap(loader => loaderElement = loader),
-                flatMap(dispatches)
+                flatMap(() => this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL OR partial = 1']))
             )
             .subscribe((dispatches: Array<Dispatch>) => {
                 this.dispatchesListConfig = dispatches.map(({id, requester,  number, startDate, endDate, locationFromLabel, locationToLabel, statusLabel, typeLabel, emergency}) => ({
@@ -125,10 +121,18 @@ export class DispatchMenuPage extends PageComponent {
         this.mainHeaderService.emitSubTitle(`${dispatchesLength === 0 ? 'Aucune' : dispatchesLength} demande${dispatchesLength > 1 ? 's' : ''}`)
     }
 
-    public filterByNumber(number?: string) {
-        this.updateDispatchList(() => {
-            this.sqliteService.findBy('dispatch', [`number LIKE '%${number}%' AND (treatedStatusId IS NULL OR partial = 1)`])
-        });
+    public onScanningDispatch(dispatch?: Dispatch) {
+        if (dispatch) {
+            this.redirectToDispatch(dispatch.id);
+        }
+        else {
+            this.toastService.presentToast('Aucun acheminement correspondant');
+        }
     }
 
+    private redirectToDispatch(id: number) {
+        this.navService.push(DispatchPacksPageRoutingModule.PATH, {
+            dispatchId: id
+        });
+    }
 }

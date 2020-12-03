@@ -9,7 +9,7 @@
 <wii-select-item #selectItemComponent
                  *ngIf="!loading && dispatchesListConfig && dispatchesListConfig.length > 0"
                  [type]="selectItemType"
-                 (itemChange)="filterByNumber($event)"
+                 (itemChange)="onScanningDispatch($event)"
                  [checkBarcodeValidity]="true"
                  [resetEmitter]="resetEmitter$"
                  [scanMode]="barcodeScannerSearchMode">
