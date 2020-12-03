@@ -626,34 +626,13 @@ export class SqliteService {
                         ? this.deleteBy('article_prepa_by_ref_article', [`reference_article IN (${refArticleToDelete})`])
                     : of(undefined)
                 }),
-                map(() => {
-                    if ((articlesPrepaByRefArticle && articlesPrepaByRefArticle.length > 0)) {
-                        const articleKeys = [
-                            ...Object.keys(articlesPrepaByRefArticle[0]),
-                            'isSelectableByUser'
-                        ];
-
-                        const articleValues = articlesPrepaByRefArticle.map((article) => {
-                            const articleTmp = {
-                                ...article,
-                                isSelectableByUser: 1
-                            };
-                            return '(' + (articleKeys.map((key) => ("'" + this.escapeQuotes(articleTmp[key]) + "'")).join(', ') + ')')
-                        });
-
-                        return (
-                            'INSERT INTO `article_prepa_by_ref_article` (' + articleKeys.map((key) => `\`${key}\``).join(', ') + ') ' +
-                            'VALUES ' + articleValues + ';'
-                        );
-                    }
-                    else {
-                        return undefined;
-                    }
-                }),
-                flatMap((query) => (
-                    query
-                        ? this.executeQuery(query)
-                        : of(undefined)
+                flatMap(() => (
+                    (articlesPrepaByRefArticle && articlesPrepaByRefArticle.length > 0)
+                        ? this.insert('article_prepa_by_ref_article', articlesPrepaByRefArticle.map((article) => ({
+                            ...article,
+                            isSelectableByUser: 1
+                        })))
+                        :  of(undefined)
                 ))
             );
     }
