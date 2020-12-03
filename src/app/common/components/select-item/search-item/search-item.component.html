@@ -25,6 +25,12 @@
                         <p>Article {{article.barcode}}</p>
                         <p *ngIf="article.location !== 'null'">Emplacement : {{article.location}}</p>
                         <p *ngIf="article.quantity">Quantité restante : {{article.quantity}}</p>
+                        <p *ngIf="article.management">
+                            <span *ngIf="article.management === 'FIFO'">Date d'entrée en stock : </span>
+                            <span *ngIf="article.management === 'FEFO'">Date d'expiration : </span>
+                            <span *ngIf="article.management !== 'FEFO' && article.management !== 'FIFO'">Date : </span>
+                            {{article.management_date}}
+                        </p>
                     </div>
                 </ng-template>
                 <ng-template ionicSelectableItemTemplate

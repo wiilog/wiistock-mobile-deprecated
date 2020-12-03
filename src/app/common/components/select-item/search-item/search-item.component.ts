@@ -2,7 +2,7 @@ import {ChangeDetectorRef, Component, EventEmitter, Input, OnDestroy, OnInit, Ou
 import {IonicSelectableComponent} from 'ionic-selectable';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {filter, map, take, tap} from 'rxjs/operators';
+import {map, take, tap} from 'rxjs/operators';
 import {ArticleInventaire} from '@entities/article-inventaire';
 import {Observable, of, ReplaySubject, Subscription} from 'rxjs';
 import {TableName} from '@app/common/services/sqlite/table-definition';
@@ -63,7 +63,11 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             valueField: 'barcode',
             templateIndex: 'article-prepa',
             databaseTable: 'article_prepa_by_ref_article',
-            placeholder: 'Sélectionnez l\'article'
+            placeholder: 'Sélectionnez l\'article',
+            requestOrder: {
+                'management_order IS NULL': 'ASC', // put null at the end
+                'management_order': 'ASC'
+            }
         },
         [SelectItemTypeEnum.LOCATION]: {
             label: 'label',

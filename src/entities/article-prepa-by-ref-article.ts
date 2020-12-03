@@ -7,4 +7,7 @@ export interface ArticlePrepaByRefArticle {
     reference_article: string;
     isSelectableByUser: number;
     barcode?: string;
+    management_date?: string;
+    management_order?: number;
+    management?: string;
 }

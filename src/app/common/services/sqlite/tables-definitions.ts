@@ -92,7 +92,10 @@ export const TablesDefinitions: Array<TableDefinition> = [
             reference_article: 'TEXT',
             barcode: 'TEXT',
             quantity: 'INTEGER',
-            isSelectableByUser: 'INTEGER'
+            isSelectableByUser: 'INTEGER',
+            management: 'VARCHAR(255)',
+            management_date: 'VARCHAR(255)',
+            management_order: 'INTEGER'
         }
     },
     {
