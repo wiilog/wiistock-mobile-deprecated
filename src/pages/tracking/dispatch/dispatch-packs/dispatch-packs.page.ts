@@ -202,6 +202,7 @@ export class DispatchPacksPage extends PageComponent {
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
         const plural = packsToTreat.length > 1 ? 's' : '';
+        const hasPackToTreat = this.dispatchPacks && this.dispatchPacks.some(({treated}) => !treated);
         this.packsToTreatListConfig = {
             header: {
                 title: 'À transférer',
@@ -209,7 +210,15 @@ export class DispatchPacksPage extends PageComponent {
                 leftIcon: {
                     name: 'download.svg',
                     color: 'list-green-light'
-                }
+                },
+                ...(hasPackToTreat
+                    ? {
+                        rightIcon: {
+                            name: 'up.svg',
+                            action: () => this.transferAll()
+                        }
+                    }
+                    : {})
             },
             body: packsToTreat.map((pack) => ({
                 ...(this.packToListItemConfig(pack, natureTranslationCapitalized)),
@@ -322,5 +331,13 @@ export class DispatchPacksPage extends PageComponent {
             this.dispatchPacks[packIndexToConfirm].quantity = Number(quantity);
             this.refreshListTreatedConfig();
         }
+    }
+
+    private transferAll(): void {
+        this.dispatchPacks
+            .filter(({treated}) => !treated)
+            .forEach(({code}) => {
+                this.takePack(code);
+            });
     }
 }
