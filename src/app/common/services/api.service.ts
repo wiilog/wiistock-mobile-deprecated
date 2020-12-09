@@ -95,15 +95,14 @@ export class ApiService {
                     return this.httpClient.request(method, url, options);
                 }),
                 catchError((response: HttpResponse<any>) => {
-                        if(response.status == 401) {
-                            this.userService.doLogout();
-                            return of(response);
-                        }
-                        else {
-                            return throwError(response);
-                        }
+                    if(response.status == 401) {
+                        this.userService.doLogout();
+                        return of(response);
                     }
-                ),
+                    else {
+                        return throwError(response);
+                    }
+                }),
                 filter((response: HttpResponse<any>) => (response.status != 401)),
                 map((response: HttpResponse<any>) => response.body)
             );
