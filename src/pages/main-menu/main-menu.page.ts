@@ -5,7 +5,7 @@ import {flatMap, map, take, tap} from 'rxjs/operators';
 import {AlertController, Platform} from '@ionic/angular';
 import { Preparation } from '@entities/preparation';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {StorageService} from '@app/common/services/storage.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
 import {Network} from '@ionic-native/network/ngx';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {ToastService} from '@app/common/services/toast.service';

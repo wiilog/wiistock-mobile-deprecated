@@ -5,7 +5,7 @@ import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {DemandeLivraison} from '@entities/demande-livraison';
 import {DemandeLivraisonType} from '@entities/demande-livraison-type';
 import {CardListConfig} from '@app/common/components/card-list/card-list-config';
-import {StorageService} from '@app/common/services/storage.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {NavService} from '@app/common/services/nav.service';
 import {DemandeLivraisonHeaderPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-header/demande-livraison-header-routing.module';

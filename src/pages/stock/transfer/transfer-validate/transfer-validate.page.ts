@@ -2,7 +2,7 @@ import {Component, EventEmitter, ViewChild} from '@angular/core';
 import {NavService} from '@app/common/services/nav.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {ToastService} from '@app/common/services/toast.service';
-import {StorageService} from '@app/common/services/storage.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
 import {Network} from '@ionic-native/network/ngx';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';

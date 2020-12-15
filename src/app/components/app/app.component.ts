@@ -8,7 +8,7 @@ import {NavService} from '@app/common/services/nav.service';
 import {flatMap} from 'rxjs/operators';
 import {LoginPageRoutingModule} from '@pages/login/login-routing.module';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {StorageService} from '@app/common/services/storage.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
 
 @Component({
     selector: 'wii-root',

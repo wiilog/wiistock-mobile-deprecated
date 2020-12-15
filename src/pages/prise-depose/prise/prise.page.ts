@@ -12,7 +12,7 @@ import {ToastService} from '@app/common/services/toast.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {TrackingListFactoryService} from '@app/common/services/tracking-list-factory.service';
-import {StorageService} from '@app/common/services/storage.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
 import {AlertController} from '@ionic/angular';
 import {filter, flatMap, map, tap} from 'rxjs/operators';
 import * as moment from 'moment';

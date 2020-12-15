@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpResponse} from '@angular/common/http';
 import {Observable, of, throwError, zip} from 'rxjs';
-import {StorageService} from '@app/common/services/storage.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
 import {catchError, filter, flatMap, map, tap, timeout} from "rxjs/operators";
 import {UserService} from "@app/common/services/user.service";
 
@@ -33,6 +33,7 @@ export class ApiService {
     public static readonly GET_DEMANDE_LIVRAISON_DATA: string = '/demande-livraison-data';
     public static readonly GET_PACK_NATURE: string = '/packs/{code}/nature';
     public static readonly PATCH_DISPATCH: string = '/dispatches';
+    public static readonly GET_SERVER_IMAGES: string = '/server-images';
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'

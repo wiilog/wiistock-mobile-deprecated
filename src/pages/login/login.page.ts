@@ -3,7 +3,7 @@ import {ApiService} from '@app/common/services/api.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {of, Subscription} from 'rxjs';
 import {filter, flatMap, map, tap} from 'rxjs/operators';
-import {StorageService} from '@app/common/services/storage.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
 import {VersionCheckerService} from '@app/common/services/version-checker.service';
 import {Network} from '@ionic-native/network/ngx';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
@@ -16,6 +16,7 @@ import {ActivatedRoute, Router} from '@angular/router';
 import {environment} from '@environments/environment';
 import {autoConnect, loginKey} from '../../dev-credentials.json';
 import {PageComponent} from '@pages/page.component';
+import {ServerImageKeyEnum} from '@app/common/components/server-image/server-image-key.enum';
 
 
 @Component({
@@ -26,6 +27,7 @@ import {PageComponent} from '@pages/page.component';
 export class LoginPage extends PageComponent {
 
     private static readonly PATH_DOWNLOAD_APK: string = 'telecharger/nomade.apk';
+    public readonly LOGIN_IMAGE_KEY: ServerImageKeyEnum = ServerImageKeyEnum.LOGIN_IMAGE_KEY;
 
     public loginKey: string;
 

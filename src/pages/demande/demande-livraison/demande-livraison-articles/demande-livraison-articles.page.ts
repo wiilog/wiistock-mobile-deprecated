@@ -7,7 +7,7 @@ import {from, Observable, of, zip} from 'rxjs';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {LoadingService} from '@app/common/services/loading.service';
-import {StorageService} from '@app/common/services/storage.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
 import {AlertController} from '@ionic/angular';
 import {filter, flatMap, map} from 'rxjs/operators';
 import {NavService} from '@app/common/services/nav.service';

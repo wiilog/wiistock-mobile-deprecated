@@ -10,7 +10,7 @@ import {PrisePageRoutingModule} from '@pages/prise-depose/prise/prise-routing.mo
 import {DeposePageRoutingModule} from '@pages/prise-depose/depose/depose-routing.module';
 import {NewEmplacementPageRoutingModule} from '@pages/new-emplacement/new-emplacement-routing.module';
 import {PageComponent} from '@pages/page.component';
-import {StorageService} from '@app/common/services/storage.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
 
 @Component({
     selector: 'wii-emplacement-scan',
