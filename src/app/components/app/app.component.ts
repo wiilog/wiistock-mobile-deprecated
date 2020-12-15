@@ -9,6 +9,7 @@ import {flatMap} from 'rxjs/operators';
 import {LoginPageRoutingModule} from '@pages/login/login-routing.module';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
+import {ServerImageService} from '@app/common/services/server-image.service';
 
 @Component({
     selector: 'wii-root',
@@ -29,6 +30,7 @@ export class AppComponent {
                        private storageService: StorageService,
                        private scssHelper: ScssHelperService,
                        private splashScreen: SplashScreen,
+                       private serverImageService: ServerImageService,
                        private statusBar: StatusBar) {
         this.platformReady = false;
         this.primaryColor = this.scssHelper.getVariable('ion-color-primary');
@@ -46,8 +48,10 @@ export class AppComponent {
         from(this.platform.ready())
             .pipe(
                 flatMap(() => this.sqliteService.resetDataBase()),
+                flatMap(() => this.serverImageService.loadFromStorage()),
                 flatMap(() => this.storageService.clearStorage()),
-                flatMap(() => this.navService.setRoot(LoginPageRoutingModule.PATH))
+                flatMap(() => this.serverImageService.saveToStorage()),
+                flatMap(() => this.navService.setRoot(LoginPageRoutingModule.PATH)),
             )
             .subscribe(() => {
                 this.platformReady = true;

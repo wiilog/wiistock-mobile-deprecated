@@ -1,11 +1,9 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit, SecurityContext} from '@angular/core';
 import {ServerImageKeyEnum} from '@app/common/components/server-image/server-image-key.enum';
 import {ApiService} from '@app/common/services/api.service';
-import {DomSanitizer, SafeResourceUrl} from '@angular/platform-browser';
-import {StorageService} from '@app/common/services/storage/storage.service';
-import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
-import {of, Subscription} from 'rxjs';
-import {catchError, flatMap, tap} from 'rxjs/operators';
+import {DomSanitizer} from '@angular/platform-browser';
+import {Subscription} from 'rxjs';
+import {ServerImageService} from '@app/common/services/server-image.service';
 
 
 @Component({
@@ -23,7 +21,7 @@ export class ServerImageComponent implements OnInit, OnDestroy {
     @Input()
     public key: ServerImageKeyEnum;
 
-    public src: SafeResourceUrl;
+    public src: string;
 
     private imageSubscription: Subscription;
 
@@ -32,38 +30,23 @@ export class ServerImageComponent implements OnInit, OnDestroy {
         [ServerImageKeyEnum.LOGIN_IMAGE_KEY]: 'assets/images/followgt.svg'
     }
 
-    private static readonly CACHE_KEY = {
-        [ServerImageKeyEnum.HEADER_IMAGE_KEY]: StorageKeyEnum.IMAGE_SERVER_HEADER,
-        [ServerImageKeyEnum.LOGIN_IMAGE_KEY]: StorageKeyEnum.IMAGE_SERVER_LOGIN
-    }
-
     public constructor(private apiService: ApiService,
-                       private storageService: StorageService,
+                       private serverImageService: ServerImageService,
                        private domSanitizer: DomSanitizer) {
     }
 
     public ngOnInit(): void {
         const backup = ServerImageComponent.BACKUPS[this.key];
-        const cacheKey = ServerImageComponent.CACHE_KEY[this.key];
-        this.src = backup;
+        this.src = this.serverImageService.get(this.key);
 
         this.unsubscribeImage();
-        this.imageSubscription = this.storageService.getItem(cacheKey)
-            .pipe(
-                tap((cachedImage) => {
-                    if (cachedImage) {
-                        this.src = cachedImage;
-                    }
-                }),
-                catchError(() => {
-                    return of(undefined);
-                }),
-                flatMap(() => this.apiService.requestApi('get', ApiService.GET_SERVER_IMAGES, {params: {key: this.key}}))
-            )
+        this.imageSubscription = this.apiService
+            .requestApi('get', ApiService.GET_SERVER_IMAGES, {params: {key: this.key}})
             .subscribe(
                 ({success, image}) => {
                     if (success && image) {
-                        this.src = this.domSanitizer.bypassSecurityTrustResourceUrl(image);
+                        this.src = this.domSanitizer.sanitize(SecurityContext.RESOURCE_URL, this.domSanitizer.bypassSecurityTrustResourceUrl(image));
+                        this.serverImageService.saveOneToStorage(this.key, this.src);
                     }
                     else {
                         this.src = backup;
