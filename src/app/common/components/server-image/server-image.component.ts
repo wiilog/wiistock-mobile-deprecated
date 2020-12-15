@@ -36,6 +36,10 @@ export class ServerImageComponent implements OnInit, OnDestroy {
     }
 
     public ngOnInit(): void {
+        this.reload();
+    }
+
+    public reload(): void {
         const backup = ServerImageComponent.BACKUPS[this.key];
         this.src = this.serverImageService.get(this.key);
 

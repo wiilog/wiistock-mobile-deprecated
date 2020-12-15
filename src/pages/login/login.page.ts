@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component} from '@angular/core';
+import {ChangeDetectorRef, Component, ViewChild, ViewChildren} from '@angular/core';
 import {ApiService} from '@app/common/services/api.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {of, Subscription} from 'rxjs';
@@ -17,6 +17,7 @@ import {environment} from '@environments/environment';
 import {autoConnect, loginKey} from '../../dev-credentials.json';
 import {PageComponent} from '@pages/page.component';
 import {ServerImageKeyEnum} from '@app/common/components/server-image/server-image-key.enum';
+import {ServerImageComponent} from '@app/common/components/server-image/server-image.component';
 
 
 @Component({
@@ -25,6 +26,9 @@ import {ServerImageKeyEnum} from '@app/common/components/server-image/server-ima
     styleUrls: ['./login.page.scss'],
 })
 export class LoginPage extends PageComponent {
+
+    @ViewChild('serverImageLogo')
+    public serverImageLogo: ServerImageComponent;
 
     private static readonly PATH_DOWNLOAD_APK: string = 'telecharger/nomade.apk';
     public readonly LOGIN_IMAGE_KEY: ServerImageKeyEnum = ServerImageKeyEnum.LOGIN_IMAGE_KEY;
@@ -63,6 +67,9 @@ export class LoginPage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
+        if (this.serverImageLogo) {
+            this.serverImageLogo.reload();
+        }
         const autoConnect = this.currentNavParams.get('autoConnect');
         this.wantToAutoConnect = (typeof autoConnect === 'boolean' ? autoConnect : true);
 
