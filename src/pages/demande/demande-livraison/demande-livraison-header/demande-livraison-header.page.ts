@@ -2,7 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 import {of, Subscription, zip} from 'rxjs';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {DemandeLivraison} from '@entities/demande-livraison';
-import {StorageService} from '@app/common/services/storage.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {NavService} from '@app/common/services/nav.service';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';

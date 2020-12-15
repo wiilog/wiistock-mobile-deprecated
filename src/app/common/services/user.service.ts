@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {zip} from 'rxjs';
-import {StorageService} from '@app/common/services/storage.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
 import {NavService} from "@app/common/services/nav.service";
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
 import LOGIN_PATH from "@pages/login/login-path";

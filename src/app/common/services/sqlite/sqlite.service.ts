@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {StorageService} from '@app/common/services/storage.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
 import {Livraison} from '@entities/livraison';
 import {from, Observable, of, ReplaySubject, Subject, zip} from 'rxjs';
 import {flatMap, map, take, tap} from 'rxjs/operators';

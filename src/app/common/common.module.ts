@@ -35,6 +35,7 @@ import {DatePicker} from '@ionic-native/date-picker/ngx';
 import {FormViewerAttachmentsComponent} from '@app/common/components/panel/form-panel/form-viewer-attachments/form-viewer-attachments.component';
 import {FormViewerDirective} from '@app/common/directives/form-viewer/form-viewer.directive';
 import {FormPanelFieldComponent} from '@app/common/components/panel/form-panel/form-panel-field/form-panel-field.component';
+import {ServerImageComponent} from '@app/common/components/server-image/server-image.component';
 
 
 @NgModule({
@@ -63,7 +64,8 @@ import {FormPanelFieldComponent} from '@app/common/components/panel/form-panel/f
         SimpleFormComponent,
         StatsSlidersComponent,
         FormPanelDirective,
-        FormViewerDirective
+        FormViewerDirective,
+        ServerImageComponent
     ],
     imports: [
         AngularCommonModule,
@@ -84,7 +86,8 @@ import {FormPanelFieldComponent} from '@app/common/components/panel/form-panel/f
         FormPanelComponent,
         SimpleFormComponent,
         CardListComponent,
-        PanelHeaderComponent
+        PanelHeaderComponent,
+        ServerImageComponent
     ],
     providers: [
         // ionic

@@ -6,7 +6,7 @@ import {Livraison} from '@entities/livraison';
 import {Collecte} from '@entities/collecte';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {FileService} from "@app/common/services/file.service";
-import {StorageService} from "@app/common/services/storage.service";
+import {StorageService} from "@app/common/services/storage/storage.service";
 import {from, Observable, of, ReplaySubject, Subject, zip} from 'rxjs';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {AlertController} from '@ionic/angular';

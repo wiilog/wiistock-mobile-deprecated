@@ -4,7 +4,7 @@ import {LoadingService} from '@app/common/services/loading.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {from, Subscription} from 'rxjs';
 import {flatMap} from 'rxjs/operators';
-import {StorageService} from '@app/common/services/storage.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
 import {NavService} from '@app/common/services/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';

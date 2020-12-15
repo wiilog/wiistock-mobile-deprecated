@@ -14,7 +14,7 @@ import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item
 import {flatMap, map, tap} from 'rxjs/operators';
 import {from, of, ReplaySubject, Subscription, zip} from 'rxjs';
 import {Emplacement} from '@entities/emplacement';
-import {StorageService} from '@app/common/services/storage.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
 
 
 @Component({

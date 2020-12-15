@@ -17,7 +17,10 @@
             </wii-icon>
         </ion-button>
         <div class="header-title">
-            <img alt="FollowGT" src="assets/images/followgt_bg_transparent.svg" class="logo"/>
+            <wii-server-image alt="Follow GT"
+                              class="logo"
+                              [key]="HEADER_IMAGE_KEY">
+            </wii-server-image>
             <div class="user" *ngIf="isShown.user && loggedUser">{{ loggedUser }}</div>
         </div>
         <ion-button *ngIf="isShown.menu; else iconPlaceholderTemplate"

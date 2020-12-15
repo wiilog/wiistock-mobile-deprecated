@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {CanActivate, Router, UrlTree} from '@angular/router';
 import {Observable, zip} from 'rxjs';
-import {StorageService} from '@app/common/services/storage.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
 import {map} from 'rxjs/operators';
 
 @Injectable({

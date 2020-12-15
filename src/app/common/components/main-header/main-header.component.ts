@@ -3,7 +3,7 @@ import {Observable, Subscription, merge, of, zip} from 'rxjs';
 import {filter, flatMap, map, take, tap} from 'rxjs/operators';
 import {TitleConfig} from '@app/common/components/main-header/title-config';
 import {MainHeaderService} from '@app/common/services/main-header.service';
-import {StorageService} from '@app/common/services/storage.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
 import {ActivatedRoute, NavigationEnd, NavigationStart, Router} from '@angular/router';
 import {MainMenuPageRoutingModule} from '@pages/main-menu/main-menu-routing.module';
 import {ParamsPageRoutingModule} from '@pages/params/params-routing.module';
@@ -26,6 +26,7 @@ import {DispatchMenuPageRoutingModule} from '@pages/tracking/dispatch/dispatch-m
 import {HandlingMenuPageRoutingModule} from '@pages/demande/handling/handling-menu/handling-menu-routing.module';
 import {HandlingValidatePageRoutingModule} from '@pages/demande/handling/handling-validate/handling-validate-routing.module';
 import {UserService} from "@app/common/services/user.service";
+import {ServerImageKeyEnum} from '@app/common/components/server-image/server-image-key.enum';
 
 
 @Component({
@@ -36,6 +37,7 @@ import {UserService} from "@app/common/services/user.service";
 export class MainHeaderComponent implements OnInit, OnDestroy {
 
     public static readonly MAX_PSEUDO_LENGTH: number = 35;
+    public readonly HEADER_IMAGE_KEY: ServerImageKeyEnum = ServerImageKeyEnum.HEADER_IMAGE_KEY;
 
     @Output()
     public withHeader: EventEmitter<boolean>;
