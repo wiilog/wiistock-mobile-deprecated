@@ -241,7 +241,6 @@ export class TrackingListFactoryService {
                                 ),
                                 action: rightIcon.action
                                     ? () => {
-                                    console.log(!this.actionsDisabled);
                                         if (!this.actionsDisabled) {
                                             if (rightIcon.mode === 'upload') {
                                                 if (!this._alertPresented) {

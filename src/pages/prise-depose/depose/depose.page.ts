@@ -23,7 +23,6 @@ import {Nature} from '@entities/nature';
 import {Translation} from "@entities/translation";
 import {AlertManagerService} from "@app/common/services/alert-manager.service";
 import {CanLeave} from '@app/guards/can-leave/can-leave';
-import {MovementConfirmPage} from '@pages/prise-depose/movement-confirm/movement-confirm.page';
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
 
 @Component({
@@ -43,7 +42,6 @@ export class DeposePage extends PageComponent implements CanLeave {
     public emplacement: Emplacement;
     public colisPrise: Array<MouvementTraca&{hidden?: boolean}>;
     public colisDepose: Array<MouvementTraca>;
-    public prisesToFinish: Array<number>;
 
     public priseListConfig: {
         header: HeaderConfig;
@@ -158,8 +156,11 @@ export class DeposePage extends PageComponent implements CanLeave {
                 const online = (this.network.type !== 'none');
 
                 if (!this.fromStock || online) {
+                    const takingToFinish = this.colisPrise
+                        .filter(({hidden}) => hidden)
+                        .map(({id}) => id);
                     this.saveSubscription = this.localDataManager
-                        .saveMouvementsTraca(this.colisDepose, this.prisesToFinish)
+                        .saveMouvementsTraca(this.colisDepose, takingToFinish)
                         .pipe(
                             flatMap(() => {
                                 return online
@@ -302,7 +303,6 @@ export class DeposePage extends PageComponent implements CanLeave {
             if (allowedMovement) {
                 for (const pickingIndex of pickingIndexes) {
                     let quantity = this.colisPrise[pickingIndex].quantity;
-                    this.prisesToFinish.push(this.colisPrise[pickingIndex].id);
                     this.colisPrise[pickingIndex].hidden = true;
 
                     this.colisDepose.unshift({
@@ -453,7 +453,6 @@ export class DeposePage extends PageComponent implements CanLeave {
         this.apiLoading = false;
         this.colisDepose = [];
         this.colisPrise = [];
-        this.prisesToFinish = [];
     }
 
     private findPickingIndexes(barCode: string): Array<number> {
