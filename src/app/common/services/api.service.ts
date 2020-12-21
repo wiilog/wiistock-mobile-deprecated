@@ -1,9 +1,10 @@
 import {Injectable} from '@angular/core';
 import {HttpClient, HttpResponse} from '@angular/common/http';
-import {Observable, of, throwError, zip} from 'rxjs';
+import {from, Observable, of, throwError, zip} from 'rxjs';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {catchError, filter, flatMap, map, tap, timeout} from "rxjs/operators";
 import {UserService} from "@app/common/services/user.service";
+import {AppVersion} from '@ionic-native/app-version/ngx';
 
 
 @Injectable({
@@ -44,6 +45,7 @@ export class ApiService {
 
 
     public constructor(private storageService: StorageService,
+                       private appVersion: AppVersion,
                        private httpClient: HttpClient,
                        private userService: UserService) {
     }
@@ -66,6 +68,7 @@ export class ApiService {
 
         let requestResponse = zip(
             this.getApiUrl(service, {pathParams}),
+            from(this.appVersion.getVersionNumber()),
             ...(secured ? [this.storageService.getApiKey()] : [])
         )
             .pipe(
@@ -74,7 +77,7 @@ export class ApiService {
                         throw new Error('The api url is not set');
                     }
                 }),
-                flatMap(([url, apiKey]: [string, string]) => {
+                flatMap(([url, currentVersion, apiKey]: [string, string, string]) => {
                     const keyParam = (method === 'get' || method === 'delete')
                         ? 'params'
                         : 'body';
@@ -88,6 +91,7 @@ export class ApiService {
                         responseType: 'json' as 'json',
                         observe: 'response' as 'response',
                         headers: {
+                            'X-App-Version': currentVersion,
                             ...(secured && apiKey ? {"X-Authorization": `Bearer ${apiKey}`} : {}),
                             ...ApiService.DEFAULT_HEADERS
                         }
