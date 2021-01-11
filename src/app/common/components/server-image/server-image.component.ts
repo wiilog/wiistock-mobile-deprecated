@@ -1,7 +1,7 @@
-import {Component, Input, OnDestroy, OnInit, SecurityContext} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit} from '@angular/core';
 import {ServerImageKeyEnum} from '@app/common/components/server-image/server-image-key.enum';
 import {ApiService} from '@app/common/services/api.service';
-import {DomSanitizer} from '@angular/platform-browser';
+import {DomSanitizer, SafeUrl} from '@angular/platform-browser';
 import {Subscription} from 'rxjs';
 import {ServerImageService} from '@app/common/services/server-image.service';
 
@@ -21,7 +21,7 @@ export class ServerImageComponent implements OnInit, OnDestroy {
     @Input()
     public key: ServerImageKeyEnum;
 
-    public src: string;
+    public src: SafeUrl;
 
     private imageSubscription: Subscription;
 
@@ -41,7 +41,8 @@ export class ServerImageComponent implements OnInit, OnDestroy {
 
     public reload(): void {
         const backup = ServerImageComponent.BACKUPS[this.key];
-        this.src = this.serverImageService.get(this.key);
+        const image = this.serverImageService.get(this.key);
+        this.src = this.domSanitizer.bypassSecurityTrustUrl(image);
 
         this.unsubscribeImage();
         this.imageSubscription = this.apiService
@@ -49,8 +50,8 @@ export class ServerImageComponent implements OnInit, OnDestroy {
             .subscribe(
                 ({success, image}) => {
                     if (success && image) {
-                        this.src = this.domSanitizer.sanitize(SecurityContext.RESOURCE_URL, this.domSanitizer.bypassSecurityTrustResourceUrl(image));
-                        this.serverImageService.saveOneToStorage(this.key, this.src);
+                        this.src = this.domSanitizer.bypassSecurityTrustUrl(image);
+                        this.serverImageService.saveOneToStorage(this.key, image);
                     }
                     else {
                         this.src = backup;
