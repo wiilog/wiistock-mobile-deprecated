@@ -482,7 +482,7 @@ export class PrisePage extends PageComponent implements CanLeave {
 
                     if (needNatureChecks) {
                         this.apiService
-                            .requestApi('get', ApiService.GET_PACK_NATURE, {pathParams: {code: barCode}})
+                            .requestApi('get', ApiService.GET_PACK_NATURE, {params: {code: barCode}})
                             .pipe(
                                 flatMap(({nature}) => (
                                     nature

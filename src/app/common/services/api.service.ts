@@ -32,7 +32,7 @@ export class ApiService {
     public static readonly GET_TRACKING_DROPS: string = '/tracking-drops';
     public static readonly POST_DEMANDE_LIVRAISON: string = '/valider-dl';
     public static readonly GET_DEMANDE_LIVRAISON_DATA: string = '/demande-livraison-data';
-    public static readonly GET_PACK_NATURE: string = '/packs/{code}/nature';
+    public static readonly GET_PACK_NATURE: string = '/packs/nature';
     public static readonly PATCH_DISPATCH: string = '/dispatches';
     public static readonly GET_SERVER_IMAGES: string = '/server-images';
 
