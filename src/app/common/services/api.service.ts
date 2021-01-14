@@ -51,9 +51,18 @@ export class ApiService {
     }
 
     public pingApi(url: string): Observable<any> {
-        return this.httpClient
-            .get(url, {headers: ApiService.DEFAULT_HEADERS})
-            .pipe(timeout(ApiService.VERIFICATION_SERVICE_TIMEOUT));
+        return from(this.appVersion.getVersionNumber())
+            .pipe(
+                flatMap((currentVersion) => this.httpClient
+                    .get(url, {
+                        headers: {
+                            'X-App-Version': currentVersion,
+                            ...ApiService.DEFAULT_HEADERS
+                        }
+                    })
+                ),
+                timeout(ApiService.VERIFICATION_SERVICE_TIMEOUT)
+            );
     }
 
     public requestApi(method: string,

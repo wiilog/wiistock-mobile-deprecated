@@ -41,7 +41,7 @@ export class ServerImageComponent implements OnInit, OnDestroy {
 
     public reload(): void {
         const backup = ServerImageComponent.BACKUPS[this.key];
-        const image = this.serverImageService.get(this.key);
+        const image = this.serverImageService.get(this.key) || backup;
         this.src = this.domSanitizer.bypassSecurityTrustUrl(image);
 
         this.unsubscribeImage();
