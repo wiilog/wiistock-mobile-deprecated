@@ -252,7 +252,6 @@ export class SqliteService {
     public importDemandesLivraisonData(data): Observable<void> {
         const demandeLivraisonArticles = data['demandeLivraisonArticles'] || [];
         const demandeLivraisonTypes = data['demandeLivraisonTypes'] || [];
-
         // On supprimer tous les types
         return zip(
             this.findAll('article_in_demande_livraison'),
@@ -316,24 +315,30 @@ export class SqliteService {
     public importNaturesData(data, clearAll: boolean = true): Observable<void> {
         const natures = data['natures'] || [];
 
-        const naturesInsert = natures.map(({id, ...remainingNature}) => (
-            flatMap(() => (
-                this.deleteBy('nature', [`id = ${id}`])
-                    .pipe(
-                        flatMap(() => this.insert('nature', {id, ...remainingNature}))
-                    )
-            ))
-        ));
-
-        if (naturesInsert.length === 0) {
-            naturesInsert.push(map(() => undefined));
+        if (clearAll) {
+            return this.deleteBy('nature')
+                .pipe(
+                    flatMap(() => this.insert('nature', natures)),
+                    map(() => undefined)
+                );
+        } else {
+            const naturesInsert = natures.map(({id, ...remainingNature}) => {
+                return flatMap(() => (
+                    this.deleteBy('nature', [`id = ${id}`])
+                        .pipe(
+                            flatMap(() => this.insert('nature', {id, ...remainingNature}))
+                        )
+                ))
+            });
+            if (naturesInsert.length === 0) {
+                naturesInsert.push(map(() => undefined));
+            }
+            return zip(
+                // @ts-ignore
+                of(undefined).pipe(...naturesInsert)
+            )
+                .pipe(map(() => undefined));
         }
-
-        return zip(
-            // @ts-ignore
-            (clearAll ? this.deleteBy('nature') : of(undefined)).pipe(...naturesInsert)
-        )
-            .pipe(map(() => undefined));
     }
 
     public importAllowedNaturesData(data): Observable<void> {
