@@ -680,31 +680,17 @@ export class SqliteService {
     }
 
     private importTranslations(data): Observable<any> {
-        let ret$: ReplaySubject<any> = new ReplaySubject(1);
-        let translations = data.translations;
+        const translations = data.translations;
 
-        this.deleteBy('translations').subscribe(() => {
-            const translationsValues = translations.map((translation) => {
-                return (
-                    "('" +
-                    translation.menu.replace(/'/gi, "''") + "', '" +
-                    translation.label.replace(/'/gi, "''") + "', '" +
-                    (translation.translation ? translation.translation.replace(/'/gi, "''") : "") + "'" +
-                    ")"
-                )
-            });
-            if (translationsValues.length === 0) {
-                ret$.next(undefined);
-            }
-            else {
-                const translationsValuesStr = translationsValues.join(', ');
-                let sqlTranslations = 'INSERT INTO `translations` (`menu`, `label`, `translation`) VALUES ' + translationsValuesStr + ';';
-                this.executeQuery(sqlTranslations).subscribe(() => {
-                    ret$.next(true);
-                });
-            }
-        })
-        return ret$;
+        return this.deleteBy('translations')
+            .pipe(
+                flatMap(() => (
+                    translations.length === 0
+                        ? of(undefined)
+                        : this.insert('translations', translations.map(({menu, label, translation}) => ({menu, label, translation})))
+                            .pipe(map(() => true))
+                ))
+            );
     }
 
     public importData(data: any): Observable<any> {

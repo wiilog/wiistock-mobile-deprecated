@@ -22,6 +22,7 @@ import {FormViewerParam} from '@app/common/directives/form-viewer/form-viewer-pa
 import {FormViewerAttachmentsComponent} from '@app/common/components/panel/form-panel/form-viewer-attachments/form-viewer-attachments.component';
 import {FormPanelService} from '@app/common/services/form-panel.service';
 import {FreeField, FreeFieldType} from '@entities/free-field';
+import {Translation} from '@entities/translation';
 
 
 @Component({
@@ -38,6 +39,7 @@ export class HandlingValidatePage extends PageComponent {
     public detailsConfig: Array<FormViewerParam>;
 
     private handling: Handling;
+    private handlingsTranslations: {[label: string]: string};
 
     private loadingElement: HTMLIonLoadingElement;
     private apiSubscription: Subscription;
@@ -68,11 +70,17 @@ export class HandlingValidatePage extends PageComponent {
                 }),
                 flatMap(() => zip(
                     this.sqliteService.findBy('handling_attachment', [`handlingId = ${this.handling.id}`]),
-                    this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.HANDLING}'`])
+                    this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.HANDLING}'`]),
+                    this.sqliteService.findBy('translations', [`menu LIKE 'services'`])
                 )),
+
             )
-            .subscribe(([handlingAttachment, freeFields]: [Array<HandlingAttachment>, Array<FreeField>]) => {
+            .subscribe(([handlingAttachment, freeFields, handlingsTranslations]: [Array<HandlingAttachment>, Array<FreeField>, Array<Translation>]) => {
                 this.dismissLoading();
+                this.handlingsTranslations = handlingsTranslations.reduce((acc, {label, translation}) => ({
+                    ...acc,
+                    [label]: translation
+                }), {});
 
                 this.refreshHeader(false);
 
@@ -254,6 +262,7 @@ export class HandlingValidatePage extends PageComponent {
             requester,
             desiredDate,
             subject,
+            carriedOutOperationCount,
             source,
             destination,
             typeLabel,
@@ -280,7 +289,8 @@ export class HandlingValidatePage extends PageComponent {
             subtitle: [
                 `Demandeur : ${requester || ''}`,
                 `Date attendue : ${desiredDate || ''}`,
-                `Objet : ${subject || ''}`,
+                `${this.handlingsTranslations['Objet'] || 'Objet'} : ${subject || ''}`,
+                `${this.handlingsTranslations['Nombre d\'opération(s) réalisée(s)'] || 'Nombre d\'opération(s) réalisée(s)'} : ${carriedOutOperationCount || ''}`,
                 `Source : ${source || ''}`,
                 `Destination : ${destination || ''}`,
                 `Type : ${typeLabel || ''}`,

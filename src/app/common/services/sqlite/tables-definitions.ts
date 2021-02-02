@@ -221,6 +221,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             id: 'INTEGER PRIMARY KEY',
             number: 'VARCHAR(255)',
             typeId: 'INTEGER',
+            carriedOutOperationCount: 'INTEGER',
             typeLabel: 'VARCHAR(255)',
             requester: 'VARCHAR(255)',
             desiredDate: 'VARCHAR(255)',

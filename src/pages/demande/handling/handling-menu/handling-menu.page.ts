@@ -8,6 +8,8 @@ import {NavService} from '@app/common/services/nav.service';
 import {PageComponent} from '@pages/page.component';
 import {HandlingValidatePageRoutingModule} from '@pages/demande/handling/handling-validate/handling-validate-routing.module';
 import * as moment from 'moment';
+import {zip} from 'rxjs';
+import {Translation} from '@entities/translation';
 
 
 @Component({
@@ -23,6 +25,8 @@ export class HandlingMenuPage extends PageComponent {
 
     public hasLoaded: boolean;
 
+    private handlingsTranslations: {[label: string]: string};
+
     public constructor(private mainHeaderService: MainHeaderService,
                        private sqliteService: SqliteService,
                        navService: NavService) {
@@ -31,7 +35,15 @@ export class HandlingMenuPage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
-        this.sqliteService.findAll('handling').subscribe((handlings: Array<Handling>) => {
+        zip(
+            this.sqliteService.findAll('handling'),
+            this.sqliteService.findBy('translations', [`menu LIKE 'services'`])
+        )
+        .subscribe(([handlings, handlingsTranslations]: [Array<Handling>, Array<Translation>]) => {
+            this.handlingsTranslations = handlingsTranslations.reduce((acc, {label, translation}) => ({
+                ...acc,
+                [label]: translation
+            }), {});
             this.handlings = handlings
             this.handlingsListConfig = this.handlings
                 .sort(({desiredDate: desiredDate1}, {desiredDate: desiredDate2}) => {
@@ -53,7 +65,8 @@ export class HandlingMenuPage extends PageComponent {
                         {label: 'Date attendue', value: handling.desiredDate || ''},
                         {label: 'Chargement', value: handling.source || ''},
                         {label: 'Déchargement', value: handling.destination || ''},
-                        {label: 'Objet', value: handling.subject},
+                        {label: this.handlingsTranslations['Objet'] || 'Objet', value: handling.subject},
+                        {label: this.handlingsTranslations['Nombre d\'opération(s) réalisée(s)'] || 'Nombre d\'opération(s) réalisée(s)', value: `${handling.carriedOutOperationCount || ''}`},
                         {label: 'Type', value: handling.typeLabel},
                         (handling.emergency
                             ? {label: 'Urgence', value: handling.emergency || ''}

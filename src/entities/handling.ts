@@ -2,6 +2,7 @@ export interface Handling {
     id: number;
     number: string;
     typeId: number;
+    carriedOutOperationCount: number;
     typeLabel: string;
     desiredDate: string;
     requester: string;
