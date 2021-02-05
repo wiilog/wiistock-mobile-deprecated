@@ -75,8 +75,8 @@ export class PriseDeposeMenuPage extends PageComponent implements CanLeave {
                         !finished &&
                         // this.fromStock: boolean & fromStock: number
                         (
-                            this.fromStock && fromStock ||
-                            !this.fromStock && !fromStock
+                            (this.fromStock && fromStock) ||
+                            (!this.fromStock && !fromStock)
                         )
                     ))
                     .length;
