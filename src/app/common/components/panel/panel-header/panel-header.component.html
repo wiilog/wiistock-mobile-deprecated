@@ -4,6 +4,7 @@
     <div class="list-header-icon" *ngIf="leftIcon">
         <wii-icon [name]="leftIcon.name"
                   [color]="leftIcon.color"
+                  [customColor]="leftIcon.customColor"
                   [buttonWithoutRipple]="!leftIconHasAction"
                   (action)="onLeftIconClick($event)">
         </wii-icon>
@@ -26,6 +27,7 @@
              *ngFor="let rightIcon of _rightIcons; let index = index">
             <wii-icon [name]="rightIcon.name"
                       [color]="rightIcon.color"
+                      [customColor]="rightIcon.customColor"
                       [buttonWithoutRipple]="!rightIconHasAction(index)"
                       (action)="onRightIconClick($event, index)">
             </wii-icon>

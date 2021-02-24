@@ -267,7 +267,8 @@ export class HandlingValidatePage extends PageComponent {
             destination,
             typeLabel,
             comment,
-            emergency
+            emergency,
+            color
         } = this.handling;
         this.headerConfig = {
             title: `Demande ${number}`,
@@ -277,7 +278,8 @@ export class HandlingValidatePage extends PageComponent {
             },
             leftIcon: {
                 color: 'success',
-                name: 'people.svg'
+                name: 'people.svg',
+                customColor: color
             },
             rightIcon: {
                 name: opened ? 'eye-slash.svg' : 'eye.svg',

@@ -230,7 +230,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             source: 'TEXT',
             subject: 'VARCHAR(255)',
             emergency: 'VARCHAR(255)',
-            freeFields: 'TEXT'
+            freeFields: 'TEXT',
+            color: 'VARCHAR(255)'
         }
     },
     {

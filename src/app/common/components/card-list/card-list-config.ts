@@ -9,6 +9,7 @@ export interface CardListConfig {
         label: string;
         value: string;
     }>;
+    customColor?: string;
     rightIcon?: IconConfig;
     action?: () => void;
     info?: string;
