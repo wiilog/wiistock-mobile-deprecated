@@ -4,7 +4,6 @@ import {AlertController} from '@ionic/angular';
 import {HeaderConfig} from '@app/common/components/panel/model/header-config';
 import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel/list-panel-item-config';
 import * as moment from 'moment';
-import {IconColor} from '@app/common/components/icon/icon-color';
 import {from} from 'rxjs';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {Emplacement} from '@entities/emplacement';

@@ -17,7 +17,6 @@ import {FormPanelInputComponent} from '@app/common/components/panel/form-panel/f
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
 import {Nature} from '@entities/nature';
 import {FormViewerParam} from '@app/common/directives/form-viewer/form-viewer-param';
-import {FormViewerAttachmentsComponent} from '@app/common/components/panel/form-panel/form-viewer-attachments/form-viewer-attachments.component';
 import {FormViewerTextComponent} from '@app/common/components/panel/form-panel/form-viewer-text/form-viewer-text.component';
 
 
