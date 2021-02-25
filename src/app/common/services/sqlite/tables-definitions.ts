@@ -354,7 +354,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             dispatchId: 'INTEGER',
             lastLocation: 'VARCHAR(255)',
             treated: 'INTEGER',
-            already_treated: 'INTEGER'
+            already_treated: 'INTEGER',
+            comment: 'VARCHAR(255)'
         }
     },
     {

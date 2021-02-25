@@ -29,7 +29,7 @@ export class FormViewerDirective implements OnInit {
         const {instance} = this.viewContainerRef.createComponent<FormViewerDetailsConfig>(componentFactory);
 
         instance.label = config.label;
-        instance.values = config.values;
+        instance.value = config.value;
 
         this.instance = instance;
     }
