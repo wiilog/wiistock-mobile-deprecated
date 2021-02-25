@@ -126,7 +126,6 @@ export class SqliteService {
     private importDispatchesData(data): Observable<any> {
         const dispatches = data['dispatches'] || [];
         const dispatchPacks = data['dispatchPacks'] || [];
-        const englishDateMatcher = /^(\d{4})-(\d{2})-(\d{2})/;
 
         return zip(
             this.deleteBy('dispatch'),
@@ -135,15 +134,7 @@ export class SqliteService {
             .pipe(
                 flatMap(() => (
                     dispatches.length > 0
-                        ? this.insert('dispatch', dispatches.map(({startDate, endDate, ...dispatch}) => {
-                            const [startDate_isDate, startDate_year, startDate_month, startDate_day] = ((startDate && startDate.date && englishDateMatcher.exec(startDate.date)) || []);
-                            const [endDate_isDate, endDate_year, endDate_month, endDate_day] = ((endDate && endDate.date && englishDateMatcher.exec(endDate.date)) || []);
-                            return {
-                                 ...dispatch,
-                                 startDate: startDate_isDate ? `${startDate_day}/${startDate_month}/${startDate_year}` : null,
-                                 endDate: endDate_isDate ? `${endDate_day}/${endDate_month}/${endDate_year}` : null
-                            };
-                        }))
+                        ? this.insert('dispatch', dispatches)
                         : of(undefined)
                 )),
                 flatMap(() => (

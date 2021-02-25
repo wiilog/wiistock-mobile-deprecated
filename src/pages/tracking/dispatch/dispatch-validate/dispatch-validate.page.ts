@@ -179,7 +179,8 @@ export class DispatchValidatePage extends PageComponent {
             transparent: true,
             leftIcon: {
                 name: 'stock-transfer.svg',
-                color: CardListColorEnum.GREEN
+                color: CardListColorEnum.GREEN,
+                customColor: this.dispatch.color
             },
             rightIcon: {
                 name: 'check.svg',
