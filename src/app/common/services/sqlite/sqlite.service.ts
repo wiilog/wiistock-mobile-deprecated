@@ -858,8 +858,17 @@ export class SqliteService {
     }
 
     public insert(name: TableName, objects: any|Array<any>): Observable<number> {
-        let query = this.createInsertQuery(name, objects);
-        return this.executeQuery(query).pipe(map(({insertId}) => insertId));
+        if (objects
+            && (
+                !Array.isArray(objects)
+                || objects.length > 0
+            )) {
+            let query = this.createInsertQuery(name, objects);
+            return this.executeQuery(query).pipe(map(({insertId}) => insertId));
+        }
+        else {
+            return of(undefined);
+        }
     }
 
     public update(name: TableName, values: any, where: Array<string> = []): Observable<any> {
