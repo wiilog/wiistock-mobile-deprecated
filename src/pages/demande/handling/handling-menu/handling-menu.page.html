@@ -9,3 +9,9 @@
                    [config]="handlingsListConfig">
     </wii-card-list>
 </div>
+<wii-barcode-scanner buttonSubtitle="Objet"
+                     [mode]="scannerMode"
+                     [selectedLabel$]="selectedSubject$"
+                     (add)="onBarcodeScanned($event[0])"
+                     (clear)="onSearchCleared()">
+</wii-barcode-scanner>
