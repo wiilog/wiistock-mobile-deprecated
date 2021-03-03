@@ -93,7 +93,7 @@ export class HandlingValidatePage extends PageComponent {
                             item: FormViewerAttachmentsComponent,
                             config: {
                                 label: `Pièce${sAttachmentLabel} jointe${sAttachmentLabel}`,
-                                values: handlingAttachment.map(({fileName, href}) => ({
+                                value: handlingAttachment.map(({fileName, href}) => ({
                                     label: fileName,
                                     href
                                 }))
