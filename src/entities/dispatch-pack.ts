@@ -7,4 +7,5 @@ export interface DispatchPack {
     lastLocation?: string;
     treated?: number;
     already_treated?: number;
+    comment?: string;
 }

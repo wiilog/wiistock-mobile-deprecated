@@ -13,7 +13,7 @@ export class FormViewerAttachmentsComponent implements FormViewerAttachmentConfi
     public label: string;
 
     @Input()
-    public values: Array<{
+    public value: Array<{
         label: string;
         href: string;
     }>;

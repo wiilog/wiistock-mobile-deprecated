@@ -15,6 +15,9 @@ import {PanelHeaderComponent} from '@app/common/components/panel/panel-header/pa
 export class FormPanelComponent implements AfterViewInit {
 
     @Input()
+    public detailPosition: 'top'|'bottom' = 'top'
+
+    @Input()
     public header?: HeaderConfig;
 
     @Input()

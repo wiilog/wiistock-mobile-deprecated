@@ -12,7 +12,7 @@
                       [rightIcons]="header.rightIcon">
     </wii-panel-header>
     <div class="list-wrapper">
-        <ng-container *ngIf="details">
+        <ng-container *ngIf="detailPosition === 'top' && details">
             <ng-template *ngFor="let detailsRow of details"
                          wiiFormViewer
                          [param]="detailsRow">
@@ -23,5 +23,12 @@
                      wiiFormPanel
                      [param]="param">
         </ng-template>
+        <ng-container *ngIf="detailPosition === 'bottom' && details">
+            <ng-template *ngFor="let detailsRow of details"
+                         wiiFormViewer
+                         [param]="detailsRow">
+            </ng-template>
+        </ng-container>
+
     </div>
 </div>

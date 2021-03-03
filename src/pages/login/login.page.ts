@@ -1,4 +1,4 @@
-import {ChangeDetectorRef, Component, ViewChild, ViewChildren} from '@angular/core';
+import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {ApiService} from '@app/common/services/api.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {of, Subscription} from 'rxjs';

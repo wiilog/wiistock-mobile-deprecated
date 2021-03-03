@@ -12,4 +12,5 @@ export interface Handling {
     subject: string;
     emergency: string;
     freeFields: string;
+    color: string;
 }

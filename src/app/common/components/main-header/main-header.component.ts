@@ -1,5 +1,5 @@
 import {Component, ElementRef, EventEmitter, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
-import {Observable, Subscription, merge, of, zip} from 'rxjs';
+import {Observable, Subscription, merge, of} from 'rxjs';
 import {filter, flatMap, map, take, tap} from 'rxjs/operators';
 import {TitleConfig} from '@app/common/components/main-header/title-config';
 import {MainHeaderService} from '@app/common/services/main-header.service';

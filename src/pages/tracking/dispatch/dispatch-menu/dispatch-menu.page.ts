@@ -71,8 +71,9 @@ export class DispatchMenuPage extends PageComponent {
                 flatMap(() => this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL OR partial = 1']))
             )
             .subscribe((dispatches: Array<Dispatch>) => {
-                this.dispatchesListConfig = dispatches.map(({id, requester,  number, startDate, endDate, locationFromLabel, locationToLabel, statusLabel, typeLabel, emergency}) => ({
+                this.dispatchesListConfig = dispatches.map(({id, requester, color, number, startDate, endDate, locationFromLabel, locationToLabel, statusLabel, typeLabel, emergency}) => ({
                     title: { label: 'Demandeur', value: requester },
+                    customColor: color,
                     content: [
                         {label: 'Numéro', value: number || ''},
                         {label: 'Date d\'échéance', value: startDate && endDate ? `Du ${startDate} au ${endDate}` : ''},

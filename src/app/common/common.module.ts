@@ -36,6 +36,7 @@ import {FormViewerAttachmentsComponent} from '@app/common/components/panel/form-
 import {FormViewerDirective} from '@app/common/directives/form-viewer/form-viewer.directive';
 import {FormPanelFieldComponent} from '@app/common/components/panel/form-panel/form-panel-field/form-panel-field.component';
 import {ServerImageComponent} from '@app/common/components/server-image/server-image.component';
+import {FormViewerTextComponent} from '@app/common/components/panel/form-panel/form-viewer-text/form-viewer-text.component';
 
 
 @NgModule({
@@ -55,6 +56,7 @@ import {ServerImageComponent} from '@app/common/components/server-image/server-i
         FormPanelSelectComponent,
         FormPanelComponent,
         FormViewerAttachmentsComponent,
+        FormViewerTextComponent,
         ListPanelItemComponent,
         ListPanelComponent,
         PanelHeaderComponent,
@@ -106,7 +108,8 @@ import {ServerImageComponent} from '@app/common/components/server-image/server-i
         FormPanelToggleComponent,
         FormPanelCalendarComponent,
         FormPanelSelectComponent,
-        FormViewerAttachmentsComponent
+        FormViewerAttachmentsComponent,
+        FormViewerTextComponent
     ]
 })
 export class CommonModule {

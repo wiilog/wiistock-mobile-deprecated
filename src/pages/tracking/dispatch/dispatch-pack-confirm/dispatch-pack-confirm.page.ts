@@ -16,6 +16,8 @@ import {FormPanelParam} from '@app/common/directives/form-panel/form-panel-param
 import {FormPanelInputComponent} from '@app/common/components/panel/form-panel/form-panel-input/form-panel-input.component';
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
 import {Nature} from '@entities/nature';
+import {FormViewerParam} from '@app/common/directives/form-viewer/form-viewer-param';
+import {FormViewerTextComponent} from '@app/common/components/panel/form-panel/form-viewer-text/form-viewer-text.component';
 
 
 @Component({
@@ -33,7 +35,7 @@ export class DispatchPackConfirmPage extends PageComponent {
     private confirmPack: (pack: DispatchPack) => void;
     private natureTranslationLabel: string;
     private pack: DispatchPack;
-    private dispatch: Dispatch;
+    public detailsConfig: Array<FormViewerParam>;
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
@@ -89,6 +91,18 @@ export class DispatchPackConfirmPage extends PageComponent {
                 }
             }
         ];
+
+        this.detailsConfig = this.pack.comment
+            ? [
+                {
+                    item: FormViewerTextComponent,
+                    config: {
+                        label: `Commentaire`,
+                        value: this.pack.comment || ''
+                    }
+                }
+            ]
+            : [];
     }
 
     public onFormSubmit(): void {
