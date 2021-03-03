@@ -96,6 +96,7 @@ export class HandlingMenuPage extends PageComponent {
                     label: 'Demandeur',
                     value: handling.requester
                 },
+                customColor: handling.color,
                 content: [
                     {label: 'Numéro', value: handling.number},
                     {label: 'Date attendue', value: handling.desiredDate || ''},

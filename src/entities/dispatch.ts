@@ -12,4 +12,5 @@ export interface Dispatch {
     treatedStatusId: number;
     partial: number;
     statusLabel: string;
+    color: string;
 }

@@ -1,8 +1,8 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {Observable, ReplaySubject} from 'rxjs';
-import {map} from 'rxjs/operators';
+import {map, tap} from 'rxjs/operators';
 import {IconColor} from '@app/common/components/icon/icon-color';
 
 /**
@@ -26,6 +26,9 @@ export class IconComponent {
     // color declared in variables.scss
     @Input()
     public color?: IconColor;
+
+    @Input()
+    public customColor?: string;
 
     @Input()
     public buttonWithoutRipple?: boolean;
@@ -52,29 +55,45 @@ export class IconComponent {
     public set name(name: string) {
         if (this._name !== name) {
             this._name = name;
+            let svgObject$;
             if (IconComponent.IconsCacheObservers[this._name]) {
-                this.svgObject$ = IconComponent.IconsCacheObservers[this._name];
+                svgObject$ = IconComponent.IconsCacheObservers[this._name];
             }
             else {
-                const svgObject$ = new ReplaySubject<SafeHtml>(1);
-                this.svgObject$ = svgObject$
+                svgObject$ = new ReplaySubject<string>(1);
                 IconComponent.IconsCacheObservers[this._name] = svgObject$;
                 this.httpClient
                     .get(this.src, {responseType: "text"})
                     .pipe(
-                        map((svgStr: string) => {
+                        tap((svgStr: string) => {
                             if (!this.isSvg(svgStr)) {
                                 throw Error('IconComponent support svg images only.');
                             }
-                            return this.sanitizeSVG(svgStr);
                         })
                     )
                     .subscribe(
-                        (sanitizedSVG: SafeHtml) => svgObject$.next(sanitizedSVG),
-                        (sanitizedSVG: SafeHtml) => svgObject$.error(sanitizedSVG),
+                        (svg: string) => svgObject$.next(svg),
+                        (error: any) => svgObject$.error(error),
                         () => svgObject$.complete()
                     );
             }
+
+            this.svgObject$ = svgObject$.pipe(map((svg: string): SafeHtml => {
+                const div = document.createElement('div');
+                div.innerHTML = svg;
+                if (this.customColor) {
+                    const svgFillElements = div.querySelectorAll<HTMLElement>('.svg-fill');
+                    svgFillElements.forEach((element) => {
+                        this.addCustomStyle(element, `fill: ${this.customColor} !important;`);
+                    });
+                    const svgStrokeElements = div.querySelectorAll<HTMLElement>('.svg-stroke');
+                    svgStrokeElements.forEach((element) => {
+                        this.addCustomStyle(element, `stroke: ${this.customColor} !important;`);
+                    });
+                }
+
+                return this.sanitizeSVG(div.innerHTML);
+            }));
         }
     }
 
@@ -107,6 +126,12 @@ export class IconComponent {
             .replace(/^.*<\?xml.*$/mg, "")
             .replace(/^.*<!--.*$/mg, "")
             .trim();
+    }
+
+    private addCustomStyle(element, rule) {
+        const oldStyle = element.getAttribute('style') || '';
+        const prefix = oldStyle ? ';' : '';
+        element.setAttribute('style', `${oldStyle}${prefix}${rule}`);
     }
 
 }

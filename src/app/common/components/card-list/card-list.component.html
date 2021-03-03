@@ -8,7 +8,8 @@
 
     <ion-card *ngFor="let cardConfig of config"
               (click)="onCardClick(cardConfig)">
-        <ion-card-header *ngIf="cardConfig.title">
+        <ion-card-header *ngIf="cardConfig.title"
+                         [style.background-color]="cardConfig.customColor">
             <span class="title-label">{{ cardConfig.title.label }}&nbsp;</span>
             <span class="title-value">{{ cardConfig.title.value }}</span>
         </ion-card-header>

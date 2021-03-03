@@ -182,6 +182,7 @@ export class DispatchPacksPage extends PageComponent {
             transparent: true,
             leftIcon: {
                 color: CardListColorEnum.GREEN,
+                customColor: this.dispatch.color,
                 name: 'stock-transfer.svg'
             },
             ...((this.packsTreatedListConfig && this.packsTreatedListConfig.body.length > 0)

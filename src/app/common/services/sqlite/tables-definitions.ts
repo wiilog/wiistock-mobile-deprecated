@@ -230,7 +230,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             source: 'TEXT',
             subject: 'VARCHAR(255)',
             emergency: 'VARCHAR(255)',
-            freeFields: 'TEXT'
+            freeFields: 'TEXT',
+            color: 'VARCHAR(255)'
         }
     },
     {
@@ -341,7 +342,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             typeLabel: 'VARCHAR(255)',
             statusLabel: 'VARCHAR(255)',
             treatedStatusId: 'INTEGER',
-            partial: 'INTEGER'
+            partial: 'INTEGER',
+            color: 'VARCHAR(255)'
         }
     },
     {
@@ -354,7 +356,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             dispatchId: 'INTEGER',
             lastLocation: 'VARCHAR(255)',
             treated: 'INTEGER',
-            already_treated: 'INTEGER'
+            already_treated: 'INTEGER',
+            comment: 'VARCHAR(255)'
         }
     },
     {
