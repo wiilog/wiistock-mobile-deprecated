@@ -1,4 +1,4 @@
-import {Component, ViewChild} from '@angular/core';
+import {Component} from '@angular/core';
 import {Handling} from '@entities/handling';
 import {CardListConfig} from '@app/common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
@@ -32,6 +32,8 @@ export class HandlingMenuPage extends PageComponent {
 
     private handlingsTranslations: {[label: string]: string};
 
+    private currentFilterSubject: string;
+
     public constructor(private mainHeaderService: MainHeaderService,
                        private sqliteService: SqliteService,
                        navService: NavService) {
@@ -52,21 +54,24 @@ export class HandlingMenuPage extends PageComponent {
             }), {});
             this.handlings = handlings
 
-            this.refreshHandlingListConfig(this.handlings);
-            this.refreshSubTitle(this.handlings);
+            const initHandlingList = this.filterHandlingList(this.currentFilterSubject);
+
+            this.refreshHandlingListConfig(initHandlingList);
+            this.refreshSubTitle(initHandlingList);
 
             this.hasLoaded = true;
         });
     }
 
     public onBarcodeScanned(barcode: string) {
-        const filteredHandling = this.handlings.filter(({subject}) => (barcode === subject))
+        const filteredHandling = this.filterHandlingList(barcode);
 
         if (filteredHandling.length === 1) {
             this.onSearchCleared();
             this.navService.push(HandlingValidatePageRoutingModule.PATH, {handling: filteredHandling[0]});
         }
         else {
+            this.currentFilterSubject = barcode;
             this.selectedSubject$.next(barcode);
             this.refreshHandlingListConfig(filteredHandling);
             this.refreshSubTitle(filteredHandling);
@@ -74,6 +79,7 @@ export class HandlingMenuPage extends PageComponent {
     }
 
     public onSearchCleared() {
+        this.currentFilterSubject = undefined;
         this.selectedSubject$.next(undefined);
 
         this.refreshHandlingListConfig(this.handlings);
@@ -126,5 +132,11 @@ export class HandlingMenuPage extends PageComponent {
     public refreshSubTitle(handlings: Array<Handling>): void {
         const handlingsLength = handlings.length;
         this.mainHeaderService.emitSubTitle(`${handlingsLength === 0 ? 'Aucune' : handlingsLength} demande${handlingsLength > 1 ? 's' : ''}`)
+    }
+
+    public filterHandlingList(filter: string): Array<Handling> {
+        return filter
+            ? this.handlings.filter(({subject}) => (filter === subject))
+            : this.handlings;
     }
 }
