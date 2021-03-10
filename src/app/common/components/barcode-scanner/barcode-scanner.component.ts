@@ -116,7 +116,7 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
 
     private triggerAdd(barcode: string, isManual: boolean): void {
         if (!this.hidden) {
-            this.add.emit([barcode, isManual]);
+            this.add.emit([(barcode || '').trim(), isManual]);
         }
     }
 

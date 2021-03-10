@@ -290,7 +290,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
 
     public findItem(search: string|number, searchAttribute: string = this.config[this.type].label): any {
         return this.dbItems
-            ? this.dbItems.find((element) => (String(element[searchAttribute]) === String(search)))
+            ? this.dbItems.find((element) => (String(element[searchAttribute]).trim() === String(search).trim()))
             : undefined;
     }
 
