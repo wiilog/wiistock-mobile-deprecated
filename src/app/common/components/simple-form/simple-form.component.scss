@@ -38,8 +38,13 @@
                 .simple-form-item-wrapper {
                     display: flex;
                     align-items: center;
+
+                    ion-item {
+                        flex: 1;
+                    }
+
                     .validate-icon {
-                        width: 60px;
+                        width: 50px;
                         margin-left: 10px;
                     }
                 }
