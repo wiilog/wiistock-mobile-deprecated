@@ -13,6 +13,9 @@ export class SimpleFormComponent implements OnInit {
     public title: string;
 
     @Input()
+    public hideMainSubmit: boolean;
+
+    @Input()
     public iconInfo: IconConfig;
 
     @Input()
@@ -27,6 +30,7 @@ export class SimpleFormComponent implements OnInit {
         label: string;
         type?: string;
         value?: string|number;
+        displayValidate?: boolean;
     }>;
 
     @Output()

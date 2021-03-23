@@ -35,6 +35,15 @@
                     margin-bottom: 2rem;
                 }
 
+                .simple-form-item-wrapper {
+                    display: flex;
+                    align-items: center;
+                    .validate-icon {
+                        width: 60px;
+                        margin-left: 10px;
+                    }
+                }
+
                 .simple-form-info {
                     background-color: $white;
                     border: 1px solid $lightBlue;

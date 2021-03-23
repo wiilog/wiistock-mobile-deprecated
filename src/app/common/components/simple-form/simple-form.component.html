@@ -10,16 +10,34 @@
                 </div>
             </div>
 
-            <ion-item class="simple-form-item" *ngFor="let fieldConfig of fields">
-                <ion-label color="medium">{{ fieldConfig.label }}</ion-label>
-                <ion-input (change)="onInputChange(fieldConfig.name, fieldConfig.type || 'text', $event.target)"
-                           [type]="fieldConfig.type || 'text'"
-                           [value]="fieldConfig.value"></ion-input>
-            </ion-item>
+            <ng-container *ngFor="let fieldConfig of fields">
+                <div *ngIf="fieldConfig.displayValidate"
+                     class="simple-form-item-wrapper">
+                    <ng-container *ngTemplateOutlet="ionItem; context: fieldConfig"></ng-container>
+                    <wii-icon name="check.svg"
+                              color="success"
+                              class="validate-icon"
+                              (action)="onFormSubmit()">
+                    </wii-icon>
+                </div>
+                <ng-container *ngIf="!fieldConfig.displayValidate">
+                    <ng-container *ngTemplateOutlet="ionItem; context: fieldConfig"></ng-container>
+                </ng-container>
+            </ng-container>
+
+            <ng-template #ionItem>
+                <ion-item class="simple-form-item" *ngFor="let fieldConfig of fields">
+                    <ion-label color="medium">{{ fieldConfig.label }}</ion-label>
+                    <ion-input (change)="onInputChange(fieldConfig.name, fieldConfig.type || 'text', $event.target)"
+                               [type]="fieldConfig.type || 'text'"
+                               [value]="fieldConfig.value"></ion-input>
+                </ion-item>
+            </ng-template>
         </div>
     </div>
 
-    <div class="simple-form-footer">
+    <div class="simple-form-footer"
+         *ngIf="!hideMainSubmit">
         <ion-button class="submit-button larger"
                     color="success"
                     size="large"

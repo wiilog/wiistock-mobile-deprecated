@@ -77,8 +77,6 @@ export class NewEmplacementPage extends PageComponent {
                                     loader.dismiss();
                                     this.toastService.presentToast((response.error && response.error.msg) || 'Une erreur s\'est produite');
                                 });
-
-                        ///////////////////////////
                     });
             }
             else {
