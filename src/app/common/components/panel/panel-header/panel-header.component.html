@@ -1,5 +1,6 @@
 <ion-ripple-effect *ngIf="hasRipple"></ion-ripple-effect>
-<div class="list-header-wrapper">
+<div class="list-header-wrapper"
+     [class.list-header-wrapper-gutter]="!leftIcon && (!_rightIcons || _rightIcons.length === 0)">
     <!-- Left icon -->
     <div class="list-header-icon" *ngIf="leftIcon">
         <wii-icon [name]="leftIcon.name"
@@ -15,9 +16,15 @@
          (click)="toggleTitle()">
         <div #headerBodyWrapper
              class="header-body-wrapper">
-            <div class="header-title">{{title}}</div>
-            <div *ngFor="let partSubTitle of _subtitle" class="header-subtitle">{{partSubTitle}}</div>
-            <div *ngIf="info" class="header-info">{{info}}</div>
+            <div class="header-title" *ngIf="title" [innerHTML]="title"></div>
+            <div *ngFor="let partSubTitle of _subtitle"
+                 class="header-subtitle"
+                 [innerHTML]="partSubTitle">
+            </div>
+            <div *ngIf="info"
+                 class="header-info"
+                 [innerHTML]="info">
+            </div>
         </div>
     </div>
 

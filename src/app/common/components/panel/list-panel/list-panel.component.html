@@ -11,9 +11,11 @@
 <wii-list-panel-item *ngFor="let object of body; trackBy: trackByGenerator"
                      [infos]="object.infos"
                      [color]="object.color"
+                     [backgroundColor]="object.backgroundColor"
                      [loading]="object.loading"
                      [disabled]="object.disabled"
                      [pressAction]="object.pressAction"
                      [rightIcon]="object.rightIcon"
+                     [rightIconBase64]="object.rightIconBase64"
                      [boldValues]="boldValues">
 </wii-list-panel-item>

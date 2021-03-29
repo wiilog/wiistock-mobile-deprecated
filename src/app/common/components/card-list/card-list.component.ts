@@ -1,6 +1,7 @@
 import {Component, HostBinding, Input} from '@angular/core';
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
 import {CardListConfig} from '@app/common/components/card-list/card-list-config';
+import {HeaderConfig} from '@app/common/components/panel/model/header-config';
 
 
 @Component({
@@ -19,9 +20,24 @@ export class CardListComponent {
     @Input()
     public config: Array<CardListConfig>;
 
+    @Input()
+    public header?: HeaderConfig;
+
     public onCardClick(cardConfig: CardListConfig) {
         if (cardConfig.action) {
             cardConfig.action();
+        }
+    }
+
+    public getCardTitle(titleConfig: {label: string;value: string;} | Array<{label: string;value: string;}>): Array<{label: string;value: string;}> {
+        if (!titleConfig) {
+            return [];
+        }
+        else if (!Array.isArray(titleConfig)) {
+            return [titleConfig];
+        }
+        else {
+            return titleConfig;
         }
     }
 }

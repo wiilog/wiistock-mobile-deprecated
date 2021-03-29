@@ -6,18 +6,44 @@
         </wii-icon>
     </div>
 
+    <wii-panel-header *ngIf="header"
+                      class="list-header"
+                      [title]="header.title"
+                      [subtitle]="header.subtitle"
+                      [info]="header.info"
+                      [leftIcon]="header.leftIcon"
+                      [rightIcons]="header.rightIcon">
+    </wii-panel-header>
+
     <ion-card *ngFor="let cardConfig of config"
               (click)="onCardClick(cardConfig)">
         <ion-card-header *ngIf="cardConfig.title"
                          [style.background-color]="cardConfig.customColor">
-            <span class="title-label">{{ cardConfig.title.label }}&nbsp;</span>
-            <span class="title-value">{{ cardConfig.title.value }}</span>
+            <p class="header-wrapper"
+               *ngFor="let titleConfig of getCardTitle(cardConfig.title)">
+                <span class="title-label">{{ titleConfig.label }}</span>&nbsp;:&nbsp;
+                <span class="title-value">{{ titleConfig.value }}</span>
+            </p>
         </ion-card-header>
         <ion-card-content>
             <div class="content">
                 <p *ngFor="let contentLine of cardConfig.content">
-                    <span class="content-label">{{ contentLine.label }}&nbsp;:&nbsp;</span>
-                    <span class="content-value">{{ contentLine.value }}</span>
+                    <ng-container *ngIf="contentLine.label">
+                        <span class="content-label">{{ contentLine.label }}&nbsp;:&nbsp;</span>
+                        <span class="content-value">{{ contentLine.value }}</span>
+                    </ng-container>
+                    <ng-container *ngIf="contentLine.itemConfig; let itemConfig">
+                        <wii-list-panel-item [infos]="itemConfig.infos"
+                                             [color]="itemConfig.color"
+                                             [backgroundColor]="itemConfig.backgroundColor"
+                                             [loading]="itemConfig.loading"
+                                             [disabled]="itemConfig.disabled"
+                                             [pressAction]="itemConfig.pressAction"
+                                             [rightIcon]="itemConfig.rightIcon"
+                                             [rightIconBase64]="itemConfig.rightIconBase64"
+                                             [boldValues]="cardConfig.itemBoldValues">
+                        </wii-list-panel-item>
+                    </ng-container>
                 </p>
                 <p *ngIf="cardConfig.info" class="content-info">{{cardConfig.info}}</p>
                 <p *ngIf="cardConfig.error" class="content-error">{{cardConfig.error}}</p>

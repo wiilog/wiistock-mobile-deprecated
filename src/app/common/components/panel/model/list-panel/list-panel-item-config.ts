@@ -11,6 +11,8 @@ export interface ListPanelItemConfig {
     loading?: boolean;
     disabled?: boolean;
     color?: string;
+    backgroundColor?: string;
     pressAction?: (infos: {[name: string]: {label: string; value: string;};}) => void;
     rightIcon?: IconConfig;
+    rightIconBase64?: string;
 }

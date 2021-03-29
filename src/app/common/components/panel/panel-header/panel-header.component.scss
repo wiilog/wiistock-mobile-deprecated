@@ -25,6 +25,10 @@
         display: flex;
         align-items: center;
 
+        &.list-header-wrapper-gutter {
+            padding: 10px;
+        }
+
         .header-body,
         .list-header-icon {
             margin-bottom: $spacerMin;

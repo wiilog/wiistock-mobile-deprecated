@@ -37,6 +37,7 @@ import {FormViewerDirective} from '@app/common/directives/form-viewer/form-viewe
 import {FormPanelFieldComponent} from '@app/common/components/panel/form-panel/form-panel-field/form-panel-field.component';
 import {ServerImageComponent} from '@app/common/components/server-image/server-image.component';
 import {FormViewerTextComponent} from '@app/common/components/panel/form-panel/form-viewer-text/form-viewer-text.component';
+import {FormPanelButtonsComponent} from '@app/common/components/panel/form-panel/form-panel-buttons/form-panel-buttons.component';
 
 
 @NgModule({
@@ -54,6 +55,7 @@ import {FormViewerTextComponent} from '@app/common/components/panel/form-panel/f
         FormPanelToggleComponent,
         FormPanelCalendarComponent,
         FormPanelSelectComponent,
+        FormPanelButtonsComponent,
         FormPanelComponent,
         FormViewerAttachmentsComponent,
         FormViewerTextComponent,
@@ -89,6 +91,7 @@ import {FormViewerTextComponent} from '@app/common/components/panel/form-panel/f
         SimpleFormComponent,
         CardListComponent,
         PanelHeaderComponent,
+        ListPanelItemComponent,
         ServerImageComponent
     ],
     providers: [

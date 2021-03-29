@@ -4,7 +4,6 @@
 </div>
 
 <div class="list-element-wrapper"
-     
      (click)="onPress()">
     <div class="list-element-body-wrapper">
         <div class="list-element-item"
@@ -13,12 +12,15 @@
         </div>
     </div>
     <div class="list-element-icon"
-         *ngIf="loading || rightIcon">
-        <wii-icon *ngIf="!loading"
+         *ngIf="loading || rightIcon || rightIconBase64">
+        <wii-icon *ngIf="rightIcon && !loading"
                   [name]="rightIcon.name"
                   [color]="rightIcon.color"
                   (action)="rightIcon.action()">
         </wii-icon>
+        <img *ngIf="rightIconBase64 && !loading"
+             alt=""
+             [src]="rightIconBase64"/>
         <ion-spinner *ngIf="loading"
                      name="dots">
         </ion-spinner>

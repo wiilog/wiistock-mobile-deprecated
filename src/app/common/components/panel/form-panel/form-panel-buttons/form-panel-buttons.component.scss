@@ -1,0 +1,11 @@
+@import "~theme/variables";
+
+:host {
+    .button-container {
+        display: flex;
+        ion-button {
+            margin: $spacer / 2;
+            width: calc(50% - #{$spacer} / 2);
+        }
+    }
+}

@@ -18,11 +18,20 @@ $card-padding: 4px 12px !important;
         }
     }
 
+    .list-header {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
     ion-card-header {
         padding: $card-padding;
 
         * {
             color: $white !important;
+        }
+
+        .header-wrapper {
+            margin: 0;
         }
     }
 
@@ -40,6 +49,8 @@ $card-padding: 4px 12px !important;
         color: $black;
 
         .content {
+            flex: 1;
+
             .content-info,
             .content-error {
                 font-size: 90%;

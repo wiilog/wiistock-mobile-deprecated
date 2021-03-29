@@ -1,4 +1,12 @@
 <div class="simple-form-wrapper">
+    <div class="simple-form-icon-container">
+        <wii-icon *ngIf="iconInfo"
+                  class="simple-form-title-icon"
+                  [name]="iconInfo.name"
+                  [color]="iconInfo.color"
+                  [customColor]="iconInfo.customColor">
+        </wii-icon>
+    </div>
     <div class="simple-form-title" *ngIf="title">{{ title }}</div>
 
     <div scroll-y="true" class="simple-form-content">

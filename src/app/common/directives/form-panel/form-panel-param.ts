@@ -12,6 +12,8 @@ import {FormPanelToggleConfig} from '@app/common/components/panel/model/form-pan
 import {FormPanelToggleComponent} from '@app/common/components/panel/form-panel/form-panel-toggle/form-panel-toggle.component';
 import {FormPanelCalendarComponent} from '@app/common/components/panel/form-panel/form-panel-calendar/form-panel-calendar.component';
 import {FormPanelCalendarConfig} from '@app/common/components/panel/model/form-panel/configs/form-panel-calendar-config';
+import {FormPanelButtonsComponent} from '@app/common/components/panel/form-panel/form-panel-buttons/form-panel-buttons.component';
+import {FormPanelButtonsConfig} from '@app/common/components/panel/model/form-panel/configs/form-panel-buttons-config';
 
 interface CameraParam {
     item: Type<FormPanelCameraComponent>;
@@ -26,6 +28,11 @@ interface InputParam {
 interface SelectParam {
     item: Type<FormPanelSelectComponent>;
     config: FormPanelItemConfig<FormPanelSelectConfig>;
+}
+
+interface ButtonsParam {
+    item: Type<FormPanelButtonsComponent>;
+    config: FormPanelItemConfig<FormPanelButtonsConfig>;
 }
 
 interface SigningParam {
@@ -45,6 +52,7 @@ interface CalendarParam {
 
 export type FormPanelParam = CameraParam
                            | InputParam
+                           | ButtonsParam
                            | SelectParam
                            | SigningParam
                            | ToggleParam

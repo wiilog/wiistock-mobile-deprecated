@@ -4,6 +4,17 @@
     display: flex;
     flex: 1;
 
+    .simple-form-icon-container {
+        text-align: center;
+        margin-top: $spacer / 1.5;
+
+        & > wii-icon {
+            display: inline-block;
+            height: 50px;
+            width: 50px;
+        }
+    }
+
     .simple-form-wrapper {
         margin: $spacerMin;
         flex: 1;

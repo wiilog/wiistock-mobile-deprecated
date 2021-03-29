@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, ElementRef, HostBinding, Input} from '@angular/core';
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
 
 
@@ -33,9 +33,15 @@ export class ListPanelItemComponent {
     public rightIcon?: IconConfig;
 
     @Input()
+    public rightIconBase64?: string;
+
+    @Input()
     public pressAction?: (infos: {[name: string]: {label: string; value: string;};}) => void;
 
-    public constructor() {
+    @HostBinding('class')
+    public _backgroundColor?: string;
+
+    public constructor(private elementRef: ElementRef) {
         this.boldValues = [];
     }
 
@@ -49,6 +55,24 @@ export class ListPanelItemComponent {
     public onPress(): void {
         if (!this.loading && this.pressAction) {
             this.pressAction(this.infos);
+        }
+    }
+
+    @Input()
+    public set backgroundColor(backgroundColor: string) {
+        if (this.elementRef && this.elementRef.nativeElement) {
+            const oldBackgroundColorClass = this._backgroundColor;
+            this._backgroundColor = backgroundColor
+                ? `bg-${backgroundColor}`
+                : undefined;
+
+            if (oldBackgroundColorClass) {
+                this.elementRef.nativeElement.classList.remove(oldBackgroundColorClass);
+            }
+
+            if (this._backgroundColor) {
+                this.elementRef.nativeElement.classList.add(this._backgroundColor);
+            }
         }
     }
 }

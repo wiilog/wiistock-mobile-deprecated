@@ -43,3 +43,9 @@ ion-alert,
 ion-loading {
     outline: none;
 }
+
+@each $name, $value in $base-colors {
+    .bg-#{$name} {
+        background-color: $value !important;
+    }
+}
