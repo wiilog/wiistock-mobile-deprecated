@@ -96,7 +96,7 @@ export class LivraisonArticlesPage extends PageComponent {
         if (!this.started && this.network.type !== 'none') {
             this.loadingStartLivraison = true;
             this.apiService
-                .requestApi('post', ApiService.BEGIN_LIVRAISON, {params: {id: this.livraison.id}})
+                .requestApi(ApiService.BEGIN_LIVRAISON, {params: {id: this.livraison.id}})
                 .subscribe((resp) => {
                     if (resp.success) {
                         this.started = true;
