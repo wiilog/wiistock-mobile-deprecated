@@ -102,7 +102,7 @@ export class PrisePage extends PageComponent implements CanLeave {
             this.storageService.getOperator(),
             this.sqliteService.getPrises(this.fromStock),
             (this.network.type !== 'none' && this.emplacement && !this.fromStock
-                ? this.apiService.requestApi('get', ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})
+                ? this.apiService.requestApi(ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})
                 : of({trackingDrops: []})),
             !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
             this.sqliteService.findBy('translations', [`menu LIKE 'natures'`])
@@ -403,7 +403,7 @@ export class PrisePage extends PageComponent implements CanLeave {
 
     private checkArticleOnLocation(barCode: string): Observable<number> {
         return this.apiService
-            .requestApi('get', ApiService.GET_ARTICLES, {
+            .requestApi(ApiService.GET_ARTICLES, {
                 params: {
                     barCode,
                     location: this.emplacement.label
@@ -482,7 +482,7 @@ export class PrisePage extends PageComponent implements CanLeave {
 
                     if (needNatureChecks) {
                         this.apiService
-                            .requestApi('get', ApiService.GET_PACK_NATURE, {params: {code: barCode}})
+                            .requestApi(ApiService.GET_PACK_NATURE, {params: {code: barCode}})
                             .pipe(
                                 flatMap(({nature}) => (
                                     nature

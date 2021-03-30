@@ -15,7 +15,7 @@ export class VersionCheckerService {
                        private apiService: ApiService) {}
 
     public isAvailableVersion(): Observable<{ available: boolean, currentVersion: string }> {
-        return this.apiService.requestApi('get', ApiService.GET_NOMADE_VERSIONS, {secured: false, timeout: true})
+        return this.apiService.requestApi(ApiService.GET_NOMADE_VERSIONS, {secured: false, timeout: true})
             .pipe(
                 flatMap((condition: string) => (
                     from(this.appVersion.getVersionNumber())

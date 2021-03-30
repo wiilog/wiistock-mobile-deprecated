@@ -290,7 +290,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
         if (!this.started && this.network.type !== 'none') {
             this.loadingStartCollecte = true;
             this.apiService
-                .requestApi('post', ApiService.BEGIN_COLLECTE, {params: {id: this.collecte.id}})
+                .requestApi(ApiService.BEGIN_COLLECTE, {params: {id: this.collecte.id}})
                 .subscribe((resp) => {
                     if (resp.success) {
                         this.started = true;

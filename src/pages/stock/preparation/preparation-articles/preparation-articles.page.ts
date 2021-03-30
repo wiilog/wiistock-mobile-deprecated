@@ -212,7 +212,7 @@ export class PreparationArticlesPage extends PageComponent {
             if (!this.started) {
                 if (this.network.type !== 'none') {
                     this.loadingStartPreparation = true;
-                    this.apiService.requestApi('post', ApiService.BEGIN_PREPA, {params: {id: this.preparation.id}}).subscribe((resp) => {
+                    this.apiService.requestApi(ApiService.BEGIN_PREPA, {params: {id: this.preparation.id}}).subscribe((resp) => {
                         if (resp.success) {
                             this.started = true;
                             this.isValid = true;

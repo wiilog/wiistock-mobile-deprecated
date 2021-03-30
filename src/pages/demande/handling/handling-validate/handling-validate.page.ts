@@ -211,7 +211,7 @@ export class HandlingValidatePage extends PageComponent {
                         tap((loading: HTMLIonLoadingElement) => {
                             this.loadingElement = loading;
                         }),
-                        flatMap(() => this.apiService.requestApi('post', ApiService.POST_HANDLING, {params})),
+                        flatMap(() => this.apiService.requestApi(ApiService.POST_HANDLING, {params})),
                         flatMap((res) => (
                             res && res.success
                                 ? zip(

@@ -19,7 +19,7 @@ import {TransferOrder} from '@entities/transfer-order';
 
 type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies' | 'dispatch' | 'transfer';
 interface ApiProccessConfig {
-    service: string;
+    service: { service: string; method: string };
     createApiParams: () => Observable<{paramName: string, [name: string]: any}>
 
     // after api submit
@@ -377,7 +377,7 @@ export class LocalDataManagerService {
 
     public importData(): Observable<any> {
         return this.apiService
-            .requestApi('post', ApiService.GET_DATA)
+            .requestApi(ApiService.GET_DATA)
             .pipe(
                 flatMap(({data}) => (
                     this.storageService
@@ -425,7 +425,7 @@ export class LocalDataManagerService {
                     mouvements.length > 0
                         ? (
                             this.apiService
-                                .requestApi('post', ApiService.POST_MOUVEMENT_TRACA, {
+                                .requestApi(ApiService.POST_MOUVEMENT_TRACA, {
                                     params: {
                                         mouvements: mouvements.map(({signature, photo, ...mouvement}) => mouvement),
                                         ...(mouvements.reduce((acc, {signature}, currentIndex) => ({
@@ -505,7 +505,7 @@ export class LocalDataManagerService {
                     if (params[paramName] && params[paramName].length > 0) {
                         res$ = new Subject<{success: any, error: any}>();
                         this.apiService
-                            .requestApi('post', apiProccessConfig.service, {params})
+                            .requestApi(apiProccessConfig.service, {params})
                             .pipe(flatMap((res) => {
                                 const {success, errors, data} = res;
                                 if (apiProccessConfig.titleErrorAlert
@@ -632,7 +632,7 @@ export class LocalDataManagerService {
             // we sync DL data
             flatMap((serviceRes) => (
                 this.apiService
-                    .requestApi('get', ApiService.GET_DEMANDE_LIVRAISON_DATA)
+                    .requestApi(ApiService.GET_DEMANDE_LIVRAISON_DATA)
                     .pipe(
                         flatMap(({data}) => this.sqliteService.importDemandesLivraisonData(data)),
                         map(() => serviceRes)
@@ -665,7 +665,7 @@ export class LocalDataManagerService {
         return !first
             ? of([])
             : this.apiService
-                .requestApi('post', ApiService.POST_DEMANDE_LIVRAISON, {params: {demande: first.apiData}})
+                .requestApi(ApiService.POST_DEMANDE_LIVRAISON, {params: {demande: first.apiData}})
                 .pipe(
                     map(({success, nomadMessage}) => ({
                         success,

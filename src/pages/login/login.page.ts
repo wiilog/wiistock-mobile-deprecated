@@ -146,7 +146,7 @@ export class LoginPage extends PageComponent {
                 this.unsubscribeApi();
 
                 this.apiSubscription = this.apiService
-                    .requestApi('post', ApiService.POST_API_KEY, {params: {loginKey: this.loginKey}, secured: false, timeout: true})
+                    .requestApi(ApiService.POST_API_KEY, {params: {loginKey: this.loginKey}, secured: false, timeout: true})
                     .pipe(
                         flatMap(({data, success}) => {
                             if (success) {

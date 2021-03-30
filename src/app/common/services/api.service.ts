@@ -6,35 +6,37 @@ import {catchError, filter, flatMap, map, tap, timeout} from "rxjs/operators";
 import {UserService} from "@app/common/services/user.service";
 import {AppVersion} from '@ionic-native/app-version/ngx';
 
+const GET = 'get';
+const POST = 'post';
 
 @Injectable({
     providedIn: 'root'
 })
 export class ApiService {
-    public static readonly GET_NOMADE_VERSIONS: string = '/nomade-versions';
-    public static readonly GET_PING: string = '/ping';
+    public static readonly GET_NOMADE_VERSIONS = {method: GET, service: '/nomade-versions'};
+    public static readonly GET_PING = {method: GET, service: '/ping'};
 
-    public static readonly BEGIN_PREPA: string = '/beginPrepa';
-    public static readonly FINISH_PREPA: string = '/finishPrepa';
-    public static readonly BEGIN_LIVRAISON: string = '/beginLivraison';
-    public static readonly FINISH_LIVRAISON: string = '/finishLivraison';
-    public static readonly BEGIN_COLLECTE: string = '/beginCollecte';
-    public static readonly FINISH_COLLECTE: string = '/finishCollecte';
-    public static readonly FINISH_TRANSFER: string = '/transfer/finish';
-    public static readonly TREAT_ANOMALIES: string = '/treatAnomalies';
-    public static readonly POST_API_KEY: string = '/api-key';
-    public static readonly ADD_INVENTORY_ENTRIES: string = '/addInventoryEntries';
-    public static readonly POST_MOUVEMENT_TRACA: string = '/mouvements-traca';
-    public static readonly POST_HANDLING: string = '/handlings';
-    public static readonly GET_DATA: string = '/getData';
-    public static readonly NEW_EMP: string = '/emplacement';
-    public static readonly GET_ARTICLES: string = '/articles';
-    public static readonly GET_TRACKING_DROPS: string = '/tracking-drops';
-    public static readonly POST_DEMANDE_LIVRAISON: string = '/valider-dl';
-    public static readonly GET_DEMANDE_LIVRAISON_DATA: string = '/demande-livraison-data';
-    public static readonly GET_PACK_NATURE: string = '/packs/nature';
-    public static readonly PATCH_DISPATCH: string = '/dispatches';
-    public static readonly GET_SERVER_IMAGES: string = '/server-images';
+    public static readonly BEGIN_PREPA = {method: POST, service: '/beginPrepa'};
+    public static readonly FINISH_PREPA = {method: POST, service: '/finishPrepa'};
+    public static readonly BEGIN_LIVRAISON = {method: POST, service: '/beginLivraison'};
+    public static readonly FINISH_LIVRAISON = {method: POST, service: '/finishLivraison'};
+    public static readonly BEGIN_COLLECTE = {method: POST, service: '/beginCollecte'};
+    public static readonly FINISH_COLLECTE = {method: POST, service: '/finishCollecte'};
+    public static readonly FINISH_TRANSFER = {method: POST, service: '/transfer/finish'};
+    public static readonly TREAT_ANOMALIES = {method: POST, service: '/treatAnomalies'};
+    public static readonly POST_API_KEY = {method: POST, service: '/api-key'};
+    public static readonly ADD_INVENTORY_ENTRIES = {method: POST, service: '/addInventoryEntries'};
+    public static readonly POST_MOUVEMENT_TRACA = {method: POST, service: '/mouvements-traca'};
+    public static readonly POST_HANDLING = {method: POST, service: '/handlings'};
+    public static readonly GET_DATA = {method: POST, service: '/getData'};
+    public static readonly NEW_EMP = {method: POST, service: '/emplacement'};
+    public static readonly GET_ARTICLES = {method: GET, service: '/articles'};
+    public static readonly GET_TRACKING_DROPS = {method: GET, service: '/tracking-drops'};
+    public static readonly POST_DEMANDE_LIVRAISON = {method: POST, service: '/valider-dl'};
+    public static readonly GET_DEMANDE_LIVRAISON_DATA = {method: GET, service: '/demande-livraison-data'};
+    public static readonly GET_PACK_NATURE = {method: GET, service: '/packs/nature'};
+    public static readonly PATCH_DISPATCH = {method: POST, service: '/dispatches'};
+    public static readonly GET_SERVER_IMAGES = {method: GET, service: '/server-images'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'
@@ -65,8 +67,7 @@ export class ApiService {
             );
     }
 
-    public requestApi(method: string,
-                      service: string,
+    public requestApi({method, service}: { method: string; service: string; },
                       {params = {}, secured = true, timeout: requestWithTimeout = false, pathParams = {}}: {
                           params?: { [x: string]: any };
                           pathParams?: { [x: string]: string|number };
@@ -76,7 +77,7 @@ export class ApiService {
         params = ApiService.ObjectToHttpParams(params);
 
         let requestResponse = zip(
-            this.getApiUrl(service, {pathParams}),
+            this.getApiUrl({service}, {pathParams}),
             from(this.appVersion.getVersionNumber()),
             ...(secured ? [this.storageService.getApiKey()] : [])
         )
@@ -87,11 +88,11 @@ export class ApiService {
                     }
                 }),
                 flatMap(([url, currentVersion, apiKey]: [string, string, string]) => {
-                    const keyParam = (method === 'get' || method === 'delete')
+                    const keyParam = (method === GET || method === 'delete')
                         ? 'params'
                         : 'body';
 
-                    let smartParams = (method === 'post')
+                    let smartParams = (method === POST)
                         ? ApiService.ObjectToFormData(params)
                         : params;
 
@@ -135,7 +136,8 @@ export class ApiService {
             : this.storageService.getServerUrl().pipe(map((url) => (url ? `${url}/api` : null)));
     }
 
-    public getApiUrl(service: string, {newUrl, pathParams = {}}: { newUrl?: string, pathParams?: { [x: string]: string | number } } = {}): Observable<any> {
+    public getApiUrl({service}: {service: string},
+                     {newUrl, pathParams = {}}: { newUrl?: string, pathParams?: { [x: string]: string | number } } = {}): Observable<any> {
         for(let pathParamName in pathParams) {
             const regexMatchParam = new RegExp(`\{${pathParamName}\}`, 'g');
             service = service.replace(regexMatchParam, encodeURIComponent(pathParams[pathParamName]));

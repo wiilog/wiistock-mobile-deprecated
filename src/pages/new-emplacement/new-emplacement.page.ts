@@ -57,7 +57,7 @@ export class NewEmplacementPage extends PageComponent {
                             isDelivery: this.isDelivery ? '1' : '0'
                         };
                         this.apiService
-                            .requestApi("post", ApiService.NEW_EMP, {params})
+                            .requestApi(ApiService.NEW_EMP, {params})
                             .pipe(
                                 flatMap((response) => {
                                     this.loading = false;

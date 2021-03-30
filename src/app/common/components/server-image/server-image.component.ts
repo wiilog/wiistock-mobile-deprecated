@@ -46,7 +46,7 @@ export class ServerImageComponent implements OnInit, OnDestroy {
 
         this.unsubscribeImage();
         this.imageSubscription = this.apiService
-            .requestApi('get', ApiService.GET_SERVER_IMAGES, {params: {key: this.key}})
+            .requestApi(ApiService.GET_SERVER_IMAGES, {params: {key: this.key}})
             .subscribe(
                 ({success, image}) => {
                     if (success && image) {
