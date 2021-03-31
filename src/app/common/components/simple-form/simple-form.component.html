@@ -38,7 +38,8 @@
                     <ion-label color="medium">{{ fieldConfig.label }}</ion-label>
                     <ion-input (change)="onInputChange(fieldConfig.name, fieldConfig.type || 'text', $event.target)"
                                [type]="fieldConfig.type || 'text'"
-                               [value]="fieldConfig.value"></ion-input>
+                               [value]="fieldConfig.value">
+                    </ion-input>
                 </ion-item>
             </ng-template>
         </div>

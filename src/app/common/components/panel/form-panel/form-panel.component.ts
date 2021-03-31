@@ -35,7 +35,14 @@ export class FormPanelComponent implements AfterViewInit {
     private afterViewInit: boolean;
     private fireZebraRequested: boolean;
 
+    private multipleFieldOccurrences: {[name: string]: number} = {};
+
     public get values(): {[name: string]: any} {
+        const getNewValue = (value, oldValue, multiple) => {
+            return multiple
+                ? [...(oldValue || []), value]
+                : value
+        };
         return this.formElements
             ? this.formElements.reduce((acc, {instance: {group, name, value}, param: {config}}: FormPanelDirective) => ({
                 ...acc,
@@ -45,8 +52,11 @@ export class FormPanelComponent implements AfterViewInit {
                     || (!Array.isArray(value) && value)) ?
                     {
                         [group || name]: group
-                            ? { ...(acc[group] || {}), [name]: value}
-                            : value
+                            ? {
+                                ...(acc[group] || {}),
+                                [name]: getNewValue(value, (acc[group] || {})[name], config.multiple)
+                            }
+                            : getNewValue(value, acc[name], config.multiple)
                     }
                     : {})
             }), {})
@@ -55,9 +65,8 @@ export class FormPanelComponent implements AfterViewInit {
 
     public get firstError(): string {
         return this.formElements
-            ? this.formElements.reduce(function (error: string, {instance: {error: itemError}}: FormPanelDirective) {
-                    return error || itemError
-                },
+            ? this.formElements.reduce(
+                (error: string, {instance: {error: itemError}}: FormPanelDirective) => error || itemError,
                 undefined
             )
             : undefined;
@@ -93,6 +102,26 @@ export class FormPanelComponent implements AfterViewInit {
         this.getInstanceForZebraInit().forEach((element) => {
             element.unsubscribeZebraScan();
         });
+    }
+
+    public getOccurrences({config}: FormPanelParam): Array<number> {
+        const {multiple, name} = config;
+        const occurrences = (!multiple || !this.multipleFieldOccurrences[name])
+            ? 1
+            : this.multipleFieldOccurrences[name];
+        return new Array<void>(occurrences)
+            .fill()
+            .map((_, index) => index);
+    }
+
+    public addMultipleOccurrence({config}: FormPanelParam): void {
+        const {name, multiple} = config;
+        if (multiple) {
+            if (!this.multipleFieldOccurrences[name]) {
+                this.multipleFieldOccurrences[name] = 1;
+            }
+            this.multipleFieldOccurrences[name]++;
+        }
     }
 
     private getInstanceForZebraInit(): Array<FormPanelSelectComponent> {

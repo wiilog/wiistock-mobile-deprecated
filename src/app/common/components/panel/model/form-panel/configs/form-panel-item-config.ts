@@ -6,4 +6,5 @@ export interface FormPanelItemConfig<InputConfig> {
     value?: string|number|boolean|Array<string>;
     errors?: {[errorName: string]: string};
     inputConfig: InputConfig;
+    multiple?: boolean;
 }
