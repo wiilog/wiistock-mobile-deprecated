@@ -33,16 +33,21 @@
             height: 2.4rem;
             display: inline-block;
         }
+        .tools-selected-label {
+            max-width: 60%;
+            margin-left: $spacer / 2;
+        }
+    }
 
+    .tools,
+    .selected-label-container {
         .tools-selected-label {
             display: flex;
-            max-width: 60%;
             align-items: center;
             background-color: $medium;
             color: $lightGrey;
             padding: $spacer / 2;
             border-radius: 25px;
-            margin-left: $spacer / 2;
 
             .selected-label-content {
                 white-space: nowrap;
@@ -61,4 +66,20 @@
     .scanner-button {
         margin: 0;
     }
+
+    .scan-only-with-label-wrapper {
+        display: flex;
+        align-items: center;
+        position: relative;
+
+        & > ion-button {
+            flex: 1;
+            min-width: 60%;
+        }
+        & > .selected-label-container {
+            padding: $spacerMin 0 $spacerMin $spacerMin;
+            max-width: 40%;
+        }
+    }
+
 }
