@@ -74,7 +74,7 @@ export class HandlingValidatePage extends PageComponent {
                     this.loadingElement = loading;
                 }),
                 flatMap(() => zip(
-                    this.handling.statusId ? this.sqliteService.findOneBy('status', [`id = ${this.handling.statusId}`]) : of(undefined),
+                    this.handling.statusId ? this.sqliteService.findOneBy('status', {id: this.handling.statusId}) : of(undefined),
                     this.sqliteService.findBy('handling_attachment', [`handlingId = ${this.handling.id}`]),
                     this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.HANDLING}'`]),
                     this.sqliteService.findBy('translations', [`menu LIKE 'services'`])
@@ -89,6 +89,7 @@ export class HandlingValidatePage extends PageComponent {
                 }), {});
 
                 this.refreshHeader(false);
+                console.log(currentStatus);
 
                 let freeFieldsValues = JSON.parse(this.handling.freeFields || '{}') || {};
 
@@ -127,7 +128,7 @@ export class HandlingValidatePage extends PageComponent {
                                 onChange: (statusId) => {
                                     this.handling.statusId = statusId;
                                     this.sqliteService
-                                        .findOneBy('status', [`id = ${statusId}`])
+                                        .findOneBy('status', {id: statusId})
                                         .pipe(filter(() => this.pageEnter))
                                         .subscribe((newStatus?: Status) => {
                                             this.updateCommentNeeded(newStatus);
