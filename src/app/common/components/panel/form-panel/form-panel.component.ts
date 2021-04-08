@@ -124,6 +124,14 @@ export class FormPanelComponent implements AfterViewInit {
         }
     }
 
+    public updateConfigField(name: string, newConfig: any) {
+        const param = this.body.find(({config}) => config.name === name);
+        param.config = {
+            ...param.config,
+            ...newConfig
+        };
+    }
+
     private getInstanceForZebraInit(): Array<FormPanelSelectComponent> {
         if(this.formElements) {
             return this.formElements

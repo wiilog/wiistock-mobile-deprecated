@@ -1,4 +1,4 @@
 export interface FormPanelCameraConfig {
-    required?: true;
-    multiple?: true;
+    required?: boolean;
+    multiple?: boolean;
 }

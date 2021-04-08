@@ -17,12 +17,13 @@ import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
 import {FileService} from '@app/common/services/file.service';
-import {flatMap, map, tap} from 'rxjs/operators';
+import {filter, flatMap, map, tap} from 'rxjs/operators';
 import {FormViewerParam} from '@app/common/directives/form-viewer/form-viewer-param';
 import {FormViewerAttachmentsComponent} from '@app/common/components/panel/form-panel/form-viewer-attachments/form-viewer-attachments.component';
 import {FormPanelService} from '@app/common/services/form-panel.service';
 import {FreeField, FreeFieldType} from '@entities/free-field';
 import {Translation} from '@entities/translation';
+import {Status} from '@entities/status';
 
 
 @Component({
@@ -47,6 +48,8 @@ export class HandlingValidatePage extends PageComponent {
 
     private beginDate: Date;
 
+    private pageEnter: boolean;
+
     public constructor(private loadingService: LoadingService,
                        private network: Network,
                        private apiService: ApiService,
@@ -56,9 +59,11 @@ export class HandlingValidatePage extends PageComponent {
                        private formPanelService: FormPanelService,
                        navService: NavService) {
         super(navService);
+        this.pageEnter = false;
     }
 
     public ionViewWillEnter(): void {
+        this.pageEnter = true;
         this.handling = this.currentNavParams.get('handling');
         this.beginDate = new Date();
 
@@ -69,13 +74,14 @@ export class HandlingValidatePage extends PageComponent {
                     this.loadingElement = loading;
                 }),
                 flatMap(() => zip(
+                    this.handling.statusId ? this.sqliteService.findOneBy('status', [`id = ${this.handling.statusId}`]) : of(undefined),
                     this.sqliteService.findBy('handling_attachment', [`handlingId = ${this.handling.id}`]),
                     this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.HANDLING}'`]),
                     this.sqliteService.findBy('translations', [`menu LIKE 'services'`])
                 )),
 
             )
-            .subscribe(([handlingAttachment, freeFields, handlingsTranslations]: [Array<HandlingAttachment>, Array<FreeField>, Array<Translation>]) => {
+            .subscribe(([currentStatus, handlingAttachment, freeFields, handlingsTranslations]: [Status, Array<HandlingAttachment>, Array<FreeField>, Array<Translation>]) => {
                 this.dismissLoading();
                 this.handlingsTranslations = handlingsTranslations.reduce((acc, {label, translation}) => ({
                     ...acc,
@@ -108,14 +114,25 @@ export class HandlingValidatePage extends PageComponent {
                         config: {
                             label: 'Statut',
                             name: 'statusId',
+                            value: this.handling.statusId,
                             inputConfig: {
                                 required: true,
                                 searchType: SelectItemTypeEnum.STATUS,
                                 requestParams: [
                                     `category = 'service'`,
-                                    `state = 'treated'`,
-                                    `typeId = ${this.handling.typeId}`
+                                    `state = 'treated' OR state = 'inProgress'`,
+                                    `typeId = ${this.handling.typeId}`,
+                                    ...(status ? [`id != ${this.handling.statusId}`] : [])
                                 ],
+                                onChange: (statusId) => {
+                                    this.handling.statusId = statusId;
+                                    this.sqliteService
+                                        .findOneBy('status', [`id = ${statusId}`])
+                                        .pipe(filter(() => this.pageEnter))
+                                        .subscribe((newStatus?: Status) => {
+                                            this.updateCommentNeeded(newStatus);
+                                        })
+                                }
                             },
                             errors: {
                                 required: 'Le statut de la demande est requis',
@@ -127,10 +144,14 @@ export class HandlingValidatePage extends PageComponent {
                         config: {
                             label: 'Commentaire',
                             name: 'comment',
+                            value: this.handling.comment,
                             inputConfig: {
                                 type: 'text',
                                 maxLength: '255',
-                                required: true
+                                required: !currentStatus || Boolean(currentStatus.commentNeeded),
+                                onChange: (comment) => {
+                                    this.handling.comment = comment;
+                                }
                             },
                             errors: {
                                 required: 'Votre commentaire est requis',
@@ -165,6 +186,7 @@ export class HandlingValidatePage extends PageComponent {
     }
 
     public ionViewWillLeave(): void {
+        this.pageEnter = false;
         if (this.apiSubscription) {
             this.apiSubscription.unsubscribe();
             this.apiSubscription = undefined;
@@ -180,12 +202,13 @@ export class HandlingValidatePage extends PageComponent {
                 const {statusId, comment, photos, freeFields} = this.formPanelComponent.values
 
                 const endDate = new Date();
+                const freeFieldValues = JSON.stringify(freeFields || {});
 
                 const params = {
                     id: this.handling.id,
                     statusId,
                     comment,
-                    freeFields: JSON.stringify(freeFields || {}),
+                    freeFields: freeFieldValues,
                     treatmentDelay: Math.floor((endDate.getTime() - this.beginDate.getTime()) / 1000),
                     ...(
                         photos && photos.length
@@ -212,24 +235,38 @@ export class HandlingValidatePage extends PageComponent {
                             this.loadingElement = loading;
                         }),
                         flatMap(() => this.apiService.requestApi(ApiService.POST_HANDLING, {params})),
-                        flatMap((res) => (
-                            res && res.success
-                                ? zip(
-                                    this.sqliteService.deleteBy('handling', [`id = ${this.handling.id}`]),
-                                    this.sqliteService.deleteBy('handling_attachment', [`handlingId = ${this.handling.id}`])
-                                )
-                                    .pipe(map(() => res))
-                                : of(res)
-                        )),
+                        flatMap((res) => {
+                            if (res && res.success) {
+                                if (res.state !== 'inProgress') {
+                                    return zip(
+                                        this.sqliteService.deleteBy('handling', [`id = ${this.handling.id}`]),
+                                        this.sqliteService.deleteBy('handling_attachment', [`handlingId = ${this.handling.id}`])
+                                    ).pipe(map(() => res));
+                                }
+                                else {
+                                    return this.sqliteService
+                                        .update('handling', {statusId, comment, freeFields: freeFieldValues}, [`id = ${this.handling.id}`])
+                                        .pipe(map(() => res));
+                                }
+                            }
+                            else {
+                                return of(res);
+                            }
+                        }),
                         flatMap((res) => this.dismissLoading().pipe(map(() => res))),
 
                     )
                     .subscribe(
-                        ({success, message}) => {
+                        ({success, message, state}) => {
                             this.unsubscribeApi();
                             if (success) {
-                                this.navService.pop();
-                                this.toastService.presentToast("La demande de service a bien été traitée.");
+                                if (state === 'inProgress') {
+                                    this.toastService.presentToast("Le changement de statut a bien été pris en compte.");
+                                }
+                                else {
+                                    this.navService.pop();
+                                    this.toastService.presentToast("La demande de service a bien été traitée.");
+                                }
                             }
                             else {
                                 this.toastService.presentToast(message || "Une erreur s'est produite.");
@@ -307,5 +344,12 @@ export class HandlingValidatePage extends PageComponent {
             this.apiSubscription.unsubscribe();
             this.apiSubscription = undefined;
         }
+    }
+
+    private updateCommentNeeded(status: Status) {
+        const commentNeeded = !status || Boolean(status.commentNeeded);
+        this.formPanelComponent.updateConfigField('comment', {
+            required: commentNeeded
+        });
     }
 }

@@ -5,4 +5,5 @@ export interface Status {
     state: string;
     displayOrder: number;
     page: string;
+    commentNeeded: number;
 }

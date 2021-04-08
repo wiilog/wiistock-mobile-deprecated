@@ -2,7 +2,7 @@ export interface FormPanelInputConfig {
     type: 'number'|'text';
     min?: number;
     max?: number;
-    required?: true;
+    required?: boolean;
     maxLength?: string;
     disabled?: boolean;
 }

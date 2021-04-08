@@ -221,6 +221,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             id: 'INTEGER PRIMARY KEY',
             number: 'VARCHAR(255)',
             typeId: 'INTEGER',
+            statusId: 'INTEGER',
             carriedOutOperationCount: 'INTEGER',
             typeLabel: 'VARCHAR(255)',
             requester: 'VARCHAR(255)',
@@ -368,7 +369,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             typeId: 'INTEGER',
             state: 'VARCHAR(255)',
             category: 'VARCHAR(255)',
-            displayOrder: 'INTEGER'
+            displayOrder: 'INTEGER',
+            commentNeeded: 'INTEGER'
         }
     }
 ];
