@@ -123,15 +123,15 @@ export class HandlingValidatePage extends PageComponent {
                                     `category = 'service'`,
                                     `state = 'treated' OR state = 'inProgress'`,
                                     `typeId = ${this.handling.typeId}`,
-                                    ...(status ? [`id != ${this.handling.statusId}`] : [])
                                 ],
+                                filterItem: (status) => Number(status.id) !== Number(this.handling.statusId),
                                 onChange: (statusId) => {
                                     this.handling.statusId = statusId;
                                     this.sqliteService
                                         .findOneBy('status', {id: statusId})
                                         .pipe(filter(() => this.pageEnter))
                                         .subscribe((newStatus?: Status) => {
-                                            this.updateCommentNeeded(newStatus);
+                                            this.updateFormConfig(newStatus);
                                         })
                                 }
                             },
@@ -347,7 +347,7 @@ export class HandlingValidatePage extends PageComponent {
         }
     }
 
-    private updateCommentNeeded(status: Status) {
+    private updateFormConfig(status: Status) {
         const commentNeeded = !status || Boolean(status.commentNeeded);
         this.formPanelComponent.updateConfigField('comment', {
             required: commentNeeded
