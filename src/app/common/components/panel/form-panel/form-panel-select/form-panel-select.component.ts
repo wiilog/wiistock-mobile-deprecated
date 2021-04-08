@@ -108,7 +108,11 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
     public initText(): void {
         if (this.value) {
             const value: Array<any> = !Array.isArray(this.value) ? [this.value] : this.value;
-            const selected = this.searchComponent ? value.map((val) => this.searchComponent.findItem(val, 'id')) : [];
+            const selected = this.searchComponent
+                ? value
+                    .map((val) => this.searchComponent.findItem(val, 'id'))
+                    .filter((val) => val)
+                : [];
             if (selected.length > 0) {
                 this.text = FormPanelSelectComponent.ValueToText(selected);
             } else if (!this.searchComponent) {

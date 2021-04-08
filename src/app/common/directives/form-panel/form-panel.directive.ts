@@ -23,18 +23,24 @@ export class FormPanelDirective implements OnInit {
     }
 
     public ngOnInit(): void {
-        const {config, item} = this.param;
+        const {item} = this.param;
 
         const componentFactory = this.componentFactoryResolver.resolveComponentFactory(item as Type<FormPanelItemComponent<any>>);
         const {instance} = this.viewContainerRef.createComponent<FormPanelItemComponent<any>>(componentFactory);
-
-        instance.inputConfig = config.inputConfig;
-        instance.value = config.value;
-        instance.label = config.label;
-        instance.name = config.name;
-        instance.errors = config.errors;
-        instance.group = config.group;
-
         this.instance = instance;
+
+        this.reloadInstance();
+    }
+
+    public reloadInstance(): void {
+        const {config} = this.param;
+
+        this.instance.inputConfig = config.inputConfig;
+        this.instance.value = config.value;
+        this.instance.label = config.label;
+        this.instance.name = config.name;
+        this.instance.errors = config.errors;
+        this.instance.group = config.group;
+        console.log(this.instance.inputConfig)
     }
 }
