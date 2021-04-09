@@ -145,14 +145,10 @@ export class HandlingValidatePage extends PageComponent {
                         config: {
                             label: 'Commentaire',
                             name: 'comment',
-                            value: this.handling.comment,
                             inputConfig: {
                                 type: 'text',
                                 maxLength: '255',
-                                required: !currentStatus || Boolean(currentStatus.commentNeeded),
-                                onChange: (comment) => {
-                                    this.handling.comment = comment;
-                                }
+                                required: !currentStatus || Boolean(currentStatus.commentNeeded)
                             },
                             errors: {
                                 required: 'Votre commentaire est requis',
