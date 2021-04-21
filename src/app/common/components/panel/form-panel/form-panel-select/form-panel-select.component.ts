@@ -130,6 +130,9 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
                     });
                 this.onItemSelect(<any>valueArray);
             }
+            else {
+                this.value = undefined;
+            }
         }
     }
 }
