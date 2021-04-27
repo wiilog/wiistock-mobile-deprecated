@@ -28,6 +28,8 @@ export class UngroupScanGroupPage extends PageComponent {
         this.api.requestApi(ApiService.PACKS_GROUPS, options)
             .subscribe(response => {
                 if(response.packGroup && !response.packGroup.packs.length) {
+                    this.toastService.presentToast(`Le colis ${code} n'est pas un groupe`);
+                } else if(response.packGroup && !response.packGroup.packs.length) {
                     this.toastService.presentToast(`Le groupe ${code} ne contient aucun colis`);
                 } else if(response.packGroup) {
                     this.navService.push(UngroupConfirmPageRoutingModule.PATH, {
