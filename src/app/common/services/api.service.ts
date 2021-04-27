@@ -37,6 +37,8 @@ export class ApiService {
     public static readonly GET_PACK_NATURE = {method: GET, service: '/packs/nature'};
     public static readonly PATCH_DISPATCH = {method: POST, service: '/dispatches'};
     public static readonly GET_SERVER_IMAGES = {method: GET, service: '/server-images'};
+    public static readonly PACKS_GROUPS = {method: GET, service: '/pack-groups'};
+    public static readonly UNGROUP = {method: POST, service: '/ungroup'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'
