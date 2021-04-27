@@ -7,6 +7,7 @@ import * as moment from 'moment';
 import {from} from 'rxjs';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {Emplacement} from '@entities/emplacement';
+import {IconConfig} from "../components/panel/model/icon-config";
 
 type ListConfig = {
     header: HeaderConfig;
@@ -122,7 +123,7 @@ export class TrackingListFactoryService {
 
     public createListConfig(articles: Array<MouvementTraca & {loading?: boolean}>,
                             listType: number,
-                            {location, objectLabel,  validate, rightIcon, confirmItem, natureIdsToConfig, natureTranslation}: {
+                            {location, objectLabel,  validate, rightIcon, confirmItem, natureIdsToConfig, natureTranslation, validateIcon}: {
                                 location?: Emplacement;
                                 natureIdsToConfig?: {[id: number]: { label: string; color?: string; }};
                                 validate?: () => void;
@@ -130,6 +131,7 @@ export class TrackingListFactoryService {
                                     mode: 'upload'|'remove';
                                     action: (info: { [name: string]: { label: string; value?: string; } }) => void;
                                 };
+                                validateIcon?: IconConfig;
                                 confirmItem?: (info: { [name: string]: { label: string; value?: string; } }) => void;
                                 objectLabel: string;
                                 natureTranslation?: string;
@@ -173,12 +175,12 @@ export class TrackingListFactoryService {
                     color: iconColor
                 },
                 ...(
-                    validate
+                    validate || validateIcon
                         ? {
-                            rightIcon: {
+                            rightIcon: validateIcon || {
                                 name: 'check.svg',
                                 color: 'success',
-                                action:  () => {
+                                action: () => {
                                     if (!this._alertPresented && !this.actionsDisabled) {
                                         validate();
                                     }

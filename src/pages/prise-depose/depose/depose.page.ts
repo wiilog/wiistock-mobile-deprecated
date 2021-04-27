@@ -381,6 +381,12 @@ export class DeposePage extends PageComponent implements CanLeave {
             this.colisPrise.filter(({hidden}) => !hidden),
             TrackingListFactoryService.LIST_TYPE_DROP_SUB,
             {
+                validateIcon: {
+                    name: 'up.svg',
+                    action: () => {
+                        this.dropAll()
+                    },
+                },
                 objectLabel: this.objectLabel,
                 rightIcon: {
                     mode: 'upload',
@@ -392,6 +398,10 @@ export class DeposePage extends PageComponent implements CanLeave {
                 natureTranslation: natureLabel.translation || natureLabel.label,
             }
         );
+    }
+
+    private dropAll() {
+        this.colisPrise.filter(({hidden}) => !hidden).forEach(({ref_article}) => this.testColisDepose(ref_article, true));
     }
 
     private refreshDeposeListComponent(): void {
