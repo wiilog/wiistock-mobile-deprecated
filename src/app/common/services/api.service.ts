@@ -34,7 +34,7 @@ export class ApiService {
     public static readonly GET_TRACKING_DROPS = {method: GET, service: '/tracking-drops'};
     public static readonly POST_DEMANDE_LIVRAISON = {method: POST, service: '/valider-dl'};
     public static readonly GET_DEMANDE_LIVRAISON_DATA = {method: GET, service: '/demande-livraison-data'};
-    public static readonly GET_PACK_NATURE = {method: GET, service: '/packs/nature'};
+    public static readonly GET_PACK_DATA = {method: GET, service: '/packs'};
     public static readonly PATCH_DISPATCH = {method: POST, service: '/dispatches'};
     public static readonly GET_SERVER_IMAGES = {method: GET, service: '/server-images'};
 
