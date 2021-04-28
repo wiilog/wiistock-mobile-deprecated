@@ -9,6 +9,7 @@ import {NavService} from '@app/common/services/nav.service';
 import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
 import {PageComponent} from '@pages/page.component';
 import {DispatchMenuPageRoutingModule} from '@pages/tracking/dispatch/dispatch-menu/dispatch-menu-routing.module';
+import {UngroupScanLocationPageRoutingModule} from "@pages/tracking/ungroup/ungroup-scan-location/ungroup-scan-location-routing.module";
 
 @Component({
     selector: 'wii-tracking-menu',
@@ -41,7 +42,14 @@ export class TrackingMenuPage extends PageComponent {
                 action: () => {
                     this.navService.push(PriseDeposeMenuPageRoutingModule.PATH, {fromStock: false});
                 }
-            }
+            },
+            {
+                icon: 'ungroup.svg',
+                label: 'Dégroupage',
+                action: () => {
+                    this.navService.push(UngroupScanLocationPageRoutingModule.PATH);
+                }
+            },
         ];
     }
 }

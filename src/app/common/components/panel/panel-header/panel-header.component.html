@@ -1,4 +1,10 @@
 <ion-ripple-effect *ngIf="hasRipple"></ion-ripple-effect>
+
+<div class="list-element-color"
+     *ngIf="color"
+     [ngStyle]="{'background-color': color}">
+</div>
+
 <div class="list-header-wrapper"
      [class.list-header-wrapper-gutter]="!leftIcon && (!_rightIcons || _rightIcons.length === 0)">
     <!-- Left icon -->

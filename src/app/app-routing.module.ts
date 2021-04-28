@@ -44,6 +44,9 @@ import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose
 import {TransferListPageRoutingModule} from '@pages/stock/transfer/transfer-list/transfer-list-routing.module';
 import {TransferArticlesPageRoutingModule} from '@pages/stock/transfer/transfer-articles/transfer-articles-routing.module';
 import {TransferValidatePageRoutingModule} from '@pages/stock/transfer/transfer-validate/transfer-validate-routing.module';
+import {UngroupScanGroupPageRoutingModule} from "@pages/tracking/ungroup/ungroup-scan-group/ungroup-scan-group-routing.module";
+import {UngroupScanLocationPageRoutingModule} from "@pages/tracking/ungroup/ungroup-scan-location/ungroup-scan-location-routing.module";
+import {UngroupConfirmPageRoutingModule} from "@pages/tracking/ungroup/ungroup-confirm/ungroup-confirm-routing.module";
 
 const routes: Routes = [
     {
@@ -264,12 +267,27 @@ const routes: Routes = [
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/prise-depose/prise-depose-menu/prise-depose-menu.module').then(m => m.PriseDeposeMenuPageModule)
     },
+    {
+        path: UngroupScanLocationPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/tracking/ungroup/ungroup-scan-location/ungroup-scan-location.module').then(m => m.UngroupScanLocationPageModule)
+    },
+    {
+        path: UngroupScanGroupPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/tracking/ungroup/ungroup-scan-group/ungroup-scan-group.module').then(m => m.UngroupScanGroupPageModule)
+    },
+    {
+        path: UngroupConfirmPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/tracking/ungroup/ungroup-confirm/ungroup-confirm.module').then(m => m.UngroupConfirmPageModule)
+    },
 
     {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'
-    }
+    },
 ];
 
 @NgModule({

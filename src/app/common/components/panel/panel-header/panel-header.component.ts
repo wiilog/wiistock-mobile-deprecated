@@ -15,6 +15,9 @@ export class PanelHeaderComponent {
     public headerBodyWrapper: ElementRef;
 
     @Input()
+    public color: string;
+
+    @Input()
     public leftIcon: IconConfig;
 
     @Input()
