@@ -193,6 +193,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                             )),
                             // we display toast
                             flatMap(({online, apiResponse}) => {
+                                const emptyGroups = ((apiResponse && apiResponse.data && apiResponse.data.emptyGroups) || null)
                                 const errorsObject = ((apiResponse && apiResponse.data && apiResponse.data.errors) || {});
                                 const errorsValues = Object.keys(errorsObject).map((key) => errorsObject[key]);
                                 const errorsMessage = errorsValues.join('\n');
@@ -203,7 +204,12 @@ export class DeposePage extends PageComponent implements CanLeave {
                                         : 'Dépose sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
                                 return this.toastService
                                     .presentToast(`${errorsMessage}${(errorsMessage && message) ? '\n' : ''}${message}`)
-                                    .pipe(map(() => errorsValues.length));
+                                    .pipe(map(() => {
+                                        if (emptyGroups) {
+                                            this.toastService.presentToast(`${emptyGroups} vide(s). Le(s) groupe(s) ne sont plus en prise.`)
+                                        }
+                                        return errorsValues.length;
+                                    }));
                             })
                         )
                         .subscribe(
