@@ -10,6 +10,7 @@ import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose
 import {PageComponent} from '@pages/page.component';
 import {DispatchMenuPageRoutingModule} from '@pages/tracking/dispatch/dispatch-menu/dispatch-menu-routing.module';
 import {UngroupScanLocationPageRoutingModule} from "@pages/tracking/ungroup/ungroup-scan-location/ungroup-scan-location-routing.module";
+import {GroupScanGroupPageRoutingModule} from "@pages/tracking/group/group-scan-group/group-scan-group-routing.module";
 
 @Component({
     selector: 'wii-tracking-menu',
@@ -41,6 +42,13 @@ export class TrackingMenuPage extends PageComponent {
                 label: 'Mouvements',
                 action: () => {
                     this.navService.push(PriseDeposeMenuPageRoutingModule.PATH, {fromStock: false});
+                }
+            },
+            {
+                icon: 'group.svg',
+                label: 'Groupage',
+                action: () => {
+                    this.navService.push(GroupScanGroupPageRoutingModule.PATH);
                 }
             },
             {

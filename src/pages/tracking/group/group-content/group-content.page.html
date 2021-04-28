@@ -1,0 +1,17 @@
+<wii-main-loader [loading]="loading"></wii-main-loader>
+
+<div class="page-content" scroll-y="true" *ngIf="!loading">
+    <wii-list-panel *ngIf="listConfig"
+                    [header]="listConfig.header"
+                    [body]="listConfig.body"
+                    [boldValues]="[]">
+    </wii-list-panel>
+</div>
+
+<div class="page-footer persisted-page-footer">
+    <wii-barcode-scanner buttonSubtitle="Objet"
+                         [mode]="scannerModeManual"
+                         (add)="onPackScan($event[0])">
+    </wii-barcode-scanner>
+</div>
+

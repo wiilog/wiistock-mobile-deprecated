@@ -1,4 +1,5 @@
 export enum MovementConfirmType {
-    TACKING,
-    DROP
+    TAKE,
+    DROP,
+    GROUP,
 }

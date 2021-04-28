@@ -47,6 +47,8 @@ import {TransferValidatePageRoutingModule} from '@pages/stock/transfer/transfer-
 import {UngroupScanGroupPageRoutingModule} from "@pages/tracking/ungroup/ungroup-scan-group/ungroup-scan-group-routing.module";
 import {UngroupScanLocationPageRoutingModule} from "@pages/tracking/ungroup/ungroup-scan-location/ungroup-scan-location-routing.module";
 import {UngroupConfirmPageRoutingModule} from "@pages/tracking/ungroup/ungroup-confirm/ungroup-confirm-routing.module";
+import {GroupScanGroupPageRoutingModule} from "@pages/tracking/group/group-scan-group/group-scan-group-routing.module";
+import {GroupContentPageRoutingModule} from "@pages/tracking/group/group-content/group-content-routing.module";
 
 const routes: Routes = [
     {
@@ -281,6 +283,16 @@ const routes: Routes = [
         path: UngroupConfirmPageRoutingModule.PATH,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/tracking/ungroup/ungroup-confirm/ungroup-confirm.module').then(m => m.UngroupConfirmPageModule)
+    },
+    {
+        path: GroupScanGroupPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/tracking/group/group-scan-group/group-scan-group.module').then(m => m.GroupScanGroupPageModule)
+    },
+    {
+        path: GroupContentPageRoutingModule.PATH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/tracking/group/group-content/group-content.module').then(m => m.GroupContentPageModule)
     },
 
     {

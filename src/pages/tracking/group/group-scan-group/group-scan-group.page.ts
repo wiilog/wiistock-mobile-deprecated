@@ -4,17 +4,18 @@ import {ApiService} from "@app/common/services/api.service";
 import {ToastService} from "@app/common/services/toast.service";
 import {PageComponent} from "@pages/page.component";
 import {NavService} from "@app/common/services/nav.service";
-import {UngroupScanLocationPageRoutingModule} from "@pages/tracking/ungroup/ungroup-scan-location/ungroup-scan-location-routing.module";
-import {UngroupConfirmPageRoutingModule} from "@pages/tracking/ungroup/ungroup-confirm/ungroup-confirm-routing.module";
+import {GroupContentPageRoutingModule} from "@pages/tracking/group/group-content/group-content-routing.module";
 
 @Component({
-    selector: 'app-ungroup-scan-group',
-    templateUrl: './ungroup-scan-group.page.html',
-    styleUrls: ['./ungroup-scan-group.page.scss'],
+    selector: 'app-group-scan-group',
+    templateUrl: './group-scan-group.page.html',
+    styleUrls: ['./group-scan-group.page.scss'],
 })
-export class UngroupScanGroupPage extends PageComponent {
+export class GroupScanGroupPage extends PageComponent {
 
     public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.WITH_MANUAL;
+
+    public listConfig: any;
 
     constructor(private api: ApiService, private toastService: ToastService, navService: NavService) {
         super(navService);
@@ -29,15 +30,16 @@ export class UngroupScanGroupPage extends PageComponent {
             .subscribe(response => {
                 if(response.isPack) {
                     this.toastService.presentToast(`Le colis ${code} n'est pas un groupe`);
-                } else if(response.packGroup && !response.packGroup.packs.length) {
-                    this.toastService.presentToast(`Le groupe ${code} ne contient aucun colis`);
-                } else if(response.packGroup) {
-                    this.navService.push(UngroupConfirmPageRoutingModule.PATH, {
-                        location: this.currentNavParams.get(`location`),
-                        group: response.packGroup
-                    });
                 } else {
-                    this.toastService.presentToast(`Le groupe ${code} n'existe pas`)
+                    let group = response.packGroup ?? {
+                        code,
+                        natureId: null,
+                        packs: [],
+                    };
+
+                    this.navService.push(GroupContentPageRoutingModule.PATH, {
+                        group
+                    });
                 }
             })
     }

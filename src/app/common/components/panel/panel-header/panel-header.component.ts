@@ -1,5 +1,6 @@
 import {Component, ElementRef, EventEmitter, HostBinding, HostListener, Input, Output, ViewChild} from '@angular/core';
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
+import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
 
 
 @Component({
@@ -16,6 +17,9 @@ export class PanelHeaderComponent {
 
     @Input()
     public color: string;
+
+    @Input()
+    public item: ListPanelItemConfig;
 
     @Input()
     public leftIcon: IconConfig;

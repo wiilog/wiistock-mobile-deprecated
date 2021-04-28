@@ -49,8 +49,11 @@ export class UngroupConfirmPage extends PageComponent {
             `Objet : ${group.code}`,
             `Nombre colis : ${group.packs.length}`,
             `Date/Heure : ${this.ungroupDate}`,
-            `Nature : ${nature.label}`,
         ];
+
+        if(nature) {
+            subtitle.push(`Nature : ${nature.label}`);
+        }
 
         return {
             subtitle,

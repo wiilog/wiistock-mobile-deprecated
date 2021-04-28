@@ -334,7 +334,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                                 validate: (values) => {
                                     this.updatePicking(barCode, values);
                                 },
-                                movementType: MovementConfirmType.TACKING,
+                                movementType: MovementConfirmType.TAKE,
                                 natureTranslationLabel: natureLabel.translation || natureLabel.label,
                             });
                         }
