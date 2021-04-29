@@ -7,9 +7,7 @@ import {NavService} from "@app/common/services/nav.service";
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
 import {ApiService} from "@app/common/services/api.service";
 import {ToastService} from "@app/common/services/toast.service";
-import {GroupContentPageRoutingModule} from "@pages/tracking/group/group-content/group-content-routing.module";
 import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
-import {TrackingListFactoryService} from "@app/common/services/tracking-list-factory.service";
 import {IconColor} from "@app/common/components/icon/icon-color";
 import {MovementConfirmPageRoutingModule} from "@pages/prise-depose/movement-confirm/movement-confirm-routing.module";
 import {MovementConfirmType} from "@pages/prise-depose/movement-confirm/movement-confirm-type";
@@ -25,6 +23,7 @@ export class GroupContentPage extends PageComponent {
 
     public loading: boolean;
     public listConfig: any;
+    public listBoldValues: Array<string>;
     private groupDate: string;
     private group: any;
 
@@ -32,10 +31,12 @@ export class GroupContentPage extends PageComponent {
                 private sqlService: SqliteService, navService: NavService) {
         super(navService);
         this.groupDate = moment().format('DD/MM/YYYY HH:mm:ss');
+        this.listBoldValues = [
+            'code'
+        ];
     }
 
     async ionViewWillEnter() {
-        console.error(this.group);
         if(!this.group) {
             this.group = this.currentNavParams.get(`group`);
             this.group.newPacks = [];
@@ -71,6 +72,7 @@ export class GroupContentPage extends PageComponent {
 
                     this.group.newPacks.push(pack);
                     this.refreshBodyConfig();
+                    this.refreshHeaderConfig();
                 }
             })
     }
@@ -80,12 +82,18 @@ export class GroupContentPage extends PageComponent {
             .then(config => this.listConfig.body = config);
     }
 
+    private refreshHeaderConfig() {
+        this.createHeaderConfig(this.group)
+            .then(header => this.listConfig.header = header);
+    }
+
     private async createHeaderConfig(group): Promise<HeaderConfig> {
         const nature = await this.sqlService.findOneById(`nature`, group.natureId).toPromise();
+        const sScanned = this.group.newPacks.length > 0 ? 's' : '';
 
         return {
-            title: `Groupage`,
-            subtitle: `<i>${this.group.newPacks.length} objets scannés</i>`,
+            title: `GROUPAGE`,
+            info: `${this.group.newPacks.length} objet${sScanned} scanné${sScanned}`,
             item: {
                 infos: {
                     object: {
@@ -109,6 +117,9 @@ export class GroupContentPage extends PageComponent {
                 name: 'check.svg',
                 color: 'success',
                 action: () => this.onSubmit(),
+            },
+            leftIcon: {
+                name: 'group.svg'
             }
         };
     }
@@ -126,7 +137,7 @@ export class GroupContentPage extends PageComponent {
                     },
                     quantity: {
                         label: 'Quantité',
-                        value: pack.code
+                        value: pack.quantity
                     },
                     date: {
                         label: 'Date/Heure',
@@ -161,7 +172,6 @@ export class GroupContentPage extends PageComponent {
                             pack.photo = values.photo;
                             pack.nature_id = values.natureId;
                             pack.freeFields = values.freeFields;
-                            console.log(values, pack, this.group);
                             this.refreshBodyConfig();
                         },
                     });
@@ -172,7 +182,7 @@ export class GroupContentPage extends PageComponent {
                     action: () => {
                         this.group.newPacks.splice(this.group.newPacks.indexOf(pack), 1);
                         this.refreshBodyConfig();
-                        console.error("nonono");
+                        this.refreshHeaderConfig();
                     }
                 }
             }

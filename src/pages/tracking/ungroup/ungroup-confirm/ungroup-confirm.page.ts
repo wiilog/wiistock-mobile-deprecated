@@ -1,19 +1,12 @@
-import {Component, OnInit} from '@angular/core';
-import {DemandeLivraison} from "@entities/demande-livraison";
-import {DemandeLivraisonType} from "@entities/demande-livraison-type";
-import {Emplacement} from "@entities/emplacement";
-import {FreeField} from "@entities/free-field";
+import {Component} from '@angular/core';
 import {HeaderConfig} from "@app/common/components/panel/model/header-config";
-import {IconColor} from "@app/common/components/icon/icon-color";
 import * as moment from "moment";
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
 import {PageComponent} from "@pages/page.component";
 import {NavService} from "@app/common/services/nav.service";
-import {DemandeLivraisonArticle} from "@entities/demande-livraison-article";
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
 import {ApiService} from "@app/common/services/api.service";
 import {ToastService} from "@app/common/services/toast.service";
-import {TrackingMenuPageRoutingModule} from "@pages/tracking/tracking-menu/tracking-menu-routing.module";
 
 @Component({
     selector: 'app-ungroup-confirm',
@@ -24,6 +17,7 @@ export class UngroupConfirmPage extends PageComponent {
 
     public loading: boolean;
     public listConfig: any;
+    public listBoldValues: Array<string>;
     private ungroupDate: string;
     private group: any;
 
@@ -31,6 +25,9 @@ export class UngroupConfirmPage extends PageComponent {
                 private sqlService: SqliteService, navService: NavService) {
         super(navService);
         this.ungroupDate = moment().format('DD/MM/YYYY HH:mm:ss');
+        this.listBoldValues = [
+            'code'
+        ];
     }
 
     async ionViewWillEnter() {
@@ -46,7 +43,7 @@ export class UngroupConfirmPage extends PageComponent {
         const nature = await this.sqlService.findOneById(`nature`, group.natureId).toPromise();
 
         const subtitle = [
-            `Objet : ${group.code}`,
+            `Objet : <b>${group.code}</b>`,
             `Nombre colis : ${group.packs.length}`,
             `Date/Heure : ${this.ungroupDate}`,
         ];
@@ -57,7 +54,7 @@ export class UngroupConfirmPage extends PageComponent {
 
         return {
             subtitle,
-            color: nature.color,
+            color: nature ? nature.color : '',
         };
     }
 
@@ -66,7 +63,7 @@ export class UngroupConfirmPage extends PageComponent {
             const nature = await this.sqlService.findOneById(`nature`, pack.nature_id).toPromise();
 
             return {
-                color: nature.color,
+                color: nature ? nature.color : '',
                 infos: {
                     code: {
                         label: 'Objet',
@@ -76,10 +73,12 @@ export class UngroupConfirmPage extends PageComponent {
                         label: 'Quantité',
                         value: pack.code
                     },
-                    nature: {
-                        label: 'Nature',
-                        value: nature.label
-                    },
+                    ...(nature ? {
+                        nature: {
+                            label: `Nature`,
+                            value: nature.label,
+                        },
+                    } : {}),
                 },
             }
         }));

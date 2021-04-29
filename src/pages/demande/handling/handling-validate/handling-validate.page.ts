@@ -89,7 +89,6 @@ export class HandlingValidatePage extends PageComponent {
                 }), {});
 
                 this.refreshHeader(false);
-                console.log(currentStatus);
 
                 let freeFieldsValues = JSON.parse(this.handling.freeFields || '{}') || {};
 
