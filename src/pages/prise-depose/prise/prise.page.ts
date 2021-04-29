@@ -25,6 +25,7 @@ import {Nature} from '@entities/nature';
 import {MovementConfirmPageRoutingModule} from "../movement-confirm/movement-confirm-routing.module";
 import {Translation} from "@entities/translation";
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
+import {AlertManagerService} from "../../../app/common/services/alert-manager.service";
 
 
 @Component({
@@ -70,7 +71,7 @@ export class PrisePage extends PageComponent implements CanLeave {
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
 
-    private isIonEnter: boolean;
+    private viewEntered: boolean;
 
     public constructor(private network: Network,
                        private apiService: ApiService,
@@ -127,7 +128,7 @@ export class PrisePage extends PageComponent implements CanLeave {
 
     public ionViewWillLeave(): void {
         this.barcodeCheckLoading = false;
-        this.isIonEnter = false;
+        this.viewEntered = false;
         this.trackingListFactory.disableActions();
         this.footerScannerComponent.unsubscribeZebraScan();
         if (this.barcodeCheckSubscription) {
@@ -269,8 +270,17 @@ export class PrisePage extends PageComponent implements CanLeave {
         return TrackingListFactoryService.GetObjectLabel(this.fromStock);
     }
 
+    private get toTakeOngoingPacks() {
+        return this.currentPacksOnLocation
+            ? this.currentPacksOnLocation.filter(({hidden, ref_article: ongoingBarcode}) => (
+                !hidden
+                && !this.colisPrise.some(({ref_article: takeBarCode}) => takeBarCode === ongoingBarcode)
+            ))
+            : [];
+    }
+
     public get displayPacksOnLocationsList(): boolean {
-        return this.currentPacksOnLocation && this.currentPacksOnLocation.filter(({hidden}) => !hidden).length > 0;
+        return this.currentPacksOnLocation && this.toTakeOngoingPacks.length > 0;
     }
 
     private saveTrackingMovement(barCode: string, quantity: number, loading: boolean = false): void {
@@ -353,9 +363,15 @@ export class PrisePage extends PageComponent implements CanLeave {
         this.listTakingBody = listTakingBody;
 
         const {header: listPacksOnLocationHeader, body: listPacksOnLocationBody} = this.trackingListFactory.createListConfig(
-            this.currentPacksOnLocation.filter(({hidden}) => !hidden),
+            this.toTakeOngoingPacks,
             TrackingListFactoryService.LIST_TYPE_TAKING_SUB,
             {
+                validateIcon: {
+                    name: 'up.svg',
+                    action: () => {
+                        this.takeAll()
+                    },
+                },
                 objectLabel: this.objectLabel,
                 rightIcon: {
                     mode: 'upload',
@@ -370,8 +386,12 @@ export class PrisePage extends PageComponent implements CanLeave {
         this.listPacksOnLocationBody = listPacksOnLocationBody;
     }
 
+    private takeAll() {
+        this.toTakeOngoingPacks.forEach(({ref_article}) => this.testIfBarcodeEquals(ref_article, true));
+    }
+
     private init(fromStart: boolean = true): void {
-        this.isIonEnter = true;
+        this.viewEntered = true;
         this.loading = true;
         this.apiLoading = false;
         this.listTakingBody = [];
@@ -482,23 +502,46 @@ export class PrisePage extends PageComponent implements CanLeave {
 
                     if (needNatureChecks) {
                         this.apiService
-                            .requestApi(ApiService.GET_PACK_NATURE, {params: {code: barCode}})
+                            .requestApi(ApiService.GET_PACK_DATA, {params: {code: barCode, existing: 1, nature: 1, group: 1}})
                             .pipe(
-                                flatMap(({nature}) => (
+                                flatMap(({nature, existing, group}) => (
                                     nature
-                                        ? this.sqliteService.importNaturesData({natures: [nature]}, false).pipe(map(() => nature))
-                                        : of(undefined)
+                                        ? this.sqliteService.importNaturesData({natures: [nature]}, false).pipe(map(() => ({nature, existing, group})))
+                                        : of({nature, existing, group})
                                 )),
-                                tap((nature) => {
+                                tap(({nature}) => {
                                     if (nature) {
                                         const {id, color, label} = nature;
                                         this.natureIdsToConfig[id] = {label, color};
                                     }
                                 }),
-                                filter(() => this.isIonEnter)
+                                filter(() => this.viewEntered)
                             )
                             .subscribe(
-                                (nature) => this.updateTrackingMovementNature(barCode, nature && nature.id),
+                                ({nature, existing, group}) => {
+                                    console.log(group);
+                                    if (group) {
+                                        from(this.alertController.create({
+                                            header: 'Confirmation',
+                                            cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
+                                            message: `Ce colis est contenu dans le groupe ${group}.
+                                                      Confirmer la prise l'enlèvera du groupe.`,
+                                            buttons: [
+                                                {
+                                                    text: 'Confirmer',
+                                                    cssClass: 'alert-success'
+                                                }
+                                            ]
+                                        })).subscribe((alert: HTMLIonAlertElement) => {
+                                            alert.onDidDismiss().then(() => {
+                                                this.updateTrackingMovementNature(barCode, nature && nature.id)
+                                            });
+                                            alert.present();
+                                        });
+                                    } else {
+                                        this.updateTrackingMovementNature(barCode, nature && nature.id)
+                                    }
+                                },
                                 () => this.updateTrackingMovementNature(barCode)
                             );
                     }
