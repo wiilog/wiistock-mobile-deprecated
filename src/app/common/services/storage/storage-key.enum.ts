@@ -4,6 +4,8 @@ export enum StorageKeyEnum {
     RIGHT_DEMANDE = 'demande',
     RIGHT_STOCK = 'stock',
     RIGHT_TRACKING = 'tracking',
+    RIGHT_GROUP = 'group',
+    RIGHT_UNGROUP = 'ungroup',
     DEMO_MODE = 'demoMode',
 
     API_KEY = 'api-key',

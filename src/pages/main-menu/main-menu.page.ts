@@ -95,7 +95,7 @@ export class MainMenuPage extends PageComponent {
                         zip(
                             this.storageService.getDemandeAccessRight(),
                             this.storageService.getTrackingAccessRight(),
-                            this.storageService.getStockAccessRight()
+                            this.storageService.getStockAccessRight(),
                         ).pipe(map(([demande, tracking, stock]) => ({
                             finished,
                             message,
