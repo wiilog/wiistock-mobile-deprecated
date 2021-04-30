@@ -55,26 +55,25 @@ export class GroupContentPage extends PageComponent {
 
         if (this.group.packs.find(pack => pack.code === code) || this.group.newPacks.find(pack => pack.code === code)) {
             this.toastService.presentToast(`Le colis ${code} est déjà présent dans le groupe`);
-            return;
+        } else {
+            this.apiService.requestApi(ApiService.PACKS_GROUPS, options)
+                .subscribe(response => {
+                    if (response.packGroup) {
+                        this.toastService.presentToast(`Le colis ${code} est un groupe`);
+                    } else {
+                        let pack = response.pack ?? {
+                            code,
+                            nature_id: null,
+                            quantity: 1,
+                            date: moment().format('DD/MM/YYYY HH:mm:ss'),
+                        };
+
+                        this.group.newPacks.push(pack);
+                        this.refreshBodyConfig();
+                        this.refreshHeaderConfig();
+                    }
+                })
         }
-
-        this.apiService.requestApi(ApiService.PACKS_GROUPS, options)
-            .subscribe(response => {
-                if (response.packGroup) {
-                    this.toastService.presentToast(`Le colis ${code} est un groupe`);
-                } else {
-                    let pack = response.pack ?? {
-                        code,
-                        nature_id: null,
-                        quantity: 1,
-                        date: moment().format('DD/MM/YYYY HH:mm:ss'),
-                    };
-
-                    this.group.newPacks.push(pack);
-                    this.refreshBodyConfig();
-                    this.refreshHeaderConfig();
-                }
-            })
     }
 
     private refreshBodyConfig() {
