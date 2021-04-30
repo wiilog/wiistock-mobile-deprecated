@@ -8,7 +8,6 @@ import {NavService} from '@app/common/services/nav.service';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
 import {ToastService} from '@app/common/services/toast.service';
-import {DemandeLivraisonArticlesPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-articles/demande-livraison-articles-routing.module';
 import {flatMap, map, tap} from 'rxjs/operators';
 import {PageComponent} from '@pages/page.component';
 import {FormPanelParam} from '@app/common/directives/form-panel/form-panel-param';
@@ -17,6 +16,7 @@ import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/
 import {FormPanelService} from "@app/common/services/form-panel.service";
 import {FreeField, FreeFieldType} from "@entities/free-field";
 import {LoadingService} from '@app/common/services/loading.service';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -198,7 +198,7 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
                                 id: insertId,
                                 ...values
                             };
-                            this.navService.push(DemandeLivraisonArticlesPageRoutingModule.PATH, {
+                            this.navService.push(NavPathEnum.DEMANDE_LIVRAISON_ARTICLES, {
                                 demandeId: insertId,
                                 isUpdate: this.isUpdate
                             });

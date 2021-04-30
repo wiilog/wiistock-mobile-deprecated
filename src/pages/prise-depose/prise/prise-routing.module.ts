@@ -17,5 +17,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class PrisePageRoutingModule {
-    public static readonly PATH: string = 'prise';
 }

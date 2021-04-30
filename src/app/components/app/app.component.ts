@@ -6,10 +6,10 @@ import {ScssHelperService} from '@app/common/services/scss-helper.service';
 import {from} from 'rxjs';
 import {NavService} from '@app/common/services/nav.service';
 import {flatMap} from 'rxjs/operators';
-import {LoginPageRoutingModule} from '@pages/login/login-routing.module';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {ServerImageService} from '@app/common/services/server-image.service';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 @Component({
     selector: 'wii-root',
@@ -51,7 +51,7 @@ export class AppComponent {
                 flatMap(() => this.serverImageService.loadFromStorage()),
                 flatMap(() => this.storageService.clearStorage()),
                 flatMap(() => this.serverImageService.saveToStorage()),
-                flatMap(() => this.navService.setRoot(LoginPageRoutingModule.PATH)),
+                flatMap(() => this.navService.setRoot(NavPathEnum.LOGIN)),
             )
             .subscribe(() => {
                 this.platformReady = true;

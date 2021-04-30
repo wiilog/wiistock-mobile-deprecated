@@ -3,10 +3,10 @@ import {zip} from 'rxjs';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {NavService} from "@app/common/services/nav.service";
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
-import LOGIN_PATH from "@pages/login/login-path";
 import {MainHeaderService} from "@app/common/services/main-header.service";
 import {flatMap} from 'rxjs/operators';
 import {LoadingService} from '@app/common/services/loading.service';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Injectable({
@@ -29,7 +29,7 @@ export class UserService {
             this.logoutOnProgress = true;
             zip(this.sqliteService.resetDataBase(), this.storageService.clearStorage())
                 .pipe(
-                    flatMap(() => this.navService.setRoot(LOGIN_PATH, {autoConnect: false})),
+                    flatMap(() => this.navService.setRoot(NavPathEnum.LOGIN, {autoConnect: false})),
                     flatMap(() => this.loadingService.dismissLastLoading())
                 )
                 .subscribe(() => {

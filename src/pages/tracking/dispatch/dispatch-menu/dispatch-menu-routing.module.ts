@@ -16,5 +16,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class DispatchMenuPageRoutingModule {
-    public static readonly PATH: string = 'dispatch-menu';
 }

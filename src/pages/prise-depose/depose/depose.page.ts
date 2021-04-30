@@ -17,13 +17,13 @@ import {AlertController} from '@ionic/angular';
 import {NavService} from '@app/common/services/nav.service';
 import {flatMap, map, tap} from 'rxjs/operators';
 import * as moment from 'moment';
-import {MovementConfirmPageRoutingModule} from '@pages/prise-depose/movement-confirm/movement-confirm-routing.module';
 import {PageComponent} from '@pages/page.component';
 import {Nature} from '@entities/nature';
 import {Translation} from "@entities/translation";
 import {AlertManagerService} from "@app/common/services/alert-manager.service";
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 @Component({
     selector: 'wii-depose',
@@ -378,7 +378,9 @@ export class DeposePage extends PageComponent implements CanLeave {
     private refreshPriseListComponent(): void {
         const natureLabel = this.natureTranslation.filter((translation) => translation.label === 'nature')[0];
         this.priseListConfig = this.trackingListFactory.createListConfig(
-            this.colisPrise.filter(({hidden}) => !hidden),
+            this.colisPrise
+                .filter(({hidden}) => !hidden)
+                .map(({subPacks, ...movements}) => movements),
             TrackingListFactoryService.LIST_TYPE_DROP_SUB,
             {
                 objectLabel: this.objectLabel,
@@ -397,7 +399,7 @@ export class DeposePage extends PageComponent implements CanLeave {
     private refreshDeposeListComponent(): void {
         const natureLabel = this.natureTranslation.filter((translation) => translation.label === 'nature')[0];
         this.deposeListConfig = this.trackingListFactory.createListConfig(
-            this.colisDepose,
+            this.colisDepose.map(({subPacks, ...movements}) => movements),
             TrackingListFactoryService.LIST_TYPE_DROP_MAIN,
             {
                 natureIdsToConfig: this.natureIdsToConfig,
@@ -412,7 +414,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                         if (dropIndex !== undefined) {
                             const {quantity, comment, signature, photo, nature_id: natureId, freeFields} = this.colisDepose[dropIndex];
                             this.trackingListFactory.disableActions();
-                            this.navService.push(MovementConfirmPageRoutingModule.PATH, {
+                            this.navService.push(NavPathEnum.MOVEMENT_CONFIRM, {
                                 fromStock: this.fromStock,
                                 location: this.emplacement,
                                 barCode,

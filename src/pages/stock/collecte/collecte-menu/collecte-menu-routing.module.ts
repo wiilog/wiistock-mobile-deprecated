@@ -17,5 +17,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class CollecteMenuPageRoutingModule {
-    public static readonly PATH: string = 'collecte-menu';
 }

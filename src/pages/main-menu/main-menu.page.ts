@@ -3,7 +3,7 @@ import {MenuConfig} from '@app/common/components/menu/menu-config';
 import {from, Observable, Subscription, zip} from 'rxjs';
 import {flatMap, map, take, tap} from 'rxjs/operators';
 import {AlertController, Platform} from '@ionic/angular';
-import { Preparation } from '@entities/preparation';
+import {Preparation} from '@entities/preparation';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {Network} from '@ionic-native/network/ngx';
@@ -11,10 +11,8 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav.service';
 import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
-import {StockMenuPageRoutingModule} from '@pages/stock/stock-menu/stock-menu-routing.module';
-import {DemandeMenuPageRoutingModule} from '@pages/demande/demande-menu/demande-menu-routing.module';
 import {PageComponent} from '@pages/page.component';
-import {TrackingMenuPageRoutingModule} from '@pages/tracking/tracking-menu/tracking-menu-routing.module';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -175,7 +173,7 @@ export class MainMenuPage extends PageComponent {
                 icon: 'tracking.svg',
                 label: 'Traçabilité',
                 action: () => {
-                    this.navService.push(TrackingMenuPageRoutingModule.PATH, {
+                    this.navService.push(NavPathEnum.TRACKING_MENU, {
                         fromStock: false
                     });
                 }
@@ -187,7 +185,7 @@ export class MainMenuPage extends PageComponent {
                 icon: 'stock.svg',
                 label: 'Stock',
                 action: () => {
-                    this.navService.push(StockMenuPageRoutingModule.PATH, {avoidSync: true});
+                    this.navService.push(NavPathEnum.STOCK_MENU, {avoidSync: true});
                 }
             });
         }
@@ -198,7 +196,7 @@ export class MainMenuPage extends PageComponent {
                 iconColor: 'success',
                 label: 'Demande',
                 action: () => {
-                    this.navService.push(DemandeMenuPageRoutingModule.PATH);
+                    this.navService.push(NavPathEnum.DEMANDE_MENU);
                 }
             });
         }

@@ -18,8 +18,7 @@ import {BarcodeScannerComponent} from '@app/common/components/barcode-scanner/ba
 import {Translation} from '@entities/translation';
 import {ToastService} from '@app/common/services/toast.service';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
-import {DispatchValidatePageRoutingModule} from '@pages/tracking/dispatch/dispatch-validate/dispatch-validate-routing.module';
-import {DispatchPackConfirmPageRoutingModule} from '@pages/tracking/dispatch/dispatch-pack-confirm/dispatch-pack-confirm-routing.module';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -253,7 +252,7 @@ export class DispatchPacksPage extends PageComponent {
                     !pack.already_treated
                         ? {
                             pressAction: () => {
-                                this.navService.push(DispatchPackConfirmPageRoutingModule.PATH, {
+                                this.navService.push(NavPathEnum.DISPATCH_PACK_CONFIRM, {
                                     pack,
                                     dispatch: this.dispatch,
                                     natureTranslationLabel: natureTranslationCapitalized,
@@ -312,7 +311,7 @@ export class DispatchPacksPage extends PageComponent {
     private validate(): void {
         const partialDispatch = this.dispatchPacks.filter(({treated, already_treated}) => (treated != 1 && already_treated != 1)).length > 0
         if (!partialDispatch || !this.typeHasNoPartialStatuses) {
-            this.navService.push(DispatchValidatePageRoutingModule.PATH, {
+            this.navService.push(NavPathEnum.DISPATCH_VALIDATE, {
                 dispatchId: this.dispatch.id,
                 dispatchPacks: this.dispatchPacks,
                 afterValidate: () => {

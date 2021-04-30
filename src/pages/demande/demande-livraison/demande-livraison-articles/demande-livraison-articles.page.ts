@@ -16,13 +16,13 @@ import {DemandeLivraison} from '@entities/demande-livraison';
 import {DemandeLivraisonType} from '@entities/demande-livraison-type';
 import {DemandeLivraisonArticle} from '@entities/demande-livraison-article';
 import {AlertManagerService} from '@app/common/services/alert-manager.service';
-import {DemandeLivraisonArticleTakePageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-article-take/demande-livraison-article-take-routing.module';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {PageComponent} from '@pages/page.component';
 import {FreeField, FreeFieldType} from "@entities/free-field";
 import {FormPanelService} from '@app/common/services/form-panel.service';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -136,7 +136,7 @@ export class DemandeLivraisonArticlesPage extends PageComponent implements CanLe
     }
 
     public selectArticleQuantity(article?: DemandeLivraisonArticle) {
-        this.navService.push(DemandeLivraisonArticleTakePageRoutingModule.PATH, {
+        this.navService.push(NavPathEnum.DEMANDE_LIVRAISON_ARTICLE_TAKE, {
             addArticleInDemande: (articleToSelect: DemandeLivraisonArticle) => this.addArticleInDemande(articleToSelect),
             article
         });

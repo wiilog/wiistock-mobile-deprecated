@@ -41,6 +41,5 @@ export class FormPanelDirective implements OnInit {
         this.instance.name = config.name;
         this.instance.errors = config.errors;
         this.instance.group = config.group;
-        console.log(this.instance.inputConfig)
     }
 }

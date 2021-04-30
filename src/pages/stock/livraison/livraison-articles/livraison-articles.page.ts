@@ -14,9 +14,8 @@ import {flatMap} from 'rxjs/operators';
 import * as moment from 'moment';
 import {Mouvement} from '@entities/mouvement';
 import {IconColor} from '@app/common/components/icon/icon-color';
-import {LivraisonEmplacementPageRoutingModule} from '@pages/stock/livraison/livraison-emplacement/livraison-emplacement-routing.module';
-import {LivraisonArticleTakePageRoutingModule} from '@pages/stock/livraison/livraison-article-take/livraison-article-take-routing.module';
 import {PageComponent} from '@pages/page.component';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -232,7 +231,7 @@ export class LivraisonArticlesPage extends PageComponent {
             this.toastService.presentToast('Veuillez traiter tous les articles concernés');
         }
         else {
-            this.navService.push(LivraisonEmplacementPageRoutingModule.PATH, {
+            this.navService.push(NavPathEnum.LIVRAISON_EMPLACEMENT, {
                 livraison: this.livraison,
                 validateLivraison: () => {
                     this.navService.pop();
@@ -248,7 +247,7 @@ export class LivraisonArticlesPage extends PageComponent {
 
         if (article) {
             const self = this;
-            this.navService.push(LivraisonArticleTakePageRoutingModule.PATH, {
+            this.navService.push(NavPathEnum.LIVRAISON_ARTICLE_TAKE, {
                 article,
                 selectArticle: (quantity) => {
                     self.selectArticle(article, quantity);

@@ -6,11 +6,11 @@ import {MainHeaderService} from '@app/common/services/main-header.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {NavService} from '@app/common/services/nav.service';
 import {PageComponent} from '@pages/page.component';
-import {HandlingValidatePageRoutingModule} from '@pages/demande/handling/handling-validate/handling-validate-routing.module';
 import * as moment from 'moment';
 import {Subject, zip} from 'rxjs';
 import {Translation} from '@entities/translation';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -68,7 +68,7 @@ export class HandlingMenuPage extends PageComponent {
 
         if (filteredHandling.length === 1) {
             this.onSearchCleared();
-            this.navService.push(HandlingValidatePageRoutingModule.PATH, {handling: filteredHandling[0]});
+            this.navService.push(NavPathEnum.HANDLING_VALIDATE, {handling: filteredHandling[0]});
         }
         else {
             this.currentFilterSubject = barcode;
@@ -124,7 +124,7 @@ export class HandlingMenuPage extends PageComponent {
                     }
                     : {}),
                 action: () => {
-                    this.navService.push(HandlingValidatePageRoutingModule.PATH, {handling});
+                    this.navService.push(NavPathEnum.HANDLING_VALIDATE, {handling});
                 }
             }));
     }

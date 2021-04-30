@@ -17,5 +17,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class PriseDeposeMenuPageRoutingModule {
-    public static readonly PATH: string = 'prise-depose-menu';
 }

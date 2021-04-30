@@ -391,52 +391,15 @@ export class LocalDataManagerService {
     public sendMouvementTraca(sendFromStock: boolean): Observable<any> {
         return this.sqliteService.findAll('mouvement_traca')
             .pipe(
-                map((mouvements: Array<MouvementTraca>) => (
-                    mouvements
-                        .filter(({fromStock}) => (sendFromStock === Boolean(fromStock)))
-                        .map(({signature, photo, ...mouvement}) => ({
-                            ...mouvement,
-                            signature: signature
-                                ? this.fileService.createFile(
-                                    signature,
-                                    FileService.SIGNATURE_IMAGE_EXTENSION,
-                                    FileService.SIGNATURE_IMAGE_TYPE,
-                                    'signature'
-                                )
-                                : undefined,
-                            photo: photo
-                                ? this.fileService.createFile(
-                                    photo,
-                                    FileService.SIGNATURE_IMAGE_EXTENSION,
-                                    FileService.SIGNATURE_IMAGE_TYPE,
-                                    'photo'
-                                )
-                                : undefined
-                        }))
-                        .sort(({date: dateStr1}, {date: dateStr2}) => {
-                            const date1 = new Date(dateStr1.split('_')[0]);
-                            const date2 = new Date(dateStr2.split('_')[0]);
-                            return date1.getTime() <= date2.getTime()
-                                ? -1
-                                : 1
-                        })
+                map((mouvements: Array<MouvementTraca & {subPacks: any}>) => (
+                   this.mapTrackingMovements(mouvements.filter(({fromStock}) => (sendFromStock === Boolean(fromStock))))
                 )),
-                flatMap((mouvements: Array<MouvementTraca&{signature: File, photo: File}>) => (
+                flatMap((mouvements: Array<MouvementTraca<File> & {subPacks: any}>) => (
                     mouvements.length > 0
                         ? (
                             this.apiService
                                 .requestApi(ApiService.POST_MOUVEMENT_TRACA, {
-                                    params: {
-                                        mouvements: mouvements.map(({signature, photo, ...mouvement}) => mouvement),
-                                        ...(mouvements.reduce((acc, {signature}, currentIndex) => ({
-                                            ...acc,
-                                            ...(signature ? {[`signature_${currentIndex}`]: signature} : {})
-                                        }), {})),
-                                        ...(mouvements.reduce((acc, {photo}, currentIndex) => ({
-                                            ...acc,
-                                            ...(photo ? {[`photo_${currentIndex}`]: photo} : {})
-                                        }), {}))
-                                    }
+                                    params: this.extractTrackingMovementFiles(mouvements)
                                 })
                                 .pipe(
                                     map((apiResponse) => [apiResponse, mouvements]),
@@ -680,5 +643,49 @@ export class LocalDataManagerService {
                         ])))
                     ))
                 );
+    }
+
+    public mapTrackingMovements(movements: Array<MouvementTraca & {subPacks: any}>) {
+        return movements
+            .map(({signature, photo, ...mouvement}) => ({
+                ...mouvement,
+                signature: signature
+                    ? this.fileService.createFile(
+                        signature,
+                        FileService.SIGNATURE_IMAGE_EXTENSION,
+                        FileService.SIGNATURE_IMAGE_TYPE,
+                        'signature'
+                    )
+                    : undefined,
+                photo: photo
+                    ? this.fileService.createFile(
+                        photo,
+                        FileService.SIGNATURE_IMAGE_EXTENSION,
+                        FileService.SIGNATURE_IMAGE_TYPE,
+                        'photo'
+                    )
+                    : undefined
+            }) as MouvementTraca<File>)
+            .sort(({date: dateStr1}, {date: dateStr2}) => {
+                const date1 = new Date(dateStr1.split('_')[0]);
+                const date2 = new Date(dateStr2.split('_')[0]);
+                return date1.getTime() <= date2.getTime()
+                    ? -1
+                    : 1
+            });
+    }
+
+    public extractTrackingMovementFiles(movements: Array<MouvementTraca<File> & {subPacks: any}>) {
+        return {
+            mouvements: movements.map(({signature, photo, ...mouvement}) => mouvement),
+            ...(movements.reduce((acc, {signature}, currentIndex) => ({
+                ...acc,
+                ...(signature ? {[`signature_${currentIndex}`]: signature} : {})
+            }), {})),
+            ...(movements.reduce((acc, {photo}, currentIndex) => ({
+                ...acc,
+                ...(photo ? {[`photo_${currentIndex}`]: photo} : {})
+            }), {}))
+        }
     }
 }

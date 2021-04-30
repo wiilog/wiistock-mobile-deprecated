@@ -9,6 +9,7 @@ import {NavService} from '@app/common/services/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -74,7 +75,7 @@ export class ParamsPage extends PageComponent implements CanLeave {
                 .subscribe(
                     () => {
                         this.isLoading = false;
-                        this.navService.setRoot('login');
+                        this.navService.setRoot(NavPathEnum.LOGIN);
                     },
                     () => {
                         from(loadingComponent.dismiss()).subscribe(() => {

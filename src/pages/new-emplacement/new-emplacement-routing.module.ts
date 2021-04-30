@@ -17,5 +17,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class NewEmplacementPageRoutingModule {
-    public static readonly PATH: string = 'new-emplacement';
 }

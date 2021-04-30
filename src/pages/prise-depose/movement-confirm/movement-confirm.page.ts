@@ -19,6 +19,14 @@ import {Nature} from '@entities/nature';
 import {zip} from 'rxjs';
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
 import {IconColor} from '@app/common/components/icon/icon-color';
+import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel/list-panel-item-config';
+import {MouvementTraca} from '@entities/mouvement-traca';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+
+enum Page {
+    EDIT,
+    SUB_PACKS
+}
 
 
 @Component({
@@ -42,9 +50,21 @@ export class MovementConfirmPage extends PageComponent {
 
     public headerConfig: HeaderConfig;
     public bodyConfig: Array<FormPanelParam>;
+    public subPacksConfig: Array<ListPanelItemConfig>;
+
+    public readonly Page = Page;
+    public currentPage: Page = Page.EDIT;
+
     private savedNatureId: string;
     private location: Emplacement;
-    private validate: (values: {quantity: string; comment: string; signature: string; photo: string; natureId: number, freeFields: string}) => void;
+    private validate: (values: {quantity: string; comment: string; signature: string; photo: string; natureId: number, freeFields: string, subPacks?: any}) => void;
+
+    public isGroup: boolean;
+    public subPacks: Array<MouvementTraca>;
+    public natureIdToNature: { [natureId: string]: Nature };
+    public natureTranslationLabel: string;
+    public fromStock: boolean;
+    public movementType: MovementConfirmType;
 
     public constructor(private activatedRoute: ActivatedRoute,
                        private toastService: ToastService,
@@ -53,20 +73,23 @@ export class MovementConfirmPage extends PageComponent {
                        navService: NavService) {
         super(navService);
         this.savedNatureId = null;
+        this.subPacksConfig = [];
     }
 
     public ionViewWillEnter(): void {
         this.location = this.currentNavParams.get('location');
         this.validate = this.currentNavParams.get('validate');
+        this.isGroup = this.currentNavParams.get('isGroup');
+        this.subPacks = this.currentNavParams.get('subPacks');
+        this.natureTranslationLabel = this.currentNavParams.get('natureTranslationLabel');
+        this.movementType = this.currentNavParams.get('movementType');
 
         const barCode = this.currentNavParams.get('barCode');
-        const movementType: MovementConfirmType = this.currentNavParams.get('movementType');
-        const natureTranslationLabel = this.currentNavParams.get('natureTranslationLabel');
         const fromStock = this.currentNavParams.get('fromStock');
         const {quantity, comment, signature, photo, natureId, freeFields: freeFieldsValuesStr} = this.currentNavParams.get('values');
         const freeFieldsValues = freeFieldsValuesStr ? JSON.parse(freeFieldsValuesStr) : {};
-        const chosenIcon = MovementConfirmPage.PageIcon[movementType];
-        const chosenTitle = MovementConfirmPage.PageTitle[movementType];
+        const chosenIcon = MovementConfirmPage.PageIcon[this.movementType];
+        const chosenTitle = MovementConfirmPage.PageTitle[this.movementType];
 
         this.headerConfig = {
             title: `${chosenTitle} de ${barCode}`,
@@ -83,8 +106,15 @@ export class MovementConfirmPage extends PageComponent {
         )
             .subscribe(([natures, freeFields]: [Array<Nature>, Array<FreeField>]) => {
                 const needsToShowNatures = natures.filter(nature => nature.hide !== 1).length > 0;
+
+                this.natureIdToNature = natures.reduce((acc, nature) => ({
+                    ...acc,
+                    [Number(nature.id)]: nature
+                }), {})
+
+
                 const selectedNature = (needsToShowNatures && natureId)
-                    ? natures.find(({id}) => ((Number(id)) === Number(natureId)))
+                    ? this.natureIdToNature[Number(natureId)]
                     : null;
                 this.savedNatureId = selectedNature ? String(selectedNature.id) : null;
                 this.bodyConfig = [];
@@ -92,7 +122,7 @@ export class MovementConfirmPage extends PageComponent {
                     this.bodyConfig.push({
                         item: FormPanelInputComponent,
                         config: {
-                            label: natureTranslationLabel,
+                            label: this.natureTranslationLabel,
                             name: 'natureId',
                             value: selectedNature.label,
                             inputConfig: {
@@ -106,7 +136,7 @@ export class MovementConfirmPage extends PageComponent {
                     this.bodyConfig.push({
                         item: FormPanelSelectComponent,
                         config: {
-                            label: natureTranslationLabel,
+                            label: this.natureTranslationLabel,
                             name: 'natureId',
                             value: natureId,
                             inputConfig: {
@@ -118,7 +148,7 @@ export class MovementConfirmPage extends PageComponent {
                     });
                 }
 
-                if (!fromStock) {
+                if (!fromStock && !this.isGroup) {
                     this.bodyConfig.push({
                         item: FormPanelInputComponent,
                         config: {
@@ -183,6 +213,10 @@ export class MovementConfirmPage extends PageComponent {
                         ))
                         .filter(Boolean))
                 ]);
+
+                if (this.isGroup) {
+                    this.subPacksConfig = this.calculateSubPacksListConfig();
+                }
             });
     }
 
@@ -213,9 +247,52 @@ export class MovementConfirmPage extends PageComponent {
                 signature,
                 photo,
                 natureId,
-                freeFields: JSON.stringify(freeFields)
+                freeFields: JSON.stringify(freeFields),
+                subPacks: this.subPacks
             });
             this.navService.pop();
         }
+    }
+
+    public onPageClicked(page: Page) {
+        if (this.currentPage !== page) {
+            this.currentPage = page;
+        }
+    }
+
+    private updateSubPacks(barCode: string, { quantity, comment, signature, natureId, photo, freeFields }) {
+        const index = this.subPacks.findIndex(({ref_article}) => (ref_article === barCode));
+        if (index > -1) {
+            this.subPacks[index].quantity = quantity;
+            this.subPacks[index].comment = comment;
+            this.subPacks[index].signature = signature;
+            this.subPacks[index].nature_id = natureId;
+            this.subPacks[index].photo = photo;
+            this.subPacks[index].freeFields = freeFields;
+        }
+    }
+
+    private calculateSubPacksListConfig() {
+        return this.subPacks.map(({nature_id, ref_article, quantity, comment, signature, photo, freeFields}): ListPanelItemConfig => ({
+            color: this.natureIdToNature[nature_id] ? this.natureIdToNature[nature_id].color : undefined,
+            infos: {
+                code: {
+                    label: 'Code',
+                    value: ref_article,
+                },
+                quantity: {
+                    label: 'Quantité',
+                    value: `${quantity}`,
+                },
+                ...(this.natureIdToNature[nature_id]
+                    ? {
+                        nature: {
+                            label: this.natureTranslationLabel,
+                            value: this.natureIdToNature[nature_id].label
+                        }
+                    }
+                    : {})
+            }
+        }));
     }
 }

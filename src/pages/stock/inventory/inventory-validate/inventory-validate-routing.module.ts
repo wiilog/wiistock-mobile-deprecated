@@ -17,5 +17,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class InventoryValidatePageRoutingModule {
-    public static readonly PATH: string = 'inventory-validate';
 }

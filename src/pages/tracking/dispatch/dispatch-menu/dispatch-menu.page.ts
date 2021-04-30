@@ -9,11 +9,11 @@ import {Dispatch} from '@entities/dispatch';
 import {CardListConfig} from '@app/common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
 import {MainHeaderService} from '@app/common/services/main-header.service';
-import {DispatchPacksPageRoutingModule} from '@pages/tracking/dispatch/dispatch-packs/dispatch-packs-routing.module';
 import {SelectItemTypeEnum} from "@app/common/components/select-item/select-item-type.enum";
 import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {SelectItemComponent} from "@app/common/components/select-item/select-item.component";
 import {ToastService} from '@app/common/services/toast.service';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 @Component({
     selector: 'wii-dispatch-menu',
@@ -94,7 +94,7 @@ export class DispatchMenuPage extends PageComponent {
                         }
                         : {}),
                     action: () => {
-                        this.navService.push(DispatchPacksPageRoutingModule.PATH, {
+                        this.navService.push(NavPathEnum.DISPATCH_PACKS, {
                             dispatchId: id
                         });
                     }
@@ -132,7 +132,7 @@ export class DispatchMenuPage extends PageComponent {
     }
 
     private redirectToDispatch(id: number) {
-        this.navService.push(DispatchPacksPageRoutingModule.PATH, {
+        this.navService.push(NavPathEnum.DISPATCH_PACKS, {
             dispatchId: id
         });
     }

@@ -13,7 +13,7 @@ import {PageComponent} from '@pages/page.component';
 import {TransferOrderArticle} from '@entities/transfer-order-article';
 import {LoadingService} from '@app/common/services/loading.service';
 import {TransferOrder} from '@entities/transfer-order';
-import {TransferValidatePageRoutingModule} from '@pages/stock/transfer/transfer-validate/transfer-validate-routing.module';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -111,7 +111,7 @@ export class TransferArticlesPage extends PageComponent {
             this.toastService.presentToast('Veuillez terminer le traitement du transfert.');
         }
         else {
-            this.navService.push(TransferValidatePageRoutingModule.PATH, {
+            this.navService.push(NavPathEnum.TRANSFER_VALIDATE, {
                 transferOrder: this.transferOrder,
                 onValidate: () => {
                     this.navService.pop();

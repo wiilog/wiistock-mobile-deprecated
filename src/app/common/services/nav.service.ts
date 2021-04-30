@@ -5,6 +5,7 @@ import {from, Observable} from 'rxjs';
 import {environment} from '@environments/environment';
 import {tap} from 'rxjs/operators';
 import {MainHeaderService} from '@app/common/services/main-header.service';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 export type Params = Map<string, any>;
@@ -36,13 +37,13 @@ export class NavService {
         }
     }
 
-    public push(routeName: string, params?: RouteParams): Observable<boolean> {
+    public push(routeName: NavPathEnum, params?: RouteParams): Observable<boolean> {
         const paramsId = this.treatParams(params);
         const navigationExtras = this.createNavigationOption(paramsId);
         return from(this.navController.navigateForward(routeName, navigationExtras));
     }
 
-    public setRoot(routeName: string, params?: RouteParams): Observable<boolean> {
+    public setRoot(routeName: NavPathEnum, params?: RouteParams): Observable<boolean> {
         const paramsId = this.treatParams(params);
         const navigationExtras = this.createNavigationOption(paramsId);
         return from(this.navController.navigateRoot(routeName, {
@@ -66,9 +67,9 @@ export class NavService {
         return uniqueParamsId;
     }
 
-    public createNavigationOption(paramsId?: number): { queryParams?: RouteParams } {
+    public createNavigationOption(paramsId?: number): { queryParams?: RouteParams, onSameUrlNavigation?: 'reload' } {
         return paramsId
-            ? {queryParams: {paramsId}}
+            ? {queryParams: {paramsId}, onSameUrlNavigation: 'reload'}
             : {};
     }
 

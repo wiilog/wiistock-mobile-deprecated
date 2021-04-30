@@ -2,6 +2,14 @@
 
 .page-content {
     overflow: hidden;
+    flex-direction: column;
+
+    .nav-container {
+        display: flex;
+        & > ion-button {
+            flex: 1;
+        }
+    }
 
     wii-panel-header {
         margin: $spacerMin;

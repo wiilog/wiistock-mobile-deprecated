@@ -9,9 +9,9 @@ import {MouvementTraca} from '@entities/mouvement-traca';
 import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
 import {NavService} from '@app/common/services/nav.service';
 import {ActivatedRoute} from '@angular/router';
-import {EmplacementScanPageRoutingModule} from '@pages/prise-depose/emplacement-scan/emplacement-scan-routing.module';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -95,7 +95,7 @@ export class PriseDeposeMenuPage extends PageComponent implements CanLeave {
 
     public goToPrise(): void {
         if (!this.fromStock || this.network.type !== 'none') {
-            this.navService.push(EmplacementScanPageRoutingModule.PATH, {
+            this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
                 fromDepose: false,
                 fromStock: this.fromStock
             });
@@ -108,7 +108,7 @@ export class PriseDeposeMenuPage extends PageComponent implements CanLeave {
     public goToDrop(): void {
         if (!this.fromStock || this.network.type !== 'none') {
             if (this.canNavigateToDepose) {
-                this.navService.push(EmplacementScanPageRoutingModule.PATH, {
+                this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
                     fromDepose: true,
                     fromStock: this.fromStock
                 });

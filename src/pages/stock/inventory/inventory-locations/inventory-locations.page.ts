@@ -5,9 +5,7 @@ import {NavService} from '@app/common/services/nav.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {ToastService} from '@app/common/services/toast.service';
-import {InventoryArticlesPageRoutingModule} from '@pages/stock/inventory/inventory-articles/inventory-articles-routing.module';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
-import {InventoryLocationsAnomaliesPageRoutingModule} from '@pages/stock/inventory/inventory-locations-anomalies/inventory-locations-anomalies-routing.module';
 import {PageComponent} from '@pages/page.component';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
@@ -15,6 +13,7 @@ import {flatMap, map, tap} from 'rxjs/operators';
 import {from, of, ReplaySubject, Subscription, zip} from 'rxjs';
 import {Emplacement} from '@entities/emplacement';
 import {StorageService} from '@app/common/services/storage/storage.service';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -99,12 +98,12 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
     }
 
     public navigateToAnomalies(): void {
-        this.navService.push(InventoryLocationsAnomaliesPageRoutingModule.PATH);
+        this.navService.push(NavPathEnum.INVENTORY_LOCATIONS_ANOMALIES);
     }
 
     private navigateToArticles(selectedLocation: string): void {
         this.selectItemComponent.closeSearch();
-        this.navService.push(InventoryArticlesPageRoutingModule.PATH, {
+        this.navService.push(NavPathEnum.INVENTORY_ARTICLES, {
             selectedLocation,
             anomalyMode: false
         });

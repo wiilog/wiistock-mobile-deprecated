@@ -16,5 +16,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class HandlingValidatePageRoutingModule {
-    public static readonly PATH: string = 'handling-validate';
 }

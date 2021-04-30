@@ -22,10 +22,10 @@ import {NavService} from '@app/common/services/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {Nature} from '@entities/nature';
-import {MovementConfirmPageRoutingModule} from "../movement-confirm/movement-confirm-routing.module";
 import {Translation} from "@entities/translation";
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
-import {AlertManagerService} from "../../../app/common/services/alert-manager.service";
+import {AlertManagerService} from '@app/common/services/alert-manager.service';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -41,7 +41,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     public footerScannerComponent: BarcodeScannerComponent;
 
     public emplacement: Emplacement;
-    public colisPrise: Array<MouvementTraca&{loading?: boolean}>;
+    public colisPrise: Array<MouvementTraca & {loading?: boolean; isGroup?: boolean; subPacks?: Array<MouvementTraca>;}>;
     public currentPacksOnLocation: Array<MouvementTraca&{hidden?: boolean}>;
     public colisPriseAlreadySaved: Array<MouvementTraca>;
 
@@ -151,8 +151,19 @@ export class PrisePage extends PageComponent implements CanLeave {
             if (!this.apiLoading) {
                 this.apiLoading = true;
                 let loader: HTMLIonLoadingElement;
+
+                const movementsToSave = this.colisPrise.filter(({isGroup}) => !isGroup);
+                const groupingMovements = this.colisPrise.filter(({isGroup}) => isGroup);
+
+                if (!this.fromStock
+                    && this.network.type === 'none'
+                    && groupingMovements.length > 0) {
+                    this.toastService.presentToast('Votre prise contient des groupes, veuillez vous connectez à internet pour continuer.');
+                    return;
+                }
+
                 this.saveSubscription = this.localDataManager
-                    .saveMouvementsTraca(this.colisPrise.map(({loading, ...tracking}) => tracking))
+                    .saveMouvementsTraca(movementsToSave.map(({loading, ...tracking}) => tracking))
                     .pipe(
                         flatMap(() => {
                             const online = (this.network.type !== 'none');
@@ -172,6 +183,11 @@ export class PrisePage extends PageComponent implements CanLeave {
                                 ? this.localDataManager
                                     .sendMouvementTraca(this.fromStock)
                                     .pipe(
+                                        flatMap(() => (
+                                            !this.fromStock
+                                                ? this.apiService.requestApi(ApiService.POST_PACK_GROUPS, { params: { movements: groupingMovements}})
+                                                : of(undefined)
+                                        )),
                                         flatMap(() => (
                                             loader
                                                 ? from(loader.dismiss())
@@ -291,11 +307,15 @@ export class PrisePage extends PageComponent implements CanLeave {
         this.changeDetectorRef.detectChanges();
     }
 
-    private updateTrackingMovementNature(barCode: string, natureId?: number): void {
+    private updateTrackingMovementNature(barCode: string, natureId?: number, groupData?: any): void {
         const indexesToUpdate = this.findTakingIndexes(barCode);
         for(const index of indexesToUpdate) {
             this.colisPrise[index].nature_id = natureId;
             this.colisPrise[index].loading = false;
+            if (groupData) {
+                this.colisPrise[index].isGroup = true;
+                this.colisPrise[index].subPacks = groupData.packs;
+            }
         }
         this.refreshListComponent();
         this.changeDetectorRef.detectChanges();
@@ -318,12 +338,14 @@ export class PrisePage extends PageComponent implements CanLeave {
                         // we get first
                         const [dropIndex] = this.findTakingIndexes(barCode);
                         if (dropIndex !== undefined) {
-                            const {quantity, comment, signature, photo, nature_id: natureId, freeFields} = this.colisPrise[dropIndex];
+                            const {quantity, comment, signature, photo, nature_id: natureId, freeFields, isGroup, subPacks} = this.colisPrise[dropIndex];
                             this.trackingListFactory.disableActions();
-                            this.navService.push(MovementConfirmPageRoutingModule.PATH, {
+                            this.navService.push(NavPathEnum.MOVEMENT_CONFIRM, {
                                 fromStock: this.fromStock,
                                 location: this.emplacement,
                                 barCode,
+                                isGroup,
+                                subPacks,
                                 values: {
                                     quantity,
                                     comment,
@@ -354,7 +376,9 @@ export class PrisePage extends PageComponent implements CanLeave {
         this.listTakingBody = listTakingBody;
 
         const {header: listPacksOnLocationHeader, body: listPacksOnLocationBody} = this.trackingListFactory.createListConfig(
-            this.currentPacksOnLocation.filter(({hidden}) => !hidden),
+            this.currentPacksOnLocation
+                .filter(({hidden}) => !hidden)
+                .map(({subPacks, ...movements}) => movements),
             TrackingListFactoryService.LIST_TYPE_TAKING_SUB,
             {
                 objectLabel: this.objectLabel,
@@ -384,7 +408,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     }
 
     private updatePicking(barCode: string,
-                          {quantity, comment, signature, photo, natureId, freeFields}: {quantity: number; comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string}): void {
+                          {quantity, comment, signature, photo, natureId, freeFields, subPacks}: {quantity: number; comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string; subPacks: any;}): void {
         const dropIndexes = this.findTakingIndexes(barCode);
         if (dropIndexes.length > 0) {
             for(const dropIndex of dropIndexes) {
@@ -396,6 +420,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                 this.colisPrise[dropIndex].photo = photo;
                 this.colisPrise[dropIndex].nature_id = natureId;
                 this.colisPrise[dropIndex].freeFields = freeFields;
+                this.colisPrise[dropIndex].subPacks = subPacks;
             }
             this.refreshListComponent();
         }
@@ -483,12 +508,18 @@ export class PrisePage extends PageComponent implements CanLeave {
 
                     if (needNatureChecks) {
                         this.apiService
-                            .requestApi(ApiService.GET_PACK_DATA, {params: {code: barCode, existing: 1, nature: 1, group: 1}})
+                            .requestApi(ApiService.GET_PACK_DATA, {
+                                params: {
+                                    code: barCode,
+                                    nature: 1,
+                                    group: 1
+                                }
+                            })
                             .pipe(
-                                flatMap(({nature, existing, group}) => (
+                                flatMap(({nature, group, isPack, isGroup}) => (
                                     nature
-                                        ? this.sqliteService.importNaturesData({natures: [nature]}, false).pipe(map(() => ({nature, existing, group})))
-                                        : of({nature, existing, group})
+                                        ? this.sqliteService.importNaturesData({natures: [nature]}, false).pipe(map(() => ({nature, group, isPack, isGroup})))
+                                        : of({nature, group, isPack, isGroup})
                                 )),
                                 tap(({nature}) => {
                                     if (nature) {
@@ -499,28 +530,38 @@ export class PrisePage extends PageComponent implements CanLeave {
                                 filter(() => this.viewEntered)
                             )
                             .subscribe(
-                                ({nature, existing, group}) => {
-                                    console.log(group);
-                                    if (group) {
-                                        from(this.alertController.create({
-                                            header: 'Confirmation',
-                                            cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
-                                            message: `Ce colis est contenu dans le groupe ${group}.
+                                ({nature, group, isPack, isGroup}) => {
+                                    if (isPack || !isGroup) {
+                                        if (group) {
+                                            from(this.alertController.create({
+                                                header: 'Confirmation',
+                                                cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
+                                                message: `Le colis ${barCode} est contenu dans le groupe ${group.code}.
                                                       Confirmer la prise l'enlèvera du groupe.`,
-                                            buttons: [
-                                                {
-                                                    text: 'Confirmer',
-                                                    cssClass: 'alert-success'
-                                                }
-                                            ]
-                                        })).subscribe((alert: HTMLIonAlertElement) => {
-                                            alert.onDidDismiss().then(() => {
-                                                this.updateTrackingMovementNature(barCode, nature && nature.id)
+                                                buttons: [
+                                                    {
+                                                        text: 'Confirmer',
+                                                        cssClass: 'alert-success',
+                                                        handler: () => {
+                                                            this.updateTrackingMovementNature(barCode, nature && nature.id);
+                                                        }
+                                                    },
+                                                    {
+                                                        text: 'Annuler',
+                                                        cssClass: 'alert-danger',
+                                                        role: 'cancel'
+                                                    }
+                                                ]
+                                            })).subscribe((alert: HTMLIonAlertElement) => {
+                                                alert.present();
                                             });
-                                            alert.present();
-                                        });
-                                    } else {
-                                        this.updateTrackingMovementNature(barCode, nature && nature.id)
+                                        }
+                                        else {
+                                            this.updateTrackingMovementNature(barCode, nature && nature.id);
+                                        }
+                                    }
+                                    else { // isGroup === true
+                                        this.updateTrackingMovementNature(barCode, nature && nature.id, group);
                                     }
                                 },
                                 () => this.updateTrackingMovementNature(barCode)

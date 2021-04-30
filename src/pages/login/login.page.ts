@@ -9,8 +9,6 @@ import {Network} from '@ionic-native/network/ngx';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {BarcodeScannerManagerService} from '@app/common/services/barcode-scanner-manager.service';
 import {NavService} from '@app/common/services/nav.service';
-import {ParamsPageRoutingModule} from '@pages/params/params-routing.module';
-import {MainMenuPageRoutingModule} from '@pages/main-menu/main-menu-routing.module';
 import {SplashScreen} from '@ionic-native/splash-screen/ngx';
 import {ActivatedRoute, Router} from '@angular/router';
 import {environment} from '@environments/environment';
@@ -18,6 +16,7 @@ import {autoConnect, loginKey} from '../../dev-credentials.json';
 import {PageComponent} from '@pages/page.component';
 import {ServerImageKeyEnum} from '@app/common/components/server-image/server-image-key.enum';
 import {ServerImageComponent} from '@app/common/components/server-image/server-image.component';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -158,7 +157,7 @@ export class LoginPage extends PageComponent {
                                         tap(() => {
                                             this.loginKey = '';
                                         }),
-                                        flatMap(() => this.navService.setRoot(MainMenuPageRoutingModule.PATH, {needReload: false})),
+                                        flatMap(() => this.navService.setRoot(NavPathEnum.MAIN_MENU, {needReload: false})),
                                         map(() => ({success: true}))
                                     )
                             }
@@ -186,7 +185,7 @@ export class LoginPage extends PageComponent {
 
     public goToParams(): void {
         if (!this.loading) {
-            this.navService.push(ParamsPageRoutingModule.PATH);
+            this.navService.push(NavPathEnum.PARAMS);
         }
     }
 

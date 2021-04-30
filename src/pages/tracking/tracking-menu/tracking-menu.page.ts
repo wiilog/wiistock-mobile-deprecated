@@ -6,9 +6,8 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav.service';
-import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
 import {PageComponent} from '@pages/page.component';
-import {DispatchMenuPageRoutingModule} from '@pages/tracking/dispatch/dispatch-menu/dispatch-menu-routing.module';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 @Component({
     selector: 'wii-tracking-menu',
@@ -32,14 +31,14 @@ export class TrackingMenuPage extends PageComponent {
                 icon: 'stock-transfer.svg',
                 label: 'Acheminements',
                 action: () => {
-                    self.navService.push(DispatchMenuPageRoutingModule.PATH);
+                    self.navService.push(NavPathEnum.DISPATCH_MENU);
                 }
             },
             {
                 icon: 'tracking.svg',
                 label: 'Mouvements',
                 action: () => {
-                    this.navService.push(PriseDeposeMenuPageRoutingModule.PATH, {fromStock: false});
+                    this.navService.push(NavPathEnum.PRISE_DEPOSE_MENU, {fromStock: false});
                 }
             }
         ];

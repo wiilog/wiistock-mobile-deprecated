@@ -17,5 +17,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class DemandeMenuPageRoutingModule {
-    public static readonly PATH: string = 'demande-menu';
 }

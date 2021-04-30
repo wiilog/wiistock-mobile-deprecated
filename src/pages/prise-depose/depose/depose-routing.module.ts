@@ -16,5 +16,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class DeposePageRoutingModule {
-    public static readonly PATH: string = 'depose';
 }

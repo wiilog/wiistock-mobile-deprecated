@@ -120,7 +120,7 @@ export class TrackingListFactoryService {
         }
     }
 
-    public createListConfig(articles: Array<MouvementTraca & {loading?: boolean}>,
+    public createListConfig(articles: Array<MouvementTraca & {loading?: boolean; isGroup?: boolean; subPacks?: Array<MouvementTraca>;}>,
                             listType: number,
                             {location, objectLabel,  validate, rightIcon, confirmItem, natureIdsToConfig, natureTranslation}: {
                                 location?: Emplacement;
@@ -188,33 +188,48 @@ export class TrackingListFactoryService {
                         : {}
                 )
             },
-            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, loading}) => {
+            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, loading, isGroup, subPacks}) => {
                 const natureConfig = (natureIdsToConfig && nature_id && natureIdsToConfig[nature_id]);
+
+                let quantityRow = {};
+                if (!loading) {
+                    quantityRow = isGroup
+                        ? {
+                            quantity: {
+                                label: 'Nombre colis',
+                                value: (subPacks || []).length
+                            }
+                        }
+                        : ((quantity || quantite
+                            ? {
+                                quantity: {
+                                    label: 'Quantité',
+                                    value: String(quantity || quantite)
+                                }
+                            }
+                            : {}));
+                }
+
+
                 const infos = {
                     [TrackingListFactoryService.TRACKING_IDENTIFIER_NAME]: {
                         label: 'Objet',
                         value: ref_article
                     },
-                    ...(quantity || quantite
-                        ? {
-                            quantity: {
-                                label: 'Quantité',
-                                value: String(quantity || quantite)
-                            }
-                        }
-                        : {}),
+                    ...quantityRow,
                     date: {
                         label: 'Date / Heure',
                         value: moment(date, moment.defaultFormat).format('DD/MM/YYYY HH:mm:ss')
                     },
                     ...(
-                        natureConfig ? {
-                            nature: {
-                                label: natureTranslation,
-                                value: natureConfig.label
+                        natureConfig
+                            ? {
+                                nature: {
+                                    label: natureTranslation,
+                                    value: natureConfig.label
+                                }
                             }
-                        }
-                        : {}),
+                            : {}),
                 };
                 return {
                     infos,

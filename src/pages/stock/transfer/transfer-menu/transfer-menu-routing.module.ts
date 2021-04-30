@@ -16,5 +16,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class TransferMenuPageRoutingModule {
-    public static readonly PATH: string = 'transfer-menu';
 }

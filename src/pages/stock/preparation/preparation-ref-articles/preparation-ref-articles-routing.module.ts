@@ -17,5 +17,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class PreparationRefArticlesPageRoutingModule {
-    public static readonly PATH: string = 'preparation-ref-articles';
 }

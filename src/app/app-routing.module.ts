@@ -2,265 +2,229 @@ import {NgModule} from '@angular/core';
 import {PreloadAllModules, RouterModule, Routes} from '@angular/router';
 import {UserDisconnectedGuard} from '@app/guards/user-disconnected.guard';
 import {UserConnectedGuard} from '@app/guards/user-connected.guard';
-import {LoginPageRoutingModule} from '@pages/login/login-routing.module';
-import {ParamsPageRoutingModule} from '@pages/params/params-routing.module';
-import {MainMenuPageRoutingModule} from '@pages/main-menu/main-menu-routing.module';
-import {EmplacementScanPageRoutingModule} from '@pages/prise-depose/emplacement-scan/emplacement-scan-routing.module';
-import {PrisePageRoutingModule} from '@pages/prise-depose/prise/prise-routing.module';
-import {DeposePageRoutingModule} from '@pages/prise-depose/depose/depose-routing.module';
-import {MovementConfirmPageRoutingModule} from '@pages/prise-depose/movement-confirm/movement-confirm-routing.module';
-import {NewEmplacementPageRoutingModule} from '@pages/new-emplacement/new-emplacement-routing.module';
-import {StockMenuPageRoutingModule} from '@pages/stock/stock-menu/stock-menu-routing.module';
-import {CollecteMenuPageRoutingModule} from '@pages/stock/collecte/collecte-menu/collecte-menu-routing.module';
-import {CollecteArticlesPageRoutingModule} from '@pages/stock/collecte/collecte-articles/collecte-articles-routing.module';
-import {CollecteArticleTakePageRoutingModule} from '@pages/stock/collecte/collecte-article-take/collecte-article-take-routing.module';
-import {LivraisonMenuPageRoutingModule} from '@pages/stock/livraison/livraison-menu/livraison-menu-routing.module';
-import {LivraisonEmplacementPageRoutingModule} from '@pages/stock/livraison/livraison-emplacement/livraison-emplacement-routing.module';
-import {LivraisonArticleTakePageRoutingModule} from '@pages/stock/livraison/livraison-article-take/livraison-article-take-routing.module';
-import {LivraisonArticlesPageRoutingModule} from '@pages/stock/livraison/livraison-articles/livraison-articles-routing.module';
-import {PreparationMenuPageRoutingModule} from '@pages/stock/preparation/preparation-menu/preparation-menu-routing.module';
-import {PreparationArticlesPageRoutingModule} from '@pages/stock/preparation/preparation-articles/preparation-articles-routing.module';
-import {PreparationEmplacementPageRoutingModule} from '@pages/stock/preparation/preparation-emplacement/preparation-emplacement-routing.module';
-import {PreparationArticleTakePageRoutingModule} from '@pages/stock/preparation/preparation-article-take/preparation-article-take-routing.module';
-import {PreparationRefArticlesPageRoutingModule} from '@pages/stock/preparation/preparation-ref-articles/preparation-ref-articles-routing.module';
-import {InventoryLocationsPageRoutingModule} from '@pages/stock/inventory/inventory-locations/inventory-locations-routing.module';
-import {InventoryArticlesPageRoutingModule} from '@pages/stock/inventory/inventory-articles/inventory-articles-routing.module';
-import {InventoryValidatePageRoutingModule} from '@pages/stock/inventory/inventory-validate/inventory-validate-routing.module';
-import {DemandeMenuPageRoutingModule} from '@pages/demande/demande-menu/demande-menu-routing.module';
-import {DemandeLivraisonMenuPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu-routing.module';
-import {DemandeLivraisonHeaderPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-header/demande-livraison-header-routing.module';
-import {DemandeLivraisonArticlesPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-articles/demande-livraison-articles-routing.module';
-import {DemandeLivraisonArticleTakePageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-article-take/demande-livraison-article-take-routing.module';
-import {InventoryLocationsAnomaliesPageRoutingModule} from '@pages/stock/inventory/inventory-locations-anomalies/inventory-locations-anomalies-routing.module';
-import {TrackingMenuPageRoutingModule} from '@pages/tracking/tracking-menu/tracking-menu-routing.module';
-import {DispatchMenuPageRoutingModule} from '@pages/tracking/dispatch/dispatch-menu/dispatch-menu-routing.module';
-import {DispatchPacksPageRoutingModule} from '@pages/tracking/dispatch/dispatch-packs/dispatch-packs-routing.module';
-import {DispatchValidatePageRoutingModule} from '@pages/tracking/dispatch/dispatch-validate/dispatch-validate-routing.module';
-import {DispatchPackConfirmPageRoutingModule} from '@pages/tracking/dispatch/dispatch-pack-confirm/dispatch-pack-confirm-routing.module';
-import {HandlingMenuPageRoutingModule} from '@pages/demande/handling/handling-menu/handling-menu-routing.module';
-import {HandlingValidatePageRoutingModule} from '@pages/demande/handling/handling-validate/handling-validate-routing.module';
-import {TransferMenuPageRoutingModule} from '@pages/stock/transfer/transfer-menu/transfer-menu-routing.module';
-import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
-import {TransferListPageRoutingModule} from '@pages/stock/transfer/transfer-list/transfer-list-routing.module';
-import {TransferArticlesPageRoutingModule} from '@pages/stock/transfer/transfer-articles/transfer-articles-routing.module';
-import {TransferValidatePageRoutingModule} from '@pages/stock/transfer/transfer-validate/transfer-validate-routing.module';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 const routes: Routes = [
     {
-        path: ParamsPageRoutingModule.PATH,
+        path: NavPathEnum.PARAMS,
         canActivate: [UserDisconnectedGuard],
         loadChildren: () => import('../pages/params/params.module').then(m => m.ParamsPageModule)
     },
     {
-        path: LoginPageRoutingModule.PATH,
+        path: NavPathEnum.LOGIN,
         canActivate: [UserDisconnectedGuard],
         loadChildren: () => import('../pages/login/login.module').then(m => m.LoginPageModule)
     },
     {
-        path: MainMenuPageRoutingModule.PATH,
+        path: NavPathEnum.MAIN_MENU,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/main-menu/main-menu.module').then(m => m.MainMenuPageModule)
     },
     {
-        path: TrackingMenuPageRoutingModule.PATH,
+        path: NavPathEnum.TRACKING_MENU,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/tracking/tracking-menu/tracking-menu.module').then(m => m.TrackingMenuPageModule)
     },
     {
-        path: DispatchMenuPageRoutingModule.PATH,
+        path: NavPathEnum.DISPATCH_MENU,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/tracking/dispatch/dispatch-menu/dispatch-menu.module').then(m => m.DispatchMenuPageModule)
     },
     {
-        path: DispatchPacksPageRoutingModule.PATH,
+        path: NavPathEnum.DISPATCH_PACKS,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/tracking/dispatch/dispatch-packs/dispatch-packs.module').then(m => m.DispatchPacksPageModule)
     },
     {
-        path: DispatchValidatePageRoutingModule.PATH,
+        path: NavPathEnum.DISPATCH_VALIDATE,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/tracking/dispatch/dispatch-validate/dispatch-validate.module').then(m => m.DispatchValidatePageModule)
     },
     {
-        path: DispatchPackConfirmPageRoutingModule.PATH,
+        path: NavPathEnum.DISPATCH_PACK_CONFIRM,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/tracking/dispatch/dispatch-pack-confirm/dispatch-pack-confirm.module').then(m => m.DispatchPackConfirmPageModule)
     },
     {
-        path: EmplacementScanPageRoutingModule.PATH,
+        path: NavPathEnum.EMPLACEMENT_SCAN,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/prise-depose/emplacement-scan/emplacement-scan.module').then(m => m.EmplacementScanPageModule)
     },
     {
-        path: PrisePageRoutingModule.PATH,
+        path: NavPathEnum.PRISE,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/prise-depose/prise/prise.module').then(m => m.PrisePageModule)
     },
     {
-        path: DeposePageRoutingModule.PATH,
+        path: NavPathEnum.DEPOSE,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/prise-depose/depose/depose.module').then(m => m.DeposePageModule)
     },
     {
-        path: MovementConfirmPageRoutingModule.PATH,
+        path: NavPathEnum.MOVEMENT_CONFIRM,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/prise-depose/movement-confirm/movement-confirm.module').then(m => m.MovementConfirmPageModule)
     },
     {
-        path: NewEmplacementPageRoutingModule.PATH,
+        path: NavPathEnum.MOVEMENT_CONFIRM_SUB_PACK,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/prise-depose/movement-confirm/movement-confirm.module').then(m => m.MovementConfirmPageModule)
+    },
+    {
+        path: NavPathEnum.NEW_EMPLACEMENT,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/new-emplacement/new-emplacement.module').then(m => m.NewEmplacementPageModule)
     },
     {
-        path: HandlingMenuPageRoutingModule.PATH,
+        path: NavPathEnum.HANDLING_MENU,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/demande/handling/handling-menu/handling-menu.module').then(m => m.HandlingMenuPageModule)
     },
     {
-        path: DemandeMenuPageRoutingModule.PATH,
+        path: NavPathEnum.DEMANDE_MENU,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/demande/demande-menu/demande-menu.module').then(m => m.DemandeMenuPageModule)
     },
     {
-        path: DemandeLivraisonMenuPageRoutingModule.PATH,
+        path: NavPathEnum.DEMANDE_LIVRAISON_MENU,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu.module').then(m => m.DemandeLivraisonMenuPageModule)
     },
     {
-        path: DemandeLivraisonArticlesPageRoutingModule.PATH,
+        path: NavPathEnum.DEMANDE_LIVRAISON_ARTICLES,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/demande/demande-livraison/demande-livraison-articles/demande-livraison-articles.module').then(m => m.DemandeLivraisonArticlesPageModule)
     },
     {
-        path: DemandeLivraisonArticleTakePageRoutingModule.PATH,
+        path: NavPathEnum.DEMANDE_LIVRAISON_ARTICLE_TAKE,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/demande/demande-livraison/demande-livraison-article-take/demande-livraison-article-take.module').then(m => m.DemandeLivraisonArticleTakePageModule)
     },
     {
-        path: DemandeLivraisonHeaderPageRoutingModule.PATH,
+        path: NavPathEnum.DEMANDE_LIVRAISON_HEADER,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/demande/demande-livraison/demande-livraison-header/demande-livraison-header.module').then(m => m.DemandeLivraisonHeaderPageModule)
     },
     {
-        path: HandlingValidatePageRoutingModule.PATH,
+        path: NavPathEnum.HANDLING_VALIDATE,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/demande/handling/handling-validate/handling-validate.module').then(m => m.HandlingValidatePageModule)
     },
     {
-        path: StockMenuPageRoutingModule.PATH,
+        path: NavPathEnum.STOCK_MENU,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/stock-menu/stock-menu.module').then(m => m.StockMenuPageModule)
     },
 
     // collecte
     {
-        path: CollecteMenuPageRoutingModule.PATH,
+        path: NavPathEnum.COLLECTE_MENU,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/collecte/collecte-menu/collecte-menu.module').then(m => m.CollecteMenuPageModule)
     },
     {
-        path: CollecteArticlesPageRoutingModule.PATH,
+        path: NavPathEnum.COLLECTE_ARTICLES,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/collecte/collecte-articles/collecte-articles.module').then(m => m.CollecteArticlesPageModule)
     },
     {
-        path: CollecteArticleTakePageRoutingModule.PATH,
+        path: NavPathEnum.COLLECTE_ARTICLE_TAKE,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/collecte/collecte-article-take/collecte-article-take.module').then(m => m.CollecteArticleTakePageModule)
     },
 
     // livraison
     {
-        path: LivraisonMenuPageRoutingModule.PATH,
+        path: NavPathEnum.LIVRAISON_MENU,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/livraison/livraison-menu/livraison-menu.module').then(m => m.LivraisonMenuPageModule)
     },
     {
-        path: LivraisonArticlesPageRoutingModule.PATH,
+        path: NavPathEnum.LIVRAISON_ARTICLES,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/livraison/livraison-articles/livraison-articles.module').then(m => m.LivraisonArticlesPageModule)
     },
     {
-        path: LivraisonEmplacementPageRoutingModule.PATH,
+        path: NavPathEnum.LIVRAISON_EMPLACEMENT,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/livraison/livraison-emplacement/livraison-emplacement.module').then(m => m.LivraisonEmplacementPageModule)
     },
     {
-        path: LivraisonArticleTakePageRoutingModule.PATH,
+        path: NavPathEnum.LIVRAISON_ARTICLE_TAKE,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/livraison/livraison-article-take/livraison-article-take.module').then(m => m.LivraisonArticleTakePageModule)
     },
 
     // preparation
     {
-        path: PreparationMenuPageRoutingModule.PATH,
+        path: NavPathEnum.PREPARATION_MENU,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/preparation/preparation-menu/preparation-menu.module').then(m => m.PreparationMenuPageModule)
     },
     {
-        path: PreparationArticlesPageRoutingModule.PATH,
+        path: NavPathEnum.PREPARATION_ARTICLES,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/preparation/preparation-articles/preparation-articles.module').then(m => m.PreparationArticlesPageModule)
     },
     {
-        path: PreparationEmplacementPageRoutingModule.PATH,
+        path: NavPathEnum.PREPARATION_EMPLACEMENT,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/preparation/preparation-emplacement/preparation-emplacement.module').then(m => m.PreparationEmplacementPageModule)
     },
     {
-        path: PreparationArticleTakePageRoutingModule.PATH,
+        path: NavPathEnum.PREPARATION_ARTICLE_TAKE,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/preparation/preparation-article-take/preparation-article-take.module').then(m => m.PreparationArticleTakePageModule)
     },
     {
-        path: PreparationRefArticlesPageRoutingModule.PATH,
+        path: NavPathEnum.PREPARATION_REF_ARTICLES,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/preparation/preparation-ref-articles/preparation-ref-articles.module').then(m => m.PreparationRefArticlesPageModule)
     },
 
     // inventories
     {
-        path: InventoryLocationsPageRoutingModule.PATH,
+        path: NavPathEnum.INVENTORY_LOCATIONS,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/inventory/inventory-locations/inventory-locations.module').then(m => m.InventoryLocationsPageModule)
     },
     {
-        path: InventoryLocationsAnomaliesPageRoutingModule.PATH,
+        path: NavPathEnum.INVENTORY_LOCATIONS_ANOMALIES,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/inventory/inventory-locations-anomalies/inventory-locations-anomalies.module').then(m => m.InventoryLocationsAnomaliesPageModule)
     },
     {
-        path: InventoryArticlesPageRoutingModule.PATH,
+        path: NavPathEnum.INVENTORY_ARTICLES,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/inventory/inventory-articles/inventory-articles.module').then(m => m.InventoryArticlesPageModule)
     },
     {
-        path: InventoryValidatePageRoutingModule.PATH,
+        path: NavPathEnum.INVENTORY_VALIDATE,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/inventory/inventory-validate/inventory-validate.module').then(m => m.InventoryValidatePageModule)
     },
     {
-        path: TransferMenuPageRoutingModule.PATH,
+        path: NavPathEnum.TRANSFER_MENU,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/transfer/transfer-menu/transfer-menu.module').then(m => m.TransferMenuPageModule)
     },
     {
-        path: TransferListPageRoutingModule.PATH,
+        path: NavPathEnum.TRANSFER_LIST,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/transfer/transfer-list/transfer-list.module').then(m => m.TransferListPageModule)
     },
     {
-        path: TransferArticlesPageRoutingModule.PATH,
+        path: NavPathEnum.TRANSFER_ARTICLES,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/transfer/transfer-articles/transfer-articles.module').then(m => m.TransferArticlesPageModule)
     },
     {
-        path: TransferValidatePageRoutingModule.PATH,
+        path: NavPathEnum.TRANSFER_VALIDATE,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/transfer/transfer-validate/transfer-validate.module').then(m => m.TransferValidatePageModule)
     },
     {
-        path: PriseDeposeMenuPageRoutingModule.PATH,
+        path: NavPathEnum.PRISE_DEPOSE_MENU,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/prise-depose/prise-depose-menu/prise-depose-menu.module').then(m => m.PriseDeposeMenuPageModule)
     },

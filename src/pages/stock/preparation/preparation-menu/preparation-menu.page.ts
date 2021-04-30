@@ -5,8 +5,8 @@ import {CardListColorEnum} from '@app/common/components/card-list/card-list-colo
 import {NavService} from '@app/common/services/nav.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {PreparationArticlesPageRoutingModule} from '@pages/stock/preparation/preparation-articles/preparation-articles-routing.module';
 import {PageComponent} from '@pages/page.component';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 @Component({
     selector: 'wii-preparation-menu',
@@ -59,7 +59,7 @@ export class PreparationMenuPage extends PageComponent {
                     }
                 ],
                 action: () => {
-                    this.navService.push(PreparationArticlesPageRoutingModule.PATH, {preparation});
+                    this.navService.push(NavPathEnum.PREPARATION_ARTICLES, {preparation});
                 }
             }));
 

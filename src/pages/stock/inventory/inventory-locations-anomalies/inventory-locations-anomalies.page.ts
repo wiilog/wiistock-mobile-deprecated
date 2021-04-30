@@ -7,12 +7,12 @@ import {LoadingService} from '@app/common/services/loading.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {from, of, ReplaySubject, Subscription, zip} from 'rxjs';
-import {InventoryArticlesPageRoutingModule} from '@pages/stock/inventory/inventory-articles/inventory-articles-routing.module';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {flatMap, tap} from 'rxjs/operators';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -85,7 +85,7 @@ export class InventoryLocationsAnomaliesPage extends PageComponent implements Ca
 
     public selectLocation({label: selectedLocation}: Emplacement): void {
         this.selectItemComponent.closeSearch();
-        this.navService.push(InventoryArticlesPageRoutingModule.PATH, {
+        this.navService.push(NavPathEnum.INVENTORY_ARTICLES, {
             selectedLocation,
             anomalyMode: true
         });

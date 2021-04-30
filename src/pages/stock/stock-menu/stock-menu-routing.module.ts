@@ -16,5 +16,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class StockMenuPageRoutingModule {
-    public static readonly PATH: string = 'stock-menu';
 }

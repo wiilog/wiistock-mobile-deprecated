@@ -8,9 +8,7 @@ import {CardListConfig} from '@app/common/components/card-list/card-list-config'
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {NavService} from '@app/common/services/nav.service';
-import {DemandeLivraisonHeaderPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-header/demande-livraison-header-routing.module';
 import {flatMap, map, tap} from 'rxjs/operators';
-import {DemandeLivraisonArticlesPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-articles/demande-livraison-articles-routing.module';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
@@ -19,6 +17,7 @@ import {Network} from "@ionic-native/network/ngx";
 import {AlertController} from "@ionic/angular";
 import {AlertManagerService} from "@app/common/services/alert-manager.service";
 import {PageComponent} from '@pages/page.component';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -162,7 +161,7 @@ export class DemandeLivraisonMenuPage extends PageComponent implements CanLeave 
     }
 
     public onAddClick(): void {
-        this.navService.push(DemandeLivraisonHeaderPageRoutingModule.PATH, {
+        this.navService.push(NavPathEnum.DEMANDE_LIVRAISON_HEADER, {
             isCreation: true
         });
     }
@@ -198,12 +197,12 @@ export class DemandeLivraisonMenuPage extends PageComponent implements CanLeave 
                 error: demande.last_error,
                 action: () => {
                     this.navService
-                        .push(DemandeLivraisonHeaderPageRoutingModule.PATH, {
+                        .push(NavPathEnum.DEMANDE_LIVRAISON_HEADER, {
                             demandeId: demande.id,
                             isUpdate: true
                         })
                         .subscribe(() => {
-                            this.navService.push(DemandeLivraisonArticlesPageRoutingModule.PATH, {
+                            this.navService.push(NavPathEnum.DEMANDE_LIVRAISON_ARTICLES, {
                                 demandeId: demande.id,
                                 isUpdate: true
                             });

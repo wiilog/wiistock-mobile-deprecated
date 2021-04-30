@@ -5,8 +5,8 @@ import {CardListColorEnum} from '@app/common/components/card-list/card-list-colo
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {NavService} from '@app/common/services/nav.service';
-import {CollecteArticlesPageRoutingModule} from '@pages/stock/collecte/collecte-articles/collecte-articles-routing.module';
 import {PageComponent} from '@pages/page.component';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -65,7 +65,7 @@ export class CollecteMenuPage extends PageComponent {
                     }
                 ],
                 action: () => {
-                    this.navService.push(CollecteArticlesPageRoutingModule.PATH, {
+                    this.navService.push(NavPathEnum.COLLECTE_ARTICLES, {
                         collecte,
                         goToDrop: () => {
                             this.avoidSync();
