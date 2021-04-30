@@ -18,8 +18,8 @@
         "wiis:clean": "node scripts/rmdir www && yarn ionic cordova resources android && yarn ionic cordova platform add android && yarn cordova clean",
         "wiis:build:prod": "yarn wiis:build --prod --release --buildConfig=build.json",
         "wiis:build": "node scripts/rmdir platforms && yarn wiis:generate:build-json && yarn wiis:generate:dev-credentials && yarn wiis:generate:network-security-config:prod && yarn wiis:clean && ionic cordova build android",
-        "wiis:run": "yarn wiis:generate:dev-credentials && yarn wiis:generate:network-security-config && yarn wiis:clean && yarn ionic cordova run android",
-        "wiis:run:livereload": "yarn wiis:generate:dev-credentials && yarn wiis:generate:network-security-config && yarn wiis:clean && yarn ionic cordova run android --livereload"
+        "wiis:run": "yarn wiis:generate:dev-credentials && node scripts/get-local-address.js && yarn wiis:generate:network-security-config && yarn wiis:clean && yarn ionic cordova run android",
+        "wiis:run:livereload": "yarn wiis:generate:dev-credentials && node scripts/get-local-address.js && yarn wiis:generate:network-security-config && yarn wiis:clean && yarn ionic cordova run android --livereload"
     },
     "dependencies": {
         "@angular/common": "~9.1.6",
