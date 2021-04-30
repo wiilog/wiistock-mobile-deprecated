@@ -1,8 +1,6 @@
 import {Component, EventEmitter, OnInit, ViewChild} from '@angular/core';
 import {SelectItemTypeEnum} from "@app/common/components/select-item/select-item-type.enum";
 import {Emplacement} from "@entities/emplacement";
-import {DeposePageRoutingModule} from "@pages/prise-depose/depose/depose-routing.module";
-import {PrisePageRoutingModule} from "@pages/prise-depose/prise/prise-routing.module";
 import {Network} from "@ionic-native/network/ngx";
 import {ToastService} from "@app/common/services/toast.service";
 import {StorageService} from "@app/common/services/storage/storage.service";
@@ -11,13 +9,14 @@ import {PageComponent} from "@pages/page.component";
 import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {SelectItemComponent} from "@app/common/components/select-item/select-item.component";
 import {UngroupScanGroupPageRoutingModule} from "@pages/tracking/ungroup/ungroup-scan-group/ungroup-scan-group-routing.module";
+import {ViewWillEnter} from "@ionic/angular";
 
 @Component({
     selector: 'app-ungroup-scan-location',
     templateUrl: './ungroup-scan-location.page.html',
     styleUrls: ['./ungroup-scan-location.page.scss'],
 })
-export class UngroupScanLocationPage extends PageComponent {
+export class UngroupScanLocationPage extends PageComponent implements ViewWillEnter {
 
     public readonly selectItemType = SelectItemTypeEnum.LOCATION;
     public readonly barcodeScannerMode = BarcodeScannerModeEnum.TOOL_SEARCH;
@@ -33,7 +32,10 @@ export class UngroupScanLocationPage extends PageComponent {
     }
 
 
-    ngOnInit() {
+    ionViewWillEnter() {
+        if (this.selectItemComponent) {
+            this.selectItemComponent.fireZebraScan();
+        }
     }
 
     public selectLocation(location: Emplacement) {
@@ -52,6 +54,12 @@ export class UngroupScanLocationPage extends PageComponent {
             callback();
         } else {
             this.toastService.presentToast('Vous devez être connecté à internet pour valider un dégroupage');
+        }
+    }
+
+    ionViewWillLeave() {
+        if (this.selectItemComponent) {
+            this.selectItemComponent.unsubscribeZebraScan();
         }
     }
 
