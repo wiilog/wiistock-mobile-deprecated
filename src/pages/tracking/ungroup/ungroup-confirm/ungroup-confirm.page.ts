@@ -71,7 +71,7 @@ export class UngroupConfirmPage extends PageComponent {
                     },
                     quantity: {
                         label: 'Quantité',
-                        value: pack.code
+                        value: pack.quantity
                     },
                     ...(nature ? {
                         nature: {
