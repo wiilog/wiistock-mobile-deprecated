@@ -37,6 +37,9 @@ export class ApiService {
     public static readonly GET_PACK_DATA = {method: GET, service: '/packs'};
     public static readonly PATCH_DISPATCH = {method: POST, service: '/dispatches'};
     public static readonly GET_SERVER_IMAGES = {method: GET, service: '/server-images'};
+    public static readonly PACKS_GROUPS = {method: GET, service: '/pack-groups'};
+    public static readonly GROUP = {method: POST, service: '/group'};
+    public static readonly UNGROUP = {method: POST, service: '/ungroup'};
     public static readonly POST_PACK_GROUPS = {method: POST, service: '/pack-groups'};
 
     private static readonly DEFAULT_HEADERS = {

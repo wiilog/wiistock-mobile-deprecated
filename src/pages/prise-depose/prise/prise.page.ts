@@ -286,8 +286,19 @@ export class PrisePage extends PageComponent implements CanLeave {
         return TrackingListFactoryService.GetObjectLabel(this.fromStock);
     }
 
+    private get toTakeOngoingPacks() {
+        return this.currentPacksOnLocation
+            ? this.currentPacksOnLocation
+                .filter(({hidden, ref_article: ongoingBarcode}) => (
+                    !hidden
+                    && !this.colisPrise.some(({ref_article: takeBarCode}) => takeBarCode === ongoingBarcode)
+                ))
+                .map(({subPacks, ...movements}) => movements)
+            : [];
+    }
+
     public get displayPacksOnLocationsList(): boolean {
-        return this.currentPacksOnLocation && this.currentPacksOnLocation.filter(({hidden}) => !hidden).length > 0;
+        return this.currentPacksOnLocation && this.toTakeOngoingPacks.length > 0;
     }
 
     private saveTrackingMovement(barCode: string, quantity: number, loading: boolean = false): void {
@@ -357,7 +368,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                                 validate: (values) => {
                                     this.updatePicking(barCode, values);
                                 },
-                                movementType: MovementConfirmType.TACKING,
+                                movementType: MovementConfirmType.TAKE,
                                 natureTranslationLabel: natureLabel.translation || natureLabel.label,
                             });
                         }
@@ -376,11 +387,15 @@ export class PrisePage extends PageComponent implements CanLeave {
         this.listTakingBody = listTakingBody;
 
         const {header: listPacksOnLocationHeader, body: listPacksOnLocationBody} = this.trackingListFactory.createListConfig(
-            this.currentPacksOnLocation
-                .filter(({hidden}) => !hidden)
-                .map(({subPacks, ...movements}) => movements),
+            this.toTakeOngoingPacks,
             TrackingListFactoryService.LIST_TYPE_TAKING_SUB,
             {
+                validateIcon: {
+                    name: 'up.svg',
+                    action: () => {
+                        this.takeAll()
+                    },
+                },
                 objectLabel: this.objectLabel,
                 rightIcon: {
                     mode: 'upload',
@@ -393,6 +408,10 @@ export class PrisePage extends PageComponent implements CanLeave {
 
         this.listPacksOnLocationHeader = listPacksOnLocationHeader;
         this.listPacksOnLocationBody = listPacksOnLocationBody;
+    }
+
+    private takeAll() {
+        this.toTakeOngoingPacks.forEach(({ref_article}) => this.testIfBarcodeEquals(ref_article, true));
     }
 
     private init(fromStart: boolean = true): void {

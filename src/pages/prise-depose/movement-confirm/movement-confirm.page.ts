@@ -38,11 +38,13 @@ export class MovementConfirmPage extends PageComponent {
 
     private static readonly PageIcon = {
         [MovementConfirmType.DROP]: {icon: 'download.svg', color: 'success' as IconColor},
-        [MovementConfirmType.TACKING]: {icon: 'upload.svg', color: 'primary' as IconColor}
+        [MovementConfirmType.TAKE]: {icon: 'upload.svg', color: 'primary' as IconColor},
+        [MovementConfirmType.GROUP]: {icon: 'group.svg', color: 'primary' as IconColor},
     }
     private static readonly PageTitle = {
         [MovementConfirmType.DROP]: 'Dépose',
-        [MovementConfirmType.TACKING]: 'Prise'
+        [MovementConfirmType.TAKE]: 'Prise',
+        [MovementConfirmType.GROUP]: 'Groupage',
     }
 
     @ViewChild('formPanelComponent', {static: false})
@@ -65,6 +67,8 @@ export class MovementConfirmPage extends PageComponent {
     public natureTranslationLabel: string;
     public fromStock: boolean;
     public movementType: MovementConfirmType;
+    private group;
+    private validate: (values: {quantity: string; comment: string; signature: string; photo: string; natureId: number, freeFields: string}) => void;
 
     public constructor(private activatedRoute: ActivatedRoute,
                        private toastService: ToastService,
@@ -78,6 +82,7 @@ export class MovementConfirmPage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.location = this.currentNavParams.get('location');
+        this.group = this.currentNavParams.get('group');
         this.validate = this.currentNavParams.get('validate');
         this.isGroup = this.currentNavParams.get('isGroup');
         this.subPacks = this.currentNavParams.get('subPacks');
@@ -93,7 +98,11 @@ export class MovementConfirmPage extends PageComponent {
 
         this.headerConfig = {
             title: `${chosenTitle} de ${barCode}`,
-            subtitle: `Emplacement : ${this.location.label}`,
+            subtitle: this.location ?
+                `Emplacement : ${this.location.label}`
+                : (this.group
+                    ? `Groupe : ${this.group.code}`
+                    : ``),
             leftIcon: {
                 name: chosenIcon.icon,
                 color: chosenIcon.color

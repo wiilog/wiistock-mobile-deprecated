@@ -1,0 +1,8 @@
+<div class="page-footer">
+    <wii-select-item #selectItemComponent
+                     [type]="selectItemType"
+                     (itemChange)="selectLocation($event)"
+                     checkBarcodeValidity="true"
+                     [scanMode]="barcodeScannerMode">
+    </wii-select-item>
+</div>
