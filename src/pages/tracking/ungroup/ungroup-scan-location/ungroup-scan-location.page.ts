@@ -9,13 +9,14 @@ import {PageComponent} from "@pages/page.component";
 import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {SelectItemComponent} from "@app/common/components/select-item/select-item.component";
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {ViewWillEnter} from "@ionic/angular";
 
 @Component({
     selector: 'app-ungroup-scan-location',
     templateUrl: './ungroup-scan-location.page.html',
     styleUrls: ['./ungroup-scan-location.page.scss'],
 })
-export class UngroupScanLocationPage extends PageComponent {
+export class UngroupScanLocationPage extends PageComponent implements ViewWillEnter {
 
     public readonly selectItemType = SelectItemTypeEnum.LOCATION;
     public readonly barcodeScannerMode = BarcodeScannerModeEnum.TOOL_SEARCH;
@@ -28,6 +29,19 @@ export class UngroupScanLocationPage extends PageComponent {
                        private storageService: StorageService,
                        navService: NavService) {
         super(navService);
+    }
+
+
+    public ionViewWillEnter(): void {
+        if (this.selectItemComponent) {
+            this.selectItemComponent.fireZebraScan();
+        }
+    }
+
+    public ionViewWillLeave(): void {
+        if (this.selectItemComponent) {
+            this.selectItemComponent.unsubscribeZebraScan();
+        }
     }
 
     public selectLocation(location: Emplacement) {

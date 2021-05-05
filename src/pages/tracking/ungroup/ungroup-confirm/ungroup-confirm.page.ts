@@ -82,7 +82,7 @@ export class UngroupConfirmPage extends PageComponent implements ViewWillEnter, 
                     },
                     quantity: {
                         label: 'Quantité',
-                        value: pack.code
+                        value: pack.quantity
                     },
                     ...(nature ? {
                         nature: {
