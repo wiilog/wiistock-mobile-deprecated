@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {HeaderConfig} from "@app/common/components/panel/model/header-config";
 import * as moment from "moment";
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
@@ -10,6 +10,7 @@ import {ToastService} from "@app/common/services/toast.service";
 import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {IconColor} from "@app/common/components/icon/icon-color";
 import {MovementConfirmType} from "@pages/prise-depose/movement-confirm/movement-confirm-type";
+import {BarcodeScannerComponent} from "@app/common/components/barcode-scanner/barcode-scanner.component";
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 @Component({
@@ -27,6 +28,9 @@ export class GroupContentPage extends PageComponent {
     private groupDate: string;
     private group: any;
 
+    @ViewChild('footerScannerComponent', {static: false})
+    public footerScannerComponent: BarcodeScannerComponent;
+
     constructor(private apiService: ApiService, private toastService: ToastService,
                 private sqlService: SqliteService, navService: NavService) {
         super(navService);
@@ -37,6 +41,10 @@ export class GroupContentPage extends PageComponent {
     }
 
     async ionViewWillEnter() {
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.fireZebraScan();
+        }
+
         if(!this.group) {
             this.group = this.currentNavParams.get(`group`);
             this.group.newPacks = [];
@@ -49,32 +57,32 @@ export class GroupContentPage extends PageComponent {
     }
 
     public onPackScan(code: string): void {
+        const selectedIndex = this.group.packs.findIndex(({code}) => (code === code));
         const options = {
             params: {code}
         };
 
-        if (this.group.packs.find(pack => pack.code === code) || this.group.newPacks.find(pack => pack.code === code)) {
+        if (selectedIndex > -1) {
             this.toastService.presentToast(`Le colis ${code} est déjà présent dans le groupe`);
-            return;
+        } else {
+            this.apiService.requestApi(ApiService.PACKS_GROUPS, options)
+                .subscribe(response => {
+                    if (response.packGroup) {
+                        this.toastService.presentToast(`Le colis ${code} est un groupe`);
+                    } else {
+                        let pack = response.pack || {
+                            code,
+                            nature_id: null,
+                            quantity: 1,
+                            date: moment().format('DD/MM/YYYY HH:mm:ss'),
+                        };
+
+                        this.group.newPacks.push(pack);
+                        this.refreshBodyConfig();
+                        this.refreshHeaderConfig();
+                    }
+                })
         }
-
-        this.apiService.requestApi(ApiService.PACKS_GROUPS, options)
-            .subscribe(response => {
-                if (response.packGroup) {
-                    this.toastService.presentToast(`Le colis ${code} est un groupe`);
-                } else {
-                    let pack = response.pack || {
-                        code,
-                        nature_id: null,
-                        quantity: 1,
-                        date: moment().format('DD/MM/YYYY HH:mm:ss'),
-                    };
-
-                    this.group.newPacks.push(pack);
-                    this.refreshBodyConfig();
-                    this.refreshHeaderConfig();
-                }
-            })
     }
 
     private refreshBodyConfig() {
@@ -207,6 +215,12 @@ export class GroupContentPage extends PageComponent {
                 this.toastService.presentToast(`Erreur lors de la synchronisation du dégroupage`);
             }
         })
+    }
+
+    ionViewWillLeave() {
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.unsubscribeZebraScan();
+        }
     }
 
 }

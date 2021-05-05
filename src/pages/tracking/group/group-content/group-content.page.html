@@ -9,7 +9,8 @@
 </div>
 
 <div class="page-footer persisted-page-footer">
-    <wii-barcode-scanner buttonSubtitle="Objet"
+    <wii-barcode-scanner #footerScannerComponent
+                         buttonSubtitle="Objet"
                          [mode]="scannerModeManual"
                          (add)="onPackScan($event[0])">
     </wii-barcode-scanner>
