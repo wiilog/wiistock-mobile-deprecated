@@ -12,6 +12,8 @@ import {IconColor} from "@app/common/components/icon/icon-color";
 import {MovementConfirmType} from "@pages/prise-depose/movement-confirm/movement-confirm-type";
 import {BarcodeScannerComponent} from "@app/common/components/barcode-scanner/barcode-scanner.component";
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {LoadingService} from '@app/common/services/loading.service';
+import {Subscription} from 'rxjs';
 
 @Component({
     selector: 'app-group-content',
@@ -22,25 +24,33 @@ export class GroupContentPage extends PageComponent {
 
     public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.WITH_MANUAL;
 
-    public loading: boolean;
+    public loadingSubscription: Subscription;
     public listConfig: any;
     public listBoldValues: Array<string>;
-    private groupDate: string;
-    private group: any;
 
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
 
-    constructor(private apiService: ApiService, private toastService: ToastService,
-                private sqlService: SqliteService, navService: NavService) {
+    private groupDate: string;
+    private group: any;
+
+    private apiPacksInProgress: Array<string>;
+
+    public constructor(private apiService: ApiService,
+                       private toastService: ToastService,
+                       private loadingService: LoadingService,
+                       private sqlService: SqliteService,
+                       navService: NavService) {
         super(navService);
         this.groupDate = moment().format('DD/MM/YYYY HH:mm:ss');
         this.listBoldValues = [
             'code'
         ];
+        this.apiPacksInProgress = [];
     }
 
-    async ionViewWillEnter() {
+    public async ionViewWillEnter() {
+        this.apiPacksInProgress = [];
         if (this.footerScannerComponent) {
             this.footerScannerComponent.fireZebraScan();
         }
@@ -56,32 +66,50 @@ export class GroupContentPage extends PageComponent {
         };
     }
 
+    public ionViewWillLeave(): void {
+        this.unsubscribeLoading();
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.unsubscribeZebraScan();
+        }
+    }
+
     public onPackScan(code: string): void {
-        const selectedIndex = this.group.packs.findIndex(({code}) => (code === code));
-        const options = {
-            params: {code}
-        };
+        if (this.apiPacksInProgress.indexOf(code) === -1) {
+            const selectedIndex = this.group.newPacks.findIndex(({code: savedCode}) => (savedCode === code));
+            const options = {
+                params: {code}
+            };
 
-        if (selectedIndex > -1) {
-            this.toastService.presentToast(`Le colis ${code} est déjà présent dans le groupe`);
-        } else {
-            this.apiService.requestApi(ApiService.PACKS_GROUPS, options)
-                .subscribe(response => {
-                    if (response.packGroup) {
-                        this.toastService.presentToast(`Le colis ${code} est un groupe`);
-                    } else {
-                        let pack = response.pack || {
-                            code,
-                            nature_id: null,
-                            quantity: 1,
-                            date: moment().format('DD/MM/YYYY HH:mm:ss'),
-                        };
+            if (selectedIndex > -1) {
+                this.toastService.presentToast(`Le colis <b>${code}</b> est déjà présent dans le groupe`);
+            }
+            else {
+                this.apiPacksInProgress.push(code);
+                this.apiService.requestApi(ApiService.PACKS_GROUPS, options)
+                    .subscribe(
+                        (response) => {
+                            if (response.packGroup) {
+                                this.treatPacks(code);
+                                this.toastService.presentToast(`Le colis ${code} est un groupe`);
+                            }
+                            else {
+                                let pack = response.pack || {
+                                    code,
+                                    nature_id: null,
+                                    quantity: 1,
+                                    date: moment().format('DD/MM/YYYY HH:mm:ss'),
+                                };
 
-                        this.group.newPacks.push(pack);
-                        this.refreshBodyConfig();
-                        this.refreshHeaderConfig();
-                    }
-                })
+                                this.group.newPacks.push(pack);
+                                this.treatPacks(code);
+                                this.refreshBodyConfig();
+                                this.refreshHeaderConfig();
+                            }
+                        },
+                        () => {
+                            this.treatPacks(code);
+                        });
+            }
         }
     }
 
@@ -198,28 +226,48 @@ export class GroupContentPage extends PageComponent {
     }
 
     public onSubmit() {
-        const options = {
-            params: {
-                id: this.group.id,
-                code: this.group.code,
-                date: this.groupDate,
-                packs: this.group.newPacks,
-            }
-        };
+        if (!this.loadingSubscription) {
+            const options = {
+                params: {
+                    id: this.group.id,
+                    code: this.group.code,
+                    date: this.groupDate,
+                    packs: this.group.newPacks,
+                }
+            };
 
-        this.apiService.requestApi(ApiService.GROUP, options).subscribe(response => {
-            if (response.success) {
-                this.toastService.presentToast(response.msg);
-                this.navService.pop().subscribe(() => this.navService.pop());
-            } else {
-                this.toastService.presentToast(`Erreur lors de la synchronisation du dégroupage`);
-            }
-        })
+            this.loadingSubscription = this.loadingService
+                .presentLoadingWhile({
+                    event: () => this.apiService.requestApi(ApiService.GROUP, options)
+                })
+                .subscribe(
+                    (response) => {
+                        this.unsubscribeLoading();
+                        if (response.success) {
+                            this.toastService.presentToast(response.msg);
+                            this.navService.pop().subscribe(() => this.navService.pop());
+                        } else {
+                            this.toastService.presentToast(`Erreur lors de la synchronisation du dégroupage`);
+                        }
+                    },
+                    () => {
+                        this.unsubscribeLoading();
+                    }
+                );
+        }
     }
 
-    ionViewWillLeave() {
-        if (this.footerScannerComponent) {
-            this.footerScannerComponent.unsubscribeZebraScan();
+    private unsubscribeLoading() {
+        if (this.loadingSubscription) {
+            this.loadingSubscription.unsubscribe();
+            this.loadingSubscription = undefined;
+        }
+    }
+
+    private treatPacks(code: string): void {
+        const index = this.apiPacksInProgress.indexOf(code);
+        if (index > -1) {
+            this.apiPacksInProgress.splice(index, 1);
         }
     }
 

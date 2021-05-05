@@ -7,22 +7,29 @@ import {NavService} from "@app/common/services/nav.service";
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
 import {ApiService} from "@app/common/services/api.service";
 import {ToastService} from "@app/common/services/toast.service";
+import {Subscription} from 'rxjs';
+import {ViewWillEnter, ViewWillLeave} from '@ionic/angular';
+import {LoadingService} from '@app/common/services/loading.service';
 
 @Component({
     selector: 'app-ungroup-confirm',
     templateUrl: './ungroup-confirm.page.html',
     styleUrls: ['./ungroup-confirm.page.scss'],
 })
-export class UngroupConfirmPage extends PageComponent {
+export class UngroupConfirmPage extends PageComponent implements ViewWillEnter, ViewWillLeave {
 
-    public loading: boolean;
     public listConfig: any;
     public listBoldValues: Array<string>;
     private ungroupDate: string;
     private group: any;
 
-    constructor(private apiService: ApiService, private toastService: ToastService,
-                private sqlService: SqliteService, navService: NavService) {
+    private loadingSubscription: Subscription;
+
+    public constructor(private apiService: ApiService,
+                       private toastService: ToastService,
+                       private loadingService: LoadingService,
+                       private sqlService: SqliteService,
+                       navService: NavService) {
         super(navService);
         this.ungroupDate = moment().format('DD/MM/YYYY HH:mm:ss');
         this.listBoldValues = [
@@ -37,6 +44,10 @@ export class UngroupConfirmPage extends PageComponent {
             header: await this.createHeaderConfig(this.group),
             body: await this.createBodyConfig(this.group.packs),
         };
+    }
+
+    public ionViewWillLeave() {
+        this.unsubscribeLoading();
     }
 
     private async createHeaderConfig(group): Promise<HeaderConfig> {
@@ -85,24 +96,41 @@ export class UngroupConfirmPage extends PageComponent {
     }
 
     public onSubmit() {
-        const options = {
-            params: {
-                location: this.currentNavParams.get(`location`).id,
-                group: this.group.id,
-                date: this.ungroupDate
-            }
-        };
+        if (!this.loadingSubscription) {
+            const options = {
+                params: {
+                    location: this.currentNavParams.get(`location`).id,
+                    group: this.group.id,
+                    date: this.ungroupDate
+                }
+            };
 
-        this.apiService.requestApi(ApiService.UNGROUP, options).subscribe(response => {
-            if (response.success) {
-                this.toastService.presentToast(response.msg);
-                this.navService.pop().subscribe(() =>
-                    this.navService.pop().subscribe(() =>
-                        this.navService.pop()));
-            } else {
-                this.toastService.presentToast(`Erreur lors de la synchronisation du dégroupage`);
-            }
-        })
+            this.loadingSubscription = this.loadingService
+                .presentLoadingWhile({event: () => this.apiService.requestApi(ApiService.UNGROUP, options)})
+                .subscribe(
+                    (response) => {
+                        if (response.success) {
+                            this.toastService.presentToast(response.msg);
+                            this.navService.pop().subscribe(() =>
+                                this.navService.pop().subscribe(() =>
+                                    this.navService.pop()));
+                        }
+                        else {
+                            this.toastService.presentToast(`Erreur lors de la synchronisation du dégroupage`);
+                        }
+                    },
+                    () => {
+                        this.unsubscribeLoading();
+                    }
+                );
+        }
+    }
+
+    private unsubscribeLoading() {
+        if (this.loadingSubscription) {
+            this.loadingSubscription.unsubscribe();
+            this.loadingSubscription = undefined;
+        }
     }
 
 }

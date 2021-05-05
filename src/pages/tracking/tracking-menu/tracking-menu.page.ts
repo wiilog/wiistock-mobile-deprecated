@@ -58,7 +58,11 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
                         icon: 'group.svg',
                         label: 'Groupage',
                         action: () => {
-                            this.navService.push(NavPathEnum.GROUP_SCAN_GROUP);
+                            if(this.network.type !== 'none') {
+                                this.navService.push(NavPathEnum.GROUP_SCAN_GROUP);
+                            } else {
+                                this.toastService.presentToast('Une connexion internet est requise pour accéder à cette fonctionnalité.');
+                            }
                         }
                     });
                 }
@@ -67,7 +71,11 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
                         icon: 'ungroup.svg',
                         label: 'Dégroupage',
                         action: () => {
-                            this.navService.push(NavPathEnum.UNGROUP_SCAN_LOCATION);
+                            if(this.network.type !== 'none') {
+                                this.navService.push(NavPathEnum.UNGROUP_SCAN_LOCATION);
+                            } else {
+                                this.toastService.presentToast('Une connexion internet est requise pour accéder à cette fonctionnalité.');
+                            }
                         }
                     });
                 }

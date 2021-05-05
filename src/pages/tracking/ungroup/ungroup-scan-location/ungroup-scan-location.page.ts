@@ -30,10 +30,6 @@ export class UngroupScanLocationPage extends PageComponent {
         super(navService);
     }
 
-
-    ngOnInit() {
-    }
-
     public selectLocation(location: Emplacement) {
         this.testNetwork(() => {
             this.navService.push(NavPathEnum.UNGROUP_SCAN_GROUP, {
