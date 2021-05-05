@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component} from '@angular/core';
 import {HeaderConfig} from "@app/common/components/panel/model/header-config";
 import * as moment from "moment";
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
@@ -9,8 +9,8 @@ import {ApiService} from "@app/common/services/api.service";
 import {ToastService} from "@app/common/services/toast.service";
 import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {IconColor} from "@app/common/components/icon/icon-color";
-import {MovementConfirmPageRoutingModule} from "@pages/prise-depose/movement-confirm/movement-confirm-routing.module";
 import {MovementConfirmType} from "@pages/prise-depose/movement-confirm/movement-confirm-type";
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 @Component({
     selector: 'app-group-content',
@@ -63,7 +63,7 @@ export class GroupContentPage extends PageComponent {
                 if (response.packGroup) {
                     this.toastService.presentToast(`Le colis ${code} est un groupe`);
                 } else {
-                    let pack = response.pack ?? {
+                    let pack = response.pack || {
                         code,
                         nature_id: null,
                         quantity: 1,
@@ -152,7 +152,7 @@ export class GroupContentPage extends PageComponent {
                 },
                 pressAction: () => {
                     const {quantity, comment, signature, photo, nature_id: natureId, freeFields} = pack;
-                    this.navService.push(MovementConfirmPageRoutingModule.PATH, {
+                    this.navService.push(NavPathEnum.MOVEMENT_CONFIRM, {
                         group: this.group,
                         fromStock: false,
                         barCode: pack.code,

@@ -58,7 +58,7 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
                         icon: 'group.svg',
                         label: 'Groupage',
                         action: () => {
-                            this.navService.push(GroupScanGroupPageRoutingModule.PATH);
+                            this.navService.push(NavPathEnum.GROUP_SCAN_GROUP);
                         }
                     });
                 }
@@ -67,7 +67,7 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
                         icon: 'ungroup.svg',
                         label: 'Dégroupage',
                         action: () => {
-                            this.navService.push(UngroupScanLocationPageRoutingModule.PATH);
+                            this.navService.push(NavPathEnum.UNGROUP_SCAN_LOCATION);
                         }
                     });
                 }

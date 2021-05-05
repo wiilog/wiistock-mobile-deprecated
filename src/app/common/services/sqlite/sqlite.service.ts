@@ -229,9 +229,13 @@ export class SqliteService {
                   .pipe(flatMap((prises: Array<MouvementTraca>) => (
                       apiTaking.length > 0
                           ? zip(
-                              ...apiTaking.map((apiPrise) => (
-                                  !prises.some(({date}) => (date === apiPrise.date))
-                                      ? this.insert('mouvement_traca', apiPrise)
+                              ...apiTaking.map((apiPicking) => (
+                                  !prises.some(({date}) => (date === apiPicking.date))
+                                      ? this.insert('mouvement_traca', {
+                                          ...apiPicking,
+                                          isGroup: (apiPicking.isGroup || false),
+                                          subPacks: (apiPicking.subPacks || [])
+                                      })
                                       : of(undefined)
                               ))
                           )

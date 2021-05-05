@@ -46,7 +46,9 @@ export const TablesDefinitions: Array<TableDefinition> = [
             finished: 'INTEGER',
             fromStock: 'INTEGER',
             quantity: 'INTEGER',
-            nature_id: 'INTEGER'
+            nature_id: 'INTEGER',
+            isGroup: 'INTEGER',
+            subPacks: 'TEXT',
         }
     },
     {

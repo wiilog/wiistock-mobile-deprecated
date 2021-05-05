@@ -21,13 +21,11 @@ import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel/list-panel-item-config';
 import {MouvementTraca} from '@entities/mouvement-traca';
-import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 enum Page {
     EDIT,
     SUB_PACKS
 }
-
 
 @Component({
     selector: 'wii-movement-confirm',
@@ -68,7 +66,6 @@ export class MovementConfirmPage extends PageComponent {
     public fromStock: boolean;
     public movementType: MovementConfirmType;
     private group;
-    private validate: (values: {quantity: string; comment: string; signature: string; photo: string; natureId: number, freeFields: string}) => void;
 
     public constructor(private activatedRoute: ActivatedRoute,
                        private toastService: ToastService,

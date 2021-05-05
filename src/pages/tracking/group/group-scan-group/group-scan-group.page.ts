@@ -4,7 +4,7 @@ import {ApiService} from "@app/common/services/api.service";
 import {ToastService} from "@app/common/services/toast.service";
 import {PageComponent} from "@pages/page.component";
 import {NavService} from "@app/common/services/nav.service";
-import {GroupContentPageRoutingModule} from "@pages/tracking/group/group-content/group-content-routing.module";
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 @Component({
     selector: 'app-group-scan-group',
@@ -31,15 +31,13 @@ export class GroupScanGroupPage extends PageComponent {
                 if(response.isPack) {
                     this.toastService.presentToast(`Le colis ${code} n'est pas un groupe`);
                 } else {
-                    let group = response.packGroup ?? {
+                    let group = response.packGroup || {
                         code,
                         natureId: null,
                         packs: [],
                     };
 
-                    this.navService.push(GroupContentPageRoutingModule.PATH, {
-                        group
-                    });
+                    this.navService.push(NavPathEnum.GROUP_CONTENT, {group});
                 }
             })
     }

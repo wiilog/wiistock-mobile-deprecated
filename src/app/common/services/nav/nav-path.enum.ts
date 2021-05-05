@@ -42,4 +42,9 @@ export enum NavPathEnum {
     TRANSFER_VALIDATE = 'transfer-validate',
     TRANSFER_ARTICLES = 'transfer-articles',
     TRANSFER_LIST = 'transfer-list',
+    UNGROUP_SCAN_LOCATION = 'ungroup-scan-location',
+    UNGROUP_SCAN_GROUP = 'ungroup-scan-group',
+    UNGROUP_CONFIRM = 'ungroup-confirm',
+    GROUP_SCAN_GROUP = 'group-scan-group',
+    GROUP_CONTENT = 'group-content',
 }

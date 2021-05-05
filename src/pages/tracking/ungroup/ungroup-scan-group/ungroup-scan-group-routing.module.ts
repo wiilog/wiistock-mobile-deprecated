@@ -15,5 +15,4 @@ const routes: Routes = [
   exports: [RouterModule],
 })
 export class UngroupScanGroupPageRoutingModule {
-    public static readonly PATH: string = 'ungroup-scan-group';
 }

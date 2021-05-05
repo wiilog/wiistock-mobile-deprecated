@@ -158,7 +158,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                 if (!this.fromStock
                     && this.network.type === 'none'
                     && groupingMovements.length > 0) {
-                    this.toastService.presentToast('Votre prise contient des groupes, veuillez vous connectez à internet pour continuer.');
+                    this.toastService.presentToast('Votre prise contient des groupes, veuillez vous connecter à internet pour continuer.');
                     return;
                 }
 

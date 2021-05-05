@@ -229,27 +229,27 @@ const routes: Routes = [
         loadChildren: () => import('@pages/prise-depose/prise-depose-menu/prise-depose-menu.module').then(m => m.PriseDeposeMenuPageModule)
     },
     {
-        path: UngroupScanLocationPageRoutingModule.PATH,
+        path: NavPathEnum.UNGROUP_SCAN_LOCATION,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/tracking/ungroup/ungroup-scan-location/ungroup-scan-location.module').then(m => m.UngroupScanLocationPageModule)
     },
     {
-        path: UngroupScanGroupPageRoutingModule.PATH,
+        path: NavPathEnum.UNGROUP_SCAN_GROUP,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/tracking/ungroup/ungroup-scan-group/ungroup-scan-group.module').then(m => m.UngroupScanGroupPageModule)
     },
     {
-        path: UngroupConfirmPageRoutingModule.PATH,
+        path: NavPathEnum.UNGROUP_CONFIRM,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/tracking/ungroup/ungroup-confirm/ungroup-confirm.module').then(m => m.UngroupConfirmPageModule)
     },
     {
-        path: GroupScanGroupPageRoutingModule.PATH,
+        path: NavPathEnum.GROUP_SCAN_GROUP,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/tracking/group/group-scan-group/group-scan-group.module').then(m => m.GroupScanGroupPageModule)
     },
     {
-        path: GroupContentPageRoutingModule.PATH,
+        path: NavPathEnum.GROUP_CONTENT,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/tracking/group/group-content/group-content.module').then(m => m.GroupContentPageModule)
     },

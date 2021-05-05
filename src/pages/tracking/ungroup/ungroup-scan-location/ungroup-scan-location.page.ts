@@ -1,8 +1,6 @@
-import {Component, EventEmitter, OnInit, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {SelectItemTypeEnum} from "@app/common/components/select-item/select-item-type.enum";
 import {Emplacement} from "@entities/emplacement";
-import {DeposePageRoutingModule} from "@pages/prise-depose/depose/depose-routing.module";
-import {PrisePageRoutingModule} from "@pages/prise-depose/prise/prise-routing.module";
 import {Network} from "@ionic-native/network/ngx";
 import {ToastService} from "@app/common/services/toast.service";
 import {StorageService} from "@app/common/services/storage/storage.service";
@@ -10,7 +8,7 @@ import {NavService} from "@app/common/services/nav.service";
 import {PageComponent} from "@pages/page.component";
 import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {SelectItemComponent} from "@app/common/components/select-item/select-item.component";
-import {UngroupScanGroupPageRoutingModule} from "@pages/tracking/ungroup/ungroup-scan-group/ungroup-scan-group-routing.module";
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 @Component({
     selector: 'app-ungroup-scan-location',
@@ -38,7 +36,7 @@ export class UngroupScanLocationPage extends PageComponent {
 
     public selectLocation(location: Emplacement) {
         this.testNetwork(() => {
-            this.navService.push(UngroupScanGroupPageRoutingModule.PATH, {
+            this.navService.push(NavPathEnum.UNGROUP_SCAN_GROUP, {
                 location,
                 finishAction: () => {
                     this.navService.pop();

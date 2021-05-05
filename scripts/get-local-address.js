@@ -3,13 +3,15 @@
 const os = require('os');
 const fs = require('fs');
 const path = require('path');
-const ifaces = os.networkInterfaces();
+const interfaces = os.networkInterfaces();
 const file = require(path.join('../', 'src', 'dev-credentials.json'));
 
 const availableIPv4Addresses = Object
-    .values(ifaces)
-    .map((ifaceValues) => (ifaceValues && ifaceValues.find(({family}) => family === 'IPv4')))
-    .filter((ifaceValue) => ifaceValue && !ifaceValue.internal)
+    .keys(interfaces)
+    .filter((key) => key !== 'VirtualBox Host-Only Network')
+    .map((key) => interfaces[key])
+    .map((interfaceValues) => (interfaceValues && interfaceValues.find(({family}) => family === 'IPv4')))
+    .filter((interfaceValue) => interfaceValue && !interfaceValue.internal)
     .map(({address}) => address);
 
 if(availableIPv4Addresses.length === 0) {

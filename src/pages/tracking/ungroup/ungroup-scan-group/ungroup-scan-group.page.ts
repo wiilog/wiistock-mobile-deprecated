@@ -4,8 +4,7 @@ import {ApiService} from "@app/common/services/api.service";
 import {ToastService} from "@app/common/services/toast.service";
 import {PageComponent} from "@pages/page.component";
 import {NavService} from "@app/common/services/nav.service";
-import {UngroupScanLocationPageRoutingModule} from "@pages/tracking/ungroup/ungroup-scan-location/ungroup-scan-location-routing.module";
-import {UngroupConfirmPageRoutingModule} from "@pages/tracking/ungroup/ungroup-confirm/ungroup-confirm-routing.module";
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 @Component({
     selector: 'app-ungroup-scan-group',
@@ -32,7 +31,7 @@ export class UngroupScanGroupPage extends PageComponent {
                 } else if(response.packGroup && !response.packGroup.packs.length) {
                     this.toastService.presentToast(`Le groupe ${code} ne contient aucun colis`);
                 } else if(response.packGroup) {
-                    this.navService.push(UngroupConfirmPageRoutingModule.PATH, {
+                    this.navService.push(NavPathEnum.UNGROUP_CONFIRM, {
                         location: this.currentNavParams.get(`location`),
                         group: response.packGroup
                     });

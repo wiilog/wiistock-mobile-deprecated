@@ -24,7 +24,7 @@ export class DemandeMenuPage extends PageComponent {
     public loading: boolean;
 
     private avoidSync: boolean;
-    private synchronisationSubscription: Subscription;s
+    private synchronisationSubscription: Subscription;
     private navigationSubscription: Subscription;
 
     public constructor(private platform: Platform,
