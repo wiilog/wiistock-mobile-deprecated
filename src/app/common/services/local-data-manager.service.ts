@@ -645,7 +645,7 @@ export class LocalDataManagerService {
                 );
     }
 
-    public mapTrackingMovements(movements: Array<MouvementTraca & {subPacks: any}>) {
+    public mapTrackingMovements(movements: Array<MouvementTraca & {subPacks?: any}>) {
         return movements
             .map(({signature, photo, ...mouvement}) => ({
                 ...mouvement,
@@ -675,7 +675,7 @@ export class LocalDataManagerService {
             });
     }
 
-    public extractTrackingMovementFiles(movements: Array<MouvementTraca<File> & {subPacks: any}>) {
+    public extractTrackingMovementFiles(movements: Array<MouvementTraca<File> & {subPacks?: any}>) {
         return {
             mouvements: movements.map(({signature, photo, ...mouvement}) => mouvement),
             ...(movements.reduce((acc, {signature}, currentIndex) => ({

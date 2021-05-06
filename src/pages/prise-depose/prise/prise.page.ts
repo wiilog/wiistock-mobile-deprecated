@@ -185,7 +185,17 @@ export class PrisePage extends PageComponent implements CanLeave {
                                     .pipe(
                                         flatMap(() => (
                                             !this.fromStock
-                                                ? this.apiService.requestApi(ApiService.POST_PACK_GROUPS, { params: { movements: groupingMovements}})
+                                                ? this.apiService.requestApi(ApiService.POST_PACK_GROUPS, {
+                                                    params: this.localDataManager.extractTrackingMovementFiles(this.localDataManager.mapTrackingMovements(groupingMovements))
+                                                })
+                                                    .pipe(
+                                                        tap((res) => {
+                                                            if (res && !res.success) {
+                                                                this.toastService.presentToast(res.message || 'Une erreur inconnue est survenue');
+                                                                throw new Error(res.message);
+                                                            }
+                                                        })
+                                                    )
                                                 : of(undefined)
                                         )),
                                         flatMap(() => (
