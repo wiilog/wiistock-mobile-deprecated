@@ -4,7 +4,7 @@ const os = require('os');
 const fs = require('fs');
 const path = require('path');
 const interfaces = os.networkInterfaces();
-const file = require(path.join('../', 'src', 'dev-credentials.json'));
+const file = path.join(__dirname, '..', 'src', 'dev-credentials.json');
 
 const availableIPv4Addresses = Object
     .keys(interfaces)
