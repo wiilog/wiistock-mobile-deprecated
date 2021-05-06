@@ -190,10 +190,16 @@ export class PrisePage extends PageComponent implements CanLeave {
                                                     params: this.localDataManager.extractTrackingMovementFiles(this.localDataManager.mapTrackingMovements(groupingMovements))
                                                 })
                                                     .pipe(
-                                                        tap((res) => {
-                                                            if (res && !res.success) {
+                                                        flatMap((res) => {
+                                                            if (!res || !res.success) {
                                                                 this.toastService.presentToast(res.message || 'Une erreur inconnue est survenue');
                                                                 throw new Error(res.message);
+                                                            }
+                                                            else {
+                                                                return (res.tracking)
+                                                                    ? this.sqliteService.deleteBy('mouvement_traca', ['fromStock = 0'])
+                                                                        .pipe(flatMap(() => this.sqliteService.importMouvementTraca({trackingTaking: res.tracking})))
+                                                                    : of(undefined);
                                                             }
                                                         })
                                                     )

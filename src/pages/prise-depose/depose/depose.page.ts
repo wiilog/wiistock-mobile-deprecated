@@ -166,7 +166,6 @@ export class DeposePage extends PageComponent implements CanLeave {
                         .filter(({hidden}) => hidden)
                         .map(({id}) => id);
 
-
                     const groupingMovements = this.colisDepose.filter(({isGroup}) => isGroup);
                     if (!this.fromStock
                         && this.network.type === 'none'
