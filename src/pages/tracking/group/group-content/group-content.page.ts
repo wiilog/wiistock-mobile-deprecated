@@ -125,7 +125,7 @@ export class GroupContentPage extends PageComponent {
 
     private async createHeaderConfig(group): Promise<HeaderConfig> {
         const nature = await this.sqlService.findOneById(`nature`, group.natureId).toPromise();
-        const sScanned = this.group.newPacks.length > 0 ? 's' : '';
+        const sScanned = this.group.newPacks.length > 1 ? 's' : '';
 
         return {
             title: `GROUPAGE`,
