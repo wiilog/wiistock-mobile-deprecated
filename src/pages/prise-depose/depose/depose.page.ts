@@ -24,6 +24,7 @@ import {AlertManagerService} from "@app/common/services/alert-manager.service";
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {ApiService} from '@app/common/services/api.service';
 
 @Component({
     selector: 'wii-depose',
@@ -40,8 +41,8 @@ export class DeposePage extends PageComponent implements CanLeave {
     public footerScannerComponent: BarcodeScannerComponent;
 
     public emplacement: Emplacement;
-    public colisPrise: Array<MouvementTraca&{hidden?: boolean}>;
-    public colisDepose: Array<MouvementTraca>;
+    public colisPrise: Array<MouvementTraca&{hidden?: boolean; subPacks: any;}>;
+    public colisDepose: Array<MouvementTraca&{subPacks?: any;}>;
 
     public priseListConfig: {
         header: HeaderConfig;
@@ -76,6 +77,7 @@ export class DeposePage extends PageComponent implements CanLeave {
 
     public constructor(private network: Network,
                        private alertController: AlertController,
+                       private apiService: ApiService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
                        private sqliteService: SqliteService,
@@ -113,7 +115,11 @@ export class DeposePage extends PageComponent implements CanLeave {
                 this.sqliteService.findBy('translations', [ `menu LIKE 'natures'`])
             )
                 .subscribe(([colisPrise, operator, natures, allowedNatureLocationArray, natureTranslation]) => {
-                    this.colisPrise = colisPrise;
+                    this.colisPrise = colisPrise.map(({subPacks, ...tracking}) => ({
+                        ...tracking,
+                        subPacks: subPacks ? JSON.parse(subPacks) : []
+                    }));
+                    console.log(this.colisPrise);
                     this.operator = operator;
                     this.natureTranslation = natureTranslation;
                     this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
@@ -159,6 +165,16 @@ export class DeposePage extends PageComponent implements CanLeave {
                     const takingToFinish = this.colisPrise
                         .filter(({hidden}) => hidden)
                         .map(({id}) => id);
+
+
+                    const groupingMovements = this.colisDepose.filter(({isGroup}) => isGroup);
+                    if (!this.fromStock
+                        && this.network.type === 'none'
+                        && groupingMovements.length > 0) {
+                        this.toastService.presentToast('Votre dépose contient des groupes, veuillez vous connecter à internet pour continuer.');
+                        return;
+                    }
+
                     this.saveSubscription = this.localDataManager
                         .saveMouvementsTraca(this.colisDepose, takingToFinish)
                         .pipe(
@@ -179,6 +195,23 @@ export class DeposePage extends PageComponent implements CanLeave {
                                     ? this.localDataManager
                                         .sendMouvementTraca(this.fromStock)
                                         .pipe(
+                                            flatMap((apiResponse) => (
+                                                !this.fromStock && groupingMovements.length > 0
+                                                    ? this.apiService.requestApi(ApiService.POST_GROUP_TRACKINGS, {
+                                                        pathParams: {mode: 'drop'},
+                                                        params: this.localDataManager.extractTrackingMovementFiles(this.localDataManager.mapTrackingMovements(groupingMovements))
+                                                    })
+                                                        .pipe(
+                                                            tap((res) => {
+                                                                if (res && !res.success) {
+                                                                    this.toastService.presentToast(res.message || 'Une erreur inconnue est survenue');
+                                                                    throw new Error(res.message);
+                                                                }
+                                                            }),
+                                                            map(() => apiResponse)
+                                                        )
+                                                    : of(apiResponse)
+                                            )),
                                             flatMap((apiResponse) => (
                                                 loader
                                                     ? from(loader.dismiss()).pipe(map(() => apiResponse))
@@ -318,6 +351,8 @@ export class DeposePage extends PageComponent implements CanLeave {
                         signature: this.colisPrise[pickingIndex].signature,
                         fromStock: Number(this.fromStock),
                         quantity,
+                        subPacks: this.colisPrise[pickingIndex].subPacks,
+                        isGroup: this.colisPrise[pickingIndex].isGroup,
                         type: DeposePage.MOUVEMENT_TRACA_DEPOSE,
                         operateur: this.operator,
                         photo: this.colisPrise[pickingIndex].photo,
@@ -360,7 +395,7 @@ export class DeposePage extends PageComponent implements CanLeave {
     }
 
     private updatePicking(barCode: string,
-                          {quantity, comment, signature, photo, natureId, freeFields}: {quantity: number; comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string}): void {
+                          {quantity, comment, signature, photo, natureId, freeFields, isGroup, subPacks}: {quantity: number; comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string; isGroup: number; subPacks: any;}): void {
         const dropIndexes = this.findDropIndexes(barCode);
 
         if (dropIndexes.length > 0) {
@@ -373,7 +408,10 @@ export class DeposePage extends PageComponent implements CanLeave {
                 this.colisDepose[dropIndex].photo = photo;
                 this.colisDepose[dropIndex].nature_id = natureId;
                 this.colisDepose[dropIndex].freeFields = freeFields;
+                this.colisDepose[dropIndex].isGroup = isGroup;
+                this.colisDepose[dropIndex].subPacks = subPacks;
             }
+            console.log(this.colisDepose);
             this.refreshPriseListComponent();
             this.refreshDeposeListComponent();
         }
@@ -384,9 +422,7 @@ export class DeposePage extends PageComponent implements CanLeave {
     private refreshPriseListComponent(): void {
         const natureLabel = this.natureTranslation.filter((translation) => translation.label === 'nature')[0];
         this.priseListConfig = this.trackingListFactory.createListConfig(
-            this.colisPrise
-                .filter(({hidden}) => !hidden)
-                .map(({subPacks, ...movements}) => movements),
+            this.colisPrise.filter(({hidden}) => !hidden),
             TrackingListFactoryService.LIST_TYPE_DROP_SUB,
             {
                 validateIcon: {
@@ -415,7 +451,7 @@ export class DeposePage extends PageComponent implements CanLeave {
     private refreshDeposeListComponent(): void {
         const natureLabel = this.natureTranslation.filter((translation) => translation.label === 'nature')[0];
         this.deposeListConfig = this.trackingListFactory.createListConfig(
-            this.colisDepose.map(({subPacks, ...movements}) => movements),
+            this.colisDepose,
             TrackingListFactoryService.LIST_TYPE_DROP_MAIN,
             {
                 natureIdsToConfig: this.natureIdsToConfig,
@@ -428,12 +464,14 @@ export class DeposePage extends PageComponent implements CanLeave {
                         // we get first
                         const [dropIndex] = this.findDropIndexes(barCode);
                         if (dropIndex !== undefined) {
-                            const {quantity, comment, signature, photo, nature_id: natureId, freeFields} = this.colisDepose[dropIndex];
+                            const {quantity, comment, signature, photo, nature_id: natureId, freeFields, isGroup, subPacks} = this.colisDepose[dropIndex];
                             this.trackingListFactory.disableActions();
                             this.navService.push(NavPathEnum.MOVEMENT_CONFIRM, {
                                 fromStock: this.fromStock,
                                 location: this.emplacement,
                                 barCode,
+                                isGroup,
+                                subPacks,
                                 values: {
                                     quantity,
                                     comment,

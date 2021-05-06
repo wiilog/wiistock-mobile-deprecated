@@ -22,4 +22,5 @@ export interface MouvementTraca<FileType = string> {
 
     // grouping
     subPacks?: string;
+    isGroup?: number;
 }

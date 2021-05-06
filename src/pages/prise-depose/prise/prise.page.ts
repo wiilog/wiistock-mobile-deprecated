@@ -41,7 +41,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     public footerScannerComponent: BarcodeScannerComponent;
 
     public emplacement: Emplacement;
-    public colisPrise: Array<MouvementTraca & {loading?: boolean; isGroup?: boolean; subPacks?: Array<MouvementTraca>;}>;
+    public colisPrise: Array<MouvementTraca & {loading?: boolean; subPacks?: Array<MouvementTraca>;}>;
     public currentPacksOnLocation: Array<MouvementTraca&{hidden?: boolean}>;
     public colisPriseAlreadySaved: Array<MouvementTraca>;
 
@@ -184,8 +184,9 @@ export class PrisePage extends PageComponent implements CanLeave {
                                     .sendMouvementTraca(this.fromStock)
                                     .pipe(
                                         flatMap(() => (
-                                            !this.fromStock
-                                                ? this.apiService.requestApi(ApiService.POST_PACK_GROUPS, {
+                                            !this.fromStock && groupingMovements.length > 0
+                                                ? this.apiService.requestApi(ApiService.POST_GROUP_TRACKINGS, {
+                                                    pathParams: {mode: 'picking'},
                                                     params: this.localDataManager.extractTrackingMovementFiles(this.localDataManager.mapTrackingMovements(groupingMovements))
                                                 })
                                                     .pipe(
@@ -334,7 +335,7 @@ export class PrisePage extends PageComponent implements CanLeave {
             this.colisPrise[index].nature_id = natureId;
             this.colisPrise[index].loading = false;
             if (groupData) {
-                this.colisPrise[index].isGroup = true;
+                this.colisPrise[index].isGroup = 1;
                 this.colisPrise[index].subPacks = groupData.packs;
             }
         }

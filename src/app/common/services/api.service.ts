@@ -40,7 +40,7 @@ export class ApiService {
     public static readonly PACKS_GROUPS = {method: GET, service: '/pack-groups'};
     public static readonly GROUP = {method: POST, service: '/group'};
     public static readonly UNGROUP = {method: POST, service: '/ungroup'};
-    public static readonly POST_PACK_GROUPS = {method: POST, service: '/pack-groups'};
+    public static readonly POST_GROUP_TRACKINGS = {method: POST, service: '/group-trackings/{mode}'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'
