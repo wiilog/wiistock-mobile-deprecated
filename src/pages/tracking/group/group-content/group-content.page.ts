@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, ViewChild} from '@angular/core';
 import {HeaderConfig} from "@app/common/components/panel/model/header-config";
 import * as moment from "moment";
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
@@ -93,12 +93,13 @@ export class GroupContentPage extends PageComponent {
                                 this.toastService.presentToast(`Le colis ${code} est un groupe`);
                             }
                             else {
-                                let pack = response.pack || {
+                                const pack = response.pack || {
                                     code,
-                                    nature_id: null,
-                                    quantity: 1,
-                                    date: moment().format('DD/MM/YYYY HH:mm:ss'),
+                                    nature_id: null
                                 };
+
+                                pack.quantity = pack.quantity || 1;
+                                pack.date = pack.date || moment().format('DD/MM/YYYY HH:mm:ss');
 
                                 this.group.newPacks.push(pack);
                                 this.treatPacks(code);
