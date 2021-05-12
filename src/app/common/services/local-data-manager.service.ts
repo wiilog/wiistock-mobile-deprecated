@@ -410,16 +410,7 @@ export class LocalDataManagerService {
                                                 ? of(undefined)
                                                     .pipe(
                                                         // we delete succeed mouvement
-                                                        flatMap(() => {
-                                                            const mouvementTracaToDelete = mouvements
-                                                                .filter(({finished, type, ref_article}) => (
-                                                                    (finished && (refArticlesErrors.indexOf(ref_article) === -1)) ||
-                                                                    (type === 'depose')
-                                                                ))
-                                                                .map(({id}) => id);
-                                                            return this.sqliteService
-                                                                .deleteBy('mouvement_traca', [`id IN (${mouvementTracaToDelete.join(',')})`]);
-                                                        }),
+                                                        flatMap(() => this.updateSucceedTracking(refArticlesErrors, mouvements)),
                                                         flatMap(() => (
                                                             // we reset failed mouvement
                                                             this.sqliteService
@@ -687,5 +678,48 @@ export class LocalDataManagerService {
                 ...(photo ? {[`photo_${currentIndex}`]: photo} : {})
             }), {}))
         }
+    }
+
+    private updateSucceedTracking(refArticlesErrors, mouvements) {
+
+        const mouvementTracaToDelete = mouvements
+            .filter(({finished, type, ref_article}) => (
+                (finished && (refArticlesErrors.indexOf(ref_article) === -1)) ||
+                (type === 'depose')
+            ))
+            .map(({id}) => id);
+        return this.sqliteService.findBy('mouvement_traca', [`id IN (${mouvementTracaToDelete.join(',')}) AND packParent IS NOT NULL`])
+            .pipe(
+                flatMap((trackingToDelete: Array<MouvementTraca>) => {
+                    const subPacksToDelete = trackingToDelete.map(({ref_article}) => ref_article);
+                    return subPacksToDelete && subPacksToDelete.length > 0
+                        ? this.sqliteService
+                            .findBy('mouvement_traca', [
+                                'isGroup = 1',
+                                subPacksToDelete
+                                    .map((code) => `subPacks LIKE '${code}'`)
+                                    .join(' OR ')
+                            ])
+                            .pipe(
+                                flatMap((groupsToUpdate) => groupsToUpdate.length > 0
+                                    ? zip(...groupsToUpdate.map((group) => {
+                                        const newSubPacks = JSON.parse(group.subPacks || '[]');
+                                        for (const [index, {code}] of newSubPacks) {
+                                            if (trackingToDelete.indexOf(code) > -1) {
+                                                newSubPacks.splice(index, 1);
+                                            }
+                                        }
+                                        group.subPacks = JSON.stringify(newSubPacks);
+                                        return newSubPacks.length > 0
+                                            ? this.sqliteService.update('mouvement_traca', group, [`id = ${group.id}`])
+                                            : this.sqliteService.deleteBy('mouvement_traca', [`id = ${group.id}`]);
+                                    }))
+                                    : of(undefined)
+                                )
+                            )
+                        : of (undefined)
+                }),
+                flatMap(() => this.sqliteService.deleteBy('mouvement_traca', [`id IN (${mouvementTracaToDelete.join(',')})`]))
+            );
     }
 }

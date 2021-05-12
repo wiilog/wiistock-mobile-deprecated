@@ -49,6 +49,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             nature_id: 'INTEGER',
             isGroup: 'INTEGER',
             subPacks: 'TEXT',
+            packParent: 'VARCHAR(255)',
         }
     },
     {
