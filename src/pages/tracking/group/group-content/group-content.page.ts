@@ -90,11 +90,11 @@ export class GroupContentPage extends PageComponent {
                         (response) => {
                             if (response.packGroup) {
                                 this.treatPacks(code);
-                                this.toastService.presentToast(`Le colis ${code} est un groupe`);
+                                this.toastService.presentToast(`Le colis <b>${code}</b> est un groupe`);
                             }
                             else if (response.isSubPack) {
                                 this.treatPacks(code);
-                                this.toastService.presentToast(`Le colis <b>${code}</b> est déjà dans un group`);
+                                this.toastService.presentToast(`Le colis <b>${code}</b> est déjà présent dans un groupe`);
                             }
                             else {
                                 let pack = response.pack || {
