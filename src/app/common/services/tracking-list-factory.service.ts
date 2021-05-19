@@ -192,7 +192,7 @@ export class TrackingListFactoryService {
             },
             body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, loading, isGroup, subPacks}) => {
                 const natureConfig = (natureIdsToConfig && nature_id && natureIdsToConfig[nature_id]);
-console.log(subPacks);
+
                 let quantityRow = {};
                 if (!loading) {
                     quantityRow = isGroup

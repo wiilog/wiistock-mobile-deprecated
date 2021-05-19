@@ -201,6 +201,29 @@ export class DeposePage extends PageComponent implements CanLeave {
                                                         params: this.localDataManager.extractTrackingMovementFiles(this.localDataManager.mapTrackingMovements(groupingMovements))
                                                     })
                                                         .pipe(
+                                                            flatMap((res) => {
+                                                                if (res.tracking && res.tracking.length > 0) {
+                                                                    return this.sqliteService
+                                                                        .deleteBy('mouvement_traca', [
+                                                                            `ref_article IN (${res.tracking.map(({ref_article}) => `'${ref_article}'`).join(',')})`
+                                                                        ])
+                                                                        .pipe(
+                                                                            tap(() => {
+                                                                                const movementCounter = (apiResponse && apiResponse.data && apiResponse.data.movementCounter) || 0;
+                                                                                const insertedMovements = movementCounter + res.tracking.length;
+                                                                                const messagePlural = insertedMovements > 1 ? 's' : '';
+
+                                                                                apiResponse.data = {
+                                                                                    ...(apiResponse.data || {}),
+                                                                                    status: `${insertedMovements} mouvement${messagePlural} synchronisé${messagePlural}`
+                                                                                };
+                                                                            })
+                                                                        )
+                                                                }
+                                                                else {
+                                                                    return of(res);
+                                                                }
+                                                            }),
                                                             tap((res) => {
                                                                 if (res && !res.success) {
                                                                     this.toastService.presentToast(res.message || 'Une erreur inconnue est survenue');
