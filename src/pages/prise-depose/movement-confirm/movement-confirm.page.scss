@@ -16,8 +16,13 @@
     }
 
     &,
-    & > wii-form-panel {
+    & > wii-form-panel,
+    & > .sub-pack-container {
         flex: 1;
         display: flex;
+    }
+
+    & > .sub-pack-container > wii-list-panel {
+        flex: 1;
     }
 }

@@ -1,5 +1,4 @@
 <div class="page-content">
-
     <div class="nav-container" *ngIf="isGroup">
         <ion-button [color]="currentPage === Page.EDIT ? 'primary' : 'light'" (click)="onPageClicked(Page.EDIT)">Mouvement</ion-button>
         <ion-button [color]="currentPage === Page.SUB_PACKS ? 'primary' : 'light'" (click)="onPageClicked(Page.SUB_PACKS)">Contenu colis</ion-button>
@@ -11,7 +10,9 @@
                     [body]="bodyConfig">
     </wii-form-panel>
 
-    <div *ngIf="currentPage === Page.SUB_PACKS">
+    <div class="sub-pack-container"
+         scroll-y="true"
+         *ngIf="currentPage === Page.SUB_PACKS">
         <wii-list-panel *ngIf="headerConfig && subPacksConfig"
                         [header]="headerConfig"
                         [body]="subPacksConfig">
