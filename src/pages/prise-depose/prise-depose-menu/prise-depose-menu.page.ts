@@ -70,13 +70,13 @@ export class PriseDeposeMenuPage extends PageComponent implements CanLeave {
         )
             .subscribe(([loading, mouvementTraca]: [HTMLIonLoadingElement, Array<MouvementTraca>]) => {
                 this.nbDrop = mouvementTraca
-                    .filter(({finished, type, fromStock}) => (
+                    .filter(({finished, type, fromStock, packParent}) => (
                         type === 'prise' &&
                         !finished &&
                         // this.fromStock: boolean & fromStock: number
                         (
                             (this.fromStock && fromStock) ||
-                            (!this.fromStock && !fromStock)
+                            (!this.fromStock && !fromStock && !packParent)
                         )
                     ))
                     .length;
