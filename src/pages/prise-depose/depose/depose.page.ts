@@ -202,15 +202,15 @@ export class DeposePage extends PageComponent implements CanLeave {
                                                     })
                                                         .pipe(
                                                             flatMap((res) => {
-                                                                if (res.tracking && res.tracking.length > 0) {
+                                                                if (res.finishedMovements && res.finishedMovements.length > 0) {
                                                                     return this.sqliteService
                                                                         .deleteBy('mouvement_traca', [
-                                                                            `ref_article IN (${res.tracking.map(({ref_article}) => `'${ref_article}'`).join(',')})`
+                                                                            `ref_article IN (${res.finishedMovements.map((ref_article) => `'${ref_article}'`).join(',')})`
                                                                         ])
                                                                         .pipe(
                                                                             tap(() => {
                                                                                 const movementCounter = (apiResponse && apiResponse.data && apiResponse.data.movementCounter) || 0;
-                                                                                const insertedMovements = movementCounter + res.tracking.length;
+                                                                                const insertedMovements = movementCounter + res.finishedMovements.length;
                                                                                 const messagePlural = insertedMovements > 1 ? 's' : '';
 
                                                                                 apiResponse.data = {
