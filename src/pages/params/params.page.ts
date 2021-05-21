@@ -45,7 +45,7 @@ export class ParamsPage extends PageComponent implements CanLeave {
     public ionViewWillEnter(): void {
         this.serverUrlSubscription = this.storageService.getServerUrl().subscribe((baseUrl) => {
             this.isLoading = false;
-            if(!environment.production && localAddress) {
+            if(!environment.production && localAddress && !baseUrl) {
                 this.URL = localAddress;
                 this.registerURL();
             } else {
