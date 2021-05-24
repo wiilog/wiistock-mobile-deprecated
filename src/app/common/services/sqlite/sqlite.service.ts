@@ -236,7 +236,11 @@ export class SqliteService {
                                           isGroup: (apiPicking.isGroup || false),
                                           subPacks: (apiPicking.subPacks || [])
                                       })
-                                      : of(undefined)
+                                      : this.update(
+                                          'mouvement_traca',
+                                          { subPacks: (apiPicking.subPacks || [])},
+                                          [`ref_article = '${apiPicking.ref_article}'`]
+                                      )
                               ))
                           )
                           : of(undefined)
@@ -707,6 +711,12 @@ export class SqliteService {
             flatMap(() => this.importDispatchesData(data).pipe(tap(() => {console.log('--- > importDispatchesData')}))),
             flatMap(() => this.importStatusData(data).pipe(tap(() => {console.log('--- > importStatusData')}))),
             flatMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),
+            tap(() => {
+                this.findAll('mouvement_traca').subscribe((res) => {
+                    // @ts-ignore
+                    window.RES = res;
+                });
+            }),
             flatMap(() => (
                 this.storageService.getInventoryManagerRight().pipe(
                     flatMap((res) => (res

@@ -681,7 +681,6 @@ export class LocalDataManagerService {
     }
 
     private updateSucceedTracking(refArticlesErrors, mouvements) {
-
         const mouvementTracaToDelete = mouvements
             .filter(({finished, type, ref_article}) => (
                 (finished && (refArticlesErrors.indexOf(ref_article) === -1)) ||
@@ -697,19 +696,21 @@ export class LocalDataManagerService {
                             .findBy('mouvement_traca', [
                                 'isGroup = 1',
                                 subPacksToDelete
-                                    .map((code) => `subPacks LIKE '${code}'`)
+                                    .map((code) => `subPacks LIKE '%${code}%'`)
                                     .join(' OR ')
                             ])
                             .pipe(
                                 flatMap((groupsToUpdate) => groupsToUpdate.length > 0
                                     ? zip(...groupsToUpdate.map((group) => {
                                         const newSubPacks = JSON.parse(group.subPacks || '[]');
-                                        for (const [index, {code}] of newSubPacks) {
-                                            if (trackingToDelete.indexOf(code) > -1) {
-                                                newSubPacks.splice(index, 1);
+                                        if (Array.isArray(newSubPacks)) {
+                                            for (const [index, {code}] of newSubPacks.entries()) {
+                                                if (trackingToDelete.findIndex(({ref_article: trackingToDeleteCode}) => trackingToDeleteCode === code) > -1) {
+                                                    newSubPacks.splice(index, 1);
+                                                }
                                             }
+                                            group.subPacks = JSON.stringify(newSubPacks);
                                         }
-                                        group.subPacks = JSON.stringify(newSubPacks);
                                         return newSubPacks.length > 0
                                             ? this.sqliteService.update('mouvement_traca', group, [`id = ${group.id}`])
                                             : this.sqliteService.deleteBy('mouvement_traca', [`id = ${group.id}`]);
@@ -719,7 +720,8 @@ export class LocalDataManagerService {
                             )
                         : of (undefined)
                 }),
-                flatMap(() => this.sqliteService.deleteBy('mouvement_traca', [`id IN (${mouvementTracaToDelete.join(',')})`]))
+                flatMap(() => this.sqliteService.deleteBy('mouvement_traca', [`id IN (${mouvementTracaToDelete.join(',')})`])),
+
             );
     }
 }
