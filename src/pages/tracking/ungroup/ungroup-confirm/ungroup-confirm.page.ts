@@ -10,6 +10,7 @@ import {ToastService} from "@app/common/services/toast.service";
 import {Subscription} from 'rxjs';
 import {ViewWillEnter, ViewWillLeave} from '@ionic/angular';
 import {LoadingService} from '@app/common/services/loading.service';
+import {flatMap, map} from 'rxjs/operators';
 
 @Component({
     selector: 'app-ungroup-confirm',
@@ -28,7 +29,7 @@ export class UngroupConfirmPage extends PageComponent implements ViewWillEnter, 
     public constructor(private apiService: ApiService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
-                       private sqlService: SqliteService,
+                       private sqliteService: SqliteService,
                        navService: NavService) {
         super(navService);
         this.ungroupDate = moment().format('DD/MM/YYYY HH:mm:ss');
@@ -51,7 +52,7 @@ export class UngroupConfirmPage extends PageComponent implements ViewWillEnter, 
     }
 
     private async createHeaderConfig(group): Promise<HeaderConfig> {
-        const nature = await this.sqlService.findOneById(`nature`, group.natureId).toPromise();
+        const nature = await this.sqliteService.findOneById(`nature`, group.natureId).toPromise();
 
         const subtitle = [
             `Objet : <b>${group.code}</b>`,
@@ -71,7 +72,7 @@ export class UngroupConfirmPage extends PageComponent implements ViewWillEnter, 
 
     private async createBodyConfig(packs): Promise<Array<ListPanelItemConfig>> {
         return await Promise.all(packs.map(async pack => {
-            const nature = await this.sqlService.findOneById(`nature`, pack.nature_id).toPromise();
+            const nature = await this.sqliteService.findOneById(`nature`, pack.nature_id).toPromise();
 
             return {
                 color: nature ? nature.color : '',
@@ -106,14 +107,24 @@ export class UngroupConfirmPage extends PageComponent implements ViewWillEnter, 
             };
 
             this.loadingSubscription = this.loadingService
-                .presentLoadingWhile({event: () => this.apiService.requestApi(ApiService.UNGROUP, options)})
+                .presentLoadingWhile({event: () => {
+                    return this.apiService
+                        .requestApi(ApiService.UNGROUP, options)
+                        .pipe(
+                            flatMap((response) => this.sqliteService.update(
+                                'mouvement_traca',
+                                {subPacks: '[]'},
+                                [`ref_article = '${this.group.code}'`]
+                            ).pipe(map(() => response)))
+                        );
+                }})
                 .subscribe(
                     (response) => {
                         if (response.success) {
                             this.toastService.presentToast(response.msg);
-                            this.navService.pop().subscribe(() =>
-                                this.navService.pop().subscribe(() =>
-                                    this.navService.pop()));
+                            this.navService.pop()
+                                .pipe(flatMap(() => this.navService.pop()))
+                                .subscribe(() => this.navService.pop());
                         }
                         else {
                             this.toastService.presentToast(`Erreur lors de la synchronisation du dégroupage`);

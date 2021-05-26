@@ -23,10 +23,10 @@ export class UngroupScanGroupPage extends PageComponent {
 
     private loadingSubscription: Subscription;
 
-    constructor(private api: ApiService,
-                private loadingService: LoadingService,
-                private toastService: ToastService,
-                navService: NavService) {
+    public constructor(private api: ApiService,
+                       private loadingService: LoadingService,
+                       private toastService: ToastService,
+                       navService: NavService) {
         super(navService);
     }
 

@@ -392,7 +392,7 @@ export class LocalDataManagerService {
         return this.sqliteService.findAll('mouvement_traca')
             .pipe(
                 map((mouvements: Array<MouvementTraca & {subPacks: any}>) => (
-                   this.mapTrackingMovements(mouvements.filter(({fromStock, isGroup}) => (!isGroup && sendFromStock === Boolean(fromStock))))
+                   this.mapTrackingMovements(mouvements.filter(({fromStock, isGroup, subPacks}) => ((!isGroup || subPacks === '[]') && sendFromStock === Boolean(fromStock))))
                 )),
                 flatMap((mouvements: Array<MouvementTraca<File> & {subPacks: any}>) => (
                     mouvements.length > 0
