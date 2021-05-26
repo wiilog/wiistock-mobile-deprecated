@@ -24,6 +24,7 @@ import {FormPanelService} from '@app/common/services/form-panel.service';
 import {FreeField, FreeFieldType} from '@entities/free-field';
 import {Translation} from '@entities/translation';
 import {Status} from '@entities/status';
+import {TranslationService} from '@app/common/services/translations.service';
 
 
 @Component({
@@ -57,6 +58,7 @@ export class HandlingValidatePage extends PageComponent {
                        private sqliteService: SqliteService,
                        private fileService: FileService,
                        private formPanelService: FormPanelService,
+                       private translationService: TranslationService,
                        navService: NavService) {
         super(navService);
         this.pageEnter = false;
@@ -77,16 +79,13 @@ export class HandlingValidatePage extends PageComponent {
                     this.handling.statusId ? this.sqliteService.findOneBy('status', {id: this.handling.statusId}) : of(undefined),
                     this.sqliteService.findBy('handling_attachment', [`handlingId = ${this.handling.id}`]),
                     this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.HANDLING}'`]),
-                    this.sqliteService.findBy('translations', [`menu LIKE 'services'`])
+                    this.translationService.find('services')
                 )),
 
             )
             .subscribe(([currentStatus, handlingAttachment, freeFields, handlingsTranslations]: [Status, Array<HandlingAttachment>, Array<FreeField>, Array<Translation>]) => {
                 this.dismissLoading();
-                this.handlingsTranslations = handlingsTranslations.reduce((acc, {label, translation}) => ({
-                    ...acc,
-                    [label]: translation
-                }), {});
+                this.handlingsTranslations = this.translationService.get(handlingsTranslations);
 
                 this.refreshHeader(false);
 
@@ -324,8 +323,8 @@ export class HandlingValidatePage extends PageComponent {
             subtitle: [
                 `Demandeur : ${requester || ''}`,
                 `Date attendue : ${desiredDate || ''}`,
-                `${this.handlingsTranslations['Objet'] || 'Objet'} : ${subject || ''}`,
-                `${this.handlingsTranslations['Nombre d\'opération(s) réalisée(s)'] || 'Nombre d\'opération(s) réalisée(s)'} : ${carriedOutOperationCount || ''}`,
+                `${this.translationService.translate(this.handlingsTranslations, 'Objet')} : ${subject || ''}`,
+                `${this.translationService.translate(this.handlingsTranslations,'Nombre d\'opération(s) réalisée(s)')} : ${carriedOutOperationCount || ''}`,
                 `Source : ${source || ''}`,
                 `Destination : ${destination || ''}`,
                 `Type : ${typeLabel || ''}`,

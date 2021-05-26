@@ -19,7 +19,7 @@ import {Translation} from '@entities/translation';
 import {ToastService} from '@app/common/services/toast.service';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
-
+import {TranslationService} from "@app/common/services/translations.service";
 
 @Component({
     selector: 'wii-dispatch-packs',
@@ -71,6 +71,7 @@ export class DispatchPacksPage extends PageComponent {
                        private loadingService: LoadingService,
                        private mainHeaderService: MainHeaderService,
                        private toastService: ToastService,
+                       private translationService: TranslationService,
                        navService: NavService) {
         super(navService);
         this.loading = true;
@@ -93,7 +94,7 @@ export class DispatchPacksPage extends PageComponent {
                         this.sqliteService.findOneBy('dispatch', {id: dispatchId}),
                         this.sqliteService.findBy('dispatch_pack', [`dispatchId = ${dispatchId}`]),
                         this.sqliteService.findAll('nature'),
-                        this.sqliteService.findBy('translations', [`menu LIKE 'natures'`]),
+                        this.translationService.find('natures')
                     ).pipe(
                         flatMap((data) => this.sqliteService
                             .findBy('status', [`category = 'acheminement'`, `state = 'partial'`, `typeId = ${data[0].typeId}`])
@@ -112,10 +113,7 @@ export class DispatchPacksPage extends PageComponent {
                         ...acc,
                         [Number(id)]: label
                     }), {});
-                    this.natureTranslations = natureTranslations.reduce((acc, {label, translation}) => ({
-                        ...acc,
-                        [label]: translation
-                    }), {});
+                    this.natureTranslations = this.translationService.get(natureTranslations);
                     this.dispatchPacks = packs.map((pack) => ({
                         ...pack,
                         treated: 0
@@ -198,7 +196,7 @@ export class DispatchPacksPage extends PageComponent {
 
     private refreshListToTreatConfig(): void {
         const packsToTreat = this.dispatchPacks.filter(({treated, already_treated}) => (!already_treated && !treated));
-        const natureTranslation = (this.natureTranslations['nature'] || 'nature');
+        const natureTranslation = this.translationService.translate(this.natureTranslations, 'nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
         const plural = packsToTreat.length > 1 ? 's' : '';
@@ -233,7 +231,7 @@ export class DispatchPacksPage extends PageComponent {
 
     private refreshListTreatedConfig(): void {
         const packsTreated = this.dispatchPacks.filter(({treated, already_treated}) => (already_treated || treated));
-        const natureTranslation = (this.natureTranslations['nature'] || 'nature');
+        const natureTranslation = this.translationService.translate(this.natureTranslations, 'nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
         const plural = packsTreated.length > 1 ? 's' : '';
