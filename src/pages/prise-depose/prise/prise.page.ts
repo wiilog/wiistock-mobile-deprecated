@@ -571,6 +571,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                                         if (group) {
                                             from(this.alertController.create({
                                                 header: 'Confirmation',
+                                                backdropDismiss: false,
                                                 cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
                                                 message: `Le colis ${barCode} est contenu dans le groupe ${group.code}.
                                                       Confirmer la prise l'enlèvera du groupe.`,
