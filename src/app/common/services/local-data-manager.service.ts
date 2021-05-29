@@ -701,20 +701,23 @@ export class LocalDataManagerService {
                             ])
                             .pipe(
                                 flatMap((groupsToUpdate) => groupsToUpdate.length > 0
-                                    ? zip(...groupsToUpdate.map((group) => {
-                                        const newSubPacks = JSON.parse(group.subPacks || '[]');
-                                        if (Array.isArray(newSubPacks)) {
-                                            for (const [index, {code}] of newSubPacks.entries()) {
-                                                if (trackingToDelete.findIndex(({ref_article: trackingToDeleteCode}) => trackingToDeleteCode === code) > -1) {
-                                                    newSubPacks.splice(index, 1);
+                                    ? zip(...groupsToUpdate
+                                        // remove duplicates
+                                        .filter(({id}, index) => groupsToUpdate.findIndex(({id: idDuplicate}) => idDuplicate === id) === index)
+                                        .map((group) => {
+                                            const subPacks = JSON.parse(group.subPacks || '[]');
+                                            const newSubPacks = [];
+                                            if (Array.isArray(newSubPacks)) {
+                                                for (const pack of subPacks) {
+                                                    if (trackingToDelete.findIndex(({ref_article: trackingToDeleteCode}) => (trackingToDeleteCode === pack.code)) === -1) {
+                                                        newSubPacks.push(pack);
+                                                    }
                                                 }
+                                                group.subPacks = JSON.stringify(newSubPacks);
                                             }
-                                            group.subPacks = JSON.stringify(newSubPacks);
-                                        }
-                                        return newSubPacks.length > 0
-                                            ? this.sqliteService.update('mouvement_traca', group, [`id = ${group.id}`])
-                                            : this.sqliteService.deleteBy('mouvement_traca', [`id = ${group.id}`]);
-                                    }))
+                                            return this.sqliteService.update('mouvement_traca', group, [`id = ${group.id}`]);
+                                        })
+                                    )
                                     : of(undefined)
                                 )
                             )
