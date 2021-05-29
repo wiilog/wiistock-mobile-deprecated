@@ -147,99 +147,104 @@ export class PrisePage extends PageComponent implements CanLeave {
 
     public finishTaking(): void {
         if (this.colisPrise && this.colisPrise.length > 0) {
-            const multiPrise = (this.colisPrise.length > 1);
-            if (!this.apiLoading) {
-                this.apiLoading = true;
-                let loader: HTMLIonLoadingElement;
+            if (this.colisPrise.some(({loading}) => loading)) {
+                this.toastService.presentToast(`Veuillez attendre le chargement de tous les colis`);
+            }
+            else {
+                const multiPrise = (this.colisPrise.length > 1);
+                if (!this.apiLoading) {
+                    this.apiLoading = true;
+                    let loader: HTMLIonLoadingElement;
 
-                const movementsToSave = this.colisPrise.filter(({isGroup}) => !isGroup);
-                const groupingMovements = this.colisPrise.filter(({isGroup}) => isGroup);
+                    const movementsToSave = this.colisPrise.filter(({isGroup}) => !isGroup);
+                    const groupingMovements = this.colisPrise.filter(({isGroup}) => isGroup);
 
-                if (!this.fromStock
-                    && this.network.type === 'none'
-                    && groupingMovements.length > 0) {
-                    this.toastService.presentToast('Votre prise contient des groupes, veuillez vous connecter à internet pour continuer.');
-                    return;
+                    if (!this.fromStock
+                        && this.network.type === 'none'
+                        && groupingMovements.length > 0) {
+                        this.toastService.presentToast('Votre prise contient des groupes, veuillez vous connecter à internet pour continuer.');
+                        return;
+                    }
+
+                    this.saveSubscription = this.localDataManager
+                        .saveMouvementsTraca(movementsToSave.map(({loading, ...tracking}) => tracking))
+                        .pipe(
+                            flatMap(() => {
+                                const online = (this.network.type !== 'none');
+                                return online
+                                    ? this.loadingService
+                                        .presentLoading(multiPrise ? 'Envoi des prises en cours...' : 'Envoi de la prise en cours...')
+                                        .pipe(
+                                            tap((presentedLoader: HTMLIonLoadingElement) => {
+                                                loader = presentedLoader;
+                                            }),
+                                            map(() => online)
+                                        )
+                                    : of(online)
+                            }),
+                            flatMap((online: boolean) => (
+                                online
+                                    ? this.localDataManager
+                                        .sendMouvementTraca(this.fromStock)
+                                        .pipe(
+                                            flatMap(() => (
+                                                !this.fromStock && groupingMovements.length > 0
+                                                    ? this.apiService.requestApi(ApiService.POST_GROUP_TRACKINGS, {
+                                                        pathParams: {mode: 'picking'},
+                                                        params: this.localDataManager.extractTrackingMovementFiles(this.localDataManager.mapTrackingMovements(groupingMovements))
+                                                    })
+                                                        .pipe(
+                                                            flatMap((res) => {
+                                                                if (!res || !res.success) {
+                                                                    this.toastService.presentToast(res.message || 'Une erreur inconnue est survenue');
+                                                                    throw new Error(res.message);
+                                                                }
+                                                                else {
+                                                                    return (res.tracking)
+                                                                        ? this.sqliteService.deleteBy('mouvement_traca', ['fromStock = 0'])
+                                                                            .pipe(flatMap(() => this.sqliteService.importMouvementTraca({trackingTaking: res.tracking})))
+                                                                        : of(undefined);
+                                                                }
+                                                            })
+                                                        )
+                                                    : of(undefined)
+                                            )),
+                                            flatMap(() => (
+                                                loader
+                                                    ? from(loader.dismiss())
+                                                    : of(undefined)
+                                            )),
+                                            tap(() => {
+                                                loader = undefined;
+                                            }),
+                                            map(() => online)
+                                        )
+                                    : of(online)
+                            )),
+                            // we display toast
+                            flatMap((send: boolean) => {
+                                const message = send
+                                    ? 'Les prises ont bien été sauvegardées'
+                                    : (multiPrise
+                                        ? 'Prises sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
+                                        : 'Prise sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+                                return this.toastService.presentToast(message);
+                            })
+                        )
+                        .subscribe(
+                            () => {
+                                this.apiLoading = false;
+                                this.redirectAfterTake();
+                            },
+                            (error) => {
+                                this.apiLoading = false;
+                                if (loader) {
+                                    loader.dismiss();
+                                    loader = undefined;
+                                }
+                                throw error;
+                            });
                 }
-
-                this.saveSubscription = this.localDataManager
-                    .saveMouvementsTraca(movementsToSave.map(({loading, ...tracking}) => tracking))
-                    .pipe(
-                        flatMap(() => {
-                            const online = (this.network.type !== 'none');
-                            return online
-                                ? this.loadingService
-                                    .presentLoading(multiPrise ? 'Envoi des prises en cours...' : 'Envoi de la prise en cours...')
-                                    .pipe(
-                                        tap((presentedLoader: HTMLIonLoadingElement) =>  {
-                                            loader = presentedLoader;
-                                        }),
-                                        map(() => online)
-                                    )
-                                : of(online)
-                        }),
-                        flatMap((online: boolean) => (
-                            online
-                                ? this.localDataManager
-                                    .sendMouvementTraca(this.fromStock)
-                                    .pipe(
-                                        flatMap(() => (
-                                            !this.fromStock && groupingMovements.length > 0
-                                                ? this.apiService.requestApi(ApiService.POST_GROUP_TRACKINGS, {
-                                                    pathParams: {mode: 'picking'},
-                                                    params: this.localDataManager.extractTrackingMovementFiles(this.localDataManager.mapTrackingMovements(groupingMovements))
-                                                })
-                                                    .pipe(
-                                                        flatMap((res) => {
-                                                            if (!res || !res.success) {
-                                                                this.toastService.presentToast(res.message || 'Une erreur inconnue est survenue');
-                                                                throw new Error(res.message);
-                                                            }
-                                                            else {
-                                                                return (res.tracking)
-                                                                    ? this.sqliteService.deleteBy('mouvement_traca', ['fromStock = 0'])
-                                                                        .pipe(flatMap(() => this.sqliteService.importMouvementTraca({trackingTaking: res.tracking})))
-                                                                    : of(undefined);
-                                                            }
-                                                        })
-                                                    )
-                                                : of(undefined)
-                                        )),
-                                        flatMap(() => (
-                                            loader
-                                                ? from(loader.dismiss())
-                                                : of(undefined)
-                                        )),
-                                        tap(() => {
-                                            loader = undefined;
-                                        }),
-                                        map(() => online)
-                                    )
-                                : of(online)
-                        )),
-                        // we display toast
-                        flatMap((send: boolean) => {
-                            const message = send
-                                ? 'Les prises ont bien été sauvegardées'
-                                : (multiPrise
-                                    ? 'Prises sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
-                                    : 'Prise sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
-                            return this.toastService.presentToast(message);
-                        })
-                    )
-                    .subscribe(
-                        () => {
-                            this.apiLoading = false;
-                            this.redirectAfterTake();
-                        },
-                        (error) => {
-                            this.apiLoading = false;
-                            if (loader) {
-                                loader.dismiss();
-                                loader = undefined;
-                            }
-                            throw error;
-                        });
             }
         }
         else {
