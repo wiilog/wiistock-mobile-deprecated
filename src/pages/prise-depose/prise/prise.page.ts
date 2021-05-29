@@ -393,10 +393,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                     : undefined,
                 rightIcon: {
                     mode: 'remove',
-                    action: TrackingListFactoryService.CreateRemoveItemFromListHandler(this.colisPrise, undefined, (barCode) => {
-                        this.setPackOnLocationHidden(barCode, false);
-                        this.refreshListComponent();
-                    })
+                    action: this.cancelPickingAction()
                 }
             }
         );
@@ -429,6 +426,13 @@ export class PrisePage extends PageComponent implements CanLeave {
 
     private takeAll() {
         this.toTakeOngoingPacks.forEach(({ref_article}) => this.testIfBarcodeEquals(ref_article, true));
+    }
+
+    private cancelPickingAction(): (info: { [name: string]: { label: string; value?: string; } }) => void {
+        return TrackingListFactoryService.CreateRemoveItemFromListHandler(this.colisPrise, undefined, (barCode) => {
+            this.setPackOnLocationHidden(barCode, false);
+            this.refreshListComponent();
+        });
     }
 
     private init(fromStart: boolean = true): void {
@@ -586,7 +590,11 @@ export class PrisePage extends PageComponent implements CanLeave {
                                                     {
                                                         text: 'Annuler',
                                                         cssClass: 'alert-danger',
-                                                        role: 'cancel'
+                                                        role: 'cancel',
+                                                        handler: () => {
+                                                            const cancelPicking = this.cancelPickingAction();
+                                                            cancelPicking({object: {value: barCode, label: barCode}});
+                                                        }
                                                     }
                                                 ]
                                             })).subscribe((alert: HTMLIonAlertElement) => {
