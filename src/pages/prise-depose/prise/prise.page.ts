@@ -66,7 +66,6 @@ export class PrisePage extends PageComponent implements CanLeave {
 
     private finishAction: () => void;
     private operator: string;
-    private apiLoading: boolean;
     private natureTranslation: Array<Translation>;
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
@@ -135,14 +134,11 @@ export class PrisePage extends PageComponent implements CanLeave {
             this.barcodeCheckSubscription.unsubscribe();
             this.barcodeCheckSubscription = undefined;
         }
-        if (this.saveSubscription) {
-            this.saveSubscription.unsubscribe();
-            this.saveSubscription = undefined;
-        }
+        this.unsubscribeSaveSubscription();
     }
 
     public wiiCanLeave(): boolean {
-        return !this.barcodeCheckLoading && !this.apiLoading && !this.trackingListFactory.alertPresented;
+        return !this.barcodeCheckLoading && !this.saveSubscription && !this.trackingListFactory.alertPresented;
     }
 
     public finishTaking(): void {
@@ -152,10 +148,7 @@ export class PrisePage extends PageComponent implements CanLeave {
             }
             else {
                 const multiPrise = (this.colisPrise.length > 1);
-                if (!this.apiLoading) {
-                    this.apiLoading = true;
-                    let loader: HTMLIonLoadingElement;
-
+                if (!this.saveSubscription) {
                     const movementsToSave = this.colisPrise.filter(({isGroup}) => !isGroup);
                     const groupingMovements = this.colisPrise.filter(({isGroup}) => isGroup);
 
@@ -166,82 +159,43 @@ export class PrisePage extends PageComponent implements CanLeave {
                         return;
                     }
 
-                    this.saveSubscription = this.localDataManager
-                        .saveMouvementsTraca(movementsToSave.map(({loading, ...tracking}) => tracking))
-                        .pipe(
-                            flatMap(() => {
+                    this.saveSubscription = this.loadingService
+                        .presentLoadingWhile({
+                            message: multiPrise ? 'Envoi des prises en cours...' : 'Envoi de la prise en cours...',
+                            event: () => {
                                 const online = (this.network.type !== 'none');
-                                return online
-                                    ? this.loadingService
-                                        .presentLoading(multiPrise ? 'Envoi des prises en cours...' : 'Envoi de la prise en cours...')
-                                        .pipe(
-                                            tap((presentedLoader: HTMLIonLoadingElement) => {
-                                                loader = presentedLoader;
-                                            }),
-                                            map(() => online)
-                                        )
-                                    : of(online)
-                            }),
-                            flatMap((online: boolean) => (
-                                online
-                                    ? this.localDataManager
-                                        .sendMouvementTraca(this.fromStock)
-                                        .pipe(
-                                            flatMap(() => (
-                                                !this.fromStock && groupingMovements.length > 0
-                                                    ? this.apiService.requestApi(ApiService.POST_GROUP_TRACKINGS, {
-                                                        pathParams: {mode: 'picking'},
-                                                        params: this.localDataManager.extractTrackingMovementFiles(this.localDataManager.mapTrackingMovements(groupingMovements))
-                                                    })
-                                                        .pipe(
-                                                            flatMap((res) => {
-                                                                if (!res || !res.success) {
-                                                                    this.toastService.presentToast(res.message || 'Une erreur inconnue est survenue');
-                                                                    throw new Error(res.message);
-                                                                }
-                                                                else {
-                                                                    return (res.tracking)
-                                                                        ? this.sqliteService.deleteBy('mouvement_traca', ['fromStock = 0'])
-                                                                            .pipe(flatMap(() => this.sqliteService.importMouvementTraca({trackingTaking: res.tracking})))
-                                                                        : of(undefined);
-                                                                }
-                                                            })
-                                                        )
-                                                    : of(undefined)
-                                            )),
-                                            flatMap(() => (
-                                                loader
-                                                    ? from(loader.dismiss())
-                                                    : of(undefined)
-                                            )),
-                                            tap(() => {
-                                                loader = undefined;
-                                            }),
-                                            map(() => online)
-                                        )
-                                    : of(online)
-                            )),
-                            // we display toast
-                            flatMap((send: boolean) => {
-                                const message = send
-                                    ? 'Les prises ont bien été sauvegardées'
-                                    : (multiPrise
-                                        ? 'Prises sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
-                                        : 'Prise sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
-                                return this.toastService.presentToast(message);
-                            })
-                        )
+                                return this.localDataManager
+                                    .saveMouvementsTraca(movementsToSave.map(({loading, ...tracking}) => tracking))
+                                    .pipe(
+                                        flatMap(() => (
+                                            online
+                                                ? this.localDataManager
+                                                    .sendMouvementTraca(this.fromStock)
+                                                    .pipe(
+                                                        flatMap(() => this.postGroupingMovements(groupingMovements)),
+                                                        map(() => online)
+                                                    )
+                                                : of(online)
+                                        )),
+                                        // we display toast
+                                        flatMap((send: boolean) => {
+                                            const message = send
+                                                ? 'Les prises ont bien été sauvegardées'
+                                                : (multiPrise
+                                                    ? 'Prises sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
+                                                    : 'Prise sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+                                            return this.toastService.presentToast(message);
+                                        })
+                                    )
+                            }
+                        })
                         .subscribe(
                             () => {
-                                this.apiLoading = false;
+                                this.unsubscribeSaveSubscription();
                                 this.redirectAfterTake();
                             },
                             (error) => {
-                                this.apiLoading = false;
-                                if (loader) {
-                                    loader.dismiss();
-                                    loader = undefined;
-                                }
+                                this.unsubscribeSaveSubscription();
                                 throw error;
                             });
                 }
@@ -443,7 +397,6 @@ export class PrisePage extends PageComponent implements CanLeave {
     private init(fromStart: boolean = true): void {
         this.viewEntered = true;
         this.loading = true;
-        this.apiLoading = false;
         this.listTakingBody = [];
         if (fromStart) {
             this.colisPrise = [];
@@ -552,6 +505,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                     this.saveTrackingMovement(barCode, quantity, needNatureChecks);
 
                     if (needNatureChecks) {
+                        console.log(`>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ${(new Date().toISOString())} / ${barCode}`);
                         this.apiService
                             .requestApi(ApiService.GET_PACK_DATA, {
                                 params: {
@@ -576,6 +530,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                             )
                             .subscribe(
                                 ({nature, group, isPack, isGroup}) => {
+                                    console.log(`<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ${(new Date().toISOString())} / ${barCode}`);
                                     if (isPack || !isGroup) {
                                         if (group) {
                                             from(this.alertController.create({
@@ -648,6 +603,36 @@ export class PrisePage extends PageComponent implements CanLeave {
                         });
                 }
             }
+        }
+    }
+
+    private postGroupingMovements(groupingMovements) {
+        return !this.fromStock && groupingMovements.length > 0
+            ? this.apiService.requestApi(ApiService.POST_GROUP_TRACKINGS, {
+                pathParams: {mode: 'picking'},
+                params: this.localDataManager.extractTrackingMovementFiles(this.localDataManager.mapTrackingMovements(groupingMovements))
+            })
+                .pipe(
+                    flatMap((res) => {
+                        if (!res || !res.success) {
+                            this.toastService.presentToast(res.message || 'Une erreur inconnue est survenue');
+                            throw new Error(res.message);
+                        }
+                        else {
+                            return (res.tracking)
+                                ? this.sqliteService.deleteBy('mouvement_traca', ['fromStock = 0'])
+                                    .pipe(flatMap(() => this.sqliteService.importMouvementTraca({trackingTaking: res.tracking})))
+                                : of(undefined);
+                        }
+                    })
+                )
+            : of(undefined);
+    }
+
+    private unsubscribeSaveSubscription() {
+        if (this.saveSubscription && !this.saveSubscription.closed) {
+            this.saveSubscription.unsubscribe();
+            this.saveSubscription = undefined;
         }
     }
 }

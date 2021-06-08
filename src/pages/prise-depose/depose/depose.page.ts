@@ -66,8 +66,6 @@ export class DeposePage extends PageComponent implements CanLeave {
 
     private finishAction: () => void;
 
-    private apiLoading: boolean;
-
     private operator: string;
 
     private natureTranslation: Array<Translation>;
@@ -143,10 +141,7 @@ export class DeposePage extends PageComponent implements CanLeave {
     public ionViewWillLeave(): void {
         this.trackingListFactory.disableActions();
         this.footerScannerComponent.unsubscribeZebraScan();
-        if (this.saveSubscription) {
-            this.saveSubscription.unsubscribe();
-            this.saveSubscription = undefined;
-        }
+        this.unsubscribeSaveSubscription();
     }
 
     public wiiCanLeave(): boolean {
@@ -155,10 +150,8 @@ export class DeposePage extends PageComponent implements CanLeave {
 
     public finishTaking(): void {
         if (this.colisDepose && this.colisDepose.length > 0) {
-            if(!this.apiLoading) {
-                this.apiLoading = true;
+            if(!this.saveSubscription) {
                 const multiDepose = (this.colisDepose.length > 1);
-                let loader: HTMLIonLoadingElement;
                 const online = (this.network.type !== 'none');
 
                 if (!this.fromStock || online) {
@@ -174,125 +167,38 @@ export class DeposePage extends PageComponent implements CanLeave {
                         return;
                     }
 
-                    this.saveSubscription = this.localDataManager
-                        .saveMouvementsTraca(this.colisDepose, takingToFinish)
-                        .pipe(
-                            flatMap(() => {
-                                return online
-                                    ? this.loadingService
-                                        .presentLoading(multiDepose ? 'Envoi des déposes en cours...' : 'Envoi de la dépose en cours...')
-                                        .pipe(
-                                            tap((presentedLoader: HTMLIonLoadingElement) => {
-                                                loader = presentedLoader;
-                                            }),
-                                            map(() => online)
-                                        )
-                                    : of(online)
-                            }),
-                            flatMap((online: boolean): Observable<{ online: boolean; apiResponse?: { [x: string]: any } }> => (
-                                online
-                                    ? this.localDataManager
-                                        .sendMouvementTraca(this.fromStock)
-                                        .pipe(
-                                            flatMap((apiResponse) => (
-                                                !this.fromStock && groupingMovements.length > 0
-                                                    ? this.apiService.requestApi(ApiService.POST_GROUP_TRACKINGS, {
-                                                        pathParams: {mode: 'drop'},
-                                                        params: this.localDataManager.extractTrackingMovementFiles(this.localDataManager.mapTrackingMovements(groupingMovements))
-                                                    })
-                                                        .pipe(
-                                                            flatMap((res) => {
-                                                                if (res.finishedMovements && res.finishedMovements.length > 0) {
-                                                                    return this.sqliteService
-                                                                        .deleteBy('mouvement_traca', [
-                                                                            `ref_article IN (${res.finishedMovements.map((ref_article) => `'${ref_article}'`).join(',')})`
-                                                                        ])
-                                                                        .pipe(
-                                                                            tap(() => {
-                                                                                const movementCounter = (apiResponse && apiResponse.data && apiResponse.data.movementCounter) || 0;
-                                                                                const insertedMovements = movementCounter + res.finishedMovements.length;
-                                                                                const messagePlural = insertedMovements > 1 ? 's' : '';
-
-                                                                                apiResponse.data = {
-                                                                                    ...(apiResponse.data || {}),
-                                                                                    status: `${insertedMovements} mouvement${messagePlural} synchronisé${messagePlural}`
-                                                                                };
-                                                                            })
-                                                                        )
-                                                                }
-                                                                else {
-                                                                    return of(res);
-                                                                }
-                                                            }),
-                                                            tap((res) => {
-                                                                if (res && !res.success) {
-                                                                    this.toastService.presentToast(res.message || 'Une erreur inconnue est survenue');
-                                                                    throw new Error(res.message);
-                                                                }
-                                                            }),
-                                                            map(() => apiResponse)
-                                                        )
-                                                    : of(apiResponse)
-                                            )),
-                                            flatMap((apiResponse) => (
-                                                loader
-                                                    ? from(loader.dismiss()).pipe(map(() => apiResponse))
-                                                    : of(apiResponse)
-                                            )),
-                                            tap(() => {
-                                                loader = undefined;
-                                            }),
-                                            map((apiResponse) => ({ online, apiResponse }))
-                                        )
-                                    : of({online})
-                            )),
-                            // we display toast
-                            flatMap(({online, apiResponse}) => {
-                                const emptyGroups = ((apiResponse && apiResponse.data && apiResponse.data.emptyGroups) || null)
-                                const errorsObject = ((apiResponse && apiResponse.data && apiResponse.data.errors) || {});
-                                const errorsValues = Object.keys(errorsObject).map((key) => errorsObject[key]);
-                                const errorsMessage = errorsValues.join('\n');
-                                const message = online
-                                    ? (errorsMessage.length > 0 ? '' : apiResponse.data.status)
-                                    : (multiDepose
-                                        ? 'Déposes sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
-                                        : 'Dépose sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
-                                return this.toastService
-                                    .presentToast(`${errorsMessage}${(errorsMessage && message) ? '\n' : ''}${message}`)
+                    this.saveSubscription = this.loadingService
+                        .presentLoadingWhile({
+                            message: multiDepose ? 'Envoi des déposes en cours...' : 'Envoi de la dépose en cours...',
+                            event: () => {
+                                return this.localDataManager
+                                    .saveMouvementsTraca(this.colisDepose, takingToFinish)
                                     .pipe(
-                                        flatMap(() => {
-                                            const groupPlural = (emptyGroups && emptyGroups.length > 0);
-                                            return (emptyGroups && emptyGroups.length > 0)
-                                                ? zip(
-                                                    this.toastService.presentToast(
-                                                        groupPlural
-                                                            ? `${emptyGroups.join(', ')} vides. Ces groupes ne sont plus en prise.`
-                                                            : `${emptyGroups.join(', ')} vide. Ce groupe n'est plus en prise.`
-                                                    ),
-                                                    this.sqliteService
-                                                        .deleteBy('mouvement_traca', [
-                                                            emptyGroups
-                                                                .map((code) => `ref_article LIKE '${code}'`)
-                                                                .join(' OR ')
-                                                        ])
-                                                )
-                                                : of(undefined)
-                                        }),
-                                        map(() => errorsValues.length)
-                                    );
-                            })
-                        )
+                                        flatMap((): Observable<{ online: boolean; apiResponse?: { [x: string]: any } }> => (
+                                            online
+                                                ? this.localDataManager
+                                                    .sendMouvementTraca(this.fromStock)
+                                                    .pipe(
+                                                        flatMap((apiResponse) => (
+                                                            !this.fromStock && groupingMovements.length > 0
+                                                                ? this.postGroupingMovements(groupingMovements, apiResponse)
+                                                                : of(apiResponse)
+                                                        )),
+                                                        map((apiResponse) => ({online, apiResponse}))
+                                                    )
+                                                : of({online})
+                                        )),
+                                        flatMap((a) => this.treatApiResponse(a.online, a.apiResponse, multiDepose))
+                                    )
+                            }
+                        })
                         .subscribe(
                             (nbErrors: number) => {
-                                this.apiLoading = false;
+                                this.unsubscribeSaveSubscription();
                                 this.redirectAfterTake(nbErrors > 0);
                             },
                             (error) => {
-                                this.apiLoading = false;
-                                if (loader) {
-                                    loader.dismiss();
-                                    loader = undefined;
-                                }
+                                this.unsubscribeSaveSubscription();
                                 throw error;
                             });
                 }
@@ -572,7 +478,6 @@ export class DeposePage extends PageComponent implements CanLeave {
 
     private init(): void {
         this.loading = true;
-        this.apiLoading = false;
         this.colisDepose = [];
         this.colisPrise = [];
     }
@@ -600,5 +505,86 @@ export class DeposePage extends PageComponent implements CanLeave {
             },
             []
         );
+    }
+
+    private treatApiResponse(online, apiResponse, multiDepose) {
+        const emptyGroups = ((apiResponse && apiResponse.data && apiResponse.data.emptyGroups) || null)
+        const errorsObject = ((apiResponse && apiResponse.data && apiResponse.data.errors) || {});
+        const errorsValues = Object.keys(errorsObject).map((key) => errorsObject[key]);
+        const errorsMessage = errorsValues.join('\n');
+        const message = online
+            ? (errorsMessage.length > 0 ? '' : apiResponse.data.status)
+            : (multiDepose
+                ? 'Déposes sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
+                : 'Dépose sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+        return this.toastService
+            .presentToast(`${errorsMessage}${(errorsMessage && message) ? '\n' : ''}${message}`)
+            .pipe(
+                flatMap(() => {
+                    const groupPlural = (emptyGroups && emptyGroups.length > 0);
+                    return (emptyGroups && emptyGroups.length > 0)
+                        ? zip(
+                            this.toastService.presentToast(
+                                groupPlural
+                                    ? `${emptyGroups.join(', ')} vides. Ces groupes ne sont plus en prise.`
+                                    : `${emptyGroups.join(', ')} vide. Ce groupe n'est plus en prise.`
+                            ),
+                            this.sqliteService
+                                .deleteBy('mouvement_traca', [
+                                    emptyGroups
+                                        .map((code) => `ref_article LIKE '${code}'`)
+                                        .join(' OR ')
+                                ])
+                        )
+                        : of(undefined)
+                }),
+                map(() => errorsValues.length)
+            );
+    }
+
+    private postGroupingMovements(groupingMovements, apiResponse) {
+        return this.apiService.requestApi(ApiService.POST_GROUP_TRACKINGS, {
+            pathParams: {mode: 'drop'},
+            params: this.localDataManager.extractTrackingMovementFiles(this.localDataManager.mapTrackingMovements(groupingMovements))
+        })
+            .pipe(
+                flatMap((res) => {
+                    if (res.finishedMovements && res.finishedMovements.length > 0) {
+                        return this.sqliteService
+                            .deleteBy('mouvement_traca', [
+                                `ref_article IN (${res.finishedMovements.map((ref_article) => `'${ref_article}'`).join(',')})`
+                            ])
+                            .pipe(
+                                tap(() => {
+                                    const movementCounter = (apiResponse && apiResponse.data && apiResponse.data.movementCounter) || 0;
+                                    const insertedMovements = movementCounter + res.finishedMovements.length;
+                                    const messagePlural = insertedMovements > 1 ? 's' : '';
+
+                                    apiResponse.data = {
+                                        ...(apiResponse.data || {}),
+                                        status: `${insertedMovements} mouvement${messagePlural} synchronisé${messagePlural}`
+                                    };
+                                })
+                            )
+                    }
+                    else {
+                        return of(res);
+                    }
+                }),
+                tap((res) => {
+                    if (res && !res.success) {
+                        this.toastService.presentToast(res.message || 'Une erreur inconnue est survenue');
+                        throw new Error(res.message);
+                    }
+                }),
+                map(() => apiResponse)
+            )
+    }
+
+    private unsubscribeSaveSubscription() {
+        if (this.saveSubscription && !this.saveSubscription.closed) {
+            this.saveSubscription.unsubscribe();
+            this.saveSubscription = undefined;
+        }
     }
 }
