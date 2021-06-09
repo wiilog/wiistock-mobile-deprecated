@@ -432,15 +432,15 @@ export class LocalDataManagerService {
             );
     }
 
-    public saveMouvementsTraca(mouvementsTraca: Array<MouvementTraca>, prisesToFinish: Array<number> = []): Observable<any> {
+    public saveTrackingMovements(trackingsToSave: Array<MouvementTraca>, prisesToFinish: Array<number> = []): Observable<any> {
+        const movements = trackingsToSave
+            .map((mouvement) => ({
+                id: null,
+                ...mouvement,
+                date: mouvement.date + '_' + Math.random().toString(36).substr(2, 9)
+            }));
         return zip(
-            ...mouvementsTraca
-                .map((mouvement) => ({
-                    id: null,
-                    ...mouvement,
-                    date: mouvement.date + '_' + Math.random().toString(36).substr(2, 9)
-                }))
-                .map((mouvement) => this.sqliteService.insert('mouvement_traca', mouvement)),
+            this.sqliteService.insert('mouvement_traca', movements),
             this.sqliteService.finishPrises(prisesToFinish)
         )
             .pipe(map(() => undefined))

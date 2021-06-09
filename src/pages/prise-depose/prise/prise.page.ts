@@ -165,7 +165,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                             event: () => {
                                 const online = (this.network.type !== 'none');
                                 return this.localDataManager
-                                    .saveMouvementsTraca(movementsToSave.map(({loading, ...tracking}) => tracking))
+                                    .saveTrackingMovements(movementsToSave.map(({loading, ...tracking}) => tracking))
                                     .pipe(
                                         flatMap(() => (
                                             online
@@ -291,7 +291,6 @@ export class PrisePage extends PageComponent implements CanLeave {
         });
         this.setPackOnLocationHidden(barCode, true);
         this.refreshListComponent();
-        this.changeDetectorRef.detectChanges();
     }
 
     private updateTrackingMovementNature(barCode: string, natureId?: number, groupData?: any): void {
@@ -305,7 +304,6 @@ export class PrisePage extends PageComponent implements CanLeave {
             }
         }
         this.refreshListComponent();
-        this.changeDetectorRef.detectChanges();
         this.footerScannerComponent.fireZebraScan();
     }
 

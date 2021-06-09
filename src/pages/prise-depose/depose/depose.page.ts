@@ -172,7 +172,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                             message: multiDepose ? 'Envoi des déposes en cours...' : 'Envoi de la dépose en cours...',
                             event: () => {
                                 return this.localDataManager
-                                    .saveMouvementsTraca(this.colisDepose, takingToFinish)
+                                    .saveTrackingMovements(this.colisDepose, takingToFinish)
                                     .pipe(
                                         flatMap((): Observable<{ online: boolean; apiResponse?: { [x: string]: any } }> => (
                                             online
