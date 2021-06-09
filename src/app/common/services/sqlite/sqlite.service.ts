@@ -184,7 +184,7 @@ export class SqliteService {
                             handlingsToUpdate.length > 0
                                 ? zip(
                                     ...handlingsToUpdate.map(({id, ...handling}) => (
-                                        this.update('handling', handling, [`where id = ${id}`])
+                                        this.update('handling', [{values: handling, where: [`where id = ${id}`]}])
                                     ))
                                 )
                                 : of(undefined)
@@ -238,8 +238,10 @@ export class SqliteService {
                                       })
                                       : this.update(
                                           'mouvement_traca',
-                                          { subPacks: (apiPicking.subPacks || [])},
-                                          [`ref_article = '${apiPicking.ref_article}'`]
+                                          [{
+                                              values: {subPacks: (apiPicking.subPacks || [])},
+                                              where: [`ref_article = '${apiPicking.ref_article}'`]
+                                          }]
                                       )
                               ))
                           )
@@ -297,8 +299,8 @@ export class SqliteService {
                     );
                 }),
                 flatMap(() => zip(
-                    this.update('demande_livraison_article', {to_delete: true}),
-                    this.update('demande_livraison_type', {to_delete: true})
+                    this.update('demande_livraison_article', [{values: {to_delete: true}}]),
+                    this.update('demande_livraison_type', [{values: {to_delete: true}}])
                 )),
                 flatMap(() => (
                     ((demandeLivraisonArticles && demandeLivraisonArticles.length > 0) || (demandeLivraisonTypes && demandeLivraisonTypes.length > 0))
@@ -876,20 +878,23 @@ export class SqliteService {
         }
     }
 
-    public update(name: TableName, values: any, where: Array<string> = []): Observable<any> {
-        let query = this.createUpdateQuery(name, values, where);
-        return query
-            ? this.executeQuery(query)
+    public update(name: TableName, config: Array<{values: any, where?: Array<string>}>): Observable<any> {
+        const queries = config.map(({values, where}) => this.createUpdateQuery(name, values, where || []));
+        return queries.length > 0
+            ? this.executeQuery(queries)
             : of(false);
     }
 
-    public executeQuery(query: string, getRes: boolean = true, params: Array<any> = []): Observable<any> {
+    public executeQuery(queries: string|Array<string>, getRes: boolean = true, params: Array<any> = []): Observable<any> {
+        const queriesStr = typeof queries === 'string'
+            ? queries
+            : queries.join(';')
         return this.db$.pipe(
-            flatMap((db) => SqliteService.ExecuteQueryStatic(db, query, getRes, params)),
+            flatMap((db) => SqliteService.ExecuteQueryStatic(db, queriesStr, getRes, params)),
             tap(
                 () => {},
                 (error) => {
-                    console.error(query, error);
+                    console.error(queries, error);
                 }
             ),
             map((res) => (getRes ? res : undefined))

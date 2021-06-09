@@ -99,11 +99,13 @@ export class LivraisonEmplacementPage extends PageComponent {
                         )),
                         flatMap(() => this.sqliteService.update(
                             'livraison',
-                            {
-                                date_end: moment().format(),
-                                location: this.location.label
-                            },
-                            [`id = ${this.livraison.id}`]
+                            [{
+                                values: {
+                                    date_end: moment().format(),
+                                    location: this.location.label
+                                },
+                                where: [`id = ${this.livraison.id}`]
+                            }]
                         )),
                         flatMap((): any => (
                             (this.network.type !== 'none')

@@ -187,7 +187,7 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
                         flatMap(() => (
                             this.isUpdate
                                 ? this.sqliteService
-                                    .update('demande_livraison', values, [`id = ${this.demandeLivraisonToUpdate.id}`])
+                                    .update('demande_livraison', [{values, where: [`id = ${this.demandeLivraisonToUpdate.id}`]}])
                                     .pipe(map(() => this.demandeLivraisonToUpdate.id))
                                 : this.sqliteService.insert('demande_livraison', values)
                         ))

@@ -139,7 +139,7 @@ export class LocalDataManagerService {
                     const idsToDelete = resError.map(({id_livraison}) => id_livraison);
                     return zip(
                         idsToDelete.length > 0
-                            ? this.sqliteService.update('livraison', {date_end: null, location: null}, [`id IN (${idsToDelete.join(',')})`])
+                            ? this.sqliteService.update('livraison', [{values: {date_end: null, location: null}, where: [`id IN (${idsToDelete.join(',')})`]}])
                             : of(undefined),
                         this.sqliteService.deleteMouvementsBy('id_livraison', idsToDelete)
                     );
@@ -239,7 +239,7 @@ export class LocalDataManagerService {
                 },
                 resetFailed: (resError) => {
                     return (resError && resError.length > 0)
-                        ? this.sqliteService.update('transfer_order', {treated: 0}, [`id IN (${resError.join(',')})`])
+                        ? this.sqliteService.update('transfer_order', [{values: {treated: 0}, where: [`id IN (${resError.join(',')})`]}])
                         : of(undefined);
                 }
             },
@@ -302,10 +302,13 @@ export class LocalDataManagerService {
                             `dispatchId IN (${entireTreatedDispatch.map(({id}) => id).join(',')})`
                         ])
                         : of(undefined),
-                    this.sqliteService.update('dispatch_pack', {already_treated: 1, treated: 0}, [
-                        `treated = 1`,
-                        ...((entireTreatedDispatch && entireTreatedDispatch.length > 0) ? [`dispatchId NOT IN (${entireTreatedDispatch.map(({id}) => id).join(',')})`] : [])
-                    ])
+                    this.sqliteService.update('dispatch_pack', [{
+                        values: {already_treated: 1, treated: 0},
+                        where: [
+                            `treated = 1`,
+                            ...((entireTreatedDispatch && entireTreatedDispatch.length > 0) ? [`dispatchId NOT IN (${entireTreatedDispatch.map(({id}) => id).join(',')})`] : [])
+                        ]
+                    }])
                 )
             }
         }
@@ -576,7 +579,7 @@ export class LocalDataManagerService {
                         ...(
                             errors.length > 0
                                 ? errors.map(({id, last_error}) => (
-                                    this.sqliteService.update('demande_livraison', {last_error}, [`id = ${id}`])
+                                    this.sqliteService.update('demande_livraison', [{values: {last_error}, where: [`id = ${id}`]}])
                                 ))
                                 : []
                         )
@@ -701,22 +704,27 @@ export class LocalDataManagerService {
                             ])
                             .pipe(
                                 flatMap((groupsToUpdate) => groupsToUpdate.length > 0
-                                    ? zip(...groupsToUpdate
+                                    ? this.sqliteService.update(
+                                        'mouvement_traca',
                                         // remove duplicates
-                                        .filter(({id}, index) => groupsToUpdate.findIndex(({id: idDuplicate}) => idDuplicate === id) === index)
-                                        .map((group) => {
-                                            const subPacks = JSON.parse(group.subPacks || '[]');
-                                            const newSubPacks = [];
-                                            if (Array.isArray(newSubPacks)) {
-                                                for (const pack of subPacks) {
-                                                    if (trackingToDelete.findIndex(({ref_article: trackingToDeleteCode}) => (trackingToDeleteCode === pack.code)) === -1) {
-                                                        newSubPacks.push(pack);
+                                        groupsToUpdate
+                                            .filter(({id}, index) => groupsToUpdate.findIndex(({id: idDuplicate}) => idDuplicate === id) === index)
+                                            .map((group) => {
+                                                const subPacks = JSON.parse(group.subPacks || '[]');
+                                                const newSubPacks = [];
+                                                if (Array.isArray(newSubPacks)) {
+                                                    for (const pack of subPacks) {
+                                                        if (trackingToDelete.findIndex(({ref_article: trackingToDeleteCode}) => (trackingToDeleteCode === pack.code)) === -1) {
+                                                            newSubPacks.push(pack);
+                                                        }
                                                     }
+                                                    group.subPacks = JSON.stringify(newSubPacks);
                                                 }
-                                                group.subPacks = JSON.stringify(newSubPacks);
-                                            }
-                                            return this.sqliteService.update('mouvement_traca', group, [`id = ${group.id}`]);
-                                        })
+                                                return {
+                                                    values: group,
+                                                    where: [`id = ${group.id}`]
+                                                };
+                                            })
                                     )
                                     : of(undefined)
                                 )

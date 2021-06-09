@@ -241,7 +241,7 @@ export class HandlingValidatePage extends PageComponent {
                                 }
                                 else {
                                     return this.sqliteService
-                                        .update('handling', {statusId, comment, freeFields: freeFieldValues}, [`id = ${this.handling.id}`])
+                                        .update('handling', [{values: {statusId, comment, freeFields: freeFieldValues}, where: [`id = ${this.handling.id}`]}])
                                         .pipe(map(() => res));
                                 }
                             }

@@ -154,7 +154,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
 
     public validateQuantity(selectedArticle: ArticleInventaire&Anomalie, quantity: number): Observable<any> {
         if (this.anomalyMode) {
-            return this.sqliteService.update('anomalie_inventaire', {quantity, treated: '1'}, [`id = ${selectedArticle.id}`]);
+            return this.sqliteService.update('anomalie_inventaire', [{values: {quantity, treated: '1'}, where: [`id = ${selectedArticle.id}`]}]);
         }
         else {
             let saisieInventaire: SaisieInventaire = {
