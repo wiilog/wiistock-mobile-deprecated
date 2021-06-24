@@ -151,9 +151,7 @@ export class SqliteService {
             flatMap(() => deleteOld ? this.deleteBy('preparation') : of(undefined)),
             flatMap(() => (
                 (preparations.length > 0)
-                    ? zip(...(preparations.map(({number, ...preparation}) => (
-                        this.insert('preparation', {started: 0, numero: number, ...preparation})
-                    ))))
+                    ? this.insert('preparation', preparations.map(({number, ...preparation}) => ({started: 0, numero: number, ...preparation})))
                     : of(undefined)
             ))
         );
@@ -182,10 +180,9 @@ export class SqliteService {
                                 ? this.insert('handling', handlingsToInsert)
                                 : of(undefined),
                             handlingsToUpdate.length > 0
-                                ? zip(
-                                    ...handlingsToUpdate.map(({id, ...handling}) => (
-                                        this.update('handling', [{values: handling, where: [`where id = ${id}`]}])
-                                    ))
+                                ? this.update(
+                                    'handling',
+                                    handlingsToUpdate.map(({id, ...handling}) => ({values: handling, where: [`where id = ${id}`]}))
                                 )
                                 : of(undefined)
                         )
@@ -206,12 +203,12 @@ export class SqliteService {
             .pipe(
                 flatMap(() => (
                     transferOrders && transferOrders.length > 0
-                        ? zip(...(transferOrders.map((transferOrder) => this.insert('transfer_order', {treated: 0, ...transferOrder}))))
+                        ? this.insert('transfer_order', transferOrders.map((transferOrder) => ({treated: 0, ...transferOrder})))
                         : of(undefined)
                 )),
                 flatMap(() => (
                     transferOrderArticles && transferOrderArticles.length > 0
-                        ? zip(...(transferOrderArticles.map((transferOrderArticle) => this.insert('transfer_order_article', transferOrderArticle))))
+                        ? this.insert('transfer_order_article', transferOrderArticles)
                         : of(undefined)
                 )),
                 map(() => undefined)
@@ -305,8 +302,8 @@ export class SqliteService {
                 flatMap(() => (
                     ((demandeLivraisonArticles && demandeLivraisonArticles.length > 0) || (demandeLivraisonTypes && demandeLivraisonTypes.length > 0))
                     ? zip(
-                        ...(demandeLivraisonArticles || []).map((article) => this.insert('demande_livraison_article', article)),
-                        ...(demandeLivraisonTypes || []).map((type) => this.insert('demande_livraison_type', type)),
+                        this.insert('demande_livraison_article', demandeLivraisonArticles || []),
+                        this.insert('demande_livraison_type', demandeLivraisonTypes || []),
                     )
                     : of(undefined)
                 ))
@@ -454,12 +451,12 @@ export class SqliteService {
                     return zip(
                         // orders insert
                         deliveryOrdersToInsert && deliveryOrdersToInsert.length > 0
-                            ? zip(...deliveryOrdersToInsert.map((delivery) => this.insert('livraison', delivery)))
+                            ? this.insert('livraison', deliveryOrdersToInsert)
                             : of(undefined),
 
                         // articles insert
                         deliveryOrderArticlesToInsert && deliveryOrderArticlesToInsert.length > 0
-                            ? zip(...deliveryOrderArticlesToInsert.map((article) => this.insert('article_livraison', {has_moved: 0, ...article})))
+                            ? this.insert('article_livraison', deliveryOrderArticlesToInsert.map((article) => ({has_moved: 0, ...article})))
                             : of(undefined)
                     );
                 })
@@ -630,7 +627,7 @@ export class SqliteService {
                         .map((reference) => `'${reference}'`);
                     return refArticleToDelete.length > 0
                         ? this.deleteBy('article_prepa_by_ref_article', [`reference_article IN (${refArticleToDelete})`])
-                    : of(undefined)
+                        : of(undefined)
                 }),
                 flatMap(() => (
                     (articlesPrepaByRefArticle && articlesPrepaByRefArticle.length > 0)
@@ -713,12 +710,6 @@ export class SqliteService {
             flatMap(() => this.importDispatchesData(data).pipe(tap(() => {console.log('--- > importDispatchesData')}))),
             flatMap(() => this.importStatusData(data).pipe(tap(() => {console.log('--- > importStatusData')}))),
             flatMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),
-            tap(() => {
-                this.findAll('mouvement_traca').subscribe((res) => {
-                    // @ts-ignore
-                    window.RES = res;
-                });
-            }),
             flatMap(() => (
                 this.storageService.getInventoryManagerRight().pipe(
                     flatMap((res) => (res
