@@ -443,10 +443,13 @@ export class SqliteService {
                     const deliveryOrdersToInsert = apiDeliveryOrder.filter((toInsert) => existingDeliveryOrder.every((existing) => (Number(existing.id) !== Number(toInsert.id))));
 
                     // if article already exists we do not inset it
-                    const deliveryOrderArticlesToInsert = apiDeliveryOrderArticle.filter((toInsert) => existingDeliveryOrderArticle.every((existing) => (
-                        (Number(existing.is_ref) !== Number(toInsert.is_ref))
-                        || (existing.reference !== toInsert.reference)
-                    )));
+                    const deliveryOrderArticlesToInsert = apiDeliveryOrderArticle.filter((toInsert) => (
+                        !existingDeliveryOrderArticle.some((existing) => (
+                            (Number(existing.is_ref) === Number(toInsert.is_ref))
+                            && (Number(existing.id_livraison) === Number(toInsert.id_livraison))
+                            && (existing.reference === toInsert.reference)
+                        ))
+                    ));
 
                     return zip(
                         // orders insert
