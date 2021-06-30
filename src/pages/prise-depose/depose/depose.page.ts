@@ -24,6 +24,8 @@ import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {ApiService} from '@app/common/services/api.service';
 import {TranslationService} from "@app/common/services/translations.service";
+import {Nature} from '@entities/nature';
+import {Translations} from '@entities/translation';
 
 @Component({
     selector: 'wii-depose',
@@ -69,7 +71,7 @@ export class DeposePage extends PageComponent implements CanLeave {
 
     private operator: string;
 
-    private natureTranslation: {[label: string]: string};
+    private natureTranslations: Translations;
     private allowedNatureIdsForLocation: Array<number>;
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
@@ -112,17 +114,20 @@ export class DeposePage extends PageComponent implements CanLeave {
                 this.storageService.getOperator(),
                 !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
                 !this.fromStock ? this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + this.emplacement.id]) : of([]),
-                this.translationService.find('natures')
+                this.translationService.get('natures')
             )
-                .subscribe(([colisPrise, operator, natures, allowedNatureLocationArray, natureTranslation]) => {
+                .subscribe(([colisPrise, operator, natures, allowedNatureLocationArray, natureTranslations]) => {
                     this.colisPrise = colisPrise.map(({subPacks, ...tracking}) => ({
                         ...tracking,
                         subPacks: subPacks ? JSON.parse(subPacks) : []
                     }));
 
                     this.operator = operator;
-                    this.natureTranslation = natureTranslation;
-                    this.natureIdsToConfig = this.translationService.get(natures);
+                    this.natureTranslations = natureTranslations;
+                    this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
+                        [id]: {label, color},
+                        ...acc
+                    }), {});
 
                     this.allowedNatureIdsForLocation = allowedNatureLocationArray.map(({nature_id}) => nature_id);
                     this.footerScannerComponent.fireZebraScan();
@@ -429,7 +434,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                 }
             }
             else {
-                const natureLabel = this.translationService.translate(this.natureTranslation,'nature');
+                const natureLabel = TranslationService.Translate(this.natureTranslations, 'nature');
                 const {ref_article, nature_id} = this.colisPrise[pickingIndexes[0]] || {};
                 const nature = this.natureIdsToConfig[nature_id];
                 const natureValue = (nature ? nature.label : 'non défini');
@@ -481,7 +486,7 @@ export class DeposePage extends PageComponent implements CanLeave {
     }
 
     private refreshPriseListComponent(): void {
-        const natureLabel = this.translationService.translate(this.natureTranslation,'nature');
+        const natureLabel = TranslationService.Translate(this.natureTranslations, 'nature');
         this.priseListConfig = this.trackingListFactory.createListConfig(
             this.colisPrise.filter(({hidden, packParent}) => (!hidden && !packParent)),
             TrackingListFactoryService.LIST_TYPE_DROP_SUB,
@@ -510,7 +515,7 @@ export class DeposePage extends PageComponent implements CanLeave {
     }
 
     private refreshDeposeListComponent(): void {
-        const natureLabel = this.translationService.translate(this.natureTranslation,'nature');
+        const natureLabel = TranslationService.Translate(this.natureTranslations, 'nature');
         this.deposeListConfig = this.trackingListFactory.createListConfig(
             this.colisDepose,
             TrackingListFactoryService.LIST_TYPE_DROP_MAIN,

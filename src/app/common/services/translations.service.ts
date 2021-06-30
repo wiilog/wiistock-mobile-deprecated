@@ -1,6 +1,8 @@
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {Translation} from "@entities/translation";
+import {Translation, Translations} from "@entities/translation";
 import {Injectable} from "@angular/core";
+import {flatMap, map} from 'rxjs/operators';
+import {Observable} from 'rxjs';
 
 @Injectable({
     providedIn: 'root'
@@ -11,18 +13,22 @@ export class TranslationService {
         this.sqliteService = sqliteService;
     }
 
-    public find(entity: string) {
-        return this.sqliteService.findBy('translations', [`menu LIKE '${entity}'`])
+    public static Translate(translations: Translations, field: string): string {
+        return translations[field] || field;
     }
 
-    public get(translations: Array<Translation>) {
+    private static CreateTranslationDictionaryFromArray(translations: Array<Translation>): {[label: string]: string} {
         return translations.reduce((acc, {label, translation}) => ({
             ...acc,
             [label]: translation
         }), {});
     }
 
-    public translate(translations: {[label: string]: string}, field: string) {
-        return translations[field] || field;
+    public get(entity: string): Observable<Translations> {
+        return this.sqliteService
+            .findBy('translations', [`menu LIKE '${entity}'`])
+            .pipe(
+                map((translations: Array<Translation>) => TranslationService.CreateTranslationDictionaryFromArray(translations))
+            );
     }
 }

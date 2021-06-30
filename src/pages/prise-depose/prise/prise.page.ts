@@ -25,6 +25,8 @@ import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement
 import {AlertManagerService} from '@app/common/services/alert-manager.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {TranslationService} from "@app/common/services/translations.service";
+import {Translations} from '@entities/translation';
+import {Nature} from '@entities/nature';
 
 
 @Component({
@@ -66,7 +68,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     private finishAction: () => void;
     private operator: string;
     private apiLoading: boolean;
-    private natureTranslation: {[label: string]: string};
+    private natureTranslations: Translations;
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
 
@@ -106,14 +108,21 @@ export class PrisePage extends PageComponent implements CanLeave {
                 ? this.apiService.requestApi(ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})
                 : of({trackingDrops: []})),
             !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
-            this.translationService.find('natures')
+            this.translationService.get('natures')
         )
             .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures, natureTranslations]) => {
                 this.operator = operator;
                 this.colisPriseAlreadySaved = colisPriseAlreadySaved;
                 this.currentPacksOnLocation = trackingDrops;
                 this.footerScannerComponent.fireZebraScan();
-                this.natureTranslation = this.translationService.get(natures);
+                this.natureTranslations = natureTranslations;
+
+                if (natures) {
+                    this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
+                        [id]: {label, color},
+                        ...acc
+                    }), {})
+                }
 
                 this.refreshListComponent();
                 this.loading = false;
@@ -345,7 +354,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     }
 
     private refreshListComponent(): void {
-        const natureLabel = this.translationService.translate(this.natureTranslation,'nature');
+        const natureLabel = TranslationService.Translate(this.natureTranslations, 'nature');
         const {header: listTakingHeader, body: listTakingBody} = this.trackingListFactory.createListConfig(
             this.colisPrise,
             TrackingListFactoryService.LIST_TYPE_TAKING_MAIN,

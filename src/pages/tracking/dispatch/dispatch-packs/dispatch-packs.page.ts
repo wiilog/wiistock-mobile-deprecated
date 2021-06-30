@@ -15,7 +15,7 @@ import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel
 import {Nature} from '@entities/nature';
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {BarcodeScannerComponent} from '@app/common/components/barcode-scanner/barcode-scanner.component';
-import {Translation} from '@entities/translation';
+import {Translations} from '@entities/translation';
 import {ToastService} from '@app/common/services/toast.service';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
@@ -62,7 +62,7 @@ export class DispatchPacksPage extends PageComponent {
 
     private natureIdsToColors: {[natureId: number]: string};
     private natureIdsToLabels: {[natureId: number]: string};
-    private natureTranslations: {[item: string]: string};
+    private natureTranslations: Translations;
 
     private loadingSubscription: Subscription;
     private loadingElement?: HTMLIonLoadingElement;
@@ -94,7 +94,7 @@ export class DispatchPacksPage extends PageComponent {
                         this.sqliteService.findOneBy('dispatch', {id: dispatchId}),
                         this.sqliteService.findBy('dispatch_pack', [`dispatchId = ${dispatchId}`]),
                         this.sqliteService.findAll('nature'),
-                        this.translationService.find('natures')
+                        this.translationService.get('natures')
                     ).pipe(
                         flatMap((data) => this.sqliteService
                             .findBy('status', [`category = 'acheminement'`, `state = 'partial'`, `typeId = ${data[0].typeId}`])
@@ -103,7 +103,7 @@ export class DispatchPacksPage extends PageComponent {
                     ),
                     filter(([dispatch]) => Boolean(dispatch))
                 )
-                .subscribe(([dispatch, packs, natures, natureTranslations, partialStatuses]: [Dispatch, Array<DispatchPack>, Array<Nature>, Array<Translation>, Array<any>]) => {
+                .subscribe(([dispatch, packs, natures, natureTranslations, partialStatuses]: [Dispatch, Array<DispatchPack>, Array<Nature>, Translations, Array<any>]) => {
                     this.typeHasNoPartialStatuses = partialStatuses.length === 0;
                     this.natureIdsToColors = natures.reduce((acc, {id, color}) => ({
                         ...acc,
@@ -113,7 +113,7 @@ export class DispatchPacksPage extends PageComponent {
                         ...acc,
                         [Number(id)]: label
                     }), {});
-                    this.natureTranslations = this.translationService.get(natureTranslations);
+                    this.natureTranslations = natureTranslations;
                     this.dispatchPacks = packs.map((pack) => ({
                         ...pack,
                         treated: 0
@@ -196,7 +196,7 @@ export class DispatchPacksPage extends PageComponent {
 
     private refreshListToTreatConfig(): void {
         const packsToTreat = this.dispatchPacks.filter(({treated, already_treated}) => (!already_treated && !treated));
-        const natureTranslation = this.translationService.translate(this.natureTranslations, 'nature')
+        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
         const plural = packsToTreat.length > 1 ? 's' : '';
@@ -231,7 +231,7 @@ export class DispatchPacksPage extends PageComponent {
 
     private refreshListTreatedConfig(): void {
         const packsTreated = this.dispatchPacks.filter(({treated, already_treated}) => (already_treated || treated));
-        const natureTranslation = this.translationService.translate(this.natureTranslations, 'nature')
+        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
         const plural = packsTreated.length > 1 ? 's' : '';

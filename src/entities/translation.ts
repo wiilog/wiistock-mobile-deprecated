@@ -4,3 +4,5 @@ export interface Translation {
     label: string,
     translation: string
 }
+
+export type Translations = {[label: string]: string};

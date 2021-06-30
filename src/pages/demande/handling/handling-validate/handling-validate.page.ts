@@ -22,7 +22,7 @@ import {FormViewerParam} from '@app/common/directives/form-viewer/form-viewer-pa
 import {FormViewerAttachmentsComponent} from '@app/common/components/panel/form-panel/form-viewer-attachments/form-viewer-attachments.component';
 import {FormPanelService} from '@app/common/services/form-panel.service';
 import {FreeField, FreeFieldType} from '@entities/free-field';
-import {Translation} from '@entities/translation';
+import {Translation, Translations} from '@entities/translation';
 import {Status} from '@entities/status';
 import {TranslationService} from '@app/common/services/translations.service';
 
@@ -41,7 +41,7 @@ export class HandlingValidatePage extends PageComponent {
     public detailsConfig: Array<FormViewerParam>;
 
     private handling: Handling;
-    private handlingsTranslations: {[label: string]: string};
+    private handlingsTranslations: Translations;
 
     private loadingElement: HTMLIonLoadingElement;
     private apiSubscription: Subscription;
@@ -79,13 +79,13 @@ export class HandlingValidatePage extends PageComponent {
                     this.handling.statusId ? this.sqliteService.findOneBy('status', {id: this.handling.statusId}) : of(undefined),
                     this.sqliteService.findBy('handling_attachment', [`handlingId = ${this.handling.id}`]),
                     this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.HANDLING}'`]),
-                    this.translationService.find('services')
+                    this.translationService.get('services')
                 )),
 
             )
-            .subscribe(([currentStatus, handlingAttachment, freeFields, handlingsTranslations]: [Status, Array<HandlingAttachment>, Array<FreeField>, Array<Translation>]) => {
+            .subscribe(([currentStatus, handlingAttachment, freeFields, handlingsTranslations]: [Status, Array<HandlingAttachment>, Array<FreeField>, Translations]) => {
                 this.dismissLoading();
-                this.handlingsTranslations = this.translationService.get(handlingsTranslations);
+                this.handlingsTranslations = handlingsTranslations;
 
                 this.refreshHeader(false);
 
@@ -323,8 +323,8 @@ export class HandlingValidatePage extends PageComponent {
             subtitle: [
                 `Demandeur : ${requester || ''}`,
                 `Date attendue : ${desiredDate || ''}`,
-                `${this.translationService.translate(this.handlingsTranslations, 'Objet')} : ${subject || ''}`,
-                `${this.translationService.translate(this.handlingsTranslations,'Nombre d\'opération(s) réalisée(s)')} : ${carriedOutOperationCount || ''}`,
+                `${TranslationService.Translate(this.handlingsTranslations, 'Objet')} : ${subject || ''}`,
+                `${TranslationService.Translate(this.handlingsTranslations,'Nombre d\'opération(s) réalisée(s)')} : ${carriedOutOperationCount || ''}`,
                 `Source : ${source || ''}`,
                 `Destination : ${destination || ''}`,
                 `Type : ${typeLabel || ''}`,

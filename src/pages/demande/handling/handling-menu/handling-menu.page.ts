@@ -8,7 +8,7 @@ import {NavService} from '@app/common/services/nav.service';
 import {PageComponent} from '@pages/page.component';
 import * as moment from 'moment';
 import {Subject, zip} from 'rxjs';
-import {Translation} from '@entities/translation';
+import {Translations} from '@entities/translation';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {TranslationService} from "@app/common/services/translations.service";
@@ -47,10 +47,10 @@ export class HandlingMenuPage extends PageComponent {
         this.hasLoaded = false;
         zip(
             this.sqliteService.findAll('handling'),
-            this.translationService.find('services')
+            this.translationService.get('services')
         )
-        .subscribe(([handlings, handlingsTranslations]: [Array<Handling>, Array<Translation>]) => {
-            this.handlingsTranslations = this.translationService.get(handlingsTranslations);
+        .subscribe(([handlings, handlingsTranslations]: [Array<Handling>, Translations]) => {
+            this.handlingsTranslations = handlingsTranslations;
             this.handlings = handlings
 
             const initHandlingList = this.filterHandlingList(this.currentFilterSubject);
@@ -107,8 +107,8 @@ export class HandlingMenuPage extends PageComponent {
                     {label: 'Date attendue', value: handling.desiredDate || ''},
                     {label: 'Chargement', value: handling.source || ''},
                     {label: 'Déchargement', value: handling.destination || ''},
-                    {label: this.translationService.translate(this.handlingsTranslations, 'Objet'), value: handling.subject},
-                    {label: this.translationService.translate(this.handlingsTranslations, 'Nombre d\'opération(s) réalisée(s)'), value: `${handling.carriedOutOperationCount || ''}`},
+                    {label: TranslationService.Translate(this.handlingsTranslations, 'Objet'), value: handling.subject},
+                    {label: TranslationService.Translate(this.handlingsTranslations, 'Nombre d\'opération(s) réalisée(s)'), value: `${handling.carriedOutOperationCount || ''}`},
                     {label: 'Type', value: handling.typeLabel},
                     (handling.emergency
                         ? {label: 'Urgence', value: handling.emergency || ''}
