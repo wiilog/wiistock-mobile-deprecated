@@ -18,13 +18,14 @@ import {NavService} from '@app/common/services/nav.service';
 import {flatMap, map, tap} from 'rxjs/operators';
 import * as moment from 'moment';
 import {PageComponent} from '@pages/page.component';
-import {Nature} from '@entities/nature';
-import {Translation} from "@entities/translation";
 import {AlertManagerService} from "@app/common/services/alert-manager.service";
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {ApiService} from '@app/common/services/api.service';
+import {TranslationService} from "@app/common/services/translations.service";
+import {Nature} from '@entities/nature';
+import {Translations} from '@entities/translation';
 
 @Component({
     selector: 'wii-depose',
@@ -68,7 +69,7 @@ export class DeposePage extends PageComponent implements CanLeave {
 
     private operator: string;
 
-    private natureTranslation: Array<Translation>;
+    private natureTranslations: Translations;
     private allowedNatureIdsForLocation: Array<number>;
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
@@ -82,6 +83,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                        private localDataManager: LocalDataManagerService,
                        private trackingListFactory: TrackingListFactoryService,
                        private storageService: StorageService,
+                       private translationService: TranslationService,
                        navService: NavService) {
         super(navService);
         this.listIdentifierName = TrackingListFactoryService.TRACKING_IDENTIFIER_NAME;
@@ -110,16 +112,16 @@ export class DeposePage extends PageComponent implements CanLeave {
                 this.storageService.getOperator(),
                 !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
                 !this.fromStock ? this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + this.emplacement.id]) : of([]),
-                this.sqliteService.findBy('translations', [ `menu LIKE 'natures'`])
+                this.translationService.get('natures')
             )
-                .subscribe(([colisPrise, operator, natures, allowedNatureLocationArray, natureTranslation]) => {
+                .subscribe(([colisPrise, operator, natures, allowedNatureLocationArray, natureTranslations]) => {
                     this.colisPrise = colisPrise.map(({subPacks, ...tracking}) => ({
                         ...tracking,
                         subPacks: subPacks ? JSON.parse(subPacks) : []
                     }));
 
                     this.operator = operator;
-                    this.natureTranslation = natureTranslation;
+                    this.natureTranslations = natureTranslations;
                     this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
                         [id]: {label, color},
                         ...acc
@@ -338,9 +340,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                 }
             }
             else {
-                const natureLabel = 'nature';
-                const natureTranslation = this.natureTranslation.find((translation) => (translation.label === natureLabel));
-                const translatedNatureLabel = (natureTranslation ? (natureTranslation.translation || natureTranslation.label) : natureLabel);
+                const natureLabel = TranslationService.Translate(this.natureTranslations, 'nature');
                 const {ref_article, nature_id} = this.colisPrise[pickingIndexes[0]] || {};
                 const nature = this.natureIdsToConfig[nature_id];
                 const natureValue = (nature ? nature.label : 'non défini');
@@ -349,7 +349,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                         header: 'Erreur',
                         cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
                         message: `Le colis <strong>${ref_article}</strong>`
-                            + ` de ${translatedNatureLabel} <strong>${natureValue}</strong>`
+                            + ` de ${natureLabel} <strong>${natureValue}</strong>`
                             + ` ne peut pas être déposé sur l'emplacement <strong>${this.emplacement.label}</strong>.`,
                         buttons: [{
                             text: 'Confirmer',
@@ -392,7 +392,7 @@ export class DeposePage extends PageComponent implements CanLeave {
     }
 
     private refreshPriseListComponent(): void {
-        const natureLabel = this.natureTranslation.filter((translation) => translation.label === 'nature')[0];
+        const natureLabel = TranslationService.Translate(this.natureTranslations, 'nature');
         this.priseListConfig = this.trackingListFactory.createListConfig(
             this.colisPrise.filter(({hidden, packParent}) => (!hidden && !packParent)),
             TrackingListFactoryService.LIST_TYPE_DROP_SUB,
@@ -411,7 +411,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                     }
                 },
                 natureIdsToConfig: this.natureIdsToConfig,
-                natureTranslation: natureLabel.translation || natureLabel.label,
+                natureTranslation: natureLabel
             }
         );
     }
@@ -421,13 +421,13 @@ export class DeposePage extends PageComponent implements CanLeave {
     }
 
     private refreshDeposeListComponent(): void {
-        const natureLabel = this.natureTranslation.filter((translation) => translation.label === 'nature')[0];
+        const natureLabel = TranslationService.Translate(this.natureTranslations, 'nature');
         this.deposeListConfig = this.trackingListFactory.createListConfig(
             this.colisDepose,
             TrackingListFactoryService.LIST_TYPE_DROP_MAIN,
             {
                 natureIdsToConfig: this.natureIdsToConfig,
-                natureTranslation: natureLabel.translation || natureLabel.label,
+                natureTranslation: natureLabel,
                 objectLabel: this.objectLabel,
                 location: this.emplacement,
                 validate: () => this.finishTaking(),
@@ -456,7 +456,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                                     this.updatePicking(barCode, values);
                                 },
                                 movementType: MovementConfirmType.DROP,
-                                natureTranslationLabel: natureLabel.translation || natureLabel.label,
+                                natureTranslationLabel: natureLabel
                             });
                         }
                     }

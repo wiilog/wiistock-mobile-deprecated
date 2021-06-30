@@ -21,11 +21,12 @@ import {ActivatedRoute} from '@angular/router';
 import {NavService} from '@app/common/services/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
-import {Nature} from '@entities/nature';
-import {Translation} from "@entities/translation";
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
 import {AlertManagerService} from '@app/common/services/alert-manager.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {TranslationService} from "@app/common/services/translations.service";
+import {Translations} from '@entities/translation';
+import {Nature} from '@entities/nature';
 
 
 @Component({
@@ -66,7 +67,7 @@ export class PrisePage extends PageComponent implements CanLeave {
 
     private finishAction: () => void;
     private operator: string;
-    private natureTranslation: Array<Translation>;
+    private natureTranslation: Translations;
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
 
@@ -83,6 +84,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                        private trackingListFactory: TrackingListFactoryService,
                        private activatedRoute: ActivatedRoute,
                        private storageService: StorageService,
+                       private translationService: TranslationService,
                        navService: NavService) {
         super(navService);
         this.init();
@@ -105,14 +107,15 @@ export class PrisePage extends PageComponent implements CanLeave {
                 ? this.apiService.requestApi(ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})
                 : of({trackingDrops: []})),
             !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
-            this.sqliteService.findBy('translations', [`menu LIKE 'natures'`])
+            this.translationService.get('natures')
         )
             .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures, natureTranslations]) => {
                 this.operator = operator;
                 this.colisPriseAlreadySaved = colisPriseAlreadySaved;
                 this.currentPacksOnLocation = trackingDrops;
                 this.footerScannerComponent.fireZebraScan();
-                this.natureTranslation = natureTranslations;
+                this.natureTranslations = natureTranslations;
+
                 if (natures) {
                     this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
                         [id]: {label, color},
@@ -308,14 +311,14 @@ export class PrisePage extends PageComponent implements CanLeave {
     }
 
     private refreshListComponent(): void {
-        const natureLabel = this.natureTranslation.filter((translation) => translation.label === 'nature')[0];
+        const natureLabel = TranslationService.Translate(this.natureTranslations, 'nature');
         const {header: listTakingHeader, body: listTakingBody} = this.trackingListFactory.createListConfig(
             this.colisPrise,
             TrackingListFactoryService.LIST_TYPE_TAKING_MAIN,
             {
                 objectLabel: this.objectLabel,
                 natureIdsToConfig: this.natureIdsToConfig,
-                natureTranslation: natureLabel.translation || natureLabel.label,
+                natureTranslation: natureLabel,
                 location: this.emplacement,
                 validate: () => this.finishTaking(),
                 confirmItem: !this.fromStock
@@ -343,7 +346,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                                     this.updatePicking(barCode, values);
                                 },
                                 movementType: MovementConfirmType.TAKE,
-                                natureTranslationLabel: natureLabel.translation || natureLabel.label,
+                                natureTranslationLabel: natureLabel,
                             });
                         }
                     }
