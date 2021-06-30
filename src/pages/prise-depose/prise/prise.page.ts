@@ -67,7 +67,7 @@ export class PrisePage extends PageComponent implements CanLeave {
 
     private finishAction: () => void;
     private operator: string;
-    private natureTranslation: Translations;
+    private natureTranslations: Translations;
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
 

@@ -22,7 +22,7 @@ import {FormViewerParam} from '@app/common/directives/form-viewer/form-viewer-pa
 import {FormViewerAttachmentsComponent} from '@app/common/components/panel/form-panel/form-viewer-attachments/form-viewer-attachments.component';
 import {FormPanelService} from '@app/common/services/form-panel.service';
 import {FreeField, FreeFieldType} from '@entities/free-field';
-import {Translation, Translations} from '@entities/translation';
+import {Translations} from '@entities/translation';
 import {Status} from '@entities/status';
 import {TranslationService} from '@app/common/services/translations.service';
 
