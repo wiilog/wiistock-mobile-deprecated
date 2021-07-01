@@ -29,17 +29,20 @@ export class FormPanelDirective implements OnInit {
         const {instance} = this.viewContainerRef.createComponent<FormPanelItemComponent<any>>(componentFactory);
         this.instance = instance;
 
-        this.reloadInstance();
+        this.reloadInstance(true);
     }
 
-    public reloadInstance(): void {
+    public reloadInstance(instanceCreation: boolean = false): void {
         const {config} = this.param;
 
         this.instance.inputConfig = config.inputConfig;
-        this.instance.value = config.value;
         this.instance.label = config.label;
         this.instance.name = config.name;
         this.instance.errors = config.errors;
         this.instance.group = config.group;
+
+        if (instanceCreation) {
+            this.instance.value = config.value;
+        }
     }
 }
