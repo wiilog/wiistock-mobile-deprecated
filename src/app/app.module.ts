@@ -8,6 +8,7 @@ import {AppRoutingModule} from './app-routing.module';
 import {IonicStorageModule} from '@ionic/storage';
 import {AppComponent} from './components/app/app.component';
 import {CommonModule} from '@app/common/common.module';
+import {FCM} from 'cordova-plugin-fcm-with-dependecy-updated/ionic/ngx';
 
 
 @NgModule({
@@ -25,6 +26,7 @@ import {CommonModule} from '@app/common/common.module';
     providers: [
         StatusBar,
         SplashScreen,
+        FCM,
         {provide: RouteReuseStrategy, useClass: IonicRouteStrategy}
     ],
     exports: [],

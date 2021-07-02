@@ -15,7 +15,8 @@ export class StorageService {
     public initStorage(apiKey: string,
                        operator: string,
                        operatorId: number,
-                       rights: {[name: string]: boolean}): Observable<any> {
+                       rights: {[name: string]: boolean},
+                       notificationChannels: [string]): Observable<any> {
         return from(this.getServerUrl())
             .pipe(
                 flatMap((serverUrl) => from(this.storage.clear()).pipe(map(() => serverUrl))),
@@ -24,6 +25,8 @@ export class StorageService {
                     from(this.storage.set(StorageKeyEnum.API_KEY, apiKey)),
                     from(this.storage.set(StorageKeyEnum.OPERATOR, operator)),
                     from(this.storage.set(StorageKeyEnum.OPERATOR_ID, operatorId)),
+                    from(this.storage.set(StorageKeyEnum.NOTIFICATION_CHANNELS, JSON.stringify(notificationChannels))),
+                    from(this.storage.set(StorageKeyEnum.NB_PREPS, 0)),
                     from(this.storage.set(StorageKeyEnum.NB_PREPS, 0)),
                     this.updateRights(rights)
                 ))

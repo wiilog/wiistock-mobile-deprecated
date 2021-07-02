@@ -10,6 +10,7 @@ import {LoginPageRoutingModule} from '@pages/login/login-routing.module';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {ServerImageService} from '@app/common/services/server-image.service';
+import {NotificationService} from '@app/common/services/notification.service';
 
 @Component({
     selector: 'wii-root',
@@ -31,7 +32,8 @@ export class AppComponent {
                        private scssHelper: ScssHelperService,
                        private splashScreen: SplashScreen,
                        private serverImageService: ServerImageService,
-                       private statusBar: StatusBar) {
+                       private statusBar: StatusBar,
+                       private notificationService: NotificationService) {
         this.platformReady = false;
         this.primaryColor = this.scssHelper.getVariable('ion-color-primary');
         this.darkColor = this.scssHelper.getVariable('ion-color-dark');
@@ -51,6 +53,7 @@ export class AppComponent {
                 flatMap(() => this.serverImageService.loadFromStorage()),
                 flatMap(() => this.storageService.clearStorage()),
                 flatMap(() => this.serverImageService.saveToStorage()),
+                flatMap(() => this.notificationService.initialize()),
                 flatMap(() => this.navService.setRoot(LoginPageRoutingModule.PATH)),
             )
             .subscribe(() => {

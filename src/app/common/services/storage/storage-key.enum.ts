@@ -10,6 +10,7 @@ export enum StorageKeyEnum {
     OPERATOR = 'operator',
     OPERATOR_ID = 'operator_id',
     NB_PREPS = 'prep',
+    NOTIFICATION_CHANNELS = 'notification_channels',
 
     URL_SERVER = 'url-server',
 

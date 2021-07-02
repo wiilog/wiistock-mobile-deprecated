@@ -18,7 +18,7 @@ import {autoConnect, loginKey} from '../../dev-credentials.json';
 import {PageComponent} from '@pages/page.component';
 import {ServerImageKeyEnum} from '@app/common/components/server-image/server-image-key.enum';
 import {ServerImageComponent} from '@app/common/components/server-image/server-image.component';
-
+import {NotificationService} from '@app/common/services/notification.service';
 
 @Component({
     selector: 'wii-login',
@@ -59,6 +59,7 @@ export class LoginPage extends PageComponent {
                        private activatedRoute: ActivatedRoute,
                        private versionChecker: VersionCheckerService,
                        private storageService: StorageService,
+                       private notificationService: NotificationService,
                        navService: NavService) {
         super(navService);
         this.loading = true;
@@ -138,8 +139,7 @@ export class LoginPage extends PageComponent {
     }
 
     public logForm(): void {
-        if (!this.loading
-            && this.loginKey) {
+        if (!this.loading && this.loginKey) {
             if (this.network.type !== 'none') {
                 this.loading = true;
 
@@ -150,16 +150,18 @@ export class LoginPage extends PageComponent {
                     .pipe(
                         flatMap(({data, success}) => {
                             if (success) {
-                                const {apiKey, rights, userId, username} = data;
+                                const {apiKey, rights, userId, username, notificationChannels} = data;
+
                                 return this.sqliteService
                                     .resetDataBase()
                                     .pipe(
-                                        flatMap(() => this.storageService.initStorage(apiKey, username, userId, rights)),
+                                        flatMap(() => this.storageService.initStorage(apiKey, username, userId, rights, notificationChannels)),
                                         tap(() => {
                                             this.loginKey = '';
                                         }),
                                         flatMap(() => this.navService.setRoot(MainMenuPageRoutingModule.PATH, {needReload: false})),
-                                        map(() => ({success: true}))
+                                        map(() => ({success: true})),
+                                        tap(() => this.notificationService.initialize())
                                     )
                             }
                             else {
