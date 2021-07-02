@@ -17,5 +17,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class PreparationArticlesPageRoutingModule {
-    public static readonly PATH: string = 'preparation-articles';
 }

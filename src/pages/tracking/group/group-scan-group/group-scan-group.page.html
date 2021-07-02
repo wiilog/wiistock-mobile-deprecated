@@ -1,0 +1,7 @@
+<div class="page-footer persisted-page-footer">
+    <wii-barcode-scanner #footerScannerComponent
+                         buttonSubtitle="Contenant"
+                         [mode]="scannerModeManual"
+                         (add)="onGroupScan($event[0])">
+    </wii-barcode-scanner>
+</div>

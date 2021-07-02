@@ -7,12 +7,8 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav.service';
-import {PreparationMenuPageRoutingModule} from '@pages/stock/preparation/preparation-menu/preparation-menu-routing.module';
-import {LivraisonMenuPageRoutingModule} from '@pages/stock/livraison/livraison-menu/livraison-menu-routing.module';
-import {CollecteMenuPageRoutingModule} from '@pages/stock/collecte/collecte-menu/collecte-menu-routing.module';
-import {InventoryLocationsPageRoutingModule} from '@pages/stock/inventory/inventory-locations/inventory-locations-routing.module';
 import {PageComponent} from '@pages/page.component';
-import {TransferMenuPageRoutingModule} from "@pages/stock/transfer/transfer-menu/transfer-menu-routing.module";
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 @Component({
     selector: 'wii-stock-menu',
@@ -44,28 +40,28 @@ export class StockMenuPage extends PageComponent {
                 icon: 'stock-transfer.svg',
                 label: 'Transfert',
                 action: () => {
-                    self.navService.push(TransferMenuPageRoutingModule.PATH);
+                    self.navService.push(NavPathEnum.TRANSFER_MENU);
                 }
             },
             {
                 icon: 'preparation.svg',
                 label: 'Préparation',
                 action: () => {
-                    self.navService.push(PreparationMenuPageRoutingModule.PATH);
+                    self.navService.push(NavPathEnum.PREPARATION_MENU);
                 }
             },
             {
                 icon: 'delivery.svg',
                 label: 'Livraison',
                 action: () => {
-                    self.navService.push(LivraisonMenuPageRoutingModule.PATH);
+                    self.navService.push(NavPathEnum.LIVRAISON_MENU);
                 }
             },
             {
                 icon: 'collecte.svg',
                 label: 'Collecte',
                 action: () => {
-                    this.navService.push(CollecteMenuPageRoutingModule.PATH, {
+                    this.navService.push(NavPathEnum.COLLECTE_MENU, {
                         avoidSync: () => {
                             self.setAvoidSync(true);
                         },
@@ -79,7 +75,7 @@ export class StockMenuPage extends PageComponent {
                 icon: 'inventory.svg',
                 label: 'Inventaire',
                 action: () => {
-                    self.navService.push(InventoryLocationsPageRoutingModule.PATH);
+                    self.navService.push(NavPathEnum.INVENTORY_LOCATIONS);
                 }
             }
         ];
@@ -139,7 +135,7 @@ export class StockMenuPage extends PageComponent {
 
     public goToDrop() {
         this.navService
-            .push(TransferMenuPageRoutingModule.PATH, {
+            .push(NavPathEnum.TRANSFER_MENU, {
                 goToDropDirectly: true
             });
     }

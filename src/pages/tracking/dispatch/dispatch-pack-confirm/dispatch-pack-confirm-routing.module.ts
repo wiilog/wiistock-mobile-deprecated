@@ -16,5 +16,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class DispatchPackConfirmPageRoutingModule {
-    public static readonly PATH: string = 'dispatch-pack-confirm';
 }

@@ -16,5 +16,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class DispatchPacksPageRoutingModule {
-    public static readonly PATH: string = 'dispatch-packs';
 }

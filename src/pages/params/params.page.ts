@@ -9,6 +9,9 @@ import {NavService} from '@app/common/services/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
+import {localAddress} from '../../dev-credentials.json';
+import {environment} from "@environments/environment";
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -41,8 +44,13 @@ export class ParamsPage extends PageComponent implements CanLeave {
 
     public ionViewWillEnter(): void {
         this.serverUrlSubscription = this.storageService.getServerUrl().subscribe((baseUrl) => {
-            this.URL = !baseUrl ? '' : baseUrl;
             this.isLoading = false;
+            if(!environment.production && localAddress && !baseUrl) {
+                this.URL = localAddress;
+                this.registerURL();
+            } else {
+                this.URL = !baseUrl ? '' : baseUrl;
+            }
         });
     }
 
@@ -74,7 +82,7 @@ export class ParamsPage extends PageComponent implements CanLeave {
                 .subscribe(
                     () => {
                         this.isLoading = false;
-                        this.navService.setRoot('login');
+                        this.navService.setRoot(NavPathEnum.LOGIN);
                     },
                     () => {
                         from(loadingComponent.dismiss()).subscribe(() => {

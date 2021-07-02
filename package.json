@@ -1,6 +1,6 @@
 {
     "name": "followgt-nomade",
-    "version": "4.6.0",
+    "version": "4.7.22",
     "author": "Wiilog Team",
     "description": "Follow your supply chain with GT Logistics.",
     "private": true,
@@ -18,8 +18,8 @@
         "wiis:clean": "node scripts/rmdir www && yarn ionic cordova resources android && yarn ionic cordova platform add android && yarn cordova clean",
         "wiis:build:prod": "yarn wiis:build --prod --release --buildConfig=build.json",
         "wiis:build": "node scripts/rmdir platforms && yarn wiis:generate:build-json && yarn wiis:generate:dev-credentials && yarn wiis:generate:network-security-config:prod && yarn wiis:clean && ionic cordova build android",
-        "wiis:run": "yarn wiis:generate:dev-credentials && yarn wiis:generate:network-security-config && yarn wiis:clean && yarn ionic cordova run android",
-        "wiis:run:livereload": "yarn wiis:generate:dev-credentials && yarn wiis:generate:network-security-config && yarn wiis:clean && yarn ionic cordova run android --livereload"
+        "wiis:run": "yarn wiis:generate:dev-credentials && node scripts/get-local-address.js && yarn wiis:generate:network-security-config && yarn wiis:clean && yarn ionic cordova run android",
+        "wiis:run:livereload": "yarn wiis:generate:dev-credentials && node scripts/get-local-address.js && yarn wiis:generate:network-security-config && yarn wiis:clean && yarn ionic cordova run android --livereload"
     },
     "dependencies": {
         "@angular/common": "~9.1.6",
@@ -55,6 +55,7 @@
         "ionic-long-press": "^2.0.3",
         "ionic-selectable": "^4.7.1",
         "moment": "^2.25.3",
+        "native-run": "^1.3.0",
         "open-sans-fonts": "^1.6.2",
         "phonegap-plugin-barcodescanner": "^8.1.0",
         "rxjs": "~6.5.1",

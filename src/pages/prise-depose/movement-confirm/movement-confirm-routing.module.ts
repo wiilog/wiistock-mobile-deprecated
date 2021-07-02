@@ -17,5 +17,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class MovementConfirmPageRoutingModule {
-    public static readonly PATH: string = 'movement-confirm';
 }

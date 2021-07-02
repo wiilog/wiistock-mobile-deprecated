@@ -9,7 +9,7 @@ import {TransferOrder} from '@entities/transfer-order';
 import {Subscription} from 'rxjs';
 import {LoadingService} from '@app/common/services/loading.service';
 import {flatMap, map} from 'rxjs/operators';
-import {TransferArticlesPageRoutingModule} from '@pages/stock/transfer/transfer-articles/transfer-articles-routing.module';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -68,7 +68,7 @@ export class TransferListPage extends PageComponent {
                         }
                     ],
                     action: () => {
-                        this.navService.push(TransferArticlesPageRoutingModule.PATH, {transferOrder});
+                        this.navService.push(NavPathEnum.TRANSFER_ARTICLES, {transferOrder});
                     }
                 }));
 

@@ -7,6 +7,7 @@ import * as moment from 'moment';
 import {from} from 'rxjs';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {Emplacement} from '@entities/emplacement';
+import {IconConfig} from "../components/panel/model/icon-config";
 
 type ListConfig = {
     header: HeaderConfig;
@@ -120,9 +121,9 @@ export class TrackingListFactoryService {
         }
     }
 
-    public createListConfig(articles: Array<MouvementTraca & {loading?: boolean}>,
+    public createListConfig(articles: Array<MouvementTraca & {loading?: boolean; isGroup?: number|boolean; subPacks?: Array<MouvementTraca>;}>,
                             listType: number,
-                            {location, objectLabel,  validate, rightIcon, confirmItem, natureIdsToConfig, natureTranslation}: {
+                            {location, objectLabel,  validate, rightIcon, confirmItem, natureIdsToConfig, natureTranslation, validateIcon}: {
                                 location?: Emplacement;
                                 natureIdsToConfig?: {[id: number]: { label: string; color?: string; }};
                                 validate?: () => void;
@@ -130,6 +131,7 @@ export class TrackingListFactoryService {
                                     mode: 'upload'|'remove';
                                     action: (info: { [name: string]: { label: string; value?: string; } }) => void;
                                 };
+                                validateIcon?: IconConfig;
                                 confirmItem?: (info: { [name: string]: { label: string; value?: string; } }) => void;
                                 objectLabel: string;
                                 natureTranslation?: string;
@@ -173,12 +175,12 @@ export class TrackingListFactoryService {
                     color: iconColor
                 },
                 ...(
-                    validate
+                    validate || validateIcon
                         ? {
-                            rightIcon: {
+                            rightIcon: validateIcon || {
                                 name: 'check.svg',
                                 color: 'success',
-                                action:  () => {
+                                action: () => {
                                     if (!this._alertPresented && !this.actionsDisabled) {
                                         validate();
                                     }
@@ -188,33 +190,48 @@ export class TrackingListFactoryService {
                         : {}
                 )
             },
-            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, loading}) => {
+            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, loading, isGroup, subPacks}) => {
                 const natureConfig = (natureIdsToConfig && nature_id && natureIdsToConfig[nature_id]);
+
+                let quantityRow = {};
+                if (!loading) {
+                    quantityRow = isGroup
+                        ? {
+                            quantity: {
+                                label: 'Nombre colis',
+                                value: (subPacks || []).length
+                            }
+                        }
+                        : ((quantity || quantite
+                            ? {
+                                quantity: {
+                                    label: 'Quantité',
+                                    value: String(quantity || quantite)
+                                }
+                            }
+                            : {}));
+                }
+
+
                 const infos = {
                     [TrackingListFactoryService.TRACKING_IDENTIFIER_NAME]: {
                         label: 'Objet',
                         value: ref_article
                     },
-                    ...(quantity || quantite
-                        ? {
-                            quantity: {
-                                label: 'Quantité',
-                                value: String(quantity || quantite)
-                            }
-                        }
-                        : {}),
+                    ...quantityRow,
                     date: {
                         label: 'Date / Heure',
                         value: moment(date, moment.defaultFormat).format('DD/MM/YYYY HH:mm:ss')
                     },
                     ...(
-                        natureConfig ? {
-                            nature: {
-                                label: natureTranslation,
-                                value: natureConfig.label
+                        natureConfig
+                            ? {
+                                nature: {
+                                    label: natureTranslation,
+                                    value: natureConfig.label
+                                }
                             }
-                        }
-                        : {}),
+                            : {}),
                 };
                 return {
                     infos,

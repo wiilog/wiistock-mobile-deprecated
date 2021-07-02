@@ -16,5 +16,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class DemandeLivraisonArticleTakePageRoutingModule {
-    public static readonly PATH: string = 'demande-livraison-article-take';
 }

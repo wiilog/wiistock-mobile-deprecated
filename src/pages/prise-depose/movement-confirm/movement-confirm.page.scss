@@ -2,14 +2,27 @@
 
 .page-content {
     overflow: hidden;
+    flex-direction: column;
+
+    .nav-container {
+        display: flex;
+        & > ion-button {
+            flex: 1;
+        }
+    }
 
     wii-panel-header {
         margin: $spacerMin;
     }
 
     &,
-    & > wii-form-panel {
+    & > wii-form-panel,
+    & > .sub-pack-container {
         flex: 1;
         display: flex;
+    }
+
+    & > .sub-pack-container > wii-list-panel {
+        flex: 1;
     }
 }

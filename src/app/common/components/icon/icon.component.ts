@@ -1,4 +1,4 @@
-import {Component, ElementRef, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {HttpClient} from '@angular/common/http';
 import {DomSanitizer, SafeHtml} from '@angular/platform-browser';
 import {Observable, ReplaySubject} from 'rxjs';

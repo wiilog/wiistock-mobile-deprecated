@@ -16,5 +16,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class HandlingMenuPageRoutingModule {
-    public static readonly PATH: string = 'handling-menu';
 }

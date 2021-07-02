@@ -16,5 +16,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class InventoryArticlesPageRoutingModule {
-    public static readonly PATH: string = 'inventory-articles';
 }

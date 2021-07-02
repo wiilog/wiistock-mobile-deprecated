@@ -17,5 +17,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class InventoryLocationsAnomaliesPageRoutingModule {
-    public static readonly PATH: string = 'inventory-locations-anomalies';
 }

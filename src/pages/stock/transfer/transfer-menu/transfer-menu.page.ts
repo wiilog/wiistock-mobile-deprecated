@@ -7,9 +7,8 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav.service';
-import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
 import {PageComponent} from '@pages/page.component';
-import {TransferListPageRoutingModule} from '@pages/stock/transfer/transfer-list/transfer-list-routing.module';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 @Component({
     selector: 'wii-transfer-menu',
@@ -37,7 +36,7 @@ export class TransferMenuPage extends PageComponent {
                 iconColor: 'tertiary',
                 label: 'Transfert à traiter',
                 action: () => {
-                    this.navService.push(TransferListPageRoutingModule.PATH);
+                    this.navService.push(NavPathEnum.TRANSFER_LIST);
                 }
             },
             {
@@ -73,7 +72,7 @@ export class TransferMenuPage extends PageComponent {
 
     public navigateToPriseDeposePage(goToDropDirectly: boolean = false): void {
         this.navService
-            .push(PriseDeposeMenuPageRoutingModule.PATH, {
+            .push(NavPathEnum.PRISE_DEPOSE_MENU, {
                 fromStock: true,
                 goToDropDirectly
             });

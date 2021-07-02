@@ -7,9 +7,8 @@ import {MainHeaderService} from '@app/common/services/main-header.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
-import {DemandeLivraisonMenuPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu-routing.module';
 import {PageComponent} from '@pages/page.component';
-import {HandlingMenuPageRoutingModule} from '@pages/demande/handling/handling-menu/handling-menu-routing.module';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -25,7 +24,7 @@ export class DemandeMenuPage extends PageComponent {
     public loading: boolean;
 
     private avoidSync: boolean;
-    private synchronisationSubscription: Subscription;s
+    private synchronisationSubscription: Subscription;
     private navigationSubscription: Subscription;
 
     public constructor(private platform: Platform,
@@ -42,7 +41,7 @@ export class DemandeMenuPage extends PageComponent {
                 icon: 'people.svg',
                 label: 'Service',
                 action: () => {
-                    self.navService.push(HandlingMenuPageRoutingModule.PATH);
+                    self.navService.push(NavPathEnum.HANDLING_MENU);
                 }
             },
             {
@@ -50,7 +49,7 @@ export class DemandeMenuPage extends PageComponent {
                 iconColor: 'list-yellow',
                 label: 'Livraison',
                 action: () => {
-                    self.navService.push(DemandeLivraisonMenuPageRoutingModule.PATH);
+                    self.navService.push(NavPathEnum.DEMANDE_LIVRAISON_MENU);
                 }
             }
         ];

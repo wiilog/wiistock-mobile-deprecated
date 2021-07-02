@@ -40,7 +40,7 @@ export class PreparationArticleTakePage extends PageComponent {
             title: 'Confirmation quantité',
             info: [
                 ...(this.article.isSelectableByUser ? [{label: 'Référence', value: this.article.reference_article}] : []),
-                {label: 'Article', value: this.article.reference},
+                {label: 'Article', value: this.article.barcode},
                 {label: 'Quantité à prélever', value: `${this.quantityToSelect}`},
                 ...(this.quantityToSelect !== this.availableQuantity ? [{label: 'Quantité disponible', value: `${this.availableQuantity}`}] : []),
             ],

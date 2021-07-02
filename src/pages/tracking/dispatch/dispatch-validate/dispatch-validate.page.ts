@@ -212,14 +212,21 @@ export class DispatchValidatePage extends PageComponent {
                         flatMap(() => zip(
                             this.sqliteService.update(
                                 'dispatch',
-                                {treatedStatusId: this.selectedStatus.id, partial: Number(treatedDispatchPacks.length < this.dispatchPacks.length)},
-                                [`id = ${this.dispatch.id}`]
+                                [{
+                                    values: {
+                                        treatedStatusId: this.selectedStatus.id,
+                                        partial: Number(treatedDispatchPacks.length < this.dispatchPacks.length)
+                                    },
+                                    where: [`id = ${this.dispatch.id}`],
+                                }]
                             ),
                             ...(treatedDispatchPacks
                                 .map(({id, natureId, quantity, treated}) => this.sqliteService.update(
                                     'dispatch_pack',
-                                    {natureId, quantity, treated},
-                                    [`id = ${id}`]
+                                    [{
+                                        values: {natureId, quantity, treated},
+                                        where: [`id = ${id}`]
+                                    }]
                                 )))
                         )),
                         flatMap((): any => (

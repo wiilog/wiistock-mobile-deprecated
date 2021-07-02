@@ -139,7 +139,7 @@ export class LocalDataManagerService {
                     const idsToDelete = resError.map(({id_livraison}) => id_livraison);
                     return zip(
                         idsToDelete.length > 0
-                            ? this.sqliteService.update('livraison', {date_end: null, location: null}, [`id IN (${idsToDelete.join(',')})`])
+                            ? this.sqliteService.update('livraison', [{values: {date_end: null, location: null}, where: [`id IN (${idsToDelete.join(',')})`]}])
                             : of(undefined),
                         this.sqliteService.deleteMouvementsBy('id_livraison', idsToDelete)
                     );
@@ -239,7 +239,7 @@ export class LocalDataManagerService {
                 },
                 resetFailed: (resError) => {
                     return (resError && resError.length > 0)
-                        ? this.sqliteService.update('transfer_order', {treated: 0}, [`id IN (${resError.join(',')})`])
+                        ? this.sqliteService.update('transfer_order', [{values: {treated: 0}, where: [`id IN (${resError.join(',')})`]}])
                         : of(undefined);
                 }
             },
@@ -302,10 +302,13 @@ export class LocalDataManagerService {
                             `dispatchId IN (${entireTreatedDispatch.map(({id}) => id).join(',')})`
                         ])
                         : of(undefined),
-                    this.sqliteService.update('dispatch_pack', {already_treated: 1, treated: 0}, [
-                        `treated = 1`,
-                        ...((entireTreatedDispatch && entireTreatedDispatch.length > 0) ? [`dispatchId NOT IN (${entireTreatedDispatch.map(({id}) => id).join(',')})`] : [])
-                    ])
+                    this.sqliteService.update('dispatch_pack', [{
+                        values: {already_treated: 1, treated: 0},
+                        where: [
+                            `treated = 1`,
+                            ...((entireTreatedDispatch && entireTreatedDispatch.length > 0) ? [`dispatchId NOT IN (${entireTreatedDispatch.map(({id}) => id).join(',')})`] : [])
+                        ]
+                    }])
                 )
             }
         }
@@ -391,52 +394,15 @@ export class LocalDataManagerService {
     public sendMouvementTraca(sendFromStock: boolean): Observable<any> {
         return this.sqliteService.findAll('mouvement_traca')
             .pipe(
-                map((mouvements: Array<MouvementTraca>) => (
-                    mouvements
-                        .filter(({fromStock}) => (sendFromStock === Boolean(fromStock)))
-                        .map(({signature, photo, ...mouvement}) => ({
-                            ...mouvement,
-                            signature: signature
-                                ? this.fileService.createFile(
-                                    signature,
-                                    FileService.SIGNATURE_IMAGE_EXTENSION,
-                                    FileService.SIGNATURE_IMAGE_TYPE,
-                                    'signature'
-                                )
-                                : undefined,
-                            photo: photo
-                                ? this.fileService.createFile(
-                                    photo,
-                                    FileService.SIGNATURE_IMAGE_EXTENSION,
-                                    FileService.SIGNATURE_IMAGE_TYPE,
-                                    'photo'
-                                )
-                                : undefined
-                        }))
-                        .sort(({date: dateStr1}, {date: dateStr2}) => {
-                            const date1 = new Date(dateStr1.split('_')[0]);
-                            const date2 = new Date(dateStr2.split('_')[0]);
-                            return date1.getTime() <= date2.getTime()
-                                ? -1
-                                : 1
-                        })
+                map((mouvements: Array<MouvementTraca & {subPacks: any}>) => (
+                   this.mapTrackingMovements(mouvements.filter(({fromStock, isGroup, subPacks}) => ((!isGroup || subPacks === '[]') && sendFromStock === Boolean(fromStock))))
                 )),
-                flatMap((mouvements: Array<MouvementTraca&{signature: File, photo: File}>) => (
+                flatMap((mouvements: Array<MouvementTraca<File> & {subPacks: any}>) => (
                     mouvements.length > 0
                         ? (
                             this.apiService
                                 .requestApi(ApiService.POST_MOUVEMENT_TRACA, {
-                                    params: {
-                                        mouvements: mouvements.map(({signature, photo, ...mouvement}) => mouvement),
-                                        ...(mouvements.reduce((acc, {signature}, currentIndex) => ({
-                                            ...acc,
-                                            ...(signature ? {[`signature_${currentIndex}`]: signature} : {})
-                                        }), {})),
-                                        ...(mouvements.reduce((acc, {photo}, currentIndex) => ({
-                                            ...acc,
-                                            ...(photo ? {[`photo_${currentIndex}`]: photo} : {})
-                                        }), {}))
-                                    }
+                                    params: this.extractTrackingMovementFiles(mouvements)
                                 })
                                 .pipe(
                                     map((apiResponse) => [apiResponse, mouvements]),
@@ -447,16 +413,7 @@ export class LocalDataManagerService {
                                                 ? of(undefined)
                                                     .pipe(
                                                         // we delete succeed mouvement
-                                                        flatMap(() => {
-                                                            const mouvementTracaToDelete = mouvements
-                                                                .filter(({finished, type, ref_article}) => (
-                                                                    (finished && (refArticlesErrors.indexOf(ref_article) === -1)) ||
-                                                                    (type === 'depose')
-                                                                ))
-                                                                .map(({id}) => id);
-                                                            return this.sqliteService
-                                                                .deleteBy('mouvement_traca', [`id IN (${mouvementTracaToDelete.join(',')})`]);
-                                                        }),
+                                                        flatMap(() => this.updateSucceedTracking(refArticlesErrors, mouvements)),
                                                         flatMap(() => (
                                                             // we reset failed mouvement
                                                             this.sqliteService
@@ -478,15 +435,15 @@ export class LocalDataManagerService {
             );
     }
 
-    public saveMouvementsTraca(mouvementsTraca: Array<MouvementTraca>, prisesToFinish: Array<number> = []): Observable<any> {
+    public saveTrackingMovements(trackingsToSave: Array<MouvementTraca>, prisesToFinish: Array<number> = []): Observable<any> {
+        const movements = trackingsToSave
+            .map((mouvement) => ({
+                id: null,
+                ...mouvement,
+                date: mouvement.date + '_' + Math.random().toString(36).substr(2, 9)
+            }));
         return zip(
-            ...mouvementsTraca
-                .map((mouvement) => ({
-                    id: null,
-                    ...mouvement,
-                    date: mouvement.date + '_' + Math.random().toString(36).substr(2, 9)
-                }))
-                .map((mouvement) => this.sqliteService.insert('mouvement_traca', mouvement)),
+            this.sqliteService.insert('mouvement_traca', movements),
             this.sqliteService.finishPrises(prisesToFinish)
         )
             .pipe(map(() => undefined))
@@ -622,7 +579,7 @@ export class LocalDataManagerService {
                         ...(
                             errors.length > 0
                                 ? errors.map(({id, last_error}) => (
-                                    this.sqliteService.update('demande_livraison', {last_error}, [`id = ${id}`])
+                                    this.sqliteService.update('demande_livraison', [{values: {last_error}, where: [`id = ${id}`]}])
                                 ))
                                 : []
                         )
@@ -680,5 +637,102 @@ export class LocalDataManagerService {
                         ])))
                     ))
                 );
+    }
+
+    public mapTrackingMovements(movements: Array<MouvementTraca & {subPacks?: any}>) {
+        return movements
+            .map(({signature, photo, ...mouvement}) => ({
+                ...mouvement,
+                signature: signature
+                    ? this.fileService.createFile(
+                        signature,
+                        FileService.SIGNATURE_IMAGE_EXTENSION,
+                        FileService.SIGNATURE_IMAGE_TYPE,
+                        'signature'
+                    )
+                    : undefined,
+                photo: photo
+                    ? this.fileService.createFile(
+                        photo,
+                        FileService.SIGNATURE_IMAGE_EXTENSION,
+                        FileService.SIGNATURE_IMAGE_TYPE,
+                        'photo'
+                    )
+                    : undefined
+            }) as MouvementTraca<File>)
+            .sort(({date: dateStr1}, {date: dateStr2}) => {
+                const date1 = new Date(dateStr1.split('_')[0]);
+                const date2 = new Date(dateStr2.split('_')[0]);
+                return date1.getTime() <= date2.getTime()
+                    ? -1
+                    : 1
+            });
+    }
+
+    public extractTrackingMovementFiles(movements: Array<MouvementTraca<File> & {subPacks?: any}>) {
+        return {
+            mouvements: movements.map(({signature, photo, ...mouvement}) => mouvement),
+            ...(movements.reduce((acc, {signature}, currentIndex) => ({
+                ...acc,
+                ...(signature ? {[`signature_${currentIndex}`]: signature} : {})
+            }), {})),
+            ...(movements.reduce((acc, {photo}, currentIndex) => ({
+                ...acc,
+                ...(photo ? {[`photo_${currentIndex}`]: photo} : {})
+            }), {}))
+        }
+    }
+
+    private updateSucceedTracking(refArticlesErrors, mouvements) {
+        const mouvementTracaToDelete = mouvements
+            .filter(({finished, type, ref_article}) => (
+                (finished && (refArticlesErrors.indexOf(ref_article) === -1)) ||
+                (type === 'depose')
+            ))
+            .map(({id}) => id);
+        return this.sqliteService.findBy('mouvement_traca', [`id IN (${mouvementTracaToDelete.join(',')}) AND packParent IS NOT NULL`])
+            .pipe(
+                flatMap((trackingToDelete: Array<MouvementTraca>) => {
+                    const subPacksToDelete = trackingToDelete.map(({ref_article}) => ref_article);
+                    return subPacksToDelete && subPacksToDelete.length > 0
+                        ? this.sqliteService
+                            .findBy('mouvement_traca', [
+                                'isGroup = 1',
+                                subPacksToDelete
+                                    .map((code) => `subPacks LIKE '%${code}%'`)
+                                    .join(' OR ')
+                            ])
+                            .pipe(
+                                flatMap((groupsToUpdate) => groupsToUpdate.length > 0
+                                    ? this.sqliteService.update(
+                                        'mouvement_traca',
+                                        // remove duplicates
+                                        groupsToUpdate
+                                            .filter(({id}, index) => groupsToUpdate.findIndex(({id: idDuplicate}) => idDuplicate === id) === index)
+                                            .map((group) => {
+                                                const subPacks = JSON.parse(group.subPacks || '[]');
+                                                const newSubPacks = [];
+                                                if (Array.isArray(newSubPacks)) {
+                                                    for (const pack of subPacks) {
+                                                        if (trackingToDelete.findIndex(({ref_article: trackingToDeleteCode}) => (trackingToDeleteCode === pack.code)) === -1) {
+                                                            newSubPacks.push(pack);
+                                                        }
+                                                    }
+                                                    group.subPacks = JSON.stringify(newSubPacks);
+                                                }
+                                                return {
+                                                    values: group,
+                                                    where: [`id = ${group.id}`]
+                                                };
+                                            })
+                                    )
+                                    : of(undefined)
+                                )
+                            )
+                        : of (undefined)
+                }),
+                flatMap(() => this.sqliteService.deleteBy('mouvement_traca', [`id IN (${mouvementTracaToDelete.join(',')})`])),
+
+            );
     }
 }

@@ -14,9 +14,8 @@ import {flatMap} from 'rxjs/operators';
 import * as moment from 'moment';
 import {Mouvement} from '@entities/mouvement';
 import {IconColor} from '@app/common/components/icon/icon-color';
-import {LivraisonEmplacementPageRoutingModule} from '@pages/stock/livraison/livraison-emplacement/livraison-emplacement-routing.module';
-import {LivraisonArticleTakePageRoutingModule} from '@pages/stock/livraison/livraison-article-take/livraison-article-take-routing.module';
 import {PageComponent} from '@pages/page.component';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -145,9 +144,9 @@ export class LivraisonArticlesPage extends PageComponent {
                 let articleAlready = this.articlesT.find(art => art.id_livraison === newArticle.id_livraison && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
                 if (articleAlready !== undefined) {
                     this.sqliteService
-                        .update('article_livraison', {quantity: newArticle.quantity + articleAlready.quantity}, [`id = ${articleAlready.id}`])
+                        .update('article_livraison', [{values: {quantity: newArticle.quantity + articleAlready.quantity}, where: [`id = ${articleAlready.id}`]}])
                         .pipe(
-                            flatMap(() => this.sqliteService.update('article_livraison', {quantity: article.quantity - newArticle.quantity}, [`id = ${article.id}`])),
+                            flatMap(() => this.sqliteService.update('article_livraison', [{values: {quantity: article.quantity - newArticle.quantity}, where: [`id = ${article.id}`]}])),
                             flatMap(() => this.sqliteService.findBy('article_livraison', [`id_livraison = ${this.livraison.id}`]))
                         )
                         .subscribe((articles) => {
@@ -173,7 +172,7 @@ export class LivraisonArticlesPage extends PageComponent {
                             id_collecte: null,
                         };
                         this.sqliteService
-                            .update('article_livraison', {quantity: article.quantity - Number(quantity)}, [`id = ${article.id}`])
+                            .update('article_livraison', [{values: {quantity: article.quantity - Number(quantity)}, where: [`id = ${article.id}`]}])
                             .pipe(
                                 flatMap(() => this.sqliteService.insert('mouvement', mouvement)),
                                 flatMap(() => this.sqliteService.findBy('article_livraison', [`id_livraison = ${this.livraison.id}`])))
@@ -203,7 +202,7 @@ export class LivraisonArticlesPage extends PageComponent {
                 let articleAlready = this.articlesT.find(art => art.id_livraison === mouvement.id_livraison && art.is_ref === mouvement.is_ref && art.reference === mouvement.reference);
                 if (articleAlready !== undefined) {
                     this.sqliteService
-                        .update('article_livraison', {quantity: mouvement.quantity + articleAlready.quantity}, [`id = ${articleAlready.id}`])
+                        .update('article_livraison', [{values: {quantity: mouvement.quantity + articleAlready.quantity}, where: [`id = ${articleAlready.id}`]}])
                         .pipe(
                             flatMap(() => this.sqliteService.deleteBy('article_livraison', [`id = ${mouvement.id_article_livraison}`])),
                             flatMap(() => this.sqliteService.findBy('article_livraison', [`id_livraison = ${this.livraison.id}`]))
@@ -232,7 +231,7 @@ export class LivraisonArticlesPage extends PageComponent {
             this.toastService.presentToast('Veuillez traiter tous les articles concernés');
         }
         else {
-            this.navService.push(LivraisonEmplacementPageRoutingModule.PATH, {
+            this.navService.push(NavPathEnum.LIVRAISON_EMPLACEMENT, {
                 livraison: this.livraison,
                 validateLivraison: () => {
                     this.navService.pop();
@@ -248,7 +247,7 @@ export class LivraisonArticlesPage extends PageComponent {
 
         if (article) {
             const self = this;
-            this.navService.push(LivraisonArticleTakePageRoutingModule.PATH, {
+            this.navService.push(NavPathEnum.LIVRAISON_ARTICLE_TAKE, {
                 article,
                 selectArticle: (quantity) => {
                     self.selectArticle(article, quantity);

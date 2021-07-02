@@ -83,6 +83,14 @@ export class StorageService {
         return this.getRight(StorageKeyEnum.RIGHT_DEMANDE);
     }
 
+    public getGroupAccessRight(): Observable<boolean> {
+        return this.getRight(StorageKeyEnum.RIGHT_GROUP);
+    }
+
+    public getUngroupAccessRight(): Observable<boolean> {
+        return this.getRight(StorageKeyEnum.RIGHT_UNGROUP);
+    }
+
     public isDemoMode(): Observable<boolean> {
         return this.getRight(StorageKeyEnum.DEMO_MODE);
     }

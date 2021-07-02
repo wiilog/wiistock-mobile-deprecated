@@ -10,4 +10,5 @@ export enum SelectItemTypeEnum {
     TRACKING_NATURES,
     STATUS,
     DISPATCH_NUMBER,
+    GROUP,
 }

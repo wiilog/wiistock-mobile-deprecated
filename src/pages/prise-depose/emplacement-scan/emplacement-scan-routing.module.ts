@@ -17,5 +17,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class EmplacementScanPageRoutingModule {
-    public static readonly PATH: string = 'emplacement-scan';
 }

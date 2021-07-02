@@ -17,5 +17,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class LivraisonArticlesPageRoutingModule {
-    public static readonly PATH: string = 'livraison-articles';
 }

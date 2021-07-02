@@ -97,7 +97,7 @@ export class TransferValidatePage extends PageComponent {
                         tap((loader) => {
                             this.loader = loader;
                         }),
-                        flatMap(() => this.sqliteService.update('transfer_order', {treated: 1}, [`id = ${this.transferOrder.id}`])),
+                        flatMap(() => this.sqliteService.update('transfer_order', [{values: {treated: 1}, where: [`id = ${this.transferOrder.id}`]}])),
                         flatMap((): any => (
                             this.network.type !== 'none'
                                 ? this.localDataManager.sendFinishedProcess('transfer')

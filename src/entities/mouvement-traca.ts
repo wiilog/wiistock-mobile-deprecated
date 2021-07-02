@@ -1,4 +1,4 @@
-export interface MouvementTraca {
+export interface MouvementTraca<FileType = string> {
     ref_article: string;
     type: string;
     operateur: string;
@@ -16,7 +16,12 @@ export interface MouvementTraca {
 
     // depose
     comment?: string;
-    signature?: string;
-    photo?: string;
+    signature?: FileType;
+    photo?: FileType;
     freeFields?: string;
+
+    // grouping
+    subPacks?: string;
+    packParent?: string;
+    isGroup?: number;
 }

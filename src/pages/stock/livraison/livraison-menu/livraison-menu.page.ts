@@ -5,7 +5,6 @@ import {CardListColorEnum} from '@app/common/components/card-list/card-list-colo
 import {NavService} from '@app/common/services/nav.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {LivraisonArticlesPageRoutingModule} from '@pages/stock/livraison/livraison-articles/livraison-articles-routing.module';
 import {PageComponent} from '@pages/page.component';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
@@ -14,6 +13,7 @@ import {Emplacement} from '@entities/emplacement';
 import {Subscription} from 'rxjs';
 import {flatMap, map} from 'rxjs/operators';
 import {LoadingService} from '@app/common/services/loading.service';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -143,7 +143,7 @@ export class LivraisonMenuPage extends PageComponent {
                     )
                 ],
                 action: () => {
-                    this.navService.push(LivraisonArticlesPageRoutingModule.PATH, {livraison});
+                    this.navService.push(NavPathEnum.LIVRAISON_ARTICLES, {livraison});
                 }
             }));
     }

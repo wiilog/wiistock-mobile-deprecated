@@ -16,10 +16,8 @@ import {Observable, of} from 'rxjs';
 import {Mouvement} from '@entities/mouvement';
 import * as moment from 'moment';
 import {IconColor} from '@app/common/components/icon/icon-color';
-import {PreparationEmplacementPageRoutingModule} from '@pages/stock/preparation/preparation-emplacement/preparation-emplacement-routing.module';
-import {PreparationRefArticlesPageRoutingModule} from '@pages/stock/preparation/preparation-ref-articles/preparation-ref-articles-routing.module';
-import {PreparationArticleTakePageRoutingModule} from '@pages/stock/preparation/preparation-article-take/preparation-article-take-routing.module';
 import {PageComponent} from '@pages/page.component';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -243,7 +241,7 @@ export class PreparationArticlesPage extends PageComponent {
             this.toastService.presentToast('Veuillez traiter au moins un article');
         }
         else {
-            this.navService.push(PreparationEmplacementPageRoutingModule.PATH, {
+            this.navService.push(NavPathEnum.PREPARATION_EMPLACEMENT, {
                 preparation: this.preparation,
                 validatePrepa: () => {
                     this.navService.pop();
@@ -268,7 +266,7 @@ export class PreparationArticlesPage extends PageComponent {
             });
         }
         else if (selectedArticle && (selectedArticle as ArticlePrepa).type_quantite === 'article') {
-            this.navService.push(PreparationRefArticlesPageRoutingModule.PATH, {
+            this.navService.push(NavPathEnum.PREPARATION_REF_ARTICLES, {
                 article: selectedArticle,
                 preparation: this.preparation,
                 started: this.started,
@@ -308,7 +306,7 @@ export class PreparationArticlesPage extends PageComponent {
 
     private navigateToPreparationTake({selectedArticle, refArticle}: { selectedArticle?: ArticlePrepaByRefArticle | ArticlePrepa, refArticle?: ArticlePrepa }): void {
         if (selectedArticle) {
-            this.navService.push(PreparationArticleTakePageRoutingModule.PATH, {
+            this.navService.push(NavPathEnum.PREPARATION_ARTICLE_TAKE, {
                 article: selectedArticle,
                 refArticle,
                 preparation: this.preparation,

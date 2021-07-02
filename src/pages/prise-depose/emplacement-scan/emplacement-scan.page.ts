@@ -6,11 +6,9 @@ import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav.service';
 import {Emplacement} from '@entities/emplacement';
-import {PrisePageRoutingModule} from '@pages/prise-depose/prise/prise-routing.module';
-import {DeposePageRoutingModule} from '@pages/prise-depose/depose/depose-routing.module';
-import {NewEmplacementPageRoutingModule} from '@pages/new-emplacement/new-emplacement-routing.module';
 import {PageComponent} from '@pages/page.component';
 import {StorageService} from '@app/common/services/storage/storage.service';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 @Component({
     selector: 'wii-emplacement-scan',
@@ -70,7 +68,7 @@ export class EmplacementScanPage extends PageComponent {
 
     public createEmp(): void {
         this.testNetwork(() => {
-            this.navService.push(NewEmplacementPageRoutingModule.PATH, {
+            this.navService.push(NavPathEnum.NEW_EMPLACEMENT, {
                 fromDepose: this.fromDepose,
                 createNewEmp: (emplacement: Emplacement) => {
                     this.selectLocation(emplacement)
@@ -82,8 +80,8 @@ export class EmplacementScanPage extends PageComponent {
     public selectLocation(emplacement: Emplacement) {
         this.testNetwork(() => {
             const nextPagePath = this.fromDepose
-                ? DeposePageRoutingModule.PATH
-                : PrisePageRoutingModule.PATH;
+                ? NavPathEnum.DEPOSE
+                : NavPathEnum.PRISE;
             this.navService.push(nextPagePath, {
                 emplacement: emplacement,
                 fromStock: this.fromStock,

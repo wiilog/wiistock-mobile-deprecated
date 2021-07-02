@@ -16,5 +16,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class DispatchValidatePageRoutingModule {
-    public static readonly PATH: string = 'dispatch-validate';
 }

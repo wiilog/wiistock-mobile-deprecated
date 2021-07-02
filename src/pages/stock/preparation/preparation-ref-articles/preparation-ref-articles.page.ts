@@ -9,9 +9,9 @@ import {ToastService} from '@app/common/services/toast.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {flatMap, map, take, tap} from 'rxjs/operators';
-import {PreparationArticleTakePageRoutingModule} from '@pages/stock/preparation/preparation-article-take/preparation-article-take-routing.module';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -95,7 +95,7 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
     }
 
     public selectArticle(selectedArticle): void {
-        this.navService.push(PreparationArticleTakePageRoutingModule.PATH, {
+        this.navService.push(NavPathEnum.PREPARATION_ARTICLE_TAKE, {
             article: selectedArticle,
             refArticle: this.refArticle,
             preparation: this.navParams.get('preparation'),

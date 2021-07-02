@@ -12,11 +12,11 @@ import {from, Observable, of, ReplaySubject, Subscription, zip} from 'rxjs';
 import {flatMap, tap} from 'rxjs/operators';
 import {SaisieInventaire} from '@entities/saisie-inventaire';
 import * as moment from 'moment';
-import {InventoryValidatePageRoutingModule} from '@pages/stock/inventory/inventory-validate/inventory-validate-routing.module';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 @Component({
     selector: 'wii-inventory-articles',
@@ -102,7 +102,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
     public navigateToInventoryValidate(selectedArticle: ArticleInventaire&Anomalie): void {
         const self = this;
         this.selectItemComponent.closeSearch();
-        this.navService.push(InventoryValidatePageRoutingModule.PATH, {
+        this.navService.push(NavPathEnum.INVENTORY_VALIDATE, {
             selectedArticle,
             validateQuantity: (quantity: number) => {
                 if (!this.validateSubscription) {
@@ -154,7 +154,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
 
     public validateQuantity(selectedArticle: ArticleInventaire&Anomalie, quantity: number): Observable<any> {
         if (this.anomalyMode) {
-            return this.sqliteService.update('anomalie_inventaire', {quantity, treated: '1'}, [`id = ${selectedArticle.id}`]);
+            return this.sqliteService.update('anomalie_inventaire', [{values: {quantity, treated: '1'}, where: [`id = ${selectedArticle.id}`]}]);
         }
         else {
             let saisieInventaire: SaisieInventaire = {

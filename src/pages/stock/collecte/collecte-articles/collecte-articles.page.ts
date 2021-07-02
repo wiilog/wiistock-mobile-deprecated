@@ -18,9 +18,9 @@ import * as moment from 'moment';
 import {from, Observable, of, zip} from 'rxjs';
 import {AlertManagerService} from '@app/common/services/alert-manager.service';
 import {IconColor} from '@app/common/components/icon/icon-color';
-import {CollecteArticleTakePageRoutingModule} from '@pages/stock/collecte/collecte-article-take/collecte-article-take-routing.module';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -241,7 +241,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
             ? this.articlesNT.find(article => (article.barcode === text))
             : text;
         if (article) {
-            this.navService.push(CollecteArticleTakePageRoutingModule.PATH, {
+            this.navService.push(NavPathEnum.COLLECTE_ARTICLE_TAKE, {
                 article,
                 selectArticle: (quantity: number) => {
                     this.selectArticle(article, quantity);

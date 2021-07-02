@@ -16,5 +16,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class CollecteArticlesPageRoutingModule {
-    public static readonly PATH: string = 'collecte-articles';
 }

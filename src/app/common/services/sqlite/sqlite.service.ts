@@ -151,9 +151,7 @@ export class SqliteService {
             flatMap(() => deleteOld ? this.deleteBy('preparation') : of(undefined)),
             flatMap(() => (
                 (preparations.length > 0)
-                    ? zip(...(preparations.map(({number, ...preparation}) => (
-                        this.insert('preparation', {started: 0, numero: number, ...preparation})
-                    ))))
+                    ? this.insert('preparation', preparations.map(({number, ...preparation}) => ({started: 0, numero: number, ...preparation})))
                     : of(undefined)
             ))
         );
@@ -182,10 +180,9 @@ export class SqliteService {
                                 ? this.insert('handling', handlingsToInsert)
                                 : of(undefined),
                             handlingsToUpdate.length > 0
-                                ? zip(
-                                    ...handlingsToUpdate.map(({id, ...handling}) => (
-                                        this.update('handling', handling, [`where id = ${id}`])
-                                    ))
+                                ? this.update(
+                                    'handling',
+                                    handlingsToUpdate.map(({id, ...handling}) => ({values: handling, where: [`where id = ${id}`]}))
                                 )
                                 : of(undefined)
                         )
@@ -206,12 +203,12 @@ export class SqliteService {
             .pipe(
                 flatMap(() => (
                     transferOrders && transferOrders.length > 0
-                        ? zip(...(transferOrders.map((transferOrder) => this.insert('transfer_order', {treated: 0, ...transferOrder}))))
+                        ? this.insert('transfer_order', transferOrders.map((transferOrder) => ({treated: 0, ...transferOrder})))
                         : of(undefined)
                 )),
                 flatMap(() => (
                     transferOrderArticles && transferOrderArticles.length > 0
-                        ? zip(...(transferOrderArticles.map((transferOrderArticle) => this.insert('transfer_order_article', transferOrderArticle))))
+                        ? this.insert('transfer_order_article', transferOrderArticles)
                         : of(undefined)
                 )),
                 map(() => undefined)
@@ -229,10 +226,20 @@ export class SqliteService {
                   .pipe(flatMap((prises: Array<MouvementTraca>) => (
                       apiTaking.length > 0
                           ? zip(
-                              ...apiTaking.map((apiPrise) => (
-                                  !prises.some(({date}) => (date === apiPrise.date))
-                                      ? this.insert('mouvement_traca', apiPrise)
-                                      : of(undefined)
+                              ...apiTaking.map((apiPicking) => (
+                                  !prises.some(({date}) => (date === apiPicking.date))
+                                      ? this.insert('mouvement_traca', {
+                                          ...apiPicking,
+                                          isGroup: (apiPicking.isGroup || false),
+                                          subPacks: (apiPicking.subPacks || [])
+                                      })
+                                      : this.update(
+                                          'mouvement_traca',
+                                          [{
+                                              values: {subPacks: (apiPicking.subPacks || [])},
+                                              where: [`ref_article = '${apiPicking.ref_article}'`]
+                                          }]
+                                      )
                               ))
                           )
                           : of(undefined)
@@ -289,14 +296,14 @@ export class SqliteService {
                     );
                 }),
                 flatMap(() => zip(
-                    this.update('demande_livraison_article', {to_delete: true}),
-                    this.update('demande_livraison_type', {to_delete: true})
+                    this.update('demande_livraison_article', [{values: {to_delete: true}}]),
+                    this.update('demande_livraison_type', [{values: {to_delete: true}}])
                 )),
                 flatMap(() => (
                     ((demandeLivraisonArticles && demandeLivraisonArticles.length > 0) || (demandeLivraisonTypes && demandeLivraisonTypes.length > 0))
                     ? zip(
-                        ...(demandeLivraisonArticles || []).map((article) => this.insert('demande_livraison_article', article)),
-                        ...(demandeLivraisonTypes || []).map((type) => this.insert('demande_livraison_type', type)),
+                        this.insert('demande_livraison_article', demandeLivraisonArticles || []),
+                        this.insert('demande_livraison_type', demandeLivraisonTypes || []),
                     )
                     : of(undefined)
                 ))
@@ -436,20 +443,23 @@ export class SqliteService {
                     const deliveryOrdersToInsert = apiDeliveryOrder.filter((toInsert) => existingDeliveryOrder.every((existing) => (Number(existing.id) !== Number(toInsert.id))));
 
                     // if article already exists we do not inset it
-                    const deliveryOrderArticlesToInsert = apiDeliveryOrderArticle.filter((toInsert) => existingDeliveryOrderArticle.every((existing) => (
-                        (Number(existing.is_ref) !== Number(toInsert.is_ref))
-                        || (existing.reference !== toInsert.reference)
-                    )));
+                    const deliveryOrderArticlesToInsert = apiDeliveryOrderArticle.filter((toInsert) => (
+                        !existingDeliveryOrderArticle.some((existing) => (
+                            (Number(existing.is_ref) === Number(toInsert.is_ref))
+                            && (Number(existing.id_livraison) === Number(toInsert.id_livraison))
+                            && (existing.reference === toInsert.reference)
+                        ))
+                    ));
 
                     return zip(
                         // orders insert
                         deliveryOrdersToInsert && deliveryOrdersToInsert.length > 0
-                            ? zip(...deliveryOrdersToInsert.map((delivery) => this.insert('livraison', delivery)))
+                            ? this.insert('livraison', deliveryOrdersToInsert)
                             : of(undefined),
 
                         // articles insert
                         deliveryOrderArticlesToInsert && deliveryOrderArticlesToInsert.length > 0
-                            ? zip(...deliveryOrderArticlesToInsert.map((article) => this.insert('article_livraison', {has_moved: 0, ...article})))
+                            ? this.insert('article_livraison', deliveryOrderArticlesToInsert.map((article) => ({has_moved: 0, ...article})))
                             : of(undefined)
                     );
                 })
@@ -620,7 +630,7 @@ export class SqliteService {
                         .map((reference) => `'${reference}'`);
                     return refArticleToDelete.length > 0
                         ? this.deleteBy('article_prepa_by_ref_article', [`reference_article IN (${refArticleToDelete})`])
-                    : of(undefined)
+                        : of(undefined)
                 }),
                 flatMap(() => (
                     (articlesPrepaByRefArticle && articlesPrepaByRefArticle.length > 0)
@@ -862,20 +872,23 @@ export class SqliteService {
         }
     }
 
-    public update(name: TableName, values: any, where: Array<string> = []): Observable<any> {
-        let query = this.createUpdateQuery(name, values, where);
-        return query
-            ? this.executeQuery(query)
+    public update(name: TableName, config: Array<{values: any, where?: Array<string>}>): Observable<any> {
+        const queries = config.map(({values, where}) => this.createUpdateQuery(name, values, where || []));
+        return queries.length > 0
+            ? this.executeQuery(queries)
             : of(false);
     }
 
-    public executeQuery(query: string, getRes: boolean = true, params: Array<any> = []): Observable<any> {
+    public executeQuery(queries: string|Array<string>, getRes: boolean = true, params: Array<any> = []): Observable<any> {
+        const queriesStr = typeof queries === 'string'
+            ? queries
+            : queries.join(';')
         return this.db$.pipe(
-            flatMap((db) => SqliteService.ExecuteQueryStatic(db, query, getRes, params)),
+            flatMap((db) => SqliteService.ExecuteQueryStatic(db, queriesStr, getRes, params)),
             tap(
                 () => {},
                 (error) => {
-                    console.error(query, error);
+                    console.error(queries, error);
                 }
             ),
             map((res) => (getRes ? res : undefined))

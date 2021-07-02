@@ -1,32 +1,17 @@
 import {Component, ElementRef, EventEmitter, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
-import {Observable, Subscription, merge, of} from 'rxjs';
+import {merge, Observable, of, Subscription} from 'rxjs';
 import {filter, flatMap, map, take, tap} from 'rxjs/operators';
 import {TitleConfig} from '@app/common/components/main-header/title-config';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {ActivatedRoute, NavigationEnd, NavigationStart, Router} from '@angular/router';
-import {MainMenuPageRoutingModule} from '@pages/main-menu/main-menu-routing.module';
-import {ParamsPageRoutingModule} from '@pages/params/params-routing.module';
-import {LoginPageRoutingModule} from '@pages/login/login-routing.module';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {RouterDirection} from '@ionic/core';
 import {NavService} from '@app/common/services/nav.service';
 import {NavController} from '@ionic/angular';
-import {PriseDeposeMenuPageRoutingModule} from '@pages/prise-depose/prise-depose-menu/prise-depose-menu-routing.module';
-import {EmplacementScanPageRoutingModule} from '@pages/prise-depose/emplacement-scan/emplacement-scan-routing.module';
-import {PreparationMenuPageRoutingModule} from '@pages/stock/preparation/preparation-menu/preparation-menu-routing.module';
-import {LivraisonMenuPageRoutingModule} from '@pages/stock/livraison/livraison-menu/livraison-menu-routing.module';
-import {CollecteMenuPageRoutingModule} from '@pages/stock/collecte/collecte-menu/collecte-menu-routing.module';
-import {InventoryLocationsPageRoutingModule} from '@pages/stock/inventory/inventory-locations/inventory-locations-routing.module';
-import {DemandeMenuPageRoutingModule} from '@pages/demande/demande-menu/demande-menu-routing.module';
-import {DemandeLivraisonMenuPageRoutingModule} from '@pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu-routing.module';
-import {InventoryLocationsAnomaliesPageRoutingModule} from '@pages/stock/inventory/inventory-locations-anomalies/inventory-locations-anomalies-routing.module';
-import {TrackingMenuPageRoutingModule} from '@pages/tracking/tracking-menu/tracking-menu-routing.module';
-import {DispatchMenuPageRoutingModule} from '@pages/tracking/dispatch/dispatch-menu/dispatch-menu-routing.module';
-import {HandlingMenuPageRoutingModule} from '@pages/demande/handling/handling-menu/handling-menu-routing.module';
-import {HandlingValidatePageRoutingModule} from '@pages/demande/handling/handling-validate/handling-validate-routing.module';
 import {UserService} from "@app/common/services/user.service";
 import {ServerImageKeyEnum} from '@app/common/components/server-image/server-image-key.enum';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Component({
@@ -55,26 +40,26 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     public titlesConfig: Array<TitleConfig>;
     public subTitle$: Observable<string>;
 
-    public readonly iconMenuHide: Array<string> = [
-        MainMenuPageRoutingModule.PATH,
-        ParamsPageRoutingModule.PATH
+    public readonly iconMenuHide: Array<NavPathEnum> = [
+        NavPathEnum.MAIN_MENU,
+        NavPathEnum.PARAMS
     ];
 
-    public readonly iconLogoutShow: Array<string> = [
-        MainMenuPageRoutingModule.PATH
+    public readonly iconLogoutShow: Array<NavPathEnum> = [
+        NavPathEnum.MAIN_MENU
     ];
 
     public readonly iconLeftHide: Array<string> = [];
 
-    public readonly userHide: Array<string> = [
-        ParamsPageRoutingModule.PATH
+    public readonly userHide: Array<NavPathEnum> = [
+        NavPathEnum.PARAMS
     ];
 
-    public readonly headerHide: Array<string> = [
-        LoginPageRoutingModule.PATH
+    public readonly headerHide: Array<NavPathEnum> = [
+        NavPathEnum.LOGIN
     ];
 
-    public currentPagePath: string;
+    public currentPagePath: NavPathEnum;
     public loading: boolean;
     public readonly isShown: {
         iconLogout?: boolean;
@@ -116,11 +101,11 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.lastDirections = {};
 
         this.titlesConfig = [
-            {pagePath: MainMenuPageRoutingModule.PATH, label: 'Menu'},
-            {pagePath: TrackingMenuPageRoutingModule.PATH, label: 'Traçabilité'},
-            {pagePath: DispatchMenuPageRoutingModule.PATH, label: 'Acheminements'},
+            {pagePath: NavPathEnum.MAIN_MENU, label: 'Menu'},
+            {pagePath: NavPathEnum.TRACKING_MENU, label: 'Traçabilité'},
+            {pagePath: NavPathEnum.DISPATCH_MENU, label: 'Acheminements'},
             {
-                pagePath: PriseDeposeMenuPageRoutingModule.PATH,
+                pagePath: NavPathEnum.PRISE_DEPOSE_MENU,
                 label: 'Transfert',
                 filter: (params) => (
                     (typeof params.get('fromStock') === 'boolean') &&
@@ -128,7 +113,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                 )
             },
             {
-                pagePath: EmplacementScanPageRoutingModule.PATH,
+                pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Prise',
                 filter: (params) => (
                     (typeof params.get('fromDepose') === 'boolean') &&
@@ -136,22 +121,24 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                 )
             },
             {
-                pagePath: EmplacementScanPageRoutingModule.PATH,
+                pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Dépose',
                 filter: (params) => (
                     (typeof params.get('fromDepose') === 'boolean') &&
                     params.get('fromDepose')
                 )
             },
-            {pagePath: PreparationMenuPageRoutingModule.PATH, label: 'Préparation'},
-            {pagePath: LivraisonMenuPageRoutingModule.PATH, label: 'Livraison'},
-            {pagePath: CollecteMenuPageRoutingModule.PATH, label: 'Collecte'},
-            {pagePath: InventoryLocationsPageRoutingModule.PATH, label: 'Inventaire'},
-            {pagePath: InventoryLocationsAnomaliesPageRoutingModule.PATH, label: 'Anomalies'},
-            {pagePath: DemandeMenuPageRoutingModule.PATH, label: 'Demande'},
-            {pagePath: HandlingMenuPageRoutingModule.PATH, label: 'Service'},
-            {pagePath: DemandeLivraisonMenuPageRoutingModule.PATH, label: 'Livraison'},
-            {pagePath: HandlingValidatePageRoutingModule.name, label: 'Détails'}
+            {pagePath: NavPathEnum.PREPARATION_MENU, label: 'Préparation'},
+            {pagePath: NavPathEnum.LIVRAISON_MENU, label: 'Livraison'},
+            {pagePath: NavPathEnum.COLLECTE_MENU, label: 'Collecte'},
+            {pagePath: NavPathEnum.INVENTORY_LOCATIONS, label: 'Inventaire'},
+            {pagePath: NavPathEnum.INVENTORY_LOCATIONS_ANOMALIES, label: 'Anomalies'},
+            {pagePath: NavPathEnum.DEMANDE_MENU, label: 'Demande'},
+            {pagePath: NavPathEnum.HANDLING_MENU, label: 'Service'},
+            {pagePath: NavPathEnum.DEMANDE_LIVRAISON_MENU, label: 'Livraison'},
+            {pagePath: NavPathEnum.HANDLING_VALIDATE, label: 'Détails'},
+            {pagePath: NavPathEnum.GROUP_SCAN_GROUP, label: 'Groupage'},
+            {pagePath: NavPathEnum.UNGROUP_SCAN_LOCATION, label: 'Dégroupage'}
         ];
     }
 
@@ -190,7 +177,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                     if (this.loading) {
                         this.loading = false;
                     }
-                    this.currentPagePath = urlSplit[urlSplit.length - 1];
+                    this.currentPagePath = urlSplit[urlSplit.length - 1] as NavPathEnum;
                     this.lastRouteNavigated = this.currentPagePath;
 
                     this.isShown.iconLogout = this.iconLogoutShow.indexOf(this.currentPagePath) > -1;
@@ -227,7 +214,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
     public goHome(): void {
         this.mainHeaderService.emitNavigationChange();
-        this.navService.setRoot(MainMenuPageRoutingModule.PATH);
+        this.navService.setRoot(NavPathEnum.MAIN_MENU);
     }
 
     public onTitleClick(last: boolean, titleConfig: TitleConfig): void {
@@ -267,7 +254,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             : of(undefined);
     }
 
-    private refreshTitles(navigationId: number, currentPagePath: string, paramsId: number): void {
+    private refreshTitles(navigationId: number, currentPagePath: NavPathEnum, paramsId: number): void {
         if (navigationId && this.lastDirections[navigationId]) {
             if (this.lastDirections[navigationId].value === 'back') {
                 const currentPageIndex = this.findIndexInPageStack(currentPagePath, paramsId);
@@ -314,7 +301,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.mainHeaderService.emitSubTitle('');
     }
 
-    private findTitleAndPushConfig(currentPagePath: string, paramsId?: number): void {
+    private findTitleAndPushConfig(currentPagePath: NavPathEnum, paramsId?: number): void {
         const indexInPageStack = this.findIndexInPageStack(currentPagePath, paramsId);
         if (indexInPageStack === -1) {
             let currentTitleConfig = this.findTitleConfig(currentPagePath, paramsId);

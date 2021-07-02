@@ -17,13 +17,15 @@ import {AlertController} from '@ionic/angular';
 import {NavService} from '@app/common/services/nav.service';
 import {flatMap, map, tap} from 'rxjs/operators';
 import * as moment from 'moment';
-import {MovementConfirmPageRoutingModule} from '@pages/prise-depose/movement-confirm/movement-confirm-routing.module';
 import {PageComponent} from '@pages/page.component';
-import {Nature} from '@entities/nature';
-import {Translation} from "@entities/translation";
 import {AlertManagerService} from "@app/common/services/alert-manager.service";
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {ApiService} from '@app/common/services/api.service';
+import {TranslationService} from "@app/common/services/translations.service";
+import {Nature} from '@entities/nature';
+import {Translations} from '@entities/translation';
 
 @Component({
     selector: 'wii-depose',
@@ -40,8 +42,8 @@ export class DeposePage extends PageComponent implements CanLeave {
     public footerScannerComponent: BarcodeScannerComponent;
 
     public emplacement: Emplacement;
-    public colisPrise: Array<MouvementTraca&{hidden?: boolean}>;
-    public colisDepose: Array<MouvementTraca>;
+    public colisPrise: Array<MouvementTraca&{hidden?: boolean; subPacks: any;}>;
+    public colisDepose: Array<MouvementTraca&{subPacks?: any;}>;
 
     public priseListConfig: {
         header: HeaderConfig;
@@ -65,23 +67,23 @@ export class DeposePage extends PageComponent implements CanLeave {
 
     private finishAction: () => void;
 
-    private apiLoading: boolean;
-
     private operator: string;
 
-    private natureTranslation: Array<Translation>;
+    private natureTranslations: Translations;
     private allowedNatureIdsForLocation: Array<number>;
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
 
     public constructor(private network: Network,
                        private alertController: AlertController,
+                       private apiService: ApiService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
                        private sqliteService: SqliteService,
                        private localDataManager: LocalDataManagerService,
                        private trackingListFactory: TrackingListFactoryService,
                        private storageService: StorageService,
+                       private translationService: TranslationService,
                        navService: NavService) {
         super(navService);
         this.listIdentifierName = TrackingListFactoryService.TRACKING_IDENTIFIER_NAME;
@@ -110,12 +112,16 @@ export class DeposePage extends PageComponent implements CanLeave {
                 this.storageService.getOperator(),
                 !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
                 !this.fromStock ? this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + this.emplacement.id]) : of([]),
-                this.sqliteService.findBy('translations', [ `menu LIKE 'natures'`])
+                this.translationService.get('natures')
             )
-                .subscribe(([colisPrise, operator, natures, allowedNatureLocationArray, natureTranslation]) => {
-                    this.colisPrise = colisPrise;
+                .subscribe(([colisPrise, operator, natures, allowedNatureLocationArray, natureTranslations]) => {
+                    this.colisPrise = colisPrise.map(({subPacks, ...tracking}) => ({
+                        ...tracking,
+                        subPacks: subPacks ? JSON.parse(subPacks) : []
+                    }));
+
                     this.operator = operator;
-                    this.natureTranslation = natureTranslation;
+                    this.natureTranslations = natureTranslations;
                     this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
                         [id]: {label, color},
                         ...acc
@@ -137,10 +143,7 @@ export class DeposePage extends PageComponent implements CanLeave {
     public ionViewWillLeave(): void {
         this.trackingListFactory.disableActions();
         this.footerScannerComponent.unsubscribeZebraScan();
-        if (this.saveSubscription) {
-            this.saveSubscription.unsubscribe();
-            this.saveSubscription = undefined;
-        }
+        this.unsubscribeSaveSubscription();
     }
 
     public wiiCanLeave(): boolean {
@@ -149,74 +152,55 @@ export class DeposePage extends PageComponent implements CanLeave {
 
     public finishTaking(): void {
         if (this.colisDepose && this.colisDepose.length > 0) {
-            if(!this.apiLoading) {
-                this.apiLoading = true;
+            if(!this.saveSubscription) {
                 const multiDepose = (this.colisDepose.length > 1);
-                let loader: HTMLIonLoadingElement;
                 const online = (this.network.type !== 'none');
 
                 if (!this.fromStock || online) {
                     const takingToFinish = this.colisPrise
                         .filter(({hidden}) => hidden)
                         .map(({id}) => id);
-                    this.saveSubscription = this.localDataManager
-                        .saveMouvementsTraca(this.colisDepose, takingToFinish)
-                        .pipe(
-                            flatMap(() => {
-                                return online
-                                    ? this.loadingService
-                                        .presentLoading(multiDepose ? 'Envoi des déposes en cours...' : 'Envoi de la dépose en cours...')
-                                        .pipe(
-                                            tap((presentedLoader: HTMLIonLoadingElement) => {
-                                                loader = presentedLoader;
-                                            }),
-                                            map(() => online)
-                                        )
-                                    : of(online)
-                            }),
-                            flatMap((online: boolean): Observable<{ online: boolean; apiResponse?: { [x: string]: any } }> => (
-                                online
-                                    ? this.localDataManager
-                                        .sendMouvementTraca(this.fromStock)
-                                        .pipe(
-                                            flatMap((apiResponse) => (
-                                                loader
-                                                    ? from(loader.dismiss()).pipe(map(() => apiResponse))
-                                                    : of(apiResponse)
-                                            )),
-                                            tap(() => {
-                                                loader = undefined;
-                                            }),
-                                            map((apiResponse) => ({ online, apiResponse }))
-                                        )
-                                    : of({online})
-                            )),
-                            // we display toast
-                            flatMap(({online, apiResponse}) => {
-                                const errorsObject = ((apiResponse && apiResponse.data && apiResponse.data.errors) || {});
-                                const errorsValues = Object.keys(errorsObject).map((key) => errorsObject[key]);
-                                const errorsMessage = errorsValues.join('\n');
-                                const message = online
-                                    ? (errorsMessage.length > 0 ? '' : apiResponse.data.status)
-                                    : (multiDepose
-                                        ? 'Déposes sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
-                                        : 'Dépose sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
-                                return this.toastService
-                                    .presentToast(`${errorsMessage}${(errorsMessage && message) ? '\n' : ''}${message}`)
-                                    .pipe(map(() => errorsValues.length));
-                            })
-                        )
+
+                    const groupingMovements = this.colisDepose.filter(({isGroup, subPacks}) => isGroup && (!subPacks || subPacks.length > 0));
+                    if (!this.fromStock
+                        && this.network.type === 'none'
+                        && groupingMovements.length > 0) {
+                        this.toastService.presentToast('Votre dépose contient des groupes, veuillez vous connecter à internet pour continuer.');
+                        return;
+                    }
+
+                    this.saveSubscription = this.loadingService
+                        .presentLoadingWhile({
+                            message: multiDepose ? 'Envoi des déposes en cours...' : 'Envoi de la dépose en cours...',
+                            event: () => {
+                                return this.localDataManager
+                                    .saveTrackingMovements(this.colisDepose, takingToFinish)
+                                    .pipe(
+                                        flatMap((): Observable<{ online: boolean; apiResponse?: { [x: string]: any } }> => (
+                                            online
+                                                ? this.localDataManager
+                                                    .sendMouvementTraca(this.fromStock)
+                                                    .pipe(
+                                                        flatMap((apiResponse) => (
+                                                            !this.fromStock && groupingMovements.length > 0
+                                                                ? this.postGroupingMovements(groupingMovements, apiResponse)
+                                                                : of(apiResponse)
+                                                        )),
+                                                        map((apiResponse) => ({online, apiResponse}))
+                                                    )
+                                                : of({online})
+                                        )),
+                                        flatMap((a) => this.treatApiResponse(a.online, a.apiResponse, multiDepose))
+                                    )
+                            }
+                        })
                         .subscribe(
                             (nbErrors: number) => {
-                                this.apiLoading = false;
+                                this.unsubscribeSaveSubscription();
                                 this.redirectAfterTake(nbErrors > 0);
                             },
                             (error) => {
-                                this.apiLoading = false;
-                                if (loader) {
-                                    loader.dismiss();
-                                    loader = undefined;
-                                }
+                                this.unsubscribeSaveSubscription();
                                 throw error;
                             });
                 }
@@ -226,7 +210,7 @@ export class DeposePage extends PageComponent implements CanLeave {
             }
         }
         else {
-            this.toastService.presentToast(`Vous devez sélectionner au moins un ${this.objectLabel}`)
+            this.toastService.presentToast(`Vous devez sélectionner au moins un ${this.objectLabel}`);
         }
     }
 
@@ -282,7 +266,10 @@ export class DeposePage extends PageComponent implements CanLeave {
     }
 
     public get displayPrisesList(): boolean {
-        return this.colisPrise && this.colisPrise.filter(({hidden}) => !hidden).length > 0;
+        return (
+            this.colisPrise
+            && this.colisPrise.filter(({hidden, packParent}) => !hidden && !packParent).length > 0
+        );
     }
 
     private saveMouvementTraca(pickingIndexes: Array<number>): void {
@@ -302,32 +289,58 @@ export class DeposePage extends PageComponent implements CanLeave {
             );
             if (allowedMovement) {
                 for (const pickingIndex of pickingIndexes) {
-                    let quantity = this.colisPrise[pickingIndex].quantity;
-                    this.colisPrise[pickingIndex].hidden = true;
+                    const picking = this.colisPrise[pickingIndex];
+                    if (!picking.packParent || this.findDropIndexes(picking.packParent).length === 0) {
+                        let quantity = picking.quantity;
+                        picking.hidden = true;
 
-                    this.colisDepose.unshift({
-                        ref_article: this.colisPrise[pickingIndex].ref_article,
-                        nature_id: this.colisPrise[pickingIndex].nature_id,
-                        comment: this.colisPrise[pickingIndex].comment,
-                        signature: this.colisPrise[pickingIndex].signature,
-                        fromStock: Number(this.fromStock),
-                        quantity,
-                        type: DeposePage.MOUVEMENT_TRACA_DEPOSE,
-                        operateur: this.operator,
-                        photo: this.colisPrise[pickingIndex].photo,
-                        ref_emplacement: this.emplacement.label,
-                        date: moment().format(),
-                        freeFields: this.colisPrise[pickingIndex].freeFields
-                    });
-                    this.refreshPriseListComponent();
-                    this.refreshDeposeListComponent();
-                    this.footerScannerComponent.fireZebraScan();
+                        this.colisDepose.unshift({
+                            ref_article: picking.ref_article,
+                            nature_id: picking.nature_id,
+                            comment: picking.comment,
+                            signature: picking.signature,
+                            fromStock: Number(this.fromStock),
+                            quantity,
+                            subPacks: picking.subPacks,
+                            isGroup: picking.isGroup,
+                            type: DeposePage.MOUVEMENT_TRACA_DEPOSE,
+                            operateur: this.operator,
+                            photo: picking.photo,
+                            ref_emplacement: this.emplacement.label,
+                            date: moment().format(),
+                            freeFields: picking.freeFields,
+                            packParent: picking.packParent
+                        });
+
+                        const remover = TrackingListFactoryService.CreateRemoveItemFromListHandler(
+                            this.colisDepose,
+                            this.colisPrise,
+                            () => {
+                                this.refreshPriseListComponent();
+                                this.refreshDeposeListComponent();
+                            }
+                        );
+
+                        for (const subPack of (picking.subPacks || [])) {
+                            let dropIndexes = this.findDropIndexes(subPack.code);
+                            while (dropIndexes.length > 0) {
+                                remover({object: {value: subPack.code}});
+                                dropIndexes = this.findDropIndexes(subPack.code);
+                            }
+                        }
+
+                        this.refreshPriseListComponent();
+                        this.refreshDeposeListComponent();
+                        this.footerScannerComponent.fireZebraScan();
+                    }
+                    else {
+                        this.toastService.presentToast(`Cet objet est déjà dans le groupe <b>${picking.packParent}</b>`);
+                        break;
+                    }
                 }
             }
             else {
-                const natureLabel = 'nature';
-                const natureTranslation = this.natureTranslation.find((translation) => (translation.label === natureLabel));
-                const translatedNatureLabel = (natureTranslation ? (natureTranslation.translation || natureTranslation.label) : natureLabel);
+                const natureLabel = TranslationService.Translate(this.natureTranslations, 'nature');
                 const {ref_article, nature_id} = this.colisPrise[pickingIndexes[0]] || {};
                 const nature = this.natureIdsToConfig[nature_id];
                 const natureValue = (nature ? nature.label : 'non défini');
@@ -336,7 +349,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                         header: 'Erreur',
                         cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
                         message: `Le colis <strong>${ref_article}</strong>`
-                            + ` de ${translatedNatureLabel} <strong>${natureValue}</strong>`
+                            + ` de ${natureLabel} <strong>${natureValue}</strong>`
                             + ` ne peut pas être déposé sur l'emplacement <strong>${this.emplacement.label}</strong>.`,
                         buttons: [{
                             text: 'Confirmer',
@@ -354,7 +367,7 @@ export class DeposePage extends PageComponent implements CanLeave {
     }
 
     private updatePicking(barCode: string,
-                          {quantity, comment, signature, photo, natureId, freeFields}: {quantity: number; comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string}): void {
+                          {quantity, comment, signature, photo, natureId, freeFields, isGroup, subPacks}: {quantity: number; comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string; isGroup: number; subPacks: any;}): void {
         const dropIndexes = this.findDropIndexes(barCode);
 
         if (dropIndexes.length > 0) {
@@ -367,7 +380,10 @@ export class DeposePage extends PageComponent implements CanLeave {
                 this.colisDepose[dropIndex].photo = photo;
                 this.colisDepose[dropIndex].nature_id = natureId;
                 this.colisDepose[dropIndex].freeFields = freeFields;
+                this.colisDepose[dropIndex].isGroup = isGroup;
+                this.colisDepose[dropIndex].subPacks = subPacks;
             }
+
             this.refreshPriseListComponent();
             this.refreshDeposeListComponent();
         }
@@ -376,11 +392,17 @@ export class DeposePage extends PageComponent implements CanLeave {
     }
 
     private refreshPriseListComponent(): void {
-        const natureLabel = this.natureTranslation.filter((translation) => translation.label === 'nature')[0];
+        const natureLabel = TranslationService.Translate(this.natureTranslations, 'nature');
         this.priseListConfig = this.trackingListFactory.createListConfig(
-            this.colisPrise.filter(({hidden}) => !hidden),
+            this.colisPrise.filter(({hidden, packParent}) => (!hidden && !packParent)),
             TrackingListFactoryService.LIST_TYPE_DROP_SUB,
             {
+                validateIcon: {
+                    name: 'up.svg',
+                    action: () => {
+                        this.dropAll()
+                    },
+                },
                 objectLabel: this.objectLabel,
                 rightIcon: {
                     mode: 'upload',
@@ -389,19 +411,23 @@ export class DeposePage extends PageComponent implements CanLeave {
                     }
                 },
                 natureIdsToConfig: this.natureIdsToConfig,
-                natureTranslation: natureLabel.translation || natureLabel.label,
+                natureTranslation: natureLabel
             }
         );
     }
 
+    private dropAll() {
+        this.colisPrise.filter(({hidden}) => !hidden).forEach(({ref_article}) => this.testColisDepose(ref_article, true));
+    }
+
     private refreshDeposeListComponent(): void {
-        const natureLabel = this.natureTranslation.filter((translation) => translation.label === 'nature')[0];
+        const natureLabel = TranslationService.Translate(this.natureTranslations, 'nature');
         this.deposeListConfig = this.trackingListFactory.createListConfig(
             this.colisDepose,
             TrackingListFactoryService.LIST_TYPE_DROP_MAIN,
             {
                 natureIdsToConfig: this.natureIdsToConfig,
-                natureTranslation: natureLabel.translation || natureLabel.label,
+                natureTranslation: natureLabel,
                 objectLabel: this.objectLabel,
                 location: this.emplacement,
                 validate: () => this.finishTaking(),
@@ -410,12 +436,14 @@ export class DeposePage extends PageComponent implements CanLeave {
                         // we get first
                         const [dropIndex] = this.findDropIndexes(barCode);
                         if (dropIndex !== undefined) {
-                            const {quantity, comment, signature, photo, nature_id: natureId, freeFields} = this.colisDepose[dropIndex];
+                            const {quantity, comment, signature, photo, nature_id: natureId, freeFields, isGroup, subPacks} = this.colisDepose[dropIndex];
                             this.trackingListFactory.disableActions();
-                            this.navService.push(MovementConfirmPageRoutingModule.PATH, {
+                            this.navService.push(NavPathEnum.MOVEMENT_CONFIRM, {
                                 fromStock: this.fromStock,
                                 location: this.emplacement,
                                 barCode,
+                                isGroup,
+                                subPacks,
                                 values: {
                                     quantity,
                                     comment,
@@ -428,7 +456,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                                     this.updatePicking(barCode, values);
                                 },
                                 movementType: MovementConfirmType.DROP,
-                                natureTranslationLabel: natureLabel.translation || natureLabel.label,
+                                natureTranslationLabel: natureLabel
                             });
                         }
                     }
@@ -450,7 +478,6 @@ export class DeposePage extends PageComponent implements CanLeave {
 
     private init(): void {
         this.loading = true;
-        this.apiLoading = false;
         this.colisDepose = [];
         this.colisPrise = [];
     }
@@ -478,5 +505,86 @@ export class DeposePage extends PageComponent implements CanLeave {
             },
             []
         );
+    }
+
+    private treatApiResponse(online, apiResponse, multiDepose) {
+        const emptyGroups = ((apiResponse && apiResponse.data && apiResponse.data.emptyGroups) || null)
+        const errorsObject = ((apiResponse && apiResponse.data && apiResponse.data.errors) || {});
+        const errorsValues = Object.keys(errorsObject).map((key) => errorsObject[key]);
+        const errorsMessage = errorsValues.join('\n');
+        const message = online
+            ? (errorsMessage.length > 0 ? '' : apiResponse.data.status)
+            : (multiDepose
+                ? 'Déposes sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
+                : 'Dépose sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+        return this.toastService
+            .presentToast(`${errorsMessage}${(errorsMessage && message) ? '\n' : ''}${message}`)
+            .pipe(
+                flatMap(() => {
+                    const groupPlural = (emptyGroups && emptyGroups.length > 0);
+                    return (emptyGroups && emptyGroups.length > 0)
+                        ? zip(
+                            this.toastService.presentToast(
+                                groupPlural
+                                    ? `${emptyGroups.join(', ')} vides. Ces groupes ne sont plus en prise.`
+                                    : `${emptyGroups.join(', ')} vide. Ce groupe n'est plus en prise.`
+                            ),
+                            this.sqliteService
+                                .deleteBy('mouvement_traca', [
+                                    emptyGroups
+                                        .map((code) => `ref_article LIKE '${code}'`)
+                                        .join(' OR ')
+                                ])
+                        )
+                        : of(undefined)
+                }),
+                map(() => errorsValues.length)
+            );
+    }
+
+    private postGroupingMovements(groupingMovements, apiResponse) {
+        return this.apiService.requestApi(ApiService.POST_GROUP_TRACKINGS, {
+            pathParams: {mode: 'drop'},
+            params: this.localDataManager.extractTrackingMovementFiles(this.localDataManager.mapTrackingMovements(groupingMovements))
+        })
+            .pipe(
+                flatMap((res) => {
+                    if (res.finishedMovements && res.finishedMovements.length > 0) {
+                        return this.sqliteService
+                            .deleteBy('mouvement_traca', [
+                                `ref_article IN (${res.finishedMovements.map((ref_article) => `'${ref_article}'`).join(',')})`
+                            ])
+                            .pipe(
+                                tap(() => {
+                                    const movementCounter = (apiResponse && apiResponse.data && apiResponse.data.movementCounter) || 0;
+                                    const insertedMovements = movementCounter + res.finishedMovements.length;
+                                    const messagePlural = insertedMovements > 1 ? 's' : '';
+
+                                    apiResponse.data = {
+                                        ...(apiResponse.data || {}),
+                                        status: `${insertedMovements} mouvement${messagePlural} synchronisé${messagePlural}`
+                                    };
+                                })
+                            )
+                    }
+                    else {
+                        return of(res);
+                    }
+                }),
+                tap((res) => {
+                    if (res && !res.success) {
+                        this.toastService.presentToast(res.message || 'Une erreur inconnue est survenue');
+                        throw new Error(res.message);
+                    }
+                }),
+                map(() => apiResponse)
+            )
+    }
+
+    private unsubscribeSaveSubscription() {
+        if (this.saveSubscription && !this.saveSubscription.closed) {
+            this.saveSubscription.unsubscribe();
+            this.saveSubscription = undefined;
+        }
     }
 }

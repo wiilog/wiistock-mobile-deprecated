@@ -16,5 +16,4 @@ const routes: Routes = [
     exports: [RouterModule],
 })
 export class TransferArticlesPageRoutingModule {
-    public static readonly PATH: string = 'transfer-articles';
 }
