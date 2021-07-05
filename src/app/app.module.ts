@@ -9,6 +9,7 @@ import {IonicStorageModule} from '@ionic/storage';
 import {AppComponent} from './components/app/app.component';
 import {CommonModule} from '@app/common/common.module';
 import {FCM} from 'cordova-plugin-fcm-with-dependecy-updated/ionic/ngx';
+import {LocalNotifications} from '@ionic-native/local-notifications/ngx';
 
 
 @NgModule({
@@ -27,6 +28,7 @@ import {FCM} from 'cordova-plugin-fcm-with-dependecy-updated/ionic/ngx';
         StatusBar,
         SplashScreen,
         FCM,
+        LocalNotifications,
         {provide: RouteReuseStrategy, useClass: IonicRouteStrategy}
     ],
     exports: [],

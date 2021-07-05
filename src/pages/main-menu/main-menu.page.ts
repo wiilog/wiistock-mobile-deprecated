@@ -13,6 +13,7 @@ import {NavService} from '@app/common/services/nav.service';
 import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {StorageKeyEnum} from "../../app/common/services/storage/storage-key.enum";
 
 
 @Component({
@@ -51,7 +52,6 @@ export class MainMenuPage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.synchronise();
-
         this.backButtonSubscription = this.platform.backButton.subscribe(() => {
             this.onBackButton();
         });
@@ -110,6 +110,16 @@ export class MainMenuPage extends PageComponent {
                             this.refreshCounters().subscribe(() => {
                                 this.loading = false;
                             });
+                            this.storageService.getItem(StorageKeyEnum.REDIRECT_PAGE).subscribe((page) => {
+                                this.storageService.getItem(StorageKeyEnum.REDIRECT_ID).subscribe((id) => {
+                                    console.log(page, id);
+                                    this.storageService.setItem(StorageKeyEnum.REDIRECT_PAGE, null).subscribe(() => {
+                                        this.storageService.setItem(StorageKeyEnum.REDIRECT_ID, null).subscribe(() => {
+
+                                        });
+                                    });
+                                })
+                            })
                         }
                         else {
                             this.loading = true;
