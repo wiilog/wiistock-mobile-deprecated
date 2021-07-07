@@ -160,8 +160,8 @@ export class LoginPage extends PageComponent {
                                             this.loginKey = '';
                                         }),
                                         flatMap(() => this.navService.setRoot(NavPathEnum.MAIN_MENU, {needReload: false})),
-                                        map(() => ({success: true})),
-                                        tap(() => this.notificationService.initialize())
+                                        flatMap(() => this.notificationService.initialize()),
+                                        map(() => ({success: true}))
                                     )
                             }
                             else {

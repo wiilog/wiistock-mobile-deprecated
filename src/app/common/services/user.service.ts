@@ -27,7 +27,10 @@ export class UserService {
     public doLogout(): void {
         if (!this.logoutOnProgress) {
             this.logoutOnProgress = true;
-            zip(this.sqliteService.resetDataBase(), this.storageService.clearStorage())
+            zip(
+                this.sqliteService.resetDataBase(),
+                this.storageService.clearStorage()
+            )
                 .pipe(
                     flatMap(() => this.navService.setRoot(NavPathEnum.LOGIN, {autoConnect: false})),
                     flatMap(() => this.loadingService.dismissLastLoading())

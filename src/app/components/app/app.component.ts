@@ -53,7 +53,6 @@ export class AppComponent {
                 flatMap(() => this.serverImageService.loadFromStorage()),
                 flatMap(() => this.storageService.clearStorage()),
                 flatMap(() => this.serverImageService.saveToStorage()),
-                flatMap(() => this.notificationService.initialize()),
                 flatMap(() => this.navService.setRoot(NavPathEnum.LOGIN)),
             )
             .subscribe(() => {

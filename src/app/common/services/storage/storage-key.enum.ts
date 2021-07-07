@@ -19,6 +19,8 @@ export enum StorageKeyEnum {
     IMAGE_SERVER_LOGIN = 'image_server_login',
     IMAGE_SERVER_HEADER = 'image_server_header',
 
+    LOCAL_NOTIFICATIONS = 'local_notifications',
+
     REDIRECT_ID = 'redirect_id',
     REDIRECT_PAGE = 'redirect_page',
 
