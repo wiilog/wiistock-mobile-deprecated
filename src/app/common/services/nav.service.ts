@@ -44,6 +44,8 @@ export class NavService {
     }
 
     public setRoot(routeName: NavPathEnum, params?: RouteParams): Observable<boolean> {
+        this.clearParams();
+
         const paramsId = this.treatParams(params);
         const navigationExtras = this.createNavigationOption(paramsId);
         return from(this.navController.navigateRoot(routeName, {
@@ -74,7 +76,6 @@ export class NavService {
     }
 
     public getParams(paramId: number): Params {
-        console.log(NavService.ParamsCollection)
         return NavService.ParamsCollection[paramId] || new Map<string, any>();
     }
 
@@ -86,5 +87,12 @@ export class NavService {
         if (NavService.ParamsCollection[paramId]) {
             delete NavService.ParamsCollection[paramId];
         }
+    }
+
+    private clearParams(): void {
+        Object.keys(NavService.ParamsCollection)
+            .forEach((key) => {
+                this.removeParams(Number(key));
+            });
     }
 }

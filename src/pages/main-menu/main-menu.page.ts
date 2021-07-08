@@ -59,6 +59,7 @@ export class MainMenuPage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
+        super.ionViewWillEnter();
         const notification = this.currentNavParams.get('notification');
 
         this.synchronise().subscribe(() => {
