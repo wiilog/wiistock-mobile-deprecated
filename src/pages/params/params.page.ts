@@ -12,6 +12,7 @@ import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
 import {localAddress} from '../../dev-credentials.json';
 import {environment} from "@environments/environment";
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {NotificationService} from '@app/common/services/notification.service';
 
 
 @Component({
@@ -32,6 +33,7 @@ export class ParamsPage extends PageComponent implements CanLeave {
                        private loadingService: LoadingService,
                        private sqliteService: SqliteService,
                        private toastService: ToastService,
+                       private notificationService: NotificationService,
                        navService: NavService) {
         super(navService);
         this.URL = '';
@@ -43,6 +45,7 @@ export class ParamsPage extends PageComponent implements CanLeave {
     }
 
     public ionViewWillEnter(): void {
+        this.notificationService.userIsLogged = false;
         this.serverUrlSubscription = this.storageService.getServerUrl().subscribe((baseUrl) => {
             this.isLoading = false;
             if(!environment.production && localAddress && !baseUrl) {

@@ -74,6 +74,7 @@ export class NavService {
     }
 
     public getParams(paramId: number): Params {
+        console.log(NavService.ParamsCollection)
         return NavService.ParamsCollection[paramId] || new Map<string, any>();
     }
 

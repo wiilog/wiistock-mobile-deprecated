@@ -18,6 +18,8 @@ import {ServerImageKeyEnum} from '@app/common/components/server-image/server-ima
 import {ServerImageComponent} from '@app/common/components/server-image/server-image.component';
 import {NotificationService} from '@app/common/services/notification.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {ILocalNotification} from '@ionic-native/local-notifications';
+import {INotificationPayload} from 'cordova-plugin-fcm-with-dependecy-updated';
 
 
 @Component({
@@ -40,11 +42,15 @@ export class LoginPage extends PageComponent {
     public currentVersion: string;
 
     public apkUrl: string;
+
+    public tappedNotification: ILocalNotification;
+
     private wantToAutoConnect: boolean;
     private appVersionSubscription: Subscription;
     private urlServerSubscription: Subscription;
     private zebraSubscription: Subscription;
     private apiSubscription: Subscription;
+    private notificationSubscription: Subscription;
 
     private passwordInputIsFocused: boolean;
 
@@ -75,6 +81,7 @@ export class LoginPage extends PageComponent {
         this.wantToAutoConnect = (typeof autoConnect === 'boolean' ? autoConnect : true);
 
         this.barcodeScannerManager.registerZebraBroadcastReceiver();
+        this.notificationService.userIsLogged = false;
 
         this.unsubscribeZebra();
         this.zebraSubscription = this.barcodeScannerManager
@@ -123,11 +130,18 @@ export class LoginPage extends PageComponent {
                 this.goToParams();
             }
         });
+
+        this.notificationSubscription = this.notificationService
+            .$localNotification
+            .subscribe((notification) => {
+                this.tappedNotification = notification;
+            });
     }
 
     public ionViewWillLeave(): void {
         this.unsubscribeZebra();
         this.unsubscribeApi();
+        this.unsubscribeNotification();
         if (this.appVersionSubscription) {
             this.appVersionSubscription.unsubscribe();
             this.appVersionSubscription = undefined;
@@ -159,8 +173,14 @@ export class LoginPage extends PageComponent {
                                         tap(() => {
                                             this.loginKey = '';
                                         }),
-                                        flatMap(() => this.navService.setRoot(NavPathEnum.MAIN_MENU, {needReload: false})),
                                         flatMap(() => this.notificationService.initialize()),
+                                        flatMap((notificationOptions) => {
+                                            this.notificationService.userIsLogged = true;
+                                            const {notification} = notificationOptions || {};
+                                            return this.navService.setRoot(NavPathEnum.MAIN_MENU, {
+                                                notification: this.tappedNotification || notification
+                                            });
+                                        }),
                                         map(() => ({success: true}))
                                     )
                             }
@@ -236,5 +256,12 @@ export class LoginPage extends PageComponent {
             this.apiSubscription.unsubscribe();
             this.apiSubscription = undefined;
         }
+    }
+
+    private unsubscribeNotification(): void {
+        if (this.notificationSubscription && !this.notificationSubscription.closed) {
+            this.notificationSubscription.unsubscribe();
+        }
+        this.notificationSubscription = undefined;
     }
 }

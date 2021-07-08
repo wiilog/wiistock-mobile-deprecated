@@ -38,46 +38,49 @@ export class TransferListPage extends PageComponent {
         this.hasLoaded = false;
         this.unsubscribeLoading();
 
-        this.loadingSubscription = this.loadingService.presentLoading()
-            .pipe(
-                flatMap((loader) => (
-                    this.sqliteService
-                        .findBy('transfer_order', ['treated <> 1'])
-                        .pipe(map((transferOrders) => [loader, transferOrders]))
-                ))
-            )
-            .subscribe(([loader, transferOrders]: [HTMLIonLoadingElement, Array<TransferOrder>]) => {
-                this.loader = loader;
-                this.transfersListConfig = transferOrders.map((transferOrder: TransferOrder) => ({
-                    title: {
-                        label: 'Demandeur',
-                        value: transferOrder.requester
-                    },
-                    content: [
-                        {
-                            label: 'Numéro',
-                            value: transferOrder.number
+        const withoutLoading = this.currentNavParams.get('withoutLoading');
+        if (!withoutLoading) {
+            this.loadingSubscription = this.loadingService.presentLoading()
+                .pipe(
+                    flatMap((loader) => (
+                        this.sqliteService
+                            .findBy('transfer_order', ['treated <> 1'])
+                            .pipe(map((transferOrders) => [loader, transferOrders]))
+                    ))
+                )
+                .subscribe(([loader, transferOrders]: [HTMLIonLoadingElement, Array<TransferOrder>]) => {
+                    this.loader = loader;
+                    this.transfersListConfig = transferOrders.map((transferOrder: TransferOrder) => ({
+                        title: {
+                            label: 'Demandeur',
+                            value: transferOrder.requester
                         },
-                        {
-                            label: 'Origine',
-                            value: transferOrder.origin
-                        },
-                        {
-                            label: 'Destination',
-                            value: transferOrder.destination
+                        content: [
+                            {
+                                label: 'Numéro',
+                                value: transferOrder.number
+                            },
+                            {
+                                label: 'Origine',
+                                value: transferOrder.origin
+                            },
+                            {
+                                label: 'Destination',
+                                value: transferOrder.destination
+                            }
+                        ],
+                        action: () => {
+                            this.navService.push(NavPathEnum.TRANSFER_ARTICLES, {transferOrder});
                         }
-                    ],
-                    action: () => {
-                        this.navService.push(NavPathEnum.TRANSFER_ARTICLES, {transferOrder});
-                    }
-                }));
+                    }));
 
-                this.hasLoaded = true;
-                const transferOrdersLength = transferOrders.length;
-                this.mainHeaderService.emitSubTitle(`${transferOrdersLength === 0 ? 'Aucun' : transferOrdersLength} transfert${transferOrdersLength > 1 ? 's' : ''}`);
+                    this.hasLoaded = true;
+                    const transferOrdersLength = transferOrders.length;
+                    this.mainHeaderService.emitSubTitle(`${transferOrdersLength === 0 ? 'Aucun' : transferOrdersLength} transfert${transferOrdersLength > 1 ? 's' : ''}`);
 
-                this.unsubscribeLoading();
-            });
+                    this.unsubscribeLoading();
+                });
+        }
     }
 
     public ionViewWillLeave(): void {
