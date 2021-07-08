@@ -84,7 +84,6 @@ export class NotificationService {
 
         if (this._userIsLogged) {
             this.ngZone.run(() => {
-                console.log(notification)
                 // if we are not on Main Menu we redirect
                 this.navService.setRoot(NavPathEnum.MAIN_MENU, {notification});
             });

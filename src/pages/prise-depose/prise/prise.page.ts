@@ -506,7 +506,6 @@ export class PrisePage extends PageComponent implements CanLeave {
                     this.saveTrackingMovement(barCode, quantity, needNatureChecks);
 
                     if (needNatureChecks) {
-                        console.log(`>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> ${(new Date().toISOString())} / ${barCode}`);
                         this.apiService
                             .requestApi(ApiService.GET_PACK_DATA, {
                                 params: {
@@ -531,7 +530,6 @@ export class PrisePage extends PageComponent implements CanLeave {
                             )
                             .subscribe(
                                 ({nature, group, isPack, isGroup}) => {
-                                    console.log(`<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< ${(new Date().toISOString())} / ${barCode}`);
                                     if (isPack || !isGroup) {
                                         if (group) {
                                             from(this.alertController.create({
