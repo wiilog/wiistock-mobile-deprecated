@@ -30,42 +30,48 @@ export class PreparationMenuPage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
-        this.sqlLiteProvider.findAll('preparation').subscribe((preparations) => {
-            this.preparations = preparations
-                .filter(p => (p.date_end === null))
-                .sort(({type : type1}, {type : type2}) => (type1 > type2) ? 1 : ((type2 > type1) ? -1 : 0));
+        const withoutLoading = this.currentNavParams.get('withoutLoading');
+        if (!withoutLoading) {
+            this.sqlLiteProvider.findAll('preparation').subscribe((preparations) => {
+                this.preparations = preparations
+                    .filter(p => (p.date_end === null))
+                    .sort(({type: type1}, {type: type2}) => (type1 > type2) ? 1 : ((type2 > type1) ? -1 : 0));
 
-            this.preparationsListConfig = this.preparations.map((preparation: Preparation) => ({
-                title: {
-                    label: 'Demandeur',
-                    value: preparation.requester
-                },
-                content: [
-                    {
-                        label: 'Numéro',
-                        value: preparation.numero
+                this.preparationsListConfig = this.preparations.map((preparation: Preparation) => ({
+                    title: {
+                        label: 'Demandeur',
+                        value: preparation.requester
                     },
-                    {
-                        label: 'Flux',
-                        value: preparation.type
-                    },
-                    {
-                        label: 'Destination',
-                        value: preparation.destination
-                    },
-                    {
-                        label: 'Commentaire',
-                        value: preparation.comment
+                    content: [
+                        {
+                            label: 'Numéro',
+                            value: preparation.numero
+                        },
+                        {
+                            label: 'Flux',
+                            value: preparation.type
+                        },
+                        {
+                            label: 'Destination',
+                            value: preparation.destination
+                        },
+                        {
+                            label: 'Commentaire',
+                            value: preparation.comment
+                        }
+                    ],
+                    action: () => {
+                        this.navService.push(NavPathEnum.PREPARATION_ARTICLES, {preparation});
                     }
-                ],
-                action: () => {
-                    this.navService.push(NavPathEnum.PREPARATION_ARTICLES, {preparation});
-                }
-            }));
+                }));
 
+                this.hasLoaded = true;
+                this.refreshSubTitle();
+            });
+        }
+        else {
             this.hasLoaded = true;
-            this.refreshSubTitle();
-        });
+        }
     }
 
     public refreshSubTitle(): void {

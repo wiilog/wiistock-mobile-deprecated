@@ -269,7 +269,7 @@ export class MainMenuPage extends PageComponent {
                     this.navService
                         .push(NavPathEnum.TRACKING_MENU)
                         .pipe(
-                            flatMap(() => this.navService.push(NavPathEnum.DISPATCH_MENU)),
+                            flatMap(() => this.navService.push(NavPathEnum.DISPATCH_MENU, {withoutLoading: true})),
                             flatMap(() => this.navService.push(NavPathEnum.DISPATCH_PACKS, {dispatchId}))
                         )
                         .subscribe(() => {
@@ -284,7 +284,7 @@ export class MainMenuPage extends PageComponent {
                             this.navService
                                 .push(NavPathEnum.DEMANDE_MENU)
                                 .pipe(
-                                    flatMap(() => this.navService.push(NavPathEnum.HANDLING_MENU)),
+                                    flatMap(() => this.navService.push(NavPathEnum.HANDLING_MENU, {withoutLoading: true})),
                                     flatMap(() => this.navService.push(NavPathEnum.HANDLING_VALIDATE, {handling}))
                                 )
                                 .subscribe(() => {
@@ -325,7 +325,7 @@ export class MainMenuPage extends PageComponent {
                             this.navService
                                 .push(NavPathEnum.STOCK_MENU)
                                 .pipe(
-                                    flatMap(() => this.navService.push(NavPathEnum.PREPARATION_MENU)),
+                                    flatMap(() => this.navService.push(NavPathEnum.PREPARATION_MENU, {withoutLoading: true})),
                                     flatMap(() => this.navService.push(NavPathEnum.PREPARATION_ARTICLES, {preparation}))
                                 )
                                 .subscribe(() => {
@@ -345,7 +345,7 @@ export class MainMenuPage extends PageComponent {
                             this.navService
                                 .push(NavPathEnum.STOCK_MENU)
                                 .pipe(
-                                    flatMap(() => this.navService.push(NavPathEnum.LIVRAISON_MENU)),
+                                    flatMap(() => this.navService.push(NavPathEnum.LIVRAISON_MENU, {withoutLoading: true})),
                                     flatMap(() => this.navService.push(NavPathEnum.LIVRAISON_ARTICLES, {livraison: delivery}))
                                 )
                                 .subscribe(() => {
@@ -365,7 +365,7 @@ export class MainMenuPage extends PageComponent {
                             this.navService
                                 .push(NavPathEnum.STOCK_MENU)
                                 .pipe(
-                                    flatMap(() => this.navService.push(NavPathEnum.COLLECTE_MENU)),
+                                    flatMap(() => this.navService.push(NavPathEnum.COLLECTE_MENU, {withoutLoading: true})),
                                     flatMap(() => this.navService.push(NavPathEnum.COLLECTE_ARTICLES, {collecte: collect}))
                                 )
                                 .subscribe(() => {
@@ -375,7 +375,7 @@ export class MainMenuPage extends PageComponent {
                         else {
                             this.pageIsRedirecting = false;
                         }
-                    })
+                    });
                 }
             });
         }

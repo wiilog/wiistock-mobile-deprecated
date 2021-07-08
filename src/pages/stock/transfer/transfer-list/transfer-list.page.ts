@@ -81,6 +81,9 @@ export class TransferListPage extends PageComponent {
                     this.unsubscribeLoading();
                 });
         }
+        else {
+            this.hasLoaded = true;
+        }
     }
 
     public ionViewWillLeave(): void {

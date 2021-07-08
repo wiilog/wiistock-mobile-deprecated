@@ -36,50 +36,57 @@ export class CollecteMenuPage extends PageComponent {
         this.hasLoaded = false;
         this.goToDrop = this.currentNavParams.get('goToDrop');
         this.avoidSync = this.currentNavParams.get('avoidSync');
-        this.sqliteService.findAll('collecte').subscribe((collectes: Array<Collecte>) => {
-            this.collectes = collectes
-                .filter(({date_end, location_to}) => (!date_end && !location_to))
-                .sort(({location_from: location_from_1}, {location_from: location_from_2}) => ((location_from_1 < location_from_2) ? -1 : 1));
 
-            this.collectesListConfig = this.collectes.map((collecte: Collecte) => ({
-                title: {
-                    label: 'Demandeur',
-                    value: collecte.requester
-                },
-                content: [
-                    {
-                        label: 'Numéro',
-                        value: collecte.number
+        const withoutLoading = this.currentNavParams.get('withoutLoading');
+        if (!withoutLoading) {
+            this.sqliteService.findAll('collecte').subscribe((collectes: Array<Collecte>) => {
+                this.collectes = collectes
+                    .filter(({date_end, location_to}) => (!date_end && !location_to))
+                    .sort(({location_from: location_from_1}, {location_from: location_from_2}) => ((location_from_1 < location_from_2) ? -1 : 1));
+
+                this.collectesListConfig = this.collectes.map((collecte: Collecte) => ({
+                    title: {
+                        label: 'Demandeur',
+                        value: collecte.requester
                     },
-                    {
-                        label: 'Flux',
-                        value: collecte.type
-                    },
-                    {
-                        label: 'Point de collecte',
-                        value: collecte.location_from
-                    },
-                    {
-                        label: 'Destination',
-                        value: (collecte.forStock ? 'Mise en stock' : 'Destruction')
-                    }
-                ],
-                action: () => {
-                    this.navService.push(NavPathEnum.COLLECTE_ARTICLES, {
-                        collecte,
-                        goToDrop: () => {
-                            this.avoidSync();
-                            this.navService.pop().subscribe(() => {
-                                this.goToDrop();
-                            });
+                    content: [
+                        {
+                            label: 'Numéro',
+                            value: collecte.number
+                        },
+                        {
+                            label: 'Flux',
+                            value: collecte.type
+                        },
+                        {
+                            label: 'Point de collecte',
+                            value: collecte.location_from
+                        },
+                        {
+                            label: 'Destination',
+                            value: (collecte.forStock ? 'Mise en stock' : 'Destruction')
                         }
-                    });
-                }
-            }));
+                    ],
+                    action: () => {
+                        this.navService.push(NavPathEnum.COLLECTE_ARTICLES, {
+                            collecte,
+                            goToDrop: () => {
+                                this.avoidSync();
+                                this.navService.pop().subscribe(() => {
+                                    this.goToDrop();
+                                });
+                            }
+                        });
+                    }
+                }));
 
+                this.hasLoaded = true;
+                this.refreshSubTitle();
+            });
+        }
+        else {
             this.hasLoaded = true;
-            this.refreshSubTitle();
-        });
+        }
     }
 
     public refreshSubTitle(): void {

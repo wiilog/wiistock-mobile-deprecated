@@ -45,21 +45,28 @@ export class HandlingMenuPage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
-        zip(
-            this.sqliteService.findAll('handling'),
-            this.translationService.get('services')
-        )
-        .subscribe(([handlings, handlingsTranslations]: [Array<Handling>, Translations]) => {
-            this.handlingsTranslations = handlingsTranslations;
-            this.handlings = handlings
 
-            const initHandlingList = this.filterHandlingList(this.currentFilterSubject);
+        const withoutLoading = this.currentNavParams.get('withoutLoading');
+        if (!withoutLoading) {
+            zip(
+                this.sqliteService.findAll('handling'),
+                this.translationService.get('services')
+            )
+                .subscribe(([handlings, handlingsTranslations]: [Array<Handling>, Translations]) => {
+                    this.handlingsTranslations = handlingsTranslations;
+                    this.handlings = handlings
 
-            this.refreshHandlingListConfig(initHandlingList);
-            this.refreshSubTitle(initHandlingList);
+                    const initHandlingList = this.filterHandlingList(this.currentFilterSubject);
 
+                    this.refreshHandlingListConfig(initHandlingList);
+                    this.refreshSubTitle(initHandlingList);
+
+                    this.hasLoaded = true;
+                });
+        }
+        else {
             this.hasLoaded = true;
-        });
+        }
     }
 
     public onBarcodeScanned(barcode: string) {

@@ -54,40 +54,46 @@ export class LivraisonMenuPage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
-        this.resetEmitter$.emit();
+        const withoutLoading = this.currentNavParams.get('withoutLoading');
+        if (!withoutLoading) {
+            this.resetEmitter$.emit();
 
-        this.unsubscribeLoading();
-        this.loadingSubscription = this.loadingService.presentLoading()
-            .pipe(
-                flatMap((loader) => (
-                    this.sqliteService
-                        .findAll('livraison')
-                        .pipe(map((articles) => [loader, articles]))
-                ))
-            )
-            .subscribe(([loader, deliveries]: [HTMLIonLoadingElement, Array<Livraison>]) => {
-                this.loader = loader;
-                this.deliveryOrders = deliveries.filter(({date_end}) => (date_end === null));
-                const preparationLocationsStr = deliveries
-                    .reduce((acc: Array<string>, {preparationLocation}) => {
-                        if (preparationLocation && acc.indexOf(preparationLocation) === -1) {
-                            acc.push(preparationLocation);
-                        }
-                        return acc;
+            this.unsubscribeLoading();
+            this.loadingSubscription = this.loadingService.presentLoading()
+                .pipe(
+                    flatMap((loader) => (
+                        this.sqliteService
+                            .findAll('livraison')
+                            .pipe(map((articles) => [loader, articles]))
+                    ))
+                )
+                .subscribe(([loader, deliveries]: [HTMLIonLoadingElement, Array<Livraison>]) => {
+                    this.loader = loader;
+                    this.deliveryOrders = deliveries.filter(({date_end}) => (date_end === null));
+                    const preparationLocationsStr = deliveries
+                        .reduce((acc: Array<string>, {preparationLocation}) => {
+                            if (preparationLocation && acc.indexOf(preparationLocation) === -1) {
+                                acc.push(preparationLocation);
+                            }
+                            return acc;
 
-                    }, [])
-                    .map((label) => `'${label.replace("'", "''")}'`);
+                        }, [])
+                        .map((label) => `'${label.replace("'", "''")}'`);
 
-                this.locationFilterRequestParams = preparationLocationsStr.length > 0
-                    ? [`label IN (${preparationLocationsStr.join(',')})`]
-                    : [];
+                    this.locationFilterRequestParams = preparationLocationsStr.length > 0
+                        ? [`label IN (${preparationLocationsStr.join(',')})`]
+                        : [];
 
-                this.refreshListConfig(this.deliveryOrders);
-                this.refreshSubTitle(this.deliveryOrders);
+                    this.refreshListConfig(this.deliveryOrders);
+                    this.refreshSubTitle(this.deliveryOrders);
 
-                this.hasLoaded = true;
-                this.unsubscribeLoading();
-            });
+                    this.hasLoaded = true;
+                    this.unsubscribeLoading();
+                });
+        }
+        else {
+            this.hasLoaded = true;
+        }
     }
 
     public refreshSubTitle(deliveryOrders: Array<Livraison>): void {

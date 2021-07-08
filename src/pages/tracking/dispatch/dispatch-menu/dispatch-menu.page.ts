@@ -65,49 +65,70 @@ export class DispatchMenuPage extends PageComponent {
         this.unsubscribeLoading();
         let loaderElement;
 
-        this.loadingSubscription = this.loadingService.presentLoading()
-            .pipe(
-                tap(loader => loaderElement = loader),
-                flatMap(() => this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL OR partial = 1']))
-            )
-            .subscribe((dispatches: Array<Dispatch>) => {
-                this.dispatchesListConfig = dispatches.map(({id, requester, color, number, startDate, endDate, locationFromLabel, locationToLabel, statusLabel, typeLabel, emergency}) => ({
-                    title: { label: 'Demandeur', value: requester },
-                    customColor: color,
-                    content: [
-                        {label: 'Numéro', value: number || ''},
-                        {label: 'Date d\'échéance', value: startDate && endDate ? `Du ${startDate} au ${endDate}` : ''},
-                        {label: 'Emplacement prise', value: locationFromLabel || ''},
-                        {label: 'Emplacement dépose', value: locationToLabel || ''},
-                        {label: 'Type', value: typeLabel || ''},
-                        {label: 'Statut', value: statusLabel || ''},
-                        (emergency
-                            ? {label: 'Urgence', value: emergency || ''}
-                            : undefined)
-                    ].filter((item) => item),
-                    ...(emergency
-                        ? {
-                            rightIcon: {
-                                name: 'exclamation-triangle.svg',
-                                color: 'danger'
+        const withoutLoading = this.currentNavParams.get('withoutLoading');
+        if (!withoutLoading) {
+            this.loadingSubscription = this.loadingService.presentLoading()
+                .pipe(
+                    tap(loader => loaderElement = loader),
+                    flatMap(() => this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL OR partial = 1']))
+                )
+                .subscribe((dispatches: Array<Dispatch>) => {
+                    this.dispatchesListConfig = dispatches.map(({
+                                                                    id,
+                                                                    requester,
+                                                                    color,
+                                                                    number,
+                                                                    startDate,
+                                                                    endDate,
+                                                                    locationFromLabel,
+                                                                    locationToLabel,
+                                                                    statusLabel,
+                                                                    typeLabel,
+                                                                    emergency
+                                                                }) => ({
+                        title: {label: 'Demandeur', value: requester},
+                        customColor: color,
+                        content: [
+                            {label: 'Numéro', value: number || ''},
+                            {
+                                label: 'Date d\'échéance',
+                                value: startDate && endDate ? `Du ${startDate} au ${endDate}` : ''
+                            },
+                            {label: 'Emplacement prise', value: locationFromLabel || ''},
+                            {label: 'Emplacement dépose', value: locationToLabel || ''},
+                            {label: 'Type', value: typeLabel || ''},
+                            {label: 'Statut', value: statusLabel || ''},
+                            (emergency
+                                ? {label: 'Urgence', value: emergency || ''}
+                                : undefined)
+                        ].filter((item) => item),
+                        ...(emergency
+                            ? {
+                                rightIcon: {
+                                    name: 'exclamation-triangle.svg',
+                                    color: 'danger'
+                                }
                             }
+                            : {}),
+                        action: () => {
+                            this.navService.push(NavPathEnum.DISPATCH_PACKS, {
+                                dispatchId: id
+                            });
                         }
-                        : {}),
-                    action: () => {
-                        this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-                            dispatchId: id
-                        });
-                    }
-                }));
+                    }));
 
-                this.refreshSubTitle();
-                this.unsubscribeLoading();
-                this.loading = false;
-                if (loaderElement) {
-                    loaderElement.dismiss();
-                    loaderElement = undefined;
-                }
-            });
+                    this.refreshSubTitle();
+                    this.unsubscribeLoading();
+                    this.loading = false;
+                    if (loaderElement) {
+                        loaderElement.dismiss();
+                        loaderElement = undefined;
+                    }
+                });
+        }
+        else {
+            this.loading = true;
+        }
     }
 
     private unsubscribeLoading(): void {
