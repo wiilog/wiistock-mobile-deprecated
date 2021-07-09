@@ -40,6 +40,7 @@ npm-debug.log*
 /plugins/android.json
 /plugins/ios.json
 /src/dev-credentials.json
+/src/dev-credentials-*.json
 /build.json
 /wiistock-key.jks
 /wiistock-key-password.json

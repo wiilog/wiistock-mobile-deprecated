@@ -31,6 +31,8 @@ export class HandlingMenuPage extends PageComponent {
 
     public selectedSubject$: Subject<string>;
 
+    public firstLaunch: boolean;
+
     private handlingsTranslations: {[label: string]: string};
 
     private currentFilterSubject: string;
@@ -41,13 +43,14 @@ export class HandlingMenuPage extends PageComponent {
                        navService: NavService) {
         super(navService);
         this.selectedSubject$ = new Subject<string>();
+        this.firstLaunch = true;
     }
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
 
         const withoutLoading = this.currentNavParams.get('withoutLoading');
-        if (!withoutLoading) {
+        if (!this.firstLaunch || !withoutLoading) {
             zip(
                 this.sqliteService.findAll('handling'),
                 this.translationService.get('services')
@@ -66,6 +69,7 @@ export class HandlingMenuPage extends PageComponent {
         }
         else {
             this.hasLoaded = true;
+            this.firstLaunch = false;
         }
     }
 

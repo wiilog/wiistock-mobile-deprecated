@@ -4,7 +4,7 @@ import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {FCM} from 'cordova-plugin-fcm-with-dependecy-updated/ionic/ngx';
 import {LocalNotifications} from '@ionic-native/local-notifications/ngx';
 import {Platform} from '@ionic/angular';
-import {from, Observable, of, Subject, Subscription, zip} from 'rxjs';
+import {from, merge, Observable, of, Subject, Subscription, zip} from 'rxjs';
 import {filter, flatMap, map, tap} from 'rxjs/operators';
 import {INotificationPayload} from 'cordova-plugin-fcm-with-dependecy-updated';
 import {ILocalNotification} from '@ionic-native/local-notifications';
@@ -71,8 +71,13 @@ export class NotificationService {
     private handleLocalNotificationTapped(): void {
         this.unsubscribeLocalNotificationTapped();
 
-        this.localNotificationTappedSubscription = this.localNotifications
-            .on('click')
+        this.localNotificationTappedSubscription = merge(
+            this.localNotifications.on('click'),
+            from(this.fcm.onNotification()).pipe(
+                filter(({wasTapped}) => wasTapped),
+                map((notification: INotificationPayload) => NotificationService.CreateLocalFromFCMNotification(notification))
+            )
+        )
             .subscribe((data) => {
                 this.handleNotification(data);
             });
@@ -133,11 +138,11 @@ export class NotificationService {
     private scheduleLocalNotification(id: number, FCMNotification: INotificationPayload): void {
         this.localNotifications.schedule({
             id,
-            ...NotificationService.createLocalFromFCMNotification(FCMNotification)
+            ...NotificationService.CreateLocalFromFCMNotification(FCMNotification)
         });
     }
 
-    private static createLocalFromFCMNotification(FCMNotification: INotificationPayload): ILocalNotification {
+    private static CreateLocalFromFCMNotification(FCMNotification: INotificationPayload): ILocalNotification {
         return {
             title: FCMNotification.title,
             smallIcon: 'res://notification_icon',
@@ -163,7 +168,7 @@ export class NotificationService {
 
                     // a FCM notification was tapped to open the application
                     if (initialPushPayload) {
-                        return of(NotificationService.createLocalFromFCMNotification(initialPushPayload));
+                        return of(NotificationService.CreateLocalFromFCMNotification(initialPushPayload));
                     }
                     // a local notification was tapped to open the application
                     else if (tappedNotification) {

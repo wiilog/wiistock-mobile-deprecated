@@ -105,14 +105,6 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.TRACKING_MENU, label: 'Traçabilité'},
             {pagePath: NavPathEnum.DISPATCH_MENU, label: 'Acheminements'},
             {
-                pagePath: NavPathEnum.PRISE_DEPOSE_MENU,
-                label: 'Transfert',
-                filter: (params) => (
-                    (typeof params.get('fromStock') === 'boolean') &&
-                    params.get('fromStock')
-                )
-            },
-            {
                 pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Prise',
                 filter: (params) => (
@@ -136,6 +128,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.DEMANDE_MENU, label: 'Demande'},
             {pagePath: NavPathEnum.HANDLING_MENU, label: 'Service'},
             {pagePath: NavPathEnum.DEMANDE_LIVRAISON_MENU, label: 'Livraison'},
+            {pagePath: NavPathEnum.TRANSFER_MENU, label: 'Transfert'},
             {pagePath: NavPathEnum.HANDLING_VALIDATE, label: 'Détails'},
             {pagePath: NavPathEnum.GROUP_SCAN_GROUP, label: 'Groupage'},
             {pagePath: NavPathEnum.UNGROUP_SCAN_LOCATION, label: 'Dégroupage'}

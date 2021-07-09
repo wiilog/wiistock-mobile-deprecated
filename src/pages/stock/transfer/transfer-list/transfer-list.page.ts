@@ -27,11 +27,14 @@ export class TransferListPage extends PageComponent {
     private loadingSubscription: Subscription;
     private loader: HTMLIonLoadingElement;
 
+    private firstLaunch: boolean;
+
     public constructor(private mainHeaderService: MainHeaderService,
                        private sqliteService: SqliteService,
                        private loadingService: LoadingService,
                        navService: NavService) {
         super(navService);
+        this.firstLaunch = true;
     }
 
     public ionViewWillEnter(): void {
@@ -39,7 +42,8 @@ export class TransferListPage extends PageComponent {
         this.unsubscribeLoading();
 
         const withoutLoading = this.currentNavParams.get('withoutLoading');
-        if (!withoutLoading) {
+
+        if (!this.firstLaunch || !withoutLoading) {
             this.loadingSubscription = this.loadingService.presentLoading()
                 .pipe(
                     flatMap((loader) => (
@@ -83,6 +87,7 @@ export class TransferListPage extends PageComponent {
         }
         else {
             this.hasLoaded = true;
+            this.firstLaunch = false;
         }
     }
 

@@ -40,6 +40,7 @@ export class LivraisonMenuPage extends PageComponent {
     public locationFilterRequestParams: Array<string>;
 
     public loader: HTMLIonLoadingElement;
+    public firstLaunch: boolean;
 
     private loadingSubscription: Subscription;
 
@@ -50,12 +51,13 @@ export class LivraisonMenuPage extends PageComponent {
         super(navService);
         this.resetEmitter$ = new EventEmitter<void>();
         this.locationFilterRequestParams = [];
+        this.firstLaunch = true;
     }
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
         const withoutLoading = this.currentNavParams.get('withoutLoading');
-        if (!withoutLoading) {
+        if (!this.firstLaunch || !withoutLoading) {
             this.resetEmitter$.emit();
 
             this.unsubscribeLoading();
@@ -93,6 +95,7 @@ export class LivraisonMenuPage extends PageComponent {
         }
         else {
             this.hasLoaded = true;
+            this.firstLaunch = false;
         }
     }
 

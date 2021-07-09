@@ -26,10 +26,13 @@ export class CollecteMenuPage extends PageComponent {
     private goToDrop: () => void;
     private avoidSync: () => void;
 
+    private firstLaunch: boolean;
+
     public constructor(private mainHeaderService: MainHeaderService,
                        private sqliteService: SqliteService,
                        navService: NavService) {
         super(navService);
+        this.firstLaunch = true;
     }
 
     public ionViewWillEnter(): void {
@@ -38,7 +41,7 @@ export class CollecteMenuPage extends PageComponent {
         this.avoidSync = this.currentNavParams.get('avoidSync');
 
         const withoutLoading = this.currentNavParams.get('withoutLoading');
-        if (!withoutLoading) {
+        if (!this.firstLaunch || !withoutLoading) {
             this.sqliteService.findAll('collecte').subscribe((collectes: Array<Collecte>) => {
                 this.collectes = collectes
                     .filter(({date_end, location_to}) => (!date_end && !location_to))
@@ -86,6 +89,7 @@ export class CollecteMenuPage extends PageComponent {
         }
         else {
             this.hasLoaded = true;
+            this.firstLaunch = false;
         }
     }
 

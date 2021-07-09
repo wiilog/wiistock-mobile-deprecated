@@ -28,6 +28,8 @@ export class MainMenuPage extends PageComponent {
     public loading: boolean;
     public displayNotifications: boolean;
 
+    public firstLaunch: boolean;
+
     public menuConfig: Array<MenuConfig>;
 
     public messageLoading?: string;
@@ -56,6 +58,7 @@ export class MainMenuPage extends PageComponent {
         this.loading = true;
         this.displayNotifications = false;
         this.pageIsRedirecting = false;
+        this.firstLaunch = true;
     }
 
     public ionViewWillEnter(): void {
@@ -63,9 +66,10 @@ export class MainMenuPage extends PageComponent {
         const notification = this.currentNavParams.get('notification');
 
         this.synchronise().subscribe(() => {
-            if (notification) {
+            if (this.firstLaunch && notification) {
                 this.doNotificationRedirection(notification);
             }
+            this.firstLaunch = false;
         });
 
         this.backButtonSubscription = this.platform.backButton.subscribe(() => {

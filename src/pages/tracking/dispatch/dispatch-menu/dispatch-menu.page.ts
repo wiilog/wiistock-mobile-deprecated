@@ -30,6 +30,7 @@ export class DispatchMenuPage extends PageComponent {
     private loadingSubscription: Subscription;
 
     public loading: boolean;
+    public firstLaunch: boolean;
 
     public resetEmitter$: EventEmitter<void>;
 
@@ -45,6 +46,7 @@ export class DispatchMenuPage extends PageComponent {
         super(navService);
         this.resetEmitter$ = new EventEmitter<void>();
         this.loading = true;
+        this.firstLaunch = true;
     }
 
 
@@ -66,7 +68,7 @@ export class DispatchMenuPage extends PageComponent {
         let loaderElement;
 
         const withoutLoading = this.currentNavParams.get('withoutLoading');
-        if (!withoutLoading) {
+        if (!this.firstLaunch || !withoutLoading) {
             this.loadingSubscription = this.loadingService.presentLoading()
                 .pipe(
                     tap(loader => loaderElement = loader),
@@ -128,6 +130,7 @@ export class DispatchMenuPage extends PageComponent {
         }
         else {
             this.loading = true;
+            this.firstLaunch = false;
         }
     }
 

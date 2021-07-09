@@ -21,17 +21,19 @@ export class PreparationMenuPage extends PageComponent {
     public readonly preparationsIconName = 'preparation.svg';
 
     public hasLoaded: boolean;
+    public firstLaunch: boolean;
 
     public constructor(private mainHeaderService: MainHeaderService,
                        private sqlLiteProvider: SqliteService,
                        navService: NavService) {
         super(navService);
+        this.firstLaunch = true;
     }
 
     public ionViewWillEnter(): void {
         this.hasLoaded = false;
         const withoutLoading = this.currentNavParams.get('withoutLoading');
-        if (!withoutLoading) {
+        if (!this.firstLaunch || !withoutLoading) {
             this.sqlLiteProvider.findAll('preparation').subscribe((preparations) => {
                 this.preparations = preparations
                     .filter(p => (p.date_end === null))
@@ -71,6 +73,7 @@ export class PreparationMenuPage extends PageComponent {
         }
         else {
             this.hasLoaded = true;
+            this.firstLaunch = false;
         }
     }
 

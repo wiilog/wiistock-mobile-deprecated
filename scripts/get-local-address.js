@@ -6,18 +6,20 @@ const path = require('path');
 const interfaces = os.networkInterfaces();
 const file = require(path.join(__dirname, '..', 'src', 'dev-credentials.json'));
 
-const availableIPv4Addresses = Object
-    .keys(interfaces)
-    .filter((key) => key !== 'VirtualBox Host-Only Network')
-    .map((key) => interfaces[key])
-    .map((interfaceValues) => (interfaceValues && interfaceValues.find(({family}) => family === 'IPv4')))
-    .filter((interfaceValue) => interfaceValue && !interfaceValue.internal)
-    .map(({address}) => address);
+if (!file.keep) {
+    const availableIPv4Addresses = Object
+        .keys(interfaces)
+        .filter((key) => key !== 'VirtualBox Host-Only Network')
+        .map((key) => interfaces[key])
+        .map((interfaceValues) => (interfaceValues && interfaceValues.find(({family}) => family === 'IPv4')))
+        .filter((interfaceValue) => interfaceValue && !interfaceValue.internal)
+        .map(({address}) => address);
 
-if(availableIPv4Addresses.length === 0) {
-    throw new Error('IP of the local server not found');
-} else {
-    writeAddress("http://" + availableIPv4Addresses[0]);
+    if (availableIPv4Addresses.length === 0) {
+        throw new Error('IP of the local server not found');
+    } else {
+        writeAddress("http://" + availableIPv4Addresses[0]);
+    }
 }
 
 function writeAddress(address) {
