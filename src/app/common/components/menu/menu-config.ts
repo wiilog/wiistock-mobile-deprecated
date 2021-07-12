@@ -6,3 +6,8 @@ export interface MenuConfig {
     label: string;
     action?: () => void;
 }
+
+export enum ColumnNumber {
+    TWO,
+    THREE
+}
