@@ -2,7 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {Emplacement} from '@entities/emplacement';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {ToastService} from '@app/common/services/toast.service';

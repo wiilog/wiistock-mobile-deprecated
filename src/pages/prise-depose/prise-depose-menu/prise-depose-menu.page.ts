@@ -7,7 +7,7 @@ import {Network} from '@ionic-native/network/ngx';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {ActivatedRoute} from '@angular/router';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';

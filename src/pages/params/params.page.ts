@@ -5,7 +5,7 @@ import {ToastService} from '@app/common/services/toast.service';
 import {from, Subscription} from 'rxjs';
 import {flatMap} from 'rxjs/operators';
 import {StorageService} from '@app/common/services/storage/storage.service';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
@@ -13,6 +13,7 @@ import {localAddress} from '../../dev-credentials.json';
 import {environment} from "@environments/environment";
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {NotificationService} from '@app/common/services/notification.service';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 
 @Component({
@@ -46,7 +47,7 @@ export class ParamsPage extends PageComponent implements CanLeave {
 
     public ionViewWillEnter(): void {
         this.notificationService.userIsLogged = false;
-        this.serverUrlSubscription = this.storageService.getServerUrl().subscribe((baseUrl) => {
+        this.serverUrlSubscription = this.storageService.getString(StorageKeyEnum.URL_SERVER).subscribe((baseUrl) => {
             this.isLoading = false;
             if(!environment.production && localAddress && !baseUrl) {
                 this.URL = localAddress;
@@ -76,7 +77,7 @@ export class ParamsPage extends PageComponent implements CanLeave {
                         return this.apiService.getApiUrl(ApiService.GET_PING, {newUrl: this.URL});
                     }),
                     flatMap((pingURL: string) => this.apiService.pingApi(pingURL)),
-                    flatMap(() => this.storageService.setServerUrl(this.URL)),
+                    flatMap(() => this.storageService.setItem(StorageKeyEnum.URL_SERVER, this.URL)),
                     flatMap(() => this.sqliteService.resetDataBase(true)),
                     flatMap(() => from(loadingComponent.dismiss())),
                     flatMap(() => this.toastService.presentToast('URL enregistrée')),

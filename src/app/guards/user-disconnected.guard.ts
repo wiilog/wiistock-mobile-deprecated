@@ -3,6 +3,8 @@ import {CanActivate, Router, UrlTree} from '@angular/router';
 import {Observable, zip} from 'rxjs';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {map} from 'rxjs/operators';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 
 @Injectable({
@@ -15,11 +17,11 @@ export class UserDisconnectedGuard implements CanActivate {
 
     public canActivate(): Observable<UrlTree|boolean> {
         return zip(
-            this.storageService.getOperator(),
-            this.storageService.getApiKey()
+            this.storageService.getString(StorageKeyEnum.OPERATOR),
+            this.storageService.getString(StorageKeyEnum.API_KEY)
         ).pipe(
             map(([operator, apiKey]) => (
-                Boolean(!operator || !apiKey) || this.router.createUrlTree(['/main-menu'])
+                Boolean(!operator || !apiKey) || this.router.createUrlTree([NavPathEnum.MAIN_MENU])
             ))
         );
     }

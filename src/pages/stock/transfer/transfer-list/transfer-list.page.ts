@@ -3,7 +3,7 @@ import {CardListConfig} from '@app/common/components/card-list/card-list-config'
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {PageComponent} from '@pages/page.component';
 import {TransferOrder} from '@entities/transfer-order';
 import {Subscription} from 'rxjs';

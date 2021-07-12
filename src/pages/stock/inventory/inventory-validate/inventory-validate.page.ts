@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {ArticleInventaire} from '@entities/article-inventaire';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {PageComponent} from '@pages/page.component';
 

@@ -7,7 +7,7 @@ import {DemandeLivraisonType} from '@entities/demande-livraison-type';
 import {CardListConfig} from '@app/common/components/card-list/card-list-config';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {flatMap, map, tap} from 'rxjs/operators';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {ToastService} from '@app/common/services/toast.service';
@@ -18,6 +18,7 @@ import {AlertController} from "@ionic/angular";
 import {AlertManagerService} from "@app/common/services/alert-manager.service";
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 
 @Component({
@@ -70,7 +71,7 @@ export class DemandeLivraisonMenuPage extends PageComponent implements CanLeave 
     public ionViewWillEnter(): void {
         this.fabListActivated = false
         this.hasLoaded = false;
-        this.storageService.getOperatorId()
+        this.storageService.getNumber(StorageKeyEnum.OPERATOR_ID)
             .pipe(
                 flatMap((userId) => this.sqliteService.findBy('demande_livraison', [`user_id = ${userId}`])),
                 flatMap((demandesLivraison: Array<DemandeLivraison>) => this.preloadData(demandesLivraison).pipe(map(() => demandesLivraison)))
@@ -217,7 +218,7 @@ export class DemandeLivraisonMenuPage extends PageComponent implements CanLeave 
     public preloadData(demandesLivraison: Array<DemandeLivraison>): Observable<[{ [id: number]: string }, string, { [id: number]: string }, { [id: number]: number }]> {
         return zip(
             this.sqliteService.findAll('demande_livraison_type'),
-            this.storageService.getOperator()
+            this.storageService.getString(StorageKeyEnum.OPERATOR)
         )
             .pipe(
                 flatMap(([types, operator]: [Array<DemandeLivraisonType>, string]) => {

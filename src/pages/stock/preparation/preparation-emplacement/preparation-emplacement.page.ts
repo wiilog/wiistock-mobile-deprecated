@@ -1,5 +1,5 @@
 import {Component, EventEmitter, ViewChild} from '@angular/core';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
@@ -11,9 +11,10 @@ import {Preparation} from '@entities/preparation';
 import {Emplacement} from '@entities/emplacement';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
-import {flatMap} from 'rxjs/operators';
-import {of, zip} from 'rxjs';
+import {flatMap, map} from 'rxjs/operators';
+import {from, Observable, of, zip} from 'rxjs';
 import {PageComponent} from '@pages/page.component';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 @Component({
     selector: 'wii-preparation-emplacement',
@@ -100,7 +101,7 @@ export class PreparationEmplacementPage extends PageComponent {
                             ))
                         )),
 
-                        flatMap(() => this.storageService.addPrepa()),
+                        flatMap(() => this.incrementStoragePreparationCounter()),
                         flatMap(() => this.sqliteService.finishPrepa(this.preparation.id, this.location.label)),
                         flatMap((): any => (
                             this.network.type !== 'none'
@@ -166,5 +167,13 @@ export class PreparationEmplacementPage extends PageComponent {
                 action: () => this.validate()
             }
         };
+    }
+
+    public incrementStoragePreparationCounter(): Observable<void> {
+        return this.storageService.getNumber(StorageKeyEnum.NB_PREPS).pipe(
+            map((counter) => counter || 0),
+            flatMap((counter) => this.storageService.setItem(StorageKeyEnum.NB_PREPS, `${counter + 1}`)),
+            map(() => undefined)
+        );
     }
 }

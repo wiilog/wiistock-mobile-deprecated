@@ -5,6 +5,7 @@ import {StorageService} from '@app/common/services/storage/storage.service';
 import {catchError, filter, flatMap, map, tap, timeout} from "rxjs/operators";
 import {UserService} from "@app/common/services/user.service";
 import {AppVersion} from '@ionic-native/app-version/ngx';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 const GET = 'get';
 const POST = 'post';
@@ -83,7 +84,7 @@ export class ApiService {
         let requestResponse = zip(
             this.getApiUrl({service}, {pathParams}),
             from(this.appVersion.getVersionNumber()),
-            ...(secured ? [this.storageService.getApiKey()] : [])
+            ...(secured ? [this.storageService.getString(StorageKeyEnum.API_KEY)] : [])
         )
             .pipe(
                 tap(([url]) => {
@@ -137,7 +138,7 @@ export class ApiService {
     public getApiBaseUrl(newUrl?: string): Observable<any> {
         return newUrl
             ? of(`${newUrl}/api`)
-            : this.storageService.getServerUrl().pipe(map((url) => (url ? `${url}/api` : null)));
+            : this.storageService.getString(StorageKeyEnum.URL_SERVER).pipe(map((url) => (url ? `${url}/api` : null)));
     }
 
     public getApiUrl({service}: {service: string},

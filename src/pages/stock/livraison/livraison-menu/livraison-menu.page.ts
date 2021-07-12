@@ -2,7 +2,7 @@ import {Component, EventEmitter, ViewChild} from '@angular/core';
 import {Livraison} from '@entities/livraison';
 import {CardListConfig} from '@app/common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {PageComponent} from '@pages/page.component';

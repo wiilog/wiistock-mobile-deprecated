@@ -1,7 +1,7 @@
 import {Component, ViewChild} from '@angular/core';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {ToastService} from '@app/common/services/toast.service';
@@ -14,6 +14,7 @@ import {from, of, ReplaySubject, Subscription, zip} from 'rxjs';
 import {Emplacement} from '@entities/emplacement';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 
 @Component({
@@ -50,7 +51,7 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
         if (!this.dataSubscription) {
             this.dataSubscription = zip(
                 this.loadingService.presentLoading('Chargement...'),
-                this.storageService.getInventoryManagerRight()
+                this.storageService.getRight(StorageKeyEnum.RIGHT_INVENTORY_MANAGER)
             )
                 .pipe(
                     map(([loader, isInventoryManager]) => ({loader, isInventoryManager})),

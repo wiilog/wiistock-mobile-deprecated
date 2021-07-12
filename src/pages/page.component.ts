@@ -1,4 +1,4 @@
-import {NavService, Params} from '@app/common/services/nav.service';
+import {NavService, Params} from '@app/common/services/nav/nav.service';
 import {OnDestroy, OnInit} from '@angular/core';
 import {ViewWillEnter} from '@ionic/angular';
 

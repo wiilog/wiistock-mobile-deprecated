@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {ArticlePrepa} from '@entities/article-prepa';
 import {ArticlePrepaByRefArticle} from '@entities/article-prepa-by-ref-article';
 import {Preparation} from '@entities/preparation';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {PageComponent} from '@pages/page.component';
 

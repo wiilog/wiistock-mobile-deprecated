@@ -8,7 +8,7 @@ import {from, merge, Observable, of, Subject, Subscription, zip} from 'rxjs';
 import {filter, flatMap, map, tap} from 'rxjs/operators';
 import {INotificationPayload} from 'cordova-plugin-fcm-with-dependecy-updated';
 import {ILocalNotification} from '@ionic-native/local-notifications';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 declare let cordova: any;
@@ -57,7 +57,7 @@ export class NotificationService {
     }
 
     private subscribeToTopics(): Observable<void> {
-        return this.storageService.getItem(StorageKeyEnum.NOTIFICATION_CHANNELS)
+        return this.storageService.getString(StorageKeyEnum.NOTIFICATION_CHANNELS)
             .pipe(
                 map((rawChannels?: string) => (JSON.parse(rawChannels || null) || [])),
                 flatMap((channels: Array<string>) => (
@@ -191,7 +191,7 @@ export class NotificationService {
     }
 
     private getStoredNotifications(): Observable<Array<ILocalNotification>> {
-        return this.storageService.getItem(StorageKeyEnum.LOCAL_NOTIFICATIONS)
+        return this.storageService.getString(StorageKeyEnum.LOCAL_NOTIFICATIONS)
             .pipe(
                 map((localNotificationsStr) => JSON.parse(localNotificationsStr || null) || [])
             );

@@ -7,11 +7,12 @@ import {StorageService} from '@app/common/services/storage/storage.service';
 import {ActivatedRoute, NavigationEnd, NavigationStart, Router} from '@angular/router';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {RouterDirection} from '@ionic/core';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {NavController} from '@ionic/angular';
 import {UserService} from "@app/common/services/user.service";
 import {ServerImageKeyEnum} from '@app/common/components/server-image/server-image-key.enum';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 
 @Component({
@@ -21,7 +22,6 @@ import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 })
 export class MainHeaderComponent implements OnInit, OnDestroy {
 
-    public static readonly MAX_PSEUDO_LENGTH: number = 35;
     public readonly HEADER_IMAGE_KEY: ServerImageKeyEnum = ServerImageKeyEnum.HEADER_IMAGE_KEY;
 
     @Output()
@@ -279,10 +279,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
     private refreshUser(): Observable<void> {
         return this.storageService
-            .getOperator()
+            .getString(StorageKeyEnum.OPERATOR, UserService.MAX_PSEUDO_LENGTH)
             .pipe(
                 take(1),
-                map((user: string) => (user || '').substring(0, MainHeaderComponent.MAX_PSEUDO_LENGTH)),
                 tap((user: string) => {
                     this.loggedUser = user;
                 }),

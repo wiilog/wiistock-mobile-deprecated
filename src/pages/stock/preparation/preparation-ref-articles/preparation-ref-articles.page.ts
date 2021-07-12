@@ -4,7 +4,7 @@ import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {ArticlePrepa} from '@entities/article-prepa';
 import {from, Subscription} from 'rxjs';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';

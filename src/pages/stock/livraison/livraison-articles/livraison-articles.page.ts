@@ -9,7 +9,7 @@ import {ToastService} from '@app/common/services/toast.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {Network} from '@ionic-native/network/ngx';
 import {ApiService} from '@app/common/services/api.service';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {flatMap} from 'rxjs/operators';
 import * as moment from 'moment';
 import {Mouvement} from '@entities/mouvement';

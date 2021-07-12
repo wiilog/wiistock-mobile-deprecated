@@ -24,6 +24,18 @@
     .version-not-valid {
         height: 5rem;
     }
+
+    .logged-user {
+        margin-bottom: 15px;
+        text-align: center;
+        font-weight: bold;
+        color: grey;
+
+        .logged-user-info {
+            font-weight: normal;
+            display: block;
+        }
+    }
 }
 
 .page-footer {

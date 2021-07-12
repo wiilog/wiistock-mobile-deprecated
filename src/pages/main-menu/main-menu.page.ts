@@ -9,12 +9,13 @@ import {StorageService} from '@app/common/services/storage/storage.service';
 import {Network} from '@ionic-native/network/ngx';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {ToastService} from '@app/common/services/toast.service';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {ILocalNotification} from '@ionic-native/local-notifications';
 import {NotificationService} from '@app/common/services/notification.service';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 
 @Component({
@@ -95,7 +96,7 @@ export class MainMenuPage extends PageComponent {
     public refreshCounters(): Observable<void> {
         return zip(
             this.sqliteService.findAll('preparation'),
-            this.storageService.getFinishedPreps(),
+            this.storageService.getNumber(StorageKeyEnum.NB_PREPS),
             this.sqliteService.count('article_inventaire')
         )
             .pipe(
@@ -116,9 +117,9 @@ export class MainMenuPage extends PageComponent {
                 .pipe(
                     flatMap(({finished, message}) => (
                         zip(
-                            this.storageService.getDemandeAccessRight(),
-                            this.storageService.getTrackingAccessRight(),
-                            this.storageService.getStockAccessRight(),
+                            this.storageService.getRight(StorageKeyEnum.RIGHT_DEMANDE),
+                            this.storageService.getRight(StorageKeyEnum.RIGHT_TRACKING),
+                            this.storageService.getRight(StorageKeyEnum.RIGHT_STOCK),
                         ).pipe(map(([demande, tracking, stock]) => ({
                             finished,
                             message,

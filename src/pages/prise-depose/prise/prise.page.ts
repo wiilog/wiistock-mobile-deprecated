@@ -18,7 +18,7 @@ import {filter, flatMap, map, tap} from 'rxjs/operators';
 import * as moment from 'moment';
 import {Network} from '@ionic-native/network/ngx';
 import {ActivatedRoute} from '@angular/router';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
@@ -27,6 +27,7 @@ import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {TranslationService} from "@app/common/services/translations.service";
 import {Translations} from '@entities/translation';
 import {Nature} from '@entities/nature';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 
 @Component({
@@ -101,7 +102,7 @@ export class PrisePage extends PageComponent implements CanLeave {
         this.trackingListFactory.enableActions();
 
         zip(
-            this.storageService.getOperator(),
+            this.storageService.getString(StorageKeyEnum.OPERATOR),
             this.sqliteService.getPrises(this.fromStock),
             (this.network.type !== 'none' && this.emplacement && !this.fromStock
                 ? this.apiService.requestApi(ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})

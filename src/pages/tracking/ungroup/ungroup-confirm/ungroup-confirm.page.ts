@@ -3,7 +3,7 @@ import {HeaderConfig} from "@app/common/components/panel/model/header-config";
 import * as moment from "moment";
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
 import {PageComponent} from "@pages/page.component";
-import {NavService} from "@app/common/services/nav.service";
+import {NavService} from "@app/common/services/nav/nav.service";
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
 import {ApiService} from "@app/common/services/api.service";
 import {ToastService} from "@app/common/services/toast.service";

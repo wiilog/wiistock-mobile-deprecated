@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {ApiService} from '@app/common/services/api.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {LoadingService} from '@app/common/services/loading.service';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {flatMap, map} from 'rxjs/operators';
 import {from} from 'rxjs';
 import {PageComponent} from '@pages/page.component';

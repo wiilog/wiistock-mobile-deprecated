@@ -7,7 +7,7 @@
                           [key]="LOGIN_IMAGE_KEY">
         </wii-server-image>
     </div>
-    <div class="version-not-valid-container" *ngIf="!loading && appVersionInvalid">
+    <div class="version-not-valid-container" *ngIf="!loading && appVersionInvalid else userTemplate">
         <ion-button class="version-not-valid"
                     [href]="apkUrl"
                     size="large"
@@ -40,3 +40,11 @@
     <wii-icon class="parameters" name="cogs.svg" (action)="goToParams()"></wii-icon>
     <div class="version-container" *ngIf="currentVersion">V {{ currentVersion }}</div>
 </div>
+
+<ng-template #userTemplate>
+    <div class="logged-user"
+         *ngIf="loggedUser$ && loggedUser$|async as loggedUser">
+        <div class="logged-user-info">Dernière session en cours</div>
+        {{ loggedUser }}
+    </div>
+</ng-template>

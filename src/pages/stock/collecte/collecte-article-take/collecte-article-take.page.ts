@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {ArticleCollecte} from '@entities/article-collecte';
 import {PageComponent} from '@pages/page.component';

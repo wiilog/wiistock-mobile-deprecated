@@ -4,7 +4,7 @@ import {Emplacement} from "@entities/emplacement";
 import {Network} from "@ionic-native/network/ngx";
 import {ToastService} from "@app/common/services/toast.service";
 import {StorageService} from "@app/common/services/storage/storage.service";
-import {NavService} from "@app/common/services/nav.service";
+import {NavService} from "@app/common/services/nav/nav.service";
 import {PageComponent} from "@pages/page.component";
 import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {SelectItemComponent} from "@app/common/components/select-item/select-item.component";

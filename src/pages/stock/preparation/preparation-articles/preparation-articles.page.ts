@@ -7,7 +7,7 @@ import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
 import {ToastService} from '@app/common/services/toast.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {Network} from '@ionic-native/network/ngx';
 import {ApiService} from '@app/common/services/api.service';
 import {ArticlePrepaByRefArticle} from '@entities/article-prepa-by-ref-article';

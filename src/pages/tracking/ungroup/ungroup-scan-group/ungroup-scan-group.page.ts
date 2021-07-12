@@ -3,7 +3,7 @@ import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/bar
 import {ApiService} from "@app/common/services/api.service";
 import {ToastService} from "@app/common/services/toast.service";
 import {PageComponent} from "@pages/page.component";
-import {NavService} from "@app/common/services/nav.service";
+import {NavService} from "@app/common/services/nav/nav.service";
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {Subscription} from 'rxjs';
 import {LoadingService} from '@app/common/services/loading.service';

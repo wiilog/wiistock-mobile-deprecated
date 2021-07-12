@@ -3,7 +3,7 @@ import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-p
 import {HeaderConfig} from '@app/common/components/panel/model/header-config';
 import {Emplacement} from '@entities/emplacement';
 import {ToastService} from '@app/common/services/toast.service';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {ActivatedRoute} from '@angular/router';
 import {PageComponent} from '@pages/page.component';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';

@@ -5,11 +5,12 @@ import {MainHeaderService} from '@app/common/services/main-header.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {StorageService} from "@app/common/services/storage/storage.service";
 import {zip} from "rxjs";
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 @Component({
     selector: 'wii-tracking-menu',
@@ -49,8 +50,8 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
         ];
 
         zip(
-            this.storageService.getGroupAccessRight(),
-            this.storageService.getUngroupAccessRight(),
+            this.storageService.getRight(StorageKeyEnum.RIGHT_GROUP),
+            this.storageService.getRight(StorageKeyEnum.RIGHT_UNGROUP),
         ).subscribe(
             ([group, ungroup]) => {
                 if(group) {

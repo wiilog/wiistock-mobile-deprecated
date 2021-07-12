@@ -5,7 +5,7 @@ import {ApiService} from '@app/common/services/api.service';
 import {Network} from '@ionic-native/network/ngx';
 import {LoadingService} from '@app/common/services/loading.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {from, Observable, of, Subscription, zip} from 'rxjs';
 import {PageComponent} from '@pages/page.component';
 import {HeaderConfig} from '@app/common/components/panel/model/header-config';

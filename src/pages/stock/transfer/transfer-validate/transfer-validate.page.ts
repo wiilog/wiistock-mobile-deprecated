@@ -1,5 +1,5 @@
 import {Component, EventEmitter, ViewChild} from '@angular/core';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {StorageService} from '@app/common/services/storage/storage.service';

@@ -4,7 +4,7 @@ import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {DemandeLivraison} from '@entities/demande-livraison';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
 import {ToastService} from '@app/common/services/toast.service';
@@ -17,6 +17,7 @@ import {FormPanelService} from "@app/common/services/form-panel.service";
 import {FreeField, FreeFieldType} from "@entities/free-field";
 import {LoadingService} from '@app/common/services/loading.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 
 @Component({
@@ -59,9 +60,9 @@ export class DemandeLivraisonHeaderPage extends PageComponent {
         this.formPanelComponent.fireZebraScan();
 
         zip(
-            this.storageService.getOperatorId(),
+            this.storageService.getNumber(StorageKeyEnum.OPERATOR_ID),
             this.isUpdate ? this.sqliteService.findOneById('demande_livraison', demandeId) : of(this.demandeLivraisonToUpdate),
-            this.storageService.getOperator(),
+            this.storageService.getString(StorageKeyEnum.OPERATOR),
             this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.DELIVERY_REQUEST}'`])
         )
         .subscribe(([operatorId, demandeLivraison, operator, freeFields]: [number, DemandeLivraison|undefined, string, Array<FreeField>]) => {

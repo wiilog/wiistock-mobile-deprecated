@@ -16,6 +16,7 @@ import {Platform} from '@ionic/angular';
 import * as moment from 'moment';
 import {TablesDefinitions} from '@app/common/services/sqlite/tables-definitions';
 import {TableName} from '@app/common/services/sqlite/table-definition';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 
 @Injectable({
@@ -714,7 +715,7 @@ export class SqliteService {
             flatMap(() => this.importStatusData(data).pipe(tap(() => {console.log('--- > importStatusData')}))),
             flatMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),
             flatMap(() => (
-                this.storageService.getInventoryManagerRight().pipe(
+                this.storageService.getRight(StorageKeyEnum.RIGHT_INVENTORY_MANAGER).pipe(
                     flatMap((res) => (res
                         ? this.importAnomaliesInventaire(data)
                         : of(undefined))),

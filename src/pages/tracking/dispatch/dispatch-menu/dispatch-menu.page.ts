@@ -1,6 +1,6 @@
 import {Component, EventEmitter, ViewChild} from '@angular/core';
 import {Subscription} from 'rxjs';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {PageComponent} from '@pages/page.component';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {LoadingService} from '@app/common/services/loading.service';

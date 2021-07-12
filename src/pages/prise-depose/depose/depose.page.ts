@@ -14,7 +14,7 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {TrackingListFactoryService} from '@app/common/services/tracking-list-factory.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {AlertController} from '@ionic/angular';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {flatMap, map, tap} from 'rxjs/operators';
 import * as moment from 'moment';
 import {PageComponent} from '@pages/page.component';
@@ -26,6 +26,7 @@ import {ApiService} from '@app/common/services/api.service';
 import {TranslationService} from "@app/common/services/translations.service";
 import {Nature} from '@entities/nature';
 import {Translations} from '@entities/translation';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 @Component({
     selector: 'wii-depose',
@@ -109,7 +110,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                         `fromStock = ${Number(this.fromStock)}`
                     ]
                 ),
-                this.storageService.getOperator(),
+                this.storageService.getString(StorageKeyEnum.OPERATOR),
                 !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
                 !this.fromStock ? this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + this.emplacement.id]) : of([]),
                 this.translationService.get('natures')

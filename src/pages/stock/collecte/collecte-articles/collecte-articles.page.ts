@@ -11,7 +11,7 @@ import {Network} from '@ionic-native/network/ngx';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {AlertController} from '@ionic/angular';
 import {ApiService} from '@app/common/services/api.service';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {filter, flatMap, map} from 'rxjs/operators';
 import {Mouvement} from '@entities/mouvement';
 import * as moment from 'moment';

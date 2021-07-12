@@ -10,7 +10,7 @@ import {LoadingService} from '@app/common/services/loading.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {AlertController} from '@ionic/angular';
 import {filter, flatMap, map} from 'rxjs/operators';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {DemandeLivraison} from '@entities/demande-livraison';
 import {DemandeLivraisonType} from '@entities/demande-livraison-type';
@@ -23,6 +23,7 @@ import {PageComponent} from '@pages/page.component';
 import {FreeField, FreeFieldType} from "@entities/free-field";
 import {FormPanelService} from '@app/common/services/form-panel.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 
 @Component({
@@ -99,7 +100,7 @@ export class DemandeLivraisonArticlesPage extends PageComponent implements CanLe
                             this.sqliteService.findOneById('demande_livraison_type', demandeLivraison.type_id),
                             this.sqliteService.findOneById('emplacement', demandeLivraison.location_id),
                             this.sqliteService.findArticlesInDemandeLivraison(demandeLivraison.id),
-                            this.storageService.getOperator(),
+                            this.storageService.getString(StorageKeyEnum.OPERATOR),
                             this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.DELIVERY_REQUEST}'`])
                         )
                             .pipe((map(([type, location, articles, operator, freeFields]) => ([demandeLivraison, type, location, articles, operator, freeFields]))))

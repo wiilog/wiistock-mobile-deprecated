@@ -9,7 +9,7 @@ import {ToastService} from '@app/common/services/toast.service';
 import {Network} from '@ionic-native/network/ngx';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {of, zip} from 'rxjs';
 import {flatMap} from 'rxjs/operators';
 import {PageComponent} from '@pages/page.component';

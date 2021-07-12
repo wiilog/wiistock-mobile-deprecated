@@ -4,13 +4,14 @@ import {SplashScreen} from '@ionic-native/splash-screen/ngx';
 import {StatusBar} from '@ionic-native/status-bar/ngx';
 import {ScssHelperService} from '@app/common/services/scss-helper.service';
 import {from} from 'rxjs';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {flatMap} from 'rxjs/operators';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {ServerImageService} from '@app/common/services/server-image.service';
 import {NotificationService} from '@app/common/services/notification.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 @Component({
     selector: 'wii-root',
@@ -51,7 +52,7 @@ export class AppComponent {
             .pipe(
                 flatMap(() => this.sqliteService.resetDataBase()),
                 flatMap(() => this.serverImageService.loadFromStorage()),
-                flatMap(() => this.storageService.clearStorage()),
+                flatMap(() => this.storageService.clearStorage([StorageKeyEnum.URL_SERVER, StorageKeyEnum.OPERATOR])),
                 flatMap(() => this.serverImageService.saveToStorage()),
                 flatMap(() => this.navService.setRoot(NavPathEnum.LOGIN)),
             )

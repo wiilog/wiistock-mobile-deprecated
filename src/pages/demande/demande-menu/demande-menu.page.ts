@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
 import {MenuConfig} from '@app/common/components/menu/menu-config';
 import {merge, Subscription} from 'rxjs';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {Platform} from '@ionic/angular';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';

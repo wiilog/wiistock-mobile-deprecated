@@ -3,7 +3,7 @@ import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/bar
 import {Anomalie} from '@entities/anomalie';
 import {ArticleInventaire} from '@entities/article-inventaire';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';

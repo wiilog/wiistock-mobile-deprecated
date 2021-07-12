@@ -1,14 +1,14 @@
 import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {ApiService} from '@app/common/services/api.service';
 import {ToastService} from '@app/common/services/toast.service';
-import {of, Subscription} from 'rxjs';
+import {Observable, of, Subscription} from 'rxjs';
 import {filter, flatMap, map, tap} from 'rxjs/operators';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {VersionCheckerService} from '@app/common/services/version-checker.service';
 import {Network} from '@ionic-native/network/ngx';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {BarcodeScannerManagerService} from '@app/common/services/barcode-scanner-manager.service';
-import {NavService} from '@app/common/services/nav.service';
+import {NavService} from '@app/common/services/nav/nav.service';
 import {SplashScreen} from '@ionic-native/splash-screen/ngx';
 import {ActivatedRoute, Router} from '@angular/router';
 import {environment} from '@environments/environment';
@@ -19,7 +19,8 @@ import {ServerImageComponent} from '@app/common/components/server-image/server-i
 import {NotificationService} from '@app/common/services/notification.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {ILocalNotification} from '@ionic-native/local-notifications';
-import {INotificationPayload} from 'cordova-plugin-fcm-with-dependecy-updated';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {UserService} from '@app/common/services/user.service';
 
 
 @Component({
@@ -44,6 +45,8 @@ export class LoginPage extends PageComponent {
     public apkUrl: string;
 
     public tappedNotification: ILocalNotification;
+
+    public loggedUser$: Observable<string>;
 
     private wantToAutoConnect: boolean;
     private appVersionSubscription: Subscription;
@@ -83,6 +86,8 @@ export class LoginPage extends PageComponent {
         this.barcodeScannerManager.registerZebraBroadcastReceiver();
         this.notificationService.userIsLogged = false;
 
+        this.loggedUser$ = this.storageService.getString(StorageKeyEnum.OPERATOR, UserService.MAX_PSEUDO_LENGTH);
+
         this.unsubscribeZebra();
         this.zebraSubscription = this.barcodeScannerManager
             .zebraScan$
@@ -101,7 +106,7 @@ export class LoginPage extends PageComponent {
                 this.fillForm(barCode);
             });
 
-        this.urlServerSubscription = this.storageService.getServerUrl().subscribe((url) => {
+        this.urlServerSubscription = this.storageService.getString(StorageKeyEnum.URL_SERVER).subscribe((url) => {
             if (url) {
                 this.appVersionSubscription = this.versionChecker.isAvailableVersion()
                     .pipe(
@@ -124,7 +129,8 @@ export class LoginPage extends PageComponent {
                             this.finishLoading();
                             this.toastService.presentToast('Erreur : la liaison avec le serveur est impossible', ToastService.LONG_DURATION);
                         });
-            } else {
+            }
+            else {
                 this.toastService.presentToast('Veuillez mettre à jour l\'url', ToastService.LONG_DURATION);
                 this.finishLoading();
                 this.goToParams();

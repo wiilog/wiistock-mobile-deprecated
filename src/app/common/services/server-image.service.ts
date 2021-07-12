@@ -27,7 +27,7 @@ export class ServerImageService {
                 .keys(ServerImageService.CACHE_KEY)
                 .map((key) => (
                     this.storageService
-                        .getItem(ServerImageService.CACHE_KEY[key])
+                        .getString(ServerImageService.CACHE_KEY[key])
                         .pipe(tap((value) => {
                             if (value) {
                                 ServerImageService.CACHED_IMAGES[key] = value;

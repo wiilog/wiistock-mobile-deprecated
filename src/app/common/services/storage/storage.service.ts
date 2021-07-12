@@ -17,29 +17,40 @@ export class StorageService {
                        operatorId: number,
                        rights: {[name: string]: boolean},
                        notificationChannels: [string]): Observable<any> {
-        return from(this.getServerUrl())
+        return this.getString(StorageKeyEnum.URL_SERVER)
             .pipe(
                 flatMap((serverUrl) => from(this.storage.clear()).pipe(map(() => serverUrl))),
                 flatMap((serverUrl) => zip(
-                    from(this.storage.set(StorageKeyEnum.URL_SERVER, serverUrl)),
-                    from(this.storage.set(StorageKeyEnum.API_KEY, apiKey)),
-                    from(this.storage.set(StorageKeyEnum.OPERATOR, operator)),
-                    from(this.storage.set(StorageKeyEnum.OPERATOR_ID, operatorId)),
-                    from(this.storage.set(StorageKeyEnum.NOTIFICATION_CHANNELS, JSON.stringify(notificationChannels))),
-                    from(this.storage.set(StorageKeyEnum.NB_PREPS, 0)),
-                    from(this.storage.set(StorageKeyEnum.NB_PREPS, 0)),
+                    this.setItem(StorageKeyEnum.URL_SERVER, serverUrl),
+                    this.setItem(StorageKeyEnum.API_KEY, apiKey),
+                    this.setItem(StorageKeyEnum.OPERATOR, operator),
+                    this.setItem(StorageKeyEnum.OPERATOR_ID, operatorId),
+                    this.setItem(StorageKeyEnum.NOTIFICATION_CHANNELS, JSON.stringify(notificationChannels)),
+                    this.setItem(StorageKeyEnum.NB_PREPS, 0),
                     this.updateRights(rights)
                 ))
             );
     }
 
-    public clearStorage(): Observable<void> {
-        return from(this.getServerUrl())
-            .pipe(
-                flatMap((serverUrl) => from(this.storage.clear()).pipe(map(() => serverUrl))),
-                flatMap((serverUrl) => from(this.storage.set(StorageKeyEnum.URL_SERVER, serverUrl))),
-                map(() => undefined)
-            );
+    public clearStorage(valuesToKeep: Array<StorageKeyEnum> = []): Observable<void> {
+        if (valuesToKeep.length > 0) {
+            return zip(
+                ...valuesToKeep.map((key) => this.getString(key))
+            )
+                .pipe(
+                    map((data) => {
+                        // wee associated all keys to value
+                        return valuesToKeep.reduce((acc, currentKey, index) => {
+                            acc[currentKey] = data[index];
+                            return acc;
+                        }, {})
+                    }),
+                    flatMap((initialValues) => this.clearWithInitialValues(initialValues))
+                )
+        }
+        else {
+            return this.clearWithInitialValues();
+        }
     }
 
     public updateRights(rights: {[name: string]: boolean}): Observable<any> {
@@ -49,77 +60,41 @@ export class StorageService {
             : of(undefined);
     }
 
-
-
-    public getItem(key: StorageKeyEnum): Observable<string> {
-        return from(this.storage.get(key));
+    public getString(key: StorageKeyEnum, maxLength?: number): Observable<string> {
+        return from(this.storage.get(key))
+            .pipe(
+                map((user: string) => (
+                    maxLength
+                        ? (user || '').substring(0, maxLength)
+                        : user
+                ))
+            );
     }
 
-    public setItem(key: StorageKeyEnum, value: string): Observable<string> {
+    public getNumber(key: StorageKeyEnum): Observable<number> {
+        return from(this.storage.get(key)).pipe(map(Number));
+    }
+
+    public getRight(rightName: string): Observable<boolean> {
+        return from(this.storage.get(rightName)).pipe(map(Boolean));
+    }
+
+    public setItem(key: StorageKeyEnum, value: string|number): Observable<string> {
         return from(this.storage.set(key, value));
     }
 
-    public getOperator(): Observable<string> {
-        return from(this.storage.get(StorageKeyEnum.OPERATOR));
-    }
-
-    public getOperatorId(): Observable<number> {
-        return from(this.storage.get(StorageKeyEnum.OPERATOR_ID)).pipe(map(Number));
-    }
-
-    public getFinishedPreps(): Observable<number> {
-        return from(this.storage.get(StorageKeyEnum.NB_PREPS));
-    }
-
-    public getApiKey(): Observable<string> {
-        return from(this.storage.get(StorageKeyEnum.API_KEY));
-    }
-
-    public getInventoryManagerRight(): Observable<boolean> {
-        return this.getRight(StorageKeyEnum.RIGHT_INVENTORY_MANAGER);
-    }
-
-    public getDemandeAccessRight(): Observable<boolean> {
-        return this.getRight(StorageKeyEnum.RIGHT_DEMANDE);
-    }
-
-    public getGroupAccessRight(): Observable<boolean> {
-        return this.getRight(StorageKeyEnum.RIGHT_GROUP);
-    }
-
-    public getUngroupAccessRight(): Observable<boolean> {
-        return this.getRight(StorageKeyEnum.RIGHT_UNGROUP);
-    }
-
-    public isDemoMode(): Observable<boolean> {
-        return this.getRight(StorageKeyEnum.DEMO_MODE);
-    }
-
-    public getTrackingAccessRight(): Observable<boolean> {
-        return this.getRight(StorageKeyEnum.RIGHT_TRACKING);
-    }
-
-    public getStockAccessRight(): Observable<boolean> {
-        return this.getRight(StorageKeyEnum.RIGHT_STOCK);
-    }
-
-    public addPrepa(): Observable<any> {
-        return from(this.storage.get(StorageKeyEnum.NB_PREPS)).pipe(
-            flatMap((nbPrepas) => from(this.storage.set(StorageKeyEnum.NB_PREPS, nbPrepas + 1))),
-            map(() => undefined)
-        );
-    }
-
-    public setServerUrl(url: string): Observable<any> {
-        return from(this.storage.set(StorageKeyEnum.URL_SERVER, url));
-    }
-
-    public getServerUrl(): Observable<string> {
-        return from(this.storage.get(StorageKeyEnum.URL_SERVER));
-    }
-
-    private getRight(rightName: string): Observable<boolean> {
-        return from(this.storage.get(rightName))
-            .pipe(map((value) => Boolean(value)));
+    private clearWithInitialValues(values: {[name: string]: any} = {}): Observable<void> {
+        const cacheNames = Object.keys(values);
+        console.log(values);
+        return from(this.storage.clear())
+            .pipe(
+                flatMap(() => cacheNames.length > 0
+                    ? zip(
+                        ...cacheNames.map((name) => this.setItem(name as StorageKeyEnum, values[name]))
+                    )
+                    : of(undefined)
+                ),
+                map(() => undefined)
+            );
     }
 }
