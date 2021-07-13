@@ -26,7 +26,7 @@ export class StorageService {
                     this.setItem(StorageKeyEnum.OPERATOR, operator),
                     this.setItem(StorageKeyEnum.OPERATOR_ID, operatorId),
                     this.setItem(StorageKeyEnum.NOTIFICATION_CHANNELS, JSON.stringify(notificationChannels)),
-                    this.setItem(StorageKeyEnum.NB_PREPS, 0),
+                    this.resetCounters(),
                     this.updateRights(rights)
                 ))
             );
@@ -79,13 +79,33 @@ export class StorageService {
         return from(this.storage.get(rightName)).pipe(map(Boolean));
     }
 
-    public setItem(key: StorageKeyEnum, value: string|number): Observable<string> {
+    public setItem(key: StorageKeyEnum, value: any): Observable<void> {
         return from(this.storage.set(key, value));
+    }
+
+    public resetCounters(): Observable<void> {
+        return this.setItem(StorageKeyEnum.COUNTERS, JSON.parse('{}'));
+    }
+
+    public incrementCounter(key: StorageKeyEnum): Observable<void> {
+        return this.getString(StorageKeyEnum.COUNTERS).pipe(
+            map((countersStr) => countersStr || {}),
+            flatMap((counters) => {
+                counters[key] = (counters[key] || 0) + 1;
+                return this.setItem(StorageKeyEnum.COUNTERS, counters) as Observable<void>;
+            })
+        );
+    }
+
+    public getCounter(key: StorageKeyEnum): Observable<number> {
+        return this.getString(StorageKeyEnum.COUNTERS).pipe(
+            map((counters) => counters[key]),
+            map((counter) => Number(counter) || 0)
+        );
     }
 
     private clearWithInitialValues(values: {[name: string]: any} = {}): Observable<void> {
         const cacheNames = Object.keys(values);
-        console.log(values);
         return from(this.storage.clear())
             .pipe(
                 flatMap(() => cacheNames.length > 0

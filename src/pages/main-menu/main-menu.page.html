@@ -4,11 +4,6 @@
 <div scroll-y="true"
      class="page-content"
      *ngIf="!loading">
-
-    <wii-stats-sliders *ngIf="statsSlidersData"
-                       [data]="statsSlidersData">
-    </wii-stats-sliders>
-
     <wii-menu *ngIf="menuConfig" [config]="menuConfig"></wii-menu>
 </div>
 

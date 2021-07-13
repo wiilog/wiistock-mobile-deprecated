@@ -1,16 +1,14 @@
 import {Component, NgZone} from '@angular/core';
 import {MenuConfig} from '@app/common/components/menu/menu-config';
 import {from, Observable, Subject, Subscription, zip} from 'rxjs';
-import {flatMap, map, take, tap} from 'rxjs/operators';
+import {flatMap, map} from 'rxjs/operators';
 import {AlertController, Platform} from '@ionic/angular';
-import {Preparation} from '@entities/preparation';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {Network} from '@ionic-native/network/ngx';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav/nav.service';
-import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {ILocalNotification} from '@ionic-native/local-notifications';
@@ -24,8 +22,6 @@ import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
     styleUrls: ['./main-menu.page.scss'],
 })
 export class MainMenuPage extends PageComponent {
-    public statsSlidersData: Array<StatsSlidersData>;
-
     public loading: boolean;
     public displayNotifications: boolean;
 
@@ -93,21 +89,6 @@ export class MainMenuPage extends PageComponent {
         this.unsubscribeNotification();
     }
 
-    public refreshCounters(): Observable<void> {
-        return zip(
-            this.sqliteService.findAll('preparation'),
-            this.storageService.getNumber(StorageKeyEnum.NB_PREPS),
-            this.sqliteService.count('article_inventaire')
-        )
-            .pipe(
-                take(1),
-                tap(([preparations, preps, nbArticlesInventaire]: [Array<Preparation>, number, number]) => {
-                    this.statsSlidersData = this.createStatsSlidersData(preparations, preps, nbArticlesInventaire);
-                }),
-                map(() => undefined)
-            );
-    }
-
     public synchronise(): Observable<void> {
         const $res = new Subject<void>();
         if (this.network.type !== 'none') {
@@ -133,21 +114,17 @@ export class MainMenuPage extends PageComponent {
                         if (finished) {
                             this.displayNotifications = Boolean(rights.stock);
                             this.resetMainMenuConfig(rights);
-                            this.refreshCounters().subscribe(() => {
-                                this.loading = false;
-                                $res.next();
-                                $res.complete();
-                            });
+                            this.loading = false;
+                            $res.next();
+                            $res.complete();
                         }
                         else {
                             this.loading = true;
                         }
                     },
                     (error) => {
+                        this.loading = false;
                         const {api, message} = error;
-                        this.refreshCounters().subscribe(() => {
-                            this.loading = false;
-                        });
                         if (api && message) {
                             this.toastService.presentToast(message);
                         }
@@ -158,7 +135,6 @@ export class MainMenuPage extends PageComponent {
         else {
             this.loading = false;
             this.toastService.presentToast('Veuillez vous connecter à internet afin de synchroniser vos données');
-            this.refreshCounters();
             $res.complete();
         }
         return $res;
@@ -231,20 +207,6 @@ export class MainMenuPage extends PageComponent {
                 }
             });
         }
-    }
-
-    private createStatsSlidersData(preparations: Array<Preparation>,
-                                   nbPrepT: number,
-                                   nbArticlesInventaire: number): Array<StatsSlidersData> {
-        const nbPrep = preparations.filter(p => p.date_end === null).length;
-        const sNbPrep = nbPrep > 1 ? 's' : '';
-        const sNbPrepT = nbPrepT > 1 ? 's' : '';
-        const sNbArticlesInventaire = nbArticlesInventaire > 1 ? 's' : '';
-        return [
-            { label: `Préparation${sNbPrep} à traiter`, counter: nbPrep },
-            { label: `Préparation${sNbPrepT} traitée${sNbPrepT}`, counter: nbPrepT },
-            { label: `Article${sNbArticlesInventaire} à inventorier`, counter: nbArticlesInventaire }
-        ]
     }
 
     private doSynchronisationAndNotificationRedirection(notification: ILocalNotification): void {

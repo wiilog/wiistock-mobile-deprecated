@@ -11,6 +11,8 @@ import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {StorageService} from "@app/common/services/storage/storage.service";
 import {zip} from "rxjs";
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 
 @Component({
     selector: 'wii-tracking-menu',
@@ -20,14 +22,16 @@ import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
 
     public menuConfig: Array<MenuConfig>;
+    public statsSlidersData: Array<StatsSlidersData>;
 
     public constructor(private platform: Platform,
                        private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
                        private network: Network,
                        private toastService: ToastService,
-                       navService: NavService,
-                       private storageService: StorageService) {
+                       private storageService: StorageService,
+                       private sqliteService: SqliteService,
+                       navService: NavService) {
         super(navService);
     }
 
@@ -52,8 +56,10 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
         zip(
             this.storageService.getRight(StorageKeyEnum.RIGHT_GROUP),
             this.storageService.getRight(StorageKeyEnum.RIGHT_UNGROUP),
+            this.storageService.getCounter(StorageKeyEnum.COUNTERS_DISPATCHES_TREATED),
+            this.sqliteService.count('dispatch', ['treatedStatusId IS NULL OR partial = 1'])
         ).subscribe(
-            ([group, ungroup]) => {
+            ([group, ungroup, treatedDispatches, toTreatDispatches]) => {
                 if(group) {
                     this.menuConfig.push({
                         icon: 'group.svg',
@@ -80,7 +86,17 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
                         }
                     });
                 }
+                this.statsSlidersData = this.createStatsSlidersData(treatedDispatches, toTreatDispatches);
             }
         )
+    }
+
+    private createStatsSlidersData(treatedDispatchesCounter: number, toTreatedDispatchesCounter: number): Array<StatsSlidersData> {
+        const sTreatedDispatches = treatedDispatchesCounter > 1 ? 's' : '';
+        const sToTreatedDispatches = toTreatedDispatchesCounter > 1 ? 's' : '';
+        return [
+            { label: `Acheminement${sToTreatedDispatches} à traiter`, counter: toTreatedDispatchesCounter },
+            { label: `Acheminement${sTreatedDispatches} traité${sTreatedDispatches}`, counter: treatedDispatchesCounter }
+        ];
     }
 }

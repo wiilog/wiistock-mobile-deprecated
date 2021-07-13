@@ -11,7 +11,6 @@ export enum StorageKeyEnum {
     API_KEY = 'api-key',
     OPERATOR = 'operator',
     OPERATOR_ID = 'operator_id',
-    NB_PREPS = 'prep',
     NOTIFICATION_CHANNELS = 'notification_channels',
 
     URL_SERVER = 'url-server',
@@ -21,7 +20,7 @@ export enum StorageKeyEnum {
 
     LOCAL_NOTIFICATIONS = 'local_notifications',
 
-    REDIRECT_ID = 'redirect_id',
-    REDIRECT_PAGE = 'redirect_page',
+    COUNTERS = 'counters',
+    COUNTERS_DISPATCHES_TREATED = 'counters_dispatches_to_treat'
 
 }

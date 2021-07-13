@@ -4,7 +4,7 @@ import {NavService} from '@app/common/services/nav/nav.service';
 import {PageComponent} from '@pages/page.component';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {LoadingService} from '@app/common/services/loading.service';
-import {filter, flatMap, tap} from 'rxjs/operators';
+import {filter, flatMap, map, tap} from 'rxjs/operators';
 import {Dispatch} from '@entities/dispatch';
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
 import {MainHeaderService} from '@app/common/services/main-header.service';
@@ -18,6 +18,8 @@ import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {DispatchPack} from '@entities/dispatch-pack';
 import {Network} from "@ionic-native/network/ngx";
+import {StorageService} from '@app/common/services/storage/storage.service';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 enum Page {
     LOCATION,
@@ -81,6 +83,7 @@ export class DispatchValidatePage extends PageComponent {
                        private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
                        private toastService: ToastService,
+                       private storageService: StorageService,
                        private network: Network,
                        navService: NavService) {
         super(navService);
@@ -233,6 +236,11 @@ export class DispatchValidatePage extends PageComponent {
                             this.network.type !== 'none'
                                 ? this.localDataManager.sendFinishedProcess('dispatch')
                                 : of({offline: true})
+                        )),
+                        flatMap((res: any) => (
+                            res.success
+                                ? this.storageService.incrementCounter(StorageKeyEnum.COUNTERS_DISPATCHES_TREATED).pipe(map(() => res))
+                                : of(res)
                         )),
                         flatMap(({offline, success}) => {
                             if (!offline) {
