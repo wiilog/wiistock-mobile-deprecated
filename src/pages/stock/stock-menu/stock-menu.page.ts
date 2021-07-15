@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
-import {merge, Subscription} from 'rxjs';
-import {MenuConfig} from '@app/common/components/menu/menu-config';
+import {merge, Subscription, zip} from 'rxjs';
+import {MenuConfig, ColumnNumber} from '@app/common/components/menu/menu-config';
 import {Platform} from '@ionic/angular';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
@@ -9,6 +9,11 @@ import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {StorageService} from '@app/common/services/storage/storage.service';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
+import {map} from 'rxjs/operators';
 
 @Component({
     selector: 'wii-stock-menu',
@@ -16,6 +21,8 @@ import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
     styleUrls: ['./stock-menu.page.scss'],
 })
 export class StockMenuPage extends PageComponent {
+    public readonly ColumnNumber = ColumnNumber;
+    public statsSlidersData: Array<StatsSlidersData|[StatsSlidersData,StatsSlidersData,StatsSlidersData,StatsSlidersData]>;
 
     public readonly menuConfig: Array<MenuConfig>;
 
@@ -31,6 +38,8 @@ export class StockMenuPage extends PageComponent {
                        private localDataManager: LocalDataManagerService,
                        private network: Network,
                        private toastService: ToastService,
+                       private storageService: StorageService,
+                       private sqliteService: SqliteService,
                        navService: NavService) {
         super(navService);
         this.avoidSync = true;
@@ -96,6 +105,8 @@ export class StockMenuPage extends PageComponent {
         else {
             this.setAvoidSync(false);
         }
+
+        this.refreshSlidersData();
     }
 
     public ionViewWillLeave(): void {
@@ -142,5 +153,54 @@ export class StockMenuPage extends PageComponent {
 
     public setAvoidSync(avoidSync: boolean) {
         this.avoidSync = avoidSync;
+    }
+
+    public refreshSlidersData(): void {
+        zip(
+            zip(
+                this.storageService.getCounter(StorageKeyEnum.COUNTERS_TRANSFERS_TREATED),
+                this.sqliteService.count('transfer_order', ['treated <> 1'])
+            ).pipe(map(([treated, toTreat]) => ({treated, toTreat}))),
+            zip(
+                this.storageService.getCounter(StorageKeyEnum.COUNTERS_PREPARATIONS_TREATED),
+                this.sqliteService.count('preparation', ['date_end IS NOT NULL'])
+            ).pipe(map(([treated, toTreat]) => ({treated, toTreat}))),
+            zip(
+                this.storageService.getCounter(StorageKeyEnum.COUNTERS_COLLECTS_TREATED),
+                this.sqliteService.count('collecte', ['date_end IS NOT NULL', 'location_to IS NULL'])
+            ).pipe(map(([treated, toTreat]) => ({treated, toTreat}))),
+            zip(
+                this.storageService.getCounter(StorageKeyEnum.COUNTERS_DELIVERIES_TREATED),
+                this.sqliteService.count('livraison', ['date_end IS NOT NULL'])
+            ).pipe(map(([treated, toTreat]) => ({treated, toTreat})))
+        )
+            .subscribe(([transfers, preparations, collects, deliveries]) => {
+                const sToTreat = {
+                    transfers: transfers.toTreat > 1 ? 's' : '',
+                    preparations: preparations.toTreat > 1 ? 's' : '',
+                    collects: collects.toTreat > 1 ? 's' : '',
+                    deliveries: deliveries.toTreat > 1 ? 's' : '',
+                };
+                const sTreated = {
+                    transfers: transfers.treated > 1 ? 's' : '',
+                    preparations: preparations.toTreat > 1 ? 's' : '',
+                    collects: collects.toTreat > 1 ? 's' : '',
+                    deliveries: deliveries.toTreat > 1 ? 's' : '',
+                };
+                this.statsSlidersData = [
+                    [
+                        { label: `Transfert${sToTreat.transfers} à traiter`, counter: transfers.toTreat },
+                        { label: `Préparation${sToTreat.preparations} à traiter`, counter: preparations.toTreat },
+                        { label: `Collecte${sToTreat.collects} à traiter`, counter: collects.toTreat },
+                        { label: `Livraison${sToTreat.deliveries} à traiter`, counter: deliveries.toTreat },
+                    ],
+                    [
+                        { label: `Transfert${sTreated.transfers} traité${sTreated.transfers}`, counter: transfers.treated },
+                        { label: `Préparation${sTreated.preparations} traitée${sTreated.preparations}`, counter: preparations.treated },
+                        { label: `Collecte${sTreated.collects} traitée${sTreated.collects}`, counter: collects.treated },
+                        { label: `Livraison${sTreated.deliveries} traitée${sTreated.deliveries}`, counter: deliveries.treated },
+                    ],
+                ];
+            });
     }
 }

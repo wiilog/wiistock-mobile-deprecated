@@ -21,6 +21,8 @@ import {IconColor} from '@app/common/components/icon/icon-color';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {StorageService} from '@app/common/services/storage/storage.service';
 
 
 @Component({
@@ -66,6 +68,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                        private localDataManager: LocalDataManagerService,
                        private alertController: AlertController,
                        private apiService: ApiService,
+                       private storageService: StorageService,
                        navService: NavService) {
         super(navService);
         this.loadingStartCollecte = false;
@@ -355,7 +358,12 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                         this.network.type !== 'none'
                             ? this.localDataManager.sendFinishedProcess('collecte')
                             : of({offline: true})
-                    ))
+                    )),
+                    flatMap((res: any) => (
+                        res.offline || res.success.length > 0
+                            ? this.storageService.incrementCounter(StorageKeyEnum.COUNTERS_COLLECTS_TREATED).pipe(map(() => res))
+                            : of(res)
+                    )),
                 )
                 .subscribe(
                     ({offline, success}: any) => {

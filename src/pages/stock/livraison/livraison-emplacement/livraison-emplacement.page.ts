@@ -11,9 +11,11 @@ import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {of, zip} from 'rxjs';
-import {flatMap} from 'rxjs/operators';
+import {flatMap, map} from 'rxjs/operators';
 import {PageComponent} from '@pages/page.component';
 import * as moment from 'moment';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {StorageService} from '@app/common/services/storage/storage.service';
 
 @Component({
     selector: 'wii-livraison-emplacement',
@@ -48,6 +50,7 @@ export class LivraisonEmplacementPage extends PageComponent {
                        private toastService: ToastService,
                        private network: Network,
                        private localDataManager: LocalDataManagerService,
+                       private storageService: StorageService,
                        navService: NavService) {
         super(navService);
         this.validateIsLoading = false;
@@ -111,7 +114,12 @@ export class LivraisonEmplacementPage extends PageComponent {
                             (this.network.type !== 'none')
                                 ? this.localDataManager.sendFinishedProcess('livraison')
                                 : of({offline: true})
-                        ))
+                        )),
+                        flatMap((res: any) => (
+                            res.offline || res.success.length > 0
+                                ? this.storageService.incrementCounter(StorageKeyEnum.COUNTERS_DELIVERIES_TREATED).pipe(map(() => res))
+                                : of(res)
+                        )),
                     )
                     .subscribe(
                         ({offline, success}: any) => {

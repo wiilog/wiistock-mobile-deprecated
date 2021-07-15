@@ -1,6 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
 
+type DataType = Array<StatsSlidersData&{isSingleData?: boolean} | [StatsSlidersData, StatsSlidersData, StatsSlidersData, StatsSlidersData]>;
 
 @Component({
     selector: 'wii-stats-sliders',
@@ -9,7 +10,18 @@ import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-slide
 })
 export class StatsSlidersComponent {
 
+    public _data: DataType;
+
     @Input()
-    public data: Array<StatsSlidersData>;
+    public set data(data: DataType) {
+        this._data = data.map((datum) => (
+            Array.isArray(datum)
+                ? datum
+                : {...datum, isSingleData: true}))
+    }
+
+    public get data(): DataType {
+        return this._data;
+    };
 
 }

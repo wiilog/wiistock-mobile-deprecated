@@ -11,9 +11,10 @@ import {Preparation} from '@entities/preparation';
 import {Emplacement} from '@entities/emplacement';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
-import {flatMap} from 'rxjs/operators';
+import {flatMap, map} from 'rxjs/operators';
 import {of, zip} from 'rxjs';
 import {PageComponent} from '@pages/page.component';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 
 @Component({
@@ -106,7 +107,12 @@ export class PreparationEmplacementPage extends PageComponent {
                             this.network.type !== 'none'
                                 ? this.localDataManager.sendFinishedProcess('preparation')
                                 : of({offline: true})
-                        ))
+                        )),
+                        flatMap((res: any) => (
+                            res.offline || res.success.length > 0
+                                ? this.storageService.incrementCounter(StorageKeyEnum.COUNTERS_PREPARATIONS_TREATED).pipe(map(() => res))
+                                : of(res)
+                        )),
                     )
                     .subscribe(
                         ({offline, success}: any) => {

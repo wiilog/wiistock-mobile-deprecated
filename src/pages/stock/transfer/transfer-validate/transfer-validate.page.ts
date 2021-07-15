@@ -10,11 +10,12 @@ import {IconConfig} from '@app/common/components/panel/model/icon-config';
 import {Emplacement} from '@entities/emplacement';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
-import {flatMap, tap} from 'rxjs/operators';
+import {flatMap, map, tap} from 'rxjs/operators';
 import {of, Subscription} from 'rxjs';
 import {PageComponent} from '@pages/page.component';
 import {LoadingService} from '@app/common/services/loading.service';
 import {TransferOrder} from '@entities/transfer-order';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 
 @Component({
@@ -102,13 +103,18 @@ export class TransferValidatePage extends PageComponent {
                             this.network.type !== 'none'
                                 ? this.localDataManager.sendFinishedProcess('transfer')
                                 : of({offline: true})
-                        ))
+                        )),
+                        flatMap((res: any) => (
+                            res.offline || res.success.length > 0
+                                ? this.storageService.incrementCounter(StorageKeyEnum.COUNTERS_TRANSFERS_TREATED).pipe(map(() => res))
+                                : of(res)
+                        )),
                     )
                     .subscribe(
                         ({offline, success}) => {
                             this.unsubscribeLoading();
                             if (offline) {
-                                this.toastService.presentToast('Préparation sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+                                this.toastService.presentToast('Transfert sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
                                 this.closeScreen();
                             }
                             else {

@@ -11,6 +11,11 @@
         <ion-ripple-effect></ion-ripple-effect>
     </ion-card>
     <div class="menu-item"
-         *ngIf="config.length % 2 === 1">
+         [class.small-column]="columns === ColumnNumber.THREE"
+         *ngIf="firstPlaceholderDisplayed">
+    </div>
+    <div class="menu-item"
+         [class.small-column]="columns === ColumnNumber.THREE"
+         *ngIf="secondPlaceholderDisplayed">
     </div>
 </div>
