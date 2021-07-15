@@ -1,5 +1,5 @@
 import {Component, NgZone} from '@angular/core';
-import {MenuConfig} from '@app/common/components/menu/menu-config';
+import {ColumnNumber, MenuConfig} from '@app/common/components/menu/menu-config';
 import {from, Observable, Subject, Subscription, zip} from 'rxjs';
 import {flatMap, map} from 'rxjs/operators';
 import {AlertController, Platform} from '@ionic/angular';
@@ -22,6 +22,8 @@ import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
     styleUrls: ['./main-menu.page.scss'],
 })
 export class MainMenuPage extends PageComponent {
+    public readonly ColumnNumber = ColumnNumber;
+
     public loading: boolean;
     public displayNotifications: boolean;
 

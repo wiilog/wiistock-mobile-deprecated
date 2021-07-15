@@ -2,7 +2,8 @@
     <ion-card class="menu-item ion-activatable ripple-parent"
               type="button"
               *ngFor="let item of config"
-              (click)="item.action()">
+              (click)="item.action()"
+              [class.small-column]="columns === ColumnNumber.THREE">
         <wii-icon [name]="item.icon"
                   [color]="item.iconColor"
                   class="menu-icon"></wii-icon>

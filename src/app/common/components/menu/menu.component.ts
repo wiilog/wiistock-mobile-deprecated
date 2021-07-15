@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {MenuConfig} from '@app/common/components/menu/menu-config';
+import {ColumnNumber, MenuConfig} from '@app/common/components/menu/menu-config';
 
 
 @Component({
@@ -8,6 +8,11 @@ import {MenuConfig} from '@app/common/components/menu/menu-config';
     styleUrls: ['./menu.component.scss']
 })
 export class MenuComponent {
+    public readonly ColumnNumber = ColumnNumber;
+
     @Input()
     public config: Array<MenuConfig>;
+
+    @Input()
+    public columns: number = ColumnNumber.TWO;
 }
