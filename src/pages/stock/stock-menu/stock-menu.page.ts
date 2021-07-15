@@ -156,51 +156,75 @@ export class StockMenuPage extends PageComponent {
     }
 
     public refreshSlidersData(): void {
-        zip(
+        if (!this.loading) {
+            this.loading = true;
             zip(
-                this.storageService.getCounter(StorageKeyEnum.COUNTERS_TRANSFERS_TREATED),
-                this.sqliteService.count('transfer_order', ['treated <> 1'])
-            ).pipe(map(([treated, toTreat]) => ({treated, toTreat}))),
-            zip(
-                this.storageService.getCounter(StorageKeyEnum.COUNTERS_PREPARATIONS_TREATED),
-                this.sqliteService.count('preparation', ['date_end IS NOT NULL'])
-            ).pipe(map(([treated, toTreat]) => ({treated, toTreat}))),
-            zip(
-                this.storageService.getCounter(StorageKeyEnum.COUNTERS_COLLECTS_TREATED),
-                this.sqliteService.count('collecte', ['date_end IS NOT NULL', 'location_to IS NULL'])
-            ).pipe(map(([treated, toTreat]) => ({treated, toTreat}))),
-            zip(
-                this.storageService.getCounter(StorageKeyEnum.COUNTERS_DELIVERIES_TREATED),
-                this.sqliteService.count('livraison', ['date_end IS NOT NULL'])
-            ).pipe(map(([treated, toTreat]) => ({treated, toTreat})))
-        )
-            .subscribe(([transfers, preparations, collects, deliveries]) => {
-                const sToTreat = {
-                    transfers: transfers.toTreat > 1 ? 's' : '',
-                    preparations: preparations.toTreat > 1 ? 's' : '',
-                    collects: collects.toTreat > 1 ? 's' : '',
-                    deliveries: deliveries.toTreat > 1 ? 's' : '',
-                };
-                const sTreated = {
-                    transfers: transfers.treated > 1 ? 's' : '',
-                    preparations: preparations.toTreat > 1 ? 's' : '',
-                    collects: collects.toTreat > 1 ? 's' : '',
-                    deliveries: deliveries.toTreat > 1 ? 's' : '',
-                };
-                this.statsSlidersData = [
-                    [
-                        { label: `Transfert${sToTreat.transfers} à traiter`, counter: transfers.toTreat },
-                        { label: `Préparation${sToTreat.preparations} à traiter`, counter: preparations.toTreat },
-                        { label: `Collecte${sToTreat.collects} à traiter`, counter: collects.toTreat },
-                        { label: `Livraison${sToTreat.deliveries} à traiter`, counter: deliveries.toTreat },
-                    ],
-                    [
-                        { label: `Transfert${sTreated.transfers} traité${sTreated.transfers}`, counter: transfers.treated },
-                        { label: `Préparation${sTreated.preparations} traitée${sTreated.preparations}`, counter: preparations.treated },
-                        { label: `Collecte${sTreated.collects} traitée${sTreated.collects}`, counter: collects.treated },
-                        { label: `Livraison${sTreated.deliveries} traitée${sTreated.deliveries}`, counter: deliveries.treated },
-                    ],
-                ];
-            });
+                zip(
+                    this.storageService.getCounter(StorageKeyEnum.COUNTERS_TRANSFERS_TREATED),
+                    this.sqliteService.count('transfer_order', ['treated <> 1'])
+                ).pipe(map(([treated, toTreat]) => ({treated, toTreat}))),
+                zip(
+                    this.storageService.getCounter(StorageKeyEnum.COUNTERS_PREPARATIONS_TREATED),
+                    this.sqliteService.count('preparation', ['date_end IS NULL'])
+                ).pipe(map(([treated, toTreat]) => ({treated, toTreat}))),
+                zip(
+                    this.storageService.getCounter(StorageKeyEnum.COUNTERS_COLLECTS_TREATED),
+                    this.sqliteService.count('collecte', ['date_end IS NULL', 'location_to IS NULL'])
+                ).pipe(map(([treated, toTreat]) => ({treated, toTreat}))),
+                zip(
+                    this.storageService.getCounter(StorageKeyEnum.COUNTERS_DELIVERIES_TREATED),
+                    this.sqliteService.count('livraison', ['date_end IS NULL'])
+                ).pipe(map(([treated, toTreat]) => ({treated, toTreat})))
+            )
+                .subscribe(
+                    ([transfers, preparations, collects, deliveries]) => {
+                        this.statsSlidersData = this.createSlidersData(transfers, preparations, collects, deliveries);
+                        this.loading = false;
+                    },
+                    () => {
+                        this.loading = false;
+                    });
+        }
+    }
+
+    private createSlidersData(transfers, preparations, collects, deliveries): Array<StatsSlidersData|[StatsSlidersData,StatsSlidersData,StatsSlidersData,StatsSlidersData]> {
+        const sToTreat = {
+            transfers: transfers.toTreat > 1 ? 's' : '',
+            preparations: preparations.toTreat > 1 ? 's' : '',
+            collects: collects.toTreat > 1 ? 's' : '',
+            deliveries: deliveries.toTreat > 1 ? 's' : '',
+        };
+        const sTreated = {
+            transfers: transfers.treated > 1 ? 's' : '',
+            preparations: preparations.toTreat > 1 ? 's' : '',
+            collects: collects.toTreat > 1 ? 's' : '',
+            deliveries: deliveries.toTreat > 1 ? 's' : '',
+        };
+        return [
+            [
+                {label: `Transfert${sToTreat.transfers} à traiter`, counter: transfers.toTreat},
+                {label: `Préparation${sToTreat.preparations} à traiter`, counter: preparations.toTreat},
+                {label: `Collecte${sToTreat.collects} à traiter`, counter: collects.toTreat},
+                {label: `Livraison${sToTreat.deliveries} à traiter`, counter: deliveries.toTreat},
+            ],
+            [
+                {
+                    label: `Transfert${sTreated.transfers} traité${sTreated.transfers}`,
+                    counter: transfers.treated
+                },
+                {
+                    label: `Préparation${sTreated.preparations} traitée${sTreated.preparations}`,
+                    counter: preparations.treated
+                },
+                {
+                    label: `Collecte${sTreated.collects} traitée${sTreated.collects}`,
+                    counter: collects.treated
+                },
+                {
+                    label: `Livraison${sTreated.deliveries} traitée${sTreated.deliveries}`,
+                    counter: deliveries.treated
+                },
+            ],
+        ];
     }
 }
