@@ -33,8 +33,7 @@ export class AppComponent {
                        private scssHelper: ScssHelperService,
                        private splashScreen: SplashScreen,
                        private serverImageService: ServerImageService,
-                       private statusBar: StatusBar,
-                       private notificationService: NotificationService) {
+                       private statusBar: StatusBar) {
         this.platformReady = false;
         this.primaryColor = this.scssHelper.getVariable('ion-color-primary');
         this.darkColor = this.scssHelper.getVariable('ion-color-dark');

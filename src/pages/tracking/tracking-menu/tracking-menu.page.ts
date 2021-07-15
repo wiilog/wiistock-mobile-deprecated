@@ -88,7 +88,7 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
                 }
                 this.statsSlidersData = this.createStatsSlidersData(treatedDispatches, toTreatDispatches);
             }
-        )
+        );
     }
 
     private createStatsSlidersData(treatedDispatchesCounter: number, toTreatedDispatchesCounter: number): Array<StatsSlidersData> {

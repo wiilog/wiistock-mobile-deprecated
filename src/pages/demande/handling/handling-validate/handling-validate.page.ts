@@ -25,6 +25,8 @@ import {FreeField, FreeFieldType} from '@entities/free-field';
 import {Translations} from '@entities/translation';
 import {Status} from '@entities/status';
 import {TranslationService} from '@app/common/services/translations.service';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {StorageService} from '@app/common/services/storage/storage.service';
 
 
 @Component({
@@ -59,6 +61,7 @@ export class HandlingValidatePage extends PageComponent {
                        private fileService: FileService,
                        private formPanelService: FormPanelService,
                        private translationService: TranslationService,
+                       private storageService: StorageService,
                        navService: NavService) {
         super(navService);
         this.pageEnter = false;
@@ -235,7 +238,8 @@ export class HandlingValidatePage extends PageComponent {
                                 if (res.state !== 'inProgress') {
                                     return zip(
                                         this.sqliteService.deleteBy('handling', [`id = ${this.handling.id}`]),
-                                        this.sqliteService.deleteBy('handling_attachment', [`handlingId = ${this.handling.id}`])
+                                        this.sqliteService.deleteBy('handling_attachment', [`handlingId = ${this.handling.id}`]),
+                                        this.storageService.incrementCounter(StorageKeyEnum.COUNTERS_HANDLINGS_TREATED)
                                     ).pipe(map(() => res));
                                 }
                                 else {

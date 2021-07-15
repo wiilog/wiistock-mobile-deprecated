@@ -1,3 +1,8 @@
-<div scroll-y="true" class="page-content">
+<div scroll-y="true"
+     class="page-content">
+    <wii-stats-sliders *ngIf="statsSlidersData"
+                       [data]="statsSlidersData">
+    </wii-stats-sliders>
+
     <wii-menu [config]="menuConfig"></wii-menu>
 </div>

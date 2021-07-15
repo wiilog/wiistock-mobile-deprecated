@@ -21,6 +21,7 @@ export enum StorageKeyEnum {
     LOCAL_NOTIFICATIONS = 'local_notifications',
 
     COUNTERS = 'counters',
-    COUNTERS_DISPATCHES_TREATED = 'counters_dispatches_to_treat'
+    COUNTERS_DISPATCHES_TREATED = 'counters_dispatches_treat',
+    COUNTERS_HANDLINGS_TREATED = 'counters_handlings_treat'
 
 }

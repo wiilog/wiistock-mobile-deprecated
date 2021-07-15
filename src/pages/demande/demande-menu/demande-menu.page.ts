@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 import {MenuConfig} from '@app/common/components/menu/menu-config';
-import {merge, Subscription} from 'rxjs';
+import {merge, Subscription, zip} from 'rxjs';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {Platform} from '@ionic/angular';
 import {MainHeaderService} from '@app/common/services/main-header.service';
@@ -9,6 +9,10 @@ import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {StorageService} from '@app/common/services/storage/storage.service';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 
 
 @Component({
@@ -19,6 +23,7 @@ import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 export class DemandeMenuPage extends PageComponent {
 
     public readonly menuConfig: Array<MenuConfig>;
+    public statsSlidersData: Array<StatsSlidersData>;
 
     public messageLoading: string;
     public loading: boolean;
@@ -32,6 +37,8 @@ export class DemandeMenuPage extends PageComponent {
                        private localDataManager: LocalDataManagerService,
                        private network: Network,
                        private toastService: ToastService,
+                       private storageService: StorageService,
+                       private sqliteService: SqliteService,
                        navService: NavService) {
         super(navService);
         this.avoidSync = true;
@@ -70,6 +77,15 @@ export class DemandeMenuPage extends PageComponent {
         else {
             this.setAvoidSync(false);
         }
+
+        zip(
+            this.storageService.getCounter(StorageKeyEnum.COUNTERS_HANDLINGS_TREATED),
+            this.sqliteService.count('handling')
+        ).subscribe(
+            ([treatedHandlings, toTreatDispatches]) => {
+                this.statsSlidersData = this.createStatsSlidersData(treatedHandlings, toTreatDispatches);
+            }
+        )
     }
 
     public ionViewWillLeave(): void {
@@ -109,5 +125,15 @@ export class DemandeMenuPage extends PageComponent {
 
     public setAvoidSync(avoidSync: boolean) {
         this.avoidSync = avoidSync;
+    }
+
+    private createStatsSlidersData(treatedHandlingsCounter: number,
+                                   toTreatedHandlingsCounter: number): Array<StatsSlidersData> {
+        const sTreatedHandlings = treatedHandlingsCounter > 1 ? 's' : '';
+        const sToTreatedHandlings = toTreatedHandlingsCounter > 1 ? 's' : '';
+        return [
+            { label: `Service${sToTreatedHandlings} à traiter`, counter: toTreatedHandlingsCounter },
+            { label: `Service${sTreatedHandlings} traité${sTreatedHandlings}`, counter: treatedHandlingsCounter }
+        ];
     }
 }
