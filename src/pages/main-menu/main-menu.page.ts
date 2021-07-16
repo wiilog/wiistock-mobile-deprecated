@@ -27,8 +27,6 @@ export class MainMenuPage extends PageComponent {
     public loading: boolean;
     public displayNotifications: boolean;
 
-    public firstLaunch: boolean;
-
     public menuConfig: Array<MenuConfig>;
 
     public messageLoading?: string;
@@ -42,6 +40,7 @@ export class MainMenuPage extends PageComponent {
     private notificationSubscription: Subscription;
 
     private pageIsRedirecting: boolean;
+    private lastNotificationRedirected: ILocalNotification;
 
     public constructor(private alertController: AlertController,
                        private sqliteService: SqliteService,
@@ -57,7 +56,6 @@ export class MainMenuPage extends PageComponent {
         this.loading = true;
         this.displayNotifications = false;
         this.pageIsRedirecting = false;
-        this.firstLaunch = true;
     }
 
     public ionViewWillEnter(): void {
@@ -65,10 +63,9 @@ export class MainMenuPage extends PageComponent {
         const notification = this.currentNavParams.get('notification');
 
         this.synchronise().subscribe(() => {
-            if (this.firstLaunch && notification) {
+            if (notification && this.lastNotificationRedirected !== notification) {
                 this.doNotificationRedirection(notification);
             }
-            this.firstLaunch = false;
         });
 
         this.backButtonSubscription = this.platform.backButton.subscribe(() => {
@@ -230,6 +227,7 @@ export class MainMenuPage extends PageComponent {
 
     private doNotificationRedirection(notification: ILocalNotification) {
         if (!this.pageIsRedirecting && notification) {
+            this.lastNotificationRedirected = notification;
             this.ngZone.run(() => {
                 const {data} = notification;
                 if (data.type === 'dispatch') {
