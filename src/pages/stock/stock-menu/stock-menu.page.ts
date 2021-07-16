@@ -104,9 +104,8 @@ export class StockMenuPage extends PageComponent {
         }
         else {
             this.setAvoidSync(false);
+            this.refreshSlidersData();
         }
-
-        this.refreshSlidersData();
     }
 
     public ionViewWillLeave(): void {
@@ -128,10 +127,12 @@ export class StockMenuPage extends PageComponent {
                 ({finished, message}) => {
                     this.messageLoading = message;
                     this.loading = !finished;
+                    this.refreshSlidersData();
                 },
                 (error) => {
                     const {api, message} = error;
                     this.loading = false;
+                    this.refreshSlidersData();
                     if (api && message) {
                         this.toastService.presentToast(message);
                     }
@@ -140,6 +141,7 @@ export class StockMenuPage extends PageComponent {
         }
         else {
             this.loading = false;
+            this.refreshSlidersData();
             this.toastService.presentToast('Veuillez vous connecter à internet afin de synchroniser vos données');
         }
     }
@@ -178,8 +180,8 @@ export class StockMenuPage extends PageComponent {
             )
                 .subscribe(
                     ([transfers, preparations, collects, deliveries]) => {
-                        this.statsSlidersData = this.createSlidersData(transfers, preparations, collects, deliveries);
                         this.loading = false;
+                        this.statsSlidersData = this.createSlidersData(transfers, preparations, collects, deliveries);
                     },
                     () => {
                         this.loading = false;
@@ -196,9 +198,9 @@ export class StockMenuPage extends PageComponent {
         };
         const sTreated = {
             transfers: transfers.treated > 1 ? 's' : '',
-            preparations: preparations.toTreat > 1 ? 's' : '',
-            collects: collects.toTreat > 1 ? 's' : '',
-            deliveries: deliveries.toTreat > 1 ? 's' : '',
+            preparations: preparations.treated > 1 ? 's' : '',
+            collects: collects.treated > 1 ? 's' : '',
+            deliveries: deliveries.treated > 1 ? 's' : '',
         };
         return [
             [
