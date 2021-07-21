@@ -366,22 +366,17 @@ export class SqliteService {
 
     public importFreeFieldsData(data): Observable<void> {
         // for multiple types
-        const freeFields = [
-            ...(data['freeFields'] || [])
-        ];
+        const freeFields = data['freeFields'] || [];
 
-        // @ts-ignore
-        return this.deleteBy('free_field').pipe(
-            ...freeFields.map(({id, ...freeField}) => (
-                flatMap(() => (
-                    this.deleteBy('free_field', [`id = ${id}`])
-                        .pipe(
-                            flatMap(() => this.insert('free_field', {id, ...freeField}))
-                        )
-                ))
-            )),
-            map(() => undefined)
+        return of(undefined).pipe(
+            flatMap(() => this.deleteBy('free_field')),
+            flatMap(() => (
+                (freeFields.length > 0)
+                    ? this.insert('free_field', freeFields)
+                    : of(undefined)
+            ))
         );
+
     }
 
     public importArticlesPrepas(data): Observable<any> {
