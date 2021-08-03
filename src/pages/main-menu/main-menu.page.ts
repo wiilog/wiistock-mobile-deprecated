@@ -174,37 +174,47 @@ export class MainMenuPage extends PageComponent {
 
     private resetMainMenuConfig(rights: {stock?: boolean, demande?: boolean, tracking?: boolean}) {
         this.menuConfig = [];
+        let actions = [];
         if (rights.tracking) {
+            const action = () => {
+                this.navService.push(NavPathEnum.TRACKING_MENU, {
+                    fromStock: false
+                });
+            }
             this.menuConfig.push({
                 icon: 'tracking.svg',
                 label: 'Traçabilité',
-                action: () => {
-                    this.navService.push(NavPathEnum.TRACKING_MENU, {
-                        fromStock: false
-                    });
-                }
+                action
             });
+            actions.push(action);
         }
 
         if (rights.stock) {
+            const action = () => {
+                this.navService.push(NavPathEnum.STOCK_MENU, {avoidSync: true});
+            }
             this.menuConfig.push({
                 icon: 'stock.svg',
                 label: 'Stock',
-                action: () => {
-                    this.navService.push(NavPathEnum.STOCK_MENU, {avoidSync: true});
-                }
+                action
             });
+            actions.push(action);
         }
 
         if (rights.demande) {
+            const action = () => {
+                this.navService.push(NavPathEnum.DEMANDE_MENU);
+            }
             this.menuConfig.push({
                 icon: 'demande.svg',
                 iconColor: 'success',
                 label: 'Demande',
-                action: () => {
-                    this.navService.push(NavPathEnum.DEMANDE_MENU);
-                }
+                action
             });
+            actions.push(action);
+        }
+        if (actions.length === 1) {
+            actions[0]();
         }
     }
 
