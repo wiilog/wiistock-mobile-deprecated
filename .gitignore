@@ -45,3 +45,4 @@ npm-debug.log*
 /wiistock-key.jks
 /wiistock-key-password.json
 /google-services.json
+build.json.dist

@@ -221,7 +221,7 @@ export class TrackingListFactoryService {
                     ...quantityRow,
                     date: {
                         label: 'Date / Heure',
-                        value: moment(date,'DD/MM/YYYY HH:mm:ss').format('DD/MM/YYYY HH:mm:ss')
+                        value: moment(date, 'DD/MM/YYYY HH:mm:ss').format('DD/MM/YYYY HH:mm:ss')
                     },
                     ...(
                         natureConfig
