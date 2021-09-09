@@ -103,7 +103,7 @@ export class GroupContentPage extends PageComponent {
                                 };
 
                                 pack.quantity = pack.quantity || 1;
-                                pack.date = pack.date || moment().format('DD/MM/YYYY HH:mm:ss');
+                                pack.date = moment().format('DD/MM/YYYY HH:mm:ss');
 
                                 this.group.newPacks.push(pack);
                                 this.treatPacks(code);
