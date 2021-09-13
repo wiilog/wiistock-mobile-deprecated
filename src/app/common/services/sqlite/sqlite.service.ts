@@ -429,15 +429,16 @@ export class SqliteService {
         const apiDeliveryOrder: Array<Livraison> = data['livraisons'];
         const apiDeliveryOrderArticle: Array<ArticleLivraison> = data['articlesLivraison'];
 
+        const ordersToInsert = apiDeliveryOrder
+            ? apiDeliveryOrder.map(({id}) => id)
+            : [];
+
         return zip(
-            this.findAll('livraison'),
+            this.deleteBy('livraison'),
             this.findAll('article_livraison')
         )
             .pipe(
-                flatMap(([existingDeliveryOrder, existingDeliveryOrderArticle]: [Array<Livraison>, Array<ArticleLivraison>]) => {
-                    // if order already exists we do not inset it
-                    const deliveryOrdersToInsert = apiDeliveryOrder.filter((toInsert) => existingDeliveryOrder.every((existing) => (Number(existing.id) !== Number(toInsert.id))));
-
+                flatMap(([_, existingDeliveryOrderArticle]: [any, Array<ArticleLivraison>]) => {
                     // if article already exists we do not inset it
                     const deliveryOrderArticlesToInsert = apiDeliveryOrderArticle.filter((toInsert) => (
                         !existingDeliveryOrderArticle.some((existing) => (
@@ -449,8 +450,8 @@ export class SqliteService {
 
                     return zip(
                         // orders insert
-                        deliveryOrdersToInsert && deliveryOrdersToInsert.length > 0
-                            ? this.insert('livraison', deliveryOrdersToInsert)
+                        apiDeliveryOrder && apiDeliveryOrder.length > 0
+                            ? this.insert('livraison', apiDeliveryOrder)
                             : of(undefined),
 
                         // articles insert
@@ -458,7 +459,13 @@ export class SqliteService {
                             ? this.insert('article_livraison', deliveryOrderArticlesToInsert.map((article) => ({has_moved: 0, ...article})))
                             : of(undefined)
                     );
-                })
+                }),
+                // remove unused articles
+                flatMap(() => (
+                    ordersToInsert.length > 0
+                        ? this.deleteBy('article_livraison', [`id_livraison NOT IN (${ordersToInsert.join(',')})`])
+                        : of(undefined)
+                ))
             );
     }
 
@@ -471,65 +478,38 @@ export class SqliteService {
         const articlesCollecteAPI = data['articlesCollecte'];
 
         return of(undefined).pipe(
-            // we clear 'articleCollecte' table and add given articles
+            flatMap(() => this.deleteBy('collecte')),
             flatMap(() => this.deleteBy('article_collecte')),
-            map(() => (
-                (articlesCollecteAPI && articlesCollecteAPI.length > 0)
-                    ? articlesCollecteAPI.map((articleCollecte) => (
-                        "(NULL, " +
-                        "'" + this.escapeQuotes(articleCollecte.label) + "', " +
-                        "'" + this.escapeQuotes(articleCollecte.reference) + "', " +
-                        articleCollecte.quantity + ", " +
-                        articleCollecte.is_ref + ", " +
-                        articleCollecte.id_collecte + ", " +
-                        "0, " +
-                        "'" + this.escapeQuotes(articleCollecte.location) + "', " +
-                        "'" + articleCollecte.barCode + "', " +
-                        "'" + this.escapeQuotes(articleCollecte.reference_label) + "')"
-                    ))
-                    : []
-            )),
-            flatMap((articlesCollecteValues: Array<string>) => (
-                articlesCollecteValues.length > 0
-                    ? this.executeQuery(
-                        'INSERT INTO `article_collecte` (' +
-                        '`id`, ' +
-                        '`label`, ' +
-                        '`reference`, ' +
-                        '`quantite`, ' +
-                        '`is_ref`, ' +
-                        '`id_collecte`, ' +
-                        '`has_moved`, ' +
-                        '`emplacement`, ' +
-                        '`barcode`, ' +
-                        '`reference_label`' +
-                        ') ' +
-                        'VALUES ' + articlesCollecteValues.join(',') + ';'
-                    )
+
+            flatMap(() => (
+                collectesAPI.length > 0
+                    ? this.insert('collecte', collectesAPI
+                        .map(({id, number, location_from, forStock, requester, type, comment}) => ({
+                            id,
+                            number,
+                            location_from,
+                            forStock,
+                            requester,
+                            type,
+                            comment
+                        })))
                     : of(undefined)
             )),
-
-            // we update collecte table
-            flatMap(() => this.findAll('collecte')),
-            flatMap((collectesDB: Array<Collecte>) => {
-                // we delete 'collecte' in sqlite DB if it is not in the api array and if it's not finished
-                const collectesIdToDelete = collectesDB
-                    .filter(({id: idDB, location_to, date_end}) => (!collectesAPI.some(({id: idAPI}) => ((idAPI === idDB)) && !location_to && !date_end)))
-                    .map(({id}) => id);
-                return (collectesIdToDelete.length > 0
-                    ? this.deleteBy('collecte', [`id IN (${collectesIdToDelete.join(',')}`])
-                    : of(undefined)).pipe(map(() => collectesDB));
-            }),
-            flatMap((collectesDB: Array<Collecte>) => {
-                // we add 'collecte' in sqlite DB if it is in the api and not in DB
-                const collectesValuesToAdd = collectesAPI
-                    .filter(({id: idAPI}) => !collectesDB.some(({id: idDB}) => (idDB === idAPI)))
-                    .map(({id, number, location_from, forStock, requester, type, comment}) => ({id, number, location_from, forStock, requester, type, comment}));
-
-                return (collectesValuesToAdd.length > 0
-                    ? this.insert('collecte', collectesValuesToAdd)
-                    : of(undefined));
-            }),
+            map(() => (
+                (articlesCollecteAPI && articlesCollecteAPI.length > 0)
+                    ? this.insert('article_collecte', articlesCollecteAPI.map(({label, reference, quantity, is_ref, id_collecte, location, barCode, reference_label}) => ({
+                        label,
+                        reference,
+                        is_ref,
+                        id_collecte,
+                        location,
+                        barCode,
+                        reference_label,
+                        quantite: quantity,
+                        has_moved: 0,
+                    })))
+                    : []
+            )),
             map(() => undefined)
         );
     }
