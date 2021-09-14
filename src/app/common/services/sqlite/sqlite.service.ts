@@ -495,20 +495,20 @@ export class SqliteService {
                         })))
                     : of(undefined)
             )),
-            map(() => (
+            flatMap(() => (
                 (articlesCollecteAPI && articlesCollecteAPI.length > 0)
                     ? this.insert('article_collecte', articlesCollecteAPI.map(({label, reference, quantity, is_ref, id_collecte, location, barCode, reference_label}) => ({
                         label,
                         reference,
                         is_ref,
                         id_collecte,
-                        location,
-                        barCode,
+                        emplacement: location,
+                        barcode: barCode,
                         reference_label,
                         quantite: quantity,
                         has_moved: 0,
                     })))
-                    : []
+                    : of(undefined)
             )),
             map(() => undefined)
         );
