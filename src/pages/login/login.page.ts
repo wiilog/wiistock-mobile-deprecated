@@ -2,7 +2,7 @@ import {ChangeDetectorRef, Component, ViewChild} from '@angular/core';
 import {ApiService} from '@app/common/services/api.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {Observable, of, Subscription} from 'rxjs';
-import {filter, flatMap, map, tap} from 'rxjs/operators';
+import {filter, flatMap, map, mergeMap, take, tap} from 'rxjs/operators';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {VersionCheckerService} from '@app/common/services/version-checker.service';
 import {Network} from '@ionic-native/network/ngx';
@@ -47,6 +47,7 @@ export class LoginPage extends PageComponent {
     public tappedNotification: ILocalNotification;
 
     public loggedUser$: Observable<string>;
+    public pendingDeposits: boolean = false;
 
     private wantToAutoConnect: boolean;
     private appVersionSubscription: Subscription;
@@ -77,7 +78,16 @@ export class LoginPage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        if (this.serverImageLogo) {
+        this.storageService.getString(StorageKeyEnum.OPERATOR_ID).pipe(
+            take(1),
+            filter(operator => operator != null),
+            map(operator => ({pathParams: {operator}})),
+            mergeMap(params => this.apiService.requestApi(ApiService.GET_PREVIOUS_OPERATOR_MOVEMENTS, params))
+        ).subscribe(data => {
+            this.pendingDeposits = data.movements.length as boolean;
+        });
+
+        if(this.serverImageLogo) {
             this.serverImageLogo.reload();
         }
         const autoConnect = this.currentNavParams.get('autoConnect');
@@ -107,7 +117,7 @@ export class LoginPage extends PageComponent {
             });
 
         this.urlServerSubscription = this.storageService.getString(StorageKeyEnum.URL_SERVER).subscribe((url) => {
-            if (url) {
+            if(url) {
                 this.appVersionSubscription = this.versionChecker.isAvailableVersion()
                     .pipe(
                         map((availableVersion) => ({
@@ -129,8 +139,7 @@ export class LoginPage extends PageComponent {
                             this.finishLoading();
                             this.toastService.presentToast('Erreur : la liaison avec le serveur est impossible', ToastService.LONG_DURATION);
                         });
-            }
-            else {
+            } else {
                 this.toastService.presentToast('Veuillez mettre à jour l\'url', ToastService.LONG_DURATION);
                 this.finishLoading();
                 this.goToParams();
@@ -142,34 +151,48 @@ export class LoginPage extends PageComponent {
             .subscribe((notification) => {
                 this.tappedNotification = notification;
             });
+
+        const where = [
+            `type LIKE 'prise'`,
+            `finished = 0`,
+        ];
+
+        this.sqliteService.findBy('mouvement_traca', where).subscribe(result => {
+            console.log(result);
+            this.pendingDeposits = result;
+        })
     }
 
     public ionViewWillLeave(): void {
         this.unsubscribeZebra();
         this.unsubscribeApi();
         this.unsubscribeNotification();
-        if (this.appVersionSubscription) {
+        if(this.appVersionSubscription) {
             this.appVersionSubscription.unsubscribe();
             this.appVersionSubscription = undefined;
         }
-        if (this.urlServerSubscription) {
+        if(this.urlServerSubscription) {
             this.urlServerSubscription.unsubscribe();
             this.urlServerSubscription = undefined;
         }
     }
 
     public logForm(): void {
-        if (!this.loading && this.loginKey) {
-            if (this.network.type !== 'none') {
+        if(!this.loading && this.loginKey) {
+            if(this.network.type !== 'none') {
                 this.loading = true;
 
                 this.unsubscribeApi();
 
                 this.apiSubscription = this.apiService
-                    .requestApi(ApiService.POST_API_KEY, {params: {loginKey: this.loginKey}, secured: false, timeout: true})
+                    .requestApi(ApiService.POST_API_KEY, {
+                        params: {loginKey: this.loginKey},
+                        secured: false,
+                        timeout: true
+                    })
                     .pipe(
                         flatMap(({data, success}) => {
-                            if (success) {
+                            if(success) {
                                 const {apiKey, rights, userId, username, notificationChannels} = data;
 
                                 return this.sqliteService
@@ -189,8 +212,7 @@ export class LoginPage extends PageComponent {
                                         }),
                                         map(() => ({success: true}))
                                     )
-                            }
-                            else {
+                            } else {
                                 return of({success: false})
                             }
                         })
@@ -198,7 +220,7 @@ export class LoginPage extends PageComponent {
                     .subscribe(
                         ({success}) => {
                             this.finishLoading();
-                            if (!success) {
+                            if(!success) {
                                 this.toastService.presentToast('Identifiants incorrects.');
                             }
                         },
@@ -213,17 +235,16 @@ export class LoginPage extends PageComponent {
     }
 
     public goToParams(): void {
-        if (!this.loading) {
+        if(!this.loading) {
             this.navService.push(NavPathEnum.PARAMS);
         }
     }
 
     public set loading(loading: boolean) {
         this._loading = loading;
-        if (this._loading) {
+        if(this._loading) {
             this.splashScreen.show();
-        }
-        else {
+        } else {
             this.splashScreen.hide();
         }
     }
@@ -243,7 +264,7 @@ export class LoginPage extends PageComponent {
     }
 
     private autoLoginIfAllowed() {
-        if (!environment.production
+        if(!environment.production
             && autoConnect
             && this.wantToAutoConnect) {
             this.fillForm(loginKey);
@@ -251,21 +272,21 @@ export class LoginPage extends PageComponent {
     }
 
     private unsubscribeZebra(): void {
-        if (this.zebraSubscription) {
+        if(this.zebraSubscription) {
             this.zebraSubscription.unsubscribe();
             this.zebraSubscription = undefined;
         }
     }
 
     private unsubscribeApi(): void {
-        if (this.apiSubscription) {
+        if(this.apiSubscription) {
             this.apiSubscription.unsubscribe();
             this.apiSubscription = undefined;
         }
     }
 
     private unsubscribeNotification(): void {
-        if (this.notificationSubscription && !this.notificationSubscription.closed) {
+        if(this.notificationSubscription && !this.notificationSubscription.closed) {
             this.notificationSubscription.unsubscribe();
         }
         this.notificationSubscription = undefined;

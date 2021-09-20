@@ -1,13 +1,11 @@
 import {Injectable} from '@angular/core';
-import {AlertManagerService} from "./alert-manager.service";
-import {AlertController} from '@ionic/angular';
 import {HeaderConfig} from '@app/common/components/panel/model/header-config';
 import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel/list-panel-item-config';
 import * as moment from 'moment';
-import {from} from 'rxjs';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {Emplacement} from '@entities/emplacement';
-import {IconConfig} from "../components/panel/model/icon-config";
+import {IconConfig} from '../components/panel/model/icon-config';
+import {AlertService} from '@app/common/services/alert.service';
 
 type ListConfig = {
     header: HeaderConfig;
@@ -55,7 +53,7 @@ export class TrackingListFactoryService {
     private _alertPresented: boolean;
     private actionsDisabled: boolean;
 
-    public constructor(private alertController: AlertController) {
+    public constructor(private alertService: AlertService) {
         this._alertPresented = false;
         this.actionsDisabled = true;
     }
@@ -88,36 +86,27 @@ export class TrackingListFactoryService {
     }
 
     private createConfirmationBoxAlert(message?: string, removeItem?: (info: { [name: string]: { value?: string } }) => void): void {
-        if (!this.actionsDisabled && !this._alertPresented) {
+        if(!this.actionsDisabled && !this._alertPresented) {
             this._alertPresented = true;
-            from(this.alertController.create({
+
+            this.alertService.show({
                 header: 'Confirmation',
-                cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
+                cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
                 message,
-                buttons: [
-                    {
-                        text: 'Confirmer',
-                        cssClass: 'alert-success',
-                        handler: removeItem
-                    },
-                    {
-                        text: 'Annuler',
-                        cssClass: 'alert-danger',
-                        role: 'cancel',
-                        handler: () => {
-                            this._alertPresented = false;
-                            return null;
-                        }
+                buttons: [{
+                    text: 'Confirmer',
+                    cssClass: 'alert-success',
+                    handler: removeItem
+                }, {
+                    text: 'Annuler',
+                    cssClass: 'alert-danger',
+                    role: 'cancel',
+                    handler: () => {
+                        this._alertPresented = false;
+                        return null;
                     }
-                ]
-            })).subscribe((alert: HTMLIonAlertElement) => {
-                alert.onDidDismiss().then(() => {
-                    this._alertPresented = false;
-                });
-                if (this._alertPresented) {
-                    alert.present();
-                }
-            });
+                }]
+            }, () => this._alertPresented = false)
         }
     }
 

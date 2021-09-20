@@ -1911,6 +1911,11 @@ array-flatten@^3.0.0:
   resolved "https://registry.yarnpkg.com/array-flatten/-/array-flatten-3.0.0.tgz#6428ca2ee52c7b823192ec600fa3ed2f157cd541"
   integrity sha512-zPMVc3ZYlGLNk4mpK1NzP2wg0ml9t7fUgDsayR5Y5rSzxQilzR9FGu/EH2jQOcKSAeAfWeylyW8juy3OkWRvNA==
 
+array-ify@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/array-ify/-/array-ify-1.0.0.tgz#9e528762b4a9066ad163a6962a364418e9626ece"
+  integrity sha1-nlKHYrSpBmrRY6aWKjZEGOlibs4=
+
 array-union@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/array-union/-/array-union-1.0.2.tgz#9a34410e4f4e3da23dea375be5be70f24778ec39"
@@ -2957,6 +2962,14 @@ commondir@^1.0.1:
   resolved "https://registry.yarnpkg.com/commondir/-/commondir-1.0.1.tgz#ddd800da0c66127393cca5950ea968a3aaf1253b"
   integrity sha1-3dgA2gxmEnOTzKWVDqloo6rxJTs=
 
+compare-func@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/compare-func/-/compare-func-2.0.0.tgz#fb65e75edbddfd2e568554e8b5b05fff7a51fcb3"
+  integrity sha512-zHig5N+tPWARooBnb0Zx1MFcdfpyJrfTJ3Y5L+IFvUm8rM74hHz66z0gw0x4tijh5CorKkKUCnW82R2vmpeCRA==
+  dependencies:
+    array-ify "^1.0.0"
+    dot-prop "^5.1.0"
+
 compare-versions@^3.4.0:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/compare-versions/-/compare-versions-3.6.0.tgz#1a5689913685e5a87637b8d3ffca75514ec41d62"
@@ -3309,6 +3322,11 @@ cordova-plugin-local-notification@^0.9.0-beta.2:
   version "0.9.0-beta.2"
   resolved "https://registry.yarnpkg.com/cordova-plugin-local-notification/-/cordova-plugin-local-notification-0.9.0-beta.2.tgz#e3a0b4a35d11f95bb4f1e367d9baee9909cca695"
   integrity sha512-63n77K1pt8dnbWnNR8QWETi9Glezi1bvNHvHWmGNIOv0xCb0phZnm+Ku49BQ+omwe8Z5voMvrA4I03SYPpv38w==
+
+cordova-plugin-nativeaudio@^3.0.9:
+  version "3.0.9"
+  resolved "https://registry.yarnpkg.com/cordova-plugin-nativeaudio/-/cordova-plugin-nativeaudio-3.0.9.tgz#16cebfdaee24beb23c05f49713cb8773bc78536c"
+  integrity sha1-Fs6/2u4kvrI8BfSXE8uHc7x4U2w=
 
 cordova-plugin-network-information@^2.0.2:
   version "2.0.2"
@@ -4110,6 +4128,13 @@ dot-prop@^4.1.0:
   integrity sha512-l0p4+mIuJIua0mhxGoh4a+iNL9bmeK5DvnSVQa6T0OhrVmaEa1XScX5Etc673FePCJOArq/4Pa2cLGODUWTPOQ==
   dependencies:
     is-obj "^1.0.0"
+
+dot-prop@^5.1.0:
+  version "5.3.0"
+  resolved "https://registry.yarnpkg.com/dot-prop/-/dot-prop-5.3.0.tgz#90ccce708cd9cd82cc4dc8c3ddd9abdd55b20e88"
+  integrity sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==
+  dependencies:
+    is-obj "^2.0.0"
 
 dot-prop@^5.2.0:
   version "5.2.0"
