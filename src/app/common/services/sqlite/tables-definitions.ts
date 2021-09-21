@@ -347,7 +347,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             statusLabel: 'VARCHAR(255)',
             treatedStatusId: 'INTEGER',
             partial: 'INTEGER',
-            color: 'VARCHAR(255)'
+            color: 'VARCHAR(255)',
+            destination: 'VARCHAR(255)'
         }
     },
     {
