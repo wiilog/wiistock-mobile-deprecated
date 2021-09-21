@@ -376,5 +376,13 @@ export const TablesDefinitions: Array<TableDefinition> = [
             displayOrder: 'INTEGER',
             commentNeeded: 'INTEGER'
         }
+    },
+    {
+        name: 'empty_round',
+        attributes: {
+            location: 'VARCHAR(255)',
+            comment: 'TEXT',
+            date: 'VARCHAR(255)'
+        }
     }
 ];

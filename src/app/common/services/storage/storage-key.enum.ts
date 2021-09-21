@@ -6,6 +6,7 @@ export enum StorageKeyEnum {
     RIGHT_TRACKING = 'tracking',
     RIGHT_GROUP = 'group',
     RIGHT_UNGROUP = 'ungroup',
+    RIGHT_EMPTY_ROUND = 'emptyRound',
     DEMO_MODE = 'demoMode',
 
     API_KEY = 'api-key',

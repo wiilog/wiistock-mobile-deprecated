@@ -24,6 +24,7 @@ export class EmplacementScanPage extends PageComponent {
 
     public fromDepose: boolean;
     public fromStock: boolean;
+    public fromEmptyRound: boolean;
 
     public barcodeScannerMode: BarcodeScannerModeEnum;
 
@@ -46,6 +47,7 @@ export class EmplacementScanPage extends PageComponent {
         this.storageService.getRight(StorageKeyEnum.DEMO_MODE).subscribe((isDemoMode) => {
             this.fromDepose = Boolean(this.currentNavParams.get('fromDepose'));
             this.fromStock = Boolean(this.currentNavParams.get('fromStock'));
+            this.fromEmptyRound = Boolean(this.currentNavParams.get('fromEmptyRound'));
             this.loading = false;
             this.isDemoMode = isDemoMode;
 
@@ -82,7 +84,9 @@ export class EmplacementScanPage extends PageComponent {
         this.testNetwork(() => {
             const nextPagePath = this.fromDepose
                 ? NavPathEnum.DEPOSE
-                : NavPathEnum.PRISE;
+                : (this.fromEmptyRound
+                    ? NavPathEnum.EMPTY_ROUND
+                    : NavPathEnum.PRISE);
             this.navService.push(nextPagePath, {
                 emplacement: emplacement,
                 fromStock: this.fromStock,

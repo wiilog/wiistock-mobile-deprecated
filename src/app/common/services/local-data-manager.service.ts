@@ -17,7 +17,7 @@ import {DemandeLivraisonArticleSelected} from '@entities/demande-livraison-artic
 import {TransferOrder} from '@entities/transfer-order';
 
 
-type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies' | 'dispatch' | 'transfer';
+type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies' | 'dispatch' | 'transfer' | 'empty_round';
 interface ApiProccessConfig {
     service: { service: string; method: string };
     createApiParams: () => Observable<{paramName: string, [name: string]: any}>
@@ -310,6 +310,23 @@ export class LocalDataManagerService {
                         ]
                     }])
                 )
+            },
+            empty_round: {
+                service: ApiService.POST_EMPTY_ROUND,
+                createApiParams: () => (
+                    this.sqliteService
+                        .findBy('empty_round')
+                        .pipe(map((emptyRounds) => ({
+                                paramName: 'params',
+                                params: emptyRounds
+                            }))
+                        )
+                ),
+                deleteSucceed: (success) => (
+                    (success && success.length > 0)
+                        ? this.sqliteService.deleteBy('empty_round')
+                        : of(undefined)
+                )
             }
         }
     }
@@ -355,6 +372,10 @@ export class LocalDataManagerService {
                 flatMap((needAnotherSynchronise) => {
                     synchronise$.next({finished: false, message: 'Envoi des transferts'});
                     return this.sendFinishedProcess('transfer').pipe(map(() => needAnotherSynchronise));
+                }),
+                flatMap((needAnotherSynchronise) => {
+                    synchronise$.next({finished: false, message: 'Envoi des mouvements de passage à vide non synchronisés'});
+                    return this.sendFinishedProcess('empty_round').pipe(map(() => needAnotherSynchronise));
                 }),
                 // we reload data from API if we have save data in previous requests
                 flatMap((needAnotherSynchronise) => {

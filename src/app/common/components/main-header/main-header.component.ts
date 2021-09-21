@@ -131,7 +131,14 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.TRANSFER_MENU, label: 'Transfert'},
             {pagePath: NavPathEnum.HANDLING_VALIDATE, label: 'Détails'},
             {pagePath: NavPathEnum.GROUP_SCAN_GROUP, label: 'Groupage'},
-            {pagePath: NavPathEnum.UNGROUP_SCAN_LOCATION, label: 'Dégroupage'}
+            {pagePath: NavPathEnum.UNGROUP_SCAN_LOCATION, label: 'Dégroupage'},
+            {
+                pagePath: NavPathEnum.EMPLACEMENT_SCAN,
+                label: 'Passage à vide',
+                filter: (params) => (
+                    params.get('fromEmptyRound')
+                )
+            },
         ];
     }
 

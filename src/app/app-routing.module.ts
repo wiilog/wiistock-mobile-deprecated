@@ -253,12 +253,16 @@ const routes: Routes = [
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/tracking/group/group-content/group-content.module').then(m => m.GroupContentPageModule)
     },
-
+    {
+        path: 'empty-round',
+        loadChildren: () => import('@pages/tracking/empty-round/empty-round.module').then(m => m.EmptyRoundPageModule)
+    },
     {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'
     },
+
 ];
 
 @NgModule({
