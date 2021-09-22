@@ -158,7 +158,6 @@ export class LoginPage extends PageComponent {
         ];
 
         this.sqliteService.findBy('mouvement_traca', where).subscribe(result => {
-            console.log(result);
             this.pendingDeposits = result;
         })
     }

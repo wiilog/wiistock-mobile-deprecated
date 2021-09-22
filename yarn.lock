@@ -3323,11 +3323,6 @@ cordova-plugin-local-notification@^0.9.0-beta.2:
   resolved "https://registry.yarnpkg.com/cordova-plugin-local-notification/-/cordova-plugin-local-notification-0.9.0-beta.2.tgz#e3a0b4a35d11f95bb4f1e367d9baee9909cca695"
   integrity sha512-63n77K1pt8dnbWnNR8QWETi9Glezi1bvNHvHWmGNIOv0xCb0phZnm+Ku49BQ+omwe8Z5voMvrA4I03SYPpv38w==
 
-cordova-plugin-nativeaudio@^3.0.9:
-  version "3.0.9"
-  resolved "https://registry.yarnpkg.com/cordova-plugin-nativeaudio/-/cordova-plugin-nativeaudio-3.0.9.tgz#16cebfdaee24beb23c05f49713cb8773bc78536c"
-  integrity sha1-Fs6/2u4kvrI8BfSXE8uHc7x4U2w=
-
 cordova-plugin-network-information@^2.0.2:
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/cordova-plugin-network-information/-/cordova-plugin-network-information-2.0.2.tgz#f48a92cbd7cccb63cb0a5e5a00030001b8ac4fea"
