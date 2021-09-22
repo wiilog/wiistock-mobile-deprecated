@@ -8,22 +8,21 @@ import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
-import {AlertController} from '@ionic/angular';
 import {filter, flatMap, map} from 'rxjs/operators';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {DemandeLivraison} from '@entities/demande-livraison';
 import {DemandeLivraisonType} from '@entities/demande-livraison-type';
 import {DemandeLivraisonArticle} from '@entities/demande-livraison-article';
-import {AlertManagerService} from '@app/common/services/alert-manager.service';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {PageComponent} from '@pages/page.component';
-import {FreeField, FreeFieldType} from "@entities/free-field";
+import {FreeField, FreeFieldType} from '@entities/free-field';
 import {FormPanelService} from '@app/common/services/form-panel.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {AlertService} from '@app/common/services/alert.service';
 
 
 @Component({
@@ -62,7 +61,7 @@ export class DemandeLivraisonArticlesPage extends PageComponent implements CanLe
     public constructor(private sqliteService: SqliteService,
                        private formPanelService: FormPanelService,
                        private storageService: StorageService,
-                       private alertController: AlertController,
+                       private alertService: AlertService,
                        private toastService: ToastService,
                        private changeDetector: ChangeDetectorRef,
                        private loadingService: LoadingService,
@@ -229,9 +228,9 @@ export class DemandeLivraisonArticlesPage extends PageComponent implements CanLe
 
     private presentAlertToDeleteDemande(): void {
         this.alertPresented = true;
-        from(this.alertController.create({
+        this.alertService.show({
             header: 'Confirmation',
-            cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
+            cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
             message: 'Êtes-vous sur de vouloir supprimer cette demande de livraison ?',
             buttons: [
                 {
@@ -252,10 +251,7 @@ export class DemandeLivraisonArticlesPage extends PageComponent implements CanLe
                     }
                 }
             ]
-        })).subscribe((alert: HTMLIonAlertElement) => {
-            alert.present();
         });
-
     }
 
     private deleteDemande(): void {

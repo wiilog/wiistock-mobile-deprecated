@@ -13,7 +13,6 @@ import {LoadingService} from '@app/common/services/loading.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {TrackingListFactoryService} from '@app/common/services/tracking-list-factory.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
-import {AlertController} from '@ionic/angular';
 import {filter, flatMap, map, tap} from 'rxjs/operators';
 import * as moment from 'moment';
 import {Network} from '@ionic-native/network/ngx';
@@ -22,12 +21,12 @@ import {NavService} from '@app/common/services/nav/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
-import {AlertManagerService} from '@app/common/services/alert-manager.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
-import {TranslationService} from "@app/common/services/translations.service";
+import {TranslationService} from '@app/common/services/translations.service';
 import {Translations} from '@entities/translation';
 import {Nature} from '@entities/nature';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {AlertService} from '@app/common/services/alert.service';
 
 
 @Component({
@@ -77,7 +76,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     public constructor(private network: Network,
                        private apiService: ApiService,
                        private sqliteService: SqliteService,
-                       private alertController: AlertController,
+                       private alertService: AlertService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
                        private changeDetectorRef: ChangeDetectorRef,
@@ -533,10 +532,10 @@ export class PrisePage extends PageComponent implements CanLeave {
                                 ({nature, group, isPack, isGroup}) => {
                                     if (isPack || !isGroup) {
                                         if (group) {
-                                            from(this.alertController.create({
+                                            this.alertService.show({
                                                 header: 'Confirmation',
                                                 backdropDismiss: false,
-                                                cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
+                                                cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
                                                 message: `Le colis ${barCode} est contenu dans le groupe ${group.code}.
                                                       Confirmer la prise l'enlèvera du groupe.`,
                                                 buttons: [
@@ -557,8 +556,6 @@ export class PrisePage extends PageComponent implements CanLeave {
                                                         }
                                                     }
                                                 ]
-                                            })).subscribe((alert: HTMLIonAlertElement) => {
-                                                alert.present();
                                             });
                                         }
                                         else {
@@ -578,29 +575,26 @@ export class PrisePage extends PageComponent implements CanLeave {
                     const quantitySuffix = (typeof quantity === 'number')
                         ? ` en quantité de ${quantity}`
                         : '';
-                    from(this.alertController
-                        .create({
-                            header: `Prise de ${barCode}${quantitySuffix}`,
-                            buttons: [
-                                {
-                                    text: 'Annuler',
-                                    handler: () => {
-                                        this.footerScannerComponent.fireZebraScan();
-                                    }
-                                },
-                                {
-                                    text: 'Confirmer',
-                                    handler: () => {
-                                        this.saveTrackingMovement(barCode, quantity);
-                                        this.footerScannerComponent.fireZebraScan();
-                                    },
-                                    cssClass: 'alert-success'
+
+                    this.alertService.show({
+                        header: `Prise de ${barCode}${quantitySuffix}`,
+                        buttons: [
+                            {
+                                text: 'Annuler',
+                                handler: () => {
+                                    this.footerScannerComponent.fireZebraScan();
                                 }
-                            ]
-                        }))
-                        .subscribe((alert: HTMLIonAlertElement) => {
-                            alert.present();
-                        });
+                            },
+                            {
+                                text: 'Confirmer',
+                                handler: () => {
+                                    this.saveTrackingMovement(barCode, quantity);
+                                    this.footerScannerComponent.fireZebraScan();
+                                },
+                                cssClass: 'alert-success'
+                            }
+                        ]
+                    });
                 }
             }
         }

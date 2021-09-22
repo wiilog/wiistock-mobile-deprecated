@@ -51,7 +51,11 @@ export class AppComponent {
             .pipe(
                 flatMap(() => this.sqliteService.resetDataBase()),
                 flatMap(() => this.serverImageService.loadFromStorage()),
-                flatMap(() => this.storageService.clearStorage([StorageKeyEnum.URL_SERVER, StorageKeyEnum.OPERATOR])),
+                flatMap(() => this.storageService.clearStorage([
+                    StorageKeyEnum.URL_SERVER,
+                    StorageKeyEnum.OPERATOR,
+                    StorageKeyEnum.OPERATOR_ID,
+                ])),
                 flatMap(() => this.serverImageService.saveToStorage()),
                 flatMap(() => this.navService.setRoot(NavPathEnum.LOGIN)),
             )
