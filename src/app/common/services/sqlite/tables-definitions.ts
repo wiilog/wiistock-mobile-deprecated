@@ -347,7 +347,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             statusLabel: 'VARCHAR(255)',
             treatedStatusId: 'INTEGER',
             partial: 'INTEGER',
-            color: 'VARCHAR(255)'
+            color: 'VARCHAR(255)',
+            destination: 'VARCHAR(255)'
         }
     },
     {
@@ -374,6 +375,14 @@ export const TablesDefinitions: Array<TableDefinition> = [
             category: 'VARCHAR(255)',
             displayOrder: 'INTEGER',
             commentNeeded: 'INTEGER'
+        }
+    },
+    {
+        name: 'empty_round',
+        attributes: {
+            location: 'VARCHAR(255)',
+            comment: 'TEXT',
+            date: 'VARCHAR(255)'
         }
     }
 ];

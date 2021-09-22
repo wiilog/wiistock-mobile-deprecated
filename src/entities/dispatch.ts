@@ -13,4 +13,5 @@ export interface Dispatch {
     partial: number;
     statusLabel: string;
     color: string;
+    destination: string;
 }

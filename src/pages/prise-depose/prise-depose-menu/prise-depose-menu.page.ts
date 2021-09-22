@@ -12,6 +12,8 @@ import {ActivatedRoute} from '@angular/router';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {StorageService} from '@app/common/services/storage/storage.service';
 
 
 @Component({
@@ -34,6 +36,7 @@ export class PriseDeposeMenuPage extends PageComponent implements CanLeave {
                        private sqliteService: SqliteService,
                        private activatedRoute: ActivatedRoute,
                        private toastService: ToastService,
+                       private storageService: StorageService,
                        navService: NavService) {
         super(navService);
         this.nbDrop = 0;
@@ -53,6 +56,18 @@ export class PriseDeposeMenuPage extends PageComponent implements CanLeave {
                 action: () => this.goToDrop()
             }
         ];
+
+        this.storageService.getRight(StorageKeyEnum.RIGHT_EMPTY_ROUND).subscribe((emptyRound) => {
+            if(emptyRound) {
+                this.menuConfig.push({
+                    icon: 'empty-round.svg',
+                    label: 'Passage à vide',
+                    action: () => {
+                        this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {fromEmptyRound: true});
+                    }
+                });
+            }
+        });
     }
 
     public wiiCanLeave(): boolean {

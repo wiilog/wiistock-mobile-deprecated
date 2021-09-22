@@ -30,6 +30,7 @@ export class ApiService {
     public static readonly POST_MOUVEMENT_TRACA = {method: POST, service: '/mouvements-traca'};
     public static readonly POST_HANDLING = {method: POST, service: '/handlings'};
     public static readonly GET_DATA = {method: POST, service: '/getData'};
+    public static readonly GET_PREVIOUS_OPERATOR_MOVEMENTS = {method: POST, service: '/previous-operator-movements'};
     public static readonly NEW_EMP = {method: POST, service: '/emplacement'};
     public static readonly GET_ARTICLES = {method: GET, service: '/articles'};
     public static readonly GET_TRACKING_DROPS = {method: GET, service: '/tracking-drops'};
@@ -42,6 +43,7 @@ export class ApiService {
     public static readonly GROUP = {method: POST, service: '/group'};
     public static readonly UNGROUP = {method: POST, service: '/ungroup'};
     public static readonly POST_GROUP_TRACKINGS = {method: POST, service: '/group-trackings/{mode}'};
+    public static readonly POST_EMPTY_ROUND = {method: POST, service: '/empty-round'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'

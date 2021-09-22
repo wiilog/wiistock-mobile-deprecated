@@ -37,7 +37,7 @@ export class DispatchPacksPage extends PageComponent {
 
     public dispatchHeaderConfig: {
         title: string;
-        subtitle?: string;
+        subtitle?: Array<string>;
         info?: string;
         transparent: boolean;
         leftIcon: IconConfig;
@@ -174,7 +174,10 @@ export class DispatchPacksPage extends PageComponent {
     private refreshHeaderPanelConfigFromDispatch(): void {
         this.dispatchHeaderConfig = {
             title: `Demande N°${this.dispatch.number}`,
-            subtitle: `Emplacement prise : ${this.dispatch.locationFromLabel}`,
+            subtitle: [
+                `Emplacement prise : ${this.dispatch.locationFromLabel}`,
+                this.dispatch.destination ? `Destination : ${this.dispatch.destination}` : ''
+            ],
             info: `Type ${this.dispatch.typeLabel}`,
             transparent: true,
             leftIcon: {

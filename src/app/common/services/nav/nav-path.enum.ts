@@ -47,4 +47,5 @@ export enum NavPathEnum {
     UNGROUP_CONFIRM = 'ungroup-confirm',
     GROUP_SCAN_GROUP = 'group-scan-group',
     GROUP_CONTENT = 'group-content',
+    EMPTY_ROUND = 'empty-round',
 }

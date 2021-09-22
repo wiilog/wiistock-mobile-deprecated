@@ -9,20 +9,19 @@ import {ToastService} from '@app/common/services/toast.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {Network} from '@ionic-native/network/ngx';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
-import {AlertController} from '@ionic/angular';
 import {ApiService} from '@app/common/services/api.service';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {filter, flatMap, map} from 'rxjs/operators';
 import {Mouvement} from '@entities/mouvement';
 import * as moment from 'moment';
-import {from, Observable, of, zip} from 'rxjs';
-import {AlertManagerService} from '@app/common/services/alert-manager.service';
+import {Observable, of, zip} from 'rxjs';
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {StorageService} from '@app/common/services/storage/storage.service';
+import {AlertService} from '@app/common/services/alert.service';
 
 
 @Component({
@@ -66,7 +65,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                        private sqliteService: SqliteService,
                        private network: Network,
                        private localDataManager: LocalDataManagerService,
-                       private alertController: AlertController,
+                       private alertService: AlertService,
                        private apiService: ApiService,
                        private storageService: StorageService,
                        navService: NavService) {
@@ -256,36 +255,31 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
         }
     }
 
-    private alertPartialCollecte(): void {
+    private async alertPartialCollecte(): Promise<void> {
         if (this.partialCollecteAlert) {
             this.partialCollecteAlert.dismiss();
             this.partialCollecteAlert = undefined;
         } else {
-             from(this.alertController
-                .create({
-                    header: `Votre collecte est partielle`,
-                    backdropDismiss: false,
-                    buttons: [
-                        {
-                            text: 'Annuler',
-                            handler: () => {
-                                this.partialCollecteAlert = undefined;
-                            }
-                        },
-                        {
-                            text: 'Continuer',
-                            handler: () => {
-                                this.partialCollecteAlert = undefined;
-                                this.finishCollecte();
-                            },
-                            cssClass: 'alert-success'
+            this.partialCollecteAlert = await this.alertService.show({
+                header: `Votre collecte est partielle`,
+                backdropDismiss: false,
+                buttons: [
+                    {
+                        text: 'Annuler',
+                        handler: () => {
+                            this.partialCollecteAlert = undefined;
                         }
-                    ]
-                }))
-                 .subscribe((alert) => {
-                     this.partialCollecteAlert = alert;
-                     this.partialCollecteAlert.present();
-                 });
+                    },
+                    {
+                        text: 'Continuer',
+                        handler: () => {
+                            this.partialCollecteAlert = undefined;
+                            this.finishCollecte();
+                        },
+                        cssClass: 'alert-success'
+                    }
+                ]
+            });
         }
     }
 
@@ -369,31 +363,24 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                     ({offline, success}: any) => {
                         this.canLeave = true;
                         this.screenAlreadyClosed = false;
-                        if (this.collecte && this.collecte.forStock && success.length > 0) {
-                            from(this.alertController
-                                .create({
-                                    header: 'Collecte validée',
-                                    cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
-                                    message: 'Pour valider l\'entrée en stock vous devez effectuer la dépose',
-                                    buttons: [{
-                                        text: 'Aller vers la dépose',
-                                        cssClass: 'alert-success',
-                                        handler: () => {
-                                            this.canLeave = true;
-                                            this.closeScreen(offline ? [] : success, offline)
-                                                .pipe(filter((screenClosed) => screenClosed))
-                                                .subscribe(() => {
-                                                    this.goToDrop();
-                                                });
-                                        }
-                                    }]
-                                }))
-                                .subscribe((alert: HTMLIonAlertElement) => {
-                                    alert.onDidDismiss().then(() => {
+                        if(this.collecte && this.collecte.forStock && success.length > 0) {
+                            this.alertService.show({
+                                header: 'Collecte validée',
+                                cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+                                message: 'Pour valider l\'entrée en stock vous devez effectuer la dépose',
+                                buttons: [{
+                                    text: 'Aller vers la dépose',
+                                    cssClass: 'alert-success',
+                                    handler: () => {
+                                        this.canLeave = true;
                                         this.closeScreen(offline ? [] : success, offline)
-                                    });
-                                    alert.present();
-                                });
+                                            .pipe(filter((screenClosed) => screenClosed))
+                                            .subscribe(() => {
+                                                this.goToDrop();
+                                            });
+                                    }
+                                }]
+                            }, () => this.closeScreen(offline ? [] : success, offline))
                         }
                         else {
                             this.closeScreen(offline ? [] : success, offline);

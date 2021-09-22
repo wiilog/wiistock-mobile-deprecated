@@ -13,12 +13,10 @@ import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {TrackingListFactoryService} from '@app/common/services/tracking-list-factory.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
-import {AlertController} from '@ionic/angular';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {flatMap, map, tap} from 'rxjs/operators';
 import * as moment from 'moment';
 import {PageComponent} from '@pages/page.component';
-import {AlertManagerService} from "@app/common/services/alert-manager.service";
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
@@ -27,6 +25,7 @@ import {TranslationService} from "@app/common/services/translations.service";
 import {Nature} from '@entities/nature';
 import {Translations} from '@entities/translation';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {AlertService} from '@app/common/services/alert.service';
 
 @Component({
     selector: 'wii-depose',
@@ -76,7 +75,7 @@ export class DeposePage extends PageComponent implements CanLeave {
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
 
     public constructor(private network: Network,
-                       private alertController: AlertController,
+                       private alertService: AlertService,
                        private apiService: ApiService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
@@ -233,28 +232,24 @@ export class DeposePage extends PageComponent implements CanLeave {
             }
             else {
                 this.footerScannerComponent.unsubscribeZebraScan();
-                from(this.alertController
-                    .create({
-                        header: `Vous avez sélectionné l'${this.objectLabel} ${barCode}`,
-                        buttons: [
-                            {
-                                text: 'Annuler',
-                                handler: () => {
-                                    this.footerScannerComponent.fireZebraScan();
-                                },
+                this.alertService.show({
+                    header: `Vous avez sélectionné l'${this.objectLabel} ${barCode}`,
+                    buttons: [
+                        {
+                            text: 'Annuler',
+                            handler: () => {
+                                this.footerScannerComponent.fireZebraScan();
                             },
-                            {
-                                text: 'Confirmer',
-                                handler: () => {
-                                    this.saveMouvementTraca(pickingIndexes);
-                                },
-                                cssClass: 'alert-success'
-                            }
-                        ]
-                    }))
-                    .subscribe((alert: HTMLIonAlertElement) => {
-                        alert.present();
-                    });
+                        },
+                        {
+                            text: 'Confirmer',
+                            handler: () => {
+                                this.saveMouvementTraca(pickingIndexes);
+                            },
+                            cssClass: 'alert-success'
+                        }
+                    ]
+                });
             }
         }
         else {
@@ -345,24 +340,17 @@ export class DeposePage extends PageComponent implements CanLeave {
                 const {ref_article, nature_id} = this.colisPrise[pickingIndexes[0]] || {};
                 const nature = this.natureIdsToConfig[nature_id];
                 const natureValue = (nature ? nature.label : 'non défini');
-                from(this.alertController
-                    .create({
-                        header: 'Erreur',
-                        cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
-                        message: `Le colis <strong>${ref_article}</strong>`
-                            + ` de ${natureLabel} <strong>${natureValue}</strong>`
-                            + ` ne peut pas être déposé sur l'emplacement <strong>${this.emplacement.label}</strong>.`,
-                        buttons: [{
-                            text: 'Confirmer',
-                            cssClass: 'alert-danger'
-                        }]
-                    })
-                ).subscribe((alert: HTMLIonAlertElement) => {
-                    let audio = new Audio('../../../assets/sounds/Error-sound.mp3');
-                    audio.load();
-                    audio.play();
-                    alert.present();
-                })
+                this.alertService.show({
+                    header: 'Erreur',
+                    cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+                    message: `Le colis <strong>${ref_article}</strong>`
+                        + ` de ${natureLabel} <strong>${natureValue}</strong>`
+                        + ` ne peut pas être déposé sur l'emplacement <strong>${this.emplacement.label}</strong>.`,
+                    buttons: [{
+                        text: 'Confirmer',
+                        cssClass: 'alert-danger'
+                    }]
+                });
             }
         }
     }

@@ -9,11 +9,11 @@ import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {RouterDirection} from '@ionic/core';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {NavController} from '@ionic/angular';
-import {UserService} from "@app/common/services/user.service";
+import {UserService} from '@app/common/services/user.service';
 import {ServerImageKeyEnum} from '@app/common/components/server-image/server-image-key.enum';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
-
+import {AlertService} from '@app/common/services/alert.service';
 
 @Component({
     selector: 'wii-main-header',
@@ -90,7 +90,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                        private mainHeaderService: MainHeaderService,
                        private activatedRoute: ActivatedRoute,
                        private userService: UserService,
-                       private router: Router) {
+                       private router: Router,
+                       private alertService: AlertService) {
         this.pagesInStack = 0;
         this.loading = true;
         this.withHeader = new EventEmitter<boolean>();
@@ -131,7 +132,14 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.TRANSFER_MENU, label: 'Transfert'},
             {pagePath: NavPathEnum.HANDLING_VALIDATE, label: 'Détails'},
             {pagePath: NavPathEnum.GROUP_SCAN_GROUP, label: 'Groupage'},
-            {pagePath: NavPathEnum.UNGROUP_SCAN_LOCATION, label: 'Dégroupage'}
+            {pagePath: NavPathEnum.UNGROUP_SCAN_LOCATION, label: 'Dégroupage'},
+            {
+                pagePath: NavPathEnum.EMPLACEMENT_SCAN,
+                label: 'Passage à vide',
+                filter: (params) => (
+                    params.get('fromEmptyRound')
+                )
+            },
         ];
     }
 
@@ -143,10 +151,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             .subscribe((navigation: NavigationStart) => {
                 const {id} = navigation;
                 this.clearSubTitle();
-                if (id) {
+                if(id) {
                     const transition = this.navController.consumeTransition();
                     const direction = transition && transition.direction;
-                    if (direction) {
+                    if(direction) {
                         this.lastDirections[id] = {
                             value: direction,
                             origin: this.lastRouteNavigated
@@ -166,8 +174,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                 const {url, id: navigationId} = navigation;
                 const [path] = (url || '').split('?');
                 const urlSplit = (path || '').split('/').filter(Boolean);
-                if (urlSplit && urlSplit.length > 0) {
-                    if (this.loading) {
+                if(urlSplit && urlSplit.length > 0) {
+                    if(this.loading) {
                         this.loading = false;
                     }
                     this.currentPagePath = urlSplit[urlSplit.length - 1] as NavPathEnum;
@@ -187,19 +195,19 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     }
 
     public ngOnDestroy(): void {
-        if (this.routeStartChangeSubscription) {
+        if(this.routeStartChangeSubscription) {
             this.routeStartChangeSubscription.unsubscribe();
             this.routeStartChangeSubscription = undefined;
         }
-        if (this.routeEndChangeSubscription) {
+        if(this.routeEndChangeSubscription) {
             this.routeEndChangeSubscription.unsubscribe();
             this.routeEndChangeSubscription = undefined;
         }
-        if (this.logoutSubscription) {
+        if(this.logoutSubscription) {
             this.logoutSubscription.unsubscribe();
             this.logoutSubscription = undefined;
         }
-        if (this.popSubscription && !this.popSubscription.closed) {
+        if(this.popSubscription && !this.popSubscription.closed) {
             this.popSubscription.unsubscribe();
             this.popSubscription = undefined;
         }
@@ -211,12 +219,12 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     }
 
     public onTitleClick(last: boolean, titleConfig: TitleConfig): void {
-        if (!last && !this.popSubscription) {
-            if (titleConfig && titleConfig.stackIndex) {
+        if(!last && !this.popSubscription) {
+            if(titleConfig && titleConfig.stackIndex) {
                 const nbNavigateBack = (this.pagesInStack - titleConfig.stackIndex);
-                if (nbNavigateBack > 0) {
+                if(nbNavigateBack > 0) {
                     this.popSubscription = this.runMultiplePop(nbNavigateBack).subscribe(() => {
-                        if (this.popSubscription && !this.popSubscription.closed) {
+                        if(this.popSubscription && !this.popSubscription.closed) {
                             this.popSubscription.unsubscribe();
                             this.popSubscription = undefined;
                         }
@@ -228,7 +236,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
     public onLeftIconClick(): void {
         return this.isShown.iconLogout
-            ?  this.doLogout()
+            ? this.doLogout()
             : this.doPop();
     }
 
@@ -238,7 +246,22 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     }
 
     private doLogout(): void {
-        this.userService.doLogout();
+        const where = [
+            `type LIKE 'prise'`,
+            `finished = 0`,
+        ];
+
+        this.sqliteService.findBy('mouvement_traca', where).subscribe(async result => {
+            if(result.length) {
+                await this.alertService.show({
+                    header: 'Déconnexion impossible',
+                    message: `Vous ne pouvez pas vous déconnecter car il y a des prises de traçabilité en cours`,
+                    buttons: [`Annuler`]
+                });
+            } else {
+                this.userService.doLogout();
+            }
+        })
     }
 
     private runMultiplePop(popNumber: number): Observable<void> {
@@ -248,31 +271,27 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     }
 
     private refreshTitles(navigationId: number, currentPagePath: NavPathEnum, paramsId: number): void {
-        if (navigationId && this.lastDirections[navigationId]) {
-            if (this.lastDirections[navigationId].value === 'back') {
+        if(navigationId && this.lastDirections[navigationId]) {
+            if(this.lastDirections[navigationId].value === 'back') {
                 const currentPageIndex = this.findIndexInPageStack(currentPagePath, paramsId);
-                if (currentPageIndex > -1) {
+                if(currentPageIndex > -1) {
                     this.pagesInStack = this.pageStack[currentPageIndex].stackIndex;
                     this.pageStack = this.pageStack.slice(0, currentPageIndex + 1)
                     this.refreshCurrentTitles();
-                }
-                else {
+                } else {
                     this.pagesInStack--;
                 }
-            }
-            else {
-                if (this.lastDirections[navigationId].value === 'root') {
+            } else {
+                if(this.lastDirections[navigationId].value === 'root') {
                     this.pagesInStack = 1;
                     this.pageStack = [];
-                }
-                else {
+                } else {
                     this.pagesInStack++;
                 }
                 this.findTitleAndPushConfig(currentPagePath, paramsId);
             }
             delete this.lastDirections[navigationId];
-        }
-        else {
+        } else {
             this.findTitleAndPushConfig(currentPagePath, paramsId);
         }
     }
@@ -295,10 +314,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
     private findTitleAndPushConfig(currentPagePath: NavPathEnum, paramsId?: number): void {
         const indexInPageStack = this.findIndexInPageStack(currentPagePath, paramsId);
-        if (indexInPageStack === -1) {
+        if(indexInPageStack === -1) {
             let currentTitleConfig = this.findTitleConfig(currentPagePath, paramsId);
-            if (!currentTitleConfig) {
-                currentTitleConfig = { pagePath: currentPagePath };
+            if(!currentTitleConfig) {
+                currentTitleConfig = {pagePath: currentPagePath};
             }
             this.pageStack.push({...currentTitleConfig, stackIndex: this.pagesInStack});
             this.refreshCurrentTitles();

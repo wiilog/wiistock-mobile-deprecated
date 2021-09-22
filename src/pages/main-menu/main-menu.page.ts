@@ -1,8 +1,8 @@
 import {Component, NgZone} from '@angular/core';
 import {ColumnNumber, MenuConfig} from '@app/common/components/menu/menu-config';
-import {from, Observable, Subject, Subscription, zip} from 'rxjs';
+import {Observable, Subject, Subscription, zip} from 'rxjs';
 import {flatMap, map} from 'rxjs/operators';
-import {AlertController, Platform} from '@ionic/angular';
+import {Platform} from '@ionic/angular';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {Network} from '@ionic-native/network/ngx';
@@ -14,6 +14,7 @@ import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {ILocalNotification} from '@ionic-native/local-notifications';
 import {NotificationService} from '@app/common/services/notification.service';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {AlertService} from '@app/common/services/alert.service';
 
 
 @Component({
@@ -42,7 +43,7 @@ export class MainMenuPage extends PageComponent {
     private pageIsRedirecting: boolean;
     private lastNotificationRedirected: ILocalNotification;
 
-    public constructor(private alertController: AlertController,
+    public constructor(private alertService: AlertService,
                        private sqliteService: SqliteService,
                        private storageService: StorageService,
                        private localDataManager: LocalDataManagerService,
@@ -139,36 +140,31 @@ export class MainMenuPage extends PageComponent {
         return $res;
     }
 
-    private onBackButton(): void {
+    private async onBackButton(): Promise<void> {
         if (this.exitAlert) {
             this.exitAlert.dismiss();
             this.exitAlert = undefined;
         }
         else {
-            from(this.alertController
-                .create({
-                    header: `Êtes-vous sûr de vouloir quitter l'application ?`,
-                    backdropDismiss: false,
-                    buttons: [
-                        {
-                            text: 'Annuler',
-                            handler: () => {
-                                this.exitAlert = undefined;
-                            }
-                        },
-                        {
-                            text: 'Confirmer',
-                            handler: () => {
-                                navigator['app'].exitApp();
-                            },
-                            cssClass: 'alert-success'
+            this.exitAlert = await this.alertService.show({
+                header: `Êtes-vous sûr de vouloir quitter l'application ?`,
+                backdropDismiss: false,
+                buttons: [
+                    {
+                        text: 'Annuler',
+                        handler: () => {
+                            this.exitAlert = undefined;
                         }
-                    ]
-                }))
-                .subscribe((exitAlert: HTMLIonAlertElement) => {
-                    this.exitAlert = exitAlert;
-                    this.exitAlert.present();
-                });
+                    },
+                    {
+                        text: 'Confirmer',
+                        handler: () => {
+                            navigator['app'].exitApp();
+                        },
+                        cssClass: 'alert-success'
+                    }
+                ]
+            });
         }
     }
 

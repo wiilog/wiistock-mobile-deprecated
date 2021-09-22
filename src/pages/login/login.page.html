@@ -7,7 +7,7 @@
                           [key]="LOGIN_IMAGE_KEY">
         </wii-server-image>
     </div>
-    <div class="version-not-valid-container" *ngIf="!loading && appVersionInvalid else userTemplate">
+    <div class="version-not-valid-container" *ngIf="!loading && appVersionInvalid else pendingDepositsTemplate">
         <ion-button class="version-not-valid"
                     [href]="apkUrl"
                     size="large"
@@ -41,9 +41,15 @@
     <div class="version-container" *ngIf="currentVersion">V {{ currentVersion }}</div>
 </div>
 
+<ng-template #pendingDepositsTemplate>
+    <div class="logged-user" *ngIf="pendingDeposits && loggedUser$ && loggedUser$|async as loggedUser else userTemplate">
+        <div class="logged-user-info">L'utilisateur {{ loggedUser }} doit se reconnecter
+            car il reste des prises en cours</div>
+    </div>
+</ng-template>
+
 <ng-template #userTemplate>
-    <div class="logged-user"
-         *ngIf="loggedUser$ && loggedUser$|async as loggedUser">
+    <div class="logged-user" *ngIf="loggedUser$ && loggedUser$|async as loggedUser">
         <div class="logged-user-info">Dernière session en cours</div>
         {{ loggedUser }}
     </div>

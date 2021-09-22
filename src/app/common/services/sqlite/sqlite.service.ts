@@ -3,7 +3,6 @@ import {StorageService} from '@app/common/services/storage/storage.service';
 import {Livraison} from '@entities/livraison';
 import {from, Observable, of, ReplaySubject, Subject, zip} from 'rxjs';
 import {flatMap, map, take, tap} from 'rxjs/operators';
-import {Collecte} from '@entities/collecte';
 import {Handling} from '@entities/handling';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {Anomalie} from "@entities/anomalie";

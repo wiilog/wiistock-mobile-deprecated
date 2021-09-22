@@ -11,7 +11,6 @@ import {CommonModule} from '@app/common/common.module';
 import {FCM} from 'cordova-plugin-fcm-with-dependecy-updated/ionic/ngx';
 import {LocalNotifications} from '@ionic-native/local-notifications/ngx';
 
-
 @NgModule({
     declarations: [
         AppComponent
