@@ -89,18 +89,6 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
                 this.statsSlidersData = this.createStatsSlidersData(treatedDispatches, toTreatDispatches);
             }
         );
-
-        this.storageService.getRight(StorageKeyEnum.RIGHT_EMPTY_ROUND).subscribe((emptyRound) => {
-            if(emptyRound) {
-                this.menuConfig.push({
-                    icon: 'empty-round.svg',
-                    label: 'Passage à vide',
-                    action: () => {
-                        this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {fromEmptyRound: true});
-                    }
-                });
-            }
-        });
     }
 
     private createStatsSlidersData(treatedDispatchesCounter: number, toTreatedDispatchesCounter: number): Array<StatsSlidersData> {

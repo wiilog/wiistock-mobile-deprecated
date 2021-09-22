@@ -8,7 +8,6 @@ import {FormPanelParam} from '@app/common/directives/form-panel/form-panel-param
 import {FormPanelInputComponent} from '@app/common/components/panel/form-panel/form-panel-input/form-panel-input.component';
 import {ApiService} from '@app/common/services/api.service';
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
-import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {LoadingService} from '@app/common/services/loading.service';
 import {Network} from '@ionic-native/network/ngx';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
@@ -59,18 +58,17 @@ export class EmptyRoundPage extends PageComponent implements ViewWillEnter, View
             },
         };
 
-        this.formBodyConfig = [
-            {
-                item: FormPanelInputComponent,
-                config: {
-                    label: 'Commentaire',
-                    name: 'comment',
-                    inputConfig: {
-                        type: 'text',
-                        disabled: false
-                    }
+        this.formBodyConfig = [{
+            item: FormPanelInputComponent,
+            config: {
+                label: 'Commentaire',
+                name: 'comment',
+                inputConfig: {
+                    type: 'text',
+                    disabled: false
                 }
-            }];
+            }
+        }];
     }
 
     ionViewWillLeave(): void {
@@ -89,12 +87,12 @@ export class EmptyRoundPage extends PageComponent implements ViewWillEnter, View
 
         this.loading
             .presentLoading(`${online ? 'Envoi' : 'Sauvegarde'} du mouvement de passage à vide`).subscribe((loader: HTMLIonLoadingElement) => {
-            if (online) {
+            if(online) {
                 this.api.requestApi(ApiService.POST_EMPTY_ROUND, {
                     params: options
                 }).subscribe(() => {
                     loader.dismiss();
-                    this.nav.push(NavPathEnum.TRACKING_MENU);
+                    this.nav.pop().subscribe(() => this.nav.pop());
                 }, () => {
                     loader.dismiss();
                     this.toast.presentToast('Une erreur est survenue lors de l\'envoi des données');
@@ -102,7 +100,7 @@ export class EmptyRoundPage extends PageComponent implements ViewWillEnter, View
             } else {
                 this.sqliteService.insert('empty_round', options).subscribe(() => {
                     loader.dismiss();
-                    this.nav.push(NavPathEnum.TRACKING_MENU);
+                    this.nav.pop().subscribe(() => this.nav.pop());
                 });
             }
         })
