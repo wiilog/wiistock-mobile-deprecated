@@ -7,14 +7,13 @@ import {Collecte} from '@entities/collecte';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {FileService} from "@app/common/services/file.service";
 import {StorageService} from "@app/common/services/storage/storage.service";
-import {from, Observable, of, ReplaySubject, Subject, zip} from 'rxjs';
+import {Observable, of, ReplaySubject, Subject, zip} from 'rxjs';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {AlertController} from '@ionic/angular';
 import {catchError, flatMap, map} from 'rxjs/operators';
-import {AlertManagerService} from '@app/common/services/alert-manager.service';
 import {DemandeLivraison} from '@entities/demande-livraison';
 import {DemandeLivraisonArticleSelected} from '@entities/demande-livraison-article-selected';
 import {TransferOrder} from '@entities/transfer-order';
+import {AlertService} from '@app/common/services/alert.service';
 
 
 type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies' | 'dispatch' | 'transfer' | 'empty_round';
@@ -49,8 +48,7 @@ export class LocalDataManagerService {
                        private apiService: ApiService,
                        private fileService: FileService,
                        private storageService: StorageService,
-                       private alertManager: AlertManagerService,
-                       private alertController: AlertController) {
+                       private alertService: AlertService) {
         this.apiProccessConfigs = {
             preparation: {
                 service: ApiService.FINISH_PREPA,
@@ -622,21 +620,15 @@ export class LocalDataManagerService {
     private presentAlertError(title: string,
                               numeroFailedName: string,
                               errors: Array<{[numeros: string]: string, message: string}>): void {
-        from(this.alertController
-            .create({
-                header: title,
-                cssClass: AlertManagerService.CSS_CLASS_MANAGED_ALERT,
-                message: errors.map(({message, ...numeros}) => `${numeros[numeroFailedName]} : ${message}`).join(`\n`),
-                buttons: [{
-                    text: 'Valider',
-                    cssClass: 'alert-success'
-                }]
-            })
-        )
-            .pipe(flatMap((alert: HTMLIonAlertElement) => from(alert.present())))
-            .subscribe(() => {
-                this.alertManager.breakMessageLines();
-            });
+        this.alertService.show({
+            header: title,
+            cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+            message: errors.map(({message, ...numeros}) => `${numeros[numeroFailedName]} : ${message}`).join(`\n`),
+            buttons: [{
+                text: 'Valider',
+                cssClass: 'alert-success'
+            }]
+        });
     }
 
     private requestApiForDeliveryRequests([first, ...remaining]: Array<{apiData: DemandeForApi, demande: DemandeLivraison}>): Observable<Array<{success: boolean; message: string; demande: DemandeLivraison}>> {
