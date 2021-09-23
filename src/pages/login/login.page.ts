@@ -84,7 +84,7 @@ export class LoginPage extends PageComponent {
             map(operator => ({params: {operator}})),
             mergeMap(params => this.apiService.requestApi(ApiService.GET_PREVIOUS_OPERATOR_MOVEMENTS, params))
         ).subscribe(data => {
-            this.pendingDeposits = (data.movements.length > 0);
+            this.pendingDeposits = data.movements.length > 0;
         });
 
         if(this.serverImageLogo) {

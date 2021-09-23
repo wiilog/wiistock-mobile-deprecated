@@ -249,6 +249,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         const where = [
             `type LIKE 'prise'`,
             `finished = 0`,
+            `fromStock = 0`,
         ];
 
         this.sqliteService.findBy('mouvement_traca', where).subscribe(async result => {
