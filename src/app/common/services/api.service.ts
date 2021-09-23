@@ -30,7 +30,7 @@ export class ApiService {
     public static readonly POST_MOUVEMENT_TRACA = {method: POST, service: '/mouvements-traca'};
     public static readonly POST_HANDLING = {method: POST, service: '/handlings'};
     public static readonly GET_DATA = {method: POST, service: '/getData'};
-    public static readonly GET_PREVIOUS_OPERATOR_MOVEMENTS = {method: POST, service: '/previous-operator-movements'};
+    public static readonly GET_PREVIOUS_OPERATOR_MOVEMENTS = {method: GET, service: '/previous-operator-movements'};
     public static readonly NEW_EMP = {method: POST, service: '/emplacement'};
     public static readonly GET_ARTICLES = {method: GET, service: '/articles'};
     public static readonly GET_TRACKING_DROPS = {method: GET, service: '/tracking-drops'};

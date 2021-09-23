@@ -80,11 +80,11 @@ export class LoginPage extends PageComponent {
     public ionViewWillEnter(): void {
         this.storageService.getString(StorageKeyEnum.OPERATOR_ID).pipe(
             take(1),
-            filter(operator => operator != null),
-            map(operator => ({pathParams: {operator}})),
+            filter(Boolean),
+            map(operator => ({params: {operator}})),
             mergeMap(params => this.apiService.requestApi(ApiService.GET_PREVIOUS_OPERATOR_MOVEMENTS, params))
         ).subscribe(data => {
-            this.pendingDeposits = data.movements.length as boolean;
+            this.pendingDeposits = (data.movements.length > 0);
         });
 
         if(this.serverImageLogo) {
