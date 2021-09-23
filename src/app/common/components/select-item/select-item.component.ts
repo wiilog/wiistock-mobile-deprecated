@@ -34,6 +34,9 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
     public checkBarcodeValidity?: boolean = false;
 
     @Input()
+    public customBarcodeValidator?: (barcode: string) => Observable<any>;
+
+    @Input()
     public requestParams?: Array<string> = [];
 
     @Input()
@@ -165,22 +168,16 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
         });
     }
 
-    public testIfBarcodeValid(barcode: string): void {
+    public testIfBarcodeValid(barcode: string, withoutCustom: boolean = false): void {
         if (barcode) {
-            let item = this.searchComponent.findItem(barcode);
-            if (!item) {
-                if (this.scanMode === BarcodeScannerModeEnum.TOOL_SEARCH || this.checkBarcodeValidity) {
-                    this.presentInvalidItemToast();
-                }
-                else {
-                    this.onItemSelect({
-                        id: new Date().getUTCMilliseconds(),
-                        label: barcode
-                    });
-                }
+            if (!withoutCustom && this.customBarcodeValidator) {
+                this.customBarcodeValidator(barcode).subscribe((item: any) => {
+                    this.validateItem(item, barcode);
+                });
             }
             else {
-                this.onItemSelect(item);
+                let item = this.searchComponent.findItem(barcode);
+                this.validateItem(item, barcode);
             }
         }
         else {
@@ -209,5 +206,22 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
     private resetSearchComponent(): void {
         this.searchComponent.clear();
         this.changeDetector.detectChanges();
+    }
+
+    private validateItem(item: any, barcode: string): void {
+        if (!item) {
+            if (this.scanMode === BarcodeScannerModeEnum.TOOL_SEARCH || this.checkBarcodeValidity) {
+                this.presentInvalidItemToast();
+            }
+            else {
+                this.onItemSelect({
+                    id: new Date().getUTCMilliseconds(),
+                    label: barcode
+                });
+            }
+        }
+        else {
+            this.onItemSelect(item);
+        }
     }
 }

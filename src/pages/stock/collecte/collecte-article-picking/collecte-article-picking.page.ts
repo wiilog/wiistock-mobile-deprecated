@@ -11,8 +11,9 @@ import {SelectItemComponent} from '@app/common/components/select-item/select-ite
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {map, mergeMap} from 'rxjs/operators';
-import {of} from 'rxjs';
+import {Observable, of} from 'rxjs';
 import {Network} from '@ionic-native/network/ngx';
+import {ToastService} from '@app/common/services/toast.service';
 
 
 @Component({
@@ -30,12 +31,15 @@ export class CollecteArticlePickingPage extends PageComponent implements ViewWil
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
 
+    public barcodeValidator = (barcode: string) => this.validateBarcode(barcode);
+
     private article: ArticleCollecte;
     private selectArticle: (quantity: number, article?: ArticleCollecte) => void;
 
     public constructor(navService: NavService,
                        private network: Network,
                        private loadingService: LoadingService,
+                       private toastService: ToastService,
                        private sqliteService: SqliteService,
                        private apiService: ApiService) {
         super(navService);
@@ -110,5 +114,20 @@ export class CollecteArticlePickingPage extends PageComponent implements ViewWil
                 this.selectArticle(quantity, pickedArticle);
             }
         });
+    }
+
+    public validateBarcode(barcode: string): Observable<ArticleCollecte> {
+        return this.loadingService
+            .presentLoadingWhile({
+                event: () => this.apiService.requestApi(ApiService.GET_COLLECTABLE_ARTICLES, {
+                    params: {
+                        reference: this.article.reference,
+                        barcode
+                    }
+                })
+            })
+            .pipe(
+                map(({articles}) => articles ? articles[0] : undefined)
+            );
     }
 }

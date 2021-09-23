@@ -3,6 +3,7 @@
                      *ngIf="showArticlePicking"
                      [type]="selectItemType"
                      (itemChange)="pickArticle($event)"
+                     [customBarcodeValidator]="barcodeValidator"
                      [checkBarcodeValidity]="true"
                      [scanMode]="selectItemMode">
     </wii-select-item>
