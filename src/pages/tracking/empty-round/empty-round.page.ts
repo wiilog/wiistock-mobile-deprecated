@@ -13,6 +13,7 @@ import {Network} from '@ionic-native/network/ngx';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {ToastService} from '@app/common/services/toast.service';
+import * as moment from 'moment';
 
 @Component({
     selector: 'app-empty-round',
@@ -77,12 +78,11 @@ export class EmptyRoundPage extends PageComponent implements ViewWillEnter, View
     public validate() {
         const values = this.formPanelComponent.values;
         const online = (this.network.type !== 'none');
-        const date = new Date();
 
         const options = {
             location: this.location.label,
             comment: values.comment,
-            date
+            date: moment().format('DD/MM/YYYY HH:mm:ss')
         }
 
         this.loading
