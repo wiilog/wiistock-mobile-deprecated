@@ -9,4 +9,5 @@ export interface ArticleCollecte {
     emplacement: string;
     barcode?: string;
     reference_label?: string;
+    quantity_type?: 'article'|'reference';
 }

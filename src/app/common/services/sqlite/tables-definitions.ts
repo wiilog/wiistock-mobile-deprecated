@@ -188,7 +188,20 @@ export const TablesDefinitions: Array<TableDefinition> = [
             is_ref: 'INTEGER',
             id_collecte: 'INTEGER',
             has_moved: 'INTEGER',
-            reference_label: 'VARCHAR(255)'
+            reference_label: 'VARCHAR(255)',
+            quantity_type: 'VARCHAR(255)'
+        }
+    },
+    {
+        name: 'picking_article_collecte',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY AUTOINCREMENT',
+            label: 'TEXT',
+            reference: 'TEXT',
+            reference_label: 'TEXT',
+            barcode: 'TEXT',
+            location: 'TEXT',
+            is_ref: 'INTEGER'
         }
     },
     {

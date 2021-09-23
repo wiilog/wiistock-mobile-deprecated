@@ -44,6 +44,7 @@ export class ApiService {
     public static readonly UNGROUP = {method: POST, service: '/ungroup'};
     public static readonly POST_GROUP_TRACKINGS = {method: POST, service: '/group-trackings/{mode}'};
     public static readonly POST_EMPTY_ROUND = {method: POST, service: '/empty-round'};
+    public static readonly GET_COLLECTABLE_ARTICLES = {method: GET, service: '/collectable-articles'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'

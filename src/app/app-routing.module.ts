@@ -128,6 +128,11 @@ const routes: Routes = [
         loadChildren: () => import('../pages/stock/collecte/collecte-articles/collecte-articles.module').then(m => m.CollecteArticlesPageModule)
     },
     {
+        path: NavPathEnum.COLLECTE_ARTICLE_PICKING,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/stock/collecte/collecte-article-picking/collecte-article-picking.module').then(m => m.CollecteArticlePickingPageModule)
+    },
+    {
         path: NavPathEnum.COLLECTE_ARTICLE_TAKE,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('../pages/stock/collecte/collecte-article-take/collecte-article-take.module').then(m => m.CollecteArticleTakePageModule)

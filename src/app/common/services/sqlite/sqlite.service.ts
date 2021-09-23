@@ -496,11 +496,12 @@ export class SqliteService {
             )),
             flatMap(() => (
                 (articlesCollecteAPI && articlesCollecteAPI.length > 0)
-                    ? this.insert('article_collecte', articlesCollecteAPI.map(({label, reference, quantity, is_ref, id_collecte, location, barCode, reference_label}) => ({
+                    ? this.insert('article_collecte', articlesCollecteAPI.map(({label, quantity_type, reference, quantity, is_ref, id_collecte, location, barCode, reference_label}) => ({
                         label,
                         reference,
                         is_ref,
                         id_collecte,
+                        quantity_type,
                         emplacement: location,
                         barcode: barCode,
                         reference_label,

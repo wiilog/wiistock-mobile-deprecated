@@ -64,6 +64,14 @@
                              *ngIf="config[smartType].templateIndex === 'default'">
                     {{ item[config[smartType].label] }}
                 </ng-template>
+                <ng-template ionicSelectableItemTemplate
+                             let-article="item"
+                             *ngIf="config[smartType].templateIndex === 'collectable-articles'">
+                    <div class="ionic-selectable-item-wrapper">
+                        <p>Barcode : {{article.barcode}}</p>
+                        <p>Libellé : {{article.label}}</p>
+                    </div>
+                </ng-template>
             </ionic-selectable>
         </ion-item>
     </ion-card-content>

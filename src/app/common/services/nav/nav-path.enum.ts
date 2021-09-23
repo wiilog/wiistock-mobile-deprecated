@@ -1,5 +1,6 @@
 export enum NavPathEnum {
     COLLECTE_ARTICLE_TAKE = 'collecte-article-take',
+    COLLECTE_ARTICLE_PICKING = 'collecte-article-picking',
     LIVRAISON_MENU = 'livraison-menu',
     DEMANDE_LIVRAISON_MENU = 'demande-livraison-menu',
     COLLECTE_ARTICLES = 'collecte-articles',

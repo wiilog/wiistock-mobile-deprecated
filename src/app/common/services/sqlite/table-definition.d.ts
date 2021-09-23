@@ -35,4 +35,5 @@ export type TableName = 'emplacement'
                       | 'status'
                       | 'transfer_order'
                       | 'transfer_order_article'
-                      | 'empty_round';
+                      | 'empty_round'
+                      | 'picking_article_collecte';

@@ -3,6 +3,8 @@ import {NavService} from '@app/common/services/nav/nav.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {ArticleCollecte} from '@entities/article-collecte';
 import {PageComponent} from '@pages/page.component';
+import {mergeMap} from 'rxjs/operators';
+import {of} from 'rxjs';
 
 @Component({
     selector: 'wii-collecte-article-take',
@@ -12,6 +14,7 @@ import {PageComponent} from '@pages/page.component';
 export class CollecteArticleTakePage extends PageComponent {
 
     public article: ArticleCollecte;
+    public pickedArticle: ArticleCollecte;
 
     public simpleFormConfig: {
         title: string;
@@ -28,6 +31,7 @@ export class CollecteArticleTakePage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.article = this.currentNavParams.get('article');
+        this.pickedArticle = this.currentNavParams.get('pickedArticle');
         this.selectArticle = this.currentNavParams.get('selectArticle');
 
         this.simpleFormConfig = {
@@ -35,7 +39,7 @@ export class CollecteArticleTakePage extends PageComponent {
             info: [
                 {label: 'Référence', value: this.article.reference},
                 {label: 'Libellé référence', value: this.article.reference_label},
-                {label: 'Code barre', value: this.article.barcode},
+                {label: 'Code barre', value: this.pickedArticle ? this.pickedArticle.barcode : this.article.barcode},
                 {label: 'Quantité à collecter', value: `${this.article.quantite}`}
             ],
             fields: [
@@ -55,9 +59,17 @@ export class CollecteArticleTakePage extends PageComponent {
             this.toastService.presentToast('Veuillez selectionner une quantité valide.');
         }
         else {
-            this.navService.pop().subscribe(() => {
-                this.selectArticle(quantity);
-            });
+            this.navService.pop()
+                .pipe(
+                    mergeMap(() => (
+                        (this.article.is_ref && this.article.quantity_type === 'article')
+                            ? this.navService.pop()
+                            : of(undefined)
+                    ))
+                )
+                .subscribe(() => {
+                    this.selectArticle(quantity);
+                });
         }
     }
 }

@@ -96,6 +96,10 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
             invalidMessage: 'L\'acheminement n\'est pas dans la liste',
             buttonSubtitle: 'Acheminement'
         },
+        [SelectItemTypeEnum.COLLECTABLE_ARTICLES]: {
+            invalidMessage: 'L\'article n\'est pas dans la liste',
+            buttonSubtitle: 'Article'
+        },
     }
 
     public constructor(private toastService: ToastService,

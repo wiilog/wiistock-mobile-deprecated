@@ -122,7 +122,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
         this.toastService.presentToast('Quantité bien prélevée.')
     }
 
-    public registerMvt(article, quantite): void {
+    public registerMvt(article, quantite, pickedArticle?: ArticleCollecte): void {
         if (this.isValid) {
             if (article.quantite !== Number(quantite)) {
                 let newArticle: ArticleCollecte = {
@@ -130,11 +130,11 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                     label: article.label,
                     reference: article.reference,
                     quantite: Number(quantite),
-                    is_ref: article.is_ref,
+                    is_ref: pickedArticle ? 0 : article.is_ref,
                     id_collecte: article.id_collecte,
                     has_moved: 1,
                     emplacement: article.emplacement,
-                    barcode: article.barcode,
+                    barcode: pickedArticle ? pickedArticle.barcode : article.barcode,
                 };
                 let articleAlready = this.articlesT.find(art => (
                     (art.id_collecte === newArticle.id_collecte) &&
@@ -150,7 +150,8 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                         .subscribe((articles) => {
                             this.updateList(articles);
                         });
-                } else {
+                }
+                else {
                     this.sqliteService.insert('article_collecte', newArticle).subscribe((insertId) => {
                         let mouvement: Mouvement = {
                             id: null,
@@ -184,13 +185,13 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                     id: null,
                     reference: article.reference,
                     quantity: article.quantite,
-                    barcode: article.barcode,
+                    barcode: pickedArticle ? pickedArticle.barcode : article.barcode,
                     date_pickup: moment().format(),
                     location_from: article.emplacement,
                     date_drop: null,
                     location: null,
                     type: 'prise-dépose',
-                    is_ref: article.is_ref,
+                    is_ref: pickedArticle ? 0 : article.is_ref,
                     id_article_prepa: null,
                     id_prepa: null,
                     id_article_livraison: null,
@@ -214,10 +215,28 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                             this.updateList(articles);
                         });
                 } else {
+                    let newArticle: ArticleCollecte = {
+                        id: null,
+                        label: article.label,
+                        reference: article.reference,
+                        quantite: Number(quantite),
+                        is_ref: pickedArticle ? 0 : article.is_ref,
+                        id_collecte: article.id_collecte,
+                        has_moved: 1,
+                        emplacement: article.emplacement,
+                        barcode: pickedArticle ? pickedArticle.barcode : article.barcode,
+                    };
                     this.sqliteService
                         .insert('mouvement', mouvement)
                         .pipe(
-                            flatMap(() => this.sqliteService.moveArticleCollecte(article.id)),
+                            flatMap(() => (
+                                !pickedArticle
+                                    ? this.sqliteService.moveArticleCollecte(article.id)
+                                    : zip(
+                                        this.sqliteService.deleteBy('article_collecte', [`id = ${article.id}`]),
+                                        this.sqliteService.insert('article_collecte', newArticle)
+                                    )
+                            )),
                             flatMap(() => this.sqliteService.findArticlesByCollecte(this.collecte.id))
                         )
                         .subscribe((articles) => {
@@ -243,10 +262,13 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
             ? this.articlesNT.find(article => (article.barcode === text))
             : text;
         if (article) {
-            this.navService.push(NavPathEnum.COLLECTE_ARTICLE_TAKE, {
+            const pickingPage = (article.is_ref && article.quantity_type === 'article')
+                ? NavPathEnum.COLLECTE_ARTICLE_PICKING
+                : NavPathEnum.COLLECTE_ARTICLE_TAKE
+            this.navService.push(pickingPage, {
                 article,
-                selectArticle: (quantity: number) => {
-                    this.selectArticle(article, quantity);
+                selectArticle: (quantity: number, pickedArticle: ArticleCollecte) => {
+                    this.selectArticle(article, quantity, pickedArticle);
                 }
             });
         }
@@ -283,7 +305,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
         }
     }
 
-    private selectArticle(article, quantity): void {
+    private selectArticle(article, quantity, pickedArticle: ArticleCollecte): void {
         if (!this.started && this.network.type !== 'none') {
             this.loadingStartCollecte = true;
             this.apiService
@@ -293,7 +315,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                         this.started = true;
                         this.isValid = true;
                         this.toastService.presentToast('Collecte commencée.');
-                        this.registerMvt(article, quantity);
+                        this.registerMvt(article, quantity, pickedArticle);
                     } else {
                         this.isValid = false;
                         this.loadingStartCollecte = false;

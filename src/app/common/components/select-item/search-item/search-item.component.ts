@@ -124,6 +124,13 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             databaseTable: 'dispatch',
             placeholder: 'Sélectionnez un acheminement',
         },
+        [SelectItemTypeEnum.COLLECTABLE_ARTICLES]: {
+            label: 'barcode',
+            valueField: 'barcode',
+            templateIndex: 'collectable-articles',
+            databaseTable: 'picking_article_collecte',
+            placeholder: 'Sélectionnez un article',
+        },
     }
 
     public constructor(private sqliteService: SqliteService,
