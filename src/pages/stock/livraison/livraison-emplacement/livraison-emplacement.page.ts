@@ -16,6 +16,7 @@ import {PageComponent} from '@pages/page.component';
 import * as moment from 'moment';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {StorageService} from '@app/common/services/storage/storage.service';
+import {LoadingService} from "../../../../app/common/services/loading.service";
 
 @Component({
     selector: 'wii-livraison-emplacement',
@@ -50,6 +51,7 @@ export class LivraisonEmplacementPage extends PageComponent {
                        private toastService: ToastService,
                        private network: Network,
                        private localDataManager: LocalDataManagerService,
+                       private loadingService: LoadingService,
                        private storageService: StorageService,
                        navService: NavService) {
         super(navService);
@@ -89,51 +91,56 @@ export class LivraisonEmplacementPage extends PageComponent {
     public validate(): void {
         if (!this.validateIsLoading) {
             if (this.location && this.location.label) {
-                this.validateIsLoading = true;
-                this.sqliteService
-                    .findBy('article_livraison', [`id_livraison = ${this.livraison.id}`])
-                    .pipe(
-                        flatMap((articles) => zip(
-                            ...articles.map((article) => (
-                                this.sqliteService
-                                    .findMvtByArticleLivraison(article.id)
-                                    .pipe(flatMap((mvt) => this.sqliteService.finishMvt(mvt.id, this.location.label)))
-                            ))
-                        )),
-                        flatMap(() => this.sqliteService.update(
-                            'livraison',
-                            [{
-                                values: {
-                                    date_end: moment().format(),
-                                    location: this.location.label
-                                },
-                                where: [`id = ${this.livraison.id}`]
-                            }]
-                        )),
-                        flatMap((): any => (
-                            (this.network.type !== 'none')
-                                ? this.localDataManager.sendFinishedProcess('livraison')
-                                : of({offline: true})
-                        )),
-                        flatMap((res: any) => (
-                            res.offline || res.success.length > 0
-                                ? this.storageService.incrementCounter(StorageKeyEnum.COUNTERS_DELIVERIES_TREATED).pipe(map(() => res))
-                                : of(res)
-                        )),
-                    )
-                    .subscribe(
-                        ({offline, success}: any) => {
-                            if (offline) {
-                                this.toastService.presentToast('Livraison sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
-                                this.closeScreen();
-                            }
-                            else {
-                                this.handleLivraisonSuccess(success.length);
-                            }
-                        },
-                        (error) => {
-                            this.handleLivraisonError(error);
-                        });
+                this.loadingService.presentLoadingWhile(
+                    {
+                        message: 'Envoi de la livraison en cours...',
+                        event: () => {
+                            this.validateIsLoading = true;
+                            return this.sqliteService
+                                .findBy('article_livraison', [`id_livraison = ${this.livraison.id}`])
+                                .pipe(
+                                    flatMap((articles) => zip(
+                                        ...articles.map((article) => (
+                                            this.sqliteService
+                                                .findMvtByArticleLivraison(article.id)
+                                                .pipe(flatMap((mvt) => this.sqliteService.finishMvt(mvt.id, this.location.label)))
+                                        ))
+                                    )),
+                                    flatMap(() => this.sqliteService.update(
+                                        'livraison',
+                                        [{
+                                            values: {
+                                                date_end: moment().format(),
+                                                location: this.location.label
+                                            },
+                                            where: [`id = ${this.livraison.id}`]
+                                        }]
+                                    )),
+                                    flatMap((): any => (
+                                        (this.network.type !== 'none')
+                                            ? this.localDataManager.sendFinishedProcess('livraison')
+                                            : of({offline: true})
+                                    )),
+                                    flatMap((res: any) => (
+                                        res.offline || res.success.length > 0
+                                            ? this.storageService.incrementCounter(StorageKeyEnum.COUNTERS_DELIVERIES_TREATED).pipe(map(() => res))
+                                            : of(res)
+                                    )),
+                                );
+                        }
+                    }
+                ).subscribe(
+                    ({offline, success}: any) => {
+                        if (offline) {
+                            this.toastService.presentToast('Livraison sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+                            this.closeScreen();
+                        } else {
+                            this.handleLivraisonSuccess(success.length);
+                        }
+                    },
+                    (error) => {
+                        this.handleLivraisonError(error);
+                    });
             }
             else {
                 this.toastService.presentToast('Veuillez sélectionner ou scanner un emplacement.');
