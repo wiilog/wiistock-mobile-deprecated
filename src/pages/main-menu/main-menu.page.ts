@@ -339,7 +339,17 @@ export class MainMenuPage extends PageComponent {
                                 .push(NavPathEnum.STOCK_MENU)
                                 .pipe(
                                     flatMap(() => this.navService.push(NavPathEnum.COLLECTE_MENU, {withoutLoading: true})),
-                                    flatMap(() => this.navService.push(NavPathEnum.COLLECTE_ARTICLES, {collecte: collect}))
+                                    flatMap(() => this.navService.push(NavPathEnum.COLLECTE_ARTICLES, {
+                                        collecte: collect,
+                                        goToDrop: () => {
+                                            this.navService.pop().subscribe(() => {
+                                                this.navService
+                                                    .push(NavPathEnum.TRANSFER_MENU, {
+                                                        goToDropDirectly: true
+                                                    });
+                                            });
+                                        }
+                                    }))
                                 )
                                 .subscribe(() => {
                                     this.pageIsRedirecting = false;
