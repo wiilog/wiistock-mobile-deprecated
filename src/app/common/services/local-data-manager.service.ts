@@ -420,9 +420,9 @@ export class LocalDataManagerService {
                     mouvements.length > 0
                         ? (
                             this.apiService
-                                .requestApi(ApiService.POST_MOUVEMENT_TRACA, {
-                                    params: this.extractTrackingMovementFiles(mouvements)
-                                })
+                                .requestApi(
+                                    sendFromStock ? ApiService.POST_STOCK_MOVEMENTS : ApiService.POST_TRACKING_MOVEMENTS,
+                                    {params: this.extractTrackingMovementFiles(mouvements)})
                                 .pipe(
                                     map((apiResponse) => [apiResponse, mouvements]),
                                     flatMap(([apiResponse, mouvements]) => {
