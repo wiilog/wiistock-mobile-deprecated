@@ -75,49 +75,7 @@ export class DispatchMenuPage extends PageComponent {
                     flatMap(() => this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL OR partial = 1']))
                 )
                 .subscribe((dispatches: Array<Dispatch>) => {
-                    this.dispatchesListConfig = dispatches.map(({
-                                                                    id,
-                                                                    requester,
-                                                                    color,
-                                                                    number,
-                                                                    startDate,
-                                                                    endDate,
-                                                                    locationFromLabel,
-                                                                    locationToLabel,
-                                                                    statusLabel,
-                                                                    typeLabel,
-                                                                    emergency
-                                                                }) => ({
-                        title: {label: 'Demandeur', value: requester},
-                        customColor: color,
-                        content: [
-                            {label: 'Numéro', value: number || ''},
-                            {
-                                label: 'Date d\'échéance',
-                                value: startDate && endDate ? `Du ${startDate} au ${endDate}` : ''
-                            },
-                            {label: 'Emplacement prise', value: locationFromLabel || ''},
-                            {label: 'Emplacement dépose', value: locationToLabel || ''},
-                            {label: 'Type', value: typeLabel || ''},
-                            {label: 'Statut', value: statusLabel || ''},
-                            (emergency
-                                ? {label: 'Urgence', value: emergency || ''}
-                                : undefined)
-                        ].filter((item) => item),
-                        ...(emergency
-                            ? {
-                                rightIcon: {
-                                    name: 'exclamation-triangle.svg',
-                                    color: 'danger'
-                                }
-                            }
-                            : {}),
-                        action: () => {
-                            this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-                                dispatchId: id
-                            });
-                        }
-                    }));
+                    this.refreshDispatchesListConfig(dispatches);
 
                     this.refreshSubTitle();
                     this.unsubscribeLoading();
@@ -159,5 +117,51 @@ export class DispatchMenuPage extends PageComponent {
         this.navService.push(NavPathEnum.DISPATCH_PACKS, {
             dispatchId: id
         });
+    }
+
+    private refreshDispatchesListConfig(dispatches: Array<Dispatch>): void {
+        this.dispatchesListConfig = dispatches.map(({
+                                                        id,
+                                                        requester,
+                                                        color,
+                                                        number,
+                                                        startDate,
+                                                        endDate,
+                                                        locationFromLabel,
+                                                        locationToLabel,
+                                                        statusLabel,
+                                                        typeLabel,
+                                                        emergency
+                                                    }) => ({
+            title: {label: 'Demandeur', value: requester},
+            customColor: color,
+            content: [
+                {label: 'Numéro', value: number || ''},
+                {
+                    label: 'Date d\'échéance',
+                    value: startDate && endDate ? `Du ${startDate} au ${endDate}` : ''
+                },
+                {label: 'Emplacement prise', value: locationFromLabel || ''},
+                {label: 'Emplacement dépose', value: locationToLabel || ''},
+                {label: 'Type', value: typeLabel || ''},
+                {label: 'Statut', value: statusLabel || ''},
+                (emergency
+                    ? {label: 'Urgence', value: emergency || ''}
+                    : undefined)
+            ].filter((item) => item),
+            ...(emergency
+                ? {
+                    rightIcon: {
+                        name: 'exclamation-triangle.svg',
+                        color: 'danger'
+                    }
+                }
+                : {}),
+            action: () => {
+                this.navService.push(NavPathEnum.DISPATCH_PACKS, {
+                    dispatchId: id
+                });
+            }
+        }));
     }
 }
