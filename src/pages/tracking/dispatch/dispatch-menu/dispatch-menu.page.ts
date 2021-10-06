@@ -148,7 +148,7 @@ export class DispatchMenuPage extends PageComponent {
                 (emergency
                     ? {label: 'Urgence', value: emergency || ''}
                     : undefined)
-            ].filter((item) => item),
+            ].filter((item) => item && item.value),
             ...(emergency
                 ? {
                     rightIcon: {
