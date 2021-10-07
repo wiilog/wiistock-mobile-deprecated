@@ -27,7 +27,8 @@ export class ApiService {
     public static readonly TREAT_ANOMALIES = {method: POST, service: '/treatAnomalies'};
     public static readonly POST_API_KEY = {method: POST, service: '/api-key'};
     public static readonly ADD_INVENTORY_ENTRIES = {method: POST, service: '/addInventoryEntries'};
-    public static readonly POST_MOUVEMENT_TRACA = {method: POST, service: '/mouvements-traca'};
+    public static readonly POST_TRACKING_MOVEMENTS = {method: POST, service: '/tracking-movements'};
+    public static readonly POST_STOCK_MOVEMENTS = {method: POST, service: '/stock-movements'};
     public static readonly POST_HANDLING = {method: POST, service: '/handlings'};
     public static readonly GET_DATA = {method: POST, service: '/getData'};
     public static readonly GET_PREVIOUS_OPERATOR_MOVEMENTS = {method: GET, service: '/previous-operator-movements'};
