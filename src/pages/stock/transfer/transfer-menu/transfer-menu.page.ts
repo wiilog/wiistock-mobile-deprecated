@@ -72,7 +72,7 @@ export class TransferMenuPage extends PageComponent {
 
     public navigateToPriseDeposePage(goToDropDirectly: boolean = false): void {
         this.navService
-            .push(NavPathEnum.PRISE_DEPOSE_MENU, {
+            .push(NavPathEnum.STOCK_MOVEMENT_MENU, {
                 fromStock: true,
                 goToDropDirectly
             });

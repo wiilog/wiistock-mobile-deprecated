@@ -1,8 +1,8 @@
 import {NgModule} from '@angular/core';
 import {FormsModule} from '@angular/forms';
 import {IonicModule} from '@ionic/angular';
-import {PriseDeposeMenuPageRoutingModule} from './prise-depose-menu-routing.module';
-import {PriseDeposeMenuPage} from './prise-depose-menu.page';
+import {StockMovementMenuPageRoutingModule} from './stock-movement-menu-routing.module';
+import {StockMovementMenuPage} from './stock-movement-menu.page';
 import {CommonModule as AngularCommonModule} from '@angular/common';
 import {CommonModule} from '@app/common/common.module';
 
@@ -11,10 +11,10 @@ import {CommonModule} from '@app/common/common.module';
         AngularCommonModule,
         FormsModule,
         IonicModule,
-        PriseDeposeMenuPageRoutingModule,
+        StockMovementMenuPageRoutingModule,
         CommonModule
     ],
-    declarations: [PriseDeposeMenuPage]
+    declarations: [StockMovementMenuPage]
 })
-export class PriseDeposeMenuPageModule {
+export class StockMovementMenuPageModule {
 }

@@ -229,9 +229,14 @@ const routes: Routes = [
         loadChildren: () => import('@pages/stock/transfer/transfer-validate/transfer-validate.module').then(m => m.TransferValidatePageModule)
     },
     {
-        path: NavPathEnum.PRISE_DEPOSE_MENU,
+        path: NavPathEnum.STOCK_MOVEMENT_MENU,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('@pages/prise-depose/prise-depose-menu/prise-depose-menu.module').then(m => m.PriseDeposeMenuPageModule)
+        loadChildren: () => import('@pages/stock/stock-movement-menu/stock-movement-menu.page').then(m => m.StockMovementMenuPage)
+    },
+    {
+        path: NavPathEnum.TRACKING_MOVEMENT_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/tracking-movement-menu/tracking-movement-menu.module').then(m => m.TrackingMovementMenuPageModule)
     },
     {
         path: NavPathEnum.UNGROUP_SCAN_LOCATION,

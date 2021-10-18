@@ -48,7 +48,7 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
                 icon: 'tracking.svg',
                 label: 'Mouvements',
                 action: () => {
-                    this.navService.push(NavPathEnum.PRISE_DEPOSE_MENU, {fromStock: false});
+                    this.navService.push(NavPathEnum.TRACKING_MOVEMENT_MENU);
                 }
             },
         ];

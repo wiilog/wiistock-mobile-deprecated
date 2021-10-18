@@ -1,13 +1,13 @@
 import {NgModule} from '@angular/core';
 import {Routes, RouterModule} from '@angular/router';
 
-import {PriseDeposeMenuPage} from './prise-depose-menu.page';
 import {CanLeaveGuard} from '@app/guards/can-leave/can-leave.guard';
+import {TrackingMovementMenuPage} from './tracking-movement-menu.page';
 
 const routes: Routes = [
     {
         path: '',
-        component: PriseDeposeMenuPage,
+        component: TrackingMovementMenuPage,
         canDeactivate: [CanLeaveGuard]
     }
 ];
@@ -16,5 +16,5 @@ const routes: Routes = [
     imports: [RouterModule.forChild(routes)],
     exports: [RouterModule],
 })
-export class PriseDeposeMenuPageRoutingModule {
+export class TrackingMovementMenuPageRoutingModule {
 }

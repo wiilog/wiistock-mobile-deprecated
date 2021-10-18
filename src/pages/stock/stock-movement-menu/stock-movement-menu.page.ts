@@ -12,22 +12,20 @@ import {ActivatedRoute} from '@angular/router';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
-import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {StorageService} from '@app/common/services/storage/storage.service';
 
 
 @Component({
-    selector: 'wii-prise-depose-menu',
-    templateUrl: './prise-depose-menu.page.html',
-    styleUrls: ['./prise-depose-menu.page.scss'],
+    selector: 'wii-stock-movement-menu',
+    templateUrl: './stock-movement-menu.page.html',
+    styleUrls: ['./stock-movement-menu.page.scss'],
 })
-export class PriseDeposeMenuPage extends PageComponent implements CanLeave {
+export class StockMovementMenuPage extends PageComponent implements CanLeave {
 
     public nbDrop: number;
     public statsSlidersData: Array<StatsSlidersData>;
     public readonly menuConfig: Array<MenuConfig>;
 
-    private fromStock: boolean;
     private canLeave: boolean;
     private deposeAlreadyNavigate: boolean;
 
@@ -56,18 +54,6 @@ export class PriseDeposeMenuPage extends PageComponent implements CanLeave {
                 action: () => this.goToDrop()
             }
         ];
-
-        this.storageService.getRight(StorageKeyEnum.RIGHT_EMPTY_ROUND).subscribe((emptyRound) => {
-            if(emptyRound) {
-                this.menuConfig.push({
-                    icon: 'empty-round.svg',
-                    label: 'Passage à vide',
-                    action: () => {
-                        this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {fromEmptyRound: true});
-                    }
-                });
-            }
-        });
     }
 
     public wiiCanLeave(): boolean {
@@ -75,7 +61,6 @@ export class PriseDeposeMenuPage extends PageComponent implements CanLeave {
     }
 
     public ionViewWillEnter(): void {
-        this.fromStock = Boolean(this.currentNavParams.get('fromStock'));
         const goToDropDirectly = (!this.deposeAlreadyNavigate && Boolean(this.currentNavParams.get('goToDropDirectly')));
         this.canLeave = false;
 
@@ -85,14 +70,10 @@ export class PriseDeposeMenuPage extends PageComponent implements CanLeave {
         )
             .subscribe(([loading, mouvementTraca]: [HTMLIonLoadingElement, Array<MouvementTraca>]) => {
                 this.nbDrop = mouvementTraca
-                    .filter(({finished, type, fromStock, packParent}) => (
+                    .filter(({finished, type, fromStock}) => (
                         type === 'prise' &&
                         !finished &&
-                        // this.fromStock: boolean & fromStock: number
-                        (
-                            (this.fromStock && fromStock) ||
-                            (!this.fromStock && !fromStock && !packParent)
-                        )
+                        fromStock
                     ))
                     .length;
 
@@ -109,10 +90,10 @@ export class PriseDeposeMenuPage extends PageComponent implements CanLeave {
     }
 
     public goToPrise(): void {
-        if (!this.fromStock || this.network.type !== 'none') {
+        if (this.network.type !== 'none') {
             this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
                 fromDepose: false,
-                fromStock: this.fromStock
+                fromStock: true
             });
         }
         else {
@@ -121,11 +102,11 @@ export class PriseDeposeMenuPage extends PageComponent implements CanLeave {
     }
 
     public goToDrop(): void {
-        if (!this.fromStock || this.network.type !== 'none') {
+        if (this.network.type !== 'none') {
             if (this.canNavigateToDepose) {
                 this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
                     fromDepose: true,
-                    fromStock: this.fromStock
+                    fromStock: true
                 });
             }
             else {
