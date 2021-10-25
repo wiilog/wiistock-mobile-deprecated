@@ -27,6 +27,15 @@
         </ion-card-header>
         <ion-card-content>
             <div class="content">
+                <p class="badges-container"
+                   *ngIf="cardConfig.badges && cardConfig.badges.length > 0">
+                    <span class="badge"
+                          *ngFor="let badge of cardConfig.badges"
+                          [class.no-color]="!badge.color"
+                          [style.background-color]="badge.color">
+                        {{ badge.label }}
+                    </span>
+                </p>
                 <p *ngFor="let contentLine of cardConfig.content">
                     <ng-container *ngIf="contentLine.label">
                         <span class="content-label">{{ contentLine.label }}&nbsp;:&nbsp;</span>
