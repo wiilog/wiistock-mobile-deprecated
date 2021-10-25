@@ -31,8 +31,9 @@
                    *ngIf="cardConfig.badges && cardConfig.badges.length > 0">
                     <span class="badge"
                           *ngFor="let badge of cardConfig.badges"
-                          [class.no-color]="!badge.color"
-                          [style.background-color]="badge.color">
+                          [class.default-color]="!badge.color"
+                          [style.background-color]="badge.color && badge.color.background"
+                          [style.color]="badge.color && badge.color.font">
                         {{ badge.label }}
                     </span>
                 </p>

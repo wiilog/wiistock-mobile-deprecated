@@ -62,9 +62,11 @@ $card-padding: 4px 12px !important;
                     &:last-child {
                         margin-right: 0;
                     }
-                    &.no-color {
-                        border: 1px solid #bfbfbf;
+                    &.default-color {
+                        background-color: #c4c7d5;
+                        color: $primary;
                     }
+                    color: white;
                     margin-left: 2px;
                     margin-right: 2px;
                     padding: 3px 5px;
