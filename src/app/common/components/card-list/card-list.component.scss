@@ -54,6 +54,8 @@ $card-padding: 4px 12px !important;
             .badges-container {
                 display: flex;
                 justify-content: space-between;
+                margin-top: $spacerMin;
+                margin-bottom: $spacerMin;
 
                 .badge {
                     &:first-child {
@@ -65,6 +67,9 @@ $card-padding: 4px 12px !important;
                     &.default-color {
                         background-color: #c4c7d5;
                         color: $primary;
+                    }
+                    &:not(.default-color) {
+                        font-weight: bold;
                     }
                     color: white;
                     margin-left: 2px;
