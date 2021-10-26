@@ -231,7 +231,7 @@ const routes: Routes = [
     {
         path: NavPathEnum.STOCK_MOVEMENT_MENU,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('@pages/stock/stock-movement-menu/stock-movement-menu.page').then(m => m.StockMovementMenuPage)
+        loadChildren: () => import('@pages/stock/stock-movement-menu/stock-movement-menu.module').then(m => m.StockMovementMenuPageModule)
     },
     {
         path: NavPathEnum.TRACKING_MOVEMENT_MENU,
