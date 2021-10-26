@@ -51,6 +51,38 @@ $card-padding: 4px 12px !important;
         .content {
             flex: 1;
 
+            .badges-container {
+                display: flex;
+                justify-content: space-between;
+                margin-top: $spacerMin;
+                margin-bottom: $spacerMin;
+
+                .badge {
+                    &:first-child {
+                        margin-left: 0;
+                    }
+
+                    &:last-child {
+                        margin-right: 0;
+                    }
+
+                    &.default-color {
+                        background-color: #c4c7d5;
+                        color: $primary;
+                    }
+
+                    &:not(.default-color) {
+                        font-weight: bold;
+                    }
+
+                    color: white;
+                    margin-left: 2px;
+                    margin-right: 2px;
+                    padding: 3px 14px;
+                    border-radius: 5px;
+                }
+            }
+
             .content-info,
             .content-error {
                 font-size: 90%;

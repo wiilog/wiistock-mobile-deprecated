@@ -41,9 +41,7 @@ export class ListPanelItemComponent {
     @HostBinding('class')
     public _backgroundColor?: string;
 
-    public constructor(private elementRef: ElementRef) {
-        this.boldValues = [];
-    }
+    public constructor(private elementRef: ElementRef) {}
 
     public get infosArray(): Array<{label: string; value: string; key: string;}> {
         return Object.keys(this.infos).map((key) => ({

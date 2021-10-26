@@ -27,6 +27,16 @@
         </ion-card-header>
         <ion-card-content>
             <div class="content">
+                <p class="badges-container"
+                   *ngIf="cardConfig.badges && cardConfig.badges.length > 0">
+                    <span class="badge"
+                          *ngFor="let badge of cardConfig.badges"
+                          [class.default-color]="!badge.color"
+                          [style.background-color]="badge.color && badge.color.background"
+                          [style.color]="badge.color && badge.color.font">
+                        {{ badge.label }}
+                    </span>
+                </p>
                 <p *ngFor="let contentLine of cardConfig.content">
                     <ng-container *ngIf="contentLine.label">
                         <span class="content-label">{{ contentLine.label }}&nbsp;:&nbsp;</span>
@@ -47,13 +57,6 @@
                 </p>
                 <p *ngIf="cardConfig.info" class="content-info">{{cardConfig.info}}</p>
                 <p *ngIf="cardConfig.error" class="content-error">{{cardConfig.error}}</p>
-            </div>
-            <div class="actions"
-                 *ngIf="cardConfig.action">
-                <wii-icon [name]="cardConfig.rightIcon ? cardConfig.rightIcon.name : 'arrow-right.svg'"
-                          [color]="cardConfig.rightIcon && cardConfig.rightIcon.color"
-                          [attr.class]="cardConfig.rightIcon ? 'right-icon' : 'arrow'">
-                </wii-icon>
             </div>
         </ion-card-content>
     </ion-card>
