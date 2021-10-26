@@ -58,13 +58,6 @@
                 <p *ngIf="cardConfig.info" class="content-info">{{cardConfig.info}}</p>
                 <p *ngIf="cardConfig.error" class="content-error">{{cardConfig.error}}</p>
             </div>
-            <div class="actions"
-                 *ngIf="cardConfig.action">
-                <wii-icon [name]="cardConfig.rightIcon ? cardConfig.rightIcon.name : 'arrow-right.svg'"
-                          [color]="cardConfig.rightIcon && cardConfig.rightIcon.color"
-                          [attr.class]="cardConfig.rightIcon ? 'right-icon' : 'arrow'">
-                </wii-icon>
-            </div>
         </ion-card-content>
     </ion-card>
 </div>
