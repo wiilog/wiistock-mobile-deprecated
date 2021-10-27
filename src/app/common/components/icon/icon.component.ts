@@ -118,7 +118,7 @@ export class IconComponent {
     }
 
     private isSvg(iconStr: string): boolean {
-        return iconStr.includes('<?xml') && iconStr.includes('<svg');
+        return iconStr.includes('<svg');
     }
 
     private cleanSVG(svgStr: string): string {
