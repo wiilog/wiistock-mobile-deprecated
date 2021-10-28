@@ -14,6 +14,7 @@ import {DemandeLivraison} from '@entities/demande-livraison';
 import {DemandeLivraisonArticleSelected} from '@entities/demande-livraison-article-selected';
 import {TransferOrder} from '@entities/transfer-order';
 import {AlertService} from '@app/common/services/alert.service';
+import {TranslationService} from '@app/common/services/translations.service';
 
 
 type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies' | 'dispatch' | 'transfer' | 'empty_round';
@@ -48,7 +49,8 @@ export class LocalDataManagerService {
                        private apiService: ApiService,
                        private fileService: FileService,
                        private storageService: StorageService,
-                       private alertService: AlertService) {
+                       private alertService: AlertService,
+                       private translationService: TranslationService) {
         this.apiProccessConfigs = {
             preparation: {
                 service: ApiService.FINISH_PREPA,
@@ -385,6 +387,7 @@ export class LocalDataManagerService {
             )
             .subscribe(
                 () => {
+                    this.translationService.changedTranslations$.next();
                     synchronise$.next({finished: true});
                     synchronise$.complete();
                 },

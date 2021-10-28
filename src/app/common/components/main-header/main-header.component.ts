@@ -14,6 +14,8 @@ import {ServerImageKeyEnum} from '@app/common/components/server-image/server-ima
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {AlertService} from '@app/common/services/alert.service';
+import {Translations} from '@entities/translation';
+import {TranslationService} from '@app/common/services/translations.service';
 
 @Component({
     selector: 'wii-main-header',
@@ -83,6 +85,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     };
     private lastRouteNavigated: string;
 
+    public titleLabelTranslations: Translations = {};
+
     public constructor(private storageService: StorageService,
                        private sqliteService: SqliteService,
                        private navController: NavController,
@@ -91,7 +95,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                        private activatedRoute: ActivatedRoute,
                        private userService: UserService,
                        private router: Router,
-                       private alertService: AlertService) {
+                       private alertService: AlertService,
+                       private translationService: TranslationService) {
         this.pagesInStack = 0;
         this.loading = true;
         this.withHeader = new EventEmitter<boolean>();
@@ -100,6 +105,14 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.pageStack = [];
         this.subTitle$ = this.mainHeaderService.subTitle$;
         this.lastDirections = {};
+
+        this.translationService.changedTranslations$
+            .pipe(
+                flatMap(() => this.translationService.get())
+            )
+            .subscribe((result) => {
+                this.titleLabelTranslations = result;
+            });
 
         this.titlesConfig = [
             {pagePath: NavPathEnum.MAIN_MENU, label: 'Menu'},
