@@ -12,7 +12,9 @@ wii-icon.button-icon {
     }
 }
 
-ion-button{
+ion-button {
+    margin: 2px;
+
     .button-text-wrapper {
         .title {
             font-weight: bold;
@@ -20,8 +22,13 @@ ion-button{
     }
 
     &[size="large"] {
+        wii-icon {
+            max-height: 20px; /* text size */
+        }
+
         &.larger {
             height: 5rem;
+            font-weight: bolder;
         }
 
         .button-text-wrapper {
