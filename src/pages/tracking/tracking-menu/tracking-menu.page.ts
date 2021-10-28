@@ -13,6 +13,7 @@ import {zip} from "rxjs";
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
+import {TranslationService} from '@app/common/services/translations.service';
 
 @Component({
     selector: 'wii-tracking-menu',
@@ -21,7 +22,7 @@ import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 })
 export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
 
-    public menuConfig: Array<MenuConfig>;
+    public menuConfig: Array<MenuConfig> = [];
     public statsSlidersData: Array<StatsSlidersData>;
 
     public constructor(private platform: Platform,
@@ -31,35 +32,56 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
                        private toastService: ToastService,
                        private storageService: StorageService,
                        private sqliteService: SqliteService,
+                       private translationService: TranslationService,
                        navService: NavService) {
         super(navService);
     }
 
     public ionViewWillEnter(): void {
-        this.menuConfig = [
-            {
-                icon: 'stock-transfer.svg',
-                label: 'Acheminements',
-                action: () => {
-                    this.navService.push(NavPathEnum.DISPATCH_MENU);
-                }
-            },
-            {
-                icon: 'tracking.svg',
-                label: 'Mouvements',
-                action: () => {
-                    this.navService.push(NavPathEnum.TRACKING_MOVEMENT_MENU);
-                }
-            },
-        ];
+        super.ionViewWillEnter();
 
         zip(
             this.storageService.getRight(StorageKeyEnum.RIGHT_GROUP),
             this.storageService.getRight(StorageKeyEnum.RIGHT_UNGROUP),
             this.storageService.getCounter(StorageKeyEnum.COUNTERS_DISPATCHES_TREATED),
-            this.sqliteService.count('dispatch', ['treatedStatusId IS NULL OR partial = 1'])
+            this.sqliteService.count('dispatch', ['treatedStatusId IS NULL OR partial = 1']),
+
+            this.translationService.get('acheminement')
         ).subscribe(
-            ([group, ungroup, treatedDispatches, toTreatDispatches]) => {
+            ([group, ungroup, treatedDispatches, toTreatDispatches, dispatch]) => {
+                this.menuConfig.push(
+                    {
+                        icon: 'stock-transfer.svg',
+                        label: TranslationService.Translate(dispatch, 'Acheminements'),
+                        action: () => {
+                            this.navService.push(NavPathEnum.DISPATCH_MENU);
+                        }
+                    },
+                    {
+                        icon: 'tracking.svg',
+                        label: 'Mouvements',
+                        action: () => {
+                            this.navService.push(NavPathEnum.TRACKING_MOVEMENT_MENU);
+                        }
+                });
+                if (receiptAssociation) {
+                    this.menuConfig.push({
+                        icon: 'receipt-association.svg',
+                        label: 'Association BR',
+                        action: () => {
+                            this.navService.push(NavPathEnum.RECEIPT_ASSOCIATION_MENU);
+                        }
+                    });
+                }
+                if (packAssociation) {
+                    this.menuConfig.push({
+                        icon: 'packing.svg',
+                        label: 'Association<br/>Colis - Référence',
+                        action: () => {
+                            this.navService.push(NavPathEnum.PACK_ASSOCIATION_MENU);
+                        }
+                    });
+                }
                 if(group) {
                     this.menuConfig.push({
                         icon: 'group.svg',

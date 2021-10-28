@@ -172,29 +172,31 @@ export class DispatchPacksPage extends PageComponent {
     }
 
     private refreshHeaderPanelConfigFromDispatch(): void {
-        this.dispatchHeaderConfig = {
-            title: `Demande N°${this.dispatch.number}`,
-            subtitle: [
-                `Emplacement prise : ${this.dispatch.locationFromLabel}`,
-                this.dispatch.destination ? `Destination : ${this.dispatch.destination}` : ''
-            ],
-            info: `Type ${this.dispatch.typeLabel}`,
-            transparent: true,
-            leftIcon: {
-                color: CardListColorEnum.GREEN,
-                customColor: this.dispatch.color,
-                name: 'stock-transfer.svg'
-            },
-            ...((this.packsTreatedListConfig && this.packsTreatedListConfig.body.length > 0)
-                ? {
-                    rightIcon: {
-                        name: 'check.svg',
-                        color: 'success',
-                        action: () => this.validate()
+        this.translationService.get('acheminement').subscribe((dispatch) => {
+            this.dispatchHeaderConfig = {
+                title: `Demande N°${this.dispatch.number}`,
+                subtitle: [
+                    TranslationService.Translate(dispatch, 'Emplacement prise') + ' : ' + this.dispatch.locationFromLabel,
+                    this.dispatch.destination ? `Destination : ${this.dispatch.destination}` : ''
+                ],
+                info: `Type ${this.dispatch.typeLabel}`,
+                transparent: true,
+                leftIcon: {
+                    color: CardListColorEnum.GREEN,
+                    customColor: this.dispatch.color,
+                    name: 'stock-transfer.svg'
+                },
+                ...((this.packsTreatedListConfig && this.packsTreatedListConfig.body.length > 0)
+                    ? {
+                        rightIcon: {
+                            name: 'check.svg',
+                            color: 'success',
+                            action: () => this.validate()
+                        }
                     }
-                }
-                : {})
-        };
+                    : {})
+            };
+        });
     }
 
     private refreshListToTreatConfig(): void {

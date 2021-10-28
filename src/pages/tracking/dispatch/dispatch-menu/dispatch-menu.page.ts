@@ -14,6 +14,8 @@ import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/bar
 import {SelectItemComponent} from "@app/common/components/select-item/select-item.component";
 import {ToastService} from '@app/common/services/toast.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {Translations} from '@entities/translation';
+import {TranslationService} from '@app/common/services/translations.service';
 
 @Component({
     selector: 'wii-dispatch-menu',
@@ -38,10 +40,13 @@ export class DispatchMenuPage extends PageComponent {
     public readonly dispatchesListColor = CardListColorEnum.GREEN;
     public readonly dispatchesIconName = 'stock-transfer.svg';
 
+    private dispatchTranslations: Translations;
+
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
                        private mainHeaderService: MainHeaderService,
+                       private translationService: TranslationService,
                        navService: NavService) {
         super(navService);
         this.resetEmitter$ = new EventEmitter<void>();
@@ -72,10 +77,13 @@ export class DispatchMenuPage extends PageComponent {
             this.loadingSubscription = this.loadingService.presentLoading()
                 .pipe(
                     tap(loader => loaderElement = loader),
-                    flatMap(() => this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL OR partial = 1']))
+                    flatMap(() => zip(
+                        this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL OR partial = 1']),
+                        this.translationService.get('acheminement')
+                    ))
                 )
-                .subscribe((dispatches: Array<Dispatch>) => {
-                    this.refreshDispatchesListConfig(dispatches);
+                .subscribe(([dispatches, translations]: [Array<Dispatch>, Translations]) => {
+                    this.refreshDispatchesListConfig(dispatches, translations);
 
                     this.refreshSubTitle();
                     this.unsubscribeLoading();
@@ -119,49 +127,51 @@ export class DispatchMenuPage extends PageComponent {
         });
     }
 
-    private refreshDispatchesListConfig(dispatches: Array<Dispatch>): void {
-        this.dispatchesListConfig = dispatches.map(({
-                                                        id,
-                                                        requester,
-                                                        color,
-                                                        number,
-                                                        startDate,
-                                                        endDate,
-                                                        locationFromLabel,
-                                                        locationToLabel,
-                                                        statusLabel,
-                                                        typeLabel,
-                                                        emergency
-                                                    }) => ({
-            title: {label: 'Demandeur', value: requester},
-            customColor: color,
-            content: [
-                {label: 'Numéro', value: number || ''},
-                {
-                    label: 'Date d\'échéance',
-                    value: startDate && endDate ? `Du ${startDate} au ${endDate}` : ''
-                },
-                {label: 'Emplacement prise', value: locationFromLabel || ''},
-                {label: 'Emplacement dépose', value: locationToLabel || ''},
-                {label: 'Type', value: typeLabel || ''},
-                {label: 'Statut', value: statusLabel || ''},
-                (emergency
-                    ? {label: 'Urgence', value: emergency || ''}
-                    : undefined)
-            ].filter((item) => item && item.value),
-            ...(emergency
-                ? {
-                    rightIcon: {
-                        name: 'exclamation-triangle.svg',
-                        color: 'danger'
+    private refreshDispatchesListConfig(dispatches: Array<Dispatch>, translations: Translations): void {
+        this.dispatchTranslations = translations;
+
+        this.dispatchesListConfig = dispatches.map((dispatch: Dispatch) => {
+            const typeColor = dispatch.typeColor || '#030f4c';
+            return {
+                title: {label: 'Demandeur', value: dispatch.requester},
+                customColor: dispatch.color,
+                content: [
+                    {label: 'Numéro', value: dispatch.number || ''},
+                    {label: 'Type', value: dispatch.typeLabel || ''},
+                    {label: 'Statut', value: dispatch.statusLabel || ''},
+                    {
+                        name: `Date d'échéance`,
+                        label: TranslationService.Translate(this.dispatchTranslations, "Date d'échéance 1"),
+                        value: dispatch.startDate && dispatch.endDate ? `Du ${dispatch.startDate} au ${dispatch.endDate}` : ''
+                    },
+                    {
+                        name: 'pickLocation',
+                        label: TranslationService.Translate(this.dispatchTranslations, "Emplacement prise"),
+                        value: dispatch.locationFromLabel || ''
+                    },
+                    {
+                        name: 'dropLocation',
+                        label: TranslationService.Translate(this.dispatchTranslations, "Emplacement dépose"),
+                        value: dispatch.locationToLabel || ''
+                    },
+                    (dispatch.emergency
+                        ? {name: 'emergency', label: 'Urgence', value: dispatch.emergency || ''}
+                        : undefined)
+                ].filter((item) => item && item.value),
+                ...(dispatch.emergency
+                    ? {
+                        rightIcon: {
+                            name: 'exclamation-triangle.svg',
+                            color: 'danger'
+                        }
                     }
+                    : {}),
+                action: () => {
+                    this.navService.push(NavPathEnum.DISPATCH_PACKS, {
+                        dispatchId: dispatch.id
+                    });
                 }
-                : {}),
-            action: () => {
-                this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-                    dispatchId: id
-                });
-            }
-        }));
+            };
+        });
     }
 }
