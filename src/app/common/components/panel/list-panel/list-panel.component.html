@@ -10,6 +10,21 @@
                   (action)="onHeaderClicked($event)">
 </wii-panel-header>
 
+<div class="actions-container"
+     *ngIf="actions && actions.length > 0">
+    <ion-button *ngFor="let actionConfig of actions"
+                (click)="actionConfig.action($event)"
+                color="primary">
+
+        <wii-icon *ngIf="actionConfig.icon"
+                  [color]="actionConfig.icon.color"
+                  [customColor]="actionConfig.icon.customColor"
+                  [name]="actionConfig.icon.name">
+        </wii-icon>
+        {{actionConfig.label}}
+    </ion-button>
+</div>
+
 <wii-list-panel-item *ngFor="let object of body; trackBy: trackByGenerator"
                      [infos]="object.infos"
                      [color]="object.color"

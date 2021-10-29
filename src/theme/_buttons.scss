@@ -12,7 +12,9 @@ wii-icon.button-icon {
     }
 }
 
-ion-button{
+ion-button {
+    --border-radius: 0;
+
     .button-text-wrapper {
         .title {
             font-weight: bold;

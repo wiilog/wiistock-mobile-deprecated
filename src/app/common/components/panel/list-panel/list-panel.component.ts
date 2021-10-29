@@ -1,6 +1,7 @@
 import {Component, Input} from '@angular/core';
 import {HeaderConfig} from '@app/common/components/panel/model/header-config';
 import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel/list-panel-item-config';
+import {ActionConfig} from '@app/common/components/panel/model/action-config';
 
 
 @Component({
@@ -11,6 +12,9 @@ import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel
 export class ListPanelComponent {
     @Input()
     public header?: HeaderConfig;
+
+    @Input()
+    public actions?: Array<ActionConfig>;
 
     @Input()
     public body: Array<ListPanelItemConfig>;

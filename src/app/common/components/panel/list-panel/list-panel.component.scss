@@ -7,6 +7,19 @@
         margin: $spacerMin;
     }
 
+    .actions-container {
+        display: flex;
+
+        ion-button {
+            flex: 1;
+
+            wii-icon {
+                width: 25px;
+                margin-right: $spacer;
+            }
+        }
+    }
+
     wii-list-panel-item {
         margin-right: $spacer * 1.2;
         margin-left: $spacer * 1.2;
