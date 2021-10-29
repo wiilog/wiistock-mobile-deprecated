@@ -15,6 +15,9 @@ wii-icon.button-icon {
 ion-button {
     --border-radius: 0;
 
+    margin: 2px;
+    font-weight: bolder;
+
     .button-text-wrapper {
         .title {
             font-weight: bold;
@@ -22,6 +25,10 @@ ion-button {
     }
 
     &[size="large"] {
+        wii-icon[name="check.svg"] {
+            max-height: 20px; /* text size */
+        }
+
         &.larger {
             height: 5rem;
         }
@@ -33,6 +40,7 @@ ion-button {
 
             .subtitle {
                 font-size: 10pt;
+                font-weight: normal;
             }
         }
     }
