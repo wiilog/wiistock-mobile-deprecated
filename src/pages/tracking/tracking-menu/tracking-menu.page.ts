@@ -64,24 +64,6 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
                             this.navService.push(NavPathEnum.TRACKING_MOVEMENT_MENU);
                         }
                 });
-                if (receiptAssociation) {
-                    this.menuConfig.push({
-                        icon: 'receipt-association.svg',
-                        label: 'Association BR',
-                        action: () => {
-                            this.navService.push(NavPathEnum.RECEIPT_ASSOCIATION_MENU);
-                        }
-                    });
-                }
-                if (packAssociation) {
-                    this.menuConfig.push({
-                        icon: 'packing.svg',
-                        label: 'Association<br/>Colis - Référence',
-                        action: () => {
-                            this.navService.push(NavPathEnum.PACK_ASSOCIATION_MENU);
-                        }
-                    });
-                }
                 if(group) {
                     this.menuConfig.push({
                         icon: 'group.svg',

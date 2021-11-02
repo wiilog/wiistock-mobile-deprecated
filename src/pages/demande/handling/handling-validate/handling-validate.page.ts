@@ -318,8 +318,9 @@ export class HandlingValidatePage extends PageComponent {
                 customColor: color
             },
             rightIcon: {
-                name: opened ? 'eye-slash.svg' : 'eye.svg',
-                color: 'medium',
+                name: opened ? 'double-arrow-up.svg' : 'double-arrow-down.svg',
+                color: 'dark',
+                width: '26px',
                 action: () => {
                     this.formPanelComponent.formHeaderComponent.toggleTitle();
                 }

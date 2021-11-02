@@ -1,6 +1,7 @@
 import {Component, ElementRef, EventEmitter, HostBinding, HostListener, Input, Output, ViewChild} from '@angular/core';
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
+import {IconColor} from '@app/common/components/icon/icon-color';
 
 
 @Component({
@@ -41,6 +42,9 @@ export class PanelHeaderComponent {
     @Input()
     public fireAction: boolean;
 
+    @Input()
+    public showOrHide: boolean = false;
+
     @Output()
     public action: EventEmitter<Event>;
 
@@ -49,6 +53,21 @@ export class PanelHeaderComponent {
 
     @HostBinding('class.open')
     public open: boolean;
+
+    @Input()
+    public leftBadge: {label: string; color: string}
+
+    @Input()
+    public rightBadge: {label: string; color: string}
+
+    @Input()
+    public headerButtonConfig: {
+        label: string;
+        icon: IconConfig;
+    }
+
+    @Output()
+    public mainButtonAction: EventEmitter<boolean>;
 
     public _bodyMaxHeight: number;
 
@@ -61,6 +80,7 @@ export class PanelHeaderComponent {
         this.open = false;
         this.action = new EventEmitter<Event>();
         this.toggle = new EventEmitter<boolean>();
+        this.mainButtonAction = new EventEmitter<boolean>();
         this._bodyMaxHeight = PanelHeaderComponent.INIT_COLLAPSED_HEADER_BODY
     }
 
@@ -140,5 +160,9 @@ export class PanelHeaderComponent {
 
     public get bodyMaxHeight(): number {
         return this.collapsed ? this._bodyMaxHeight : undefined;
+    }
+
+    public mainButtonActionClick(): void {
+        this.mainButtonAction.emit();
     }
 }

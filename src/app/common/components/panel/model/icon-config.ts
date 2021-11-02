@@ -5,4 +5,6 @@ export interface IconConfig {
     color?: IconColor;
     customColor?: string;
     action?: () => void;
+    width?: string|number;
+    height?: string|number;
 }

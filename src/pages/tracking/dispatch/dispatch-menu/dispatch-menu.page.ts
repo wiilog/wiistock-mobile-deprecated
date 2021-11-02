@@ -1,5 +1,5 @@
 import {Component, EventEmitter, ViewChild} from '@angular/core';
-import {Subscription} from 'rxjs';
+import {Subscription, zip} from 'rxjs';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {PageComponent} from '@pages/page.component';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
@@ -131,7 +131,6 @@ export class DispatchMenuPage extends PageComponent {
         this.dispatchTranslations = translations;
 
         this.dispatchesListConfig = dispatches.map((dispatch: Dispatch) => {
-            const typeColor = dispatch.typeColor || '#030f4c';
             return {
                 title: {label: 'Demandeur', value: dispatch.requester},
                 customColor: dispatch.color,

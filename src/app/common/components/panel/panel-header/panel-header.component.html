@@ -13,8 +13,11 @@
         <wii-icon [name]="leftIcon.name"
                   [color]="leftIcon.color"
                   [customColor]="leftIcon.customColor"
+                  [style.width]="leftIcon.width"
+                  [style.height]="leftIcon.height"
                   [buttonWithoutRipple]="!leftIconHasAction"
-                  (action)="onLeftIconClick($event)">
+                  (action)="onLeftIconClick($event)"
+                  [class.custom-size]="leftIcon.width !== undefined || leftIcon.height !== undefined">
         </wii-icon>
     </div>
 
@@ -36,7 +39,6 @@
                                  [rightIconBase64]="item.rightIconBase64"
                                  [boldValues]="[]"
                                  style="padding-left: 15px">
-
             </wii-list-panel-item>
 
             <div *ngFor="let partSubTitle of _subtitle"
@@ -48,6 +50,19 @@
                  class="header-info"
                  [innerHTML]="info">
             </div>
+
+            <div class="badges-container">
+                <div class="badge"
+                     *ngIf="leftBadge"
+                     [style.background-color]="leftBadge.color"
+                     [innerHTML]="leftBadge.label">
+                </div>
+                <div class="badge"
+                     *ngIf="rightBadge"
+                     [style.background-color]="rightBadge.color"
+                     [innerHTML]="rightBadge.label">
+                </div>
+            </div>
         </div>
     </div>
 
@@ -57,10 +72,28 @@
              *ngFor="let rightIcon of _rightIcons; let index = index">
             <wii-icon [name]="rightIcon.name"
                       [color]="rightIcon.color"
+                      [style.width]="rightIcon.width"
+                      [style.height]="rightIcon.height"
                       [customColor]="rightIcon.customColor"
                       [buttonWithoutRipple]="!rightIconHasAction(index)"
-                      (action)="onRightIconClick($event, index)">
+                      (action)="onRightIconClick($event, index)"
+                      [class.custom-size]="rightIcon.width !== undefined || rightIcon.height !== undefined">
             </wii-icon>
         </div>
+    </div>
+
+    <div class="header-button-container"
+         *ngIf="headerButtonConfig && open">
+        <button (click)="mainButtonActionClick()"
+                class="header-button">
+            <wii-icon *ngIf="headerButtonConfig.icon"
+                      [name]="headerButtonConfig.icon.name"
+                      [style.width]="headerButtonConfig.icon.width"
+                      [style.height]="headerButtonConfig.icon.height"
+                      [color]="headerButtonConfig.icon.color"
+                      [class.custom-size]="headerButtonConfig.icon.width !== undefined || headerButtonConfig.icon.height !== undefined">
+            </wii-icon>
+            {{ headerButtonConfig.label }}
+        </button>
     </div>
 </div>
