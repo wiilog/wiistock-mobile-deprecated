@@ -29,6 +29,9 @@ export class FormPanelCalendarComponent implements FormPanelItemComponent<FormPa
     @Input()
     public errors?: { [errorName: string]: string };
 
+    @Input()
+    public inline?: boolean;
+
     @Output()
     public valueChange: EventEmitter<string>;
 

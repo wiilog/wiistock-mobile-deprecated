@@ -30,6 +30,7 @@ export class FormViewerDirective implements OnInit {
 
         instance.label = config.label;
         instance.value = config.value;
+        instance.inline = config.inline;
 
         this.instance = instance;
     }

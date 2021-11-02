@@ -13,5 +13,14 @@
             width: 32px;
             height: 32px;
         }
+
+        &.field-blocked {
+            width: 100%;
+            .search-icon {
+                margin-left: auto;
+                position: relative;
+                top: -10px;
+            }
+        }
     }
 }

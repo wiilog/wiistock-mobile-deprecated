@@ -25,6 +25,9 @@ export class FormPanelButtonsComponent implements FormPanelItemComponent<FormPan
     @Input()
     public value?: number;
 
+    @Input()
+    public inline?: boolean;
+
     @Output()
     public valueChange: EventEmitter<number>;
 

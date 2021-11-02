@@ -29,6 +29,9 @@ export class FormPanelInputComponent implements FormPanelItemComponent<FormPanel
     @Input()
     public errors?: {[errorName: string]: string};
 
+    @Input()
+    public inline?: boolean;
+
     @Output()
     public valueChange: EventEmitter<string>;
 

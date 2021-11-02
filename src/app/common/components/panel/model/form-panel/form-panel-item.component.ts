@@ -2,4 +2,5 @@ import {FormPanelItemConfig} from '@app/common/components/panel/model/form-panel
 
 export interface FormPanelItemComponent<InputConfig> extends FormPanelItemConfig<InputConfig> {
     error: string;
+    inline?: boolean;
 }

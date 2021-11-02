@@ -17,4 +17,7 @@ export class FormViewerAttachmentsComponent implements FormViewerAttachmentConfi
         label: string;
         href: string;
     }>;
+
+    @Input()
+    public inline?: boolean;
 }

@@ -32,6 +32,9 @@ export class FormPanelCameraComponent implements FormPanelItemComponent<FormPane
     @Input()
     public errors?: { [errorName: string]: string };
 
+    @Input()
+    public inline?: boolean;
+
     @Output()
     public valueChange: EventEmitter<string|Array<string>>;
 

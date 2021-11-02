@@ -1,4 +1,4 @@
-<wii-form-field [label]="label">
+<wii-form-field [label]="label" [inline]="inline">
     <div class="files-wrapper" field>
         <ng-container *ngIf="value.length === 0">Aucune pièce jointe</ng-container>
         <ng-container *ngFor="let fileLink of value">

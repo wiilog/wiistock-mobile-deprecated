@@ -14,4 +14,7 @@ export class FormViewerTextComponent implements FormViewerTextConfig {
 
     @Input()
     public value: string;
+
+    @Input()
+    public inline?: boolean;
 }

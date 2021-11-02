@@ -30,14 +30,17 @@ export class FormPanelToggleComponent implements FormPanelItemComponent<FormPane
     @Input()
     public errors?: {[errorName: string]: string};
 
+    @Input()
+    public inline?: boolean;
+
     @Output()
-    public valueChange: EventEmitter<string>;
+    public valueChange: EventEmitter<boolean>;
 
     public constructor() {
-        this.valueChange = new EventEmitter<string>();
+        this.valueChange = new EventEmitter<boolean>();
     }
 
-    public onValueChange(value: string) {
+    public onValueChange(value: boolean) {
         this.valueChange.emit(value);
     }
 

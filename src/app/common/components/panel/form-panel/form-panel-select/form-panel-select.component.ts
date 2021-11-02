@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from '@angular/core';
 import {SearchItemComponent} from '@app/common/components/select-item/search-item/search-item.component';
 import {BarcodeScannerComponent} from '@app/common/components/barcode-scanner/barcode-scanner.component';
 import {FormPanelItemComponent} from '@app/common/components/panel/model/form-panel/form-panel-item.component';
@@ -10,7 +10,7 @@ import {FormPanelSelectConfig} from '@app/common/components/panel/model/form-pan
     templateUrl: 'form-panel-select.component.html',
     styleUrls: ['./form-panel-select.component.scss']
 })
-export class FormPanelSelectComponent implements FormPanelItemComponent<FormPanelSelectConfig> {
+export class FormPanelSelectComponent implements FormPanelItemComponent<FormPanelSelectConfig>, OnInit {
 
     private static readonly MULTIPLE_SEPARATOR: string = ';'
 
@@ -35,6 +35,9 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
     @Input()
     public value?: string;
 
+    @Input()
+    public inline?: boolean;
+
     @Output()
     public valueChange: EventEmitter<number>;
 
@@ -44,10 +47,21 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
         this.valueChange = new EventEmitter<number>();
     }
 
-    private static ValueToText(value: any) {
+    public ngOnInit() {
+        setTimeout(() => {
+            if (this.searchComponent) {
+                const item = this.searchComponent.findItem(this.value, this.searchComponent.config[this.searchComponent.type].valueField);
+                if (item) {
+                    this.searchComponent.item = item;
+                }
+            }
+        }, 200);
+    }
+
+    private valueToText(value: any) {
         return Array.isArray(value)
-            ? value.map(({label}) => label).join(FormPanelSelectComponent.MULTIPLE_SEPARATOR)
-            : value.label
+            ? value.map(v => v[this.inputConfig.label || `label`]).join(FormPanelSelectComponent.MULTIPLE_SEPARATOR)
+            : value[this.inputConfig.label || `label`]
     }
 
     public fireZebraScan(): void {
@@ -83,7 +97,7 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
         if (itemSelected
             && (!Array.isArray(itemSelected) || itemSelected.length > 0)) {
             const value: Array<any> = !Array.isArray(itemSelected) ? [itemSelected] : itemSelected;
-            this.text = FormPanelSelectComponent.ValueToText(itemSelected);
+            this.text = this.valueToText(itemSelected);
             this.value = value.map(({id}) => id).join(FormPanelSelectComponent.MULTIPLE_SEPARATOR);
         }
         else {
@@ -113,8 +127,9 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
                     .map((val) => this.searchComponent.findItem(val, 'id'))
                     .filter((val) => val)
                 : [];
+
             if (selected.length > 0) {
-                this.text = FormPanelSelectComponent.ValueToText(selected);
+                this.text = this.valueToText(selected);
             } else if (!this.searchComponent) {
                 let valueArray = value
                     .filter((arrayValue) => arrayValue)

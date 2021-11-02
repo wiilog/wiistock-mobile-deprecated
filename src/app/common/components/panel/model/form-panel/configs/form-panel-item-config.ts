@@ -7,4 +7,5 @@ export interface FormPanelItemConfig<InputConfig> {
     errors?: {[errorName: string]: string};
     inputConfig: InputConfig;
     multiple?: boolean;
+    inline?: boolean;
 }

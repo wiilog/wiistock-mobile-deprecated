@@ -1,5 +1,6 @@
 <wii-form-field [label]="label"
-                [required]="inputConfig.required">
+                [required]="inputConfig.required"
+                [inline]="inline">
     <div class="button-container" add-on>
         <ng-container *ngFor="let element of inputConfig.elements">
             <ion-button [color]="value === element.id ? 'success' : 'primary'"

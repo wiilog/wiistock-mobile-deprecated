@@ -32,6 +32,9 @@ export class FormPanelSigningComponent implements OnDestroy, FormPanelItemCompon
     @Input()
     public errors?: {[errorName: string]: string};
 
+    @Input()
+    public inline?: boolean;
+
     @Output()
     public valueChange: EventEmitter<string>;
 

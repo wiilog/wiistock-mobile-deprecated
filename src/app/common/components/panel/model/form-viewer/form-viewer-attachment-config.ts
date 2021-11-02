@@ -5,4 +5,5 @@ export interface FormViewerAttachmentConfig extends FormViewerDetailsConfig {
         label: string;
         href: string;
     }>;
+    inline?: boolean;
 }

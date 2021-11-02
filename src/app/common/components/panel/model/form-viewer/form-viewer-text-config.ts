@@ -2,4 +2,5 @@ import {FormViewerDetailsConfig} from '@app/common/components/panel/model/form-v
 
 export interface FormViewerTextConfig extends FormViewerDetailsConfig {
     value: string;
+    inline?: boolean;
 }

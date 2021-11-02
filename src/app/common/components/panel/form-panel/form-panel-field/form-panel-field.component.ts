@@ -13,4 +13,7 @@ export class FormPanelFieldComponent {
     @Input()
     public label: string = '';
 
+    @Input()
+    public inline?: boolean;
+
 }
