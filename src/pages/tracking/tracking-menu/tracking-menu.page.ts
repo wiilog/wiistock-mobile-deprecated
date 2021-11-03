@@ -40,6 +40,7 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
     public ionViewWillEnter(): void {
         super.ionViewWillEnter();
 
+        this.menuConfig = [];
         zip(
             this.storageService.getRight(StorageKeyEnum.RIGHT_GROUP),
             this.storageService.getRight(StorageKeyEnum.RIGHT_UNGROUP),

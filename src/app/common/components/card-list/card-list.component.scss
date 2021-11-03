@@ -30,6 +30,11 @@ $card-padding: 4px 12px !important;
             color: $white !important;
         }
 
+        &.flex {
+            display: flex;
+            justify-content: space-between;
+        }
+
         .header-wrapper {
             margin: 0;
         }

@@ -18,10 +18,11 @@
     <ion-card *ngFor="let cardConfig of config"
               (click)="onCardClick(cardConfig)">
         <ion-card-header *ngIf="cardConfig.title"
+                         [class.flex]="cardConfig.titleFlex"
                          [style.background-color]="cardConfig.customColor">
             <p class="header-wrapper"
                *ngFor="let titleConfig of getCardTitle(cardConfig.title)">
-                <span class="title-label">{{ titleConfig.label }}</span>&nbsp;:&nbsp;
+                <span class="title-label" *ngIf="titleConfig.label">{{ titleConfig.label }}&nbsp;:&nbsp;</span>
                 <span class="title-value">{{ titleConfig.value }}</span>
             </p>
         </ion-card-header>
