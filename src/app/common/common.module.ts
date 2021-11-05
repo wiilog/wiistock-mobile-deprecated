@@ -38,10 +38,12 @@ import {FormPanelFieldComponent} from '@app/common/components/panel/form-panel/f
 import {ServerImageComponent} from '@app/common/components/server-image/server-image.component';
 import {FormViewerTextComponent} from '@app/common/components/panel/form-panel/form-viewer-text/form-viewer-text.component';
 import {FormPanelButtonsComponent} from '@app/common/components/panel/form-panel/form-panel-buttons/form-panel-buttons.component';
+import {BadgeComponent} from '@app/common/components/badge/badge.component';
 
 @NgModule({
     declarations: [
         BarcodeScannerComponent,
+        BadgeComponent,
         CardListComponent,
         IconComponent,
         MainHeaderComponent,
@@ -86,6 +88,7 @@ import {FormPanelButtonsComponent} from '@app/common/components/panel/form-panel
         SelectItemComponent,
         ListPanelComponent,
         BarcodeScannerComponent,
+        BadgeComponent,
         FormPanelComponent,
         SimpleFormComponent,
         CardListComponent,

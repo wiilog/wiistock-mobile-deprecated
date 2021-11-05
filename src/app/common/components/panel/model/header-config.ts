@@ -1,6 +1,7 @@
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
 import {IconColor} from '@app/common/components/icon/icon-color';
+import {BadgeConfig} from '@app/common/components/badge/badge-config';
 
 
 export interface HeaderConfig {
@@ -15,8 +16,8 @@ export interface HeaderConfig {
     collapsed?: true;
     onToggle?: (opened: boolean) => void;
     transparent?: boolean;
-    leftBadge?: {label: string; color: string};
-    rightBadge?: {label: string; color: string};
+    leftBadge?: BadgeConfig;
+    rightBadge?: BadgeConfig;
     headerButtonConfig?: {
         label: string;
         icon: IconConfig;

@@ -52,16 +52,12 @@
             </div>
 
             <div class="badges-container">
-                <div class="badge"
-                     *ngIf="leftBadge"
-                     [style.background-color]="leftBadge.color"
-                     [innerHTML]="leftBadge.label">
-                </div>
-                <div class="badge"
-                     *ngIf="rightBadge"
-                     [style.background-color]="rightBadge.color"
-                     [innerHTML]="rightBadge.label">
-                </div>
+                <wii-badge *ngIf="leftBadge"
+                           [config]="leftBadge">
+                </wii-badge>
+                <wii-badge *ngIf="rightBadge"
+                           [config]="rightBadge">
+                </wii-badge>
             </div>
         </div>
     </div>

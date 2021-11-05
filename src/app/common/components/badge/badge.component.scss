@@ -1,0 +1,19 @@
+@import "~theme/variables";
+
+:host {
+    &.default-color {
+        background-color: #c4c7d5;
+        color: $primary;
+    }
+
+    &:not(.default-color) {
+        font-weight: bold;
+    }
+
+    color: white;
+    margin-left: 2px;
+    margin-right: 2px;
+    padding: 3px 14px;
+    border-radius: 5px;
+    font-weight: 600 !important;
+}

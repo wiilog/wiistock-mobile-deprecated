@@ -20,8 +20,8 @@
         <ion-card-header *ngIf="cardConfig.title"
                          [class.flex]="cardConfig.titleFlex"
                          [style.background-color]="cardConfig.customColor">
-            <p class="header-wrapper"
-               *ngFor="let titleConfig of getCardTitle(cardConfig.title)">
+            <p class="header-wrapper" [class.text-right]="index % 2 !== 0 && !cardConfig.titleFlex"
+               *ngFor="let titleConfig of getCardTitle(cardConfig.title); let index = index">
                 <span class="title-label" *ngIf="titleConfig.label">{{ titleConfig.label }}&nbsp;:&nbsp;</span>
                 <span class="title-value">{{ titleConfig.value }}</span>
             </p>
@@ -30,13 +30,9 @@
             <div class="content">
                 <p class="badges-container"
                    *ngIf="cardConfig.badges && cardConfig.badges.length > 0">
-                    <span class="badge"
-                          *ngFor="let badge of cardConfig.badges"
-                          [class.default-color]="!badge.color"
-                          [style.background-color]="badge.color && badge.color.background"
-                          [style.color]="badge.color && badge.color.font">
-                        {{ badge.label }}
-                    </span>
+                    <wii-badge *ngFor="let badge of cardConfig.badges"
+                               [config]="badge">
+                    </wii-badge>
                 </p>
                 <p *ngFor="let contentLine of cardConfig.content">
                     <ng-container *ngIf="contentLine.label">

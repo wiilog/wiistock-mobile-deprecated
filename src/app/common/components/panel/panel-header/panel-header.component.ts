@@ -2,6 +2,7 @@ import {Component, ElementRef, EventEmitter, HostBinding, HostListener, Input, O
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
 import {IconColor} from '@app/common/components/icon/icon-color';
+import {BadgeConfig} from '@app/common/components/badge/badge-config';
 
 
 @Component({
@@ -55,16 +56,16 @@ export class PanelHeaderComponent {
     public open: boolean;
 
     @Input()
-    public leftBadge: {label: string; color: string}
+    public leftBadge: BadgeConfig;
 
     @Input()
-    public rightBadge: {label: string; color: string}
+    public rightBadge: BadgeConfig;
 
     @Input()
     public headerButtonConfig: {
         label: string;
         icon: IconConfig;
-    }
+    };
 
     @Output()
     public mainButtonAction: EventEmitter<boolean>;
