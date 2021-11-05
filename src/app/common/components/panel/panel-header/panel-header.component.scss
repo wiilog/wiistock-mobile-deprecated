@@ -92,23 +92,11 @@
 .badges-container {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
 
     margin-top: $spacerMin;
     margin-bottom: $spacerMin;
-
-    .badge {
-        font-weight: bold;
-        color: white;
-        margin-left: 2px;
-        margin-right: 10px;
-        padding: 3px 14px;
-        border-radius: 5px;
-
-        &:last-of-type {
-            color: #030F4C;
-            font-weight: normal;
-        }
-    }
 }
 
 .header-button-container {
