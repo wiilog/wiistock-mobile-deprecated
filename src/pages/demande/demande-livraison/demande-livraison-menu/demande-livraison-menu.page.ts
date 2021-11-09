@@ -13,11 +13,11 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {ToastService} from '@app/common/services/toast.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {LoadingService} from '@app/common/services/loading.service';
-import {Network} from '@ionic-native/network/ngx';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {AlertService} from '@app/common/services/alert.service';
+import {NetworkService} from '@app/common/services/network.service';
 
 
 @Component({
@@ -46,7 +46,7 @@ export class DemandeLivraisonMenuPage extends PageComponent implements CanLeave 
     };
 
     public constructor(private sqliteService: SqliteService,
-                       private network: Network,
+                       private networkService: NetworkService,
                        private alertService: AlertService,
                        private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
@@ -97,7 +97,7 @@ export class DemandeLivraisonMenuPage extends PageComponent implements CanLeave 
     public onRefreshClick(): void {
         this.fabListActivated = false;
 
-        if (this.network.type && this.network.type !== 'unknown' && this.network.type !== 'none') {
+        if (this.networkService.hasNetwork()) {
             let loader: HTMLIonLoadingElement;
             this.apiSending = true;
             this.loadingService.presentLoading()

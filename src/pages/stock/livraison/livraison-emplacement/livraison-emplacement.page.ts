@@ -6,7 +6,6 @@ import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
 import {ToastService} from '@app/common/services/toast.service';
-import {Network} from '@ionic-native/network/ngx';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {NavService} from '@app/common/services/nav/nav.service';
@@ -16,7 +15,8 @@ import {PageComponent} from '@pages/page.component';
 import * as moment from 'moment';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {StorageService} from '@app/common/services/storage/storage.service';
-import {LoadingService} from "../../../../app/common/services/loading.service";
+import {LoadingService} from "@app/common/services/loading.service";
+import {NetworkService} from '@app/common/services/network.service';
 
 @Component({
     selector: 'wii-livraison-emplacement',
@@ -49,7 +49,7 @@ export class LivraisonEmplacementPage extends PageComponent {
 
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
-                       private network: Network,
+                       private networkService: NetworkService,
                        private localDataManager: LocalDataManagerService,
                        private loadingService: LoadingService,
                        private storageService: StorageService,
@@ -117,7 +117,7 @@ export class LivraisonEmplacementPage extends PageComponent {
                                         }]
                                     )),
                                     flatMap((): any => (
-                                        (this.network.type !== 'none')
+                                        this.networkService.hasNetwork()
                                             ? this.localDataManager.sendFinishedProcess('livraison')
                                             : of({offline: true})
                                     )),

@@ -3,7 +3,6 @@ import {LoadingService} from '@app/common/services/loading.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {zip} from 'rxjs';
 import {MenuConfig} from '@app/common/components/menu/menu-config';
-import {Network} from '@ionic-native/network/ngx';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
@@ -30,8 +29,7 @@ export class TrackingMovementMenuPage extends PageComponent implements CanLeave 
     private canLeave: boolean;
     private deposeAlreadyNavigate: boolean;
 
-    public constructor(private network: Network,
-                       private loadingService: LoadingService,
+    public constructor(private loadingService: LoadingService,
                        private sqliteService: SqliteService,
                        private activatedRoute: ActivatedRoute,
                        private toastService: ToastService,

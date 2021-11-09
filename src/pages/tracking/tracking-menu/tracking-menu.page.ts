@@ -3,7 +3,6 @@ import {MenuConfig} from '@app/common/components/menu/menu-config';
 import {Platform, ViewWillEnter} from '@ionic/angular';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
-import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {PageComponent} from '@pages/page.component';
@@ -14,6 +13,7 @@ import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {StatsSlidersData} from '@app/common/components/stats-sliders/stats-sliders-data';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {TranslationService} from '@app/common/services/translations.service';
+import {NetworkService} from '@app/common/services/network.service';
 
 @Component({
     selector: 'wii-tracking-menu',
@@ -28,7 +28,7 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
     public constructor(private platform: Platform,
                        private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
-                       private network: Network,
+                       private networkService: NetworkService,
                        private toastService: ToastService,
                        private storageService: StorageService,
                        private sqliteService: SqliteService,
@@ -70,7 +70,7 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
                         icon: 'group.svg',
                         label: 'Groupage',
                         action: () => {
-                            if(this.network.type !== 'none') {
+                            if(this.networkService.hasNetwork()) {
                                 this.navService.push(NavPathEnum.GROUP_SCAN_GROUP);
                             } else {
                                 this.toastService.presentToast('Une connexion internet est requise pour accéder à cette fonctionnalité.');
@@ -83,7 +83,7 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
                         icon: 'ungroup.svg',
                         label: 'Dégroupage',
                         action: () => {
-                            if(this.network.type !== 'none') {
+                            if(this.networkService.hasNetwork()) {
                                 this.navService.push(NavPathEnum.UNGROUP_SCAN_LOCATION);
                             } else {
                                 this.toastService.presentToast('Une connexion internet est requise pour accéder à cette fonctionnalité.');

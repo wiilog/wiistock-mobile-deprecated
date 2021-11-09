@@ -12,8 +12,8 @@ import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/bar
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {map, mergeMap} from 'rxjs/operators';
 import {Observable, of} from 'rxjs';
-import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
+import {NetworkService} from '@app/common/services/network.service';
 
 
 @Component({
@@ -37,7 +37,7 @@ export class CollecteArticlePickingPage extends PageComponent implements ViewWil
     private selectArticle: (quantity: number, article?: ArticleCollecte) => void;
 
     public constructor(navService: NavService,
-                       private network: Network,
+                       private networkService: NetworkService,
                        private loadingService: LoadingService,
                        private toastService: ToastService,
                        private sqliteService: SqliteService,
@@ -52,7 +52,7 @@ export class CollecteArticlePickingPage extends PageComponent implements ViewWil
         this.selectArticle = this.currentNavParams.get('selectArticle');
         this.showArticlePicking = false;
 
-        if (this.network.type !== 'none') {
+        if (this.networkService.hasNetwork()) {
             this.loadingService
                 .presentLoadingWhile({
                     event: () => {

@@ -7,7 +7,6 @@ import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
 import {ToastService} from '@app/common/services/toast.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {Network} from '@ionic-native/network/ngx';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {ApiService} from '@app/common/services/api.service';
 import {NavService} from '@app/common/services/nav/nav.service';
@@ -22,6 +21,7 @@ import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {AlertService} from '@app/common/services/alert.service';
+import {NetworkService} from '@app/common/services/network.service';
 
 
 @Component({
@@ -63,7 +63,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
 
     public constructor(private toastService: ToastService,
                        private sqliteService: SqliteService,
-                       private network: Network,
+                       private networkService: NetworkService,
                        private localDataManager: LocalDataManagerService,
                        private alertService: AlertService,
                        private apiService: ApiService,
@@ -306,7 +306,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
     }
 
     private selectArticle(article, quantity, pickedArticle: ArticleCollecte): void {
-        if (!this.started && this.network.type !== 'none') {
+        if (!this.started && this.networkService.hasNetwork()) {
             this.loadingStartCollecte = true;
             this.apiService
                 .requestApi(ApiService.BEGIN_COLLECTE, {params: {id: this.collecte.id}})
@@ -324,7 +324,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                 });
         }
         else {
-            if (this.network.type === 'none') {
+            if (!this.networkService.hasNetwork()) {
                 this.toastService.presentToast('Collecte commencée en mode hors ligne');
             }
 
@@ -371,7 +371,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                     )),
                     flatMap(() => this.sqliteService.finishCollecte(this.collecte.id)),
                     flatMap((): any => (
-                        this.network.type !== 'none'
+                        this.networkService.hasNetwork()
                             ? this.localDataManager.sendFinishedProcess('collecte')
                             : of({offline: true})
                     )),

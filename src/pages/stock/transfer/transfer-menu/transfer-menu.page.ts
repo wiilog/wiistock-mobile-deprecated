@@ -4,7 +4,6 @@ import {MenuConfig} from '@app/common/components/menu/menu-config';
 import {Platform} from '@ionic/angular';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
-import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {PageComponent} from '@pages/page.component';
@@ -26,7 +25,6 @@ export class TransferMenuPage extends PageComponent {
     public constructor(private platform: Platform,
                        private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
-                       private network: Network,
                        private toastService: ToastService,
                        navService: NavService) {
         super(navService);

@@ -5,7 +5,6 @@ import {flatMap, map} from 'rxjs/operators';
 import {Platform} from '@ionic/angular';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
-import {Network} from '@ionic-native/network/ngx';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav/nav.service';
@@ -15,6 +14,7 @@ import {ILocalNotification} from '@ionic-native/local-notifications';
 import {NotificationService} from '@app/common/services/notification.service';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {AlertService} from '@app/common/services/alert.service';
+import {NetworkService} from '@app/common/services/network.service';
 
 
 @Component({
@@ -48,7 +48,7 @@ export class MainMenuPage extends PageComponent {
                        private storageService: StorageService,
                        private localDataManager: LocalDataManagerService,
                        private toastService: ToastService,
-                       private network: Network,
+                       private networkService: NetworkService,
                        private platform: Platform,
                        private ngZone: NgZone,
                        private notificationService: NotificationService,
@@ -91,7 +91,7 @@ export class MainMenuPage extends PageComponent {
 
     public synchronise(): Observable<void> {
         const $res = new Subject<void>();
-        if (this.network.type !== 'none') {
+        if (this.networkService.hasNetwork()) {
             this.loading = true;
 
             this.synchronisationSubscription = this.localDataManager.synchroniseData()

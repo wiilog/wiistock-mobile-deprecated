@@ -1,6 +1,5 @@
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
-import {IconColor} from '@app/common/components/icon/icon-color';
 import {BadgeConfig} from '@app/common/components/badge/badge-config';
 
 

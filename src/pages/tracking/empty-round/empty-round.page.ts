@@ -9,11 +9,11 @@ import {FormPanelInputComponent} from '@app/common/components/panel/form-panel/f
 import {ApiService} from '@app/common/services/api.service';
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
 import {LoadingService} from '@app/common/services/loading.service';
-import {Network} from '@ionic-native/network/ngx';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {ToastService} from '@app/common/services/toast.service';
 import * as moment from 'moment';
+import {NetworkService} from '@app/common/services/network.service';
 
 @Component({
     selector: 'app-empty-round',
@@ -38,7 +38,7 @@ export class EmptyRoundPage extends PageComponent implements ViewWillEnter, View
     constructor(private nav: NavService,
                 private api: ApiService,
                 private loading: LoadingService,
-                private network: Network,
+                private networkService: NetworkService,
                 private localDataManager: LocalDataManagerService,
                 private sqliteService: SqliteService,
                 private toast: ToastService) {
@@ -77,7 +77,7 @@ export class EmptyRoundPage extends PageComponent implements ViewWillEnter, View
 
     public validate() {
         const values = this.formPanelComponent.values;
-        const online = (this.network.type !== 'none');
+        const online = this.networkService.hasNetwork();
 
         const options = {
             location: this.location.label,

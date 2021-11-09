@@ -2,7 +2,6 @@ import {Component, ViewChild} from '@angular/core';
 import {Handling} from '@entities/handling';
 import {ToastService} from '@app/common/services/toast.service';
 import {ApiService} from '@app/common/services/api.service';
-import {Network} from '@ionic-native/network/ngx';
 import {LoadingService} from '@app/common/services/loading.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {NavService} from '@app/common/services/nav/nav.service';
@@ -27,6 +26,7 @@ import {Status} from '@entities/status';
 import {TranslationService} from '@app/common/services/translations.service';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {StorageService} from '@app/common/services/storage/storage.service';
+import {NetworkService} from '@app/common/services/network.service';
 
 
 @Component({
@@ -54,7 +54,7 @@ export class HandlingValidatePage extends PageComponent {
     private pageEnter: boolean;
 
     public constructor(private loadingService: LoadingService,
-                       private network: Network,
+                       private networkService: NetworkService,
                        private apiService: ApiService,
                        private toastService: ToastService,
                        private sqliteService: SqliteService,
@@ -192,7 +192,7 @@ export class HandlingValidatePage extends PageComponent {
     }
 
     public onFormSubmit(): void {
-        if (this.network.type !== 'none') {
+        if (this.networkService.hasNetwork()) {
             if (this.formPanelComponent.firstError) {
                 this.toastService.presentToast(this.formPanelComponent.firstError);
             }

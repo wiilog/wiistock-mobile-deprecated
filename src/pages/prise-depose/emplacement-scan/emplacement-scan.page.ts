@@ -2,7 +2,6 @@ import {Component, EventEmitter, ViewChild} from '@angular/core';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
-import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {Emplacement} from '@entities/emplacement';
@@ -10,6 +9,7 @@ import {PageComponent} from '@pages/page.component';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {NetworkService} from '@app/common/services/network.service';
 
 @Component({
     selector: 'wii-emplacement-scan',
@@ -33,7 +33,7 @@ export class EmplacementScanPage extends PageComponent {
     public loading: boolean;
     public isDemoMode: boolean;
 
-    public constructor(private network: Network,
+    public constructor(private networkService: NetworkService,
                        private toastService: ToastService,
                        private storageService: StorageService,
                        navService: NavService) {
@@ -98,7 +98,7 @@ export class EmplacementScanPage extends PageComponent {
     }
 
     private testNetwork(callback: () => void): void {
-        if (!this.fromStock || this.network.type !== 'none') {
+        if (!this.fromStock || this.networkService.hasNetwork()) {
             callback();
         }
         else {

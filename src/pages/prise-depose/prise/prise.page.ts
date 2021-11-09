@@ -15,7 +15,6 @@ import {TrackingListFactoryService} from '@app/common/services/tracking-list-fac
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {filter, flatMap, map, tap} from 'rxjs/operators';
 import * as moment from 'moment';
-import {Network} from '@ionic-native/network/ngx';
 import {ActivatedRoute} from '@angular/router';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
@@ -27,6 +26,7 @@ import {Translations} from '@entities/translation';
 import {Nature} from '@entities/nature';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {AlertService} from '@app/common/services/alert.service';
+import {NetworkService} from '@app/common/services/network.service';
 
 
 @Component({
@@ -73,7 +73,7 @@ export class PrisePage extends PageComponent implements CanLeave {
 
     private viewEntered: boolean;
 
-    public constructor(private network: Network,
+    public constructor(private networkService: NetworkService,
                        private apiService: ApiService,
                        private sqliteService: SqliteService,
                        private alertService: AlertService,
@@ -103,7 +103,7 @@ export class PrisePage extends PageComponent implements CanLeave {
         zip(
             this.storageService.getString(StorageKeyEnum.OPERATOR),
             this.sqliteService.getPrises(this.fromStock),
-            (this.network.type !== 'none' && this.emplacement && !this.fromStock
+            (this.networkService.hasNetwork() && this.emplacement && !this.fromStock
                 ? this.apiService.requestApi(ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})
                 : of({trackingDrops: []})),
             !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
@@ -155,8 +155,9 @@ export class PrisePage extends PageComponent implements CanLeave {
                     const movementsToSave = this.colisPrise.filter(({isGroup}) => !isGroup);
                     const groupingMovements = this.colisPrise.filter(({isGroup}) => isGroup);
 
+                    const online = this.networkService.hasNetwork();
                     if (!this.fromStock
-                        && this.network.type === 'none'
+                        && !online
                         && groupingMovements.length > 0) {
                         this.toastService.presentToast('Votre prise contient des groupes, veuillez vous connecter à internet pour continuer.');
                         return;
@@ -166,7 +167,6 @@ export class PrisePage extends PageComponent implements CanLeave {
                         .presentLoadingWhile({
                             message: multiPrise ? 'Envoi des prises en cours...' : 'Envoi de la prise en cours...',
                             event: () => {
-                                const online = (this.network.type !== 'none');
                                 return this.localDataManager
                                     .saveTrackingMovements(movementsToSave.map(({loading, ...tracking}) => tracking))
                                     .pipe(
@@ -222,7 +222,7 @@ export class PrisePage extends PageComponent implements CanLeave {
             if (!this.fromStock) {
                 this.processTackingBarCode(barCode, isManualAdd, 1);
             }
-            else if (this.network.type !== 'none') {
+            else if (this.networkService.hasNetwork()) {
                 this.barcodeCheckLoading = true;
                 let loader: HTMLIonLoadingElement;
                 this.barcodeCheckSubscription = this.loadingService
@@ -502,7 +502,7 @@ export class PrisePage extends PageComponent implements CanLeave {
             }
             else {
                 if (isManualAdd || !this.fromStock) {
-                    const needNatureChecks = (!this.fromStock && this.network.type !== 'none');
+                    const needNatureChecks = (!this.fromStock && this.networkService.hasNetwork());
                     this.saveTrackingMovement(barCode, quantity, needNatureChecks);
 
                     if (needNatureChecks) {

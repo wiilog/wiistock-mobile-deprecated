@@ -1,7 +1,6 @@
 import {Component, ViewChild} from '@angular/core';
 import {SelectItemTypeEnum} from "@app/common/components/select-item/select-item-type.enum";
 import {Emplacement} from "@entities/emplacement";
-import {Network} from "@ionic-native/network/ngx";
 import {ToastService} from "@app/common/services/toast.service";
 import {StorageService} from "@app/common/services/storage/storage.service";
 import {NavService} from "@app/common/services/nav/nav.service";
@@ -10,6 +9,7 @@ import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/bar
 import {SelectItemComponent} from "@app/common/components/select-item/select-item.component";
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {ViewWillEnter} from "@ionic/angular";
+import {NetworkService} from '@app/common/services/network.service';
 
 @Component({
     selector: 'app-ungroup-scan-location',
@@ -24,7 +24,7 @@ export class UngroupScanLocationPage extends PageComponent implements ViewWillEn
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
 
-    public constructor(private network: Network,
+    public constructor(private networkService: NetworkService,
                        private toastService: ToastService,
                        private storageService: StorageService,
                        navService: NavService) {
@@ -56,7 +56,7 @@ export class UngroupScanLocationPage extends PageComponent implements ViewWillEn
     }
 
     private testNetwork(callback: () => void): void {
-        if (this.network.type !== 'none') {
+        if (this.networkService.hasNetwork()) {
             callback();
         } else {
             this.toastService.presentToast('Vous devez être connecté à internet pour valider un dégroupage');

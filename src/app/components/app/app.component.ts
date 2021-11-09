@@ -9,7 +9,6 @@ import {flatMap} from 'rxjs/operators';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {ServerImageService} from '@app/common/services/server-image.service';
-import {NotificationService} from '@app/common/services/notification.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 

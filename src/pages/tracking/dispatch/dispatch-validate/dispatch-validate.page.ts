@@ -17,9 +17,9 @@ import {SelectItemComponent} from '@app/common/components/select-item/select-ite
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {DispatchPack} from '@entities/dispatch-pack';
-import {Network} from "@ionic-native/network/ngx";
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {NetworkService} from '@app/common/services/network.service';
 
 enum Page {
     LOCATION,
@@ -84,7 +84,7 @@ export class DispatchValidatePage extends PageComponent {
                        private localDataManager: LocalDataManagerService,
                        private toastService: ToastService,
                        private storageService: StorageService,
-                       private network: Network,
+                       private networkService: NetworkService,
                        navService: NavService) {
         super(navService);
     }
@@ -233,7 +233,7 @@ export class DispatchValidatePage extends PageComponent {
                                 )))
                         )),
                         flatMap((): any => (
-                            this.network.type !== 'none'
+                            this.networkService.hasNetwork()
                                 ? this.localDataManager.sendFinishedProcess('dispatch')
                                 : of({offline: true})
                         )),

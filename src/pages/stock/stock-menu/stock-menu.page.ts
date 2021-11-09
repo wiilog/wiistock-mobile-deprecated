@@ -4,7 +4,6 @@ import {MenuConfig, ColumnNumber} from '@app/common/components/menu/menu-config'
 import {Platform} from '@ionic/angular';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
-import {Network} from '@ionic-native/network/ngx';
 import {ToastService} from '@app/common/services/toast.service';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {PageComponent} from '@pages/page.component';
@@ -14,6 +13,7 @@ import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {map} from 'rxjs/operators';
+import {NetworkService} from '@app/common/services/network.service';
 
 @Component({
     selector: 'wii-stock-menu',
@@ -36,7 +36,7 @@ export class StockMenuPage extends PageComponent {
     public constructor(private platform: Platform,
                        private mainHeaderService: MainHeaderService,
                        private localDataManager: LocalDataManagerService,
-                       private network: Network,
+                       private networkService: NetworkService,
                        private toastService: ToastService,
                        private storageService: StorageService,
                        private sqliteService: SqliteService,
@@ -120,7 +120,7 @@ export class StockMenuPage extends PageComponent {
     }
 
     public synchronise(): void {
-        if (this.network.type !== 'none') {
+        if (this.networkService.hasNetwork()) {
             this.loading = true;
 
             this.synchronisationSubscription = this.localDataManager.synchroniseData().subscribe(

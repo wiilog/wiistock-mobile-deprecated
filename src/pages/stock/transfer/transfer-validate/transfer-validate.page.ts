@@ -3,7 +3,6 @@ import {NavService} from '@app/common/services/nav/nav.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
-import {Network} from '@ionic-native/network/ngx';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
@@ -16,6 +15,7 @@ import {PageComponent} from '@pages/page.component';
 import {LoadingService} from '@app/common/services/loading.service';
 import {TransferOrder} from '@entities/transfer-order';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {NetworkService} from '@app/common/services/network.service';
 
 
 @Component({
@@ -51,7 +51,7 @@ export class TransferValidatePage extends PageComponent {
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
                        private storageService: StorageService,
-                       private network: Network,
+                       private networkService: NetworkService,
                        private loadingService: LoadingService,
                        private localDataManager: LocalDataManagerService,
                        navService: NavService) {
@@ -100,7 +100,7 @@ export class TransferValidatePage extends PageComponent {
                         }),
                         flatMap(() => this.sqliteService.update('transfer_order', [{values: {treated: 1}, where: [`id = ${this.transferOrder.id}`]}])),
                         flatMap((): any => (
-                            this.network.type !== 'none'
+                            this.networkService.hasNetwork()
                                 ? this.localDataManager.sendFinishedProcess('transfer')
                                 : of({offline: true})
                         )),

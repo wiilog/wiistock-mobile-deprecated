@@ -5,7 +5,6 @@ import {Observable, of, Subscription} from 'rxjs';
 import {filter, flatMap, map, mergeMap, take, tap} from 'rxjs/operators';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {VersionCheckerService} from '@app/common/services/version-checker.service';
-import {Network} from '@ionic-native/network/ngx';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {BarcodeScannerManagerService} from '@app/common/services/barcode-scanner-manager.service';
 import {NavService} from '@app/common/services/nav/nav.service';
@@ -21,6 +20,7 @@ import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {ILocalNotification} from '@ionic-native/local-notifications';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {UserService} from '@app/common/services/user.service';
+import {NetworkService} from '@app/common/services/network.service';
 
 
 @Component({
@@ -60,7 +60,7 @@ export class LoginPage extends PageComponent {
 
     public constructor(private toastService: ToastService,
                        private apiService: ApiService,
-                       private network: Network,
+                       private networkService: NetworkService,
                        private router: Router,
                        private splashScreen: SplashScreen,
                        private changeDetector: ChangeDetectorRef,
@@ -178,7 +178,7 @@ export class LoginPage extends PageComponent {
 
     public logForm(): void {
         if(!this.loading && this.loginKey) {
-            if(this.network.type !== 'none') {
+            if(this.networkService.hasNetwork()) {
                 this.loading = true;
 
                 this.unsubscribeApi();

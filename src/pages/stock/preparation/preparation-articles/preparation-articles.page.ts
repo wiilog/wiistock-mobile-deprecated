@@ -8,7 +8,6 @@ import {IconConfig} from '@app/common/components/panel/model/icon-config';
 import {ToastService} from '@app/common/services/toast.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {NavService} from '@app/common/services/nav/nav.service';
-import {Network} from '@ionic-native/network/ngx';
 import {ApiService} from '@app/common/services/api.service';
 import {ArticlePrepaByRefArticle} from '@entities/article-prepa-by-ref-article';
 import {flatMap, map} from 'rxjs/operators';
@@ -18,6 +17,7 @@ import * as moment from 'moment';
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {NetworkService} from '@app/common/services/network.service';
 
 
 @Component({
@@ -51,7 +51,7 @@ export class PreparationArticlesPage extends PageComponent {
 
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
-                       private network: Network,
+                       private networkService: NetworkService,
                        private apiService: ApiService,
                        navService: NavService) {
         super(navService);
@@ -208,7 +208,7 @@ export class PreparationArticlesPage extends PageComponent {
         if (selectedArticle && selectedQuantity) {
             // we start preparation
             if (!this.started) {
-                if (this.network.type !== 'none') {
+                if (this.networkService.hasNetwork()) {
                     this.loadingStartPreparation = true;
                     this.apiService.requestApi(ApiService.BEGIN_PREPA, {params: {id: this.preparation.id}}).subscribe((resp) => {
                         if (resp.success) {

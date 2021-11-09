@@ -7,7 +7,6 @@ import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
 import {ToastService} from '@app/common/services/toast.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {Network} from '@ionic-native/network/ngx';
 import {ApiService} from '@app/common/services/api.service';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {flatMap} from 'rxjs/operators';
@@ -16,6 +15,7 @@ import {Mouvement} from '@entities/mouvement';
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {NetworkService} from '@app/common/services/network.service';
 
 
 @Component({
@@ -49,7 +49,7 @@ export class LivraisonArticlesPage extends PageComponent {
 
     public constructor(private toastService: ToastService,
                        private sqliteService: SqliteService,
-                       private network: Network,
+                       private networkService: NetworkService,
                        private apiService: ApiService,
                        navService: NavService) {
         super(navService);
@@ -92,7 +92,7 @@ export class LivraisonArticlesPage extends PageComponent {
     }
 
     public selectArticle(article, quantity) {
-        if (!this.started && this.network.type !== 'none') {
+        if (!this.started && this.networkService.hasNetwork()) {
             this.loadingStartLivraison = true;
             this.apiService
                 .requestApi(ApiService.BEGIN_LIVRAISON, {params: {id: this.livraison.id}})
@@ -111,7 +111,7 @@ export class LivraisonArticlesPage extends PageComponent {
                 });
         }
         else {
-            if (this.network.type === 'none') {
+            if (!this.networkService.hasNetwork()) {
                 this.toastService.presentToast('Livraison commencée en mode hors ligne');
             }
 

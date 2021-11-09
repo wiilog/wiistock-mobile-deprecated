@@ -3,7 +3,6 @@ import {NavService} from '@app/common/services/nav/nav.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
-import {Network} from '@ionic-native/network/ngx';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
@@ -15,6 +14,7 @@ import {flatMap, map} from 'rxjs/operators';
 import {of, zip} from 'rxjs';
 import {PageComponent} from '@pages/page.component';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {NetworkService} from '@app/common/services/network.service';
 
 
 @Component({
@@ -49,7 +49,7 @@ export class PreparationEmplacementPage extends PageComponent {
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
                        private storageService: StorageService,
-                       private network: Network,
+                       private networkService: NetworkService,
                        private localDataManager: LocalDataManagerService,
                        navService: NavService) {
         super(navService);
@@ -104,7 +104,7 @@ export class PreparationEmplacementPage extends PageComponent {
 
                         flatMap(() => this.sqliteService.finishPrepa(this.preparation.id, this.location.label)),
                         flatMap((): any => (
-                            this.network.type !== 'none'
+                            this.networkService.hasNetwork()
                                 ? this.localDataManager.sendFinishedProcess('preparation')
                                 : of({offline: true})
                         )),

@@ -5,8 +5,7 @@ import {MouvementTraca} from '@entities/mouvement-traca';
 import {HeaderConfig} from '@app/common/components/panel/model/header-config';
 import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel/list-panel-item-config';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
-import {from, Observable, of, Subscription, zip} from 'rxjs';
-import {Network} from '@ionic-native/network/ngx';
+import {Observable, of, Subscription, zip} from 'rxjs';
 import {ToastService} from '@app/common/services/toast.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
@@ -26,6 +25,7 @@ import {Nature} from '@entities/nature';
 import {Translations} from '@entities/translation';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {AlertService} from '@app/common/services/alert.service';
+import {NetworkService} from '@app/common/services/network.service';
 
 @Component({
     selector: 'wii-depose',
@@ -74,7 +74,7 @@ export class DeposePage extends PageComponent implements CanLeave {
 
     private natureIdsToConfig: {[id: number]: { label: string; color?: string; }};
 
-    public constructor(private network: Network,
+    public constructor(private networkService: NetworkService,
                        private alertService: AlertService,
                        private apiService: ApiService,
                        private toastService: ToastService,
@@ -154,7 +154,7 @@ export class DeposePage extends PageComponent implements CanLeave {
         if (this.colisDepose && this.colisDepose.length > 0) {
             if(!this.saveSubscription) {
                 const multiDepose = (this.colisDepose.length > 1);
-                const online = (this.network.type !== 'none');
+                const online = this.networkService.hasNetwork();
 
                 if (!this.fromStock || online) {
                     const takingToFinish = this.colisPrise
@@ -163,7 +163,7 @@ export class DeposePage extends PageComponent implements CanLeave {
 
                     const groupingMovements = this.colisDepose.filter(({isGroup, subPacks}) => isGroup && (!subPacks || subPacks.length > 0));
                     if (!this.fromStock
-                        && this.network.type === 'none'
+                        && !online
                         && groupingMovements.length > 0) {
                         this.toastService.presentToast('Votre dépose contient des groupes, veuillez vous connecter à internet pour continuer.');
                         return;
