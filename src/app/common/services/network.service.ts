@@ -12,8 +12,8 @@ export class NetworkService {
     public hasNetwork(): boolean {
         return (
             this.network.type
-            && this.network.type !== Connection.UNKNOWN
-            && this.network.type !== Connection.NONE
+            && this.network.type !== this.network.Connection.UNKNOWN
+            && this.network.type !== this.network.Connection.NONE
         );
     }
 }
