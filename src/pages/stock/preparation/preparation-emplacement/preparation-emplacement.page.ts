@@ -85,8 +85,10 @@ export class PreparationEmplacementPage extends PageComponent {
         if (!this.isLoading) {
             if (this.location && this.location.label) {
                 this.isLoading = true;
-                this.sqliteService
-                    .findArticlesByPrepa(this.preparation.id)
+                this.sqliteService.findBy(
+                    'article_prepa',
+                    [`id_prepa = ${this.preparation.id}`, `deleted <> 1`]
+                )
                     .pipe(
                         flatMap((articles) => zip(
                             ...articles.map((article) => (

@@ -320,7 +320,10 @@ export class PreparationArticlesPage extends PageComponent {
     }
 
     private updateLists(): Observable<undefined> {
-        return this.sqliteService.findArticlesByPrepa(this.preparation.id).pipe(
+        return this.sqliteService.findBy(
+            'article_prepa',
+            [`id_prepa = ${this.preparation.id}`, `deleted <> 1`]
+        ).pipe(
             flatMap((articlesPrepa: Array<ArticlePrepa>) => {
                 this.articlesNT = articlesPrepa.filter(({has_moved}) => has_moved === 0);
                 this.articlesT = articlesPrepa.filter(({has_moved}) => has_moved === 1);

@@ -2,13 +2,12 @@ import {Injectable} from '@angular/core';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {Livraison} from '@entities/livraison';
 import {from, Observable, of, ReplaySubject, Subject, zip} from 'rxjs';
-import {flatMap, map, take, tap} from 'rxjs/operators';
+import {flatMap, map, mergeMap, take, tap} from 'rxjs/operators';
 import {Handling} from '@entities/handling';
 import {MouvementTraca} from '@entities/mouvement-traca';
 import {Anomalie} from "@entities/anomalie";
 import {ArticlePrepaByRefArticle} from "@entities/article-prepa-by-ref-article";
 import {ArticleCollecte} from "@entities/article-collecte";
-import {ArticlePrepa} from "@entities/article-prepa";
 import {ArticleLivraison} from "@entities/article-livraison";
 import {SQLite, SQLiteObject} from '@ionic-native/sqlite/ngx';
 import {Platform} from '@ionic/angular';
@@ -147,11 +146,46 @@ export class SqliteService {
 
     public importPreparations(data, deleteOld: boolean = true): Observable<any> {
         const preparations = (data['preparations'] || []);
+        const articlesPrepaApi = (data['articlesPrepa'] || []);
+        const preparationIds = preparations.map(({id}) => id);
+
         return of(undefined).pipe(
-            flatMap(() => deleteOld ? this.deleteBy('preparation') : of(undefined)),
-            flatMap(() => (
-                (preparations.length > 0)
-                    ? this.insert('preparation', preparations.map(({number, ...preparation}) => ({started: 0, numero: number, ...preparation})))
+            mergeMap(() => deleteOld ? this.deleteBy('preparation') : of(undefined)),
+            mergeMap(() => this.insert(
+                'preparation',
+                preparations.map(({number, ...preparation}) => ({started: 0, numero: number, ...preparation}))
+            )),
+
+            // articlePrepa
+            mergeMap(() => (
+                preparationIds.length > 0
+                    ? this.findBy('article_prepa', [`id_prepa IN (${preparationIds.join(',')})`, `deleted <> 1`])
+                        .pipe(
+                            mergeMap((articles) => {
+                                const articlesToInsert = articlesPrepaApi
+                                    .filter((toInsert) => (
+                                        articles.every((articlePrepa) => (
+                                            (articlePrepa.reference !== toInsert.reference) ||
+                                            (articlePrepa.is_ref != toInsert.is_ref))
+                                        )
+                                    ))
+                                    .map((toInsert) => ({
+                                        label: toInsert.label,
+                                        reference: toInsert.reference,
+                                        quantite: toInsert.quantity,
+                                        is_ref: toInsert.is_ref,
+                                        id_prepa: toInsert.id_prepa,
+                                        has_moved: 0,
+                                        emplacement: toInsert.location,
+                                        type_quantite: toInsert.type_quantite,
+                                        barcode: toInsert.barCode,
+                                        original_quantity: toInsert.quantity,
+                                        reference_article_reference: toInsert.reference_article_reference
+                                    }))
+                                ;
+
+                                return this.insert('article_prepa', articlesToInsert);
+                            }))
                     : of(undefined)
             ))
         );
@@ -376,52 +410,6 @@ export class SqliteService {
             ))
         );
 
-    }
-
-    public importArticlesPrepas(data): Observable<any> {
-        const ret$ = new ReplaySubject<any>(1);
-        let articlesPrepa = data['articlesPrepa'];
-        let articlesPrepaValues = [];
-        if (articlesPrepa.length === 0) {
-            ret$.next(undefined);
-        }
-        for (let article of articlesPrepa) {
-            this.findArticlesByPrepa(article.id_prepa).subscribe((articles) => {
-                // TODO remove '=='
-                const isArticleAlreadySaved = articles.some((articlePrepa) => (
-                    (articlePrepa.reference === article.reference) &&
-                    (articlePrepa.is_ref == article.is_ref))
-                );
-                if (!isArticleAlreadySaved) {
-                    articlesPrepaValues.push("(" +
-                        null + ", " +
-                        "'" + this.escapeQuotes(article.label) + "', " +
-                        "'" + this.escapeQuotes(article.reference) + "', " +
-                        article.quantity + ", " +
-                        article.is_ref + ", " +
-                        article.id_prepa + ", " +
-                        0 + ", " +
-                        "'" + this.escapeQuotes(article.location) + "', " +
-                        "'" + article.type_quantite + "', " +
-                        "'" + article.barCode + "', " +
-                        article.quantity + ", " +
-                        "'" + this.escapeQuotes(article.reference_article_reference)  + "')");
-                }
-                if (articlesPrepa.indexOf(article) === articlesPrepa.length - 1) {
-                    if (articlesPrepaValues.length > 0) {
-                        let articlesPrepaValuesStr = articlesPrepaValues.join(', ');
-                        let sqlArticlesPrepa = 'INSERT INTO `article_prepa` (`id`, `label`, `reference`, `quantite`, `is_ref`, `id_prepa`, `has_moved`, `emplacement`, `type_quantite`, `barcode`, `original_quantity`, `reference_article_reference`) VALUES ' + articlesPrepaValuesStr + ';';
-
-                        this.executeQuery(sqlArticlesPrepa).subscribe(() => {
-                            ret$.next(true);
-                        });
-                    } else {
-                        ret$.next(undefined);
-                    }
-                }
-            });
-        }
-        return ret$;
     }
 
     public importLivraisons(data): Observable<any> {
@@ -675,7 +663,6 @@ export class SqliteService {
             flatMap(() => this.importLocations(data).pipe(tap(() => {console.log('--- > importLocations')}))),
             flatMap(() => this.importArticlesPrepaByRefArticle(data).pipe(tap(() => {console.log('--- > importArticlesPrepaByRefArticle')}))),
             flatMap(() => this.importPreparations(data).pipe(tap(() => {console.log('--- > importPreparations')}))),
-            flatMap(() => this.importArticlesPrepas(data).pipe(tap(() => {console.log('--- > importArticlesPrepas')}))),
             flatMap(() => this.importLivraisons(data).pipe(tap(() => {console.log('--- > importLivraisons')}))),
             flatMap(() => this.importArticlesInventaire(data).pipe(tap(() => {console.log('--- > importArticlesInventaire')}))),
             flatMap(() => this.importHandlings(data).pipe(tap(() => {console.log('--- > importHandlings')}))),
@@ -868,13 +855,6 @@ export class SqliteService {
                 }
             ),
             map((res) => (getRes ? res : undefined))
-        );
-    }
-
-    public findArticlesByPrepa(id_prepa: number): Observable<Array<ArticlePrepa>> {
-        return this.db$.pipe(
-            flatMap((db: SQLiteObject) => from(db.executeSql(`SELECT * FROM \`article_prepa\` WHERE \`id_prepa\` = ${id_prepa} AND deleted <> 1`, []))),
-            map((articles) => SqliteService.MultiSelectQueryMapper<ArticlePrepa>(articles))
         );
     }
 

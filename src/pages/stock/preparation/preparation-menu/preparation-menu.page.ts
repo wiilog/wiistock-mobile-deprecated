@@ -37,6 +37,7 @@ export class PreparationMenuPage extends PageComponent {
             this.sqlLiteProvider.findAll('preparation').subscribe((preparations) => {
                 this.preparations = preparations
                     .filter(p => (p.date_end === null))
+                    // sort in APi side too
                     .sort(({type: type1}, {type: type2}) => (type1 > type2) ? 1 : ((type2 > type1) ? -1 : 0));
 
                 this.preparationsListConfig = this.preparations.map((preparation: Preparation) => ({
