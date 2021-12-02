@@ -1,7 +1,8 @@
 import {Injectable} from '@angular/core';
 import {from, Observable, of, throwError} from 'rxjs';
 import {LoadingController} from '@ionic/angular';
-import {catchError, flatMap, map, tap} from 'rxjs/operators';
+import {catchError, filter, map, mergeMap, tap} from 'rxjs/operators';
+import {NavigationEnd, Router} from '@angular/router';
 
 
 @Injectable({
@@ -13,14 +14,24 @@ export class LoadingService {
 
     private lastLoading?: HTMLIonLoadingElement;
 
-    public constructor(public loadingController: LoadingController) {}
+    public constructor(private loadingController: LoadingController,
+                       router: Router) {
+        router.events
+            .pipe(
+                filter((event) => (event instanceof NavigationEnd)),
+                mergeMap(() => this.dismissLastLoading())
+            )
+            .subscribe(() => {
+            });
+    }
 
     public presentLoading(message?: string): Observable<HTMLIonLoadingElement> {
         const messageToPrint = message ? message : LoadingService.DEFAULT_MESSAGE;
         return of(undefined)
             .pipe(
-                flatMap(() => from(this.loadingController.create({message: messageToPrint}))),
-                flatMap((loading) => from(loading.present()).pipe(map(() => loading))),
+                mergeMap(() => this.dismissLastLoading()),
+                mergeMap(() => from(this.loadingController.create({message: messageToPrint}))),
+                mergeMap((loading) => from(loading.present()).pipe(map(() => loading))),
                 tap((loading: HTMLIonLoadingElement) => {
                     this.lastLoading = loading;
                 })
@@ -28,13 +39,14 @@ export class LoadingService {
     }
 
     public presentLoadingWhile<T>({message, event}: { message?: string; event: () => Observable<T>; }): Observable<T> {
-        return this.presentLoading(message)
+        return this.dismissLastLoading()
             .pipe(
-                flatMap((loader) => event().pipe(
+                mergeMap(() => this.presentLoading(message)),
+                mergeMap((loader) => event().pipe(
                     map((res) => ([res, loader])),
-                    catchError((err) => from(loader.dismiss()).pipe(flatMap(() => throwError(err))))
+                    catchError((err) => from(loader.dismiss()).pipe(mergeMap(() => throwError(err))))
                 )),
-                flatMap(([res, loader]: [T, HTMLIonLoadingElement]) => from(loader.dismiss()).pipe(map(() => res))),
+                mergeMap(([res, loader]: [T, HTMLIonLoadingElement]) => from(loader.dismiss()).pipe(map(() => res))),
             );
     }
 
@@ -42,6 +54,9 @@ export class LoadingService {
         return (this.lastLoading
             ? from(this.lastLoading.dismiss()).pipe(
                 catchError(() => of(undefined)),
+                tap(() => {
+                    this.lastLoading = undefined;
+                }),
                 map(() => undefined)
             )
             : of(undefined))
