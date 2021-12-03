@@ -9,6 +9,7 @@ import {
     ViewChild
 } from '@angular/core';
 import {ToastService} from '@app/common/services/toast.service';
+import {AlertService} from '@app/common/services/alert.service';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {SearchItemComponent} from '@app/common/components/select-item/search-item/search-item.component';
@@ -77,7 +78,8 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
         },
         [SelectItemTypeEnum.LOCATION]: {
             invalidMessage: 'Veuillez flasher ou sélectionner un emplacement connu',
-            buttonSubtitle: 'Emplacement'
+            buttonSubtitle: 'Emplacement',
+            alert: true
         },
         [SelectItemTypeEnum.INVENTORY_LOCATION]: {
             invalidMessage: 'L\'emplacement scanné n\'est pas dans la liste',
@@ -106,7 +108,8 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
     }
 
     public constructor(private toastService: ToastService,
-                       private changeDetector: ChangeDetectorRef) {
+                       private changeDetector: ChangeDetectorRef,
+                       private alertService: AlertService) {
         this.itemChange = new EventEmitter<any>();
         this.createItem = new EventEmitter<boolean>();
         this.selectedLabel$ = new Subject<string>();
@@ -198,9 +201,16 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
     }
 
     private presentInvalidItemToast(): void {
-        this.toastService.presentToast(
-            this.config[this.type].invalidMessage
-        );
+        const message = this.config[this.type].invalidMessage;
+        if(this.config[this.type].alert) {
+            this.alertService.show({
+                header: 'Erreur',
+                message,
+                buttons: [`Fermer`]
+            });
+        } else {
+            this.toastService.presentToast(message);
+        }
     }
 
     private resetSearchComponent(): void {
