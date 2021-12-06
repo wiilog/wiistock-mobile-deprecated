@@ -608,7 +608,6 @@ export class SqliteService {
     }
 
     public importAnomaliesInventaire(data, deleteOldAnomalies: boolean = true): Observable<any> {
-        console.log(1);
         let ret$: ReplaySubject<any> = new ReplaySubject(1);
         let anomalies = data.anomalies;
 
@@ -631,14 +630,12 @@ export class SqliteService {
                             "'" + anomaly.barCode + "')"
                         ));
                     if (anomaliesToInsert.length === 0) {
-                        console.log(2);
                         ret$.next(undefined);
                     }
                     else {
                         const anomaliesValuesStr = anomaliesToInsert.join(', ');
                         let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `countedQuantity`, `location`, `is_treatable`, `barcode`) VALUES ' + anomaliesValuesStr + ';';
                         this.executeQuery(sqlAnomaliesInventaire).subscribe(() => {
-                            console.log(3);
                             ret$.next(true);
                         });
                     }
