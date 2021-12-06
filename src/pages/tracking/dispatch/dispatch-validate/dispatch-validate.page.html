@@ -3,8 +3,7 @@
                   [transparent]="locationHeaderConfig.transparent"
                   [title]="locationHeaderConfig.title"
                   [subtitle]="locationHeaderConfig.subtitle"
-                  [leftIcon]="locationHeaderConfig.leftIcon"
-                  [rightIcons]="locationHeaderConfig.rightIcon">
+                  [leftIcon]="locationHeaderConfig.leftIcon">
 </wii-panel-header>
 
 <wii-panel-header *ngIf="statusHeaderConfig && currentPage == PageStatus"
@@ -12,9 +11,21 @@
                   [transparent]="statusHeaderConfig.transparent"
                   [title]="statusHeaderConfig.title"
                   [subtitle]="statusHeaderConfig.subtitle"
-                  [leftIcon]="statusHeaderConfig.leftIcon"
-                  [rightIcons]="statusHeaderConfig.rightIcon">
+                  [leftIcon]="statusHeaderConfig.leftIcon">
 </wii-panel-header>
+
+<div *ngIf="currentPage === PageStatus"
+     scroll-y="true">
+    <ion-radio-group [(ngModel)]="selectedStatus"
+                     name="status"
+                     ngDefaultControl>
+        <ion-item *ngFor="let status of statuses"
+                  class="status-item">
+            <ion-label>{{ status.label }}</ion-label>
+            <ion-radio slot="start" [value]="status"></ion-radio>
+        </ion-item>
+    </ion-radio-group>
+</div>
 
 <div class="page-footer">
     <wii-select-item #locationSelectItemComponent
@@ -24,12 +35,16 @@
                      [scanMode]="barcodeScannerLocationMode"
                      [hidden]="currentPage !== PageLocation">
     </wii-select-item>
-    <wii-select-item #statusSelectItemComponent
-                     [type]="selectItemStatus"
-                     [requestParams]="statusRequestParams"
-                     (itemChange)="selectStatus($event)"
-                     [checkBarcodeValidity]="true"
-                     [scanMode]="barcodeScannerStatusMode"
-                     [hidden]="currentPage !== PageStatus">
-    </wii-select-item>
+    <ion-button class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                [hidden]="(currentPage === PageLocation && !selectedLocation) || (currentPage === PageStatus && !selectedStatus)"
+                (click)="validate()">
+        Valider
+        <wii-icon name="check.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
 </div>

@@ -33,7 +33,7 @@ export class DispatchPacksPage extends PageComponent {
 
     public loading: boolean;
 
-    public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SCAN;
+    public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.HIDDEN;
 
     public dispatchHeaderConfig: {
         title: string;
@@ -185,16 +185,7 @@ export class DispatchPacksPage extends PageComponent {
                     color: CardListColorEnum.GREEN,
                     customColor: this.dispatch.color,
                     name: 'stock-transfer.svg'
-                },
-                ...((this.packsTreatedListConfig && this.packsTreatedListConfig.body.length > 0)
-                    ? {
-                        rightIcon: {
-                            name: 'check.svg',
-                            color: 'success',
-                            action: () => this.validate()
-                        }
-                    }
-                    : {})
+                }
             };
         });
     }
@@ -209,7 +200,7 @@ export class DispatchPacksPage extends PageComponent {
         this.packsToTreatListConfig = {
             header: {
                 title: 'À transférer',
-                info: `${packsToTreat.length} objet${plural} scanné${plural}`,
+                info: `${packsToTreat.length} objet${plural} à scanner`,
                 leftIcon: {
                     name: 'download.svg',
                     color: 'list-green-light'
@@ -243,7 +234,7 @@ export class DispatchPacksPage extends PageComponent {
         this.packsTreatedListConfig = {
             header: {
                 title: 'Transféré',
-                info: `${packsTreated.length} objet${plural} à scanner`,
+                info: `${packsTreated.length} objet${plural} scanné${plural}`,
                 leftIcon: {
                     name: 'upload.svg',
                     color: CardListColorEnum.GREEN
@@ -311,7 +302,7 @@ export class DispatchPacksPage extends PageComponent {
         }
     }
 
-    private validate(): void {
+    public validate(): void {
         const partialDispatch = this.dispatchPacks.filter(({treated, already_treated}) => (treated != 1 && already_treated != 1)).length > 0
         if (!partialDispatch || !this.typeHasNoPartialStatuses) {
             this.navService.push(NavPathEnum.DISPATCH_VALIDATE, {

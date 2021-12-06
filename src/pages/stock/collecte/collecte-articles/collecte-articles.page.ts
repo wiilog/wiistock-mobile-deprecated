@@ -22,6 +22,8 @@ import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {AlertService} from '@app/common/services/alert.service';
 import {NetworkService} from '@app/common/services/network.service';
+import {BarcodeScannerModeEnum} from "../../../../app/common/components/barcode-scanner/barcode-scanner-mode.enum";
+import {LoadingService} from "../../../../app/common/services/loading.service";
 
 
 @Component({
@@ -47,6 +49,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
         subtitle?: Array<string>;
         info?: string;
     };
+    public readonly scannerModeHidden: BarcodeScannerModeEnum = BarcodeScannerModeEnum.HIDDEN;
 
     public started: boolean = false;
     public isValid: boolean = true;
@@ -68,6 +71,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                        private alertService: AlertService,
                        private apiService: ApiService,
                        private storageService: StorageService,
+                       private loadingService: LoadingService,
                        navService: NavService) {
         super(navService);
         this.loadingStartCollecte = false;
@@ -355,32 +359,37 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
             this.isLoading = true;
 
             this.canLeave = false;
-            this.sqliteService
-                .findArticlesByCollecte(this.collecte.id)
-                .pipe(
-                    flatMap((articles) => zip(
-                        ...articles.map((article) => (
-                            this.sqliteService
-                                .findMvtByArticleCollecte(article.id)
-                                .pipe(flatMap((mvt) => (
-                                    mvt
-                                        ? this.sqliteService.finishMvt(mvt.id)
-                                        : of(undefined)
-                                )))
-                        ))
-                    )),
-                    flatMap(() => this.sqliteService.finishCollecte(this.collecte.id)),
-                    flatMap((): any => (
-                        this.networkService.hasNetwork()
-                            ? this.localDataManager.sendFinishedProcess('collecte')
-                            : of({offline: true})
-                    )),
-                    flatMap((res: any) => (
-                        res.offline || res.success.length > 0
-                            ? this.storageService.incrementCounter(StorageKeyEnum.COUNTERS_COLLECTS_TREATED).pipe(map(() => res))
-                            : of(res)
-                    )),
-                )
+            this.loadingService.presentLoadingWhile({
+                message: 'Chargement...',
+                event: () => {
+                    return this.sqliteService
+                        .findArticlesByCollecte(this.collecte.id)
+                        .pipe(
+                            flatMap((articles) => zip(
+                                ...articles.map((article) => (
+                                    this.sqliteService
+                                        .findMvtByArticleCollecte(article.id)
+                                        .pipe(flatMap((mvt) => (
+                                            mvt
+                                                ? this.sqliteService.finishMvt(mvt.id)
+                                                : of(undefined)
+                                        )))
+                                ))
+                            )),
+                            flatMap(() => this.sqliteService.finishCollecte(this.collecte.id)),
+                            flatMap((): any => (
+                                this.networkService.hasNetwork()
+                                    ? this.localDataManager.sendFinishedProcess('collecte')
+                                    : of({offline: true})
+                            )),
+                            flatMap((res: any) => (
+                                res.offline || res.success.length > 0
+                                    ? this.storageService.incrementCounter(StorageKeyEnum.COUNTERS_COLLECTS_TREATED).pipe(map(() => res))
+                                    : of(res)
+                            )),
+                        )
+                }
+            })
                 .subscribe(
                     ({offline, success}: any) => {
                         this.canLeave = true;
@@ -481,13 +490,6 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                 leftIcon: {
                     name: 'upload.svg',
                     color: 'list-orange'
-                },
-                rightIcon: {
-                    name: 'check.svg',
-                    color: 'success',
-                    action: () => {
-                        this.validate()
-                    }
                 }
             },
             body: this.articlesT.map((articleCollecte: ArticleCollecte) => ({

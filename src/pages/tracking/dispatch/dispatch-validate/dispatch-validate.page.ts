@@ -37,18 +37,13 @@ export class DispatchValidatePage extends PageComponent {
     public readonly PageLocation: Page = Page.LOCATION;
     public readonly PageStatus: Page = Page.STATUS;
 
-    public readonly selectItemStatus = SelectItemTypeEnum.STATUS;
     public readonly selectItemLocation = SelectItemTypeEnum.LOCATION;
-    public readonly barcodeScannerLocationMode = BarcodeScannerModeEnum.TOOL_SEARCH;
-    public readonly barcodeScannerStatusMode = BarcodeScannerModeEnum.ONLY_SEARCH;
+    public readonly barcodeScannerLocationMode = BarcodeScannerModeEnum.ONLY_SEARCH_SCAN;
 
     public statusRequestParams;
 
     @ViewChild('locationSelectItemComponent', {static: false})
     public locationSelectItemComponent: SelectItemComponent;
-
-    @ViewChild('statusSelectItemComponent', {static: false})
-    public statusSelectItemComponent: SelectItemComponent;
 
     public loading: boolean;
 
@@ -61,7 +56,6 @@ export class DispatchValidatePage extends PageComponent {
         title: string;
         subtitle?: string;
         leftIcon: IconConfig;
-        rightIcon: IconConfig;
         transparent: boolean;
     };
 
@@ -69,14 +63,14 @@ export class DispatchValidatePage extends PageComponent {
         title: string;
         subtitle?: string;
         leftIcon: IconConfig;
-        rightIcon: IconConfig;
         transparent: boolean;
     };
 
-    private selectedLocation: Emplacement;
-    private selectedStatus: Status;
+    public selectedLocation: Emplacement;
+    public selectedStatus: Status;
     private dispatch: Dispatch;
     private dispatchPacks: Array<DispatchPack>;
+    public statuses: Array<Status> = [];
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
@@ -99,21 +93,25 @@ export class DispatchValidatePage extends PageComponent {
         const partial = (treatedDispatchPacks.length < this.dispatchPacks.length);
         this.afterValidate = this.currentNavParams.get('afterValidate');
 
+        this.statusRequestParams = [
+            `state = '${partial ? 'partial' : 'treated'}'`,
+            `category = 'acheminement'`,
+        ];
         this.loadingSubscription = this.loadingService.presentLoading()
             .pipe(
                 tap((loader) => {
                     this.loadingElement = loader;
                 }),
-                flatMap(() => this.sqliteService.findOneBy('dispatch', {id: dispatchId})),
+                flatMap(() => zip(
+                    this.sqliteService.findOneBy('dispatch', {id: dispatchId}),
+                    this.sqliteService.findBy('status', this.statusRequestParams)
+                )),
                 filter((dispatch) => Boolean(dispatch))
             )
-            .subscribe((dispatch: Dispatch) => {
+            .subscribe(([dispatch, statuses]: [Dispatch, Array<any>]) => {
                 this.dispatch = dispatch;
-                this.statusRequestParams = [
-                    `state = '${partial ? 'partial' : 'treated'}'`,
-                    `category = 'acheminement'`,
-                    `typeId = ${this.dispatch.typeId}`
-                ];
+
+                this.statuses = statuses.filter((status) => status.typeId === this.dispatch.typeId);
 
                 this.refreshLocationHeaderConfig();
                 this.refreshStatusHeaderConfig();
@@ -122,10 +120,6 @@ export class DispatchValidatePage extends PageComponent {
                 this.loading = false;
 
                 this.locationSelectItemComponent.fireZebraScan();
-
-                setTimeout(() => {
-                    this.statusSelectItemComponent.searchComponent.reload();
-                })
             });
     }
 
@@ -177,23 +171,18 @@ export class DispatchValidatePage extends PageComponent {
         };
     }
 
-    private createHeaderConfig(): { leftIcon: IconConfig; rightIcon: IconConfig; transparent: boolean;} {
+    private createHeaderConfig(): { leftIcon: IconConfig; transparent: boolean;} {
         return {
             transparent: true,
             leftIcon: {
                 name: 'stock-transfer.svg',
                 color: CardListColorEnum.GREEN,
                 customColor: this.dispatch.color
-            },
-            rightIcon: {
-                name: 'check.svg',
-                color: 'success',
-                action: () => this.validate()
             }
         };
     }
 
-    private validate() {
+    public validate() {
         if (this.currentPage === this.PageLocation) {
             if (this.selectedLocation) {
                 this.currentPage = this.PageStatus;

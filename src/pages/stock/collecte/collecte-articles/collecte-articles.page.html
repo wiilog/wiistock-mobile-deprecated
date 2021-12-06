@@ -30,7 +30,19 @@
         <wii-barcode-scanner #footerScannerComponent
                              [buttonSubtitle]="'article'"
                              [hidden]="!articlesNT || articlesNT.length === 0"
+                             [mode]="scannerModeHidden"
                              (add)="testIfBarcodeEquals($event[0])">
         </wii-barcode-scanner>
+        <ion-button class="submit-button larger"
+                    color="primary"
+                    size="large"
+                    expand="full"
+                    (click)="validate()">
+            Valider
+            <wii-icon name="check.svg"
+                      class="button-icon"
+                      color="white">
+            </wii-icon>
+        </ion-button>
     </div>
 </ng-container>
