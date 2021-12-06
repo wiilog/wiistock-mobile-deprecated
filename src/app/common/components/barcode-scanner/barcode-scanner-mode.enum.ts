@@ -1,4 +1,6 @@
 export enum BarcodeScannerModeEnum {
+    HIDDEN,
+    ONLY_MANUAL,
     ONLY_SCAN,
     ONLY_SCAN_WITH_LABEL_MODE,
     WITH_MANUAL,

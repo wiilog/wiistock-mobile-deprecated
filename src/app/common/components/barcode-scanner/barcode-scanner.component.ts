@@ -12,6 +12,7 @@ import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/bar
 })
 export class BarcodeScannerComponent implements OnInit, OnDestroy {
 
+    public readonly ONLY_MANUAL_MODE = BarcodeScannerModeEnum.ONLY_MANUAL;
     public readonly WITH_MANUAL_MODE = BarcodeScannerModeEnum.WITH_MANUAL;
     public readonly ONLY_SCAN_MODE = BarcodeScannerModeEnum.ONLY_SCAN;
     public readonly ONLY_SCAN_WITH_LABEL_MODE = BarcodeScannerModeEnum.ONLY_SCAN_WITH_LABEL_MODE;

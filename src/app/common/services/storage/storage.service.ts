@@ -88,6 +88,10 @@ export class StorageService {
         return from(this.storage.get(rightName)).pipe(map(Boolean));
     }
 
+    public getBoolean(key: StorageKeyEnum): Observable<boolean> {
+        return from(this.storage.get(key)).pipe(map(Boolean));
+    }
+
     public setItem(key: StorageKeyEnum, value: any): Observable<void> {
         return from(this.storage.set(key, value));
     }

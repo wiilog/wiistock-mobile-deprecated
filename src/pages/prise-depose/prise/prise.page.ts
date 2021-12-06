@@ -55,7 +55,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     public listTakingBody: Array<ListPanelItemConfig>;
     public listBoldValues: Array<string>;
 
-    public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.WITH_MANUAL;
+    public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_MANUAL;
 
     public loading: boolean;
     public barcodeCheckLoading: boolean;
@@ -320,7 +320,6 @@ export class PrisePage extends PageComponent implements CanLeave {
                 natureIdsToConfig: this.natureIdsToConfig,
                 natureTranslation: natureLabel,
                 location: this.emplacement,
-                validate: () => this.finishTaking(),
                 confirmItem: !this.fromStock
                     ? ({object: {value: barCode}}: { object?: { value?: string } }) => {
                         // we get first

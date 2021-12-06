@@ -1,11 +1,15 @@
 @import "~theme/variables";
 
 :host {
-    padding: $spacerMin;
+    padding: 0;
     display: block;
 
+    .input-manual {
+        padding: 0 $spacerMin;
+    }
+
     &:not(.button-small) ion-item {
-        margin-bottom: .5rem !important;
+        margin-bottom: $spacerMin !important;
         ion-input {
             font-size: $normalFontSize;
         }

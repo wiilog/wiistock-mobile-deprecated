@@ -9,6 +9,8 @@ export enum StorageKeyEnum {
     RIGHT_EMPTY_ROUND = 'emptyRound',
     DEMO_MODE = 'demoMode',
 
+    PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER = 'skipValidationsManualTransfer',
+
     API_KEY = 'api-key',
     OPERATOR = 'operator',
     OPERATOR_ID = 'operator_id',

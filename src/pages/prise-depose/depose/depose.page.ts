@@ -57,7 +57,7 @@ export class DeposePage extends PageComponent implements CanLeave {
 
     public listBoldValues: Array<string>;
 
-    public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.WITH_MANUAL;
+    public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_MANUAL;
 
     public loading: boolean;
 
@@ -68,6 +68,8 @@ export class DeposePage extends PageComponent implements CanLeave {
     private finishAction: () => void;
 
     private operator: string;
+
+    private skipValidation: boolean;
 
     private natureTranslations: Translations;
     private allowedNatureIdsForLocation: Array<number>;
@@ -110,17 +112,19 @@ export class DeposePage extends PageComponent implements CanLeave {
                     ]
                 ),
                 this.storageService.getString(StorageKeyEnum.OPERATOR),
+                this.storageService.getBoolean(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER),
                 !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
                 !this.fromStock ? this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + this.emplacement.id]) : of([]),
                 this.translationService.get('natures')
             )
-                .subscribe(([colisPrise, operator, natures, allowedNatureLocationArray, natureTranslations]) => {
+                .subscribe(([colisPrise, operator, skipValidation, natures, allowedNatureLocationArray, natureTranslations]) => {
                     this.colisPrise = colisPrise.map(({subPacks, ...tracking}) => ({
                         ...tracking,
                         subPacks: subPacks ? JSON.parse(subPacks) : []
                     }));
 
                     this.operator = operator;
+                    this.skipValidation = skipValidation && this.fromStock;
                     this.natureTranslations = natureTranslations;
                     this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
                         [id]: {label, color},
@@ -334,6 +338,9 @@ export class DeposePage extends PageComponent implements CanLeave {
                         break;
                     }
                 }
+                if (this.pickingIsOver() && this.skipValidation) {
+                    this.finishTaking();
+                }
             }
             else {
                 const natureLabel = TranslationService.Translate(this.natureTranslations, 'nature');
@@ -353,6 +360,10 @@ export class DeposePage extends PageComponent implements CanLeave {
                 });
             }
         }
+    }
+
+    private pickingIsOver(): boolean {
+        return this.colisPrise.filter(({hidden, packParent}) => (!hidden && !packParent)).length === 0;
     }
 
     private updatePicking(barCode: string,
@@ -419,7 +430,6 @@ export class DeposePage extends PageComponent implements CanLeave {
                 natureTranslation: natureLabel,
                 objectLabel: this.objectLabel,
                 location: this.emplacement,
-                validate: () => this.finishTaking(),
                 confirmItem: !this.fromStock
                     ? ({object: {value: barCode}}: { object?: { value?: string } }) => {
                         // we get first

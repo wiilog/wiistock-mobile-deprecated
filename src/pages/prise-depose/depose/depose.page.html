@@ -25,4 +25,15 @@
                          [mode]="scannerModeManual"
                          (add)="testColisDepose($event[0], $event[1])">
     </wii-barcode-scanner>
+    <ion-button class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="finishTaking()">
+        Valider
+        <wii-icon name="check.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
 </div>
