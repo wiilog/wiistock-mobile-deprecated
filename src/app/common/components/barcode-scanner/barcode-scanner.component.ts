@@ -18,6 +18,7 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
     public readonly TOOL_SEARCH_MODE = BarcodeScannerModeEnum.TOOL_SEARCH;
     public readonly TOOLS_FULL_MODE = BarcodeScannerModeEnum.TOOLS_FULL;
     public readonly ONLY_SEARCH_MODE = BarcodeScannerModeEnum.ONLY_SEARCH;
+    public readonly ONLY_SEARCH_SCAN_MODE = BarcodeScannerModeEnum.ONLY_SEARCH_SCAN;
     public readonly TOOL_SEARCH_AND_LABEL = BarcodeScannerModeEnum.TOOL_SEARCH_AND_LABEL;
     public readonly TOOL_SELECTED_LABEL = BarcodeScannerModeEnum.TOOL_SELECTED_LABEL;
 
