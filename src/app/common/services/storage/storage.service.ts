@@ -16,7 +16,8 @@ export class StorageService {
                        operator: string,
                        operatorId: number,
                        rights: {[name: string]: boolean},
-                       notificationChannels: [string]): Observable<any> {
+                       notificationChannels: [string],
+                       parameters: {[name: string]: boolean}): Observable<any> {
         return this.getString(StorageKeyEnum.URL_SERVER)
             .pipe(
                 flatMap((serverUrl) => from(this.storage.clear()).pipe(map(() => serverUrl))),
@@ -27,7 +28,8 @@ export class StorageService {
                     this.setItem(StorageKeyEnum.OPERATOR_ID, operatorId),
                     this.setItem(StorageKeyEnum.NOTIFICATION_CHANNELS, JSON.stringify(notificationChannels)),
                     this.resetCounters(),
-                    this.updateRights(rights)
+                    this.updateRights(rights),
+                    this.updateParameters(parameters),
                 ))
             );
     }
@@ -57,6 +59,13 @@ export class StorageService {
         const rightKeys = Object.keys(rights);
         return rightKeys.length > 0
             ? zip(...(rightKeys.map((key) => from(this.storage.set(key, Number(Boolean(rights[key])))))))
+            : of(undefined);
+    }
+
+    public updateParameters(parameters: {[name: string]: boolean}): Observable<any> {
+        const rightKeys = Object.keys(parameters);
+        return rightKeys.length > 0
+            ? zip(...(rightKeys.map((key) => from(this.storage.set(key, Number(Boolean(parameters[key])))))))
             : of(undefined);
     }
 

@@ -408,6 +408,11 @@ export class LocalDataManagerService {
                         .updateRights(data.rights || {})
                         .pipe(map(() => ({data})))
                 )),
+                flatMap(({data}) => (
+                    this.storageService
+                        .updateParameters(data.parameters || {})
+                        .pipe(map(() => ({data})))
+                )),
                 flatMap(({data}) => this.sqliteService.importData(data))
             );
     }
