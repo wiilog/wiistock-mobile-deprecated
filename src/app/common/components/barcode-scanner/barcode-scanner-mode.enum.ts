@@ -7,4 +7,5 @@ export enum BarcodeScannerModeEnum {
     TOOL_SELECTED_LABEL, // With selected label and scan buttons
     TOOLS_FULL, // With search and creation form
     ONLY_SEARCH, // Only with search button
+    ONLY_SEARCH_SCAN, // Only with search button
 }
