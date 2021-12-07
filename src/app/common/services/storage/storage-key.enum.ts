@@ -10,6 +10,7 @@ export enum StorageKeyEnum {
     DEMO_MODE = 'demoMode',
 
     PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER = 'skipValidationsManualTransfer',
+    PARAMETER_SKIP_VALIDATION_DELIVERY = 'skipValidationsLivraisons',
 
     API_KEY = 'api-key',
     OPERATOR = 'operator',

@@ -16,6 +16,9 @@ import {IconColor} from '@app/common/components/icon/icon-color';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {NetworkService} from '@app/common/services/network.service';
+import {BarcodeScannerModeEnum} from "../../../../app/common/components/barcode-scanner/barcode-scanner-mode.enum";
+import {StorageService} from "../../../../app/common/services/storage/storage.service";
+import {StorageKeyEnum} from "../../../../app/common/services/storage/storage-key.enum";
 
 
 @Component({
@@ -42,15 +45,18 @@ export class LivraisonArticlesPage extends PageComponent {
         info?: string;
     };
 
+    public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.HIDDEN;
+
     public started: boolean = false;
     public isValid: boolean = true;
-
+    public skipValidation: boolean = false;
     public loadingStartLivraison: boolean;
 
     public constructor(private toastService: ToastService,
                        private sqliteService: SqliteService,
                        private networkService: NetworkService,
                        private apiService: ApiService,
+                       private storageService: StorageService,
                        navService: NavService) {
         super(navService);
         this.loadingStartLivraison = false;
@@ -77,11 +83,13 @@ export class LivraisonArticlesPage extends PageComponent {
         this.sqliteService
             .findBy('article_livraison', [`id_livraison = ${this.livraison.id}`])
             .subscribe((articles) => {
-                this.updateList(articles, true);
-
-                if (this.articlesT.length > 0) {
-                    this.started = true;
-                }
+                this.storageService.getBoolean(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_DELIVERY).subscribe((skipValidation) => {
+                    this.skipValidation = skipValidation;
+                    this.updateList(articles, true);
+                    if (this.articlesT.length > 0) {
+                        this.started = true;
+                    }
+                });
             });
     }
 
@@ -120,7 +128,11 @@ export class LivraisonArticlesPage extends PageComponent {
     }
 
     public refreshOver(): void {
-        this.toastService.presentToast('Livraison prête à être finalisée.')
+        this.toastService.presentToast('Livraison prête à être finalisée.').subscribe(() => {
+            if (this.skipValidation) {
+                this.validate();
+            }
+        })
     }
 
     public refresh(): void {
@@ -297,13 +309,6 @@ export class LivraisonArticlesPage extends PageComponent {
                     name: 'upload.svg',
                     color: 'list-yellow'
                 },
-                rightIcon: {
-                    name: 'check.svg',
-                    color: 'success',
-                    action: () => {
-                        this.validate()
-                    }
-                }
             },
             body: this.articlesT.map((articleLivraison: ArticleLivraison) => ({
                 infos: this.createArticleInfo(articleLivraison)

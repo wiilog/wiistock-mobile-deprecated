@@ -22,7 +22,7 @@ import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
     styleUrls: ['./livraison-menu.page.scss'],
 })
 export class LivraisonMenuPage extends PageComponent {
-    public readonly barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.TOOL_SEARCH_AND_LABEL;
+    public readonly barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SEARCH_SCAN;
     public readonly selectItemType = SelectItemTypeEnum.LOCATION;
 
     @ViewChild('selectItemComponent', {static: false})
