@@ -56,5 +56,11 @@
                 <p *ngIf="cardConfig.error" class="content-error">{{cardConfig.error}}</p>
             </div>
         </ion-card-content>
+        <div *ngIf="cardConfig.table" class="table-container">
+            <div class="table-title">{{ cardConfig.table.title }}</div>
+            <div class="table-values">
+                <span *ngFor="let value of cardConfig.table.values">{{ value }}</span>
+            </div>
+        </div>
     </ion-card>
 </div>

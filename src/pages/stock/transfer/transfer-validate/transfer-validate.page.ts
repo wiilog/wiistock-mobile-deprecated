@@ -27,17 +27,18 @@ export class TransferValidatePage extends PageComponent {
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
 
-    public readonly barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.TOOL_SEARCH;
+    public readonly barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SEARCH_SCAN;
     public readonly selectItemType = SelectItemTypeEnum.LOCATION;
 
     public location: Emplacement;
     public transferOrder: TransferOrder;
+    public dropOnFreeLocation: boolean;
+    public skipValidation: boolean;
 
     public panelHeaderConfig: {
         title: string;
         subtitle?: string;
         leftIcon: IconConfig;
-        rightIcon: IconConfig;
         transparent: boolean;
     };
 
@@ -61,7 +62,20 @@ export class TransferValidatePage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.transferOrder = this.currentNavParams.get('transferOrder');
+        this.skipValidation = this.currentNavParams.get('skipValidation');
         this.onValidate = this.currentNavParams.get('onValidate');
+
+        this.storageService.getBoolean(StorageKeyEnum.PARAMETER_DROP_ON_FREE_LOCATION).subscribe((dropOnFreeLocation: boolean) => {
+            this.dropOnFreeLocation = dropOnFreeLocation;
+        });
+
+        if (this.dropOnFreeLocation) {
+            this.sqliteService.findOneBy(`emplacement`, {label: this.transferOrder.destination})
+                .subscribe((location: Emplacement) => {
+                    this.location = location;
+                    this.validate();
+                });
+        }
 
         this.resetEmitter$.emit();
 
@@ -151,18 +165,13 @@ export class TransferValidatePage extends PageComponent {
         });
     }
 
-    private createPanelHeaderConfig(): { title: string; subtitle?: string; leftIcon: IconConfig; rightIcon: IconConfig; transparent: boolean;} {
+    private createPanelHeaderConfig(): { title: string; subtitle?: string; leftIcon: IconConfig; transparent: boolean;} {
         return {
             title: 'Emplacement sélectionné',
             subtitle: this.location && this.location.label,
             transparent: true,
             leftIcon: {
                 name: 'preparation.svg'
-            },
-            rightIcon: {
-                name: 'check.svg',
-                color: 'success',
-                action: () => this.validate()
             }
         };
     }
