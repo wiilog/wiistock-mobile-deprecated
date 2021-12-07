@@ -148,7 +148,7 @@ export class TransferArticlesPage extends PageComponent {
                 leftIcon: {
                     name: 'download.svg',
                     color: 'tertiary-light'
-                }
+                },
             },
             body: this.toTreatArticles.map((article: TransferOrderArticle, index: number) => ({
                 infos: this.createArticleInfo(article),
