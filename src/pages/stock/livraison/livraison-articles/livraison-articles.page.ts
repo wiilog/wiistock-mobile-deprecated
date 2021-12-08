@@ -53,6 +53,7 @@ export class LivraisonArticlesPage extends PageComponent {
     public skipValidation: boolean = false;
     public skipQuantities: boolean = false;
     public loadingStartLivraison: boolean;
+    public displayTargetLocationPicking: boolean = false;
 
     public constructor(private toastService: ToastService,
                        private sqliteService: SqliteService,
@@ -76,7 +77,7 @@ export class LivraisonArticlesPage extends PageComponent {
             ]
         };
 
-        this.listBoldValues = ['label', 'barCode', 'location', 'quantity'];
+        this.listBoldValues = ['label', 'barCode', 'location', 'quantity', 'targetLocationPicking'];
 
         if (this.footerScannerComponent) {
             this.footerScannerComponent.fireZebraScan();
@@ -86,10 +87,12 @@ export class LivraisonArticlesPage extends PageComponent {
         zip(
             this.sqliteService.findBy('article_livraison', [`id_livraison = ${this.livraison.id}`]),
             this.storageService.getBoolean(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_DELIVERY),
-            this.storageService.getBoolean(StorageKeyEnum.PARAMETER_SKIP_QUANTITIES_DELIVERY)
-        ).subscribe(([articles, skipValidation, skipQuantities]) => {
+            this.storageService.getBoolean(StorageKeyEnum.PARAMETER_SKIP_QUANTITIES_DELIVERY),
+            this.storageService.getBoolean(StorageKeyEnum.PARAMETER_DISPLAY_TARGET_LOCATION_PICKING)
+        ).subscribe(([articles, skipValidation, skipQuantities, displayTargetLocationPicking]) => {
             this.skipValidation = skipValidation;
             this.skipQuantities = skipQuantities;
+            this.displayTargetLocationPicking = displayTargetLocationPicking;
             this.updateList(articles, true);
             if (this.articlesT.length > 0) {
                 this.started = true;
@@ -155,7 +158,8 @@ export class LivraisonArticlesPage extends PageComponent {
                     id_livraison: article.id_livraison,
                     has_moved: 1,
                     location: article.location,
-                    barcode: article.barcode
+                    barcode: article.barcode,
+                    targetLocationPicking: article.targetLocationPicking
                 };
                 let articleAlready = this.articlesT.find(art => art.id_livraison === newArticle.id_livraison && art.is_ref === newArticle.is_ref && art.reference === newArticle.reference);
                 if (articleAlready !== undefined) {
@@ -349,7 +353,7 @@ export class LivraisonArticlesPage extends PageComponent {
         };
     }
 
-    private createArticleInfo({label, barcode, location, quantity}: ArticleLivraison): {[name: string]: { label: string; value: string; }} {
+    private createArticleInfo({label, barcode, location, quantity, targetLocationPicking}: ArticleLivraison): {[name: string]: { label: string; value: string; }} {
         return {
             label: {
                 label: 'Label',
@@ -381,6 +385,16 @@ export class LivraisonArticlesPage extends PageComponent {
                         quantity: {
                             label: 'Quantité',
                             value: `${quantity}`
+                        }
+                    }
+                    : {}
+            ),
+            ...(
+                this.displayTargetLocationPicking
+                    ? {
+                        targetLocationPicking: {
+                            label: 'Emplacement cible picking',
+                            value: `${targetLocationPicking || '-'}`
                         }
                     }
                     : {}
