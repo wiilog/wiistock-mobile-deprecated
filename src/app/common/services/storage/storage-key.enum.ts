@@ -10,6 +10,8 @@ export enum StorageKeyEnum {
     DEMO_MODE = 'demoMode',
 
     PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER = 'skipValidationsManualTransfer',
+    PARAMETER_SKIP_VALIDATION_DELIVERY = 'skipValidationsLivraisons',
+    PARAMETER_SKIP_QUANTITIES_DELIVERY = 'skipQuantitiesLivraisons',
     PARAMETER_SKIP_VALIDATION_TO_TREAT_TRANSFER = 'skipValidationsToTreatTransfer',
     PARAMETER_DISPLAY_REFERENCES_ON_TRANSFER_CARDS = 'displayReferencesOnTransferCards',
     PARAMETER_DROP_ON_FREE_LOCATION = 'dropOnFreeLocation',

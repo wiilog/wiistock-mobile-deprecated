@@ -32,13 +32,12 @@ export class LivraisonEmplacementPage extends PageComponent {
     public location: Emplacement;
     public livraison: Livraison;
 
-    public barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.TOOL_SEARCH;
+    public barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SEARCH_SCAN;
 
     public panelHeaderConfig: {
         title: string;
         subtitle?: string;
         leftIcon: IconConfig;
-        rightIcon: IconConfig;
         transparent: boolean;
     };
 
@@ -46,6 +45,8 @@ export class LivraisonEmplacementPage extends PageComponent {
 
     private validateIsLoading: boolean;
     private validateLivraison: () => void;
+
+    public skipValidation: boolean = false;
 
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
@@ -60,16 +61,19 @@ export class LivraisonEmplacementPage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        this.validateLivraison = this.currentNavParams.get('validateLivraison');
-        this.livraison = this.currentNavParams.get('livraison');
+        this.storageService.getBoolean(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_DELIVERY).subscribe((skipValidation) => {
+            this.skipValidation = skipValidation;
+            this.validateLivraison = this.currentNavParams.get('validateLivraison');
+            this.livraison = this.currentNavParams.get('livraison');
 
-        this.resetEmitter$.emit();
+            this.resetEmitter$.emit();
 
-        this.panelHeaderConfig = this.createPanelHeaderConfig();
+            this.panelHeaderConfig = this.createPanelHeaderConfig();
 
-        if (this.selectItemComponent) {
-            this.selectItemComponent.fireZebraScan();
-        }
+            if (this.selectItemComponent) {
+                this.selectItemComponent.fireZebraScan();
+            }
+        });
     }
 
     public ionViewWillLeave(): void {
@@ -82,6 +86,9 @@ export class LivraisonEmplacementPage extends PageComponent {
         if (this.livraison.location === locationToTest.label) {
             this.location = locationToTest;
             this.panelHeaderConfig = this.createPanelHeaderConfig();
+            if (this.skipValidation) {
+                this.validate();
+            }
         }
         else {
             this.toastService.presentToast("Vous n'avez pas scanné le bon emplacement (destination demandée : " + this.livraison.location + ")")
@@ -177,18 +184,13 @@ export class LivraisonEmplacementPage extends PageComponent {
         });
     }
 
-    private createPanelHeaderConfig(): { title: string; subtitle?: string; leftIcon: IconConfig; rightIcon: IconConfig; transparent: boolean;} {
+    private createPanelHeaderConfig(): { title: string; subtitle?: string; leftIcon: IconConfig; transparent: boolean;} {
         return {
             title: 'Emplacement sélectionné',
             subtitle: this.location && this.location.label,
             transparent: true,
             leftIcon: {
                 name: 'delivery.svg'
-            },
-            rightIcon: {
-                name: 'check.svg',
-                color: 'success',
-                action: () => this.validate()
             }
         };
     }

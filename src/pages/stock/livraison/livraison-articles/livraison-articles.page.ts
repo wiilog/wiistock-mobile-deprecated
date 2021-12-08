@@ -16,6 +16,10 @@ import {IconColor} from '@app/common/components/icon/icon-color';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {NetworkService} from '@app/common/services/network.service';
+import {BarcodeScannerModeEnum} from "../../../../app/common/components/barcode-scanner/barcode-scanner-mode.enum";
+import {StorageService} from "../../../../app/common/services/storage/storage.service";
+import {StorageKeyEnum} from "../../../../app/common/services/storage/storage-key.enum";
+import {zip} from "rxjs";
 
 
 @Component({
@@ -42,15 +46,19 @@ export class LivraisonArticlesPage extends PageComponent {
         info?: string;
     };
 
+    public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.HIDDEN;
+
     public started: boolean = false;
     public isValid: boolean = true;
-
+    public skipValidation: boolean = false;
+    public skipQuantities: boolean = false;
     public loadingStartLivraison: boolean;
 
     public constructor(private toastService: ToastService,
                        private sqliteService: SqliteService,
                        private networkService: NetworkService,
                        private apiService: ApiService,
+                       private storageService: StorageService,
                        navService: NavService) {
         super(navService);
         this.loadingStartLivraison = false;
@@ -74,15 +82,19 @@ export class LivraisonArticlesPage extends PageComponent {
             this.footerScannerComponent.fireZebraScan();
         }
 
-        this.sqliteService
-            .findBy('article_livraison', [`id_livraison = ${this.livraison.id}`])
-            .subscribe((articles) => {
-                this.updateList(articles, true);
 
-                if (this.articlesT.length > 0) {
-                    this.started = true;
-                }
-            });
+        zip(
+            this.sqliteService.findBy('article_livraison', [`id_livraison = ${this.livraison.id}`]),
+            this.storageService.getBoolean(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_DELIVERY),
+            this.storageService.getBoolean(StorageKeyEnum.PARAMETER_SKIP_QUANTITIES_DELIVERY)
+        ).subscribe(([articles, skipValidation, skipQuantities]) => {
+            this.skipValidation = skipValidation;
+            this.skipQuantities = skipQuantities;
+            this.updateList(articles, true);
+            if (this.articlesT.length > 0) {
+                this.started = true;
+            }
+        });
     }
 
     public ionViewWillLeave(): void {
@@ -120,7 +132,11 @@ export class LivraisonArticlesPage extends PageComponent {
     }
 
     public refreshOver(): void {
-        this.toastService.presentToast('Livraison prête à être finalisée.')
+        this.toastService.presentToast('Livraison prête à être finalisée.').subscribe(() => {
+            if (this.skipValidation) {
+                this.validate();
+            }
+        })
     }
 
     public refresh(): void {
@@ -247,16 +263,39 @@ export class LivraisonArticlesPage extends PageComponent {
 
         if (article) {
             const self = this;
-            this.navService.push(NavPathEnum.LIVRAISON_ARTICLE_TAKE, {
-                article,
-                selectArticle: (quantity) => {
-                    self.selectArticle(article, quantity);
-                }
-            });
+            if (this.skipQuantities) {
+                self.selectArticle(article, article.quantity);
+            } else {
+                this.navService.push(NavPathEnum.LIVRAISON_ARTICLE_TAKE, {
+                    article,
+                    selectArticle: (quantity) => {
+                        self.selectArticle(article, quantity);
+                    }
+                });
+            }
+
         }
         else {
             this.toastService.presentToast('L\'article scanné n\'est pas dans la liste.');
         }
+    }
+
+    public takeAll() {
+        this.apiService
+            .requestApi(ApiService.BEGIN_LIVRAISON, {params: {id: this.livraison.id}})
+            .subscribe((resp) => {
+                if (resp.success) {
+                    this.started = true;
+                    this.isValid = true;
+                    this.toastService.presentToast('Livraison commencée.');
+                    this.articlesNT.forEach((article) => this.selectArticle(article, article.quantity));
+                }
+                else {
+                    this.isValid = false;
+                    this.loadingStartLivraison = false;
+                    this.toastService.presentToast(resp.msg);
+                }
+            });
     }
 
     private createListToTreatConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
@@ -270,7 +309,13 @@ export class LivraisonArticlesPage extends PageComponent {
                     leftIcon: {
                         name: 'download.svg',
                         color: 'list-yellow-light'
-                    }
+                    },
+                    rightIcon: this.skipQuantities ? {
+                        name: 'up.svg',
+                        action: () => {
+                            this.takeAll()
+                        },
+                    }: {} as any,
                 },
                 body: this.articlesNT.map((articleLivraison: ArticleLivraison) => ({
                     infos: this.createArticleInfo(articleLivraison),
@@ -297,13 +342,6 @@ export class LivraisonArticlesPage extends PageComponent {
                     name: 'upload.svg',
                     color: 'list-yellow'
                 },
-                rightIcon: {
-                    name: 'check.svg',
-                    color: 'success',
-                    action: () => {
-                        this.validate()
-                    }
-                }
             },
             body: this.articlesT.map((articleLivraison: ArticleLivraison) => ({
                 infos: this.createArticleInfo(articleLivraison)
