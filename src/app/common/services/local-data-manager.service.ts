@@ -223,7 +223,7 @@ export class LocalDataManagerService {
                             map((transfers: Array<TransferOrder>) => ({
                                 paramName: 'transfers',
                                 transfers: transfers
-                                    .map(({id}) => id)
+                                    .map(({id, destination}) => ({id, destination}))
                             }))
                         )
                 ),
@@ -231,14 +231,22 @@ export class LocalDataManagerService {
                 deleteSucceed: (resSuccess) => {
                     return (resSuccess && resSuccess.length > 0)
                         ? zip(
-                            this.sqliteService.deleteBy('transfer_order', [`id IN (${resSuccess.join(',')})`]),
-                            this.sqliteService.deleteBy('transfer_order_article', [`transfer_order_id IN (${resSuccess.join(',')})`])
+                            this.sqliteService.deleteBy('transfer_order', [`id IN (${resSuccess.map((transfer) => transfer.id).join(',')})`]),
+                            this.sqliteService.deleteBy('transfer_order_article', [`transfer_order_id IN (${resSuccess.map((transfer) => transfer.id).join(',')})`])
                         )
                         : of(undefined);
                 },
                 resetFailed: (resError) => {
                     return (resError && resError.length > 0)
-                        ? this.sqliteService.update('transfer_order', [{values: {treated: 0}, where: [`id IN (${resError.join(',')})`]}])
+                        ? this.sqliteService.update('transfer_order', [{
+                            values: {
+                                treated: 0
+                            },
+                            where: [`id IN (${resError
+                                .map((transfer) => transfer.id)
+                                .join(',')
+                            })`]
+                        }])
                         : of(undefined);
                 }
             },

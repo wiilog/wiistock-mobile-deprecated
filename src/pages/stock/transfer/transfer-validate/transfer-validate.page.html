@@ -6,7 +6,7 @@
                   [leftIcon]="panelHeaderConfig.leftIcon">
 </wii-panel-header>
 
-<div class="page-footer" *ngIf="!this.skipValidation">
+<div class="page-footer">
     <wii-select-item #selectItemComponent
                      [type]="selectItemType"
                      (itemChange)="selectLocation($event)"
@@ -14,7 +14,8 @@
                      [resetEmitter]="resetEmitter$"
                      [scanMode]="barcodeScannerSearchMode">
     </wii-select-item>
-    <ion-button class="submit-button larger"
+    <ion-button *ngIf="!this.skipValidation"
+                class="submit-button larger"
                 color="primary"
                 size="large"
                 expand="full"
