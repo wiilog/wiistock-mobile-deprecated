@@ -8,4 +8,5 @@ export interface ArticleLivraison {
     has_moved: number;
     location: string;
     barcode?: string;
+    targetLocationPicking?: string;
 }

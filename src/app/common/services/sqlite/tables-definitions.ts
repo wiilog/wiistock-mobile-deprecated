@@ -82,7 +82,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             has_moved: 'INTEGER',
             isSelectableByUser: 'INTEGER',
             original_quantity: 'INTEGER',
-            deleted: 'INTEGER DEFAULT 0'
+            deleted: 'INTEGER DEFAULT 0',
+            targetLocationPicking: 'TEXT'
         }
     },
     {
@@ -162,7 +163,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             quantity: 'INTEGER',
             is_ref: 'INTEGER',
             id_livraison: 'INTEGER',
-            has_moved: 'INTEGER'
+            has_moved: 'INTEGER',
+            targetLocationPicking: 'TEXT'
         }
     },
     {

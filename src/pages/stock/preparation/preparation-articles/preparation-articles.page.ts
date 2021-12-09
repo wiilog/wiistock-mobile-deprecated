@@ -11,13 +11,15 @@ import {NavService} from '@app/common/services/nav/nav.service';
 import {ApiService} from '@app/common/services/api.service';
 import {ArticlePrepaByRefArticle} from '@entities/article-prepa-by-ref-article';
 import {flatMap, map} from 'rxjs/operators';
-import {Observable, of} from 'rxjs';
+import {Observable, of, zip} from 'rxjs';
 import {Mouvement} from '@entities/mouvement';
 import * as moment from 'moment';
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {NetworkService} from '@app/common/services/network.service';
+import {StorageService} from '@app/common/services/storage/storage.service';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 
 @Component({
@@ -46,6 +48,7 @@ export class PreparationArticlesPage extends PageComponent {
 
     public started: boolean = false;
     public isValid: boolean = true;
+    public displayTargetLocationPicking: boolean = false;
 
     public loadingStartPreparation: boolean;
 
@@ -53,7 +56,8 @@ export class PreparationArticlesPage extends PageComponent {
                        private toastService: ToastService,
                        private networkService: NetworkService,
                        private apiService: ApiService,
-                       navService: NavService) {
+                       navService: NavService,
+                       private storageService: StorageService) {
         super(navService);
         this.loadingStartPreparation = false;
     }
@@ -70,7 +74,7 @@ export class PreparationArticlesPage extends PageComponent {
             info: `Flux : ${this.preparation.type}`
         };
 
-        this.listBoldValues = ['reference', 'referenceArticleReference', 'label', 'barCode', 'location', 'quantity'];
+        this.listBoldValues = ['reference', 'referenceArticleReference', 'label', 'barCode', 'location', 'quantity', 'targetLocationPicking'];
 
         this.updateLists()
             .subscribe(() => {
@@ -320,13 +324,15 @@ export class PreparationArticlesPage extends PageComponent {
     }
 
     private updateLists(): Observable<undefined> {
-        return this.sqliteService.findBy(
-            'article_prepa',
-            [`id_prepa = ${this.preparation.id}`, `deleted <> 1`]
+        return zip(
+            this.sqliteService.findBy('article_prepa', [`id_prepa = ${this.preparation.id}`, `deleted <> 1`]),
+            this.storageService.getBoolean(StorageKeyEnum.PARAMETER_DISPLAY_TARGET_LOCATION_PICKING),
         ).pipe(
-            flatMap((articlesPrepa: Array<ArticlePrepa>) => {
+            flatMap(([articlesPrepa, displayTargetLocationPicking]: [Array<ArticlePrepa>, boolean]) => {
                 this.articlesNT = articlesPrepa.filter(({has_moved}) => has_moved === 0);
                 this.articlesT = articlesPrepa.filter(({has_moved}) => has_moved === 1);
+
+                this.displayTargetLocationPicking = displayTargetLocationPicking;
 
                 this.listToTreatConfig = this.createListToTreatConfig();
                 this.listTreatedConfig = this.ceateListTreatedConfig();
@@ -491,7 +497,7 @@ export class PreparationArticlesPage extends PageComponent {
         };
     }
 
-    private createArticleInfo({reference, is_ref, reference_article_reference, label,  barcode, emplacement, quantite}: ArticlePrepa): {[name: string]: { label: string; value: string; }} {
+    private createArticleInfo({reference, is_ref, reference_article_reference, label,  barcode, emplacement, quantite, targetLocationPicking}: ArticlePrepa): {[name: string]: { label: string; value: string; }} {
         return {
             reference: {
                 label: 'Référence',
@@ -537,6 +543,16 @@ export class PreparationArticlesPage extends PageComponent {
                         quantity: {
                             label: 'Quantité',
                             value: `${quantite}`
+                        }
+                    }
+                    : {}
+            ),
+            ...(
+                this.displayTargetLocationPicking
+                    ? {
+                        targetLocationPicking: {
+                            label: 'Emplacement cible picking',
+                            value: `${targetLocationPicking || '-'}`
                         }
                     }
                     : {}
