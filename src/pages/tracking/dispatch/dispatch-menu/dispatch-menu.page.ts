@@ -135,11 +135,15 @@ export class DispatchMenuPage extends PageComponent {
             .sort(({startDate: startDate1}, {startDate: startDate2}) => {
                 const momentDesiredDate1 = moment(startDate1, 'DD/MM/YYYY HH:mm:ss')
                 const momentDesiredDate2 = moment(startDate2, 'DD/MM/YYYY HH:mm:ss')
-                console.log(momentDesiredDate1, momentDesiredDate2, (
-                    momentDesiredDate1.isBefore(momentDesiredDate2) ? -1 :
-                        momentDesiredDate1.isAfter(momentDesiredDate2) ? 1 :
-                            0
-                ))
+
+                if(momentDesiredDate1.isValid() && !momentDesiredDate2.isValid()) {
+                    return -1;
+                } else if(momentDesiredDate1.isValid() && !momentDesiredDate2.isValid()) {
+                    return 1;
+                } else if(!momentDesiredDate1.isValid() && !momentDesiredDate2.isValid()) {
+                    return 0;
+                }
+
                 return (
                     momentDesiredDate1.isBefore(momentDesiredDate2) ? -1 :
                         momentDesiredDate1.isAfter(momentDesiredDate2) ? 1 :
