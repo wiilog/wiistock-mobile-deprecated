@@ -16,9 +16,9 @@ import {IconColor} from '@app/common/components/icon/icon-color';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {NetworkService} from '@app/common/services/network.service';
-import {BarcodeScannerModeEnum} from "../../../../app/common/components/barcode-scanner/barcode-scanner-mode.enum";
-import {StorageService} from "../../../../app/common/services/storage/storage.service";
-import {StorageKeyEnum} from "../../../../app/common/services/storage/storage-key.enum";
+import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
+import {StorageService} from "@app/common/services/storage/storage.service";
+import {StorageKeyEnum} from "@app/common/services/storage/storage-key.enum";
 import {zip} from "rxjs";
 
 
@@ -46,7 +46,7 @@ export class LivraisonArticlesPage extends PageComponent {
         info?: string;
     };
 
-    public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.HIDDEN;
+    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.HIDDEN;
 
     public started: boolean = false;
     public isValid: boolean = true;
@@ -81,7 +81,6 @@ export class LivraisonArticlesPage extends PageComponent {
         if (this.footerScannerComponent) {
             this.footerScannerComponent.fireZebraScan();
         }
-
 
         zip(
             this.sqliteService.findBy('article_livraison', [`id_livraison = ${this.livraison.id}`]),

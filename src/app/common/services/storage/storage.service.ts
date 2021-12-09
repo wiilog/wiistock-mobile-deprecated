@@ -63,9 +63,9 @@ export class StorageService {
     }
 
     public updateParameters(parameters: {[name: string]: boolean}): Observable<any> {
-        const rightKeys = Object.keys(parameters);
-        return rightKeys.length > 0
-            ? zip(...(rightKeys.map((key) => from(this.storage.set(key, Number(Boolean(parameters[key])))))))
+        const parameterKeys = Object.keys(parameters);
+        return parameterKeys.length > 0
+            ? zip(...(parameterKeys.map((key) => from(this.storage.set(key, Number(Boolean(parameters[key])))))))
             : of(undefined);
     }
 
