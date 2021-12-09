@@ -142,7 +142,7 @@ export class TransferArticlesPage extends PageComponent {
 
             this.changeDetector.detectChanges();
 
-            if(this.toTreatArticles.length === 0) {
+            if(this.toTreatArticles.length === 0 && this.skipValidation) {
                 this.validate();
             }
         }
