@@ -7,13 +7,15 @@ import {ToastService} from '@app/common/services/toast.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {flatMap, map} from 'rxjs/operators';
-import {Subscription} from 'rxjs';
+import {Subscription, zip} from 'rxjs';
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {PageComponent} from '@pages/page.component';
 import {TransferOrderArticle} from '@entities/transfer-order-article';
 import {LoadingService} from '@app/common/services/loading.service';
 import {TransferOrder} from '@entities/transfer-order';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {StorageService} from '@app/common/services/storage/storage.service';
 
 
 @Component({
@@ -35,6 +37,8 @@ export class TransferArticlesPage extends PageComponent {
         info?: string;
     };
 
+    public skipValidation: boolean;
+
     public loader: HTMLIonLoadingElement;
 
     private transferOrder: TransferOrder;
@@ -47,7 +51,8 @@ export class TransferArticlesPage extends PageComponent {
                        private changeDetector: ChangeDetectorRef,
                        private sqliteService: SqliteService,
                        private loadingService: LoadingService,
-                       navService: NavService) {
+                       navService: NavService,
+                       private storageService: StorageService) {
         super(navService);
     }
 
@@ -62,13 +67,16 @@ export class TransferArticlesPage extends PageComponent {
             this.loadingSubscription = this.loadingService.presentLoading()
                 .pipe(
                     flatMap((loader) => (
-                        this.sqliteService
-                            .findBy('transfer_order_article', [`transfer_order_id = ${this.transferOrder.id}`])
-                            .pipe(map((articles) => [loader, articles]))
+                        zip(
+                            this.sqliteService.findBy('transfer_order_article', [`transfer_order_id = ${this.transferOrder.id}`]),
+                            this.storageService.getBoolean(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_TO_TREAT_TRANSFER)
+                        )
+                            .pipe(map(([articles, skipValidation]) => [loader, articles, skipValidation]))
                     ))
                 )
-                .subscribe(([loader, transferOrderArticles]: [HTMLIonLoadingElement, Array<TransferOrderArticle>]) => {
+                .subscribe(([loader, transferOrderArticles, skipValidation]: [HTMLIonLoadingElement, Array<TransferOrderArticle>, boolean]) => {
                     this.loader = loader;
+                    this.skipValidation = skipValidation;
 
                     this.listBoldValues = ['barCode', 'label', 'reference', 'location', 'quantity'];
                     this.headerConfig = {
@@ -113,6 +121,7 @@ export class TransferArticlesPage extends PageComponent {
         else {
             this.navService.push(NavPathEnum.TRANSFER_VALIDATE, {
                 transferOrder: this.transferOrder,
+                skipValidation: this.skipValidation,
                 onValidate: () => {
                     this.navService.pop();
                 }
@@ -132,6 +141,10 @@ export class TransferArticlesPage extends PageComponent {
             this.refreshListTreatedConfig();
 
             this.changeDetector.detectChanges();
+
+            if(this.toTreatArticles.length === 0 && this.skipValidation) {
+                this.validate();
+            }
         }
         else {
             this.toastService.presentToast('L\'article scanné n\'est pas dans la liste.');
@@ -149,6 +162,12 @@ export class TransferArticlesPage extends PageComponent {
                     name: 'download.svg',
                     color: 'tertiary-light'
                 },
+                rightIcon: {
+                    name: 'up.svg',
+                    action: () => {
+                        this.takeAll()
+                    },
+                }
             },
             body: this.toTreatArticles.map((article: TransferOrderArticle, index: number) => ({
                 infos: this.createArticleInfo(article),
@@ -163,6 +182,10 @@ export class TransferArticlesPage extends PageComponent {
         };
     }
 
+    private takeAll() {
+        this.toTreatArticles.forEach(({barcode}) => this.testIfBarcodeEquals(barcode));
+    }
+
     private refreshListTreatedConfig(): void {
         const pickedArticlesNumber = (this.treatedArticles ? this.treatedArticles.length : 0);
         const pickedArticlesPlural = pickedArticlesNumber > 1 ? 's' : '';
@@ -173,13 +196,6 @@ export class TransferArticlesPage extends PageComponent {
                 leftIcon: {
                     name: 'upload.svg',
                     color: 'tertiary'
-                },
-                rightIcon: {
-                    name: 'check.svg',
-                    color: 'success',
-                    action: () => {
-                        this.validate()
-                    }
                 }
             },
             body: this.treatedArticles.map((article: TransferOrderArticle) => ({

@@ -27,17 +27,18 @@ export class TransferValidatePage extends PageComponent {
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
 
-    public readonly barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.TOOL_SEARCH;
+    public readonly barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SEARCH_SCAN;
     public readonly selectItemType = SelectItemTypeEnum.LOCATION;
 
     public location: Emplacement;
     public transferOrder: TransferOrder;
+    public dropOnFreeLocation: boolean;
+    public skipValidation: boolean;
 
     public panelHeaderConfig: {
         title: string;
         subtitle?: string;
         leftIcon: IconConfig;
-        rightIcon: IconConfig;
         transparent: boolean;
     };
 
@@ -61,7 +62,12 @@ export class TransferValidatePage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.transferOrder = this.currentNavParams.get('transferOrder');
+        this.skipValidation = this.currentNavParams.get('skipValidation');
         this.onValidate = this.currentNavParams.get('onValidate');
+
+        this.storageService.getBoolean(StorageKeyEnum.PARAMETER_DROP_ON_FREE_LOCATION).subscribe((dropOnFreeLocation: boolean) => {
+            this.dropOnFreeLocation = dropOnFreeLocation;
+        });
 
         this.resetEmitter$.emit();
 
@@ -79,9 +85,13 @@ export class TransferValidatePage extends PageComponent {
     }
 
     public selectLocation(location: Emplacement): void {
-        if (location.label === this.transferOrder.destination) {
+        if (this.dropOnFreeLocation || location.label === this.transferOrder.destination) {
             this.location = location;
             this.panelHeaderConfig = this.createPanelHeaderConfig();
+
+            if(this.skipValidation) {
+                this.validate();
+            }
         }
         else {
             this.resetEmitter$.emit();
@@ -98,7 +108,13 @@ export class TransferValidatePage extends PageComponent {
                         tap((loader) => {
                             this.loader = loader;
                         }),
-                        flatMap(() => this.sqliteService.update('transfer_order', [{values: {treated: 1}, where: [`id = ${this.transferOrder.id}`]}])),
+                        flatMap(() => this.sqliteService.update('transfer_order', [{
+                            values: {
+                                treated: 1,
+                                destination: this.location.label
+                            },
+                            where: [`id = ${this.transferOrder.id}`]
+                        }])),
                         flatMap((): any => (
                             this.networkService.hasNetwork()
                                 ? this.localDataManager.sendFinishedProcess('transfer')
@@ -114,7 +130,7 @@ export class TransferValidatePage extends PageComponent {
                         ({offline, success}) => {
                             this.unsubscribeLoading();
                             if (offline) {
-                                this.toastService.presentToast('Transfert sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
+                                this.toastService.presentToast('Transfert sauvegardé localement, nous l\'enverrons au serveur une fois la connexion internet retrouvée');
                                 this.closeScreen();
                             }
                             else {
@@ -139,7 +155,7 @@ export class TransferValidatePage extends PageComponent {
             this.toastService.presentToast(
                 (nbPreparationsSucceed === 1
                     ? 'Votre transfert a bien été enregistré'
-                    : `Votre transfert et ${nbPreparationsSucceed - 1} transfert${nbPreparationsSucceed - 1 > 1 ? 's' : ''} en attente ont bien été enregistrées`)
+                    : `Votre transfert et ${nbPreparationsSucceed - 1} transfert${nbPreparationsSucceed - 1 > 1 ? 's' : ''} en attente ont bien été enregistrés`)
             );
         }
         this.closeScreen();
@@ -151,18 +167,13 @@ export class TransferValidatePage extends PageComponent {
         });
     }
 
-    private createPanelHeaderConfig(): { title: string; subtitle?: string; leftIcon: IconConfig; rightIcon: IconConfig; transparent: boolean;} {
+    private createPanelHeaderConfig(): { title: string; subtitle?: string; leftIcon: IconConfig; transparent: boolean;} {
         return {
             title: 'Emplacement sélectionné',
             subtitle: this.location && this.location.label,
             transparent: true,
             leftIcon: {
                 name: 'preparation.svg'
-            },
-            rightIcon: {
-                name: 'check.svg',
-                color: 'success',
-                action: () => this.validate()
             }
         };
     }

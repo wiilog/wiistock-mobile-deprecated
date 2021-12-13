@@ -106,7 +106,6 @@ export class CollecteArticlePickingPage extends PageComponent implements ViewWil
     }
 
     public pickArticle(pickedArticle: ArticleCollecte): void {
-        console.log(pickedArticle)
         this.navService.push(NavPathEnum.COLLECTE_ARTICLE_TAKE, {
             article: this.article,
             pickedArticle: pickedArticle,

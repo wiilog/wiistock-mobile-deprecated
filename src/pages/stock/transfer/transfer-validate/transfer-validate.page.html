@@ -3,8 +3,7 @@
                   [transparent]="panelHeaderConfig.transparent"
                   [title]="panelHeaderConfig.title"
                   [subtitle]="panelHeaderConfig.subtitle"
-                  [leftIcon]="panelHeaderConfig.leftIcon"
-                  [rightIcons]="panelHeaderConfig.rightIcon">
+                  [leftIcon]="panelHeaderConfig.leftIcon">
 </wii-panel-header>
 
 <div class="page-footer">
@@ -15,4 +14,16 @@
                      [resetEmitter]="resetEmitter$"
                      [scanMode]="barcodeScannerSearchMode">
     </wii-select-item>
+    <ion-button *ngIf="!this.skipValidation"
+                class="submit-button larger"
+                color="primary"
+                size="large"
+                expand="full"
+                (click)="validate()">
+        Valider
+        <wii-icon name="check.svg"
+                  class="button-icon"
+                  color="white">
+        </wii-icon>
+    </ion-button>
 </div>

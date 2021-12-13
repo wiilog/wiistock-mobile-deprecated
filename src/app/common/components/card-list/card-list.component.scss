@@ -113,3 +113,28 @@ $card-padding: 4px 12px !important;
         }
     }
 }
+
+.table-container {
+    .table-title {
+        background-color: #E8E8E8;
+        padding: 5px 12px;
+        color: $black;
+        font-weight: 600;
+    }
+
+    .table-values {
+        display: flex;
+        flex-direction: column;
+
+        padding: 0 12px;
+        color: $black;
+
+        span {
+            padding: 6px 4px;
+
+            &:not(:last-child) {
+                border-bottom: 1px solid #A9A9A9;
+            }
+        }
+    }
+}

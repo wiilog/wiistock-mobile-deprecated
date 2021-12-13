@@ -13,5 +13,5 @@ export interface ArticlePrepa {
     // ArticlePrepaByRefArticle
     isSelectableByUser?: number;
     reference_article?: string;
-
+    targetLocationPicking?: string;
 }

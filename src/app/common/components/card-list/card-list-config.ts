@@ -11,6 +11,10 @@ export interface CardListConfig {
         value?: string;
         itemConfig?: ListPanelItemConfig;
     }>;
+    table?: {
+        title: string;
+        values: Array<string>;
+    };
     customColor?: string;
     rightIcon?: IconConfig;
     action?: () => void;

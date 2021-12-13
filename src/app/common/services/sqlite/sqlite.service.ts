@@ -180,7 +180,8 @@ export class SqliteService {
                                         type_quantite: toInsert.type_quantite,
                                         barcode: toInsert.barCode,
                                         original_quantity: toInsert.quantity,
-                                        reference_article_reference: toInsert.reference_article_reference
+                                        reference_article_reference: toInsert.reference_article_reference,
+                                        targetLocationPicking: toInsert.targetLocationPicking,
                                     }))
                                 ;
 

@@ -22,11 +22,17 @@
         </wii-list-panel>
     </div>
 
-    <div class="page-footer">
-        <wii-barcode-scanner #footerScannerComponent
-                             [buttonSubtitle]="'article'"
-                             [hidden]="!listToTreatConfig || !listToTreatConfig.body || listToTreatConfig.body.length === 0"
-                             (add)="testIfBarcodeEquals($event[0])">
-        </wii-barcode-scanner>
+    <div class="page-footer" *ngIf="!skipValidation">
+        <ion-button class="submit-button larger"
+                    color="primary"
+                    size="large"
+                    expand="full"
+                    (click)="validate()">
+            Valider
+            <wii-icon name="check.svg"
+                      class="button-icon"
+                      color="white">
+            </wii-icon>
+        </ion-button>
     </div>
 </ng-container>
