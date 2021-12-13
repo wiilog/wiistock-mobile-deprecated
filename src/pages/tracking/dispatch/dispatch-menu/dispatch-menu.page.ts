@@ -16,6 +16,7 @@ import {ToastService} from '@app/common/services/toast.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {Translations} from '@entities/translation';
 import {TranslationService} from '@app/common/services/translations.service';
+import * as moment from 'moment';
 
 @Component({
     selector: 'wii-dispatch-menu',
@@ -130,7 +131,26 @@ export class DispatchMenuPage extends PageComponent {
     private refreshDispatchesListConfig(dispatches: Array<Dispatch>, translations: Translations): void {
         this.dispatchTranslations = translations;
 
-        this.dispatchesListConfig = dispatches.map((dispatch: Dispatch) => {
+        this.dispatchesListConfig = dispatches
+            .sort(({startDate: startDate1}, {startDate: startDate2}) => {
+                const momentDesiredDate1 = moment(startDate1, 'DD/MM/YYYY HH:mm:ss')
+                const momentDesiredDate2 = moment(startDate2, 'DD/MM/YYYY HH:mm:ss')
+
+                if(momentDesiredDate1.isValid() && !momentDesiredDate2.isValid()) {
+                    return -1;
+                } else if(momentDesiredDate1.isValid() && !momentDesiredDate2.isValid()) {
+                    return 1;
+                } else if(!momentDesiredDate1.isValid() && !momentDesiredDate2.isValid()) {
+                    return 0;
+                }
+
+                return (
+                    momentDesiredDate1.isBefore(momentDesiredDate2) ? -1 :
+                        momentDesiredDate1.isAfter(momentDesiredDate2) ? 1 :
+                            0
+                );
+            })
+            .map((dispatch: Dispatch) => {
             return {
                 title: {label: 'Demandeur', value: dispatch.requester},
                 customColor: dispatch.color,
@@ -139,22 +159,19 @@ export class DispatchMenuPage extends PageComponent {
                     {label: 'Type', value: dispatch.typeLabel || ''},
                     {label: 'Statut', value: dispatch.statusLabel || ''},
                     {
-                        name: `Date d'échéance`,
-                        label: TranslationService.Translate(this.dispatchTranslations, "Date d'échéance 1"),
+                        label: `Date d'échéance`,
                         value: dispatch.startDate && dispatch.endDate ? `Du ${dispatch.startDate} au ${dispatch.endDate}` : ''
                     },
                     {
-                        name: 'pickLocation',
                         label: TranslationService.Translate(this.dispatchTranslations, "Emplacement prise"),
                         value: dispatch.locationFromLabel || ''
                     },
                     {
-                        name: 'dropLocation',
                         label: TranslationService.Translate(this.dispatchTranslations, "Emplacement dépose"),
                         value: dispatch.locationToLabel || ''
                     },
                     (dispatch.emergency
-                        ? {name: 'emergency', label: 'Urgence', value: dispatch.emergency || ''}
+                        ? {label: 'Urgence', value: dispatch.emergency || ''}
                         : undefined)
                 ].filter((item) => item && item.value),
                 ...(dispatch.emergency
