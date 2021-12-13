@@ -65,7 +65,7 @@ export class PreparationEmplacementPage extends PageComponent {
         this.validatePrepa = this.currentNavParams.get('validatePrepa');
 
         this.storageService
-            .getBoolean(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_PREPARATIONS)
+            .getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_PREPARATIONS)
             .subscribe((skipValidation) => {
                 this.skipValidation = skipValidation;
                 this.resetEmitter$.emit();

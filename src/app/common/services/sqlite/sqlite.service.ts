@@ -764,8 +764,9 @@ export class SqliteService {
      * @param {string} table name of the table to do the search
      * @param {string[]} where boolean clauses to apply with AND separator
      * @param {Object.<string,'ASC'|'DESC'>} order
+     * @param {number|undefined} limit
      */
-    public findBy(table: TableName, where: Array<string> = [], order: {[column: string]: 'ASC'|'DESC'} = {}): Observable<any> {
+    public findBy(table: TableName, where: Array<string> = [], order: {[column: string]: 'ASC'|'DESC'} = {}, limit: number = undefined): Observable<any> {
         const sqlWhereClauses = (where && where.length > 0)
             ? ` WHERE ${SqliteService.JoinWhereClauses(where)}`
             : undefined;
@@ -778,7 +779,9 @@ export class SqliteService {
             ? ` ORDER BY ${orderByArray.join(',')}`
             : undefined;
 
-        const sqlQuery = 'SELECT * FROM ' + table + (sqlWhereClauses || '') + (sqlOrderByClauses || '');
+        const limitClause = limit !== undefined ? ` LIMIT ${limit}` : undefined;
+
+        const sqlQuery = `SELECT * FROM ${table}${sqlWhereClauses || ''}${sqlOrderByClauses || ''}${limitClause || ''}`;
         return this.executeQuery(sqlQuery).pipe(
             map((data) => SqliteService.MultiSelectQueryMapper<any>(data)),
             take(1)

@@ -1,7 +1,7 @@
 import {Injectable} from '@angular/core';
 import {Storage} from '@ionic/storage';
 import {from, Observable, of, zip} from 'rxjs';
-import {flatMap, map} from 'rxjs/operators';
+import {flatMap, map, tap} from 'rxjs/operators';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 
@@ -65,7 +65,7 @@ export class StorageService {
     public updateParameters(parameters: {[name: string]: boolean}): Observable<any> {
         const parameterKeys = Object.keys(parameters);
         return parameterKeys.length > 0
-            ? zip(...(parameterKeys.map((key) => from(this.storage.set(key, Number(Boolean(parameters[key])))))))
+            ? zip(...(parameterKeys.map((key) => from(this.storage.set(key, Number(parameters[key]))))))
             : of(undefined);
     }
 
@@ -85,11 +85,7 @@ export class StorageService {
     }
 
     public getRight(rightName: string): Observable<boolean> {
-        return from(this.storage.get(rightName)).pipe(map(Boolean));
-    }
-
-    public getBoolean(key: StorageKeyEnum): Observable<boolean> {
-        return from(this.storage.get(key)).pipe(map(Boolean));
+        return from(this.storage.get(rightName)).pipe(tap((a) => {console.log(rightName, a)}),map(Number), map(Boolean));
     }
 
     public setItem(key: StorageKeyEnum, value: any): Observable<void> {

@@ -85,9 +85,9 @@ export class LivraisonArticlesPage extends PageComponent {
 
         zip(
             this.sqliteService.findBy('article_livraison', [`id_livraison = ${this.livraison.id}`]),
-            this.storageService.getBoolean(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_DELIVERY),
-            this.storageService.getBoolean(StorageKeyEnum.PARAMETER_SKIP_QUANTITIES_DELIVERY),
-            this.storageService.getBoolean(StorageKeyEnum.PARAMETER_DISPLAY_TARGET_LOCATION_PICKING)
+            this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_DELIVERY),
+            this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_QUANTITIES_DELIVERY),
+            this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_TARGET_LOCATION_PICKING)
         ).subscribe(([articles, skipValidation, skipQuantities, displayTargetLocationPicking]) => {
             this.skipValidation = skipValidation;
             this.skipQuantities = skipQuantities;

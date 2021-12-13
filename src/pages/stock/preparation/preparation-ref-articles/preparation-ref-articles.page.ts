@@ -3,7 +3,7 @@ import {SelectItemComponent} from '@app/common/components/select-item/select-ite
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {ArticlePrepa} from '@entities/article-prepa';
-import {from, Subscription, zip} from 'rxjs';
+import {Observable, of, Subscription, zip} from 'rxjs';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {LoadingService} from '@app/common/services/loading.service';
@@ -14,6 +14,8 @@ import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {ArticlePrepaByRefArticle} from '@entities/article-prepa-by-ref-article';
+import {IconConfig} from '@app/common/components/panel/model/icon-config';
+import {map, mergeMap} from 'rxjs/operators';
 
 
 @Component({
@@ -23,13 +25,16 @@ import {ArticlePrepaByRefArticle} from '@entities/article-prepa-by-ref-article';
 })
 export class PreparationRefArticlesPage extends PageComponent implements CanLeave {
 
+    private static readonly SUGGESTING_LIST_LIMIT: number = 15;
+
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
 
     public readonly selectItemType = SelectItemTypeEnum.ARTICLE_TO_PICK;
-    public readonly barcodeScannerMode = BarcodeScannerModeEnum.TOOL_SEARCH;
+    public scannerMode = BarcodeScannerModeEnum.HIDDEN;
     public listWhereClause: Array<string>;
     public refArticle: ArticlePrepa;
+    public suggestingArticleList: Array<ArticlePrepaByRefArticle> = [];
 
     public loading: boolean;
 
@@ -39,7 +44,14 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
     private countSubscription: Subscription;
     private navParams: Map<string, any>;
 
-    public skipQuantities: boolean = false;
+    public parameterSkipQuantities: boolean = false;
+    public parameterWithoutManual: boolean = false;
+
+    public panelHeaderConfig: {
+        title: string;
+        leftIcon: IconConfig;
+        transparent: boolean;
+    };
 
     public constructor(private toastService: ToastService,
                        private loadingService: LoadingService,
@@ -50,6 +62,13 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
         this.loading = true;
         this.pageHasLoadedOnce = false;
         this.resetEmitter$ = new EventEmitter<void>();
+        this.panelHeaderConfig = {
+            title: 'Sélectionner un article',
+            transparent: true,
+            leftIcon: {
+                name: 'preparation.svg'
+            }
+        };
     }
 
     public wiiCanLeave(): boolean {
@@ -68,17 +87,34 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
             this.countSubscription = this.loadingService
                 .presentLoadingWhile({
                     event: () => zip(
+                        this.storageService.getRight(StorageKeyEnum.PARAMETER_PREPARATION_DISPLAY_ARTICLE_WITHOUT_MANUAL),
+                        this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_QUANTITIES_PREPARATIONS),
                         this.sqliteService.count('article_prepa_by_ref_article', this.listWhereClause),
-                        this.storageService.getBoolean(StorageKeyEnum.PARAMETER_SKIP_QUANTITIES_PREPARATIONS),
+                    ).pipe(
+                        mergeMap(([withoutManual, ...other]) => {
+                            return this.findSuggestingArticleList(withoutManual).pipe(map((suggestingArticleList) => [
+                                withoutManual,
+                                ...other,
+                                suggestingArticleList
+                            ]))
+                        })
                     )
                 })
-                .subscribe(([counter, skipQuantities]) => {
+                .subscribe(([withoutManual, skipQuantities, counter, suggestingArticleList]) => {
                     this.loading = false;
-                    this.skipQuantities = skipQuantities;
+                    this.parameterSkipQuantities = skipQuantities as boolean;
+                    this.parameterWithoutManual = withoutManual as boolean;
+                    this.suggestingArticleList = suggestingArticleList as Array<ArticlePrepaByRefArticle>;
+
+
+                    console.log(this.parameterWithoutManual, this.suggestingArticleList)
+
+                    this.scannerMode = this.parameterWithoutManual ? BarcodeScannerModeEnum.HIDDEN : BarcodeScannerModeEnum.ONLY_SEARCH_SCAN;
                     if (!counter || counter <= 0) {
                         this.toastService.presentToast('Aucun article trouvé...');
                         this.navService.pop();
                     }
+
                     else if (this.selectItemComponent) {
                         this.selectItemComponent.fireZebraScan();
                     }
@@ -97,7 +133,7 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
     }
 
     public selectArticle(selectedArticle: ArticlePrepaByRefArticle): void {
-        if (this.skipQuantities) {
+        if (this.parameterSkipQuantities) {
             this.selectArticleAndPop(selectedArticle, selectedArticle.quantity);
         }
         else {
@@ -119,5 +155,20 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
             const selectArticle = this.navParams.get('selectArticle');
             selectArticle(selectedQuantity, selectedArticle);
         });
+    }
+
+    private findSuggestingArticleList(withoutManual: boolean): Observable<Array<ArticlePrepaByRefArticle>> {
+        return withoutManual
+            ? this.sqliteService.findBy(
+                'article_prepa_by_ref_article',
+                this.listWhereClause,
+                {
+                    'pickingPriority': 'DESC',
+                    'management_order IS NULL': 'ASC', // put null at the end
+                    'management_order': 'ASC'
+                },
+                PreparationRefArticlesPage.SUGGESTING_LIST_LIMIT
+            )
+            : of([]);
     }
 }

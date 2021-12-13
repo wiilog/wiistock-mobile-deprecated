@@ -1,9 +1,41 @@
-<wii-select-item #selectItemComponent
-                 *ngIf="!loading && refArticle"
-                 [type]="selectItemType"
-                 (itemChange)="selectArticle($event)"
-                 [checkBarcodeValidity]="true"
-                 [resetEmitter]="resetEmitter$"
-                 [requestParams]="listWhereClause"
-                 [scanMode]="barcodeScannerMode">
-</wii-select-item>
+<div scroll-y="true" class="page-content">
+    <wii-panel-header *ngIf="panelHeaderConfig"
+                      class="page-header"
+                      [transparent]="panelHeaderConfig.transparent"
+                      [title]="panelHeaderConfig.title"
+                      [leftIcon]="panelHeaderConfig.leftIcon">
+    </wii-panel-header>
+    <div *ngIf="parameterWithoutManual"
+         class="suggesting-article-container">
+        <ng-container *ngIf="suggestingArticleList.length > 0">
+            <div class="suggesting-article">Suggestion d'articles</div>
+            <div *ngFor="let article of suggestingArticleList"
+                 class="suggesting-article">
+                <p>Article {{article.barcode}}</p>
+                <p *ngIf="article.location !== 'null'">Emplacement : {{article.location}}</p>
+                <p *ngIf="article.quantity">Quantité restante : {{article.quantity}}</p>
+                <p *ngIf="article.management">
+                    <span *ngIf="article.management === 'FIFO'">Date d'entrée en stock : </span>
+                    <span *ngIf="article.management === 'FEFO'">Date d'expiration : </span>
+                    <span *ngIf="article.management !== 'FEFO' && article.management !== 'FIFO'">Date : </span>
+                    {{article.management_date}}
+                </p>
+            </div>
+        </ng-container>
+        <ng-container *ngIf="suggestingArticleList.length === 0">
+            <div class="suggesting-article">Aucun article</div>
+        </ng-container>
+    </div>
+
+    <div class="page-footer">
+        <wii-select-item #selectItemComponent
+                         *ngIf="!loading && refArticle"
+                         [type]="selectItemType"
+                         (itemChange)="selectArticle($event)"
+                         [checkBarcodeValidity]="true"
+                         [resetEmitter]="resetEmitter$"
+                         [requestParams]="listWhereClause"
+                         [scanMode]="scannerMode">
+        </wii-select-item>
+    </div>
+</div>

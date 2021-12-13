@@ -99,7 +99,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             isSelectableByUser: 'INTEGER',
             management: 'VARCHAR(255)',
             management_date: 'VARCHAR(255)',
-            management_order: 'INTEGER'
+            management_order: 'INTEGER',
+            pickingPriority: 'INTEGER',
         }
     },
     {

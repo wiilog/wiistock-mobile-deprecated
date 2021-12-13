@@ -6,6 +6,7 @@ export interface ArticlePrepaByRefArticle {
     quantity: number;
     reference_article: string;
     isSelectableByUser: number;
+    pickingPriority: number;
     barcode?: string;
     management_date?: string;
     management_order?: number;

@@ -21,8 +21,6 @@ import {NetworkService} from '@app/common/services/network.service';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
-import {StorageService} from '@app/common/services/storage/storage.service';
-import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 
 @Component({
@@ -84,8 +82,8 @@ export class PreparationArticlesPage extends PageComponent {
         this.listBoldValues = ['reference', 'referenceArticleReference', 'label', 'barCode', 'location', 'quantity', 'targetLocationPicking'];
 
         zip(
-            this.storageService.getBoolean(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_PREPARATIONS),
-            this.storageService.getBoolean(StorageKeyEnum.PARAMETER_SKIP_QUANTITIES_PREPARATIONS),
+            this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_PREPARATIONS),
+            this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_QUANTITIES_PREPARATIONS),
             this.updateLists()
         ).subscribe(([skipValidation, skipQuantities]) => {
             this.skipValidation = skipValidation;
@@ -354,7 +352,7 @@ export class PreparationArticlesPage extends PageComponent {
     private updateLists(): Observable<undefined> {
         return zip(
             this.sqliteService.findBy('article_prepa', [`id_prepa = ${this.preparation.id}`, `deleted <> 1`]),
-            this.storageService.getBoolean(StorageKeyEnum.PARAMETER_DISPLAY_TARGET_LOCATION_PICKING),
+            this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_TARGET_LOCATION_PICKING),
         ).pipe(
             flatMap(([articlesPrepa, displayTargetLocationPicking]: [Array<ArticlePrepa>, boolean]) => {
                 this.articlesNT = articlesPrepa.filter(({has_moved}) => has_moved === 0);
