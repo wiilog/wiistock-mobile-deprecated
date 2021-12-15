@@ -16,6 +16,7 @@ import {StorageService} from '@app/common/services/storage/storage.service';
 import {ArticlePrepaByRefArticle} from '@entities/article-prepa-by-ref-article';
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
 import {map, mergeMap} from 'rxjs/operators';
+import {IonInfiniteScroll} from '@ionic/angular';
 
 
 @Component({
@@ -26,6 +27,9 @@ import {map, mergeMap} from 'rxjs/operators';
 export class PreparationRefArticlesPage extends PageComponent implements CanLeave {
 
     private static readonly SUGGESTING_LIST_LIMIT: number = 15;
+
+    @ViewChild('infiniteScroll', {static: false})
+    public infiniteScroll: IonInfiniteScroll;
 
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
@@ -42,10 +46,13 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
 
     private pageHasLoadedOnce: boolean;
     private countSubscription: Subscription;
+    private loadMoreSubscription: Subscription;
     private navParams: Map<string, any>;
 
     public parameterSkipQuantities: boolean = false;
     public parameterWithoutManual: boolean = false;
+
+    private suggestingListOffset: number = 0;
 
     public panelHeaderConfig: {
         title: string;
@@ -105,9 +112,7 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
                     this.parameterSkipQuantities = skipQuantities as boolean;
                     this.parameterWithoutManual = withoutManual as boolean;
                     this.suggestingArticleList = suggestingArticleList as Array<ArticlePrepaByRefArticle>;
-
-
-                    console.log(this.parameterWithoutManual, this.suggestingArticleList)
+                    this.suggestingListOffset = PreparationRefArticlesPage.SUGGESTING_LIST_LIMIT;
 
                     this.scannerMode = this.parameterWithoutManual ? BarcodeScannerModeEnum.HIDDEN : BarcodeScannerModeEnum.ONLY_SEARCH_SCAN;
                     if (!counter || counter <= 0) {
@@ -130,6 +135,7 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
             this.countSubscription.unsubscribe();
             this.countSubscription = undefined;
         }
+        this.unsubscribeLoadMore();
     }
 
     public selectArticle(selectedArticle: ArticlePrepaByRefArticle): void {
@@ -167,8 +173,36 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
                     'management_order IS NULL': 'ASC', // put null at the end
                     'management_order': 'ASC'
                 },
-                PreparationRefArticlesPage.SUGGESTING_LIST_LIMIT
+                {
+                    limit: PreparationRefArticlesPage.SUGGESTING_LIST_LIMIT,
+                    offset: this.suggestingListOffset
+                }
             )
             : of([]);
+    }
+
+    public loadMore(): void {
+        this.unsubscribeLoadMore();
+        this.loadMoreSubscription = this.findSuggestingArticleList(this.parameterWithoutManual)
+            .subscribe((following: Array<ArticlePrepaByRefArticle>) => {
+                this.infiniteScroll.complete();
+                if (following.length > 0) {
+                    this.suggestingArticleList = [
+                        ...this.suggestingArticleList,
+                        ...following
+                    ];
+                    this.suggestingListOffset += PreparationRefArticlesPage.SUGGESTING_LIST_LIMIT;
+                }
+                else {
+                    this.infiniteScroll.disabled = true;
+                }
+            });
+    }
+
+    private unsubscribeLoadMore() {
+        if (this.loadMoreSubscription && !this.loadMoreSubscription.closed) {
+            this.loadMoreSubscription.unsubscribe();
+        }
+        this.loadMoreSubscription = undefined;
     }
 }

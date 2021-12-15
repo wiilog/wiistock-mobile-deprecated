@@ -85,7 +85,7 @@ export class StorageService {
     }
 
     public getRight(rightName: string): Observable<boolean> {
-        return from(this.storage.get(rightName)).pipe(tap((a) => {console.log(rightName, a)}),map(Number), map(Boolean));
+        return from(this.storage.get(rightName)).pipe(map(Number), map(Boolean));
     }
 
     public setItem(key: StorageKeyEnum, value: any): Observable<void> {

@@ -1,30 +1,17 @@
 @import "~theme/variables";
 
-.page-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-}
-
 wii-panel-header.page-header {
     margin-top: $spacer;
     margin-bottom: $spacer;
 }
 
 .suggesting-article-container {
-    padding: $spacer;
-
-    .suggesting-article {
-        font-size: 14px;
-        padding-top: $spacer;
-        padding-bottom: $spacer;
-
-        p {
-            margin: 0;
-        }
-
-        &:not(:last-child) {
-            border-bottom: 1px solid rgba(0, 0, 0, 0.13);
-        }
+    p {
+        color: $black;
     }
+}
+
+.page-footer {
+    width: 100%;
+    bottom: 0;
 }

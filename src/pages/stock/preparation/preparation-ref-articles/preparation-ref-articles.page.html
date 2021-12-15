@@ -1,33 +1,41 @@
-<div scroll-y="true" class="page-content">
+<ion-content>
     <wii-panel-header *ngIf="panelHeaderConfig"
                       class="page-header"
                       [transparent]="panelHeaderConfig.transparent"
                       [title]="panelHeaderConfig.title"
                       [leftIcon]="panelHeaderConfig.leftIcon">
     </wii-panel-header>
-    <div *ngIf="parameterWithoutManual"
-         class="suggesting-article-container">
+    <ion-list *ngIf="parameterWithoutManual" class="suggesting-article-container">
         <ng-container *ngIf="suggestingArticleList.length > 0">
-            <div class="suggesting-article">Suggestion d'articles</div>
-            <div *ngFor="let article of suggestingArticleList"
-                 class="suggesting-article">
-                <p>Article {{article.barcode}}</p>
-                <p *ngIf="article.location !== 'null'">Emplacement : {{article.location}}</p>
-                <p *ngIf="article.quantity">Quantité restante : {{article.quantity}}</p>
-                <p *ngIf="article.management">
-                    <span *ngIf="article.management === 'FIFO'">Date d'entrée en stock : </span>
-                    <span *ngIf="article.management === 'FEFO'">Date d'expiration : </span>
-                    <span *ngIf="article.management !== 'FEFO' && article.management !== 'FIFO'">Date : </span>
-                    {{article.management_date}}
-                </p>
-            </div>
+            <ion-item>
+                <ion-label><p>Suggestion d'articles</p></ion-label>
+            </ion-item>
+            <ion-item *ngFor="let article of suggestingArticleList">
+                <ion-label>
+                    <p>Article {{article.barcode}}</p>
+                    <p *ngIf="article.location !== 'null'">Emplacement : {{article.location}}</p>
+                    <p *ngIf="article.quantity">Quantité restante : {{article.quantity}}</p>
+                    <p *ngIf="article.management">
+                        <span *ngIf="article.management === 'FIFO'">Date d'entrée en stock : </span>
+                        <span *ngIf="article.management === 'FEFO'">Date d'expiration : </span>
+                        <span *ngIf="article.management !== 'FEFO' && article.management !== 'FIFO'">Date : </span>
+                        {{article.management_date}}
+                    </p>
+                </ion-label>
+            </ion-item>
         </ng-container>
         <ng-container *ngIf="suggestingArticleList.length === 0">
-            <div class="suggesting-article">Aucun article</div>
+            <ion-item>Aucun article</ion-item>
         </ng-container>
-    </div>
+    </ion-list>
 
-    <div class="page-footer">
+    <ion-infinite-scroll #infiniteScroll
+                         threshold="100px"
+                         (ionInfinite)="loadMore()">
+        <ion-infinite-scroll-content loadingSpinner="circular"></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <div slot="fixed" class="page-footer">
         <wii-select-item #selectItemComponent
                          *ngIf="!loading && refArticle"
                          [type]="selectItemType"
@@ -38,4 +46,4 @@
                          [scanMode]="scannerMode">
         </wii-select-item>
     </div>
-</div>
+</ion-content>
