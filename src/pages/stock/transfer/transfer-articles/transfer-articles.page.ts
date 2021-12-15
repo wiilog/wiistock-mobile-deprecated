@@ -69,7 +69,7 @@ export class TransferArticlesPage extends PageComponent {
                     flatMap((loader) => (
                         zip(
                             this.sqliteService.findBy('transfer_order_article', [`transfer_order_id = ${this.transferOrder.id}`]),
-                            this.storageService.getBoolean(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_TO_TREAT_TRANSFER)
+                            this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_TO_TREAT_TRANSFER)
                         )
                             .pipe(map(([articles, skipValidation]) => [loader, articles, skipValidation]))
                     ))
