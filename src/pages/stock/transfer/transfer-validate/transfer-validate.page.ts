@@ -65,7 +65,7 @@ export class TransferValidatePage extends PageComponent {
         this.skipValidation = this.currentNavParams.get('skipValidation');
         this.onValidate = this.currentNavParams.get('onValidate');
 
-        this.storageService.getBoolean(StorageKeyEnum.PARAMETER_DROP_ON_FREE_LOCATION).subscribe((dropOnFreeLocation: boolean) => {
+        this.storageService.getRight(StorageKeyEnum.PARAMETER_DROP_ON_FREE_LOCATION).subscribe((dropOnFreeLocation: boolean) => {
             this.dropOnFreeLocation = dropOnFreeLocation;
         });
 

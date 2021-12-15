@@ -65,6 +65,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             databaseTable: 'article_prepa_by_ref_article',
             placeholder: 'Sélectionnez l\'article',
             requestOrder: {
+                'pickingPriority': 'DESC',
                 'management_order IS NULL': 'ASC', // put null at the end
                 'management_order': 'ASC'
             }

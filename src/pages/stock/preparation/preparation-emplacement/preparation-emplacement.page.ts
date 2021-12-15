@@ -11,10 +11,11 @@ import {Emplacement} from '@entities/emplacement';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {flatMap, map} from 'rxjs/operators';
-import {of, zip} from 'rxjs';
+import {of, Subscription, zip} from 'rxjs';
 import {PageComponent} from '@pages/page.component';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {NetworkService} from '@app/common/services/network.service';
+import {LoadingService} from '@app/common/services/loading.service';
 
 
 @Component({
@@ -26,7 +27,7 @@ export class PreparationEmplacementPage extends PageComponent {
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
 
-    public readonly barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.TOOL_SEARCH;
+    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SEARCH_SCAN;
     public readonly selectItemType = SelectItemTypeEnum.LOCATION;
 
     public location: Emplacement;
@@ -36,13 +37,14 @@ export class PreparationEmplacementPage extends PageComponent {
         title: string;
         subtitle?: string;
         leftIcon: IconConfig;
-        rightIcon: IconConfig;
         transparent: boolean;
     };
 
     public resetEmitter$: EventEmitter<void>;
 
-    private isLoading: boolean;
+    public skipValidation: boolean;
+
+    private validateSubscription: Subscription;
 
     private validatePrepa: () => void;
 
@@ -50,10 +52,11 @@ export class PreparationEmplacementPage extends PageComponent {
                        private toastService: ToastService,
                        private storageService: StorageService,
                        private networkService: NetworkService,
+                       private loadingService: LoadingService,
                        private localDataManager: LocalDataManagerService,
                        navService: NavService) {
         super(navService);
-        this.isLoading = false;
+        this.skipValidation = false;
         this.resetEmitter$ = new EventEmitter<void>();
     }
 
@@ -61,13 +64,18 @@ export class PreparationEmplacementPage extends PageComponent {
         this.preparation = this.currentNavParams.get('preparation');
         this.validatePrepa = this.currentNavParams.get('validatePrepa');
 
-        this.resetEmitter$.emit();
+        this.storageService
+            .getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_PREPARATIONS)
+            .subscribe((skipValidation) => {
+                this.skipValidation = skipValidation;
+                this.resetEmitter$.emit();
 
-        this.panelHeaderConfig = this.createPanelHeaderConfig();
+                this.panelHeaderConfig = this.createPanelHeaderConfig();
 
-        if (this.selectItemComponent) {
-            this.selectItemComponent.fireZebraScan();
-        }
+                if (this.selectItemComponent) {
+                    this.selectItemComponent.fireZebraScan();
+                }
+            });
     }
 
     public ionViewWillLeave(): void {
@@ -79,43 +87,48 @@ export class PreparationEmplacementPage extends PageComponent {
     public selectLocation(location: Emplacement): void {
         this.location = location;
         this.panelHeaderConfig = this.createPanelHeaderConfig();
+        if (this.skipValidation) {
+            this.validate();
+        }
     }
 
     public validate(): void {
-        if (!this.isLoading) {
+        if (!this.validateSubscription) {
             if (this.location && this.location.label) {
-                this.isLoading = true;
-                this.sqliteService.findBy(
-                    'article_prepa',
-                    [`id_prepa = ${this.preparation.id}`, `deleted <> 1`]
-                )
-                    .pipe(
-                        flatMap((articles) => zip(
-                            ...articles.map((article) => (
-                                this.sqliteService
-                                    .findMvtByArticlePrepa(article.id)
-                                    .pipe(
-                                        flatMap((mvt) => (
-                                            mvt
-                                                ? this.sqliteService.finishMvt(mvt.id, this.location.label)
-                                                : of(undefined)
+                this.validateSubscription = this.loadingService
+                    .presentLoadingWhile({
+                        event: () => (
+                            this.sqliteService
+                                .findBy('article_prepa', [`id_prepa = ${this.preparation.id}`, `deleted <> 1`])
+                                .pipe(
+                                    flatMap((articles) => zip(
+                                        ...articles.map((article) => (
+                                            this.sqliteService
+                                                .findMvtByArticlePrepa(article.id)
+                                                .pipe(
+                                                    flatMap((mvt) => (
+                                                        mvt
+                                                            ? this.sqliteService.finishMvt(mvt.id, this.location.label)
+                                                            : of(undefined)
+                                                    ))
+                                                )
                                         ))
-                                    )
-                            ))
-                        )),
+                                    )),
 
-                        flatMap(() => this.sqliteService.finishPrepa(this.preparation.id, this.location.label)),
-                        flatMap((): any => (
-                            this.networkService.hasNetwork()
-                                ? this.localDataManager.sendFinishedProcess('preparation')
-                                : of({offline: true})
-                        )),
-                        flatMap((res: any) => (
-                            res.offline || res.success.length > 0
-                                ? this.storageService.incrementCounter(StorageKeyEnum.COUNTERS_PREPARATIONS_TREATED).pipe(map(() => res))
-                                : of(res)
-                        )),
-                    )
+                                    flatMap(() => this.sqliteService.finishPrepa(this.preparation.id, this.location.label)),
+                                    flatMap((): any => (
+                                        this.networkService.hasNetwork()
+                                            ? this.localDataManager.sendFinishedProcess('preparation')
+                                            : of({offline: true})
+                                    )),
+                                    flatMap((res: any) => (
+                                        res.offline || res.success.length > 0
+                                            ? this.storageService.incrementCounter(StorageKeyEnum.COUNTERS_PREPARATIONS_TREATED).pipe(map(() => res))
+                                            : of(res)
+                                    )),
+                                )
+                        )
+                    })
                     .subscribe(
                         ({offline, success}: any) => {
                             if (offline) {
@@ -128,6 +141,7 @@ export class PreparationEmplacementPage extends PageComponent {
                         },
                         (error) => {
                             this.handlePreparationsError(error);
+                            this.unsubscribeValidate();
                         });
             }
             else {
@@ -148,31 +162,32 @@ export class PreparationEmplacementPage extends PageComponent {
     }
 
     private handlePreparationsError(resp): void {
-        this.isLoading = false;
         this.toastService.presentToast((resp && resp.api && resp.message) ? resp.message : 'Une erreur s\'est produite');
         throw resp;
     }
 
     private closeScreen(): void {
-        this.isLoading = false;
+        this.unsubscribeValidate();
         this.navService.pop().subscribe(() => {
             this.validatePrepa();
         });
     }
 
-    private createPanelHeaderConfig(): { title: string; subtitle?: string; leftIcon: IconConfig; rightIcon: IconConfig; transparent: boolean;} {
+    private createPanelHeaderConfig(): { title: string; subtitle?: string; leftIcon: IconConfig; transparent: boolean;} {
         return {
             title: 'Emplacement sélectionné',
             subtitle: this.location && this.location.label,
             transparent: true,
             leftIcon: {
                 name: 'preparation.svg'
-            },
-            rightIcon: {
-                name: 'check.svg',
-                color: 'success',
-                action: () => this.validate()
             }
         };
+    }
+
+    private unsubscribeValidate(): void {
+        if (this.validateSubscription && !this.validateSubscription.closed) {
+            this.validateSubscription.unsubscribe();
+        }
+        this.validateSubscription = undefined;
     }
 }

@@ -54,7 +54,7 @@ export class TransferListPage extends PageComponent {
                         zip(
                             this.sqliteService.findBy('transfer_order', ['treated <> 1']),
                             this.sqliteService.findAll('transfer_order_article'),
-                            this.storageService.getBoolean(StorageKeyEnum.PARAMETER_DISPLAY_REFERENCES_ON_TRANSFER_CARDS),
+                            this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_REFERENCES_ON_TRANSFER_CARDS),
                         )
                             .pipe((map(([transferOrders, transferOrderArticles, displayReferencesOnCard]) => ([loader, transferOrders, transferOrderArticles, displayReferencesOnCard]))))
                     ))

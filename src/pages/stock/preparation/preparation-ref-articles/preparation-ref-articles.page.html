@@ -1,9 +1,49 @@
-<wii-select-item #selectItemComponent
-                 *ngIf="!loading && refArticle"
-                 [type]="selectItemType"
-                 (itemChange)="selectArticle($event)"
-                 [checkBarcodeValidity]="true"
-                 [resetEmitter]="resetEmitter$"
-                 [requestParams]="listWhereClause"
-                 [scanMode]="barcodeScannerMode">
-</wii-select-item>
+<ion-content>
+    <wii-panel-header *ngIf="panelHeaderConfig"
+                      class="page-header"
+                      [transparent]="panelHeaderConfig.transparent"
+                      [title]="panelHeaderConfig.title"
+                      [leftIcon]="panelHeaderConfig.leftIcon">
+    </wii-panel-header>
+    <ion-list *ngIf="parameterWithoutManual" class="suggesting-article-container">
+        <ng-container *ngIf="suggestingArticleList.length > 0">
+            <ion-item>
+                <ion-label><p>Suggestion d'articles</p></ion-label>
+            </ion-item>
+            <ion-item *ngFor="let article of suggestingArticleList">
+                <ion-label>
+                    <p>Article {{article.barcode}}</p>
+                    <p *ngIf="article.location !== 'null'">Emplacement : {{article.location}}</p>
+                    <p *ngIf="article.quantity">Quantité restante : {{article.quantity}}</p>
+                    <p *ngIf="article.management">
+                        <span *ngIf="article.management === 'FIFO'">Date d'entrée en stock : </span>
+                        <span *ngIf="article.management === 'FEFO'">Date d'expiration : </span>
+                        <span *ngIf="article.management !== 'FEFO' && article.management !== 'FIFO'">Date : </span>
+                        {{article.management_date}}
+                    </p>
+                </ion-label>
+            </ion-item>
+        </ng-container>
+        <ng-container *ngIf="suggestingArticleList.length === 0">
+            <ion-item>Aucun article</ion-item>
+        </ng-container>
+    </ion-list>
+
+    <ion-infinite-scroll #infiniteScroll
+                         threshold="100px"
+                         (ionInfinite)="loadMore()">
+        <ion-infinite-scroll-content loadingSpinner="circular"></ion-infinite-scroll-content>
+    </ion-infinite-scroll>
+
+    <div slot="fixed" class="page-footer">
+        <wii-select-item #selectItemComponent
+                         *ngIf="!loading && refArticle"
+                         [type]="selectItemType"
+                         (itemChange)="selectArticle($event)"
+                         [checkBarcodeValidity]="true"
+                         [resetEmitter]="resetEmitter$"
+                         [requestParams]="listWhereClause"
+                         [scanMode]="scannerMode">
+        </wii-select-item>
+    </div>
+</ion-content>

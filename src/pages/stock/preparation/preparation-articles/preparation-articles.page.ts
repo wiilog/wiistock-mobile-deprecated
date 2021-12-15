@@ -10,16 +10,17 @@ import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {ApiService} from '@app/common/services/api.service';
 import {ArticlePrepaByRefArticle} from '@entities/article-prepa-by-ref-article';
-import {flatMap, map} from 'rxjs/operators';
 import {Observable, of, zip} from 'rxjs';
+import {flatMap, map, mergeMap, tap} from 'rxjs/operators';
 import {Mouvement} from '@entities/mouvement';
 import * as moment from 'moment';
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {NetworkService} from '@app/common/services/network.service';
-import {StorageService} from '@app/common/services/storage/storage.service';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {StorageService} from '@app/common/services/storage/storage.service';
+import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 
 
 @Component({
@@ -46,18 +47,22 @@ export class PreparationArticlesPage extends PageComponent {
         info?: string;
     };
 
+    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.HIDDEN;
+
     public started: boolean = false;
     public isValid: boolean = true;
-    public displayTargetLocationPicking: boolean = false;
 
     public loadingStartPreparation: boolean;
+    public displayTargetLocationPicking: boolean = false;
+    public skipValidation: boolean = false;
+    public skipQuantities: boolean = false;
 
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
                        private networkService: NetworkService,
                        private apiService: ApiService,
-                       navService: NavService,
-                       private storageService: StorageService) {
+                       private storageService: StorageService,
+                       navService: NavService) {
         super(navService);
         this.loadingStartPreparation = false;
     }
@@ -76,16 +81,21 @@ export class PreparationArticlesPage extends PageComponent {
 
         this.listBoldValues = ['reference', 'referenceArticleReference', 'label', 'barCode', 'location', 'quantity', 'targetLocationPicking'];
 
-        this.updateLists()
-            .subscribe(() => {
-                if (this.articlesT.length > 0) {
-                    this.started = true;
-                }
-            });
+        zip(
+            this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_PREPARATIONS),
+            this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_QUANTITIES_PREPARATIONS),
+            this.updateLists()
+        ).subscribe(([skipValidation, skipQuantities]) => {
+            this.skipValidation = skipValidation;
+            this.skipQuantities = skipQuantities;
+            if (this.articlesT.length > 0) {
+                this.started = true;
+            }
 
-        if (this.footerScannerComponent) {
-            this.footerScannerComponent.fireZebraScan();
-        }
+            if (this.footerScannerComponent) {
+                this.footerScannerComponent.fireZebraScan();
+            }
+        });
     }
 
     public ionViewWillLeave(): void {
@@ -95,6 +105,14 @@ export class PreparationArticlesPage extends PageComponent {
     }
 
     public saveSelectedArticle(selectedArticle: ArticlePrepa | ArticlePrepaByRefArticle, selectedQuantity: number): void {
+        const validateAfterSelect = () => {
+            if (this.skipValidation
+                && this.articlesT.length > 0
+                && this.articlesNT.length === 0) {
+                this.validate();
+            }
+        };
+
         // if preparation is valid
         if (this.isValid) {
             // check if article is managed by 'article'
@@ -120,28 +138,35 @@ export class PreparationArticlesPage extends PageComponent {
                     // then we update quantity in the list of untreated articles
                     of(undefined)
                         .pipe(
-                            flatMap(() => this.sqliteService.updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), Number(selectedQuantity) + Number(articleAlready.quantite))),
-                            flatMap(() => this.sqliteService.updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), (selectedArticle as ArticlePrepa).quantite - selectedQuantity))
+                            mergeMap(() => this.sqliteService.updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), Number(selectedQuantity) + Number(articleAlready.quantite))),
+                            mergeMap(() => this.sqliteService.updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), (selectedArticle as ArticlePrepa).quantite - selectedQuantity)),
+                            mergeMap(() => this.updateViewLists())
                         )
                         .subscribe(() => {
-                            this.updateViewLists();
+                            validateAfterSelect();
                         });
                 }
 
                 // the selection is a picking
                 else if (isSelectableByUser) {
                     this.moveArticle(selectedArticle, selectedQuantity)
+                        .pipe(
+                            mergeMap(() => this.updateViewLists())
+                        )
                         .subscribe(() => {
-                            this.updateViewLists();
+                            validateAfterSelect();
                         });
                 }
                 else {
                     // we update value quantity of selected article
                     this.sqliteService
                         .updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), (selectedArticle as ArticlePrepa).quantite - selectedQuantity)
-                        .pipe(flatMap(() => this.moveArticle(selectedArticle, selectedQuantity)))
+                        .pipe(
+                            mergeMap(() => this.moveArticle(selectedArticle, selectedQuantity)),
+                            mergeMap(() => this.updateViewLists())
+                        )
                         .subscribe(() => {
-                            this.updateViewLists();
+                            validateAfterSelect();
                         })
                 }
             }
@@ -186,26 +211,24 @@ export class PreparationArticlesPage extends PageComponent {
                     // we don't enter here if it's an article selected by the user in the liste of article_prepa_by_ref_article
                     this.sqliteService
                         .updateArticlePrepaQuantity(articleAlready.reference, articleAlready.id_prepa, Number(articleAlready.is_ref), mouvement.quantity + articleAlready.quantite)
-                        .pipe(flatMap(() => this.sqliteService.deleteArticlePrepa(articleAlready.reference, articleAlready.id_prepa, Number(articleAlready.is_ref))))
-                        .subscribe(() => this.updateViewLists());
+                        .pipe(
+                            mergeMap(() => this.sqliteService.deleteArticlePrepa(articleAlready.reference, articleAlready.id_prepa, Number(articleAlready.is_ref))),
+                            mergeMap(() => this.updateViewLists())
+                        )
+                        .subscribe(() => {
+                            validateAfterSelect();
+                        });
                 } else {
                     this.moveArticle(selectedArticle)
+                        .pipe(
+                            mergeMap(() => this.updateViewLists())
+                        )
                         .subscribe(() => {
-                            this.updateViewLists();
+                            validateAfterSelect();
                         });
                 }
             }
         }
-    }
-
-    private refreshOver(): void {
-        this.loadingStartPreparation = false;
-        this.toastService.presentToast('Préparation prête à être finalisée.')
-    }
-
-    private refresh(): void {
-        this.loadingStartPreparation = false;
-        this.toastService.presentToast('Quantité bien prélevée.')
     }
 
     private selectArticle(selectedArticle: ArticlePrepa | ArticlePrepaByRefArticle, selectedQuantity: number): void {
@@ -279,6 +302,9 @@ export class PreparationArticlesPage extends PageComponent {
                 selectArticle: (selectedQuantity: number, selectedArticleByRef: ArticlePrepaByRefArticle) => this.selectArticle(selectedArticleByRef, selectedQuantity)
             });
         }
+        else if (this.skipQuantities) {
+            this.selectArticle(selectedArticle, selectedArticle.quantite);
+        }
         else {
             this.navigateToPreparationTake({selectedArticle: (selectedArticle as ArticlePrepa)});
         }
@@ -292,7 +318,7 @@ export class PreparationArticlesPage extends PageComponent {
                     ? result[0]
                     : undefined
             )),
-            flatMap((selectedArticle?: ArticlePrepaByRefArticle) => (
+            mergeMap((selectedArticle?: ArticlePrepaByRefArticle) => (
                 !selectedArticle
                     ? of({selectedArticle})
                     : (
@@ -326,7 +352,7 @@ export class PreparationArticlesPage extends PageComponent {
     private updateLists(): Observable<undefined> {
         return zip(
             this.sqliteService.findBy('article_prepa', [`id_prepa = ${this.preparation.id}`, `deleted <> 1`]),
-            this.storageService.getBoolean(StorageKeyEnum.PARAMETER_DISPLAY_TARGET_LOCATION_PICKING),
+            this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_TARGET_LOCATION_PICKING),
         ).pipe(
             flatMap(([articlesPrepa, displayTargetLocationPicking]: [Array<ArticlePrepa>, boolean]) => {
                 this.articlesNT = articlesPrepa.filter(({has_moved}) => has_moved === 0);
@@ -335,20 +361,22 @@ export class PreparationArticlesPage extends PageComponent {
                 this.displayTargetLocationPicking = displayTargetLocationPicking;
 
                 this.listToTreatConfig = this.createListToTreatConfig();
-                this.listTreatedConfig = this.ceateListTreatedConfig();
+                this.listTreatedConfig = this.createListTreatedConfig();
 
                 return of(undefined);
             }));
     }
 
-    private updateViewLists(): void {
-        this.updateLists().subscribe(() => {
-            if (this.articlesNT.length === 0) {
-                this.refreshOver();
-            } else {
-                this.refresh();
-            }
-        });
+    private updateViewLists(): Observable<void> {
+        return this.updateLists()
+            .pipe(tap(() => {
+                this.loadingStartPreparation = false;
+                if (this.articlesNT.length === 0) {
+                    this.toastService.presentToast('Préparation prête à être finalisée.');
+                } else {
+                    this.toastService.presentToast('Quantité bien prélevée.');
+                }
+            }));
     }
 
     private moveArticle(selectedArticle, selectedQuantity?: number): Observable<any> {
@@ -472,7 +500,7 @@ export class PreparationArticlesPage extends PageComponent {
             : undefined;
     }
 
-    private ceateListTreatedConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
+    private createListTreatedConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
         const pickedArticlesNumber = (this.articlesT ? this.articlesT.length : 0);
         const pickedArticlesPlural = pickedArticlesNumber > 1 ? 's' : '';
         return {
@@ -482,13 +510,6 @@ export class PreparationArticlesPage extends PageComponent {
                 leftIcon: {
                     name: 'upload.svg',
                     color: 'list-blue'
-                },
-                rightIcon: {
-                    name: 'check.svg',
-                    color: 'success',
-                    action: () => {
-                        this.validate()
-                    }
                 }
             },
             body: this.articlesT.map((articlePrepa: ArticlePrepa) => ({

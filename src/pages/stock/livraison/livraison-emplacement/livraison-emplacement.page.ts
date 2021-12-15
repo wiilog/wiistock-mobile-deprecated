@@ -61,7 +61,7 @@ export class LivraisonEmplacementPage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        this.storageService.getBoolean(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_DELIVERY).subscribe((skipValidation) => {
+        this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_DELIVERY).subscribe((skipValidation) => {
             this.skipValidation = skipValidation;
             this.validateLivraison = this.currentNavParams.get('validateLivraison');
             this.livraison = this.currentNavParams.get('livraison');

@@ -1,4 +1,17 @@
-:host {
-    display: flex;
-    justify-content: flex-end;
+@import "~theme/variables";
+
+wii-panel-header.page-header {
+    margin-top: $spacer;
+    margin-bottom: $spacer;
+}
+
+.suggesting-article-container {
+    p {
+        color: $black;
+    }
+}
+
+.page-footer {
+    width: 100%;
+    bottom: 0;
 }
