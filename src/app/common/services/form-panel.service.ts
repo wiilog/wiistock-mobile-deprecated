@@ -106,7 +106,7 @@ export class FormPanelService {
         if(typing == FreeFieldTyping.BOOL) {
             formattedValue = value ? "Oui" : "Non";
         } else if(typing == FreeFieldTyping.LIST || typing == FreeFieldTyping.MULTI_LIST) {
-            formattedValue = (value || '').replaceAll(';', ', ');
+            formattedValue = `${(value || '')}`.replace(/;/g, ', ');
         } else {
             formattedValue = value || "Non défini";
         }
