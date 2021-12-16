@@ -84,7 +84,7 @@ export class TransferListPage extends PageComponent {
                             title: 'Références contenues',
                             values: transferOrderArticles
                                 .filter((transferOrderArticle: TransferOrderArticle) => transferOrderArticle.transfer_order_id === transferOrder.id)
-                                .map((transferOrderArticle: TransferOrderArticle) => transferOrderArticle.reference)
+                                .map((transferOrderArticle: TransferOrderArticle) => transferOrderArticle.label)
                                 .filter((value, index, array) => array.indexOf(value) === index)
                         } : undefined as any,
                         action: () => {
