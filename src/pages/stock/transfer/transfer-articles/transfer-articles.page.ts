@@ -16,6 +16,7 @@ import {TransferOrder} from '@entities/transfer-order';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {StorageService} from '@app/common/services/storage/storage.service';
+import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 
 
 @Component({
@@ -24,6 +25,8 @@ import {StorageService} from '@app/common/services/storage/storage.service';
     styleUrls: ['./transfer-articles.page.scss'],
 })
 export class TransferArticlesPage extends PageComponent {
+    public readonly barcodeScannerOnlyScan: BarcodeScannerModeEnum = BarcodeScannerModeEnum.HIDDEN;
+
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
 
