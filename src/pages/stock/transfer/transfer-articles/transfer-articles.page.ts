@@ -6,7 +6,7 @@ import {IconConfig} from '@app/common/components/panel/model/icon-config';
 import {ToastService} from '@app/common/services/toast.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {NavService} from '@app/common/services/nav/nav.service';
-import {flatMap, map} from 'rxjs/operators';
+import {flatMap, map, take} from 'rxjs/operators';
 import {Subscription, zip} from 'rxjs';
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {PageComponent} from '@pages/page.component';
@@ -129,13 +129,18 @@ export class TransferArticlesPage extends PageComponent {
         }
     }
 
-    public testIfBarcodeEquals(search: number|string, isIndex: boolean = false): void {
+    public testIfBarcodeEquals(search: number|string, isIndex: boolean = false, takeAll: boolean = false): void {
         const articleIndex: number = isIndex
             ? (search as number)
             : this.toTreatArticles.findIndex(({barcode}) => (barcode === search));
         if (articleIndex > -1) {
             this.treatedArticles.unshift(this.toTreatArticles[articleIndex]);
-            this.toTreatArticles.splice(articleIndex, 1);
+
+            if(takeAll && (articleIndex + 1) === this.toTreatArticles.length) {
+                this.toTreatArticles.splice(0, this.toTreatArticles.length);
+            } else if(!takeAll) {
+                this.toTreatArticles.splice(articleIndex, 1);
+            }
 
             this.refreshListToTreatConfig();
             this.refreshListTreatedConfig();
@@ -183,7 +188,7 @@ export class TransferArticlesPage extends PageComponent {
     }
 
     private takeAll() {
-        this.toTreatArticles.forEach(({barcode}) => this.testIfBarcodeEquals(barcode));
+        this.toTreatArticles.forEach(({barcode}) => this.testIfBarcodeEquals(barcode, false, true));
     }
 
     private refreshListTreatedConfig(): void {
