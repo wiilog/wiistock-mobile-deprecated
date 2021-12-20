@@ -140,7 +140,7 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
 
     public selectArticle(selectedArticle: ArticlePrepaByRefArticle): void {
         if (this.parameterSkipQuantities) {
-            this.selectArticleAndPop(selectedArticle, selectedArticle.quantity);
+            this.selectArticleAndPop(selectedArticle, Math.min(selectedArticle.quantity, this.refArticle.quantite));
         }
         else {
             this.navService.push(NavPathEnum.PREPARATION_ARTICLE_TAKE, {

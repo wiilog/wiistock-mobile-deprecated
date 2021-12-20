@@ -165,10 +165,9 @@ export class SqliteService {
                                 const articlesToInsert = articlesPrepaApi
                                     .filter((toInsert) => (
                                         articles.every((articlePrepa) => (
-                                                (articlePrepa.id_prepa !== toInsert.id_prepa) &&
-                                                (articlePrepa.reference !== toInsert.reference)
-                                            )
-                                        )
+                                            (articlePrepa.id_prepa !== toInsert.id_prepa) &&
+                                            (articlePrepa.reference !== toInsert.reference)
+                                        ))
                                     ))
                                     .map((toInsert) => ({
                                         label: toInsert.label,
