@@ -102,47 +102,13 @@ export class DeposePage extends PageComponent implements CanLeave {
             this.emplacement = this.currentNavParams.get('emplacement');
             this.finishAction = this.currentNavParams.get('finishAction');
             this.fromStock = Boolean(this.currentNavParams.get('fromStock'));
-            zip(
-                this.sqliteService.findBy(
-                    'mouvement_traca',
-                    [
-                        `type LIKE 'prise'`,
-                        `finished = 0`,
-                        `fromStock = ${Number(this.fromStock)}`
-                    ]
-                ),
-                this.storageService.getString(StorageKeyEnum.OPERATOR),
-                this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER),
-                !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
-                !this.fromStock ? this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + this.emplacement.id]) : of([]),
-                this.translationService.get('natures')
-            )
-                .subscribe(([colisPrise, operator, skipValidation, natures, allowedNatureLocationArray, natureTranslations]) => {
-                    this.colisPrise = colisPrise.map(({subPacks, ...tracking}) => ({
-                        ...tracking,
-                        subPacks: subPacks ? JSON.parse(subPacks) : []
-                    }));
-
-                    this.operator = operator;
-                    this.skipValidation = skipValidation && this.fromStock;
-                    this.natureTranslations = natureTranslations;
-                    this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
-                        [id]: {label, color},
-                        ...acc
-                    }), {});
-
-                    this.allowedNatureIdsForLocation = allowedNatureLocationArray.map(({nature_id}) => nature_id);
-                    this.footerScannerComponent.fireZebraScan();
-
-                    this.refreshDeposeListComponent();
-                    this.refreshPriseListComponent();
-                    this.loading = false;
-                });
+            this.initData();
         }
         else {
             this.footerScannerComponent.fireZebraScan();
         }
     }
+
 
     public ionViewWillLeave(): void {
         this.trackingListFactory.disableActions();
@@ -219,13 +185,16 @@ export class DeposePage extends PageComponent implements CanLeave {
     }
 
     public redirectAfterTake(hasErrors: boolean = false): void {
-        this.navService
-            .pop()
-            .subscribe(() => {
-                if (!hasErrors) {
+        if (!hasErrors) {
+            this.navService
+                .pop()
+                .subscribe(() => {
                     this.finishAction();
-                }
-            });
+                });
+        } else {
+            this.init();
+            this.initData();
+        }
     }
 
     public testColisDepose(barCode: string, isManualInput: boolean = false): void {
@@ -475,6 +444,45 @@ export class DeposePage extends PageComponent implements CanLeave {
         );
     }
 
+    public initData() {
+        zip(
+            this.sqliteService.findBy(
+                'mouvement_traca',
+                [
+                    `type LIKE 'prise'`,
+                    `finished = 0`,
+                    `fromStock = ${Number(this.fromStock)}`
+                ]
+            ),
+            this.storageService.getString(StorageKeyEnum.OPERATOR),
+            this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER),
+            !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
+            !this.fromStock ? this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + this.emplacement.id]) : of([]),
+            this.translationService.get('natures')
+        )
+            .subscribe(([colisPrise, operator, skipValidation, natures, allowedNatureLocationArray, natureTranslations]) => {
+                this.colisPrise = colisPrise.map(({subPacks, ...tracking}) => ({
+                    ...tracking,
+                    subPacks: subPacks ? JSON.parse(subPacks) : []
+                }));
+
+                this.operator = operator;
+                this.skipValidation = skipValidation && this.fromStock;
+                this.natureTranslations = natureTranslations;
+                this.natureIdsToConfig = natures.reduce((acc, {id, color, label}: Nature) => ({
+                    [id]: {label, color},
+                    ...acc
+                }), {});
+
+                this.allowedNatureIdsForLocation = allowedNatureLocationArray.map(({nature_id}) => nature_id);
+                this.footerScannerComponent.fireZebraScan();
+
+                this.refreshDeposeListComponent();
+                this.refreshPriseListComponent();
+                this.loading = false;
+            });
+    }
+
     private init(): void {
         this.loading = true;
         this.colisDepose = [];
@@ -517,7 +525,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                 ? 'Déposes sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
                 : 'Dépose sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
         return this.toastService
-            .presentToast(`${errorsMessage}${(errorsMessage && message) ? '\n' : ''}${message}`)
+            .presentToast(`${errorsMessage}${(errorsMessage && message) ? '\n' : ''}${message}`, ToastService.LONG_DURATION)
             .pipe(
                 flatMap(() => {
                     const groupPlural = (emptyGroups && emptyGroups.length > 0);
