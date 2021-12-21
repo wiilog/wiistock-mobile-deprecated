@@ -336,17 +336,22 @@ export class PreparationArticlesPage extends PageComponent {
 
     private navigateToPreparationTake({selectedArticle, refArticle}: { selectedArticle?: ArticlePrepaByRefArticle | ArticlePrepa, refArticle?: ArticlePrepa }): void {
         if (selectedArticle) {
-            if(this.skipQuantities) {
-                this.selectArticle(selectedArticle, Math.min((selectedArticle as ArticlePrepaByRefArticle).quantity, refArticle.quantite));
+            const referenceArticleIsToTreat = this.articlesNT.some((articlePrepa) => articlePrepa.reference === refArticle.reference);
+            if (referenceArticleIsToTreat) {
+                if (this.skipQuantities) {
+                    this.selectArticle(selectedArticle, Math.min((selectedArticle as ArticlePrepaByRefArticle).quantity, refArticle.quantite));
+                } else {
+                    this.navService.push(NavPathEnum.PREPARATION_ARTICLE_TAKE, {
+                        article: selectedArticle,
+                        refArticle,
+                        preparation: this.preparation,
+                        started: this.started,
+                        valid: this.isValid,
+                        selectArticle: (selectedQuantity: number) => this.selectArticle(selectedArticle, selectedQuantity)
+                    });
+                }
             } else {
-                this.navService.push(NavPathEnum.PREPARATION_ARTICLE_TAKE, {
-                    article: selectedArticle,
-                    refArticle,
-                    preparation: this.preparation,
-                    started: this.started,
-                    valid: this.isValid,
-                    selectArticle: (selectedQuantity: number) => this.selectArticle(selectedArticle, selectedQuantity)
-                });
+                this.toastService.presentToast(`Aucune quantité à préparer pour cette référence`);
             }
         } else {
             this.toastService.presentToast('L\'article scanné n\'est pas dans la liste.');
