@@ -366,12 +366,21 @@ export class DeposePage extends PageComponent implements CanLeave {
             this.colisPrise.filter(({hidden, packParent}) => (!hidden && !packParent)),
             TrackingListFactoryService.LIST_TYPE_DROP_SUB,
             {
-                validateIcon: {
-                    name: 'up.svg',
-                    action: () => {
-                        this.dropAll()
+                headerRightIcon: [
+                    {
+                        color: 'primary',
+                        name: 'scan-photo.svg',
+                        action: () => {
+                            this.footerScannerComponent.scan();
+                        }
                     },
-                },
+                    {
+                        name: 'up.svg',
+                        action: () => {
+                            this.dropAll()
+                        },
+                    }
+                ],
                 objectLabel: this.objectLabel,
                 rightIcon: {
                     mode: 'upload',

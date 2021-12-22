@@ -35,7 +35,7 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
     public selectItemComponent: SelectItemComponent;
 
     public readonly selectItemType = SelectItemTypeEnum.ARTICLE_TO_PICK;
-    public scannerMode = BarcodeScannerModeEnum.HIDDEN;
+    public scannerMode = BarcodeScannerModeEnum.ONLY_SCAN;
     public listWhereClause: Array<string>;
     public refArticle: ArticlePrepa;
     public suggestingArticleList: Array<ArticlePrepaByRefArticle> = [];
@@ -114,7 +114,7 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
                     this.suggestingArticleList = suggestingArticleList as Array<ArticlePrepaByRefArticle>;
                     this.suggestingListOffset = PreparationRefArticlesPage.SUGGESTING_LIST_LIMIT;
 
-                    this.scannerMode = this.parameterWithoutManual ? BarcodeScannerModeEnum.HIDDEN : BarcodeScannerModeEnum.ONLY_SEARCH_SCAN;
+                    this.scannerMode = this.parameterWithoutManual ? BarcodeScannerModeEnum.ONLY_SCAN : BarcodeScannerModeEnum.TOOL_SEARCH;
                     if (!counter || counter <= 0) {
                         this.toastService.presentToast('Aucun article trouvé...');
                         this.navService.pop();

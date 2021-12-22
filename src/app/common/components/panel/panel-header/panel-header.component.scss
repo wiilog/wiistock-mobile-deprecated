@@ -73,13 +73,20 @@
                 display: inline-block;
             }
 
-            .list-header-icon-wrapper:not(:first-child):not(.custom-size) {
-                text-align: center;
-                wii-icon {
-                    margin-top: $spacer;
-                    width: 1.7rem;
-                    height: 1.7rem;
+            &:not(.list-header-icon-horizontal) {
+                .list-header-icon-wrapper:not(:first-child):not(.custom-size) {
+                    text-align: center;
+
+                    wii-icon {
+                        margin-top: $spacer;
+                        width: 1.7rem;
+                        height: 1.7rem;
+                    }
                 }
+            }
+
+            &.list-header-icon-horizontal {
+                display: flex;
             }
 
             &:last-child {

@@ -112,7 +112,7 @@ export class TrackingListFactoryService {
 
     public createListConfig(articles: Array<MouvementTraca & {loading?: boolean; isGroup?: number|boolean; subPacks?: Array<MouvementTraca>;}>,
                             listType: number,
-                            {location, objectLabel,  validate, rightIcon, confirmItem, natureIdsToConfig, natureTranslation, validateIcon}: {
+                            {location, objectLabel,  validate, rightIcon, confirmItem, natureIdsToConfig, natureTranslation, headerRightIcon}: {
                                 location?: Emplacement;
                                 natureIdsToConfig?: {[id: number]: { label: string; color?: string; }};
                                 validate?: () => void;
@@ -120,7 +120,7 @@ export class TrackingListFactoryService {
                                     mode: 'upload'|'remove';
                                     action: (info: { [name: string]: { label: string; value?: string; } }) => void;
                                 };
-                                validateIcon?: IconConfig;
+                                headerRightIcon?: IconConfig | Array<IconConfig>;
                                 confirmItem?: (info: { [name: string]: { label: string; value?: string; } }) => void;
                                 objectLabel: string;
                                 natureTranslation?: string;
@@ -164,9 +164,10 @@ export class TrackingListFactoryService {
                     color: iconColor
                 },
                 ...(
-                    validate || validateIcon
+                    validate || headerRightIcon
                         ? {
-                            rightIcon: validateIcon || {
+                            rightIconLayout: 'horizontal',
+                            rightIcon: headerRightIcon || {
                                 name: 'check.svg',
                                 color: 'success',
                                 action: () => {

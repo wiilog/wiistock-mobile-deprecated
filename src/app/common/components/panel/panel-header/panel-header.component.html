@@ -63,7 +63,9 @@
     </div>
 
     <!-- Right icon -->
-    <div class="list-header-icon" *ngIf="_rightIcons && _rightIcons.length > 0">
+    <div class="list-header-icon"
+         [class.list-header-icon-horizontal]="rightIconLayout === 'horizontal'"
+         *ngIf="_rightIcons && _rightIcons.length > 0">
         <div class="list-header-icon-wrapper"
              *ngFor="let rightIcon of _rightIcons; let index = index">
             <wii-icon [name]="rightIcon.name"

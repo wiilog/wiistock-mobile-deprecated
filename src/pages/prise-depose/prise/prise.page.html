@@ -21,7 +21,6 @@
 <div class="page-footer persisted-page-footer">
     <wii-barcode-scanner #footerScannerComponent
                          [hidden]="loading"
-                         [buttonSubtitle]="objectLabel"
                          [mode]="scannerModeManual"
                          (add)="testIfBarcodeEquals($event[0], $event[1])">
     </wii-barcode-scanner>

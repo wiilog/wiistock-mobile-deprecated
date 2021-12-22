@@ -32,7 +32,7 @@ export class LivraisonEmplacementPage extends PageComponent {
     public location: Emplacement;
     public livraison: Livraison;
 
-    public barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SEARCH_SCAN;
+    public barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.TOOL_SEARCH;
 
     public panelHeaderConfig: {
         title: string;

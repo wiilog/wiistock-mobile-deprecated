@@ -7,7 +7,6 @@
 <div class="select-location-footer">
     <wii-barcode-scanner #barcodeScanner
                          [selectedLabel$]="selectedLabel$"
-                         [buttonSubtitle]="config[type].buttonSubtitle"
                          [mode]="scanMode"
                          (search)="openSearch()"
                          (createForm)="onPenClick()"

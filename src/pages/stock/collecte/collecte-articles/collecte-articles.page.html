@@ -28,9 +28,8 @@
 
     <div class="page-footer">
         <wii-barcode-scanner #footerScannerComponent
-                             [buttonSubtitle]="'article'"
                              [hidden]="!articlesNT || articlesNT.length === 0"
-                             [mode]="scannerModeHidden"
+                             [mode]="scannerMode"
                              (add)="testIfBarcodeEquals($event[0])">
         </wii-barcode-scanner>
         <ion-button class="submit-button larger"

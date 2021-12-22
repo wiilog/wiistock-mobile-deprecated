@@ -46,7 +46,7 @@ export class LivraisonArticlesPage extends PageComponent {
         info?: string;
     };
 
-    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.HIDDEN;
+    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SCAN;
 
     public started: boolean = false;
     public isValid: boolean = true;
@@ -313,12 +313,24 @@ export class LivraisonArticlesPage extends PageComponent {
                         name: 'download.svg',
                         color: 'list-yellow-light'
                     },
-                    rightIcon: this.skipQuantities ? {
-                        name: 'up.svg',
-                        action: () => {
-                            this.takeAll()
+                    rightIconLayout: 'horizontal',
+                    rightIcon: [
+                        {
+                            color: 'primary',
+                            name: 'scan-photo.svg',
+                            action: () => {
+                                this.footerScannerComponent.scan();
+                            }
                         },
-                    }: {} as any,
+                        ...(this.skipQuantities
+                            ? [{
+                                name: 'up.svg',
+                                action: () => {
+                                    this.takeAll()
+                                },
+                            }]
+                            : [])
+                    ]
                 },
                 body: this.articlesNT.map((articleLivraison: ArticleLivraison) => ({
                     infos: this.createArticleInfo(articleLivraison),
