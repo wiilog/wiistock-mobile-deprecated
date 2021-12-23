@@ -27,7 +27,7 @@ export class TransferValidatePage extends PageComponent {
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
 
-    public readonly barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SEARCH_SCAN;
+    public readonly barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.TOOL_SEARCH;
     public readonly selectItemType = SelectItemTypeEnum.LOCATION;
 
     public location: Emplacement;

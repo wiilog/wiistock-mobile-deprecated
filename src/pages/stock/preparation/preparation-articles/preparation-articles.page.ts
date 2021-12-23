@@ -47,7 +47,7 @@ export class PreparationArticlesPage extends PageComponent {
         info?: string;
     };
 
-    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.HIDDEN;
+    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SCAN;
 
     public started: boolean = false;
     public isValid: boolean = true;
@@ -493,6 +493,13 @@ export class PreparationArticlesPage extends PageComponent {
                     leftIcon: {
                         name: 'download.svg',
                         color: 'list-blue-light'
+                    },
+                    rightIcon: {
+                        color: 'primary',
+                        name: 'scan-photo.svg',
+                        action: () => {
+                            this.footerScannerComponent.scan();
+                        }
                     }
                 },
                 body: this.articlesNT.map((articlePrepa: ArticlePrepa) => ({

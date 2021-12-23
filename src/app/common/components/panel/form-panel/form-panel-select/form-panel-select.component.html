@@ -14,19 +14,17 @@
         </wii-search-item>
         <div>{{ text }}</div>
         <wii-icon name="search.svg"
-                  color="medium"
+                  color="primary"
                   class="search-icon"
                   (action)="onSearchClick()">
         </wii-icon>
+        <ng-container add-on>
+            <wii-barcode-scanner #barcodeScanner
+                                 *ngIf="inputConfig.barcodeScanner"
+                                 class="inline"
+                                 (add)="onBarcodeScanned($event[0])">
+            </wii-barcode-scanner>
+        </ng-container>
     </div>
-
-    <ng-container add-on>
-        <wii-barcode-scanner #barcodeScanner
-                             *ngIf="inputConfig.barcodeScanner"
-                             [small]="true"
-                             buttonSubtitle="Destination"
-                             (add)="onBarcodeScanned($event[0])">
-        </wii-barcode-scanner>
-    </ng-container>
 </wii-form-field>
 

@@ -25,7 +25,7 @@
     <div class="page-footer">
         <wii-barcode-scanner #footerScannerComponent
                              (add)="testIfBarcodeEquals($event[0])"
-                             [mode]="barcodeScannerOnlyScan">
+                             [mode]="barcodeScannerMode">
         </wii-barcode-scanner>
         <ion-button *ngIf="!skipValidation"
                     class="submit-button larger"

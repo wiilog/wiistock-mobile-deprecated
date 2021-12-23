@@ -38,7 +38,7 @@ export class DispatchValidatePage extends PageComponent {
     public readonly PageStatus: Page = Page.STATUS;
 
     public readonly selectItemLocation = SelectItemTypeEnum.LOCATION;
-    public readonly barcodeScannerLocationMode = BarcodeScannerModeEnum.ONLY_SEARCH_SCAN;
+    public readonly barcodeScannerLocationMode = BarcodeScannerModeEnum.TOOL_SEARCH;
 
     public statusRequestParams;
 

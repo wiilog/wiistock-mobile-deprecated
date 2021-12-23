@@ -66,6 +66,9 @@ export class PanelHeaderComponent {
         icon: IconConfig;
     };
 
+    @Input()
+    public rightIconLayout?: 'vertical'|'horizontal' = 'vertical';
+
     @Output()
     public mainButtonAction: EventEmitter<boolean>;
 

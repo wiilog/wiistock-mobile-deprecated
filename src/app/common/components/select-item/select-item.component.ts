@@ -62,48 +62,37 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
     public readonly config = {
         [SelectItemTypeEnum.DEMANDE_LIVRAISON_TYPE]: {
             invalidMessage: 'Le type scanné n\'est pas présent dans la liste',
-            buttonSubtitle: 'Type'
         },
         [SelectItemTypeEnum.DEMANDE_LIVRAISON_ARTICLES]: {
             invalidMessage: 'L\'article scanné n\'est pas présent dans la liste',
-            buttonSubtitle: 'Article'
         },
         [SelectItemTypeEnum.STATUS]: {
             invalidMessage: 'Le statut scanné n\'est pas présent dans la liste',
-            buttonSubtitle: 'Statut'
         },
         [SelectItemTypeEnum.ARTICLE_TO_PICK]: {
             invalidMessage: 'L\'article scanné n\'est pas présent dans la liste',
-            buttonSubtitle: 'Article'
         },
         [SelectItemTypeEnum.LOCATION]: {
             invalidMessage: 'Veuillez flasher ou sélectionner un emplacement connu',
-            buttonSubtitle: 'Emplacement',
             alert: true
         },
         [SelectItemTypeEnum.INVENTORY_LOCATION]: {
             invalidMessage: 'L\'emplacement scanné n\'est pas dans la liste',
-            buttonSubtitle: 'Emplacement'
         },
         [SelectItemTypeEnum.INVENTORY_ARTICLE]: {
             invalidMessage: 'L\'article scanné n\'est pas dans la liste',
-            buttonSubtitle: 'Article'
         },
         [SelectItemTypeEnum.INVENTORY_ANOMALIES_LOCATION]: {
             invalidMessage: 'L\'emplacement scanné n\'est pas dans la liste',
-            buttonSubtitle: 'Emplacement'
         },
         [SelectItemTypeEnum.INVENTORY_ANOMALIES_ARTICLE]: {
             invalidMessage: 'L\'article scanné n\'est pas dans la liste',
-            buttonSubtitle: 'Article'
         },
         [SelectItemTypeEnum.DISPATCH_NUMBER]: {
             invalidMessage: 'L\'acheminement n\'est pas dans la liste',
-            buttonSubtitle: 'Acheminement'
         },
         [SelectItemTypeEnum.COLLECTABLE_ARTICLES]: {
             invalidMessage: 'L\'article n\'est pas dans la liste',
-            buttonSubtitle: 'Article'
         },
     }
 

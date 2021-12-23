@@ -4,11 +4,19 @@
     padding: 0;
     display: block;
 
+    &:not(.inline) {
+        margin-bottom: $spacer;
+    }
+
+    .tools + .input-manual {
+        margin-top: $spacer;
+    }
+
     .input-manual {
         padding: 0 $spacerMin;
     }
 
-    &:not(.button-small) ion-item {
+    ion-item {
         margin-bottom: $spacerMin !important;
         ion-input {
             font-size: $normalFontSize;
@@ -24,19 +32,14 @@
 
     .tools {
         display: flex;
-        justify-content: center;
+        justify-content: space-evenly;
         align-items: center;
-        margin-bottom: $spacer;
 
         .tools-icon {
-            &:not(:first-child) {
-                margin-left: ($spacer * 3) !important;
-            }
-
-            width: 2.4rem;
             height: 2.4rem;
             display: inline-block;
         }
+
         .tools-selected-label {
             max-width: 60%;
             margin-left: $spacer / 2;
@@ -66,20 +69,4 @@
             }
         }
     }
-
-    .scan-only-with-label-wrapper {
-        display: flex;
-        align-items: center;
-        position: relative;
-
-        & > ion-button {
-            flex: 1;
-            min-width: 60%;
-        }
-        & > .selected-label-container {
-            padding: $spacerMin 0 $spacerMin $spacerMin;
-            max-width: 40%;
-        }
-    }
-
 }

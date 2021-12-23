@@ -26,7 +26,7 @@ export class EmplacementScanPage extends PageComponent {
     public fromStock: boolean;
     public fromEmptyRound: boolean;
 
-    public barcodeScannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SEARCH_SCAN;
+    public barcodeScannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.TOOL_SEARCH;
 
     public resetEmitter$: EventEmitter<void>;
 
@@ -50,6 +50,9 @@ export class EmplacementScanPage extends PageComponent {
             this.fromEmptyRound = Boolean(this.currentNavParams.get('fromEmptyRound'));
             this.loading = false;
             this.isDemoMode = isDemoMode;
+            this.barcodeScannerMode = this.fromStock || !isDemoMode
+                ? BarcodeScannerModeEnum.TOOL_SEARCH
+                : BarcodeScannerModeEnum.TOOLS_FULL;
 
             this.resetEmitter$.emit();
 

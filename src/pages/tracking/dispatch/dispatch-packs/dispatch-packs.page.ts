@@ -33,7 +33,7 @@ export class DispatchPacksPage extends PageComponent {
 
     public loading: boolean;
 
-    public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.HIDDEN;
+    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SCAN;
 
     public dispatchHeaderConfig: {
         title: string;

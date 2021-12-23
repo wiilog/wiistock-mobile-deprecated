@@ -25,8 +25,7 @@
 <div class="page-footer persisted-page-footer">
     <wii-barcode-scanner #footerScannerComponent
                          [hidden]="loading"
-                         buttonSubtitle="Colis"
-                         [mode]="scannerModeManual"
+                         [mode]="scannerMode"
                          (add)="takePack($event[0])">
     </wii-barcode-scanner>
     <ion-button class="submit-button larger"

@@ -320,6 +320,13 @@ export class PrisePage extends PageComponent implements CanLeave {
                 natureIdsToConfig: this.natureIdsToConfig,
                 natureTranslation: natureLabel,
                 location: this.emplacement,
+                headerRightIcon: {
+                    color: 'primary',
+                    name: 'scan-photo.svg',
+                    action: () => {
+                        this.footerScannerComponent.scan();
+                    }
+                },
                 confirmItem: !this.fromStock
                     ? ({object: {value: barCode}}: { object?: { value?: string } }) => {
                         // we get first
@@ -363,7 +370,7 @@ export class PrisePage extends PageComponent implements CanLeave {
             this.toTakeOngoingPacks,
             TrackingListFactoryService.LIST_TYPE_TAKING_SUB,
             {
-                validateIcon: {
+                headerRightIcon: {
                     name: 'up.svg',
                     action: () => {
                         this.takeAll()

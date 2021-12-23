@@ -150,4 +150,8 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
             }
         }
     }
+
+    public onScanButtonClicked(): void {
+        this.barcodeScanner.scan();
+    }
 }

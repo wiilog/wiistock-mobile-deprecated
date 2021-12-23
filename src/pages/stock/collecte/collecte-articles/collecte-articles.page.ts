@@ -22,8 +22,8 @@ import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {AlertService} from '@app/common/services/alert.service';
 import {NetworkService} from '@app/common/services/network.service';
-import {BarcodeScannerModeEnum} from "../../../../app/common/components/barcode-scanner/barcode-scanner-mode.enum";
-import {LoadingService} from "../../../../app/common/services/loading.service";
+import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
+import {LoadingService} from "@app/common/services/loading.service";
 
 
 @Component({
@@ -49,7 +49,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
         subtitle?: Array<string>;
         info?: string;
     };
-    public readonly scannerModeHidden: BarcodeScannerModeEnum = BarcodeScannerModeEnum.HIDDEN;
+    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SCAN;
 
     public started: boolean = false;
     public isValid: boolean = true;
@@ -490,6 +490,13 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                 leftIcon: {
                     name: 'upload.svg',
                     color: 'list-orange'
+                },
+                rightIcon: {
+                    color: 'primary',
+                    name: 'scan-photo.svg',
+                    action: () => {
+                        this.footerScannerComponent.scan();
+                    }
                 }
             },
             body: this.articlesT.map((articleCollecte: ArticleCollecte) => ({

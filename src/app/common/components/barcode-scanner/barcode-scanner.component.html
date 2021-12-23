@@ -1,5 +1,38 @@
+<div class="tools"
+     *ngIf="mode === ONLY_SCAN_MODE || mode === WITH_MANUAL_MODE || mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE || mode === ONLY_SEARCH_MODE || mode === TOOL_SELECTED_LABEL">
+    <wii-icon *ngIf="mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE || mode === ONLY_SEARCH_MODE"
+              name="search.svg"
+              color="primary"
+              class="tools-icon"
+              (action)="onSearchClick()">
+    </wii-icon>
+    <wii-icon *ngIf="mode === TOOLS_FULL_MODE"
+              name="plus.svg"
+              color="primary"
+              class="tools-icon"
+              (action)="onPenClick()">
+    </wii-icon>
+
+    <wii-icon name="scan-photo.svg"
+              color="primary"
+              class="tools-icon"
+              *ngIf="mode === ONLY_SCAN_MODE || mode === WITH_MANUAL_MODE || mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE || mode === TOOL_SELECTED_LABEL"
+              (action)="scan()">
+    </wii-icon>
+
+    <ng-container *ngIf="mode === TOOL_SELECTED_LABEL && selectedLabel$">
+        <div class="tools-selected-label ion-activatable ripple-parent"
+             (click)="onSelectedLabelClick()"
+             *ngIf="selectedLabel$ | async as selectedLabelValue">
+            <span class="selected-label-content">{{ selectedLabelValue }}</span>
+            <span class="selected-label-remove">&times;</span>
+            <ion-ripple-effect></ion-ripple-effect>
+        </div>
+    </ng-container>
+</div>
+
 <div class="input-manual"
-     *ngIf="mode === WITH_MANUAL_MODE || mode === ONLY_MANUAL_MODE">
+           *ngIf="mode === WITH_MANUAL_MODE || mode === ONLY_MANUAL_MODE">
     <ion-item>
         <ion-input type="text" placeholder="Entrée manuelle..." [(ngModel)]="input"></ion-input>
         <wii-icon name="plus.svg"
@@ -9,65 +42,3 @@
         </wii-icon>
     </ion-item>
 </div>
-<div class="tools"
-     *ngIf="mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE || mode === ONLY_SEARCH_MODE || mode === ONLY_SEARCH_SCAN_MODE || mode === TOOL_SEARCH_AND_LABEL || mode === TOOL_SELECTED_LABEL">
-    <wii-icon *ngIf="mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE || mode === ONLY_SEARCH_MODE || mode === ONLY_SEARCH_SCAN_MODE || mode === TOOL_SEARCH_AND_LABEL"
-              name="search.svg"
-              color="black"
-              class="tools-icon"
-              (action)="onSearchClick()">
-    </wii-icon>
-    <wii-icon *ngIf="mode === TOOLS_FULL_MODE"
-              name="pen.svg"
-              color="black"
-              class="tools-icon"
-              (action)="onPenClick()">
-    </wii-icon>
-    <ng-container *ngIf="(mode === TOOL_SEARCH_AND_LABEL || mode === TOOL_SELECTED_LABEL) && selectedLabel$">
-        <ng-container *ngTemplateOutlet="selectedLabelTemplate"></ng-container>
-    </ng-container>
-</div>
-
-<ng-container *ngIf="mode === ONLY_SCAN_MODE || mode === WITH_MANUAL_MODE || mode === TOOL_SEARCH_MODE || mode === TOOLS_FULL_MODE || mode === TOOL_SEARCH_AND_LABEL || mode === TOOL_SELECTED_LABEL">
-    <ng-container *ngTemplateOutlet="scanButtonTemplate"></ng-container>
-</ng-container>
-
-<div class="scan-only-with-label-wrapper"
-     *ngIf="mode === ONLY_SCAN_WITH_LABEL_MODE">
-    <ng-container *ngTemplateOutlet="scanButtonTemplate"></ng-container>
-    <div class="selected-label-container" *ngIf="selectedLabel$">
-        <ng-container *ngTemplateOutlet="selectedLabelTemplate"></ng-container>
-    </div>
-</div>
-
-
-
-<ng-template #scanButtonTemplate>
-    <ion-button class="scanner-button"
-                [class.larger]="!small"
-                [size]="small ? 'default' : 'large'"
-                expand="full"
-                color="primary"
-                (click)="scan()">
-        <span class="button-text-wrapper">
-            <span class="title">SCANNER</span>
-            <br/>
-            <span class="subtitle" *ngIf="buttonSubtitle">{{buttonSubtitle}}</span>
-        </span>
-        <wii-icon name="scan.svg"
-                  color="white"
-                  class="button-icon big"
-                  [class.big]="!small">
-        </wii-icon>
-    </ion-button>
-</ng-template>
-
-<ng-template #selectedLabelTemplate>
-    <div class="tools-selected-label ion-activatable ripple-parent"
-         (click)="onSelectedLabelClick()"
-         *ngIf="selectedLabel$ | async as selectedLabelValue">
-        <span class="selected-label-content">{{ selectedLabelValue }}</span>
-        <span class="selected-label-remove">&times;</span>
-        <ion-ripple-effect></ion-ripple-effect>
-    </div>
-</ng-template>

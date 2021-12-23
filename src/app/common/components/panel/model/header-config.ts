@@ -12,6 +12,7 @@ export interface HeaderConfig {
     info?: string;
     action?: (event: Event) => void;
     rightIcon?: IconConfig|Array<IconConfig>;
+    rightIconLayout?: 'vertical'|'horizontal';
     collapsed?: true;
     onToggle?: (opened: boolean) => void;
     transparent?: boolean;

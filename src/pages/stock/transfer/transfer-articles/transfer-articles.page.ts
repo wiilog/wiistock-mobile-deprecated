@@ -6,7 +6,7 @@ import {IconConfig} from '@app/common/components/panel/model/icon-config';
 import {ToastService} from '@app/common/services/toast.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {NavService} from '@app/common/services/nav/nav.service';
-import {flatMap, map, take} from 'rxjs/operators';
+import {flatMap, map} from 'rxjs/operators';
 import {Subscription, zip} from 'rxjs';
 import {IconColor} from '@app/common/components/icon/icon-color';
 import {PageComponent} from '@pages/page.component';
@@ -25,7 +25,7 @@ import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/bar
     styleUrls: ['./transfer-articles.page.scss'],
 })
 export class TransferArticlesPage extends PageComponent {
-    public readonly barcodeScannerOnlyScan: BarcodeScannerModeEnum = BarcodeScannerModeEnum.HIDDEN;
+    public readonly barcodeScannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SCAN;
 
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
@@ -170,12 +170,22 @@ export class TransferArticlesPage extends PageComponent {
                     name: 'download.svg',
                     color: 'tertiary-light'
                 },
-                rightIcon: {
-                    name: 'up.svg',
-                    action: () => {
-                        this.takeAll()
+                rightIconLayout: 'horizontal',
+                rightIcon: [
+                    {
+                        color: 'primary',
+                        name: 'scan-photo.svg',
+                        action: () => {
+                            this.footerScannerComponent.scan();
+                        }
                     },
-                }
+                    {
+                        name: 'up.svg',
+                        action: () => {
+                            this.takeAll()
+                        },
+                    }
+                ]
             },
             body: this.toTreatArticles.map((article: TransferOrderArticle, index: number) => ({
                 infos: this.createArticleInfo(article),
