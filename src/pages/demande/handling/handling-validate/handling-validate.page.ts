@@ -205,7 +205,6 @@ export class HandlingValidatePage extends PageComponent {
                 const params = {
                     id: this.handling.id,
                     statusId,
-                    comment,
                     freeFields: freeFieldValues,
                     treatmentDelay: Math.floor((endDate.getTime() - this.beginDate.getTime()) / 1000),
                     ...(
@@ -225,6 +224,10 @@ export class HandlingValidatePage extends PageComponent {
                             : {}
                     )
                 };
+
+                if(comment) {
+                    params.comment = comment;
+                }
 
                 this.apiSubscription = this.dismissLoading()
                     .pipe(
