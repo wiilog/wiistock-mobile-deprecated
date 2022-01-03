@@ -19,7 +19,11 @@ import {flatMap, map} from 'rxjs/operators';
 })
 export class UngroupConfirmPage extends PageComponent implements ViewWillEnter, ViewWillLeave {
 
-    public listConfig: any;
+    public listConfig: {
+        header: HeaderConfig;
+        body: Array<ListPanelItemConfig>;
+    };
+
     public listBoldValues: Array<string>;
     private ungroupDate: string;
     private group: any;

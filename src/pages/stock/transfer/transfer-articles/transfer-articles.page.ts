@@ -25,7 +25,7 @@ import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/bar
     styleUrls: ['./transfer-articles.page.scss'],
 })
 export class TransferArticlesPage extends PageComponent {
-    public readonly barcodeScannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SCAN;
+    public readonly barcodeScannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.INVISIBLE;
 
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;

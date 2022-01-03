@@ -49,7 +49,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
         subtitle?: Array<string>;
         info?: string;
     };
-    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SCAN;
+    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.INVISIBLE;
 
     public started: boolean = false;
     public isValid: boolean = true;

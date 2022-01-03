@@ -47,7 +47,7 @@ export class PreparationArticlesPage extends PageComponent {
         info?: string;
     };
 
-    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SCAN;
+    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.INVISIBLE;
 
     public started: boolean = false;
     public isValid: boolean = true;
