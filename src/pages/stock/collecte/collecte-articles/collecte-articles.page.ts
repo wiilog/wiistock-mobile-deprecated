@@ -464,6 +464,13 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                     leftIcon: {
                         name: 'download.svg',
                         color: 'list-orange-light'
+                    },
+                    rightIcon: {
+                        color: 'primary',
+                        name: 'scan-photo.svg',
+                        action: () => {
+                            this.footerScannerComponent.scan();
+                        }
                     }
                 },
                 body: this.articlesNT.map((articleCollecte: ArticleCollecte) => ({
@@ -490,13 +497,6 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                 leftIcon: {
                     name: 'upload.svg',
                     color: 'list-orange'
-                },
-                rightIcon: {
-                    color: 'primary',
-                    name: 'scan-photo.svg',
-                    action: () => {
-                        this.footerScannerComponent.scan();
-                    }
                 }
             },
             body: this.articlesT.map((articleCollecte: ArticleCollecte) => ({
