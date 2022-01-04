@@ -33,7 +33,7 @@ export class DispatchPacksPage extends PageComponent {
 
     public loading: boolean;
 
-    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SCAN;
+    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.INVISIBLE;
 
     public dispatchHeaderConfig: {
         title: string;
@@ -205,12 +205,22 @@ export class DispatchPacksPage extends PageComponent {
                     name: 'download.svg',
                     color: 'list-green-light'
                 },
+                rightIconLayout: 'horizontal',
                 ...(hasPackToTreat
                     ? {
-                        rightIcon: {
-                            name: 'up.svg',
-                            action: () => this.transferAll()
-                        }
+                        rightIcon: [
+                            {
+                                color: 'primary',
+                                name: 'scan-photo.svg',
+                                action: () => {
+                                    this.footerScannerComponent.scan();
+                                }
+                            },
+                            {
+                                name: 'up.svg',
+                                action: () => this.transferAll()
+                            }
+                        ]
                     }
                     : {})
             },
