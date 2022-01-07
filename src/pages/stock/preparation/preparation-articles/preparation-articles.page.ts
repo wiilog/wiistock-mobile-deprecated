@@ -336,11 +336,15 @@ export class PreparationArticlesPage extends PageComponent {
 
     private navigateToPreparationTake({selectedArticle, refArticle}: { selectedArticle?: ArticlePrepaByRefArticle | ArticlePrepa, refArticle?: ArticlePrepa }): void {
         if (selectedArticle) {
-            const referenceArticleIsToTreat = this.articlesNT.some((articlePrepa) => articlePrepa.reference === refArticle.reference);
+            const referenceArticleIsToTreat = !refArticle || this.articlesNT.some((articlePrepa) => articlePrepa.reference === refArticle.reference);
             if (referenceArticleIsToTreat) {
                 if (this.skipQuantities) {
-                    this.selectArticle(selectedArticle, Math.min((selectedArticle as ArticlePrepaByRefArticle).quantity, refArticle.quantite));
-                } else {
+                    const quantityToSelect = refArticle
+                        ? Math.min((selectedArticle as ArticlePrepaByRefArticle).quantity, refArticle.quantite)
+                        : (selectedArticle as ArticlePrepaByRefArticle).quantity;
+                    this.selectArticle(selectedArticle, quantityToSelect);
+                }
+                else {
                     this.navService.push(NavPathEnum.PREPARATION_ARTICLE_TAKE, {
                         article: selectedArticle,
                         refArticle,
@@ -350,7 +354,8 @@ export class PreparationArticlesPage extends PageComponent {
                         selectArticle: (selectedQuantity: number) => this.selectArticle(selectedArticle, selectedQuantity)
                     });
                 }
-            } else {
+            }
+            else {
                 this.toastService.presentToast(`Aucune quantité à préparer pour cette référence`);
             }
         } else {
