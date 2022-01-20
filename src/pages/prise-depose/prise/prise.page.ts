@@ -504,7 +504,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                     this.colisPrise.some((colis) => ((colis.ref_article || '').toLocaleLowerCase() === (barCode || '').toLocaleLowerCase())) ||
                     this.colisPriseAlreadySaved.some((colis) => ((colis.ref_article || '').toLocaleLowerCase() === (barCode || '').toLocaleLowerCase()))
                 )) {
-                this.toastService.presentToast('Cette prise a déjà été effectuée');
+                this.toastService.presentToast('Cette prise a déjà été effectuée', ToastService.DEFAULT_DURATION, true);
             }
             else {
                 if (isManualAdd || !this.fromStock) {
