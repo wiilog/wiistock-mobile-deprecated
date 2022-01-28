@@ -118,7 +118,7 @@ export class UngroupConfirmPage extends PageComponent implements ViewWillEnter, 
                             flatMap((response) => this.sqliteService.update(
                                 'mouvement_traca',
                                 [{
-                                    values: {subPacks: '[]'},
+                                    values: {subPacks: '[]', finished: 1},
                                     where: [`ref_article = '${this.group.code}'`]
                                 }]
                             ).pipe(map(() => response)))
