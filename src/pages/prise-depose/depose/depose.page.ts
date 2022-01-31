@@ -226,7 +226,7 @@ export class DeposePage extends PageComponent implements CanLeave {
             }
         }
         else {
-            this.toastService.presentToast(`Cet ${this.objectLabel} ne correspond à aucune prise`);
+            this.toastService.presentToast(`Cet ${this.objectLabel} ne correspond à aucune prise`, ToastService.DEFAULT_DURATION, true);
         }
     }
 
