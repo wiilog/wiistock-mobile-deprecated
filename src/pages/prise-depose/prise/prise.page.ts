@@ -458,7 +458,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                                 : (!article.quantity
                                     ? 'La quantité disponible de cet article est à 0'
                                     : `Vous ne pouvez effectuer de transfert sur ${thisArticle}, ${errorMessageCantTransfer}`),
-                            ToastService.LONG_DURATION
+                            {duration: ToastService.LONG_DURATION}
                         );
                     }
                 }),
@@ -504,7 +504,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                     this.colisPrise.some((colis) => ((colis.ref_article || '').toLocaleLowerCase() === (barCode || '').toLocaleLowerCase())) ||
                     this.colisPriseAlreadySaved.some((colis) => ((colis.ref_article || '').toLocaleLowerCase() === (barCode || '').toLocaleLowerCase()))
                 )) {
-                this.toastService.presentToast('Cette prise a déjà été effectuée', ToastService.DEFAULT_DURATION, true);
+                this.toastService.presentToast('Cette prise a déjà été effectuée', {audio: true});
             }
             else {
                 if (isManualAdd || !this.fromStock) {

@@ -137,10 +137,10 @@ export class LoginPage extends PageComponent {
                         },
                         () => {
                             this.finishLoading();
-                            this.toastService.presentToast('Erreur : la liaison avec le serveur est impossible', ToastService.LONG_DURATION);
+                            this.toastService.presentToast('Erreur : la liaison avec le serveur est impossible', {duration: ToastService.LONG_DURATION});
                         });
             } else {
-                this.toastService.presentToast('Veuillez mettre à jour l\'url', ToastService.LONG_DURATION);
+                this.toastService.presentToast('Veuillez mettre à jour l\'url', {duration: ToastService.LONG_DURATION});
                 this.finishLoading();
                 this.goToParams();
             }
@@ -225,7 +225,7 @@ export class LoginPage extends PageComponent {
                         },
                         () => {
                             this.finishLoading();
-                            this.toastService.presentToast('Un problème est survenu, veuillez vérifier la connexion, vos identifiants et l\'URL saisie dans les paramètres', ToastService.LONG_DURATION);
+                            this.toastService.presentToast('Un problème est survenu, veuillez vérifier la connexion, vos identifiants et l\'URL saisie dans les paramètres', {duration: ToastService.LONG_DURATION});
                         });
             } else {
                 this.toastService.presentToast('Vous devez être connecté à internet pour vous authentifier');

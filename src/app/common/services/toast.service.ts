@@ -26,7 +26,11 @@ export class ToastService {
     /**
      * @return Returns an observable which is resolved when the Toast transition has completed.
      */
-    public presentToast(message: string, duration: number = ToastService.DEFAULT_DURATION, audio: boolean = false): Observable<void> {
+    public presentToast(message: string,
+                        {duration, audio}: { duration?: number; audio?: boolean; } = {duration: ToastService.DEFAULT_DURATION, audio: false }): Observable<void> {
+        duration = duration !== undefined ? duration : ToastService.DEFAULT_DURATION;
+        audio = audio !== undefined ? audio : false;
+
         const res$ = new ReplaySubject<void>(1);
 
         // if we return observable directly, toast is not trigger

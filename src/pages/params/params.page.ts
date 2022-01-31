@@ -91,7 +91,7 @@ export class ParamsPage extends PageComponent implements CanLeave {
                     () => {
                         from(loadingComponent.dismiss()).subscribe(() => {
                             this.isLoading = false;
-                            this.toastService.presentToast('URL invalide', ToastService.DEFAULT_DURATION, true);
+                            this.toastService.presentToast('URL invalide');
                         });
                     }
                 );

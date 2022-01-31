@@ -122,7 +122,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
                                     of(loader),
                                     this.selectItemComponent.searchComponent.reload(),
                                     ((resApi && resApi.success && resApi.data && resApi.data.status)
-                                        ? this.toastService.presentToast(resApi.data.status, ToastService.LONG_DURATION)
+                                        ? this.toastService.presentToast(resApi.data.status, {duration: ToastService.LONG_DURATION})
                                         : of(undefined))
                                 )),
                                 flatMap(([loader]) => from(loader.dismiss()))
@@ -138,7 +138,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
                             });
                     }
                     else {
-                        this.toastService.presentToast('Du stock en transit existe sur ' + (selectedArticle.is_ref ? 'la référence ' : 'l\'article ') + selectedArticle.barcode + ', l\'anomalie ne peut être validée.', 5000);
+                        this.toastService.presentToast('Du stock en transit existe sur ' + (selectedArticle.is_ref ? 'la référence ' : 'l\'article ') + selectedArticle.barcode + ', l\'anomalie ne peut être validée.', {duration: ToastService.LONG_DURATION});
                     }
                 }
             }

@@ -226,7 +226,7 @@ export class DeposePage extends PageComponent implements CanLeave {
             }
         }
         else {
-            this.toastService.presentToast(`Cet ${this.objectLabel} ne correspond à aucune prise`, ToastService.DEFAULT_DURATION, true);
+            this.toastService.presentToast(`Cet ${this.objectLabel} ne correspond à aucune prise`, {audio: true});
         }
     }
 
@@ -534,7 +534,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                 ? 'Déposes sauvegardées localement, nous les enverrons au serveur une fois internet retrouvé'
                 : 'Dépose sauvegardée localement, nous l\'enverrons au serveur une fois internet retrouvé');
         return this.toastService
-            .presentToast(`${errorsMessage}${(errorsMessage && message) ? '\n' : ''}${message}`, ToastService.LONG_DURATION)
+            .presentToast(`${errorsMessage}${(errorsMessage && message) ? '\n' : ''}${message}`, { duration: ToastService.LONG_DURATION })
             .pipe(
                 flatMap(() => {
                     const groupPlural = (emptyGroups && emptyGroups.length > 0);
