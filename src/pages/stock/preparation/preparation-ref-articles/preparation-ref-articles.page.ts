@@ -85,7 +85,7 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
     public ionViewWillEnter(): void {
         this.navParams = this.currentNavParams;
         this.refArticle = this.navParams.get('article');
-        this.listWhereClause = [`reference_article LIKE '${this.refArticle.reference}'`];
+        this.listWhereClause = [`reference_barCode LIKE '${this.refArticle.barcode}'`];
 
         this.resetEmitter$.emit();
         if (!this.pageHasLoadedOnce) {
@@ -108,6 +108,7 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
                     )
                 })
                 .subscribe(([withoutManual, skipQuantities, counter, suggestingArticleList]) => {
+                    console.log(counter)
                     this.loading = false;
                     this.parameterSkipQuantities = skipQuantities as boolean;
                     this.parameterWithoutManual = withoutManual as boolean;

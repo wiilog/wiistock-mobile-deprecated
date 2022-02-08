@@ -94,6 +94,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             label: 'TEXT',
             location: 'TEXT',
             reference_article: 'TEXT',
+            reference_barCode: 'VARCHAR(255)',
             barcode: 'TEXT',
             quantity: 'INTEGER',
             isSelectableByUser: 'INTEGER',
