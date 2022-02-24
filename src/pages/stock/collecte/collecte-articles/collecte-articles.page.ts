@@ -398,7 +398,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                             this.alertService.show({
                                 header: 'Collecte validée',
                                 cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
-                                message: 'Pour valider l\'entrée en stock vous devez effectuer la dépose',
+                                message: 'Pour valider l\'entrée en stock, vous devez effectuer la dépose',
                                 buttons: [{
                                     text: 'Aller vers la dépose',
                                     cssClass: 'alert-success',

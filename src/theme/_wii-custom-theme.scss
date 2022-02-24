@@ -18,3 +18,7 @@ $dark-contrast-color: ("warning", "light");
         --ion-color-#{$name}-tint: #{adjust-color($value, $lightness: 10%)};
     }
 }
+
+body:not(svg) {
+    color: $black;
+}
