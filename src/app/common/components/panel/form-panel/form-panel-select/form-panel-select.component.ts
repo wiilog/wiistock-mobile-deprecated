@@ -50,7 +50,7 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
     public ngOnInit() {
         setTimeout(() => {
             if (this.searchComponent) {
-                const item = this.searchComponent.findItem(this.value, this.searchComponent.config[this.searchComponent.type].valueField);
+                const item = this.searchComponent.findItem(this.value, this.searchComponent.config[this.searchComponent.smartType].valueField);
                 if (item) {
                     this.searchComponent.item = item;
                 }

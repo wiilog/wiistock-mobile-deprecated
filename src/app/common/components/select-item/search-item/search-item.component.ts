@@ -211,7 +211,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
     public ngOnInit(): void {
         this.itemsSubscription = this.reload().subscribe(() => {
             this.itemsLoaded.emit();
-        })
+        });
     }
 
     public reload(): Observable<Array<any>> {
