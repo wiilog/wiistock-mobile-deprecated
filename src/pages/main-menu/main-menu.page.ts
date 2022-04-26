@@ -72,8 +72,8 @@ export class MainMenuPage extends PageComponent {
         this.backButtonSubscription = this.platform.backButton.subscribe(() => {
             this.onBackButton();
         });
-        this.notificationSubscription = this.notificationService.$localNotification.subscribe((notification) => {
-            this.doSynchronisationAndNotificationRedirection(notification);
+        this.notificationSubscription = this.notificationService.$localNotification.subscribe((n) => {
+            this.doSynchronisationAndNotificationRedirection(n);
         });
     }
 
@@ -101,10 +101,11 @@ export class MainMenuPage extends PageComponent {
                             this.storageService.getRight(StorageKeyEnum.RIGHT_DEMANDE),
                             this.storageService.getRight(StorageKeyEnum.RIGHT_TRACKING),
                             this.storageService.getRight(StorageKeyEnum.RIGHT_STOCK),
-                        ).pipe(map(([demande, tracking, stock]) => ({
+                            this.storageService.getRight(StorageKeyEnum.RIGHT_TRACK),
+                        ).pipe(map(([demande, tracking, stock, track]) => ({
                             finished,
                             message,
-                            rights: {demande, tracking, stock}
+                            rights: {demande, tracking, stock, track}
                         })))
                     ))
                 )
@@ -168,9 +169,11 @@ export class MainMenuPage extends PageComponent {
         }
     }
 
-    private resetMainMenuConfig(rights: {stock?: boolean, demande?: boolean, tracking?: boolean}) {
+    private resetMainMenuConfig(rights: {stock?: boolean, demande?: boolean, tracking?: boolean, track?: boolean}) {
         this.menuConfig = [];
-        let actions = [];
+
+        const actions = [];
+
         if (rights.tracking) {
             const action = () => {
                 this.navService.push(NavPathEnum.TRACKING_MENU, {
@@ -200,7 +203,7 @@ export class MainMenuPage extends PageComponent {
         if (rights.demande) {
             const action = () => {
                 this.navService.push(NavPathEnum.DEMANDE_MENU);
-            }
+            };
             this.menuConfig.push({
                 icon: 'demande.svg',
                 iconColor: 'success',
@@ -209,6 +212,19 @@ export class MainMenuPage extends PageComponent {
             });
             actions.push(action);
         }
+
+        if (rights.track) {
+            const action = () => {
+                this.navService.push(NavPathEnum.TRANSPORT_ROUND_LIST);
+            }
+            this.menuConfig.push({
+                icon: 'track.svg',
+                label: 'Track',
+                action
+            });
+            actions.push(action);
+        }
+
         if (actions.length === 1) {
             actions[0]();
         }

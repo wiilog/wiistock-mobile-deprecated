@@ -268,6 +268,11 @@ const routes: Routes = [
         loadChildren: () => import('@pages/tracking/empty-round/empty-round.module').then(m => m.EmptyRoundPageModule)
     },
     {
+        path: NavPathEnum.TRANSPORT_ROUND_LIST,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('../pages/track/transport-round-list/transport-round-list.module').then(m => m.TransportRoundListPageModule)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'
