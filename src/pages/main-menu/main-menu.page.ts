@@ -72,8 +72,8 @@ export class MainMenuPage extends PageComponent {
         this.backButtonSubscription = this.platform.backButton.subscribe(() => {
             this.onBackButton();
         });
-        this.notificationSubscription = this.notificationService.$localNotification.subscribe((n) => {
-            this.doSynchronisationAndNotificationRedirection(n);
+        this.notificationSubscription = this.notificationService.$localNotification.subscribe((notification) => {
+            this.doSynchronisationAndNotificationRedirection(notification);
         });
     }
 
@@ -216,7 +216,7 @@ export class MainMenuPage extends PageComponent {
         if (rights.track) {
             const action = () => {
                 this.navService.push(NavPathEnum.TRANSPORT_ROUND_LIST);
-            }
+            };
             this.menuConfig.push({
                 icon: 'track.svg',
                 label: 'Track',

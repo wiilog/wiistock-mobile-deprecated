@@ -118,6 +118,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.MAIN_MENU, label: 'Menu'},
             {pagePath: NavPathEnum.TRACKING_MENU, label: 'Traçabilité'},
             {pagePath: NavPathEnum.DISPATCH_MENU, label: 'Acheminements'},
+            {pagePath: NavPathEnum.TRANSPORT_ROUND_LIST, label: 'Track'},
             {
                 pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Prise',
