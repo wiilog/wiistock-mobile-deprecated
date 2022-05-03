@@ -1,1 +1,73 @@
 @import "~theme/variables";
+
+.round-card {
+    width: 100%;
+    padding: 12px 7px;
+
+    .header {
+        display: flex;
+        align-items: center;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+        height: 30px;
+        background-color: #6433D7;
+        color: $white;
+        font-weight: bold;
+        padding-left: 10px;
+        font-size: 14px;
+    }
+
+    .content {
+        background-color: $white;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
+        padding: 8px 10px;
+
+        .line {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+
+            .counter {
+                display: flex;
+                align-items: center;
+
+                img {
+                    margin-right: 5px;
+                }
+
+                span {
+                    font-size: 14px;
+                }
+            }
+
+            .status {
+                color: #030F4C;
+                background-color: rgba(3, 15, 76, 0.2);
+                padding: 4px 12px;
+                border-radius: 5px;
+                font-size: 12px;
+            }
+
+            ion-button {
+                width: 50%;
+                font-size: 12px;
+                text-transform: unset;
+                --box-shadow: none;
+                margin-top: 10px;
+            }
+        }
+
+        .estimated {
+            display: flex;
+            margin-top: 10px;
+
+            div {
+                width: 50%;
+                text-align: left;
+                font-size: 12px;
+                color: #666666;
+            }
+        }
+    }
+}

@@ -1,1 +1,36 @@
-le contenu de la page ici
+<div class="round-card">
+    <div class="header">
+        <span>Tournée T210510-01</span>
+    </div>
+    <div class="content">
+        <div class="line">
+            <div class="counter">
+                <img src="assets/icons/delivery-black.svg" width="15">
+                <span><strong>8/10</strong> livraisons prêtes</span>
+            </div>
+            <div class="status">
+                En attente livreur
+            </div>
+        </div>
+        <div class="line">
+            <div class="counter">
+                <img src="assets/icons/pack-black.svg" width="15">
+                <span><strong>0/15</strong> colis chargés</span>
+            </div>
+        </div>
+        <div class="line">
+            <div class="counter">
+                <img src="assets/icons/location-black.svg" width="15" height="15">
+                <span><strong>0/20</strong> transports effectués</span>
+            </div>
+        </div>
+        <div class="estimated">
+            <div>125 km estimés</div>
+            <div>2h34 estimées</div>
+        </div>
+        <div class="line">
+            <ion-button color="primary" size="small" (click)="load()">Charger</ion-button>
+            <ion-button color="primary" size="small" (click)="start()">Débuter la tournée</ion-button>
+        </div>
+    </div>
+</div>

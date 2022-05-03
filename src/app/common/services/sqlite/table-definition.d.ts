@@ -36,4 +36,6 @@ export type TableName = 'emplacement'
                       | 'transfer_order'
                       | 'transfer_order_article'
                       | 'empty_round'
-                      | 'picking_article_collecte';
+                      | 'picking_article_collecte'
+                      | 'transport_round'
+                      | 'transport_round_line';
