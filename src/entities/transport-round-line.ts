@@ -1,11 +1,17 @@
 export interface TransportRoundLine {
     id: number;
     number: string;
-    type: number;
+    type: string;
+    type_icon: string;
+    collect: {
+        type: string;
+        type_icon: string;
+        time_slot: string;
+    };
     status: string;
     kind: `delivery` | `collect`;
     packs: Array<{
-        number: string,
+        code: string,
         nature: string,
         temperature_range: string,
         color: string
