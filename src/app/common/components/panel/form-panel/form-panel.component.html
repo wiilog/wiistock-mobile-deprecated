@@ -1,5 +1,4 @@
-<div class="wrapper"
-     scroll-y="true">
+<div class="wrapper" scroll-y="true">
     <wii-panel-header *ngIf="header"
                       #formHeaderComponent
                       class="form-header"
@@ -11,7 +10,7 @@
                       [info]="header.info"
                       [rightIcons]="header.rightIcon">
     </wii-panel-header>
-    <div class="list-wrapper">
+    <div class="list-wrapper {{ isForm ? 'is-form' : '' }}">
         <ng-container *ngIf="detailPosition === 'top' && details">
             <ng-template *ngFor="let detailsRow of details"
                          wiiFormViewer

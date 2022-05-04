@@ -12,10 +12,15 @@
         }
 
         & > .list-wrapper {
-            & > ::ng-deep * {
-                display: block;
+            &:not(.is-form) > ::ng-deep * {
                 margin-right: $spacer;
                 margin-left: $spacer;
+            }
+
+            & > ::ng-deep * {
+                display: block;
+                margin-right: 0.25rem;
+                margin-left: calc(0.25rem / 2);
 
                 &:not(:last-child) {
                     margin-bottom: $spacerMin;

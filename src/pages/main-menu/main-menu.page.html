@@ -4,10 +4,7 @@
 <div scroll-y="true"
      class="page-content"
      *ngIf="!loading">
-    <wii-menu *ngIf="menuConfig"
-              [config]="menuConfig"
-              [columns]="ColumnNumber.THREE">
-    </wii-menu>
+    <wii-menu *ngIf="menuConfig" [config]="menuConfig"></wii-menu>
 </div>
 
 <ion-fab *ngIf="!loading"
