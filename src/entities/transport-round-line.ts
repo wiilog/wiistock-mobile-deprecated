@@ -26,9 +26,9 @@ export interface TransportRoundLine {
         person_to_contact: string;
         observation: string;
     };
-    comment: string;
-    photos: Array<string>; // urls des photos
-    signature: string; // url de la signature
+    comment: string|null;
+    photos: Array<string>|null; // urls des photos
+    signature: string|null; // url de la signature
     requester: string;
     free_fields: Array<{
         id: number,

@@ -26,6 +26,9 @@ export class FormPanelComponent implements AfterViewInit {
     @Input()
     public details?: Array<FormViewerParam>;
 
+    @Input()
+    public isForm: boolean = false;
+
     @ViewChildren('formElements', {read: FormPanelDirective})
     public formElements: QueryList<FormPanelDirective>;
 

@@ -51,7 +51,7 @@
                  [innerHTML]="info">
             </div>
 
-            <div class="badges-container">
+            <div *ngIf="leftBadge || rightBadge" class="badges-container">
                 <wii-badge *ngIf="leftBadge"
                            [config]="leftBadge">
                 </wii-badge>

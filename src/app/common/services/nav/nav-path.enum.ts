@@ -51,4 +51,5 @@ export enum NavPathEnum {
     GROUP_CONTENT = 'group-content',
     EMPTY_ROUND = 'empty-round',
     TRANSPORT_ROUND_LIST = 'transport-round-list',
+    FINISH_TRANSPORT = 'finish-transport',
 }
