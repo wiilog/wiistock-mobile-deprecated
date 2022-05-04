@@ -1,36 +1,38 @@
-<div class="round-card">
-    <div class="header">
-        <span>Tournée T210510-01</span>
-    </div>
-    <div class="content">
-        <div class="line">
-            <div class="counter">
-                <img src="assets/icons/delivery-black.svg" width="15">
-                <span><strong>8/10</strong> livraisons prêtes</span>
-            </div>
-            <div class="status">
-                En attente livreur
-            </div>
+<div class="rounds-container" *ngIf="transportRounds && transportRounds.length > 0">
+    <div *ngFor="let round of transportRounds" class="round-card">
+        <div class="header">
+            <span>Tournée {{ round.number }}</span>
         </div>
-        <div class="line">
-            <div class="counter">
-                <img src="assets/icons/pack-black.svg" width="15">
-                <span><strong>0/15</strong> colis chargés</span>
+        <div class="content">
+            <div class="line">
+                <div class="counter">
+                    <img src="assets/icons/delivery-black.svg" width="15">
+                    <span><strong>8/10</strong> livraison(s) prête(s)</span>
+                </div>
+                <div class="status">
+                    {{ round.status }}
+                </div>
             </div>
-        </div>
-        <div class="line">
-            <div class="counter">
-                <img src="assets/icons/location-black.svg" width="15" height="15">
-                <span><strong>0/20</strong> transports effectués</span>
+            <div class="line">
+                <div class="counter">
+                    <img src="assets/icons/pack-black.svg" width="15">
+                    <span><strong>{{ round.remaining_loaded }}/{{ round.total_loaded }}</strong> colis chargé(s)</span>
+                </div>
             </div>
-        </div>
-        <div class="estimated">
-            <div>125 km estimés</div>
-            <div>2h34 estimées</div>
-        </div>
-        <div class="line">
-            <ion-button color="primary" size="small" (click)="load()">Charger</ion-button>
-            <ion-button color="primary" size="small" (click)="start()">Débuter la tournée</ion-button>
+            <div class="line">
+                <div class="counter">
+                    <img src="assets/icons/location-black.svg" width="15" height="15">
+                    <span><strong>{{ round.remaining_transports }}/{{ round.total_transports }}</strong> transport(s) effectué(s)</span>
+                </div>
+            </div>
+            <div class="estimated">
+                <div>{{ round.estimated_distance }} km estimés</div>
+                <div>{{ round.estimated_time }} estimées</div>
+            </div>
+            <div class="line">
+                <ion-button color="primary" size="small" (click)="load(round.id)">Charger</ion-button>
+                <ion-button color="primary" size="small" (click)="start(round.id)">Débuter la tournée</ion-button>
+            </div>
         </div>
     </div>
 </div>

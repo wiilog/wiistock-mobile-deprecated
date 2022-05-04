@@ -7,5 +7,9 @@ export interface TransportRound {
     date: string;
     estimated_distance: number;
     estimated_time: string;
+    total_transports: number;
+    remaining_transports: number;
+    remaining_loaded: number;
+    total_loaded: number;
     lines: Array<TransportRoundLine>
 }
