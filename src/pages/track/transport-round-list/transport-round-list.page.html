@@ -12,7 +12,7 @@
                     <div class="line">
                         <div class="counter">
                             <img src="assets/icons/delivery-black.svg" width="15">
-                            <span><strong>{{ round.remaining_deliveries }}/{{ round.total_deliveries }}</strong> livraison(s) prête(s)</span>
+                            <span><strong>{{ round.done_deliveries }}/{{ round.total_deliveries }}</strong> livraison(s) prête(s)</span>
                         </div>
                         <div class="status">
                             {{ round.status }}
@@ -21,13 +21,13 @@
                     <div class="line">
                         <div class="counter">
                             <img src="assets/icons/pack-black.svg" width="15">
-                            <span><strong>{{ round.remaining_loaded }}/{{ round.total_loaded }}</strong> colis chargé(s)</span>
+                            <span><strong>{{ round.loaded_packs }}/{{ round.total_loaded }}</strong> colis chargé(s)</span>
                         </div>
                     </div>
                     <div class="line">
                         <div class="counter">
                             <img src="assets/icons/location-black.svg" width="15" height="15">
-                            <span><strong>{{ round.remaining_transports }}/{{ round.total_transports }}</strong> transport(s) effectué(s)</span>
+                            <span><strong>{{ round.done_transports }}/{{ round.total_transports }}</strong> transport(s) effectué(s)</span>
                         </div>
                     </div>
                     <div class="estimated">
@@ -35,13 +35,13 @@
                         <div>{{ round.estimated_time }} estimées</div>
                     </div>
                     <div class="line">
-                        <ion-button [color]="(round.remaining_loaded === round.total_loaded) || round.total_loaded === 0 ? 'medium' : 'primary'"
+                        <ion-button [color]="(round.loaded_packs === round.total_loaded) || round.total_loaded === 0 ? 'medium' : 'primary'"
                                     size="small" (click)="load(round.id)"
-                                    [disabled]="(round.remaining_loaded === round.total_loaded) || round.total_loaded === 0">Charger
+                                    [disabled]="(round.loaded_packs === round.total_loaded) || round.total_loaded === 0">Charger
                         </ion-button>
-                        <ion-button [color]="(round.remaining_loaded !== round.total_loaded) || round.total_loaded === 0 ? 'medium' : 'primary'"
+                        <ion-button [color]="(round.loaded_packs !== round.total_loaded) || round.total_loaded === 0 ? 'medium' : 'primary'"
                                     size="small" (click)="start(round.id)"
-                                    [disabled]="(round.remaining_loaded !== round.total_loaded) || round.total_loaded === 0">Débuter la tournée
+                                    [disabled]="(round.loaded_packs !== round.total_loaded) || round.total_loaded === 0">Débuter la tournée
                         </ion-button>
                     </div>
                 </div>
