@@ -7,6 +7,8 @@ import {LoadingService} from "@app/common/services/loading.service";
 import {zip} from 'rxjs';
 import {ApiService} from "@app/common/services/api.service";
 import * as moment from "moment";
+import {ToastService} from "@app/common/services/toast.service";
+import {NetworkService} from "@app/common/services/network.service";
 
 @Component({
     selector: 'wii-transport-round-list',
@@ -19,37 +21,19 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         [date: string]: Array<TransportRound>
     };
 
+    public loading: boolean;
+
     public constructor(navService: NavService,
                        private apiService: ApiService,
-                       private loadingService: LoadingService) {
+                       private loadingService: LoadingService,
+                       private toastService: ToastService,
+                       private networkService: NetworkService) {
         super(navService);
     }
 
     public ionViewWillEnter() {
         moment.locale('fr');
-        zip(
-            this.loadingService.presentLoading('Récupération des tournées en cours'),
-            this.apiService.requestApi(ApiService.GET_TRANSPORT_ROUNDS)
-        ).subscribe(([loading, rounds]: [HTMLIonLoadingElement, any]) => {
-            loading.dismiss();
-            console.log(rounds);
-            this.transportRoundsByDates = rounds
-                .sort(({date: desiredDate1}, {date: desiredDate2}) => {
-                    const momentDesiredDate1 = moment(desiredDate1, 'DD/MM/YYYY')
-                    const momentDesiredDate2 = moment(desiredDate2, 'DD/MM/YYYY')
-                    return (
-                        momentDesiredDate1.isBefore(momentDesiredDate2) ? -1 :
-                            momentDesiredDate1.isAfter(momentDesiredDate2) ? 1 :
-                                0
-                    );
-                })
-                .reduce((rv, x) => {
-                    (rv[x['date']] = rv[x['date']] || []).push(x);
-                    return rv;
-            }, {});
-
-            console.log(this.transportRoundsByDates);
-        });
+        this.synchronise();
     }
 
     public formatDate(date) {
@@ -66,5 +50,39 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
 
     public moveToRound(round) {
 
+    }
+
+    public toggleDisabled(round: TransportRound) {
+
+    }
+
+    public synchronise() {
+        if (this.networkService.hasNetwork()) {
+            this.loading = true;
+            zip(
+                this.loadingService.presentLoading('Récupération des tournées en cours'),
+                this.apiService.requestApi(ApiService.GET_TRANSPORT_ROUNDS)
+            ).subscribe(([loading, rounds]: [HTMLIonLoadingElement, any]) => {
+                loading.dismiss();
+                this.transportRoundsByDates = rounds
+                    .sort(({date: date1}, {date: date2}) => {
+                        const momentDate1 = moment(date1, 'DD/MM/YYYY')
+                        const momentDate2 = moment(date2, 'DD/MM/YYYY')
+                        return (
+                            momentDate1.isBefore(momentDate2) ? -1 :
+                                momentDate1.isAfter(momentDate2) ? 1 :
+                                    0
+                        );
+                    })
+                    .reduce((acc, round) => {
+                        (acc[round['date']] = acc[round['date']] || []).push(round);
+                        return acc;
+                    }, {});
+                this.loading = false;
+            });
+        } else {
+            this.loading = false;
+            this.toastService.presentToast('Veuillez vous connecter à internet afin de synchroniser vos données');
+        }
     }
 }
