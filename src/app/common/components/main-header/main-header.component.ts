@@ -118,7 +118,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.MAIN_MENU, label: 'Menu'},
             {pagePath: NavPathEnum.TRACKING_MENU, label: 'Traçabilité'},
             {pagePath: NavPathEnum.DISPATCH_MENU, label: 'Acheminements'},
-            {pagePath: NavPathEnum.TRANSPORT_ROUND_LIST, label: 'Track'},
+            {pagePath: NavPathEnum.TRANSPORT_ROUND_LIST, label: 'Track', noBreadcrumb: true},
             {
                 pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Prise',
@@ -334,7 +334,11 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             if(!currentTitleConfig) {
                 currentTitleConfig = {pagePath: currentPagePath};
             }
-            this.pageStack.push({...currentTitleConfig, stackIndex: this.pagesInStack});
+            if(currentTitleConfig.noBreadcrumb) {
+                this.pageStack = [currentTitleConfig];
+            } else {
+                this.pageStack.push({...currentTitleConfig, stackIndex: this.pagesInStack});
+            }
             this.refreshCurrentTitles();
         }
     }
