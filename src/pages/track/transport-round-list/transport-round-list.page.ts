@@ -9,6 +9,7 @@ import {ApiService} from "@app/common/services/api.service";
 import * as moment from "moment";
 import {ToastService} from "@app/common/services/toast.service";
 import {NetworkService} from "@app/common/services/network.service";
+import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
 
 @Component({
     selector: 'wii-transport-round-list',
@@ -31,32 +32,30 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         super(navService);
     }
 
-    public ionViewWillEnter() {
+    public ionViewWillEnter(): void {
         moment.locale('fr');
         this.synchronise();
     }
 
-    public formatDate(date) {
+    public formatDate(date): string {
         return moment(date, 'DD/MM/YYYY').format('dddd D MMMM YYYY');
     }
 
-    public load(round) {
+    public load(round: TransportRound): void {
+        this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD, {
+            round
+        });
+    }
+
+    public start(round): void {
 
     }
 
-    public start(round) {
+    public moveToRound(round): void {
 
     }
 
-    public moveToRound(round) {
-
-    }
-
-    public toggleDisabled(round: TransportRound) {
-
-    }
-
-    public synchronise() {
+    public synchronise(): void {
         if (this.networkService.hasNetwork()) {
             this.loading = true;
             zip(

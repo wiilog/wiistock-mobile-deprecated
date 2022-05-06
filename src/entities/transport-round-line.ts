@@ -13,8 +13,10 @@ export interface TransportRoundLine {
     packs: Array<{
         code: string,
         nature: string,
+        nature_id: number,
         temperature_range: string,
-        color: string
+        color: string;
+        loaded?: boolean;
     }>;
     expected_at: string;
     estimated_time: string;
