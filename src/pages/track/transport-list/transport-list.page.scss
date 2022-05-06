@@ -1,0 +1,19 @@
+@import "~theme/variables";
+
+.ion-page {
+    display: block;
+}
+
+.transport-list {
+    padding: 5px;
+}
+
+ion-button {
+    text-transform: unset;
+    font-weight: unset;
+}
+
+wii-icon:not(.priority):not(.priority):not(.priority):not(.priority) {
+    width: 15px !important;
+    margin-right: 15px;
+}

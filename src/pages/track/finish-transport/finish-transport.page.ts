@@ -50,17 +50,20 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
             id: 50,
             number: '546875-01',
             type: `Chimio`,
+            type_icon: '',
+            collect: null,
             status: `En attente livreur`,
             kind: `delivery`,
             packs: [
-                {number: `20220510-011000`, nature: `Oke`, temperature_range: `9°-20°C`, color: `#C5FFA3`},
-                {number: `20220510-011011`, nature: `Na`, temperature_range: `47°-50°C`, color: `#245f79`},
-                {number: `20220510-011012`, nature: `Na`, temperature_range: `47°-50°C`, color: `#245f79`},
-                {number: `20220510-011013`, nature: `Na`, temperature_range: `47°-50°C`, color: `#245f79`},
-                {number: `20220510-011014`, nature: `Na`, temperature_range: `47°-50°C`, color: `#245f79`},
-                {number: `20220510-011021`, nature: `Ture`, temperature_range: `7°-11°C`, color: `#f6205a`},
+                {code: `20220510-011000`, nature: `Oke`, temperature_range: `9°-20°C`, color: `#C5FFA3`},
+                {code: `20220510-011011`, nature: `Na`, temperature_range: `47°-50°C`, color: `#245f79`},
+                {code: `20220510-011012`, nature: `Na`, temperature_range: `47°-50°C`, color: `#245f79`},
+                {code: `20220510-011013`, nature: `Na`, temperature_range: `47°-50°C`, color: `#245f79`},
+                {code: `20220510-011014`, nature: `Na`, temperature_range: `47°-50°C`, color: `#245f79`},
+                {code: `20220510-011021`, nature: `Ture`, temperature_range: `7°-11°C`, color: `#f6205a`},
             ],
             expected_at: `05/20/2021 20:22`,
+            expected_time: `20:22`,
             estimated_time: `20:22`,
             time_slot: `Après-midi`,
             contact: {
@@ -69,6 +72,8 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                 contact: `Jean-Pierre Dupont`,
                 person_to_contact: `Sa Majesté`,
                 observation: `Livraison à domicile`,
+                latitude: `0.00`,
+                longitude: `0.00`,
             },
             comment: null,
             photos: [],
@@ -78,11 +83,13 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                 {label: `COVID`, value: `Oui`, id: 5},
             ],
             priority: 1,
+            cancelled: false,
+            failure: false,
+            success: false,
         };
     }
 
     public ionViewWillEnter() {
-        this.transport.contact.address = this.transport.contact.address.replace(/\n/g, '<br/>');
         this.headerConfig = {
             title: `Objets ${this.transport.kind === `delivery` ? `déposés` : `collectés`}`,
             subtitle: [`${this.transport.packs.length} ${this.transport.kind === `delivery` ? `colis` : `objets`}`],

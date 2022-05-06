@@ -1,0 +1,20 @@
+<div class="card" [class.disabled]="disabled" (click)="onClick">
+    <div class="card-titles" [style.background-color]="disabled ? '#CBCBCB' : color">
+        <div class="card-titles-left">
+            <div *ngFor="let title of leftTitles" class="card-title">
+                <img [src]="title.image" alt="">
+                {{ title.title }}
+            </div>
+        </div>
+        <div class="card-titles-right">
+            <div *ngFor="let title of rightTitles" class="card-title">
+                <img [src]="title.image" alt="">
+                {{ title.title }}
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <ng-content></ng-content>
+    </div>
+</div>

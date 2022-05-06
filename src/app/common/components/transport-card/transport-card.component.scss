@@ -1,0 +1,40 @@
+.transport-content {
+    display: flex;
+    font-size: 0.9rem;
+
+    .transport-infos {
+        flex: 1 1 auto;
+
+        wii-icon {
+            width: 15px !important;
+            margin-right: 5px;
+            margin-left: 0 !important;
+        }
+
+        .transport-kind {
+            font-weight: bold;
+        }
+
+        .transport-kind > div, .transport-time, .transport-location {
+            display: flex;
+            align-items: center;
+        }
+    }
+
+    .transport-actions {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 15px;
+
+        wii-icon {
+            width: 30px !important;
+            margin-left: 0 !important;
+
+            &:not(:last-child) {
+                margin-bottom: 10px;
+            }
+        }
+    }
+}

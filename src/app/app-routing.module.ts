@@ -278,6 +278,11 @@ const routes: Routes = [
         loadChildren: () => import('@pages/track/finish-transport/finish-transport.module').then(m => m.FinishTransportPageModule)
     },
     {
+        path: NavPathEnum.TRANSPORT_LIST,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-list/transport-list.module').then(m => m.TransportListPageModule)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'

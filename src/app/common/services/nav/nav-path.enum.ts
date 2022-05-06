@@ -52,4 +52,5 @@ export enum NavPathEnum {
     EMPTY_ROUND = 'empty-round',
     TRANSPORT_ROUND_LIST = 'transport-round-list',
     FINISH_TRANSPORT = 'finish-transport',
+    TRANSPORT_LIST = 'transport-list',
 }

@@ -6,9 +6,11 @@ import {TransportRound} from "@entities/transport-round";
 import {LoadingService} from "@app/common/services/loading.service";
 import {zip} from 'rxjs';
 import {ApiService} from "@app/common/services/api.service";
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import * as moment from "moment";
 import {ToastService} from "@app/common/services/toast.service";
 import {NetworkService} from "@app/common/services/network.service";
+import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
 
 @Component({
     selector: 'wii-transport-round-list',
@@ -40,16 +42,22 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         return moment(date, 'DD/MM/YYYY').format('dddd D MMMM YYYY');
     }
 
-    public load(round) {
+    public view(round: TransportRound) {
+        this.navService.push(NavPathEnum.TRANSPORT_LIST, {
+            round,
+            mode: TransportCardMode.VIEW,
+        });
+    }
+
+    public load(round: TransportRound) {
 
     }
 
-    public start(round) {
-
-    }
-
-    public moveToRound(round) {
-
+    public start(round: TransportRound) {
+        this.navService.push(NavPathEnum.TRANSPORT_LIST, {
+            round,
+            mode: TransportCardMode.STARTABLE,
+        });
     }
 
     public toggleDisabled(round: TransportRound) {
@@ -85,4 +93,5 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
             this.toastService.presentToast('Veuillez vous connecter à internet afin de synchroniser vos données');
         }
     }
+
 }

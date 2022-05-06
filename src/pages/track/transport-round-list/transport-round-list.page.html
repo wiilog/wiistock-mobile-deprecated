@@ -4,14 +4,14 @@
             <span>{{ formatDate(transportRounds.key) }}</span>
         </div>
         <div class="rounds-wrapper">
-            <div *ngFor="let round of transportRounds.value" class="round-card" (click)="moveToRound(round.id)">
+            <div *ngFor="let round of transportRounds.value" class="round-card" (click)="view(round)">
                 <div class="header">
                     <span>Tournée {{ round.number }}</span>
                 </div>
                 <div class="content">
                     <div class="line">
                         <div class="counter">
-                            <img src="assets/icons/delivery-black.svg" width="15">
+                            <img src="assets/icons/delivery-truck.svg" width="15">
                             <span><strong>{{ round.done_deliveries }}/{{ round.total_deliveries }}</strong> livraison(s) prête(s)</span>
                         </div>
                         <div class="status">
@@ -36,12 +36,13 @@
                     </div>
                     <div class="line">
                         <ion-button [color]="(round.loaded_packs === round.total_loaded) || round.total_loaded === 0 ? 'medium' : 'primary'"
-                                    size="small" (click)="load(round.id)"
-                                    [disabled]="(round.loaded_packs === round.total_loaded) || round.total_loaded === 0">Charger
+                                    [disabled]="(round.loaded_packs === round.total_loaded) || round.total_loaded === 0"
+                                    size="small" (click)="load(round)">Charger
                         </ion-button>
                         <ion-button [color]="(round.loaded_packs !== round.total_loaded) || round.total_loaded === 0 ? 'medium' : 'primary'"
-                                    size="small" (click)="start(round.id)"
-                                    [disabled]="(round.loaded_packs !== round.total_loaded) || round.total_loaded === 0">Débuter la tournée
+                                    [disabled]="(round.loaded_packs !== round.total_loaded) || round.total_loaded === 0"
+                                    size="small" (click)="start(round)">
+                            Débuter la tournée
                         </ion-button>
                     </div>
                 </div>
