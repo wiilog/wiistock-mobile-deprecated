@@ -14,7 +14,7 @@ export type SimpleCardTitle = {
 export class SimpleCardComponent implements OnInit {
 
     @Input()
-    public titles: Array<SimpleCardTitle>;
+    public titles: Array<SimpleCardTitle> | SimpleCardTitle | string;
 
     @Input()
     public color: string;
@@ -29,8 +29,21 @@ export class SimpleCardComponent implements OnInit {
     public rightTitles: Array<SimpleCardTitle>;
 
     ngOnInit() {
-        this.leftTitles = this.titles.filter(title => title.position === `left`);
-        this.rightTitles = this.titles.filter(title => title.position === `right`);
+        if(Array.isArray(this.titles)) {
+            this.leftTitles = this.titles.filter(title => title.position === `left`);
+            this.rightTitles = this.titles.filter(title => title.position === `right`);
+        } else if(typeof this.titles === `string`) {
+            this.leftTitles = [{
+                title: this.titles,
+                position: `left`,
+            }];
+        } else {
+            if(this.titles.position === `left`) {
+                this.leftTitles = [this.titles];
+            } else {
+                this.rightTitles = [this.titles];
+            }
+        }
     }
 
     public onClick(): void {

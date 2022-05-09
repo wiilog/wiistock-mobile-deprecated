@@ -1,6 +1,10 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {SimpleCardTitle} from '@app/common/components/simple-card/simple-card.component';
+import {Platform} from '@ionic/angular';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {Emplacement} from '@entities/emplacement';
+import {NavService} from '@app/common/services/nav/nav.service';
 
 export enum TransportCardMode {
     VIEW,
@@ -22,7 +26,12 @@ export class TransportCardComponent implements OnInit {
     @Input()
     public mode: TransportCardMode;
 
+    public canClick: boolean;
+
     public titles: Array<SimpleCardTitle> = [];
+
+    constructor(private navService: NavService, private platform: Platform) {
+    }
 
     ngOnInit() {
         this.titles.push({
@@ -44,6 +53,26 @@ export class TransportCardComponent implements OnInit {
             });
         }
 
+    }
+
+    public click() {
+        if(this.mode === TransportCardMode.STARTABLE && !this.transport.cancelled) {
+            this.navService.push(NavPathEnum.FINISH_TRANSPORT, {
+                transport: this.transport,
+            });
+        }
+    }
+
+    public navigate(event: any) {
+        const contact = this.transport.contact;
+
+        if (this.platform.is(`android`)) {
+            window.location.href = `geo:${contact.latitude},${contact.longitude}?q=${contact.address}`;
+        } else {
+            window.location.href = `maps://maps.apple.com/?q=${contact.address}`;
+        }
+
+        event.stopPropagation();
     }
 
 }

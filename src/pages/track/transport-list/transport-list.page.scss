@@ -2,6 +2,7 @@
 
 .ion-page {
     display: block;
+    overflow-y: scroll;
 }
 
 .transport-list {
@@ -16,4 +17,8 @@ ion-button {
 wii-icon:not(.priority):not(.priority):not(.priority):not(.priority) {
     width: 15px !important;
     margin-right: 15px;
+}
+
+.card-container {
+    margin-bottom: 7px;
 }

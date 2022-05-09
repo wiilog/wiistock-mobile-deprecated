@@ -8,6 +8,17 @@
     <wii-leaflet-map *ngIf="mapVisible" [markers]="markers"></wii-leaflet-map>
 
     <div class="transport-list" *ngIf="round">
-        <wii-transport-card *ngFor="let transport of round.lines" [transport]="transport" [mode]="mode"></wii-transport-card>
+        <div *ngFor="let transport of round.lines" class="card-container">
+            <wii-transport-card [transport]="transport" [mode]="mode"></wii-transport-card>
+        </div>
+        <div *ngFor="let transport of round.lines" class="card-container">
+            <wii-transport-card [transport]="transport" [mode]="mode"></wii-transport-card>
+        </div>
+        <div *ngFor="let transport of round.lines" class="card-container">
+            <wii-transport-card [transport]="transport" [mode]="mode"></wii-transport-card>
+        </div>
+        <div *ngFor="let transport of round.lines" class="card-container">
+            <wii-transport-card [transport]="transport" [mode]="mode"></wii-transport-card>
+        </div>
     </div>
 </div>

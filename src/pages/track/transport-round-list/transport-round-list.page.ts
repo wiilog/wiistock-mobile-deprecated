@@ -42,7 +42,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         return moment(date, 'DD/MM/YYYY').format('dddd D MMMM YYYY');
     }
 
-    public view(round: TransportRound) {
+    public view(event, round: TransportRound) {
         this.navService.push(NavPathEnum.TRANSPORT_LIST, {
             round,
             mode: TransportCardMode.VIEW,
@@ -53,11 +53,13 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
 
     }
 
-    public start(round: TransportRound) {
+    public start(event: any, round: TransportRound) {
         this.navService.push(NavPathEnum.TRANSPORT_LIST, {
             round,
             mode: TransportCardMode.STARTABLE,
         });
+
+        event.stopPropagation();
     }
 
     public toggleDisabled(round: TransportRound) {
