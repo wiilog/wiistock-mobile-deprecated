@@ -287,7 +287,15 @@ const routes: Routes = [
         redirectTo: 'login',
         pathMatch: 'full'
     },
-
+    {
+        path: NavPathEnum.TRANSPORT_ROUND_PACK_LOAD,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-round-pack-load/transport-round-pack-load.module').then(m => m.TransportRoundPackLoadPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_ROUND_PACK_LOAD_CONFIRM,
+        loadChildren: () => import('@pages/track/transport-round-pack-load-validate/transport-round-pack-load-validate.module').then(m => m.TransportRoundPackLoadConfirmPageModule)
+    },
 ];
 
 @NgModule({

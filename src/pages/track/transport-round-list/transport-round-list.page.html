@@ -40,6 +40,7 @@
                         </ion-button>
                         <ion-button
                                 [color]="(round.loaded_packs !== round.total_loaded) || round.total_loaded === 0 ? 'medium' : 'primary'"
+                                [disabled]="(round.loaded_packs !== round.total_loaded) || round.total_loaded === 0"
                                 size="small" (click)="start($event, round)">
                             Débuter la tournée
                         </ion-button>

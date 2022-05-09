@@ -33,12 +33,12 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         super(navService);
     }
 
-    public ionViewWillEnter() {
+    public ionViewWillEnter(): void {
         moment.locale('fr');
         this.synchronise();
     }
 
-    public formatDate(date) {
+    public formatDate(date): string {
         return moment(date, 'DD/MM/YYYY').format('dddd D MMMM YYYY');
     }
 
@@ -49,8 +49,12 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         });
     }
 
-    public load(round: TransportRound) {
+    public load(event: any, round: TransportRound): void {
+        this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD, {
+            round
+        });
 
+        event.stopPropagation();
     }
 
     public start(event: any, round: TransportRound) {
@@ -62,11 +66,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         event.stopPropagation();
     }
 
-    public toggleDisabled(round: TransportRound) {
-
-    }
-
-    public synchronise() {
+    public synchronise(): void {
         if (this.networkService.hasNetwork()) {
             this.loading = true;
             zip(

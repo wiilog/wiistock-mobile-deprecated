@@ -5,7 +5,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
         name: 'emplacement',
         attributes: {
             id: 'INTEGER PRIMARY KEY',
-            label: 'VARCHAR(255)'
+            label: 'VARCHAR(255)',
+            temperature_ranges: 'VARCHAR(255)'
         }
     },
     {
