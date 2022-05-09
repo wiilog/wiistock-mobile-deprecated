@@ -6,28 +6,41 @@
         <div class="rounds-wrapper">
             <div *ngFor="let round of transportRounds.value">
                 <wii-simple-card color="#6433D7" [titles]="round.number" (click)="view($event, round)">
-                    <div class="line">
-                        <div class="counter">
-                            <img src="assets/icons/delivery-truck.svg" width="15">
-                            <span><strong>{{ round.done_deliveries }}/{{ round.total_deliveries }}</strong> livraison(s) prête(s)</span>
-                        </div>
-                        <div class="status">
-                            {{ round.status }}
-                        </div>
-                    </div>
-                    <div class="line">
-                        <div class="counter">
-                            <img src="assets/icons/pack-black.svg" width="15">
-                            <span><strong>{{ round.loaded_packs }}
-                                /{{ round.total_loaded }}</strong> colis chargé(s)</span>
-                        </div>
-                    </div>
-                    <div class="line">
-                        <div class="counter">
-                            <img src="assets/icons/location-black.svg" width="15" height="15">
-                            <span><strong>{{ round.done_transports }}/{{ round.total_transports }}</strong> transport(s) effectué(s)</span>
-                        </div>
-                    </div>
+                   <div class="card-top">
+                       <div>
+                           <div class="line">
+                               <div class="counter">
+                                   <img src="assets/icons/delivery-truck.svg" width="15">
+                                   <span>
+                                    <strong>{{ round.done_deliveries }}/{{ round.total_deliveries }}</strong>
+                                    livraison(s) prête(s)
+                                </span>
+                               </div>
+                           </div>
+                           <div class="line">
+                               <div class="counter">
+                                   <img src="assets/icons/pack-black.svg" width="15">
+                                   <span>
+                                    <strong>{{ round.loaded_packs }}/{{ round.total_loaded }}</strong>
+                                    colis chargé(s)
+                                </span>
+                               </div>
+                           </div>
+                           <div class="line">
+                               <div class="counter">
+                                   <img src="assets/icons/location-black.svg" width="15" height="15">
+                                   <span>
+                                    <strong>{{ round.done_transports }}/{{ round.total_transports }}</strong>
+                                    transport(s) effectué(s)
+                                </span>
+                               </div>
+                           </div>
+                       </div>
+
+                       <div class="status">
+                           {{ round.status }}
+                       </div>
+                   </div>
                     <div class="estimated">
                         <div>{{ round.estimated_distance }} km estimés</div>
                         <div>{{ round.estimated_time }} estimées</div>
@@ -36,7 +49,7 @@
                         <ion-button
                                 [color]="(round.loaded_packs === round.total_loaded) || round.total_loaded === 0 ? 'medium' : 'primary'"
                                 [disabled]="(round.loaded_packs === round.total_loaded) || round.total_loaded === 0"
-                                size="small" (click)="load(round)">Charger
+                                size="small" (click)="load($event, round)">Charger
                         </ion-button>
                         <ion-button
                                 [color]="(round.loaded_packs !== round.total_loaded) || round.total_loaded === 0 ? 'medium' : 'primary'"

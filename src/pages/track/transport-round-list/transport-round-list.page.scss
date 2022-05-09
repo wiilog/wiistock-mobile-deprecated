@@ -26,6 +26,20 @@
             margin-bottom: 14px;
             border-radius: 5px;
 
+                .card-top {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                }
+
+                .status {
+                    color: #030F4C;
+                    background-color: rgba(3, 15, 76, 0.2);
+                    padding: 4px 12px;
+                    border-radius: 5px;
+                    font-size: 12px;
+                }
+
                 .line {
                     display: flex;
                     justify-content: space-between;
@@ -42,14 +56,6 @@
                         span {
                             font-size: 14px;
                         }
-                    }
-
-                    .status {
-                        color: #030F4C;
-                        background-color: rgba(3, 15, 76, 0.2);
-                        padding: 4px 12px;
-                        border-radius: 5px;
-                        font-size: 12px;
                     }
 
                     ion-button {
