@@ -2,31 +2,21 @@
      *ngIf="color"
      [ngStyle]="{'background-color': color}">
 </div>
+<ion-list lines="none" class="ion-no-padding" *ngIf="sliding else content">
+    <ion-item-sliding>
+        <ion-item>
+            <ng-container *ngTemplateOutlet="content"></ng-container>
+        </ion-item>
+        <ng-container *ngIf="slidingConfig && slidingConfig.left">
+            <ion-item-options side="start" *ngFor="let config of slidingConfig.left">
+                <button (click)="config.action()" style="{{ 'background-color: ' + config.color }}">{{ config.label }}</button>
+            </ion-item-options>
+        </ng-container>
 
-<div class="list-element-wrapper"
-     (click)="onPress()">
-    <div class="list-element-body-wrapper">
-        <div class="list-element-item"
-             *ngFor="let line of infosArray">
-            {{line.label}} : <span class="element-value" [class.element-value-bold]="!boldValues || boldValues.indexOf(line.key) > -1">{{line.value}}</span>
-        </div>
-    </div>
-    <div class="list-element-icon"
-         *ngIf="loading || rightIcon || rightIconBase64">
-        <wii-icon *ngIf="rightIcon && !loading"
-                  [name]="rightIcon.name"
-                  [color]="rightIcon.color"
-                  (action)="rightIcon.action()">
-        </wii-icon>
-        <img *ngIf="rightIconBase64 && !loading"
-             alt=""
-             [src]="rightIconBase64"/>
-        <ion-spinner *ngIf="loading"
-                     name="dots">
-        </ion-spinner>
-    </div>
-</div>
-
-<div class="list-element-disabled"
-     *ngIf="disabled">
-</div>
+        <ng-container *ngIf="slidingConfig && slidingConfig.right">
+            <ion-item-options side="end" *ngFor="let config of slidingConfig.right">
+                <button (click)="config.action()">{{ config.label }}</button>
+            </ion-item-options>
+        </ng-container>
+    </ion-item-sliding>
+</ion-list>

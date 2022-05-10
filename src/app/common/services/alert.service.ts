@@ -16,12 +16,14 @@ export class AlertService {
         this.audio.load();
     }
 
-    public async show(options: AlertOptions, onDismiss: () => void = null) {
+    public async show(options: AlertOptions, onDismiss: () => void = null, sound: boolean = true) {
         const alert = await this.alertController.create(options);
         if(alert) {
             alert.onDidDismiss().then(onDismiss);
 
-            this.audio.play();
+            if(sound) {
+                this.audio.play();
+            }
             alert.present().then((() => this.fixLinebreaks()));
         }
 

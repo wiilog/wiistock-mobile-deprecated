@@ -14,6 +14,10 @@ import {Translations} from "@entities/translation";
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
 import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
+import {AlertService} from "@app/common/services/alert.service";
+import {ApiService} from "@app/common/services/api.service";
+import {zip} from 'rxjs';
+import {LoadingService} from "@app/common/services/loading.service";
 
 @Component({
     selector: 'app-transport-round-pack-load',
@@ -32,7 +36,9 @@ export class TransportRoundPackLoadPage extends PageComponent {
         nature: string;
         nature_id: number;
         loaded: number;
+        rejected: boolean;
     }>;
+    private packRejectMotives: Array<string>;
 
     public packsToLoadListConfig: {
         header: HeaderConfig;
@@ -52,7 +58,10 @@ export class TransportRoundPackLoadPage extends PageComponent {
     constructor(navService: NavService,
                 private toastService: ToastService,
                 private sqliteService: SqliteService,
-                private translationService: TranslationService) {
+                private translationService: TranslationService,
+                private alertService: AlertService,
+                private apiService: ApiService,
+                private loadingService: LoadingService) {
         super(navService);
         this.natureIdsToColors = {};
     }
@@ -64,9 +73,15 @@ export class TransportRoundPackLoadPage extends PageComponent {
             []
         );
 
-        this.translationService.get('natures')
-            .subscribe((natureTranslations: Translations) => {
+        zip(
+            this.loadingService.presentLoading('Récupération des données en cours'),
+            this.apiService.requestApi(ApiService.GET_REJECT_MOTIVES),
+            this.translationService.get('natures')
+        )
+            .subscribe(([loading, {pack}, natureTranslations] : [HTMLIonLoadingElement, any, Translations]) => {
+                this.packRejectMotives = pack;
                 this.natureTranslations = natureTranslations;
+                loading.dismiss();
 
                 this.refreshListLoadedConfig();
                 this.refreshListToLoadConfig();
@@ -80,11 +95,11 @@ export class TransportRoundPackLoadPage extends PageComponent {
     }
 
     private refreshListToLoadConfig(): void {
-        const packsToLoad = this.packs.filter(({loaded}) => (!loaded));
+        const packsToLoad = this.packs.filter(({loaded, rejected}) => (!loaded && !rejected));
         const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
-        const hasPackToLoad = this.packs && this.packs.some(({loaded}) => !loaded);
+        const hasPackToLoad = this.packs && this.packs.some(({loaded, rejected}) => !loaded && !rejected);
         this.packsToLoadListConfig = {
             header: {
                 title: 'Colis à charger',
@@ -118,13 +133,21 @@ export class TransportRoundPackLoadPage extends PageComponent {
                     color: 'grey' as IconColor,
                     name: 'up.svg',
                     action: () => this.loadPack(pack.code)
+                },
+                sliding: true,
+                slidingConfig: {
+                    left: [{
+                        label: 'Ecarter',
+                        color: '#f53d3d',
+                        action: () => this.dismiss(pack)
+                    }]
                 }
             }))
         };
     }
 
     private refreshListLoadedConfig(): void {
-        const loadedPacks = this.packs.filter(({loaded}) => loaded);
+        const loadedPacks = this.packs.filter(({loaded, rejected}) => loaded && !rejected);
         const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
@@ -148,7 +171,15 @@ export class TransportRoundPackLoadPage extends PageComponent {
                             action: () => this.revertPack(pack.code)
                         }
                     }
-                )
+                ),
+                sliding: true,
+                slidingConfig: {
+                    left: [{
+                        label: 'Ecarter',
+                        color: '#f53d3d',
+                        action: () => this.dismiss(pack)
+                    }]
+                },
             }))
         };
     }
@@ -175,7 +206,7 @@ export class TransportRoundPackLoadPage extends PageComponent {
 
     private loadAll(): void {
         this.packs
-            .filter(({loaded}) => !loaded)
+            .filter(({loaded, rejected}) => !loaded && !rejected)
             .forEach(({code}) => {
                 this.loadPack(code);
             });
@@ -213,13 +244,70 @@ export class TransportRoundPackLoadPage extends PageComponent {
     }
 
     public validate(): void {
-        const loadedPacks = this.packs.filter(({loaded}) => loaded);
+        const loadedPacks = this.packs.filter(({loaded, rejected}) => loaded && !rejected);
         if (loadedPacks.length > 0) {
-            this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD_CONFIRM, {
-                packs: this.packs.filter(({loaded}) => loaded),
+            this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD_VALIDATE, {
+                packs: this.packs.filter(({loaded, rejected}) => loaded && !rejected),
+                round: this.round
             });
         } else {
             this.toastService.presentToast('Veuillez charger au moins un colis pour continuer');
+        }
+    }
+
+    public dismiss(pack): void {
+        if (this.packRejectMotives.length > 0) {
+            const formattedRejectMotives = this.packRejectMotives.reduce((acc: Array<any>, rejectMotive: string) => {
+                acc.push({
+                    label: rejectMotive,
+                    name: rejectMotive,
+                    value: rejectMotive,
+                    type: 'radio',
+                });
+                return acc;
+            }, []);
+
+            this.alertService.show({
+                header: `Ecarter le colis ${pack.code}`,
+                inputs: formattedRejectMotives,
+                buttons: [
+                    {
+                        text: 'Annuler',
+                        role: 'cancel'
+                    },
+                    {
+                        text: 'Valider',
+                        handler: (rejectMotive) => {
+                            if(rejectMotive) {
+                                const options = {
+                                    params: {
+                                        pack: pack.code,
+                                        rejectMotive: rejectMotive
+                                    }
+                                };
+                                zip(
+                                    this.loadingService.presentLoading(),
+                                    this.apiService.requestApi(ApiService.REJECT_PACK, options),
+                                )
+                                    .subscribe(([loading, response]: [HTMLIonLoadingElement, any]) => {
+                                        if(response && response.success) {
+                                            const selectedIndex = this.packs.findIndex(({code}) => (code === pack.code));
+                                            this.packs[selectedIndex].rejected = true;
+                                            this.refreshListLoadedConfig();
+                                            this.refreshListToLoadConfig();
+                                            loading.dismiss();
+                                        }
+                                    });
+                            } else {
+                                this.toastService.presentToast(`Veuillez renseigner un motif d'écartement`)
+                                return false;
+                            }
+                        }
+                    }
+                ]
+            }, null, false);
+        } else {
+            this.toastService.presentToast(`Aucun motif d'écartement n'a été paramétré`)
         }
     }
 }

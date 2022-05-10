@@ -36,6 +36,23 @@ export class ListPanelItemComponent {
     public rightIconBase64?: string;
 
     @Input()
+    public sliding?: boolean;
+
+    @Input()
+    public slidingConfig?: {
+        left: Array<{
+            label: string;
+            color: string;
+            action: () => void;
+        }>;
+        right: Array<{
+            label: string;
+            color: string;
+            action: () => void;
+        }>
+    };
+
+    @Input()
     public pressAction?: (infos: {[name: string]: {label: string; value: string;};}) => void;
 
     @HostBinding('class')

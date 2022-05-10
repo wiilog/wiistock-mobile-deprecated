@@ -3,12 +3,14 @@
   <wii-list-panel *ngIf="packsLoadedListConfig"
                   [header]="packsLoadedListConfig.header"
                   [body]="packsLoadedListConfig.body"
-                  [boldValues]="listBoldValues">
+                  [boldValues]="listBoldValues"
+                  sliding="true">
   </wii-list-panel>
   <wii-list-panel *ngIf="packsToLoadListConfig"
                   [header]="packsToLoadListConfig.header"
                   [body]="packsToLoadListConfig.body"
-                  [boldValues]="listBoldValues">
+                  [boldValues]="listBoldValues"
+                  sliding="true">
   </wii-list-panel>
 </div>
 

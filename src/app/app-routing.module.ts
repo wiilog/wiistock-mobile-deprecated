@@ -283,7 +283,7 @@ const routes: Routes = [
         loadChildren: () => import('@pages/track/transport-round-pack-load/transport-round-pack-load.module').then(m => m.TransportRoundPackLoadPageModule)
     },
     {
-        path: NavPathEnum.TRANSPORT_ROUND_PACK_LOAD_CONFIRM,
+        path: NavPathEnum.TRANSPORT_ROUND_PACK_LOAD_VALIDATE,
         loadChildren: () => import('@pages/track/transport-round-pack-load-validate/transport-round-pack-load-validate.module').then(m => m.TransportRoundPackLoadConfirmPageModule)
     },
 ];

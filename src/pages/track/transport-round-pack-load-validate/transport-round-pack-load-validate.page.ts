@@ -10,6 +10,10 @@ import {AlertService} from "@app/common/services/alert.service";
 import {Nature} from "@entities/nature";
 import {AllowedNatureLocation} from "@entities/allowed-nature-location";
 import {ToastService} from "@app/common/services/toast.service";
+import {ApiService} from "@app/common/services/api.service";
+import {LoadingService} from "@app/common/services/loading.service";
+import {zip} from 'rxjs';
+import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
 
 @Component({
     selector: 'app-transport-round-pack-load-validate',
@@ -30,6 +34,7 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
         nature_id: number;
         temperature_range: string;
     }>;
+    private round: any;
 
     public panelHeaderConfig: {
         title: string;
@@ -43,13 +48,16 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
     constructor(navService: NavService,
                 private sqliteService: SqliteService,
                 private alertService: AlertService,
-                private toastService: ToastService) {
+                private toastService: ToastService,
+                private apiService: ApiService,
+                private loadingService: LoadingService) {
         super(navService);
         this.resetEmitter$ = new EventEmitter<void>();
     }
 
     public ionViewWillEnter(): void {
         this.packs = this.currentNavParams.get('packs');
+        this.round = this.currentNavParams.get('round');
         this.resetEmitter$.emit();
         this.panelHeaderConfig = this.createPanelHeaderConfig();
     }
@@ -150,8 +158,22 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
     }
 
     public validate(): void {
-        if(this.location) {
-
+        if (this.location) {
+            const options = {
+                params: {
+                    packs: this.packs.map(({code}) => code)
+                }
+            }
+            zip(
+                this.loadingService.presentLoading(),
+                this.apiService.requestApi(ApiService.LOAD_PACKS, options)
+            ).subscribe(([loading, response]: [HTMLIonLoadingElement, any]) => {
+                loading.dismiss();
+                if(response && response.success) {
+                    this.toastService.presentToast('Les colis ont bien été chargés');
+                    this.navService.push(NavPathEnum.TRANSPORT_ROUND_LIST);
+                }
+            });
         } else {
             this.toastService.presentToast('Veuillez sélectionner un emplacement')
         }

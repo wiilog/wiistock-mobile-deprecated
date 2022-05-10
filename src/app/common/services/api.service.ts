@@ -47,6 +47,9 @@ export class ApiService {
     public static readonly POST_EMPTY_ROUND = {method: POST, service: '/empty-round'};
     public static readonly GET_COLLECTABLE_ARTICLES = {method: GET, service: '/collectable-articles'};
     public static readonly GET_TRANSPORT_ROUNDS = {method: GET, service: '/transport-rounds'};
+    public static readonly GET_REJECT_MOTIVES = {method: GET, service: '/reject-motives'};
+    public static readonly REJECT_PACK = {method: POST, service: '/reject-pack'};
+    public static readonly LOAD_PACKS = {method: POST, service: '/load-packs'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'

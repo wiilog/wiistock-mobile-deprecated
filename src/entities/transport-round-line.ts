@@ -17,6 +17,7 @@ export interface TransportRoundLine {
         temperature_range: string,
         color: string;
         loaded?: boolean;
+        rejected?: boolean;
     }>;
     expected_at: string;
     estimated_time: string;
