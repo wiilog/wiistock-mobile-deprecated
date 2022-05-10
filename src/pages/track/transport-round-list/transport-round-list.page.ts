@@ -11,6 +11,8 @@ import * as moment from "moment";
 import {ToastService} from "@app/common/services/toast.service";
 import {NetworkService} from "@app/common/services/network.service";
 import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
+import {TransportRoundLine} from "@entities/transport-round-line";
+import {AlertService} from "@app/common/services/alert.service";
 
 @Component({
     selector: 'wii-transport-round-list',
@@ -29,7 +31,8 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                        private apiService: ApiService,
                        private loadingService: LoadingService,
                        private toastService: ToastService,
-                       private networkService: NetworkService) {
+                       private networkService: NetworkService,
+                       private alertService: AlertService) {
         super(navService);
     }
 
@@ -58,12 +61,47 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
     }
 
     public start(event: any, round: TransportRound) {
-        this.navService.push(NavPathEnum.TRANSPORT_LIST, {
-            round,
-            mode: TransportCardMode.STARTABLE,
-        });
+        if (this.networkService.hasNetwork()) {
+            const packs = round.lines
+                .reduce(
+                    (acc: Array<any>, line: TransportRoundLine) => [...(line.packs || []), ...acc],
+                    []
+                ).map(({code}) => code);
+            const options = {
+                params: {
+                    round: round.id,
+                    packs: packs
+                }
+            }
+            event.stopPropagation();
+            this.loadingService.presentLoadingWhile({
+                event: () => this.apiService.requestApi(ApiService.HAS_NEW_PACKS, options)
+            }).subscribe(({success, has_new_packs}) => {
+                if (success) {
+                    if (has_new_packs) {
+                        this.alertService.show({
+                            header: 'Attention',
+                            cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+                            message: 'De nouveaux colis ont été ajoutés, veuillez les charger avant de débuter la tournée',
+                            buttons: [{
+                                text: 'Charger',
+                                cssClass: 'alert-success',
+                                handler: () => this.synchronise()
+                            }]
+                        });
+                    } else {
+                        this.navService.push(NavPathEnum.TRANSPORT_LIST, {
+                            round,
+                            mode: TransportCardMode.STARTABLE,
+                        });
 
-        event.stopPropagation();
+                        event.stopPropagation();
+                    }
+                }
+            });
+        } else {
+            this.toastService.presentToast('Veuillez vous connecter à internet afin de débuter la tournée');
+        }
     }
 
     public synchronise(): void {
