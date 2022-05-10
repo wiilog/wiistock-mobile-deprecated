@@ -45,7 +45,6 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
 
     public ionViewWillEnter() {
         this.transport = this.currentNavParams.get('transport');
-console.log(this.transport);
         this.headerConfig = {
             title: `Objets ${this.transport.kind === `delivery` ? `déposés` : `collectés`}`,
             subtitle: [`${this.transport.packs.length} ${this.transport.kind === `delivery` ? `colis` : `objets`}`],
