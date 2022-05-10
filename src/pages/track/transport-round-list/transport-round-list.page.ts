@@ -6,10 +6,11 @@ import {TransportRound} from "@entities/transport-round";
 import {LoadingService} from "@app/common/services/loading.service";
 import {zip} from 'rxjs';
 import {ApiService} from "@app/common/services/api.service";
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import * as moment from "moment";
 import {ToastService} from "@app/common/services/toast.service";
 import {NetworkService} from "@app/common/services/network.service";
-import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
+import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
 
 @Component({
     selector: 'wii-transport-round-list',
@@ -41,18 +42,28 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         return moment(date, 'DD/MM/YYYY').format('dddd D MMMM YYYY');
     }
 
-    public load(round: TransportRound): void {
-        this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD, {
-            round
+    public view(event, round: TransportRound) {
+        this.navService.push(NavPathEnum.TRANSPORT_LIST, {
+            round,
+            mode: TransportCardMode.VIEW,
         });
     }
 
-    public start(round): void {
+    public load(event: any, round: TransportRound): void {
+        this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD, {
+            round
+        });
 
+        event.stopPropagation();
     }
 
-    public moveToRound(round): void {
+    public start(event: any, round: TransportRound) {
+        this.navService.push(NavPathEnum.TRANSPORT_LIST, {
+            round,
+            mode: TransportCardMode.STARTABLE,
+        });
 
+        event.stopPropagation();
     }
 
     public synchronise(): void {
@@ -84,4 +95,5 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
             this.toastService.presentToast('Veuillez vous connecter à internet afin de synchroniser vos données');
         }
     }
+
 }

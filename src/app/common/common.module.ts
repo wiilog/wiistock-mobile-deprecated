@@ -39,6 +39,10 @@ import {ServerImageComponent} from '@app/common/components/server-image/server-i
 import {FormViewerTextComponent} from '@app/common/components/panel/form-panel/form-viewer-text/form-viewer-text.component';
 import {FormPanelButtonsComponent} from '@app/common/components/panel/form-panel/form-panel-buttons/form-panel-buttons.component';
 import {BadgeComponent} from '@app/common/components/badge/badge.component';
+import {FormViewerTableComponent} from '@app/common/components/panel/form-panel/form-viewer-table/form-viewer-table.component';
+import {LeafletMapComponent} from '@app/common/components/leaflet-map/leaflet-map.component';
+import {SimpleCardComponent} from '@app/common/components/simple-card/simple-card.component';
+import {TransportCardComponent} from '@app/common/components/transport-card/transport-card.component';
 
 @NgModule({
     declarations: [
@@ -60,6 +64,7 @@ import {BadgeComponent} from '@app/common/components/badge/badge.component';
         FormPanelComponent,
         FormViewerAttachmentsComponent,
         FormViewerTextComponent,
+        FormViewerTableComponent,
         ListPanelItemComponent,
         ListPanelComponent,
         PanelHeaderComponent,
@@ -70,7 +75,10 @@ import {BadgeComponent} from '@app/common/components/badge/badge.component';
         StatsSlidersComponent,
         FormPanelDirective,
         FormViewerDirective,
-        ServerImageComponent
+        ServerImageComponent,
+        LeafletMapComponent,
+        SimpleCardComponent,
+        TransportCardComponent,
     ],
     imports: [
         AngularCommonModule,
@@ -94,7 +102,10 @@ import {BadgeComponent} from '@app/common/components/badge/badge.component';
         CardListComponent,
         PanelHeaderComponent,
         ListPanelItemComponent,
-        ServerImageComponent
+        ServerImageComponent,
+        LeafletMapComponent,
+        SimpleCardComponent,
+        TransportCardComponent,
     ],
     providers: [
         // ionic
@@ -114,7 +125,8 @@ import {BadgeComponent} from '@app/common/components/badge/badge.component';
         FormPanelCalendarComponent,
         FormPanelSelectComponent,
         FormViewerAttachmentsComponent,
-        FormViewerTextComponent
+        FormViewerTextComponent,
+        FormViewerTableComponent,
     ]
 })
 export class CommonModule {

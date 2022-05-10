@@ -7,19 +7,22 @@ export interface TransportRoundLine {
         type: string;
         type_icon: string;
         time_slot: string;
+        success: boolean;
+        failure: boolean;
     };
     status: string;
     kind: `delivery` | `collect`;
     packs: Array<{
-        code: string,
-        nature: string,
-        nature_id: number,
-        temperature_range: string,
+        code: string;
+        nature: string;
+        nature_id: number;
+        temperature_range: string;
         color: string;
         loaded?: boolean;
         rejected?: boolean;
     }>;
     expected_at: string;
+    expected_time: string;
     estimated_time: string;
     time_slot: string;
     contact: {
@@ -28,10 +31,12 @@ export interface TransportRoundLine {
         contact: string;
         person_to_contact: string;
         observation: string;
+        latitude: string;
+        longitude: string;
     };
-    comment: string;
-    photos: Array<string>; // urls des photos
-    signature: string; // url de la signature
+    comment: string|null;
+    photos: Array<string>|null; // urls des photos
+    signature: string|null; // url de la signature
     requester: string;
     free_fields: Array<{
         id: number,
@@ -39,4 +44,7 @@ export interface TransportRoundLine {
         value: string
     }>;
     priority: number;
+    cancelled: boolean;
+    success: boolean;
+    failure: boolean;
 }

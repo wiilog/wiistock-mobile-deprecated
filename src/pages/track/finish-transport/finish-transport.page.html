@@ -1,0 +1,31 @@
+<div class="ion-page" *ngIf="transport">
+    <div class="page-content">
+        <div class="contact">
+            <wii-icon name="user.svg" color="black"></wii-icon>
+            <div class="contact-infos">
+                <b>{{ transport.contact.contact }}</b><br>
+                <span [innerHTML]="transport.contact.address"></span>
+            </div>
+        </div>
+        <wii-form-panel *ngIf="headerConfig && bodyConfig && detailsConfig"
+                        #formPanelComponent
+                        [header]="headerConfig"
+                        [body]="bodyConfig"
+                        [details]="detailsConfig"
+                        [isForm]="true">
+        </wii-form-panel>
+    </div>
+    <div class="page-footer">
+        <ion-button class="larger"
+                    color="primary"
+                    size="large"
+                    expand="full"
+                    (click)="onFormSubmit()">
+            Terminer la {{ transport.kind === 'delivery' ? 'livraison' : 'collecte' }}
+            <wii-icon class="button-icon"
+                      name="check.svg"
+                      color="white">
+            </wii-icon>
+        </ion-button>
+    </div>
+</div>

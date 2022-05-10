@@ -51,6 +51,8 @@ export enum NavPathEnum {
     GROUP_CONTENT = 'group-content',
     EMPTY_ROUND = 'empty-round',
     TRANSPORT_ROUND_LIST = 'transport-round-list',
+    FINISH_TRANSPORT = 'finish-transport',
+    TRANSPORT_LIST = 'transport-list',
     TRANSPORT_ROUND_PACK_LOAD = 'transport-round-pack-load',
     TRANSPORT_ROUND_PACK_LOAD_VALIDATE = 'transport-round-pack-load-validate',
 }

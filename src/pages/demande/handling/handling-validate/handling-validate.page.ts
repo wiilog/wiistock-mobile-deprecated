@@ -35,6 +35,7 @@ import {NetworkService} from '@app/common/services/network.service';
     styleUrls: ['./handling-validate.page.scss'],
 })
 export class HandlingValidatePage extends PageComponent {
+
     @ViewChild('formPanelComponent', {static: false})
     public formPanelComponent: FormPanelComponent;
 
