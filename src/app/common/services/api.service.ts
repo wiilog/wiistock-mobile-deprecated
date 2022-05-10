@@ -51,6 +51,7 @@ export class ApiService {
     public static readonly REJECT_PACK = {method: POST, service: '/reject-pack'};
     public static readonly LOAD_PACKS = {method: POST, service: '/load-packs'};
     public static readonly FINISH_TRANSPORT = {method: POST, service: '/finish-transport'};
+    public static readonly HAS_NEW_PACKS = {method: GET, service: '/has-new-packs'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'

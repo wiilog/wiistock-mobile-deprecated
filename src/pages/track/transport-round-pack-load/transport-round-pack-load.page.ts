@@ -18,6 +18,7 @@ import {AlertService} from "@app/common/services/alert.service";
 import {ApiService} from "@app/common/services/api.service";
 import {zip} from 'rxjs';
 import {LoadingService} from "@app/common/services/loading.service";
+import {NetworkService} from '@app/common/services/network.service';
 
 @Component({
     selector: 'app-transport-round-pack-load',
@@ -61,7 +62,8 @@ export class TransportRoundPackLoadPage extends PageComponent {
                 private translationService: TranslationService,
                 private alertService: AlertService,
                 private apiService: ApiService,
-                private loadingService: LoadingService) {
+                private loadingService: LoadingService,
+                private networkService: NetworkService) {
         super(navService);
         this.natureIdsToColors = {};
     }
@@ -71,21 +73,25 @@ export class TransportRoundPackLoadPage extends PageComponent {
         this.packs = this.round.lines.reduce(
             (acc: Array<any>, line: TransportRoundLine) => [...(line.packs || []), ...acc],
             []
-        );
+        ).filter(({loaded}) => !loaded);
 
-        zip(
-            this.loadingService.presentLoading('Récupération des données en cours'),
-            this.apiService.requestApi(ApiService.GET_REJECT_MOTIVES),
-            this.translationService.get('natures')
-        )
-            .subscribe(([loading, {pack}, natureTranslations] : [HTMLIonLoadingElement, any, Translations]) => {
-                this.packRejectMotives = pack;
-                this.natureTranslations = natureTranslations;
-                loading.dismiss();
+        if (this.networkService.hasNetwork()) {
+            zip(
+                this.loadingService.presentLoading('Récupération des données en cours'),
+                this.apiService.requestApi(ApiService.GET_REJECT_MOTIVES),
+                this.translationService.get('natures')
+            )
+                .subscribe(([loading, {pack}, natureTranslations]: [HTMLIonLoadingElement, any, Translations]) => {
+                    this.packRejectMotives = pack;
+                    this.natureTranslations = natureTranslations;
+                    loading.dismiss();
 
-                this.refreshListLoadedConfig();
-                this.refreshListToLoadConfig();
-            });
+                    this.refreshListLoadedConfig();
+                    this.refreshListToLoadConfig();
+                });
+        } else {
+            this.toastService.presentToast('Veuillez vous connecter à internet pour continuer');
+        }
     }
 
     public ionViewWillLeave(): void {
@@ -256,58 +262,62 @@ export class TransportRoundPackLoadPage extends PageComponent {
     }
 
     public dismiss(pack): void {
-        if (this.packRejectMotives.length > 0) {
-            const formattedRejectMotives = this.packRejectMotives.reduce((acc: Array<any>, rejectMotive: string) => {
-                acc.push({
-                    label: rejectMotive,
-                    name: rejectMotive,
-                    value: rejectMotive,
-                    type: 'radio',
-                });
-                return acc;
-            }, []);
+        if (this.networkService.hasNetwork()) {
+            if (this.packRejectMotives.length > 0) {
+                const formattedRejectMotives = this.packRejectMotives.reduce((acc: Array<any>, rejectMotive: string) => {
+                    acc.push({
+                        label: rejectMotive,
+                        name: rejectMotive,
+                        value: rejectMotive,
+                        type: 'radio',
+                    });
+                    return acc;
+                }, []);
 
-            this.alertService.show({
-                header: `Ecarter le colis ${pack.code}`,
-                inputs: formattedRejectMotives,
-                buttons: [
-                    {
-                        text: 'Annuler',
-                        role: 'cancel'
-                    },
-                    {
-                        text: 'Valider',
-                        handler: (rejectMotive) => {
-                            if(rejectMotive) {
-                                const options = {
-                                    params: {
-                                        pack: pack.code,
-                                        rejectMotive: rejectMotive
-                                    }
-                                };
-                                zip(
-                                    this.loadingService.presentLoading(),
-                                    this.apiService.requestApi(ApiService.REJECT_PACK, options),
-                                )
-                                    .subscribe(([loading, response]: [HTMLIonLoadingElement, any]) => {
-                                        if(response && response.success) {
-                                            const selectedIndex = this.packs.findIndex(({code}) => (code === pack.code));
-                                            this.packs[selectedIndex].rejected = true;
-                                            this.refreshListLoadedConfig();
-                                            this.refreshListToLoadConfig();
-                                            loading.dismiss();
+                this.alertService.show({
+                    header: `Ecarter le colis ${pack.code}`,
+                    inputs: formattedRejectMotives,
+                    buttons: [
+                        {
+                            text: 'Annuler',
+                            role: 'cancel'
+                        },
+                        {
+                            text: 'Valider',
+                            handler: (rejectMotive) => {
+                                if (rejectMotive) {
+                                    const options = {
+                                        params: {
+                                            pack: pack.code,
+                                            rejectMotive: rejectMotive
                                         }
-                                    });
-                            } else {
-                                this.toastService.presentToast(`Veuillez renseigner un motif d'écartement`)
-                                return false;
+                                    };
+                                    zip(
+                                        this.loadingService.presentLoading(),
+                                        this.apiService.requestApi(ApiService.REJECT_PACK, options),
+                                    )
+                                        .subscribe(([loading, response]: [HTMLIonLoadingElement, any]) => {
+                                            if (response && response.success) {
+                                                const selectedIndex = this.packs.findIndex(({code}) => (code === pack.code));
+                                                this.packs[selectedIndex].rejected = true;
+                                                this.refreshListLoadedConfig();
+                                                this.refreshListToLoadConfig();
+                                                loading.dismiss();
+                                            }
+                                        });
+                                } else {
+                                    this.toastService.presentToast(`Veuillez renseigner un motif d'écartement`)
+                                    return false;
+                                }
                             }
                         }
-                    }
-                ]
-            }, null, false);
+                    ]
+                }, null, false);
+            } else {
+                this.toastService.presentToast(`Aucun motif d'écartement n'a été paramétré`)
+            }
         } else {
-            this.toastService.presentToast(`Aucun motif d'écartement n'a été paramétré`)
+            this.toastService.presentToast(`Veuillez vous connecter à internet afin d'écarter un colis`);
         }
     }
 }

@@ -14,6 +14,7 @@ import {ApiService} from "@app/common/services/api.service";
 import {LoadingService} from "@app/common/services/loading.service";
 import {zip} from 'rxjs';
 import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
+import {NetworkService} from "@app/common/services/network.service";
 
 @Component({
     selector: 'app-transport-round-pack-load-validate',
@@ -50,7 +51,8 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
                 private alertService: AlertService,
                 private toastService: ToastService,
                 private apiService: ApiService,
-                private loadingService: LoadingService) {
+                private loadingService: LoadingService,
+                private networkService: NetworkService) {
         super(navService);
         this.resetEmitter$ = new EventEmitter<void>();
     }
@@ -158,24 +160,28 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
     }
 
     public validate(): void {
-        if (this.location) {
-            const options = {
-                params: {
-                    packs: this.packs.map(({code}) => code)
+        if (this.networkService.hasNetwork()) {
+            if (this.location) {
+                const options = {
+                    params: {
+                        packs: this.packs.map(({code}) => code)
+                    }
                 }
+                zip(
+                    this.loadingService.presentLoading(),
+                    this.apiService.requestApi(ApiService.LOAD_PACKS, options)
+                ).subscribe(([loading, response]: [HTMLIonLoadingElement, any]) => {
+                    loading.dismiss();
+                    if (response && response.success) {
+                        this.toastService.presentToast('Les colis ont bien été chargés');
+                        this.navService.push(NavPathEnum.TRANSPORT_ROUND_LIST);
+                    }
+                });
+            } else {
+                this.toastService.presentToast('Veuillez sélectionner un emplacement')
             }
-            zip(
-                this.loadingService.presentLoading(),
-                this.apiService.requestApi(ApiService.LOAD_PACKS, options)
-            ).subscribe(([loading, response]: [HTMLIonLoadingElement, any]) => {
-                loading.dismiss();
-                if(response && response.success) {
-                    this.toastService.presentToast('Les colis ont bien été chargés');
-                    this.navService.push(NavPathEnum.TRANSPORT_ROUND_LIST);
-                }
-            });
         } else {
-            this.toastService.presentToast('Veuillez sélectionner un emplacement')
+            this.toastService.presentToast('Veuillez vous connecter à internet afin de valider le chargement des colis');
         }
     }
 }
