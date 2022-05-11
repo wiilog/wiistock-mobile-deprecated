@@ -298,11 +298,14 @@ export class TransportRoundPackLoadPage extends PageComponent {
                                     )
                                         .subscribe(([loading, response]: [HTMLIonLoadingElement, any]) => {
                                             if (response && response.success) {
+                                                loading.dismiss();
                                                 const selectedIndex = this.packs.findIndex(({code}) => (code === pack.code));
                                                 this.packs[selectedIndex].rejected = true;
+
                                                 this.refreshListLoadedConfig();
                                                 this.refreshListToLoadConfig();
-                                                loading.dismiss();
+
+                                                this.toastService.presentToast(`Le colis <strong>${pack.code}</strong> a bien été écarté`)
                                             }
                                         });
                                 } else {

@@ -164,7 +164,8 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
             if (this.location) {
                 const options = {
                     params: {
-                        packs: this.packs.map(({code}) => code)
+                        packs: this.packs.map(({code}) => code),
+                        location: this.location.id,
                     }
                 }
                 zip(
