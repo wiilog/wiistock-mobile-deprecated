@@ -3,6 +3,7 @@ import {PreloadAllModules, RouterModule, Routes} from '@angular/router';
 import {UserDisconnectedGuard} from '@app/guards/user-disconnected.guard';
 import {UserConnectedGuard} from '@app/guards/user-connected.guard';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {TransportShowPageRoutingModule} from '@pages/track/transport-show/transport-show-routing.module';
 
 const routes: Routes = [
     {
@@ -276,6 +277,11 @@ const routes: Routes = [
         path: NavPathEnum.FINISH_TRANSPORT,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/track/finish-transport/finish-transport.module').then(m => m.FinishTransportPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_SHOW,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-show/transport-show.module').then(m => m.TransportShowPageModule)
     },
     {
         path: NavPathEnum.TRANSPORT_LIST,

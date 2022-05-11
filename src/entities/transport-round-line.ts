@@ -25,8 +25,10 @@ export interface TransportRoundLine {
     expected_time: string;
     estimated_time: string;
     time_slot: string;
+    emergency: string;
     contact: {
         file_number: string;
+        name: string;
         address: string;
         contact: string;
         person_to_contact: string;
