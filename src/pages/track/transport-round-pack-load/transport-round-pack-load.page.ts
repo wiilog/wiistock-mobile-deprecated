@@ -37,6 +37,7 @@ export class TransportRoundPackLoadPage extends PageComponent {
         nature: string;
         nature_id: number;
         loaded: number;
+        loading: boolean;
         rejected: boolean;
     }>;
     private packRejectMotives: Array<string>;
@@ -101,11 +102,11 @@ export class TransportRoundPackLoadPage extends PageComponent {
     }
 
     private refreshListToLoadConfig(): void {
-        const packsToLoad = this.packs.filter(({loaded, rejected}) => (!loaded && !rejected));
+        const packsToLoad = this.packs.filter(({loaded, loading, rejected}) => (!loaded && !loading && !rejected));
         const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
-        const hasPackToLoad = this.packs && this.packs.some(({loaded, rejected}) => !loaded && !rejected);
+        const hasPackToLoad = this.packs && this.packs.some(({loaded, loading, rejected}) => !loaded && !loading && !rejected);
         this.packsToLoadListConfig = {
             header: {
                 title: 'Colis à charger',
@@ -153,7 +154,7 @@ export class TransportRoundPackLoadPage extends PageComponent {
     }
 
     private refreshListLoadedConfig(): void {
-        const loadedPacks = this.packs.filter(({loaded, rejected}) => loaded && !rejected);
+        const loadedPacks = this.packs.filter(({loaded, loading, rejected}) => !loaded && loading && !rejected);
         const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
@@ -200,7 +201,7 @@ export class TransportRoundPackLoadPage extends PageComponent {
             else {
                 this.packs.splice(selectedIndex, 1);
                 this.packs.unshift(selectedItem);
-                selectedItem.loaded = 1;
+                selectedItem.loading = true;
                 this.refreshListToLoadConfig();
                 this.refreshListLoadedConfig();
             }
@@ -212,18 +213,17 @@ export class TransportRoundPackLoadPage extends PageComponent {
 
     private loadAll(): void {
         this.packs
-            .filter(({loaded, rejected}) => !loaded && !rejected)
+            .filter(({loaded, loading, rejected}) => !loaded && !loading && !rejected)
             .forEach(({code}) => {
                 this.loadPack(code);
             });
     }
 
     private revertPack(barCode: string): void {
-        const selectedIndex = this.packs.findIndex(({code}) => (code === barCode));
-        if (selectedIndex > -1
-            && this.packs[selectedIndex].loaded) {
-            this.packs[selectedIndex].loaded = 0;
-
+        const selectedIndex = this.packs.findIndex(({code}) => code === barCode);
+        if (selectedIndex > -1 && this.packs[selectedIndex].loading) {
+            this.packs[selectedIndex].loading = false;
+            
             this.refreshListToLoadConfig();
             this.refreshListLoadedConfig();
         }
@@ -250,11 +250,20 @@ export class TransportRoundPackLoadPage extends PageComponent {
     }
 
     public validate(): void {
-        const loadedPacks = this.packs.filter(({loaded, rejected}) => loaded && !rejected);
+        const loadedPacks = this.packs.filter(({loaded, loading, rejected}) => !loaded && loading && !rejected);
         if (loadedPacks.length > 0) {
             this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD_VALIDATE, {
-                packs: this.packs.filter(({loaded, rejected}) => loaded && !rejected),
-                round: this.round
+                everythingLoaded: loadedPacks.length + this.packs.filter(({loaded}) => loaded).length === this.packs.length,
+                packs: loadedPacks,
+                round: this.round,
+                onValidate: () => {
+                    for (const pack of loadedPacks) {
+                        pack.loaded = 1;
+                        pack.loading = false;
+                    }
+
+                    this.toastService.presentToast('Les colis ont bien été chargés');
+                }
             });
         } else {
             this.toastService.presentToast('Veuillez charger au moins un colis pour continuer');

@@ -9,13 +9,13 @@
         </ion-item>
         <ng-container *ngIf="slidingConfig && slidingConfig.left">
             <ion-item-options side="start" *ngFor="let config of slidingConfig.left">
-                <button (click)="config.action()" style="{{ 'background-color: ' + config.color }}">{{ config.label }}</button>
+                <button (click)="config.action()" [style.background-color]="config.color" [style.color]="'#FFF'">{{ config.label }}</button>
             </ion-item-options>
         </ng-container>
 
         <ng-container *ngIf="slidingConfig && slidingConfig.right">
             <ion-item-options side="end" *ngFor="let config of slidingConfig.right">
-                <button (click)="config.action()">{{ config.label }}</button>
+                <button (click)="config.action()" [style.background-color]="config.color" [style.color]="'#FFF'">{{ config.label }}</button>
             </ion-item-options>
         </ng-container>
     </ion-item-sliding>

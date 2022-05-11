@@ -15,6 +15,7 @@ import {LoadingService} from "@app/common/services/loading.service";
 import {zip} from 'rxjs';
 import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
 import {NetworkService} from "@app/common/services/network.service";
+import {mergeMap} from 'rxjs/operators';
 
 @Component({
     selector: 'app-transport-round-pack-load-validate',
@@ -174,8 +175,16 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
                 ).subscribe(([loading, response]: [HTMLIonLoadingElement, any]) => {
                     loading.dismiss();
                     if (response && response.success) {
-                        this.toastService.presentToast('Les colis ont bien été chargés');
-                        this.navService.push(NavPathEnum.TRANSPORT_ROUND_LIST);
+                        const onValidate = this.currentNavParams.get('onValidate');
+                        if(onValidate) {
+                            onValidate();
+                        }
+
+                        this.navService.pop().subscribe(() => {
+                            if (this.currentNavParams.get('everythingLoaded')) {
+                                this.navService.pop();
+                            }
+                        });
                     }
                 });
             } else {
