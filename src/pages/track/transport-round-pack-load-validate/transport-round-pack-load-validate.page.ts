@@ -13,9 +13,7 @@ import {ToastService} from "@app/common/services/toast.service";
 import {ApiService} from "@app/common/services/api.service";
 import {LoadingService} from "@app/common/services/loading.service";
 import {zip} from 'rxjs';
-import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
 import {NetworkService} from "@app/common/services/network.service";
-import {mergeMap} from 'rxjs/operators';
 
 @Component({
     selector: 'app-transport-round-pack-load-validate',
