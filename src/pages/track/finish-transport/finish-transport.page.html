@@ -3,17 +3,15 @@
         <div class="contact">
             <wii-icon name="user.svg" color="black"></wii-icon>
             <div class="contact-infos">
-                <b>{{ transport.contact.contact }}</b><br>
+                <b>{{ transport.contact.name }}</b><br>
                 <span [innerHTML]="transport.contact.address"></span>
             </div>
         </div>
-        <wii-form-panel *ngIf="headerConfig && bodyConfig && detailsConfig"
-                        #formPanelComponent
-                        [header]="headerConfig"
-                        [body]="bodyConfig"
-                        [details]="detailsConfig"
-                        [isForm]="true">
-        </wii-form-panel>
+        <wii-pack-count *ngIf="bodyConfig" #formPanelComponent
+                        [title]="'Objets' + (transport.kind === 'delivery' ? 'déposés' : 'collectés')"
+                        [packs]="transport.packs"
+                        [body]="bodyConfig">
+        </wii-pack-count>
     </div>
     <div class="page-footer">
         <ion-button class="larger"

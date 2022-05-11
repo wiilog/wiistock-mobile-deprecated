@@ -43,6 +43,7 @@ import {FormViewerTableComponent} from '@app/common/components/panel/form-panel/
 import {LeafletMapComponent} from '@app/common/components/leaflet-map/leaflet-map.component';
 import {SimpleCardComponent} from '@app/common/components/simple-card/simple-card.component';
 import {TransportCardComponent} from '@app/common/components/transport-card/transport-card.component';
+import {PackCountComponent} from '@app/common/components/pack-count/pack-count.component';
 
 @NgModule({
     declarations: [
@@ -79,6 +80,7 @@ import {TransportCardComponent} from '@app/common/components/transport-card/tran
         LeafletMapComponent,
         SimpleCardComponent,
         TransportCardComponent,
+        PackCountComponent,
     ],
     imports: [
         AngularCommonModule,
@@ -106,6 +108,7 @@ import {TransportCardComponent} from '@app/common/components/transport-card/tran
         LeafletMapComponent,
         SimpleCardComponent,
         TransportCardComponent,
+        PackCountComponent,
     ],
     providers: [
         // ionic

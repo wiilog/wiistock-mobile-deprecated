@@ -1,0 +1,127 @@
+@import "~theme/variables";
+
+.ion-page {
+    display: block;
+    overflow-y: scroll;
+}
+
+.item-group {
+    background: white;
+    box-shadow: rgb(0 0 0 / 15%) 0 3px 1px -2px;
+    margin: 5px 4px;
+    padding: 3px;
+
+    .item {
+        padding: 8px 10px;
+    }
+
+    .item:not(:last-child) {
+        border-bottom: 1px solid $darkGray;
+    }
+}
+
+
+.item.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .transport-infos {
+        display: flex;
+
+        wii-icon {
+            width: 40px;
+            margin-right: 10px;
+        }
+    }
+
+    .type {
+        display: flex;
+        color: #424242;
+        background-color: rgba(3, 15, 76, 0.2);
+        padding: 4px 12px;
+        border-radius: 5px;
+        font-size: 12px;
+        height: min-content;
+
+        img {
+            margin-right: 4px;
+        }
+    }
+}
+
+.client-info {
+    display: flex;
+
+    wii-icon {
+        width: 15px;
+    }
+
+    & > div {
+        flex: 1 1 auto;
+        margin-left: 10px;
+
+        &.inline {
+            display: flex;
+
+            & :not(:first-child) {
+                margin-left: 10px;
+            }
+        }
+
+        .free-field {
+            display: inline-block;
+            width: 49%;
+        }
+
+        p:first-child {
+            margin-top: 0;
+        }
+
+        p:last-child {
+            margin-bottom: 0;
+        }
+    }
+}
+
+.date-infos {
+    padding: 10px;
+
+    .date {
+        display: flex;
+    }
+}
+
+.emergency, .to-collect {
+    display: inline-flex;
+    color: $danger;
+    font-weight: bold;
+    font-size: 12px;
+
+    &.emergency {
+        margin-left: 10px;
+    }
+
+    wii-icon {
+        width: 15px !important;
+        margin-right: 5px !important;
+    }
+}
+
+.text-muted {
+    color: $medium;
+}
+
+.page-footer {
+    display: flex;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    justify-content: space-evenly;
+
+    ion-button {
+        width: 47.5%;
+        margin: 0 !important;
+        font-size: 13px !important;
+        text-transform: none !important;
+    }
+}

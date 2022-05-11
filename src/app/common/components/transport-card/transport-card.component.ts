@@ -35,7 +35,7 @@ export class TransportCardComponent implements OnInit {
 
     ngOnInit() {
         this.titles.push({
-            title: `${this.transport.priority}. ${this.transport.contact.contact}`,
+            title: `${this.transport.priority}. ${this.transport.contact.name}`,
             position: `left`,
         });
 

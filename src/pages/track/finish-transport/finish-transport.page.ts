@@ -115,8 +115,6 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                 this.toastService.presentToast(this.formPanelComponent.firstError);
             }
             else if (!this.apiSubscription) {
-                console.log(this.formPanelComponent.values);
-
                 const params = {
                     id: this.transport.id,
                     ...this.formPanelComponent.values,

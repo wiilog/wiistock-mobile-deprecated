@@ -9,16 +9,9 @@
 
     <div class="transport-list" *ngIf="round">
         <div *ngFor="let transport of round.lines" class="card-container">
-            <wii-transport-card [transport]="transport" [mode]="mode"></wii-transport-card>
-        </div>
-        <div *ngFor="let transport of round.lines" class="card-container">
-            <wii-transport-card [transport]="transport" [mode]="mode"></wii-transport-card>
-        </div>
-        <div *ngFor="let transport of round.lines" class="card-container">
-            <wii-transport-card [transport]="transport" [mode]="mode"></wii-transport-card>
-        </div>
-        <div *ngFor="let transport of round.lines" class="card-container">
-            <wii-transport-card [transport]="transport" [mode]="mode"></wii-transport-card>
+            <wii-transport-card [transport]="transport" [mode]="mode" (click)="showTransport(transport)">
+
+            </wii-transport-card>
         </div>
     </div>
 </div>
