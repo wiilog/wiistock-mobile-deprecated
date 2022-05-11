@@ -7,11 +7,6 @@
                     <div>
                         <b>{{ transport.kind === 'delivery' ? 'Livraison' : 'Collecte' }}</b><br>
                         <i>OTR{{ transport.number }}</i>
-
-                        <span *ngIf="transport.collect" class="to-collect">
-                            <wii-icon name="emergency.svg" color="danger"></wii-icon>
-                            Collecte à prévoir
-                        </span>
                     </div>
                 </div>
                 <div class="type">
@@ -22,6 +17,11 @@
         </div>
 
         <div class="date-infos">
+            <span *ngIf="transport.collect" class="type to-collect">
+                <wii-icon name="collect-hand.svg" color="black"></wii-icon>
+                Collecte à prévoir
+            </span>
+
             <b>Date et heure de {{ transport.kind === 'delivery' ? 'livraison attendue' : 'collecte prévue' }}</b>
             <span class="date">
                 {{ transport.expected_at }}

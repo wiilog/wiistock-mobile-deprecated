@@ -34,19 +34,32 @@
             margin-right: 10px;
         }
     }
+}
 
-    .type {
-        display: flex;
-        color: #424242;
-        background-color: rgba(3, 15, 76, 0.2);
-        padding: 4px 12px;
-        border-radius: 5px;
-        font-size: 12px;
-        height: min-content;
+.type {
+    display: flex;
+    color: #424242;
+    background-color: rgba(3, 15, 76, 0.2);
+    padding: 4px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    width: max-content;
+    height: min-content;
+    margin-bottom: 3px;
 
-        img {
-            margin-right: 4px;
-        }
+    &.to-collect {
+        background: rgba(100, 51, 215, 0.2);
+        color: black;
+    }
+
+    img {
+        width: 15px !important;
+        margin-right: 4px;
+    }
+
+    wii-icon {
+        width: 15px !important;
+        margin-right: 4px !important;
     }
 }
 
@@ -92,15 +105,12 @@
     }
 }
 
-.emergency, .to-collect {
+.emergency {
     display: inline-flex;
     color: $danger;
     font-weight: bold;
     font-size: 12px;
-
-    &.emergency {
-        margin-left: 10px;
-    }
+    margin-left: 10px;
 
     wii-icon {
         width: 15px !important;
