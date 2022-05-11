@@ -18,6 +18,7 @@ import {NetworkService} from '@app/common/services/network.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {NatureWithQuantity} from '@app/common/components/panel/model/form-viewer/form-viewer-table-config';
+import {FileService} from "@app/common/services/file.service";
 
 @Component({
     selector: 'wii-finish-transport',
@@ -39,7 +40,8 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
     public transport: TransportRoundLine;
 
     public constructor(private networkService: NetworkService, private toastService: ToastService,
-                       private loadingService: LoadingService, private apiService: ApiService, navService: NavService) {
+                       private loadingService: LoadingService, private apiService: ApiService, navService: NavService,
+                       private fileService: FileService) {
         super(navService);
     }
 
@@ -115,9 +117,26 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                 this.toastService.presentToast(this.formPanelComponent.firstError);
             }
             else if (!this.apiSubscription) {
+                let {comment, photo, signature} = this.formPanelComponent.values;
                 const params = {
                     id: this.transport.id,
-                    ...this.formPanelComponent.values,
+                    comment,
+                    ...({
+                        photo: (photo
+                            ? this.fileService.createFile(
+                                photo,
+                                FileService.SIGNATURE_IMAGE_EXTENSION,
+                                FileService.SIGNATURE_IMAGE_TYPE,
+                                "photo")
+                            : undefined),
+                        signature: (signature
+                            ? this.fileService.createFile(
+                                signature,
+                                FileService.SIGNATURE_IMAGE_EXTENSION,
+                                FileService.SIGNATURE_IMAGE_TYPE,
+                                "signature")
+                            : undefined)
+                    }),
                 };
 
                 this.apiSubscription = this.dismissLoading()
@@ -134,7 +153,7 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                             this.unsubscribeApi();
                             if (success) {
                                 this.toastService.presentToast("Les données ont été sauvegardées");
-                                //TODO: Rediriger au bon endroit
+                                this.navService.pop();
                             }
                             else {
                                 this.toastService.presentToast(message || "Une erreur s'est produite.");
