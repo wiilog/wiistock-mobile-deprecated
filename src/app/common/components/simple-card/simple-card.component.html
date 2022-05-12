@@ -2,13 +2,19 @@
     <div class="card-titles" [style.background-color]="disabled ? '#CBCBCB' : color">
         <div class="card-titles-left">
             <div *ngFor="let title of leftTitles" class="card-title">
-                <img [src]="title.image" alt="">
+                <div *ngIf="title.image" class="card-title-icon">
+                    <img [src]="title.image" alt="">
+                </div>
+
                 {{ title.title }}
             </div>
         </div>
         <div class="card-titles-right">
             <div *ngFor="let title of rightTitles" class="card-title">
-                <img [src]="title.image" alt="">
+                <div *ngIf="title.image" class="card-title-icon">
+                    <img [src]="title.image" alt="">
+                </div>
+
                 {{ title.title }}
             </div>
         </div>

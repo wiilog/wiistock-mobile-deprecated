@@ -23,6 +23,27 @@
             align-items: center;
             justify-content: center;
         }
+
+        .card-title {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .card-title-icon {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #FFF;
+            width: 15px;
+            height: 15px;
+            border-radius: 15px;
+
+            img {
+                max-width: 10px;
+                max-height: 10px;
+            }
+        }
     }
 
     .content {
