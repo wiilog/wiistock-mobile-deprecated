@@ -2,8 +2,8 @@
     <wii-form-panel #formPanelComponent *ngIf="headerConfig" [header]="headerConfig"></wii-form-panel>
 
     <ion-button color="primary" expand="full" (click)="toggleMap()">
-        <wii-icon class="button-icon" name="double-arrow-down.svg" color="white" [style.transform]="mapVisible ? '' : 'rotate(180deg)'"></wii-icon>
-        Voir le circuit de la tournée
+        <wii-icon class="button-icon" name="double-arrow-down.svg" color="white" [style.transform]="mapVisible ? 'rotate(180deg)' : ''"></wii-icon>
+        {{ mapVisible ? 'Cacher' : 'Voir' }} le circuit de la tournée
     </ion-button>
     <wii-leaflet-map *ngIf="mapVisible" [markers]="markers"></wii-leaflet-map>
 
