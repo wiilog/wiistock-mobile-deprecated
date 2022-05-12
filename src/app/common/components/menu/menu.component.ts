@@ -12,12 +12,12 @@ export class MenuComponent implements OnInit {
     @Input()
     public config: Array<MenuConfig>;
 
+    @Input()
     public columns: number;
 
     public ngOnInit(): void {
         this.columns = this.config.length === 3 || this.config.length > 4 ? ColumnNumber.THREE : ColumnNumber.TWO;
     }
-
     public get firstPlaceholderDisplayed(): boolean {
         const columnLength = this.columnLength;
         return (
