@@ -31,6 +31,9 @@ export class IconComponent {
     public customColor?: string;
 
     @Input()
+    public circle?: string;
+
+    @Input()
     public buttonWithoutRipple?: boolean;
 
     @Output()

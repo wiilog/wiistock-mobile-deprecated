@@ -40,7 +40,7 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
         this.round = this.currentNavParams.get('round');
 
         this.headerConfig = {
-            title: this.round.number,
+            title: `T${this.round.number}`,
             subtitle: [this.formatService.formatDate(this.round.date)],
             leftIcon: {
                 name: 'track.svg'
