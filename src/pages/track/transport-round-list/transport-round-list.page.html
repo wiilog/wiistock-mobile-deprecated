@@ -5,14 +5,14 @@
         </div>
         <div class="rounds-wrapper">
             <div *ngFor="let round of transportRounds.value">
-                <wii-simple-card color="#6433D7" [titles]="round.number" (click)="view($event, round)">
+                <wii-simple-card color="#6433D7" [titles]="'T' + round.number" (click)="view($event, round)">
                    <div class="card-top">
                        <div>
                            <div class="line">
                                <div class="counter">
                                    <img src="assets/icons/delivery-truck.svg" width="15">
                                    <span>
-                                    <strong>{{ round.done_deliveries }}/{{ round.total_deliveries }}</strong>
+                                    <strong>{{ round.ready_deliveries }}/{{ round.total_ready_deliveries }}</strong>
                                     livraison(s) prête(s)
                                 </span>
                                </div>
@@ -53,7 +53,6 @@
                         </ion-button>
                         <ion-button
                                 [color]="(round.loaded_packs !== round.total_loaded) || round.total_loaded === 0 ? 'medium' : 'primary'"
-                                [disabled]="(round.loaded_packs !== round.total_loaded) || round.total_loaded === 0"
                                 size="small" (click)="start($event, round)">
                             Débuter la tournée
                         </ion-button>

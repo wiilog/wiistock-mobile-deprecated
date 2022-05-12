@@ -7,8 +7,8 @@ export interface TransportRound {
     date: string;
     estimated_distance: number;
     estimated_time: string;
-    total_deliveries: number;
-    done_deliveries: number;
+    ready_deliveries: number;
+    total_ready_deliveries: number;
     total_transports: number;
     done_transports: number;
     loaded_packs: number;
