@@ -142,3 +142,7 @@
         text-transform: none !important;
     }
 }
+
+ion-button[disabled] {
+    --ion-color-base: #CBCBCB !important;
+}
