@@ -93,7 +93,7 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
                     : [];
                 const unmatchedTemperatures = [];
                 this.packs.forEach((pack) => {
-                    if (pack.temperature_range && !temperatureRanges.includes(pack.temperature_range)) {
+                    if (temperatureRanges.length > 0 && pack.temperature_range && !temperatureRanges.includes(pack.temperature_range)) {
                         unmatchedTemperatures.push(pack);
                     }
                 });
@@ -130,7 +130,7 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
                             });
                             this.resetEmitter$.emit();
                         });
-                } else if (temperatureRanges.length === 0 || unmatchedTemperatures.length > 0) {
+                } else if (unmatchedTemperatures.length > 0) {
                     let formattedUnmatchedTemperatures = unmatchedTemperatures
                         .map(({code}) => `<li><strong>${code}</strong></li>`)
                         .join(' ');
