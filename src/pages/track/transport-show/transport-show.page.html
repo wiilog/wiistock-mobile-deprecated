@@ -86,9 +86,9 @@
             </div>
         </div>
 
-        <wii-pack-count *ngIf="transport"
+        <wii-pack-count *ngIf="transport && packs"
                         [title]="'Objets ' + (transport.kind === 'delivery' ? 'à livrer' : 'à collecter')"
-                        [packs]="transport.packs">
+                        [packs]="packs">
         </wii-pack-count>
     </div>
     <div class="page-footer">

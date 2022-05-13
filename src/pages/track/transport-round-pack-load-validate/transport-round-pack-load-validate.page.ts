@@ -14,6 +14,7 @@ import {ApiService} from "@app/common/services/api.service";
 import {LoadingService} from "@app/common/services/loading.service";
 import {zip} from 'rxjs';
 import {NetworkService} from "@app/common/services/network.service";
+import {TransportRound} from "@entities/transport-round";
 
 @Component({
     selector: 'app-transport-round-pack-load-validate',
@@ -34,7 +35,7 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
         nature_id: number;
         temperature_range: string;
     }>;
-    private round: any;
+    private round: TransportRound;
 
     public panelHeaderConfig: {
         title: string;
@@ -165,6 +166,7 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
                     params: {
                         packs: this.packs.map(({code}) => code),
                         location: this.location.id,
+                        round: this.round.id
                     }
                 }
                 zip(
