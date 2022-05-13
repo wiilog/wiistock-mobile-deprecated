@@ -1,4 +1,4 @@
-<div class="ion-page">
+<div *ngIf="round" class="ion-page">
     <wii-form-panel #formPanelComponent *ngIf="headerConfig" [header]="headerConfig"></wii-form-panel>
 
     <ion-button color="primary" expand="full" (click)="toggleMap()">
@@ -7,7 +7,15 @@
     </ion-button>
     <wii-leaflet-map *ngIf="mapVisible" [markers]="markers"></wii-leaflet-map>
 
-    <div class="transport-list" *ngIf="round">
+    <span *ngIf="round.status === 'En attente livreur'" class="transports-count">
+        {{ round.ready_deliveries }}/{{ round.total_ready_deliveries }} livraisons prêtes
+    </span>
+
+    <span *ngIf="round.status === 'En cours'" class="transports-count">
+        {{ round.done_transports }}/{{ round.total_transports }} transports effectués
+    </span>
+
+    <div class="transport-list">
         <div *ngFor="let transport of round.lines" class="card-container">
             <wii-transport-card [transport]="transport" [mode]="mode" (click)="showTransport(transport)">
 

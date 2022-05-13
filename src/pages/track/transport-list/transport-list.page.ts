@@ -44,6 +44,13 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
             subtitle: [this.formatService.formatDate(this.round.date)],
             leftIcon: {
                 name: 'track.svg'
+            },
+            rightBadge: {
+                label: `Tournée en cours`,
+                color: {
+                    background: `#C4C7D5`,
+                    font: `primary`,
+                },
             }
         };
 

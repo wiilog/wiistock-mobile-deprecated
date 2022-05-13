@@ -22,3 +22,10 @@ wii-icon:not(.priority):not(.priority):not(.priority):not(.priority) {
 .card-container {
     margin-bottom: 7px;
 }
+
+.transports-count {
+    display: block;
+    font-weight: bold;
+    color: $primary;
+    padding: 4px 8px;
+}

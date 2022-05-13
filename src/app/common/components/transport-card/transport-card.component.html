@@ -1,4 +1,4 @@
-<wii-simple-card [titles]="titles" color="#6433D7" [disabled]="transport.cancelled" (click)="click()">
+<wii-simple-card [titles]="titles" color="#6433D7" [disabled]="transport.cancelled || transport.packs.length === 0" (click)="click()">
     <div class="transport-content">
         <div class="transport-infos">
             <div class="transport-kind">
