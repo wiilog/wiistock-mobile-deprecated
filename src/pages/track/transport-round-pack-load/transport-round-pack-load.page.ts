@@ -240,10 +240,12 @@ export class TransportRoundPackLoadPage extends PageComponent {
                     label: natureTranslation,
                     value: nature
                 },
-                temperature_range: {
-                    label: 'Température',
-                    value: temperature_range
-                }
+                ...(temperature_range ? {
+                    temperature_range: {
+                        label: 'Température',
+                        value: temperature_range
+                    }
+                } : {})
             },
             color: color
         }
