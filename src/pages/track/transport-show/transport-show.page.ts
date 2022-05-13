@@ -31,7 +31,7 @@ export class TransportShowPage extends PageComponent implements ViewWillEnter {
     public ionViewWillEnter() {
         this.mode = this.currentNavParams.get('mode');
         this.transport = this.currentNavParams.get('transport');
-
+console.log(this.transport);
         this.shouldDisplayFreeFields = this.transport.free_fields.filter(freeField => freeField.value !== '').length > 0;
     }
 

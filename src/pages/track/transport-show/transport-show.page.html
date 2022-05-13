@@ -18,7 +18,7 @@
 
         <div class="date-infos">
             <span *ngIf="transport.collect" class="type to-collect">
-                <wii-icon name="collect-hand.svg" color="black"></wii-icon>
+                <wii-icon name="collect-hand.svg" color="white"></wii-icon>
                 Collecte à prévoir
             </span>
 
@@ -60,8 +60,8 @@
             <div class="item client-info">
                 <wii-icon name="location-black.svg" color="black"></wii-icon>
                 <div>
-                    <b>Adresse</b><br>
-                    {{ transport.contact.address }}
+                    <b>Adresse</b>
+                    <div [innerHTML]="transport.contact.address">
                 </div>
             </div>
 
@@ -87,7 +87,7 @@
         </div>
 
         <wii-pack-count *ngIf="transport"
-                        [title]="'Objets ' + (transport.kind === 'delivery' ? 'déposés' : 'collectés')"
+                        [title]="'Objets ' + (transport.kind === 'delivery' ? 'à livrer' : 'à collecter')"
                         [packs]="transport.packs">
         </wii-pack-count>
     </div>
