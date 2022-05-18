@@ -41,22 +41,24 @@
                            {{ round.status }}
                        </div>
                    </div>
-                    <div class="estimated">
-                        <div>{{ round.estimated_distance }} km estimés</div>
-                        <div>{{ round.estimated_time }} estimées</div>
-                    </div>
-                    <div class="line">
-                        <ion-button
-                                [color]="(round.loaded_packs === round.total_loaded) || round.total_loaded === 0 ? 'medium' : 'primary'"
-                                [disabled]="(round.loaded_packs === round.total_loaded) || round.total_loaded === 0"
-                                size="small" (click)="load($event, round)">Charger
-                        </ion-button>
-                        <ion-button
-                                [color]="(round.loaded_packs !== round.total_loaded) || round.total_loaded === 0 ? 'medium' : 'primary'"
-                                size="small" (click)="start($event, round)">
-                            Débuter la tournée
-                        </ion-button>
-                    </div>
+                    <ng-container *ngIf="round.status !== 'En cours'">
+                        <div class="estimated">
+                            <div>{{ round.estimated_distance }} km estimés</div>
+                            <div>{{ round.estimated_time }} estimées</div>
+                        </div>
+                        <div class="line">
+                            <ion-button
+                                    [color]="(round.loaded_packs === round.total_loaded) || round.total_loaded === 0 ? 'medium' : 'primary'"
+                                    [disabled]="(round.loaded_packs === round.total_loaded) || round.total_loaded === 0"
+                                    size="small" (click)="load($event, round)">Charger
+                            </ion-button>
+                            <ion-button
+                                    [color]="(round.loaded_packs !== round.total_loaded) || round.total_loaded === 0 ? 'medium' : 'primary'"
+                                    size="small" (click)="start($event, round)">
+                                Débuter la tournée
+                            </ion-button>
+                        </div>
+                    </ng-container>
                 </wii-simple-card>
             </div>
         </div>

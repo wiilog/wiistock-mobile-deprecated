@@ -61,6 +61,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
     }
 
     public start(event: any, round: TransportRound) {
+        event.stopPropagation();
         let showWarning = false;
         for (const line of round.lines) {
             if (!line.packs || line.packs.length) {
@@ -71,7 +72,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         if (showWarning) {
             this.alertService.show({
                 header: `Attention`,
-                message: `Des livraisons ne sont pas encore préparées. Elles seront exclues de cette tournée si vous confirmez son début`,
+                message: `Des livraisons ne sont pas encore préparées. Elles seront exclues de cette tournée si vous confirmez son début.`,
                 buttons: [
                     {text: 'Annuler'},
                     {
@@ -101,7 +102,6 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                     packs: packs
                 }
             }
-            event.stopPropagation();
             this.loadingService.presentLoadingWhile({
                 event: () => this.apiService.requestApi(ApiService.HAS_NEW_PACKS, options)
             }).subscribe(({success, has_new_packs}) => {
@@ -118,12 +118,21 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                             }]
                         });
                     } else {
-                        this.navService.push(NavPathEnum.TRANSPORT_LIST, {
-                            round,
-                            mode: TransportCardMode.STARTABLE,
-                        });
+                        const options = {
+                            params: {
+                                round: round.id
+                            }
+                        }
+                        this.loadingService.presentLoadingWhile({
+                            event: () => this.apiService.requestApi(ApiService.PATCH_ROUND_STATUS, options)
+                        }).subscribe(() => {
+                            this.navService.push(NavPathEnum.TRANSPORT_LIST, {
+                                round,
+                                mode: TransportCardMode.STARTABLE,
+                            });
 
-                        event.stopPropagation();
+                            event.stopPropagation();
+                        });
                     }
                 }
             });

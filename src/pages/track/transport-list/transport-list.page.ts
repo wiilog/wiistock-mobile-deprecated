@@ -10,6 +10,7 @@ import {MapLocation} from '@app/common/components/leaflet-map/leaflet-map.compon
 import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {ApiService} from "@app/common/services/api.service";
 
 @Component({
     selector: 'wii-transport-list',
@@ -31,11 +32,12 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
 
     public mapVisible: boolean = false;
 
-    public constructor(navService: NavService, public formatService: FormatService) {
+    public constructor(navService: NavService,
+                       public formatService: FormatService) {
         super(navService);
     }
 
-    public ionViewWillEnter() {
+    public ionViewWillEnter(): void {
         this.mode = this.currentNavParams.get('mode');
         this.round = this.currentNavParams.get('round');
 
@@ -45,16 +47,19 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
             leftIcon: {
                 name: 'track.svg'
             },
-            rightBadge: {
-                label: `Tournée en cours`,
-                color: {
-                    background: `#C4C7D5`,
-                    font: `primary`,
-                },
-            }
+            ...(this.round.status === 'En cours' ? {
+                rightBadge: {
+                    label: `Tournée en cours`,
+                    color: {
+                        background: `#C4C7D5`,
+                        font: `primary`,
+                    },
+                    inline: true
+                }
+            } : {})
         };
 
-        for(const line of this.round.lines) {
+        for (const line of this.round.lines) {
             this.markers.push({
                 title: `${line.priority}. ${line.contact.name}`,
                 latitude: Number(line.contact.latitude),

@@ -27,7 +27,7 @@
                 {{ transport.expected_at }}
                 <span *ngIf="transport.emergency" class="emergency">
                 <wii-icon name="emergency.svg" color="danger"></wii-icon>
-                {{ transport.emergency }}
+                    {{ transport.emergency }}
             </span>
             </span>
         </div>
@@ -62,42 +62,43 @@
                 <div>
                     <b>Adresse</b>
                     <div [innerHTML]="transport.contact.address">
+                    </div>
+                </div>
+
+                <div class="item client-info" *ngIf="transport.contact.observation">
+                    <wii-icon name="question-mark.svg" color="black"></wii-icon>
+                    <div>
+                        <b>Remarque</b><br>
+                        {{ transport.contact.observation }}
+                    </div>
+                </div>
+
+                <div class="item client-info" *ngIf="shouldDisplayFreeFields">
+                    <wii-icon name="info.svg" color="black"></wii-icon>
+                    <div>
+                        <ng-container *ngFor="let freeField of transport.free_fields">
+                            <div *ngIf="freeField.value !== ''" class="free-field">
+                                <b>{{ freeField.label }}</b><br>
+                                {{ freeField.value }}
+                            </div>
+                        </ng-container>
+                    </div>
                 </div>
             </div>
 
-            <div class="item client-info" *ngIf="transport.contact.observation">
-                <wii-icon name="question-mark.svg" color="black"></wii-icon>
-                <div>
-                    <b>Remarque</b><br>
-                    {{ transport.contact.observation }}
-                </div>
-            </div>
-
-            <div class="item client-info" *ngIf="shouldDisplayFreeFields">
-                <wii-icon name="info.svg" color="black"></wii-icon>
-                <div>
-                    <ng-container *ngFor="let freeField of transport.free_fields">
-                        <div *ngIf="freeField.value !== ''" class="free-field">
-                            <b>{{ freeField.label }}</b><br>
-                            {{ freeField.value }}
-                        </div>
-                    </ng-container>
-                </div>
-            </div>
+            <wii-pack-count *ngIf="transport && packs"
+                            [title]="'Objets ' + (transport.kind === 'delivery' ? 'à livrer' : 'à collecter')"
+                            [packs]="packs">
+            </wii-pack-count>
         </div>
+        <div class="page-footer">
+            <ion-button color="primary" fill="outline" (click)="fail()" [disabled]="mode === modeViewOnly">
+                {{ transport.kind === 'delivery' ? 'Non livrée' : 'Non collectée' }}
+            </ion-button>
 
-        <wii-pack-count *ngIf="transport && packs"
-                        [title]="'Objets ' + (transport.kind === 'delivery' ? 'à livrer' : 'à collecter')"
-                        [packs]="packs">
-        </wii-pack-count>
-    </div>
-    <div class="page-footer">
-        <ion-button color="primary" fill="outline" (click)="fail()" [disabled]="mode === modeViewOnly">
-            {{ transport.kind === 'delivery' ? 'Non livrée' : 'Non collectée' }}
-        </ion-button>
-
-        <ion-button color="primary" (click)="depositOrCollect()" [disabled]="mode === modeViewOnly">
-            {{ transport.kind === 'delivery' ? 'Déposer les colis' : 'Collecter les objets' }}
-        </ion-button>
+            <ion-button color="primary" (click)="depositOrCollect()" [disabled]="mode === modeViewOnly">
+                {{ transport.kind === 'delivery' ? 'Déposer les colis' : 'Collecter les objets' }}
+            </ion-button>
+        </div>
     </div>
 </div>

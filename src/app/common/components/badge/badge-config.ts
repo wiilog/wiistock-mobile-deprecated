@@ -4,4 +4,5 @@ export interface BadgeConfig {
         background: string;
         font?: string;
     };
+    inline?: boolean;
 }
