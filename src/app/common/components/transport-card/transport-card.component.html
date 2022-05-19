@@ -1,10 +1,17 @@
-<wii-simple-card [titles]="titles" color="#6433D7" [disabled]="transport.cancelled || transport.packs.length === 0" (click)="click()">
+<wii-simple-card [titles]="titles"
+                 color="#6433D7"
+                 [disabled]="transport.cancelled || (transport.kind === 'delivery' && transport.packs.length === 0)"
+                 (click)="click()"
+                 stackedRightContent="true">
     <div class="transport-content">
         <div class="transport-infos">
             <div class="transport-kind">
                 <div *ngIf="transport.kind === 'delivery'">
                     <wii-icon class="button-icon" name="delivery-truck.svg" color="black"></wii-icon>
-                    Livraison
+                    <span>Livraison</span>
+                    <ng-container *ngIf="isReadyDelivery(transport)">
+                        <span class="packs-count">{{ transport.packs.length }} colis</span>
+                    </ng-container>
                 </div>
                 <div *ngIf="transport.kind === 'collect'">
                     <wii-icon class="button-icon" name="collect-hand.svg" color="black"></wii-icon>
@@ -23,7 +30,7 @@
             </div>
 
             <div class="transport-location">
-                <wii-icon class="button-icon" name="location-black.svg" color="black"></wii-icon>
+                <wii-icon class="button-icon" name="location-black.svg" color="black" width="12px"></wii-icon>
                 <span [innerHTML]="transport.contact.address"></span>
             </div>
         </div>

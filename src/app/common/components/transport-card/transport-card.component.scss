@@ -15,11 +15,23 @@
 
         .transport-kind {
             font-weight: bold;
+
+            .packs-count {
+                font-weight: normal;
+                font-style: italic;
+                font-size: 14px;
+                color: #666666;
+                margin-left: 6px;
+            }
         }
 
         .transport-kind > div, .transport-time, .transport-location {
             display: flex;
             align-items: center;
+
+            wii-icon {
+                margin-bottom: auto;
+            }
         }
     }
 

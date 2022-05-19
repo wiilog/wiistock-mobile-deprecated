@@ -25,6 +25,9 @@ export class SimpleCardComponent implements OnInit {
     @Output()
     public click: EventEmitter<void> = new EventEmitter();
 
+    @Input()
+    public stackedRightContent: boolean = false;
+
     public leftTitles: Array<SimpleCardTitle>;
     public rightTitles: Array<SimpleCardTitle>;
 

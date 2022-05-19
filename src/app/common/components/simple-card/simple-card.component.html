@@ -9,7 +9,7 @@
                 {{ title.title }}
             </div>
         </div>
-        <div class="card-titles-right">
+        <div class="card-titles-right" [class.stacked]="stackedRightContent">
             <div *ngFor="let title of rightTitles" class="card-title">
                 <div *ngIf="title.image" class="card-title-icon">
                     <img [src]="title.image" alt="">
