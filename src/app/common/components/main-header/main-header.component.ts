@@ -147,6 +147,21 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.HANDLING_VALIDATE, label: 'Détails'},
             {pagePath: NavPathEnum.GROUP_SCAN_GROUP, label: 'Groupage'},
             {pagePath: NavPathEnum.UNGROUP_SCAN_LOCATION, label: 'Dégroupage'},
+            {pagePath: NavPathEnum.TRANSPORT_LIST, label: 'Tournée'},
+            {
+                pagePath: NavPathEnum.TRANSPORT_SHOW,
+                label: 'Livraison',
+                filter: (params) => (
+                    params.get('transport').kind === 'delivery'
+                )
+            },
+            {
+                pagePath: NavPathEnum.TRANSPORT_SHOW,
+                label: 'Collecte',
+                filter: (params) => (
+                    params.get('transport').kind === 'collect'
+                )
+            },
             {
                 pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Passage à vide',

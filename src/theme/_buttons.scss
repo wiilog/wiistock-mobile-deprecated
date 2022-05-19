@@ -61,4 +61,9 @@ ion-button {
             }
         }
     }
+
+    &[disabled] {
+        --ion-color-base: #CBCBCB !important;
+        opacity: 1;
+    }
 }

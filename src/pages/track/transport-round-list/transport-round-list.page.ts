@@ -48,7 +48,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
     public view(event, round: TransportRound) {
         this.navService.push(NavPathEnum.TRANSPORT_LIST, {
             round,
-            mode: TransportCardMode.VIEW,
+            mode: round.status !== 'En cours' ? TransportCardMode.VIEW : TransportCardMode.STARTABLE,
         });
     }
 

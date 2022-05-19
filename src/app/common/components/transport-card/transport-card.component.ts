@@ -52,7 +52,6 @@ export class TransportCardComponent implements OnInit {
                 position: `right`,
             });
         }
-
     }
 
     public click() {

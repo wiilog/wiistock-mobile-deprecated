@@ -25,6 +25,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
 
     .transport-infos {
         display: flex;
@@ -38,7 +40,7 @@
 
 .type {
     display: flex;
-    background-color: #CBCBCB;
+    background-color: $lightGrey;
     color: #666666;
     padding: 4px 12px;
     border-radius: 5px;
@@ -54,6 +56,7 @@
         background: $purple;
         color: white;
         font-weight: bold;
+        margin-bottom: 12px;
     }
 
     img {
@@ -74,7 +77,7 @@
         height: 15px;
         width: 15px;
         min-width: 15px;
-        margin-top: 7px;
+        margin-top: 3px;
     }
 
     & > div {
@@ -131,9 +134,13 @@
 
 .page-footer {
     display: flex;
-    margin-top: 10px;
-    margin-bottom: 10px;
     justify-content: space-evenly;
+    position: sticky;
+    width: 100%;
+    bottom: 0;
+    padding-top: 6px;
+    padding-bottom: 6px;
+    background-color: $lightGrey;
 
     ion-button {
         width: 47.5%;
@@ -141,8 +148,4 @@
         font-size: 13px !important;
         text-transform: none !important;
     }
-}
-
-ion-button[disabled] {
-    --ion-color-base: #CBCBCB !important;
 }
