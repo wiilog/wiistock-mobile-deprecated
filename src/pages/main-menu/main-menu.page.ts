@@ -153,6 +153,7 @@ export class MainMenuPage extends PageComponent {
                 buttons: [
                     {
                         text: 'Annuler',
+                        role: 'cancel',
                         handler: () => {
                             this.exitAlert = undefined;
                         }

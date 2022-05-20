@@ -292,6 +292,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
                 buttons: [
                     {
                         text: 'Annuler',
+                        role: 'cancel',
                         handler: () => {
                             this.partialCollecteAlert = undefined;
                         }

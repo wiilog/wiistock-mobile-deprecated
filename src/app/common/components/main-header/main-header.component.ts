@@ -286,7 +286,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                 await this.alertService.show({
                     header: 'Déconnexion impossible',
                     message: `Vous ne pouvez pas vous déconnecter car il y a des prises de traçabilité en cours`,
-                    buttons: [`Annuler`]
+                    buttons: [{
+                        text: 'Annuler',
+                        role: 'cancel'
+                    }]
                 });
             } else {
                 this.userService.doLogout();

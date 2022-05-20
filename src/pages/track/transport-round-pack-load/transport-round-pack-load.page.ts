@@ -286,7 +286,8 @@ export class TransportRoundPackLoadPage extends PageComponent {
                 }, []);
 
                 this.alertService.show({
-                    header: `Ecarter le colis ${pack.code}`,
+                    header: `Écarter le colis`,
+                    subHeader: pack.code,
                     inputs: formattedRejectMotives,
                     buttons: [
                         {

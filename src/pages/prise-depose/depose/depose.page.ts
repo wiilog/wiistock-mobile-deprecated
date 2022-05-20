@@ -210,6 +210,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                     buttons: [
                         {
                             text: 'Annuler',
+                            role: 'cancel',
                             handler: () => {
                                 this.footerScannerComponent.fireZebraScan();
                             },

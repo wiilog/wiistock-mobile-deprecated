@@ -195,7 +195,10 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
             this.alertService.show({
                 header: 'Erreur',
                 message,
-                buttons: [`Fermer`]
+                buttons: [{
+                    text: 'Fermer',
+                    role: 'cancel'
+                }]
             });
         } else {
             this.toastService.presentToast(message);

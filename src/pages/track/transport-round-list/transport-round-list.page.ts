@@ -72,9 +72,13 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         if (showWarning) {
             this.alertService.show({
                 header: `Attention`,
+                cssClass: `warning`,
                 message: `Des livraisons ne sont pas encore préparées. Elles seront exclues de cette tournée si vous confirmez son début.`,
                 buttons: [
-                    {text: 'Annuler'},
+                    {
+                        text: 'Annuler',
+                        role: 'cancel'
+                    },
                     {
                         text: 'Confirmer',
                         handler: () => {
