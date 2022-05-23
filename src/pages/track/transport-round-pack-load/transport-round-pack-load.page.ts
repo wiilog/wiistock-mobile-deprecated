@@ -301,7 +301,8 @@ export class TransportRoundPackLoadPage extends PageComponent {
                                     const options = {
                                         params: {
                                             pack: pack.code,
-                                            rejectMotive: rejectMotive
+                                            rejectMotive: rejectMotive,
+                                            round: this.round.id
                                         }
                                     };
                                     zip(
