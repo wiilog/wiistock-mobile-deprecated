@@ -30,7 +30,6 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
     @ViewChild('formPanelComponent', {static: false})
     public formPanelComponent: FormPanelComponent;
 
-    public headerConfig: HeaderConfig;
     public bodyConfig: Array<FormPanelParam>;
     public detailsConfig: Array<FormViewerParam>;
 
@@ -47,13 +46,15 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
 
     public ionViewWillEnter() {
         this.transport = this.currentNavParams.get('transport');
-        this.headerConfig = {
-            title: `Objets ${this.transport.kind === `delivery` ? `déposés` : `collectés`}`,
-            subtitle: [`${this.transport.packs.length} ${this.transport.kind === `delivery` ? `colis` : `objets`}`],
-            leftIcon: {
-                name: 'scanned-pack.svg'
+
+        let packsCount = 0;
+        if(this.transport.kind === `delivery`) {
+            packsCount = this.transport.packs.length;
+        } else {
+            for(const nature of this.transport.narutes_to_collect) {
+                packsCount += nature.collected_quantity;
             }
-        };
+        }
 
         this.bodyConfig = [{
             item: FormPanelInputComponent,

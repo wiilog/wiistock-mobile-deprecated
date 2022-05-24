@@ -46,6 +46,18 @@
                             <div>{{ round.estimated_distance }} km estimés</div>
                             <div>{{ round.estimated_time }} estimées</div>
                         </div>
+                        <ng-container *ngIf="round.is_ongoing">
+                            <div class="line">
+                                <div class="counter">
+                                    <img src="assets/icons/pack-black.svg" width="15">
+                                    <span>
+                                    <strong>{{ round.loaded_packs }}/{{ round.total_loaded }}</strong>
+                                    colis chargé(s)
+                                </span>
+                                </div>
+                            </div>
+
+                        </ng-container>
                         <div class="line">
                             <ion-button color="primary"
                                     [disabled]="(round.loaded_packs === round.total_loaded) || round.total_loaded === 0"

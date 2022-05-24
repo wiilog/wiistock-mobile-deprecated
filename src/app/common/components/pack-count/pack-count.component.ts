@@ -25,7 +25,6 @@ export class PackCountComponent implements OnInit {
     @Input()
     public packs: Array<any>;
 
-
     @Input()
     public body: Array<FormPanelParam>;
 
@@ -36,9 +35,18 @@ export class PackCountComponent implements OnInit {
     }
 
     ngOnInit() {
+        let packsCount = 0;
+        for(const pack of this.packs) {
+            if(pack.collected_quantity) {
+                packsCount += pack.collected_quantity;
+            } else {
+                packsCount += 1;
+            }
+        }
+
         this.headerConfig = {
             title: this.title,
-            subtitle: [`${this.packs.length} colis`],
+            subtitle: [`${packsCount} colis`],
             leftIcon: {
                 name: this.icon ?? 'scanned-pack.svg',
             }
@@ -55,7 +63,11 @@ export class PackCountComponent implements OnInit {
                 }
             }
 
-            natures[pack.nature].value = natures[pack.nature].value as number + 1;
+            if(pack.collected_quantity) {
+                natures[pack.nature].value = natures[pack.nature].value as number + pack.collected_quantity;
+            } else {
+                natures[pack.nature].value = natures[pack.nature].value as number + 1;
+            }
         }
 
         this.detailsConfig = [{

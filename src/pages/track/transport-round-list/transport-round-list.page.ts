@@ -128,7 +128,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                             }
                         }
                         this.loadingService.presentLoadingWhile({
-                            event: () => this.apiService.requestApi(ApiService.PATCH_ROUND_STATUS, options)
+                            event: () => this.apiService.requestApi(ApiService.START_DELIVERY_ROUND, options)
                         }).subscribe(() => {
                             this.navService.push(NavPathEnum.TRANSPORT_LIST, {
                                 round,

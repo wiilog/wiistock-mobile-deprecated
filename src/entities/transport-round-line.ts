@@ -12,6 +12,12 @@ export interface TransportRoundLine {
     };
     status: string;
     kind: `delivery` | `collect`;
+    narutes_to_collect: Array<{
+        nature_id: number;
+        nature: string;
+        quantity_to_collect: number;
+        collected_quantity: number;
+    }>;
     packs: Array<{
         code: string;
         nature: string;

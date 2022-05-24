@@ -8,8 +8,8 @@
             </div>
         </div>
         <wii-pack-count *ngIf="bodyConfig" #formPanelComponent
-                        [title]="'Objets' + (transport.kind === 'delivery' ? 'déposés' : 'collectés')"
-                        [packs]="transport.packs"
+                        [title]="'Objets ' + (transport.kind === 'delivery' ? 'déposés' : 'collectés')"
+                        [packs]="transport.narutes_to_collect || transport.packs"
                         [body]="bodyConfig">
         </wii-pack-count>
     </div>
