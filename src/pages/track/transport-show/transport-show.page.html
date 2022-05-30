@@ -3,7 +3,7 @@
         <div class="item-group">
             <div class="item header">
                 <div class="transport-infos">
-                    <wii-icon name="truck.svg" color="purple"></wii-icon>
+                    <wii-icon [name]="transport.kind === 'delivery' ? 'truck.svg' : 'collect-hand.svg'" color="purple"></wii-icon>
                     <div>
                         <b>{{ transport.kind === 'delivery' ? 'Livraison' : 'Collecte' }}</b><br>
                         <i>OTR{{ transport.number }}</i>

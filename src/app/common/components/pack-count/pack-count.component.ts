@@ -73,7 +73,7 @@ export class PackCountComponent implements OnInit {
 
         this.headerConfig = {
             title: this.title,
-            subtitle: [`${packsCount} colis`],
+            subtitle: this.transport.kind === `delivery` ? [`${packsCount} colis`] : undefined,
             leftIcon: {
                 name: this.icon ?? 'scanned-pack.svg',
             }
