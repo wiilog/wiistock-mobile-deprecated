@@ -44,6 +44,9 @@ import {LeafletMapComponent} from '@app/common/components/leaflet-map/leaflet-ma
 import {SimpleCardComponent} from '@app/common/components/simple-card/simple-card.component';
 import {TransportCardComponent} from '@app/common/components/transport-card/transport-card.component';
 import {PackCountComponent} from '@app/common/components/pack-count/pack-count.component';
+import {
+    FormPanelTextareaComponent
+} from "@app/common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component";
 
 @NgModule({
     declarations: [
@@ -55,6 +58,7 @@ import {PackCountComponent} from '@app/common/components/pack-count/pack-count.c
         MainLoaderComponent,
         MenuComponent,
         FormPanelInputComponent,
+        FormPanelTextareaComponent,
         FormPanelSigningComponent,
         FormPanelFieldComponent,
         FormPanelCameraComponent,

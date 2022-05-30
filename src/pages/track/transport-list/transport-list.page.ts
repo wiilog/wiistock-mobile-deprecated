@@ -10,7 +10,7 @@ import {MapLocation} from '@app/common/components/leaflet-map/leaflet-map.compon
 import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
-import {ApiService} from "@app/common/services/api.service";
+import {LoadingService} from "@app/common/services/loading.service";
 
 @Component({
     selector: 'wii-transport-list',
@@ -33,7 +33,8 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
     public mapVisible: boolean = false;
 
     public constructor(navService: NavService,
-                       public formatService: FormatService) {
+                       public formatService: FormatService,
+                       private loadingService: LoadingService) {
         super(navService);
     }
 
@@ -59,19 +60,16 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
             } : {})
         };
 
-        for (const line of this.round.lines) {
-            this.markers.push({
-                title: `${line.priority}. ${line.contact.name}`,
-                latitude: Number(line.contact.latitude),
-                longitude: Number(line.contact.longitude),
-            })
-        }
+        this.refreshMarkers();
     }
 
     public showTransport(transport: TransportRoundLine) {
+        console.log(transport);
         this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
             transport,
+            round: this.round,
             mode: this.mode,
+            callback: (transport) => this.updateTransportList(transport)
         });
     }
 
@@ -79,4 +77,24 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
         this.mapVisible = !this.mapVisible;
     }
 
+    public updateTransportList(transport: TransportRound = undefined): void {
+        const index = this.round.lines.findIndex((line: TransportRoundLine) => line.id === transport.id);
+        this.round.lines.splice(index, 1);
+        if(this.round.lines.length === 0) {
+            this.navService.pop();
+        } else {
+            this.round.total_transports = this.round.lines.length;
+            this.refreshMarkers();
+        }
+    }
+
+    public refreshMarkers(): void {
+        for (const line of this.round.lines) {
+            this.markers.push({
+                title: `${line.priority}. ${line.contact.name}`,
+                latitude: Number(line.contact.latitude),
+                longitude: Number(line.contact.longitude),
+            });
+        }
+    }
 }

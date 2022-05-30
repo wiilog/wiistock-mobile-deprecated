@@ -5,6 +5,8 @@ import {NavService} from '@app/common/services/nav/nav.service';
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {ToastService} from '@app/common/services/toast.service';
 import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
+import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
+import {TransportRound} from "@entities/transport-round";
 
 @Component({
     selector: 'wii-transport-show',
@@ -16,7 +18,9 @@ export class TransportShowPage extends PageComponent implements ViewWillEnter {
     public modeViewOnly = TransportCardMode.VIEW;
 
     public transport: TransportRoundLine;
+    public round: TransportRound;
     public packs: Array<any>;
+    private callback: (transport: TransportRoundLine) => void;
 
     public shouldDisplayFreeFields: boolean;
 
@@ -26,18 +30,25 @@ export class TransportShowPage extends PageComponent implements ViewWillEnter {
         super(navService);
     }
 
-    public ionViewWillEnter() {
+    public ionViewWillEnter(): void {
         this.mode = this.currentNavParams.get('mode');
         this.transport = this.currentNavParams.get('transport');
+        this.round = this.currentNavParams.get('round');
+        this.callback = this.currentNavParams.get('callback');
+        console.log(this.callback);
         this.packs = this.transport.packs.filter(({rejected}) => !rejected);
         this.shouldDisplayFreeFields = this.transport.free_fields.filter(freeField => freeField.value !== '').length > 0;
     }
 
-    public fail() {
-        this.toastService.presentToast(`Non implémenté`);
+    public fail(): void {
+        this.navService.push(NavPathEnum.TRANSPORT_FAILURE, {
+            transport: this.transport,
+            round: this.round,
+            callback: this.callback
+        });
     }
 
-    public depositOrCollect() {
+    public depositOrCollect(): void {
         this.toastService.presentToast(`Non implémenté`);
     }
 

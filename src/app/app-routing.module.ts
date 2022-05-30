@@ -302,6 +302,11 @@ const routes: Routes = [
         path: NavPathEnum.TRANSPORT_ROUND_PACK_LOAD_VALIDATE,
         loadChildren: () => import('@pages/track/transport-round-pack-load-validate/transport-round-pack-load-validate.module').then(m => m.TransportRoundPackLoadConfirmPageModule)
     },
+    {
+        path: 'transport-failure',
+        loadChildren: () => import('@pages/track/transport-failure/transport-failure.module').then(m => m.TransportFailurePageModule)
+    },
+
 ];
 
 @NgModule({
