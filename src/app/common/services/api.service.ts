@@ -50,6 +50,8 @@ export class ApiService {
     public static readonly GET_REJECT_MOTIVES = {method: GET, service: '/reject-motives'};
     public static readonly REJECT_PACK = {method: POST, service: '/reject-pack'};
     public static readonly LOAD_PACKS = {method: POST, service: '/load-packs'};
+    public static readonly FETCH_ROUND = {method: GET, service: '/fetch-round'};
+    public static readonly FETCH_TRANSPORT = {method: GET, service: '/fetch-transport'};
     public static readonly FINISH_TRANSPORT = {method: POST, service: '/finish-transport'};
     public static readonly HAS_NEW_PACKS = {method: GET, service: '/has-new-packs'};
     public static readonly START_DELIVERY_ROUND = {method: POST, service: '/start-round'};

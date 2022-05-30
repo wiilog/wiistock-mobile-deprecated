@@ -304,6 +304,11 @@ const routes: Routes = [
         loadChildren: () => import('@pages/track/transport-collect-natures/transport-collect-natures.module').then(m => m.TransportCollectNaturesPageModule)
     },
     {
+        path: NavPathEnum.TRANSPORT_PACK_DELIVER,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-pack-deliver/transport-pack-deliver.module').then(m => m.TransportPackDeliverPageModule)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'

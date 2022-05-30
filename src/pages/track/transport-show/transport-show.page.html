@@ -83,12 +83,13 @@
                     </ng-container>
                 </div>
             </div>
-
-            <wii-pack-count *ngIf="transport && packs"
-                            [title]="transport.kind === 'delivery' ? 'Colis à livrer' : 'Objets à collecter'"
-                            [packs]="packs">
-            </wii-pack-count>
         </div>
+
+        <wii-pack-count *ngIf="transport"
+                        mode="expected"
+                        [title]="transport.kind === 'delivery' ? 'Colis à livrer' : 'Objets à collecter'"
+                        [transport]="transport">
+        </wii-pack-count>
     </div>
     <div class="page-footer">
         <ion-button color="primary" fill="outline" (click)="fail()" [disabled]="mode === modeViewOnly">

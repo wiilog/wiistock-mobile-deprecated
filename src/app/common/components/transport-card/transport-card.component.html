@@ -36,7 +36,8 @@
         </div>
         <div class="transport-actions">
             <wii-icon *ngIf="transport.cancelled" class="button-icon" name="round-cross.svg" color="black"></wii-icon>
-            <wii-icon *ngIf="mode === modeViewOnly" class="button-icon" name="gps.svg" color="medium"></wii-icon>
+            <wii-icon *ngIf="transport.success" class="button-icon" name="check.svg" color="success"></wii-icon>
+            <wii-icon *ngIf="!transport.success && !transport.cancelled && mode === modeViewOnly" class="button-icon" name="gps.svg" color="medium"></wii-icon>
 
             <ng-container *ngIf="mode !== modeViewOnly">
                 <ng-container *ngIf="transport.success || transport.failure">

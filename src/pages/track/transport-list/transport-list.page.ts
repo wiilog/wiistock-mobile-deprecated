@@ -2,7 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 import {ViewWillEnter} from '@ionic/angular';
 import {PageComponent} from '@pages/page.component';
 import {NavService} from '@app/common/services/nav/nav.service';
-import { TransportRound } from '@entities/transport-round';
+import {TransportRound} from '@entities/transport-round';
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
 import {HeaderConfig} from '@app/common/components/panel/model/header-config';
 import {FormatService} from '@app/common/services/format.service';
@@ -10,7 +10,6 @@ import {MapLocation} from '@app/common/components/leaflet-map/leaflet-map.compon
 import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
-import {ApiService} from "@app/common/services/api.service";
 
 @Component({
     selector: 'wii-transport-list',
@@ -69,10 +68,21 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
     }
 
     public showTransport(transport: TransportRoundLine) {
-        this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
-            transport,
-            mode: this.mode,
-        });
+        if(this.mode === TransportCardMode.STARTABLE && (transport.success || transport.failure)) {
+            if(transport.success) {
+                this.navService.push(NavPathEnum.FINISH_TRANSPORT, {
+                    transport,
+                    edit: true,
+                });
+            } else {
+                //TODO: non livré et non collecté thomas
+            }
+        } else {
+            this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
+                transport,
+                mode: this.mode,
+            });
+        }
     }
 
     public toggleMap() {

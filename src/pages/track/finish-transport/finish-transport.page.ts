@@ -19,6 +19,7 @@ import {ToastService} from '@app/common/services/toast.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {NatureWithQuantity} from '@app/common/components/panel/model/form-viewer/form-viewer-table-config';
 import {FileService} from "@app/common/services/file.service";
+import {PackCountComponent} from '@app/common/components/pack-count/pack-count.component';
 
 @Component({
     selector: 'wii-finish-transport',
@@ -27,16 +28,16 @@ import {FileService} from "@app/common/services/file.service";
 })
 export class FinishTransportPage extends PageComponent implements ViewWillEnter {
 
-    @ViewChild('formPanelComponent', {static: false})
-    public formPanelComponent: FormPanelComponent;
+    @ViewChild('packCount', {static: false})
+    public packCount: PackCountComponent;
 
     public bodyConfig: Array<FormPanelParam>;
-    public detailsConfig: Array<FormViewerParam>;
 
     private loadingElement: HTMLIonLoadingElement;
     private apiSubscription: Subscription;
 
     public transport: TransportRoundLine;
+    public edit: boolean = false;
 
     public constructor(private networkService: NetworkService, private toastService: ToastService,
                        private loadingService: LoadingService, private apiService: ApiService, navService: NavService,
@@ -46,22 +47,14 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
 
     public ionViewWillEnter() {
         this.transport = this.currentNavParams.get('transport');
-
-        let packsCount = 0;
-        if(this.transport.kind === `delivery`) {
-            packsCount = this.transport.packs.length;
-        } else {
-            for(const nature of this.transport.narutes_to_collect) {
-                packsCount += nature.collected_quantity;
-            }
-        }
+        this.edit = this.currentNavParams.get('edit');
 
         this.bodyConfig = [{
             item: FormPanelInputComponent,
             config: {
                 label: `Commentaire`,
                 name: 'comment',
-                value: this.transport.comment,
+                value: this.transport.comment ?? ``,
                 inputConfig: {
                     type: 'text',
                     maxLength: '512',
@@ -88,40 +81,22 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                 inputConfig: {}
             }
         }];
-
-        const natures: {[name: string]: NatureWithQuantity} = {};
-        for(const pack of this.transport.packs) {
-            if(!natures[pack.nature]) {
-                natures[pack.nature] = {
-                    color: pack.color,
-                    title: pack.nature,
-                    label: `Quantité`,
-                    value: 0,
-                }
-            }
-
-            natures[pack.nature].value = natures[pack.nature].value as number + 1;
-        }
-
-        this.detailsConfig = [{
-            item: FormViewerTableComponent,
-            config: {
-                label: ``,
-                value: Object.values(natures),
-            }
-        }];
     }
 
     public onFormSubmit() {
         if (this.networkService.hasNetwork()) {
-            if (this.formPanelComponent.firstError) {
-                this.toastService.presentToast(this.formPanelComponent.firstError);
+            if (this.packCount.formPanelComponent.firstError) {
+                this.toastService.presentToast(this.packCount.formPanelComponent.firstError);
             }
             else if (!this.apiSubscription) {
-                let {comment, photo, signature} = this.formPanelComponent.values;
+                let {comment, photo, signature} = this.packCount.formPanelComponent.values;
+
+                this.transport.comment = comment;
+
                 const params = {
                     id: this.transport.id,
-                    comment,
+                    collectedPacks: JSON.stringify(this.transport.natures_to_collect),
+                    ...(comment ? {comment} : {}),
                     ...({
                         photo: (photo
                             ? this.fileService.createFile(
@@ -147,14 +122,32 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                             this.loadingElement = loading;
                         }),
                         flatMap(() => this.apiService.requestApi(ApiService.FINISH_TRANSPORT, {params})),
+                        flatMap((result) => this.apiService.requestApi(ApiService.FETCH_ROUND, {
+                            params: {round: this.transport.round.id},
+                        }).pipe(map((round) => [result, round]))),
                         flatMap((res) => this.dismissLoading().pipe(map(() => res))),
                     )
                     .subscribe(
-                        ({success, message}) => {
+                        ([{success, message}, round]) => {
+                            const currentRound = this.transport.round;
+
+                            //clear the round
+                            for(const key in currentRound) {
+                                delete currentRound[key];
+                            }
+
+                            //update the round's properties
+                            Object.assign(currentRound, round);
+
+                            //add back references to the round on the transport
+                            for(const transport of currentRound.lines) {
+                                transport.round = currentRound;
+                            }
+
                             this.unsubscribeApi();
                             if (success) {
                                 this.toastService.presentToast("Les données ont été sauvegardées");
-                                this.navService.pop();
+                                this.navService.runMultiplePop(this.edit ? 1 : 3);
                             }
                             else {
                                 this.toastService.presentToast(message || "Une erreur s'est produite.");

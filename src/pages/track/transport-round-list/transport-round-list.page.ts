@@ -151,8 +151,15 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
             zip(
                 this.loadingService.presentLoading('Récupération des tournées en cours'),
                 this.apiService.requestApi(ApiService.GET_TRANSPORT_ROUNDS)
-            ).subscribe(([loading, rounds]: [HTMLIonLoadingElement, any]) => {
+            ).subscribe(([loading, rounds]: [HTMLIonLoadingElement, Array<TransportRound>]) => {
                 loading.dismiss();
+
+                for(const round of rounds) {
+                    for(const transport of round.lines) {
+                        transport.round = round;
+                    }
+                }
+
                 this.transportRoundsByDates = rounds
                     .sort(({date: date1}, {date: date2}) => {
                         const momentDate1 = moment(date1, 'DD/MM/YYYY')

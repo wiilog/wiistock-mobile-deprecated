@@ -39,13 +39,14 @@ export class TransportShowPage extends PageComponent implements ViewWillEnter {
     }
 
     public depositOrCollect() {
-        console.log(this.transport);
         if(this.transport.kind === `collect`) {
             this.navService.push(NavPathEnum.TRANSPORT_COLLECT_NATURES, {
                 transport: this.transport,
             });
         } else {
-            this.toastService.presentToast(`Non implémenté`);
+            this.navService.push(NavPathEnum.TRANSPORT_PACK_DELIVER, {
+                transport: this.transport,
+            });
         }
     }
 

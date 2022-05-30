@@ -52,7 +52,7 @@ export class TransportCollectNaturesPage extends PageComponent implements ViewWi
     }
 
     public setCollectedQuantity(nature_id: number, value: number) {
-        for(const nature of this.transport.narutes_to_collect) {
+        for(const nature of this.transport.natures_to_collect) {
             if(nature.nature_id === nature_id) {
                 nature.collected_quantity = value;
                 return;

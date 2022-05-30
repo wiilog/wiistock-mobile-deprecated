@@ -5,6 +5,7 @@ import {FormViewerParam} from '@app/common/directives/form-viewer/form-viewer-pa
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
 import {NatureWithQuantity} from '@app/common/components/panel/model/form-viewer/form-viewer-table-config';
 import {FormViewerTableComponent} from '@app/common/components/panel/form-panel/form-viewer-table/form-viewer-table.component';
+import {TransportRoundLine} from '@entities/transport-round-line';
 
 @Component({
     selector: 'wii-pack-count',
@@ -17,13 +18,16 @@ export class PackCountComponent implements OnInit {
     public formPanelComponent: FormPanelComponent;
 
     @Input()
+    public mode: "actual" | "expected";
+
+    @Input()
     public title: string;
 
     @Input()
     public icon: string;
 
     @Input()
-    public packs: Array<any>;
+    public transport: TransportRoundLine;
 
     @Input()
     public body: Array<FormPanelParam>;
@@ -36,12 +40,35 @@ export class PackCountComponent implements OnInit {
 
     ngOnInit() {
         let packsCount = 0;
-        for(const pack of this.packs) {
-            if(pack.collected_quantity) {
-                packsCount += pack.collected_quantity;
-            } else {
+        const natures: {[name: string]: NatureWithQuantity} = {};
+
+        if(this.transport.kind === `delivery`) {
+            for (const pack of this.transport.packs) {
+                if (!natures[pack.nature]) {
+                    natures[pack.nature] = {
+                        color: pack.color,
+                        title: pack.nature,
+                        label: `Quantité`,
+                        value: 0,
+                    }
+                }
+
+                natures[pack.nature].value = natures[pack.nature].value as number + 1;
                 packsCount += 1;
             }
+        } else {
+            for(const nature of this.transport.natures_to_collect) {
+                let value = this.mode === `expected` ? nature.quantity_to_collect : nature.collected_quantity;
+                natures[nature.nature] = {
+                    color: nature.color,
+                    title: nature.nature,
+                    label: `Quantité`,
+                    value: value || `-`,
+                }
+
+                packsCount += value;
+            }
+
         }
 
         this.headerConfig = {
@@ -51,24 +78,6 @@ export class PackCountComponent implements OnInit {
                 name: this.icon ?? 'scanned-pack.svg',
             }
         };
-
-        const natures: {[name: string]: NatureWithQuantity} = {};
-        for(const pack of this.packs) {
-            if(!natures[pack.nature]) {
-                natures[pack.nature] = {
-                    color: pack.color,
-                    title: pack.nature,
-                    label: `Quantité`,
-                    value: 0,
-                }
-            }
-
-            if(pack.collected_quantity) {
-                natures[pack.nature].value = natures[pack.nature].value as number + pack.collected_quantity;
-            } else {
-                natures[pack.nature].value = natures[pack.nature].value as number + 1;
-            }
-        }
 
         this.detailsConfig = [{
             item: FormViewerTableComponent,
