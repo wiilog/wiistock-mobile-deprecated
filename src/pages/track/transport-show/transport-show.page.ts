@@ -35,7 +35,6 @@ export class TransportShowPage extends PageComponent implements ViewWillEnter {
         this.transport = this.currentNavParams.get('transport');
         this.round = this.currentNavParams.get('round');
         this.callback = this.currentNavParams.get('callback');
-        console.log(this.callback);
         this.packs = this.transport.packs.filter(({rejected}) => !rejected);
         this.shouldDisplayFreeFields = this.transport.free_fields.filter(freeField => freeField.value !== '').length > 0;
     }

@@ -36,15 +36,19 @@
         </div>
         <div class="transport-actions">
             <wii-icon *ngIf="transport.cancelled" class="button-icon" name="round-cross.svg" color="black"></wii-icon>
-            <wii-icon *ngIf="mode === modeViewOnly" class="button-icon" name="gps.svg" color="medium"></wii-icon>
-
-            <ng-container *ngIf="mode !== modeViewOnly">
-                <ng-container *ngIf="transport.success || transport.failure">
-                    <wii-icon class="button-icon" [name]="transport.success ? 'check.svg' : 'cross.svg'" color="success"></wii-icon>
-                    <wii-icon *ngIf="transport.collect && transport.success || transport.failure" class="button-icon" [name]="transport.collect.success ? 'check.svg' : 'cross.svg'" [color]="transport.collect.success ? 'success' : 'danger'"></wii-icon>
-                </ng-container>
-                <wii-icon *ngIf="!transport.success && !transport.failure" class="button-icon" name="gps.svg" color="black" (click)="navigate($event)"></wii-icon>
+            <ng-container *ngIf="transport.success || transport.failure">
+                <wii-icon class="button-icon"
+                          [name]="transport.success ? 'check.svg' : 'cross.svg'"
+                          [color]="transport.success ? 'success' : 'danger'"></wii-icon>
+                <wii-icon *ngIf="transport.collect && (transport.success || transport.failure)"
+                          class="button-icon"
+                          [name]="transport.collect.success ? 'check.svg' : 'cross.svg'"
+                          [color]="transport.collect.success ? 'success' : 'danger'"></wii-icon>
             </ng-container>
+            <wii-icon *ngIf="!transport.success && !transport.failure && !transport.cancelled"
+                      class="button-icon" name="gps.svg"
+                      (click)="navigate($event)"
+                      [color]="mode === modeViewOnly ? 'medium' : 'black'"></wii-icon>
         </div>
     </div>
 </wii-simple-card>

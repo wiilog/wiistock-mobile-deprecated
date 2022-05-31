@@ -64,7 +64,6 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
     }
 
     public showTransport(transport: TransportRoundLine) {
-        console.log(transport);
         this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
             transport,
             round: this.round,
@@ -77,15 +76,11 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
         this.mapVisible = !this.mapVisible;
     }
 
-    public updateTransportList(transport: TransportRound = undefined): void {
-        const index = this.round.lines.findIndex((line: TransportRoundLine) => line.id === transport.id);
-        this.round.lines.splice(index, 1);
-        if(this.round.lines.length === 0) {
-            this.navService.pop();
-        } else {
-            this.round.total_transports = this.round.lines.length;
-            this.refreshMarkers();
-        }
+    public updateTransportList(transport: TransportRoundLine|undefined): void {
+        const index = this.round.lines.findIndex((line => line.id === transport.id));
+        this.round.lines[index].failure = true;
+
+        this.refreshMarkers();
     }
 
     public refreshMarkers(): void {

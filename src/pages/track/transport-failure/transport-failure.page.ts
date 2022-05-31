@@ -59,7 +59,6 @@ export class TransportFailurePage extends PageComponent {
             this.transport = this.currentNavParams.get('transport');
             this.round = this.currentNavParams.get('round');
             this.callback = this.currentNavParams.get('callback');
-            console.log(this.callback);
 
             const motives = this.transport.kind === 'collect'
                 ? this.collectRejectMotives
