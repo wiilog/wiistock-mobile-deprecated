@@ -2,17 +2,12 @@ import {TransportRound} from '@entities/transport-round';
 
 export interface TransportRoundLine {
     id: number;
-    round: TransportRound,
+    round: TransportRound;
+    from_delivery: boolean;
     number: string;
     type: string;
     type_icon: string;
-    collect: {
-        type: string;
-        type_icon: string;
-        time_slot: string;
-        success: boolean;
-        failure: boolean;
-    };
+    collect: TransportRoundLine;
     status: string;
     kind: `delivery` | `collect`;
     natures_to_collect: Array<{
@@ -62,5 +57,5 @@ export interface TransportPack {
     loaded?: boolean;
     rejected?: boolean;
     delivered?: boolean;
-    deposited?: boolean;
+    returned?: boolean;
 }

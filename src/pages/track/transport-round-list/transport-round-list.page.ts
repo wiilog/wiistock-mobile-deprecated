@@ -93,6 +93,14 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         }
     }
 
+    public depositPacks(event: any, round: TransportRound) {
+
+    }
+
+    public finishRound(event: any, round: TransportRound) {
+
+    }
+
     proceedWithStart(event: any, round: TransportRound) {
         if (this.networkService.hasNetwork()) {
             const packs = round.lines

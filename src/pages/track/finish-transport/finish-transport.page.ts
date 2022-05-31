@@ -20,6 +20,8 @@ import {LoadingService} from '@app/common/services/loading.service';
 import {NatureWithQuantity} from '@app/common/components/panel/model/form-viewer/form-viewer-table-config';
 import {FileService} from "@app/common/services/file.service";
 import {PackCountComponent} from '@app/common/components/pack-count/pack-count.component';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
 
 @Component({
     selector: 'wii-finish-transport',
@@ -128,7 +130,7 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                         flatMap((res) => this.dismissLoading().pipe(map(() => res))),
                     )
                     .subscribe(
-                        ([{success, message}, round]) => {
+                        async ([{success, message}, round]) => {
                             const currentRound = this.transport.round;
 
                             //clear the round
@@ -147,7 +149,15 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                             this.unsubscribeApi();
                             if (success) {
                                 this.toastService.presentToast("Les données ont été sauvegardées");
-                                this.navService.runMultiplePop(this.edit ? 1 : 3);
+
+                                if(!this.edit && this.transport.collect) {
+                                    this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
+                                        transport: this.transport.collect,
+                                        mode: TransportCardMode.STARTABLE,
+                                    })
+                                } else {
+                                    await this.navService.runMultiplePop(this.edit ? 1 : (this.transport.from_delivery ? 6 : 3));
+                                }
                             }
                             else {
                                 this.toastService.presentToast(message || "Une erreur s'est produite.");

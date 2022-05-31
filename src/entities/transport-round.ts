@@ -16,5 +16,6 @@ export interface TransportRound {
     total_loaded: number;
     collected_packs: number;
     to_collect_packs: number;
-    lines: Array<TransportRoundLine>
+    lines: Array<TransportRoundLine>;
+    to_finish: boolean;
 }
