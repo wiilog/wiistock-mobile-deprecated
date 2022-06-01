@@ -96,11 +96,17 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
     }
 
     public depositPacks(event: any, round: TransportRound) {
-
+        event.stopPropagation();
+console.log('wtf?');
+        this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_MENU, {
+            round
+        });
     }
 
     public finishRound(event: any, round: TransportRound) {
+        event.stopPropagation();
 
+        //TODO: push la route
     }
 
     proceedWithStart(event: any, round: TransportRound) {
@@ -179,6 +185,9 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                 for(const round of rounds) {
                     for(const transport of round.lines) {
                         transport.round = round;
+                        if(transport.collect) {
+                            transport.collect.round = round;
+                        }
                     }
                 }
 

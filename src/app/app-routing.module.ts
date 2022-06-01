@@ -4,6 +4,7 @@ import {UserDisconnectedGuard} from '@app/guards/user-disconnected.guard';
 import {UserConnectedGuard} from '@app/guards/user-connected.guard';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {TransportShowPageRoutingModule} from '@pages/track/transport-show/transport-show-routing.module';
+import {TransportDepositMenuPageModule} from '@pages/track/transport-deposit-menu/transport-deposit-menu.module';
 
 const routes: Routes = [
     {
@@ -309,10 +310,20 @@ const routes: Routes = [
         loadChildren: () => import('@pages/track/transport-pack-deliver/transport-pack-deliver.module').then(m => m.TransportPackDeliverPageModule)
     },
     {
+        path: NavPathEnum.TRANSPORT_DEPOSIT_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-deposit-menu/transport-deposit-menu.module').then(m => m.TransportDepositMenuPageModule)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'
     },
+    {
+        path: 'transport-failure',
+        loadChildren: () => import('@pages/track/transport-failure/transport-failure.module').then(m => m.TransportFailurePageModule)
+    },
+
 ];
 
 @NgModule({

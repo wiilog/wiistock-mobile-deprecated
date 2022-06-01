@@ -10,6 +10,7 @@ import {MapLocation} from '@app/common/components/leaflet-map/leaflet-map.compon
 import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {LoadingService} from "@app/common/services/loading.service";
 
 @Component({
     selector: 'wii-transport-list',
@@ -32,13 +33,25 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
     public mapVisible: boolean = false;
 
     public constructor(navService: NavService,
-                       public formatService: FormatService) {
+                       public formatService: FormatService,
+                       private loadingService: LoadingService) {
         super(navService);
     }
 
     public ionViewWillEnter(): void {
         this.mode = this.currentNavParams.get('mode');
         this.round = this.currentNavParams.get('round');
+
+        for(const transport of this.round.lines) {
+            if(this.mode === TransportCardMode.STARTABLE && transport.success && transport.collect && !(transport.collect.success || transport.collect.failure)) {
+                this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
+                    transport: transport.collect,
+                    mode: TransportCardMode.STARTABLE,
+                });
+
+                break;
+            }
+        }
 
         this.headerConfig = {
             title: `T${this.round.number}`,
@@ -58,13 +71,7 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
             } : {})
         };
 
-        for (const line of this.round.lines) {
-            this.markers.push({
-                title: `${line.priority}. ${line.contact.name}`,
-                latitude: Number(line.contact.latitude),
-                longitude: Number(line.contact.longitude),
-            })
-        }
+        this.refreshMarkers();
     }
 
     public showTransport(transport: TransportRoundLine) {
@@ -78,10 +85,17 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
                 //TODO: non livré et non collecté thomas
             }
         } else {
-            this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
-                transport,
-                mode: this.mode,
-            });
+            if(this.mode === TransportCardMode.STARTABLE && transport.collect && transport.success && (!transport.collect.success || !transport.collect.failure)) {
+                this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
+                    transport: transport.collect,
+                    mode: this.mode,
+                });
+            } else {
+                this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
+                    transport,
+                    mode: this.mode,
+                });
+            }
         }
     }
 
@@ -89,4 +103,20 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
         this.mapVisible = !this.mapVisible;
     }
 
+    public updateTransportList(transport: TransportRoundLine|undefined): void {
+        const index = this.round.lines.findIndex((line => line.id === transport.id));
+        this.round.lines[index].failure = true;
+
+        this.refreshMarkers();
+    }
+
+    public refreshMarkers(): void {
+        for (const line of this.round.lines) {
+            this.markers.push({
+                title: `${line.priority}. ${line.contact.name}`,
+                latitude: Number(line.contact.latitude),
+                longitude: Number(line.contact.longitude),
+            });
+        }
+    }
 }
