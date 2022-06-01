@@ -42,6 +42,17 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
         this.mode = this.currentNavParams.get('mode');
         this.round = this.currentNavParams.get('round');
 
+        for(const transport of this.round.lines) {
+            if(this.mode === TransportCardMode.STARTABLE && transport.success && transport.collect && !(transport.collect.success || transport.collect.failure)) {
+                this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
+                    transport: transport.collect,
+                    mode: TransportCardMode.STARTABLE,
+                });
+
+                break;
+            }
+        }
+
         this.headerConfig = {
             title: `T${this.round.number}`,
             subtitle: [this.formatService.formatDate(this.round.date)],
@@ -74,10 +85,17 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
                 //TODO: non livré et non collecté thomas
             }
         } else {
-            this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
-                transport,
-                mode: this.mode,
-            });
+            if(this.mode === TransportCardMode.STARTABLE && transport.collect && transport.success && (!transport.collect.success || !transport.collect.failure)) {
+                this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
+                    transport: transport.collect,
+                    mode: this.mode,
+                });
+            } else {
+                this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
+                    transport,
+                    mode: this.mode,
+                });
+            }
         }
     }
 

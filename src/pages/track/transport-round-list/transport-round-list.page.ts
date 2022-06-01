@@ -167,6 +167,9 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                 for(const round of rounds) {
                     for(const transport of round.lines) {
                         transport.round = round;
+                        if(transport.collect) {
+                            transport.collect.round = round;
+                        }
                     }
                 }
 
