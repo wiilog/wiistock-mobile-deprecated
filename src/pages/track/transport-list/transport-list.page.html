@@ -17,7 +17,9 @@
 
     <div class="transport-list">
         <div *ngFor="let transport of round.lines" class="card-container">
-            <wii-transport-card [transport]="transport" [mode]="mode" (click)="showTransport(transport)">
+            <wii-transport-card [transport]="transport"
+                                [mode]="mode"
+                                (click)="showTransport(transport)">
             </wii-transport-card>
         </div>
     </div>

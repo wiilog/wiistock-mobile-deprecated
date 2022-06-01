@@ -45,14 +45,17 @@
                         <div>{{ round.estimated_distance }} km estimés</div>
                         <div>{{ round.estimated_time }} estimées</div>
                     </div>
-                    <div class="line" *ngIf="round.status !== 'En cours'">
+                    <div class="line" *ngIf="round.status === 'En attente livreur'">
                         <ion-button color="primary"
                                     [class.disabled]="round.loaded_packs === round.total_loaded"
-                                    size="small" (click)="load($event, round)">Charger
+                                    size="small"
+                                    (click)="load($event, round)">
+                            Charger
                         </ion-button>
                         <ion-button color="primary"
                                     [class.disabled]="round.loaded_packs !== round.total_loaded"
-                                    size="small" (click)="start($event, round)">
+                                    size="small"
+                                    (click)="start($event, round)">
                             Débuter la tournée
                         </ion-button>
                     </div>

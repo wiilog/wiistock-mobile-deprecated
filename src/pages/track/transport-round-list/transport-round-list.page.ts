@@ -137,16 +137,28 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                                 round: round.id
                             }
                         }
-                        this.loadingService.presentLoadingWhile({
-                            event: () => this.apiService.requestApi(ApiService.START_DELIVERY_ROUND, options)
-                        }).subscribe(() => {
-                            this.navService.push(NavPathEnum.TRANSPORT_LIST, {
-                                round,
-                                mode: TransportCardMode.STARTABLE,
-                            });
+                        this.loadingService
+                            .presentLoadingWhile({
+                                event: () => this.apiService.requestApi(ApiService.START_DELIVERY_ROUND, options)
+                            })
+                            .subscribe(({success, msg, round: apiRound}) => {
+                                if (round) {
+                                    Object.assign(round, apiRound);
+                                }
 
-                            event.stopPropagation();
-                        });
+                                if (msg) {
+                                    this.toastService.presentToast(msg);
+                                }
+
+                                if (success) {
+                                    this.navService.push(NavPathEnum.TRANSPORT_LIST, {
+                                        round,
+                                        mode: TransportCardMode.STARTABLE,
+                                    });
+                                }
+
+                                event.stopPropagation();
+                            });
                     }
                 }
             });
