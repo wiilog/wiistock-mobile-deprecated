@@ -5,7 +5,7 @@ import {NavService} from '@app/common/services/nav/nav.service';
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {ToastService} from '@app/common/services/toast.service';
 import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
-import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {TransportRound} from "@entities/transport-round";
 
 @Component({
@@ -48,7 +48,15 @@ export class TransportShowPage extends PageComponent implements ViewWillEnter {
     }
 
     public depositOrCollect(): void {
-        this.toastService.presentToast(`Non implémenté`);
+        if(this.transport.kind === `collect`) {
+            this.navService.push(NavPathEnum.TRANSPORT_COLLECT_NATURES, {
+                transport: this.transport,
+            });
+        } else {
+            this.navService.push(NavPathEnum.TRANSPORT_PACK_DELIVER, {
+                transport: this.transport,
+            });
+        }
     }
 
 }

@@ -2,7 +2,7 @@ import {Component, ViewChild} from '@angular/core';
 import {ViewWillEnter} from '@ionic/angular';
 import {PageComponent} from '@pages/page.component';
 import {NavService} from '@app/common/services/nav/nav.service';
-import { TransportRound } from '@entities/transport-round';
+import {TransportRound} from '@entities/transport-round';
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
 import {HeaderConfig} from '@app/common/components/panel/model/header-config';
 import {FormatService} from '@app/common/services/format.service';
@@ -64,12 +64,21 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
     }
 
     public showTransport(transport: TransportRoundLine) {
-        this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
-            transport,
-            round: this.round,
-            mode: this.mode,
-            callback: (transport) => this.updateTransportList(transport)
-        });
+        if(this.mode === TransportCardMode.STARTABLE && (transport.success || transport.failure)) {
+            if(transport.success) {
+                this.navService.push(NavPathEnum.FINISH_TRANSPORT, {
+                    transport,
+                    edit: true,
+                });
+            } else {
+                //TODO: non livré et non collecté thomas
+            }
+        } else {
+            this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
+                transport,
+                mode: this.mode,
+            });
+        }
     }
 
     public toggleMap() {

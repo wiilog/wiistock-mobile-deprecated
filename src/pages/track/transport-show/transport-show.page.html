@@ -3,7 +3,7 @@
         <div class="item-group">
             <div class="item header">
                 <div class="transport-infos">
-                    <wii-icon name="truck.svg" color="purple"></wii-icon>
+                    <wii-icon [name]="transport.kind === 'delivery' ? 'truck.svg' : 'collect-hand.svg'" color="purple"></wii-icon>
                     <div>
                         <b>{{ transport.kind === 'delivery' ? 'Livraison' : 'Collecte' }}</b><br>
                         <i>OTR{{ transport.number }}</i>
@@ -83,12 +83,13 @@
                     </ng-container>
                 </div>
             </div>
-
-            <wii-pack-count *ngIf="transport && packs"
-                            [title]="transport.kind === 'delivery' ? 'Colis à livrer' : 'Objets à collecter'"
-                            [packs]="packs">
-            </wii-pack-count>
         </div>
+
+        <wii-pack-count *ngIf="transport"
+                        mode="expected"
+                        [title]="transport.kind === 'delivery' ? 'Colis à livrer' : 'Objets à collecter'"
+                        [transport]="transport">
+        </wii-pack-count>
     </div>
     <div class="page-footer">
         <ion-button color="primary" fill="outline" (click)="fail()" [disabled]="transport.cancelled || mode === modeViewOnly">

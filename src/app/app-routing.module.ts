@@ -289,18 +289,29 @@ const routes: Routes = [
         loadChildren: () => import('@pages/track/transport-list/transport-list.module').then(m => m.TransportListPageModule)
     },
     {
-        path: '',
-        redirectTo: 'login',
-        pathMatch: 'full'
-    },
-    {
         path: NavPathEnum.TRANSPORT_ROUND_PACK_LOAD,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/track/transport-round-pack-load/transport-round-pack-load.module').then(m => m.TransportRoundPackLoadPageModule)
     },
     {
         path: NavPathEnum.TRANSPORT_ROUND_PACK_LOAD_VALIDATE,
+        canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/track/transport-round-pack-load-validate/transport-round-pack-load-validate.module').then(m => m.TransportRoundPackLoadConfirmPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_COLLECT_NATURES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-collect-natures/transport-collect-natures.module').then(m => m.TransportCollectNaturesPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_PACK_DELIVER,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-pack-deliver/transport-pack-deliver.module').then(m => m.TransportPackDeliverPageModule)
+    },
+    {
+        path: '',
+        redirectTo: 'login',
+        pathMatch: 'full'
     },
     {
         path: 'transport-failure',
