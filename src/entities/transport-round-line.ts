@@ -1,26 +1,23 @@
+import {TransportRound} from '@entities/transport-round';
+
 export interface TransportRoundLine {
     id: number;
+    round: TransportRound;
+    from_delivery: boolean;
     number: string;
     type: string;
     type_icon: string;
-    collect: {
-        type: string;
-        type_icon: string;
-        time_slot: string;
-        success: boolean;
-        failure: boolean;
-    };
+    collect: TransportRoundLine;
     status: string;
     kind: `delivery` | `collect`;
-    packs: Array<{
-        code: string;
-        nature: string;
+    natures_to_collect: Array<{
         nature_id: number;
-        temperature_range: string;
+        nature: string;
         color: string;
-        loaded?: boolean;
-        rejected?: boolean;
+        quantity_to_collect: number;
+        collected_quantity: number;
     }>;
+    packs: Array<TransportPack>;
     expected_at: string;
     expected_time: string;
     estimated_time: string;
@@ -49,4 +46,16 @@ export interface TransportRoundLine {
     cancelled: boolean;
     success: boolean;
     failure: boolean;
+}
+
+export interface TransportPack {
+    code: string;
+    nature: string;
+    nature_id: number;
+    temperature_range: string;
+    color: string;
+    loaded?: boolean;
+    rejected?: boolean;
+    delivered?: boolean;
+    returned?: boolean;
 }

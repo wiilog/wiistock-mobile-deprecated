@@ -8,6 +8,7 @@ import {BadgeConfig} from '@app/common/components/badge/badge-config';
     styleUrls: ['./badge.component.scss']
 })
 export class BadgeComponent {
+
     @Input()
     public config: BadgeConfig;
 

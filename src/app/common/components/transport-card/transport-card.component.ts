@@ -3,7 +3,6 @@ import {TransportRoundLine} from '@entities/transport-round-line';
 import {SimpleCardTitle} from '@app/common/components/simple-card/simple-card.component';
 import {Platform} from '@ionic/angular';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
-import {Emplacement} from '@entities/emplacement';
 import {NavService} from '@app/common/services/nav/nav.service';
 
 export enum TransportCardMode {
@@ -63,6 +62,10 @@ export class TransportCardComponent implements OnInit {
     }
 
     public navigate(event: any) {
+        if(this.mode === this.modeViewOnly) {
+            return;
+        }
+
         const contact = this.transport.contact;
 
         if (this.platform.is(`android`)) {

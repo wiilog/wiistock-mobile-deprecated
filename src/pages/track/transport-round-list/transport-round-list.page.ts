@@ -53,23 +53,25 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
     }
 
     public load(event: any, round: TransportRound): void {
+        event.stopPropagation();
+
+        if(round.loaded_packs === round.total_loaded) {
+            return;
+        }
+
         this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD, {
             round
         });
-
-        event.stopPropagation();
     }
 
     public start(event: any, round: TransportRound) {
         event.stopPropagation();
-        let showWarning = false;
-        for (const line of round.lines) {
-            if (!line.packs || line.packs.length) {
-                showWarning = true;
-            }
+
+        if(round.loaded_packs !== round.total_loaded) {
+            return;
         }
 
-        if (showWarning) {
+        if (round.ready_deliveries != round.total_ready_deliveries) {
             this.alertService.show({
                 header: `Attention`,
                 cssClass: `warning`,
@@ -91,6 +93,14 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         } else {
             this.proceedWithStart(event, round);
         }
+    }
+
+    public depositPacks(event: any, round: TransportRound) {
+
+    }
+
+    public finishRound(event: any, round: TransportRound) {
+
     }
 
     proceedWithStart(event: any, round: TransportRound) {
@@ -128,7 +138,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                             }
                         }
                         this.loadingService.presentLoadingWhile({
-                            event: () => this.apiService.requestApi(ApiService.PATCH_ROUND_STATUS, options)
+                            event: () => this.apiService.requestApi(ApiService.START_DELIVERY_ROUND, options)
                         }).subscribe(() => {
                             this.navService.push(NavPathEnum.TRANSPORT_LIST, {
                                 round,
@@ -151,8 +161,15 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
             zip(
                 this.loadingService.presentLoading('Récupération des tournées en cours'),
                 this.apiService.requestApi(ApiService.GET_TRANSPORT_ROUNDS)
-            ).subscribe(([loading, rounds]: [HTMLIonLoadingElement, any]) => {
+            ).subscribe(([loading, rounds]: [HTMLIonLoadingElement, Array<TransportRound>]) => {
                 loading.dismiss();
+
+                for(const round of rounds) {
+                    for(const transport of round.lines) {
+                        transport.round = round;
+                    }
+                }
+
                 this.transportRoundsByDates = rounds
                     .sort(({date: date1}, {date: date2}) => {
                         const momentDate1 = moment(date1, 'DD/MM/YYYY')

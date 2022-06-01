@@ -44,6 +44,7 @@ import {LeafletMapComponent} from '@app/common/components/leaflet-map/leaflet-ma
 import {SimpleCardComponent} from '@app/common/components/simple-card/simple-card.component';
 import {TransportCardComponent} from '@app/common/components/transport-card/transport-card.component';
 import {PackCountComponent} from '@app/common/components/pack-count/pack-count.component';
+import {NumberInputComponent} from '@app/common/components/number-input/number-input.component';
 
 @NgModule({
     declarations: [
@@ -81,6 +82,7 @@ import {PackCountComponent} from '@app/common/components/pack-count/pack-count.c
         SimpleCardComponent,
         TransportCardComponent,
         PackCountComponent,
+        NumberInputComponent,
     ],
     imports: [
         AngularCommonModule,
@@ -109,6 +111,7 @@ import {PackCountComponent} from '@app/common/components/pack-count/pack-count.c
         SimpleCardComponent,
         TransportCardComponent,
         PackCountComponent,
+        NumberInputComponent,
     ],
     providers: [
         // ionic
