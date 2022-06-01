@@ -144,6 +144,9 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                             //add back references to the round on the transport
                             for(const transport of currentRound.lines) {
                                 transport.round = currentRound;
+                                if(transport.collect) {
+                                    transport.collect.round = currentRound;
+                                }
                             }
 
                             this.unsubscribeApi();
@@ -151,12 +154,15 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                                 this.toastService.presentToast("Les données ont été sauvegardées");
 
                                 if(!this.edit && this.transport.collect) {
+                                    console.log(this.transport.collect);
+                                    await this.navService.runMultiplePop(3);
+
                                     this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
                                         transport: this.transport.collect,
                                         mode: TransportCardMode.STARTABLE,
                                     })
                                 } else {
-                                    await this.navService.runMultiplePop(this.edit ? 1 : (this.transport.from_delivery ? 6 : 3));
+                                    await this.navService.runMultiplePop(this.edit ? 1 : 3);
                                 }
                             }
                             else {

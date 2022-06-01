@@ -319,6 +319,11 @@ const routes: Routes = [
         redirectTo: 'login',
         pathMatch: 'full'
     },
+    {
+        path: 'transport-failure',
+        loadChildren: () => import('@pages/track/transport-failure/transport-failure.module').then(m => m.TransportFailurePageModule)
+    },
+
 ];
 
 @NgModule({
