@@ -97,24 +97,24 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
 
                 const params = {
                     id: this.transport.id,
-                    collectedPacks: JSON.stringify(this.transport.natures_to_collect),
                     ...(comment ? {comment} : {}),
-                    ...({
-                        photo: (photo
-                            ? this.fileService.createFile(
-                                photo,
-                                FileService.SIGNATURE_IMAGE_EXTENSION,
-                                FileService.SIGNATURE_IMAGE_TYPE,
-                                "photo")
-                            : undefined),
-                        signature: (signature
-                            ? this.fileService.createFile(
-                                signature,
-                                FileService.SIGNATURE_IMAGE_EXTENSION,
-                                FileService.SIGNATURE_IMAGE_TYPE,
-                                "signature")
-                            : undefined)
-                    }),
+                    ...(this.transport.natures_to_collect ? {collectedPacks: JSON.stringify(this.transport.natures_to_collect)} : {}),
+                    ...(photo ? {
+                        photo: this.fileService.createFile(
+                            photo,
+                            FileService.SIGNATURE_IMAGE_EXTENSION,
+                            FileService.SIGNATURE_IMAGE_TYPE,
+                            "photo"
+                        )
+                    } : {}),
+                    ...(signature ? {
+                        signature: this.fileService.createFile(
+                            signature,
+                            FileService.SIGNATURE_IMAGE_EXTENSION,
+                            FileService.SIGNATURE_IMAGE_TYPE,
+                            "signature"
+                        )
+                    } : {}),
                 };
 
                 this.apiSubscription = this.dismissLoading()
