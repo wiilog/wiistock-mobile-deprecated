@@ -4,6 +4,7 @@ import {UserDisconnectedGuard} from '@app/guards/user-disconnected.guard';
 import {UserConnectedGuard} from '@app/guards/user-connected.guard';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {TransportShowPageRoutingModule} from '@pages/track/transport-show/transport-show-routing.module';
+import {TransportDepositMenuPageModule} from '@pages/track/transport-deposit-menu/transport-deposit-menu.module';
 
 const routes: Routes = [
     {
@@ -289,18 +290,34 @@ const routes: Routes = [
         loadChildren: () => import('@pages/track/transport-list/transport-list.module').then(m => m.TransportListPageModule)
     },
     {
-        path: '',
-        redirectTo: 'login',
-        pathMatch: 'full'
-    },
-    {
         path: NavPathEnum.TRANSPORT_ROUND_PACK_LOAD,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/track/transport-round-pack-load/transport-round-pack-load.module').then(m => m.TransportRoundPackLoadPageModule)
     },
     {
         path: NavPathEnum.TRANSPORT_ROUND_PACK_LOAD_VALIDATE,
+        canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/track/transport-round-pack-load-validate/transport-round-pack-load-validate.module').then(m => m.TransportRoundPackLoadConfirmPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_COLLECT_NATURES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-collect-natures/transport-collect-natures.module').then(m => m.TransportCollectNaturesPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_PACK_DELIVER,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-pack-deliver/transport-pack-deliver.module').then(m => m.TransportPackDeliverPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_DEPOSIT_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-deposit-menu/transport-deposit-menu.module').then(m => m.TransportDepositMenuPageModule)
+    },
+    {
+        path: '',
+        redirectTo: 'login',
+        pathMatch: 'full'
     },
 ];
 

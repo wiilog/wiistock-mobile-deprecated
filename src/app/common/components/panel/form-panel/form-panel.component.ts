@@ -46,6 +46,7 @@ export class FormPanelComponent implements AfterViewInit {
                 ? [...(oldValue || []), value]
                 : value
         };
+
         return this.formElements
             ? this.formElements.reduce((acc, {instance: {group, name, value}, param: {config}}: FormPanelDirective) => ({
                 ...acc,
