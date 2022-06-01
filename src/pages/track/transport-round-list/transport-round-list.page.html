@@ -47,11 +47,11 @@
                     </div>
                     <div class="line" *ngIf="round.status !== 'En cours'">
                         <ion-button color="primary"
-                                    [disabled]="(round.loaded_packs === round.total_loaded) || round.total_loaded === 0"
+                                    [class.disabled]="round.loaded_packs === round.total_loaded"
                                     size="small" (click)="load($event, round)">Charger
                         </ion-button>
                         <ion-button color="primary"
-                                    [disabled]="(round.loaded_packs !== round.total_loaded) || round.total_loaded === 0"
+                                    [class.disabled]="round.loaded_packs !== round.total_loaded"
                                     size="small" (click)="start($event, round)">
                             Débuter la tournée
                         </ion-button>

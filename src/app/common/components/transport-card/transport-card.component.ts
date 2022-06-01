@@ -62,6 +62,10 @@ export class TransportCardComponent implements OnInit {
     }
 
     public navigate(event: any) {
+        if(this.mode === this.modeViewOnly) {
+            return;
+        }
+
         const contact = this.transport.contact;
 
         if (this.platform.is(`android`)) {

@@ -53,23 +53,25 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
     }
 
     public load(event: any, round: TransportRound): void {
+        event.stopPropagation();
+
+        if(round.loaded_packs === round.total_loaded) {
+            return;
+        }
+
         this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD, {
             round
         });
-
-        event.stopPropagation();
     }
 
     public start(event: any, round: TransportRound) {
         event.stopPropagation();
-        let showWarning = false;
-        for (const line of round.lines) {
-            if (!line.packs || line.packs.length) {
-                showWarning = true;
-            }
+
+        if(round.loaded_packs !== round.total_loaded) {
+            return;
         }
 
-        if (showWarning) {
+        if (round.ready_deliveries != round.total_ready_deliveries) {
             this.alertService.show({
                 header: `Attention`,
                 cssClass: `warning`,

@@ -62,7 +62,7 @@ ion-button {
         }
     }
 
-    &[disabled] {
+    &[disabled], &.disabled {
         --ion-color-base: #CBCBCB !important;
         opacity: 1;
     }
