@@ -4,6 +4,7 @@ import {UserDisconnectedGuard} from '@app/guards/user-disconnected.guard';
 import {UserConnectedGuard} from '@app/guards/user-connected.guard';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {TransportShowPageRoutingModule} from '@pages/track/transport-show/transport-show-routing.module';
+import {TransportDepositMenuPageModule} from '@pages/track/transport-deposit-menu/transport-deposit-menu.module';
 
 const routes: Routes = [
     {
@@ -307,6 +308,11 @@ const routes: Routes = [
         path: NavPathEnum.TRANSPORT_PACK_DELIVER,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/track/transport-pack-deliver/transport-pack-deliver.module').then(m => m.TransportPackDeliverPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_DEPOSIT_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-deposit-menu/transport-deposit-menu.module').then(m => m.TransportDepositMenuPageModule)
     },
     {
         path: '',
