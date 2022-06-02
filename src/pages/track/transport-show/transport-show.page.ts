@@ -32,7 +32,6 @@ export class TransportShowPage extends PageComponent implements ViewWillEnter {
     public ionViewWillEnter(): void {
         this.mode = this.currentNavParams.get('mode');
         this.transport = this.currentNavParams.get('transport');
-        this.round = this.currentNavParams.get('round');
 
         this.packs = this.transport.packs.filter(({rejected}) => !rejected);
         this.shouldDisplayFreeFields = this.transport.free_fields.filter(freeField => freeField.value !== '').length > 0;
@@ -41,7 +40,6 @@ export class TransportShowPage extends PageComponent implements ViewWillEnter {
     public fail(): void {
         this.navService.push(NavPathEnum.TRANSPORT_FAILURE, {
             transport: this.transport,
-            round: this.round,
         });
     }
 

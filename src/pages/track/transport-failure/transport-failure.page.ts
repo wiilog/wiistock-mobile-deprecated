@@ -40,7 +40,6 @@ export class TransportFailurePage extends PageComponent {
     private deliveryRejectMotives: Array<any>;
     private collectRejectMotives: Array<any>;
     public transport: TransportRoundLine;
-    private round: TransportRound;
 
     constructor(private apiService: ApiService,
                 private loadingService: LoadingService,
@@ -57,7 +56,6 @@ export class TransportFailurePage extends PageComponent {
             this.deliveryRejectMotives = delivery;
             this.collectRejectMotives = collect;
             this.transport = this.currentNavParams.get('transport');
-            this.round = this.currentNavParams.get('round');
 
             const motives = this.transport.kind === 'collect'
                 ? this.collectRejectMotives
