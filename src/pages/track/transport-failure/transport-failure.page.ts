@@ -90,7 +90,7 @@ export class TransportFailurePage extends PageComponent {
                         label: `Commentaire`,
                         name: 'comment',
                         inputConfig: {
-                            required: true,
+                            required: false,
                             maxLength: '512',
                         },
                         errors: {

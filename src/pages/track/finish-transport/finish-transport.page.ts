@@ -50,7 +50,7 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
     public ionViewWillEnter() {
         this.transport = this.currentNavParams.get('transport');
         this.edit = this.currentNavParams.get('edit');
-
+console.log(this.transport);
         this.bodyConfig = [{
             item: FormPanelInputComponent,
             config: {
