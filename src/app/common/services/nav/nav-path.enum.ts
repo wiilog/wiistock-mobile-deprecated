@@ -59,4 +59,5 @@ export enum NavPathEnum {
     TRANSPORT_COLLECT_NATURES = 'transport-collect-natures',
     TRANSPORT_PACK_DELIVER = 'transport-pack-deliver',
     TRANSPORT_DEPOSIT_MENU = 'transport-deposit-menu',
+    TRANSPORT_ROUND_FINISH_PACK_DROP = 'transport-round-finish-pack-drop',
 }

@@ -97,7 +97,6 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
 
     public depositPacks(event: any, round: TransportRound) {
         event.stopPropagation();
-console.log('wtf?');
         this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_MENU, {
             round
         });
@@ -105,8 +104,7 @@ console.log('wtf?');
 
     public finishRound(event: any, round: TransportRound) {
         event.stopPropagation();
-
-        //TODO: push la route
+        this.navService.push(NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP, {round})
     }
 
     proceedWithStart(event: any, round: TransportRound) {

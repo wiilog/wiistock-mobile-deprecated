@@ -315,10 +315,15 @@ const routes: Routes = [
         loadChildren: () => import('@pages/track/transport-deposit-menu/transport-deposit-menu.module').then(m => m.TransportDepositMenuPageModule)
     },
     {
+        path: NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP,
+        loadChildren: () => import('@pages/track/transport-round-finish-pack-drop/transport-round-finish-pack-drop.module').then(m => m.TransportRoundFinishPackDropPageModule)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'
     },
+
 ];
 
 @NgModule({
