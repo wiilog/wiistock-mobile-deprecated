@@ -94,7 +94,7 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
                     : [];
                 const unmatchedTemperatures = [];
                 this.packs.forEach((pack) => {
-                    if (temperatureRanges.length > 0 && pack.temperature_range && !temperatureRanges.includes(pack.temperature_range)) {
+                    if (temperatureRanges.length === 0 && pack.temperature_range || !temperatureRanges.includes(pack.temperature_range)) {
                         unmatchedTemperatures.push(pack);
                     }
                 });
@@ -123,7 +123,7 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
                                 message: `Le${plural ? 's' : ''} colis ${formattedUnmatchedNatures} ne peu${plural ? 'vent' : 't'} pas être déposé${plural ? 's' : ''} sur l'emplacement <strong>${locationLabel}</strong> de nature${pluralNatures ? 's' : ''} ${joinAllowedNatureLabels}.`,
                                 buttons: [
                                     {
-                                        text: 'Confirmer',
+                                        text: 'OK',
                                     },
                                 ]
                             });
@@ -143,7 +143,7 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
                         message: `Le${plural ? 's' : ''} colis ${formattedUnmatchedTemperatures} ne peu${plural ? 'vent' : 't'} pas être déposé${plural ? 's' : ''} sur l'emplacement <strong>${locationLabel}</strong> (température non adéquate).`,
                         buttons: [
                             {
-                                text: 'Confirmer'
+                                text: 'OK'
                             },
                         ]
                     });
