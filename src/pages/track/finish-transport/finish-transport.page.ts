@@ -22,6 +22,7 @@ import {FileService} from "@app/common/services/file.service";
 import {PackCountComponent} from '@app/common/components/pack-count/pack-count.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
+import {TransportService} from '@app/common/services/transport.service';
 
 @Component({
     selector: 'wii-finish-transport',
@@ -43,7 +44,7 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
 
     public constructor(private networkService: NetworkService, private toastService: ToastService,
                        private loadingService: LoadingService, private apiService: ApiService, navService: NavService,
-                       private fileService: FileService) {
+                       private transportService: TransportService, private fileService: FileService) {
         super(navService);
     }
 
@@ -131,23 +132,7 @@ console.log(this.transport);
                     )
                     .subscribe(
                         async ([{success, message}, round]) => {
-                            const currentRound = this.transport.round;
-
-                            //clear the round
-                            for(const key in currentRound) {
-                                delete currentRound[key];
-                            }
-
-                            //update the round's properties
-                            Object.assign(currentRound, round);
-
-                            //add back references to the round on the transport
-                            for(const transport of currentRound.lines) {
-                                transport.round = currentRound;
-                                if(transport.collect) {
-                                    transport.collect.round = currentRound;
-                                }
-                            }
+                            this.transportService.treatTransport(this.transport, round);
 
                             this.unsubscribeApi();
                             if (success) {

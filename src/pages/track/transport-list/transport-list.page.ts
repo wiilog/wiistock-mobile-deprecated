@@ -43,6 +43,7 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
         this.round = this.currentNavParams.get('round');
 
         for(const transport of this.round.lines) {
+            console.log(transport);
             if(this.mode === TransportCardMode.STARTABLE && transport.success && transport.collect && !(transport.collect.success || transport.collect.failure)) {
                 this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
                     transport: transport.collect,

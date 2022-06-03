@@ -22,6 +22,7 @@ import {FileService} from '@app/common/services/file.service';
 import {TransportRound} from '@entities/transport-round';
 import {mergeMap} from 'rxjs/operators';
 import {filter, flatMap, map, tap} from 'rxjs/operators';
+import {TransportService} from '@app/common/services/transport.service';
 
 @Component({
     selector: 'wii-transport-failure',
@@ -45,6 +46,7 @@ export class TransportFailurePage extends PageComponent {
                 private loadingService: LoadingService,
                 private toastService: ToastService,
                 private fileService: FileService,
+                private transportService: TransportService,
                 navService: NavService) {
         super(navService);
     }
@@ -141,24 +143,7 @@ export class TransportFailurePage extends PageComponent {
                         }).pipe(map((round) => [result, round]))),
                     )
             }).subscribe(([result, round]) => {
-                const currentRound = this.transport.round;
-
-                //clear the round
-                for(const key in currentRound) {
-                    delete currentRound[key];
-                }
-
-                //update the round's properties
-                Object.assign(currentRound, round);
-
-                //add back references to the round on the transport
-                for(const transport of currentRound.lines) {
-                    transport.round = currentRound;
-                    if(transport.collect) {
-                        transport.collect.round = currentRound;
-                    }
-                }
-
+                this.transportService.treatTransport(this.transport, round);
                 this.navService.runMultiplePop(2);
             });
         }
