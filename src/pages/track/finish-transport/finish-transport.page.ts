@@ -51,7 +51,7 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
     public ionViewWillEnter() {
         this.transport = this.currentNavParams.get('transport');
         this.edit = this.currentNavParams.get('edit');
-console.log(this.transport);
+
         this.bodyConfig = [{
             item: FormPanelInputComponent,
             config: {
@@ -139,7 +139,6 @@ console.log(this.transport);
                                 this.toastService.presentToast("Les données ont été sauvegardées");
 
                                 if(!this.edit && this.transport.collect) {
-                                    console.log(this.transport.collect);
                                     await this.navService.runMultiplePop(3);
 
                                     this.navService.push(NavPathEnum.TRANSPORT_SHOW, {

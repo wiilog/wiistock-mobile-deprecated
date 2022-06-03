@@ -189,7 +189,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                         }
                     }
                 }
-console.log(rounds);
+
                 this.transportRoundsByDates = rounds
                     .sort(({date: date1}, {date: date2}) => {
                         const momentDate1 = moment(date1, 'DD/MM/YYYY')

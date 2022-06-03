@@ -133,7 +133,7 @@ export class TransportPackDeliverPage extends PageComponent {
 
     private refreshListDeliveredConfig(): void {
         const deliveredPacks = this.packs.filter(({delivered, rejected}) => delivered && !rejected);
-        console.error(this.packs, deliveredPacks);
+
         const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
