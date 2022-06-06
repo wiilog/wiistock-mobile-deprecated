@@ -19,9 +19,7 @@ import {
 } from '@app/common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component';
 import {HeaderConfig} from '@app/common/components/panel/model/header-config';
 import {FileService} from '@app/common/services/file.service';
-import {TransportRound} from '@entities/transport-round';
-import {mergeMap} from 'rxjs/operators';
-import {filter, flatMap, map, tap} from 'rxjs/operators';
+import {flatMap, map} from 'rxjs/operators';
 import {TransportService} from '@app/common/services/transport.service';
 
 @Component({

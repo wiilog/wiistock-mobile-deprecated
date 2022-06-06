@@ -223,7 +223,7 @@ export class TransportRoundPackLoadPage extends PageComponent {
         const selectedIndex = this.packs.findIndex(({code}) => code === barCode);
         if (selectedIndex > -1 && this.packs[selectedIndex].loading) {
             this.packs[selectedIndex].loading = false;
-            
+
             this.refreshListToLoadConfig();
             this.refreshListLoadedConfig();
         }
@@ -318,7 +318,12 @@ export class TransportRoundPackLoadPage extends PageComponent {
                                                 this.refreshListLoadedConfig();
                                                 this.refreshListToLoadConfig();
 
-                                                this.toastService.presentToast(`Le colis <strong>${pack.code}</strong> a bien été écarté`)
+                                                this.toastService.presentToast(`Le colis <strong>${pack.code}</strong> a bien été écarté`);
+
+                                                if (response.rejectedRound) {
+                                                    this.toastService.presentToast(`La livraison a été rejetée`);
+                                                    this.navService.pop();
+                                                }
                                             }
                                         });
                                 } else {
