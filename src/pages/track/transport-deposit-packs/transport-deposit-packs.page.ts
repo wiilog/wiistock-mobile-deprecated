@@ -38,6 +38,7 @@ export class TransportDepositPacksPage extends PageComponent {
         nature_id: number;
         returning: boolean;
         returned: boolean;
+        rejected: boolean;
     }>;
 
     public packsToReturnListConfig: {
@@ -72,7 +73,7 @@ export class TransportDepositPacksPage extends PageComponent {
         this.packs = this.round.lines
             .filter((line) => line.failure || line.cancelled)
             .reduce((acc: Array<any>, line: TransportRoundLine) => [...(line.packs || []), ...acc], [])
-            .filter(({returned}) => !returned);
+            .filter(({returned, rejected}) => !returned && !rejected);
 
         zip(
             this.loadingService.presentLoading('Récupération des données en cours'),
