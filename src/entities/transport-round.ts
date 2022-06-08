@@ -18,4 +18,15 @@ export interface TransportRound {
     to_collect_packs: number;
     lines: Array<TransportRoundLine>;
     to_finish: boolean;
+
+    not_delivered: number;
+    returned_packs: number;
+    packs_to_return: number;
+
+    done_collects: number;
+    deposited_packs: number;
+    packs_to_deposit: number;
+
+    deposited_delivery_packs: boolean;
+    deposited_collect_packs: boolean;
 }

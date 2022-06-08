@@ -1,10 +1,11 @@
 import {Component, ViewChild} from '@angular/core';
 import {NavService} from "@app/common/services/nav/nav.service";
+import {TransportRound} from "@entities/transport-round";
 import {PageComponent} from "@pages/page.component";
 import {TranslationService} from "@app/common/services/translations.service";
 import {IconColor} from "@app/common/components/icon/icon-color";
 import {CardListColorEnum} from "@app/common/components/card-list/card-list-color.enum";
-import {TransportPack, TransportRoundLine} from '@entities/transport-round-line';
+import {TransportRoundLine} from "@entities/transport-round-line";
 import {HeaderConfig} from "@app/common/components/panel/model/header-config";
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
 import {ToastService} from "@app/common/services/toast.service";
@@ -20,25 +21,32 @@ import {LoadingService} from "@app/common/services/loading.service";
 import {NetworkService} from '@app/common/services/network.service';
 
 @Component({
-    selector: 'app-transport-pack-deliver',
-    templateUrl: './transport-pack-deliver.page.html',
-    styleUrls: ['./transport-pack-deliver.page.scss'],
+    selector: 'app-transport-deposit-packs',
+    templateUrl: './transport-deposit-packs.page.html',
+    styleUrls: ['./transport-deposit-packs.page.scss'],
 })
-export class TransportPackDeliverPage extends PageComponent {
+export class TransportDepositPacksPage extends PageComponent {
 
     public readonly listBoldValues = ['code', 'nature', 'temperature_range'];
     public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.INVISIBLE;
 
     private natureTranslations: Translations;
-    private transport: TransportRoundLine;
-    private packs: Array<TransportPack>;
+    private round: TransportRound;
+    private packs: Array<{
+        code: string;
+        nature: string;
+        nature_id: number;
+        returning: boolean;
+        returned: boolean;
+        rejected: boolean;
+    }>;
 
-    public packsToDeliverListConfig: {
+    public packsToReturnListConfig: {
         header: HeaderConfig;
         body: Array<ListPanelItemConfig>;
     };
 
-    public packsDeliveredListConfig: {
+    public packsReturnedListConfig: {
         header: HeaderConfig;
         body: Array<ListPanelItemConfig>;
     };
@@ -61,8 +69,11 @@ export class TransportPackDeliverPage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        this.transport = this.currentNavParams.get('transport');
-        this.packs = this.transport.packs;
+        this.round = this.currentNavParams.get('round');
+        this.packs = this.round.lines
+            .filter((line) => line.failure || line.cancelled)
+            .reduce((acc: Array<any>, line: TransportRoundLine) => [...(line.packs || []), ...acc], [])
+            .filter(({returned, rejected}) => !returned && !rejected);
 
         zip(
             this.loadingService.presentLoading('Récupération des données en cours'),
@@ -72,8 +83,8 @@ export class TransportPackDeliverPage extends PageComponent {
                 this.natureTranslations = natureTranslations;
                 loading.dismiss();
 
-                this.refreshListDeliveredConfig();
-                this.refreshListToDeliverConfig();
+                this.refreshListReturnedConfig();
+                this.refreshListToReturnConfig();
             });
     }
 
@@ -83,22 +94,22 @@ export class TransportPackDeliverPage extends PageComponent {
         }
     }
 
-    private refreshListToDeliverConfig(): void {
-        const packsToDeliver = this.packs.filter(({delivered, rejected}) => (!delivered && !rejected));
+    private refreshListToReturnConfig(): void {
+        const packsToReturn = this.packs.filter(({returning, returned}) => (!returning && !returned));
         const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
-        const hasPackToDeliver = this.packs && this.packs.some(({delivered, rejected}) => !delivered && !rejected);
-        this.packsToDeliverListConfig = {
+        const hasPackToReturn = this.packs && this.packs.some(({returning, returned}) => !returning && !returned);
+        this.packsToReturnListConfig = {
             header: {
                 title: 'Colis à déposer',
-                info: `${packsToDeliver.length} colis`,
+                info: `${packsToReturn.length} colis`,
                 leftIcon: {
                     name: 'packs-to-load.svg',
                     color: 'list-green-light'
                 },
                 rightIconLayout: 'horizontal',
-                ...(hasPackToDeliver
+                ...(hasPackToReturn
                     ? {
                         rightIcon: [
                             {
@@ -110,42 +121,40 @@ export class TransportPackDeliverPage extends PageComponent {
                             },
                             {
                                 name: 'up.svg',
-                                action: () => this.deliverAll()
+                                action: () => this.returnAll()
                             }
                         ]
                     }
                     : {})
             },
-            body: packsToDeliver.map((pack) => ({
-                ...(TransportPackDeliverPage.packToListItemConfig(pack, natureTranslationCapitalized)),
+            body: packsToReturn.map((pack) => ({
+                ...(TransportDepositPacksPage.packToListItemConfig(pack, natureTranslationCapitalized)),
                 rightIcon: {
                     color: 'grey' as IconColor,
                     name: 'up.svg',
-                    action: () => this.deliverPack(pack.code)
+                    action: () => this.returnPack(pack.code)
                 },
             }))
         };
     }
 
-    private refreshListDeliveredConfig(): void {
-        const deliveredPacks = this.packs.filter(({delivered, rejected}) => delivered && !rejected);
-
+    private refreshListReturnedConfig(): void {
+        const returnedPacks = this.packs.filter(({returning, returned}) => returning && !returned);
         const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
-        const plural = deliveredPacks.length > 1 ? 's' : '';
-        this.packsDeliveredListConfig = {
+        const plural = returnedPacks.length > 1 ? 's' : '';
+        this.packsReturnedListConfig = {
             header: {
-                title: 'Colis déposés',
-                subtitle: `Emplacement : Patient`,
-                info: `${deliveredPacks.length} colis scanné${plural}`,
+                title: 'Colis scannés',
+                info: `${returnedPacks.length} colis scanné${plural}`,
                 leftIcon: {
                     name: 'scanned-pack.svg',
-                    color: CardListColorEnum.PURPLE
+                    color: CardListColorEnum.GREEN
                 }
             },
-            body: deliveredPacks.map((pack) => ({
-                ...(TransportPackDeliverPage.packToListItemConfig(pack, natureTranslationCapitalized)),
+            body: returnedPacks.map((pack) => ({
+                ...(TransportDepositPacksPage.packToListItemConfig(pack, natureTranslationCapitalized)),
                 ...({
                         pressAction: () => {},
                         rightIcon: {
@@ -159,19 +168,19 @@ export class TransportPackDeliverPage extends PageComponent {
         };
     }
 
-    public deliverPack(barCode: string): void {
+    public returnPack(barCode: string): void {
         const selectedIndex = this.packs.findIndex(({code}) => (code === barCode));
         if (selectedIndex > -1) {
             const selectedItem = this.packs[selectedIndex];
-            if (selectedItem.delivered) {
+            if (selectedItem.returned) {
                 this.toastService.presentToast(`Vous avez déjà traité ce colis`);
             }
             else {
                 this.packs.splice(selectedIndex, 1);
                 this.packs.unshift(selectedItem);
-                selectedItem.delivered = true;
-                this.refreshListToDeliverConfig();
-                this.refreshListDeliveredConfig();
+                selectedItem.returning = true;
+                this.refreshListToReturnConfig();
+                this.refreshListReturnedConfig();
             }
         }
         else {
@@ -179,21 +188,21 @@ export class TransportPackDeliverPage extends PageComponent {
         }
     }
 
-    private deliverAll(): void {
+    private returnAll(): void {
         this.packs
-            .filter(({delivered, rejected}) => !delivered && !rejected)
+            .filter(({returning, returned}) => !returning && !returned)
             .forEach(({code}) => {
-                this.deliverPack(code);
+                this.returnPack(code);
             });
     }
 
     private revertPack(barCode: string): void {
         const selectedIndex = this.packs.findIndex(({code}) => code === barCode);
-        if (selectedIndex > -1 && this.packs[selectedIndex].delivered) {
-            this.packs[selectedIndex].delivered = false;
+        if (selectedIndex > -1 && this.packs[selectedIndex].returning) {
+            this.packs[selectedIndex].returning = false;
 
-            this.refreshListToDeliverConfig();
-            this.refreshListDeliveredConfig();
+            this.refreshListToReturnConfig();
+            this.refreshListReturnedConfig();
         }
     }
 
@@ -220,13 +229,24 @@ export class TransportPackDeliverPage extends PageComponent {
     }
 
     public validate(): void {
-        const notDeliveredPacks = this.packs.filter(({delivered, rejected}) => !delivered && !rejected);
-        if (notDeliveredPacks.length === 0) {
-            this.navService.push(NavPathEnum.FINISH_TRANSPORT, {
-                transport: this.transport,
+        const returnedPacks = this.packs.filter(({returning, returned}) => returning && !returned);
+        if (returnedPacks.length > 0) {
+            this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_LOCATION, {
+                everythingReturned: returnedPacks.length + this.packs.filter(({returned}) => returned).length === this.packs.length,
+                depositedDeliveryPacks: returnedPacks,
+                round: this.round,
+                skippedMenu: this.currentNavParams.get('skippedMenu'),
+                onValidate: () => {
+                    for (const pack of returnedPacks) {
+                        pack.returned = true;
+                        pack.returning = false;
+                    }
+
+                    this.toastService.presentToast('Les colis ont bien été retournés');
+                }
             });
         } else {
-            this.toastService.presentToast(`Veuillez déposer les colis pour continuer`);
+            this.toastService.presentToast('Veuillez retourner au moins un colis pour continuer');
         }
     }
 

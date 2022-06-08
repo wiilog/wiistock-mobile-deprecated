@@ -10,7 +10,7 @@
         <wii-pack-count *ngIf="transport && bodyConfig"
                         #packCount
                         mode="actual"
-                        [title]="'Objets ' + (transport.kind === 'delivery' ? 'déposés' : 'collectés')"
+                        [title]="'Objets ' + (transport.kind === 'delivery' ? (transport.failure ? 'à retourner' : 'déposés') : (transport.failure ? 'non collectés' : 'collectés'))"
                         [transport]="transport"
                         [body]="bodyConfig">
         </wii-pack-count>

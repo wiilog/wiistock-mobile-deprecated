@@ -35,10 +35,13 @@
             </div>
         </div>
         <div class="transport-actions">
-            <wii-icon *ngIf="transport.cancelled" class="button-icon" name="round-cross.svg" color="black"></wii-icon>
-            <ng-container *ngIf="transport.success || transport.failure">
-                <wii-icon class="button-icon" [name]="transport.success ? 'check.svg' : 'cross.svg'" [color]="transport.success ? 'success' : 'danger'"></wii-icon>
-                <wii-icon *ngIf="transport.collect && (transport.success || transport.failure)" class="button-icon" [name]="transport.collect.success ? 'check.svg' : 'cross.svg'" [color]="transport.collect.success ? 'success' : 'danger'"></wii-icon>
+            <wii-icon *ngIf="transport.cancelled" class="button-icon" name="round-cross.svg" color="medium"></wii-icon>
+            <ng-container *ngIf="!transport.cancelled && (transport.success || transport.failure)">
+                <wii-icon class="button-icon" [name]="transport.success ? 'check.svg' : 'cross.svg'"
+                          [color]="transport.success ? 'success' : 'danger'"></wii-icon>
+                <wii-icon *ngIf="transport.collect && (transport.collect.success || transport.collect.failure)" class="button-icon"
+                          [name]="transport.collect.success ? 'check.svg' : 'cross.svg'"
+                          [color]="transport.collect.success ? 'success' : 'danger'"></wii-icon>
             </ng-container>
             <wii-icon *ngIf="!transport.success && !transport.failure && !transport.cancelled"
                       class="button-icon" name="gps.svg"

@@ -17,11 +17,11 @@ import {NetworkService} from "@app/common/services/network.service";
 import {TransportRound} from "@entities/transport-round";
 
 @Component({
-    selector: 'app-transport-round-pack-load-validate',
-    templateUrl: './transport-round-pack-load-validate.page.html',
-    styleUrls: ['./transport-round-pack-load-validate.page.scss'],
+    selector: 'app-transport-deposit-location',
+    templateUrl: './transport-deposit-location.page.html',
+    styleUrls: ['./transport-deposit-location.page.scss'],
 })
-export class TransportRoundPackLoadValidatePage extends PageComponent {
+export class TransportDepositLocationPage extends PageComponent {
 
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
@@ -30,12 +30,20 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
     public readonly selectItemType = SelectItemTypeEnum.LOCATION;
 
     private location: Emplacement;
-    private packs: Array<{
+    private depositedDeliveryPacks: Array<{
         code: string;
         nature_id: number;
         temperature_range: string;
-    }>;
+        quantity: number;
+    }> = [];
+    private depositedCollectPacks: Array<{
+        nature_id: number;
+        quantity: number;
+    }> = [];
+
     private round: TransportRound;
+    private skippedMenu: boolean;
+    private everythingReturned: boolean;
 
     public panelHeaderConfig: {
         title: string;
@@ -58,8 +66,11 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
-        this.packs = this.currentNavParams.get('packs');
         this.round = this.currentNavParams.get('round');
+        this.depositedDeliveryPacks = this.currentNavParams.get('depositedDeliveryPacks');
+        this.depositedCollectPacks = this.currentNavParams.get('depositedCollectPacks');
+        this.skippedMenu = this.currentNavParams.get('skippedMenu');
+        this.everythingReturned = this.currentNavParams.get('everythingReturned');
         this.resetEmitter$.emit();
         this.panelHeaderConfig = this.createPanelHeaderConfig();
     }
@@ -83,7 +94,7 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
             .subscribe((allowedNatures) => {
                 const allowedNatureIds = allowedNatures.map((allowedNature: AllowedNatureLocation) => allowedNature.nature_id);
                 const unmatchedNatures = [];
-                this.packs.forEach((pack) => {
+                this.depositedDeliveryPacks.forEach((pack) => {
                     if (!allowedNatureIds.includes(pack.nature_id)) {
                         unmatchedNatures.push(pack);
                     }
@@ -93,9 +104,8 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
                     ? location.temperature_ranges.split(';')
                     : [];
                 const unmatchedTemperatures = [];
-                this.packs.forEach((pack) => {
-                    if ((temperatureRanges.length === 0 && pack.temperature_range)
-                        || (pack.temperature_range && !temperatureRanges.includes(pack.temperature_range))) {
+                this.depositedDeliveryPacks.forEach((pack) => {
+                    if ((temperatureRanges.length === 0 && pack.temperature_range || !temperatureRanges.includes(pack.temperature_range))) {
                         unmatchedTemperatures.push(pack);
                     }
                 });
@@ -130,7 +140,8 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
                             });
                             this.resetEmitter$.emit();
                         });
-                } else if (unmatchedTemperatures.length > 0) {
+                }
+                else if (unmatchedTemperatures.length > 0) {
                     let formattedUnmatchedTemperatures = unmatchedTemperatures
                         .map(({code}) => `<li><strong>${code}</strong></li>`)
                         .join(' ');
@@ -149,7 +160,8 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
                         ]
                     });
                     this.resetEmitter$.emit();
-                } else {
+                }
+                else {
                     this.location = location;
                     this.panelHeaderConfig = this.createPanelHeaderConfig();
                 }
@@ -159,36 +171,33 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
     public validate(): void {
         if (this.networkService.hasNetwork()) {
             if (this.location) {
-                const options = {
-                    params: {
-                        packs: this.packs.map(({code}) => code),
-                        location: this.location.id,
-                        round: this.round.id
-                    }
-                }
+                const params = {
+                    depositedDeliveryPacks: this.depositedDeliveryPacks,
+                    depositedCollectPacks: this.depositedCollectPacks,
+                    location: this.location.id,
+                    round: this.round.id,
+                };
+
                 zip(
                     this.loadingService.presentLoading(),
-                    this.apiService.requestApi(ApiService.LOAD_PACKS, options)
+                    this.apiService.requestApi(ApiService.DEPOSIT_TRANSPORT, {params})
                 ).subscribe(([loading, response]: [HTMLIonLoadingElement, any]) => {
                     loading.dismiss();
+
                     if (response && response.success) {
                         const onValidate = this.currentNavParams.get('onValidate');
                         if(onValidate) {
                             onValidate();
                         }
 
-                        this.navService.pop().subscribe(() => {
-                            if (this.currentNavParams.get('everythingLoaded')) {
-                                this.navService.pop();
-                            }
-                        });
+                        this.navService.runMultiplePop( this.everythingReturned ? 3 - Number(this.skippedMenu) : 1);
                     }
                 });
             } else {
                 this.toastService.presentToast('Veuillez sélectionner un emplacement')
             }
         } else {
-            this.toastService.presentToast('Veuillez vous connecter à internet afin de valider le chargement des colis');
+            this.toastService.presentToast('Veuillez vous connecter à internet afin de valider la dépose des colis');
         }
     }
 }

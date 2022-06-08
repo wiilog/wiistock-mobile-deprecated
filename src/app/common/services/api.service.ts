@@ -54,7 +54,10 @@ export class ApiService {
     public static readonly FETCH_TRANSPORT = {method: GET, service: '/fetch-transport'};
     public static readonly FINISH_TRANSPORT = {method: POST, service: '/finish-transport'};
     public static readonly HAS_NEW_PACKS = {method: GET, service: '/has-new-packs'};
+    public static readonly PATCH_ROUND_STATUS = {method: POST, service: '/patch-round-status'};
+    public static readonly TRANSPORT_FAILURE = {method: POST, service: '/transport-failure'};
     public static readonly START_DELIVERY_ROUND = {method: POST, service: '/start-round'};
+    public static readonly DEPOSIT_TRANSPORT = {method: POST, service: '/deposit-transport-packs'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'

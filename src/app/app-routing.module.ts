@@ -319,11 +319,24 @@ const routes: Routes = [
         loadChildren: () => import('@pages/track/transport-round-finish-pack-drop/transport-round-finish-pack-drop.module').then(m => m.TransportRoundFinishPackDropPageModule)
     },
     {
+        path: NavPathEnum.TRANSPORT_DEPOSIT_PACKS,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-deposit-packs/transport-deposit-packs.module').then(m => m.TransportDepositPacksPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_DEPOSIT_LOCATION,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-deposit-location/transport-deposit-location.module').then(m => m.TransportDepositLocationPageModule)
+    },
+    {
+        path: 'transport-failure',
+        loadChildren: () => import('@pages/track/transport-failure/transport-failure.module').then(m => m.TransportFailurePageModule)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'
     },
-
 ];
 
 @NgModule({

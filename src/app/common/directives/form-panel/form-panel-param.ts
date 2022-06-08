@@ -14,6 +14,12 @@ import {FormPanelCalendarComponent} from '@app/common/components/panel/form-pane
 import {FormPanelCalendarConfig} from '@app/common/components/panel/model/form-panel/configs/form-panel-calendar-config';
 import {FormPanelButtonsComponent} from '@app/common/components/panel/form-panel/form-panel-buttons/form-panel-buttons.component';
 import {FormPanelButtonsConfig} from '@app/common/components/panel/model/form-panel/configs/form-panel-buttons-config';
+import {
+    FormPanelTextareaComponent
+} from "@app/common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component";
+import {
+    FormPanelTextareaConfig
+} from "@app/common/components/panel/model/form-panel/configs/form-panel-textarea-config";
 
 interface CameraParam {
     item: Type<FormPanelCameraComponent>;
@@ -23,6 +29,11 @@ interface CameraParam {
 interface InputParam {
     item: Type<FormPanelInputComponent>;
     config: FormPanelItemConfig<FormPanelInputConfig>;
+}
+
+interface TextareaParam {
+    item: Type<FormPanelTextareaComponent>;
+    config: FormPanelItemConfig<FormPanelTextareaConfig>;
 }
 
 interface SelectParam {
@@ -56,4 +67,5 @@ export type FormPanelParam = CameraParam
                            | SelectParam
                            | SigningParam
                            | ToggleParam
-                           | CalendarParam;
+                           | CalendarParam
+                           | TextareaParam;

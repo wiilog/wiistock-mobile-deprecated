@@ -63,7 +63,7 @@
                         font-size: 12px;
                         text-transform: unset;
                         --box-shadow: none;
-                        margin-top: 10px;
+                        margin-top: 5px;
 
                         &:disabled {
                             background-color: $medium;
@@ -96,4 +96,8 @@ ion-fab {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+hr {
+    border-bottom: 1px solid $darkGray;
 }

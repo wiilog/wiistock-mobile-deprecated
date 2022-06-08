@@ -8,6 +8,7 @@ import {Observable, Subject} from 'rxjs';
 export class MainHeaderService {
 
     private readonly _navigationChange$: Subject<any>;
+    private readonly _title$: Subject<any>;
     private readonly _subTitle$: Subject<any>;
 
     public constructor() {
@@ -21,6 +22,14 @@ export class MainHeaderService {
 
     public get navigationChange$(): Observable<any> {
         return this._navigationChange$;
+    }
+
+    public emitTitle(subTitle: string) {
+        this._title$.next(subTitle);
+    }
+
+    public get title$(): Observable<any> {
+        return this._title$;
     }
 
     public emitSubTitle(subTitle: string) {
