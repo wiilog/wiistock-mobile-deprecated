@@ -44,14 +44,14 @@
             <div class="item client-info">
                 <wii-icon name="phone.svg" color="black"></wii-icon>
                 <div>
-                    <p>
+                    <div>
                         <b>Contact</b><br>
-                        {{ transport.contact.contact }}
-                    </p>
-                    <p>
+                        <div [innerHTML]="transport.contact.contact"></div>
+                    </div>
+                    <div>
                         <b>Personne à prévenir</b><br>
-                        {{ transport.contact.person_to_contact }}
-                    </p>
+                        <div [innerHTML]="transport.contact.person_to_contact"></div>
+                    </div>
                 </div>
             </div>
 
@@ -68,7 +68,7 @@
                 <wii-icon name="question-mark.svg" color="black"></wii-icon>
                 <div>
                     <b>Remarque</b><br>
-                    {{ transport.contact.observation }}
+                    <div [innerHTML]="transport.contact.observation"></div>
                 </div>
             </div>
 
