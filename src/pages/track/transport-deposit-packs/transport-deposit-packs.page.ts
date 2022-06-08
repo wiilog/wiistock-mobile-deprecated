@@ -229,7 +229,6 @@ export class TransportDepositPacksPage extends PageComponent {
     }
 
     public validate(): void {
-        console.log(this.packs)
         const returnedPacks = this.packs.filter(({returning, returned}) => returning && !returned);
         if (returnedPacks.length > 0) {
             this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_LOCATION, {

@@ -110,9 +110,7 @@ export class TransportDepositLocationPage extends PageComponent {
                     }
                 });
 
-                console.log('ezfhzioehfiuze');
                 if (allowedNatureIds.length !== 0 && unmatchedNatures.length > 0) {
-                    console.log('huh?')
                     let formattedUnmatchedNatures = unmatchedNatures
                         .map(({code, nature}) => `<li><strong>${code}</strong> de nature <strong>${nature}</strong></li>`)
                         .join(' ');
@@ -144,7 +142,6 @@ export class TransportDepositLocationPage extends PageComponent {
                         });
                 }
                 else if (unmatchedTemperatures.length > 0) {
-                    console.log('uwu?')
                     let formattedUnmatchedTemperatures = unmatchedTemperatures
                         .map(({code}) => `<li><strong>${code}</strong></li>`)
                         .join(' ');
@@ -191,7 +188,7 @@ export class TransportDepositLocationPage extends PageComponent {
                         const onValidate = this.currentNavParams.get('onValidate');
                         if(onValidate) {
                             onValidate();
-                        }console.log(this.everythingReturned ? 3 - Number(this.skippedMenu) : 1);
+                        }
 
                         this.navService.runMultiplePop( this.everythingReturned ? 3 - Number(this.skippedMenu) : 1);
                     }
