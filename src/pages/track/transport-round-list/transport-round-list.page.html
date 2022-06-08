@@ -61,26 +61,28 @@
                     </div>
                     <ng-container *ngIf="round.to_finish">
                         <hr>
-                        <div class="line">
+                        <div class="line" *ngIf="round.not_delivered && round.returned_packs != round.packs_to_return">
                             <div class="counter">
                                 <img src="assets/icons/collect-hand.svg" width="15">
                                 <span>
                                     <strong>{{ round.not_delivered }} livraisons non livrées</strong>
-                                    {{ round.returned_packs }}/{{ round.packs_to_return }}
+                                    {{ round.returned_packs }}/{{ round.packs_to_return }} colis retournés
                                 </span>
                             </div>
                         </div>
-                        <div class="line">
+                        <div class="line" *ngIf="round.done_collects && round.deposited_packs != round.packs_to_deposit">
                             <div class="counter">
                                 <img src="assets/icons/cancelled-delivery.svg" width="15">
                                 <span>
                                     <strong>{{ round.done_collects }} collectes effectuées</strong>
-                                    {{ round.deposited_packs }}/{{ round.packs_to_deposit }}
+                                    {{ round.deposited_packs }}/{{ round.packs_to_deposit }} objets déposés
                                 </span>
                             </div>
                         </div>
                         <div class="line">
-                            <ion-button color="primary" size="small" (click)="depositPacks($event, round)">
+                            <ion-button color="primary" size="small"
+                                        [disabled]="!(round.not_delivered && round.returned_packs != round.packs_to_return) && !(round.done_collects && round.deposited_packs != round.packs_to_deposit)"
+                                                (click)="depositPacks($event, round)">
                                 Déposer les colis
                             </ion-button>
                             <ion-button color="primary" size="small" (click)="finishRound($event, round)">

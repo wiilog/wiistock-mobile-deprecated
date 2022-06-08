@@ -315,6 +315,16 @@ const routes: Routes = [
         loadChildren: () => import('@pages/track/transport-deposit-menu/transport-deposit-menu.module').then(m => m.TransportDepositMenuPageModule)
     },
     {
+        path: NavPathEnum.TRANSPORT_DEPOSIT_PACKS,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-deposit-packs/transport-deposit-packs.module').then(m => m.TransportDepositPacksPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_DEPOSIT_LOCATION,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-deposit-location/transport-deposit-location.module').then(m => m.TransportDepositLocationPageModule)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'

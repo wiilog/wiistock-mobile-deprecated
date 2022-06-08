@@ -16,6 +16,7 @@ export interface TransportRoundLine {
         color: string;
         quantity_to_collect: number;
         collected_quantity: number;
+        deposited_quantity: number;
     }>;
     packs: Array<TransportPack>;
     expected_at: string;
