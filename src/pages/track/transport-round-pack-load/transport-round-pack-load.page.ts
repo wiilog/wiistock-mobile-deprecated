@@ -165,7 +165,7 @@ export class TransportRoundPackLoadPage extends PageComponent {
                 info: `${loadedPacks.length} colis scanné${plural}`,
                 leftIcon: {
                     name: 'scanned-pack.svg',
-                    color: CardListColorEnum.GREEN
+                    color: CardListColorEnum.PURPLE
                 }
             },
             body: loadedPacks.map((pack) => ({
