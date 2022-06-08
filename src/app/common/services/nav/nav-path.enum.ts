@@ -60,4 +60,6 @@ export enum NavPathEnum {
     TRANSPORT_PACK_DELIVER = 'transport-pack-deliver',
     TRANSPORT_FAILURE = 'transport-failure',
     TRANSPORT_DEPOSIT_MENU = 'transport-deposit-menu',
+    TRANSPORT_DEPOSIT_PACKS = 'transport-deposit-packs',
+    TRANSPORT_DEPOSIT_LOCATION = 'transport-deposit-location',
 }

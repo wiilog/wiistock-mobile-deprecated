@@ -4,6 +4,8 @@ import {ViewWillEnter} from '@ionic/angular';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {TransportRound} from '@entities/transport-round';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {Emplacement} from '@entities/emplacement';
 
 @Component({
     selector: 'wii-transport-deposit-menu',
@@ -27,7 +29,9 @@ export class TransportDepositMenuPage extends PageComponent implements ViewWillE
     }
 
     public collect() {
-        this.toastService.presentToast(`Non implémenté`);
+        this.navService.push(NavPathEnum.TRANSPORT_COLLECT_NATURES, {
+            round: this.round,
+        });
     }
 
 }

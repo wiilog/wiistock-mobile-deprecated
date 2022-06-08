@@ -44,6 +44,10 @@ export class PackCountComponent implements OnInit {
 
         if(this.transport.kind === `delivery`) {
             for (const pack of this.transport.packs) {
+                if(pack.rejected) {
+                    continue;
+                }
+
                 if (!natures[pack.nature]) {
                     natures[pack.nature] = {
                         color: pack.color,

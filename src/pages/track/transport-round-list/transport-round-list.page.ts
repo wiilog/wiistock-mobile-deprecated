@@ -2,17 +2,18 @@ import {Component} from '@angular/core';
 import {ViewWillEnter} from '@ionic/angular';
 import {PageComponent} from '@pages/page.component';
 import {NavService} from '@app/common/services/nav/nav.service';
-import {TransportRound} from "@entities/transport-round";
-import {LoadingService} from "@app/common/services/loading.service";
+import {TransportRound} from '@entities/transport-round';
+import {LoadingService} from '@app/common/services/loading.service';
 import {zip} from 'rxjs';
-import {ApiService} from "@app/common/services/api.service";
+import {ApiService} from '@app/common/services/api.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
-import * as moment from "moment";
-import {ToastService} from "@app/common/services/toast.service";
-import {NetworkService} from "@app/common/services/network.service";
+import * as moment from 'moment';
+import {ToastService} from '@app/common/services/toast.service';
+import {NetworkService} from '@app/common/services/network.service';
 import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
-import {TransportRoundLine} from "@entities/transport-round-line";
-import {AlertService} from "@app/common/services/alert.service";
+import {TransportRoundLine} from '@entities/transport-round-line';
+import {AlertService} from '@app/common/services/alert.service';
+import {MainHeaderService} from '@app/common/services/main-header.service';
 
 @Component({
     selector: 'wii-transport-round-list',
@@ -28,6 +29,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
     public loading: boolean;
 
     public constructor(navService: NavService,
+                       private mainHeaderService: MainHeaderService,
                        private apiService: ApiService,
                        private loadingService: LoadingService,
                        private toastService: ToastService,
@@ -55,7 +57,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
     public load(event: any, round: TransportRound): void {
         event.stopPropagation();
 
-        if(round.loaded_packs === round.total_loaded) {
+        if (round.loaded_packs === round.total_loaded) {
             return;
         }
 
@@ -67,7 +69,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
     public start(event: any, round: TransportRound) {
         event.stopPropagation();
 
-        if(round.loaded_packs !== round.total_loaded) {
+        if (round.loaded_packs !== round.total_loaded) {
             return;
         }
 
@@ -97,9 +99,27 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
 
     public depositPacks(event: any, round: TransportRound) {
         event.stopPropagation();
-        this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_MENU, {
-            round
-        });
+        const depositedDeliveries = round.deposited_delivery_packs || round.packs_to_return === round.returned_packs;
+        const depositedCollects = round.deposited_collect_packs || round.packs_to_deposit === round.deposited_packs;
+
+        if (!depositedDeliveries || !depositedCollects) {
+            if (depositedDeliveries) {
+                this.navService.push(NavPathEnum.TRANSPORT_COLLECT_NATURES, {
+                    round,
+                    skippedMenu: true,
+                });
+            } else if (depositedCollects) {
+                this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_PACKS, {
+                    round,
+                    skippedMenu: true,
+                });
+            } else {
+                this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_MENU, {
+                    round,
+                    skippedMenu: false,
+                });
+            }
+        }
     }
 
     public finishRound(event: any, round: TransportRound) {
@@ -181,10 +201,10 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
             ).subscribe(([loading, rounds]: [HTMLIonLoadingElement, Array<TransportRound>]) => {
                 loading.dismiss();
 
-                for(const round of rounds) {
-                    for(const transport of round.lines) {
+                for (const round of rounds) {
+                    for (const transport of round.lines) {
                         transport.round = round;
-                        if(transport.collect) {
+                        if (transport.collect) {
                             transport.collect.round = round;
                         }
                     }

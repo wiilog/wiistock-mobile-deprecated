@@ -135,6 +135,7 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                             this.transportService.treatTransport(this.transport, round);
 
                             this.unsubscribeApi();
+                            console.log(success, message, round);
                             if (success) {
                                 this.toastService.presentToast("Les données ont été sauvegardées");
 

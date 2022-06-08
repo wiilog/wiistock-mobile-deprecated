@@ -73,6 +73,10 @@
 .client-info {
     display: flex;
 
+    a {
+        color: black !important;
+    }
+
     wii-icon {
         height: 15px;
         width: 15px;
@@ -97,11 +101,11 @@
             width: 49%;
         }
 
-        p:first-child {
+        p:first-child, div:first-child {
             margin-top: 0;
         }
 
-        p:last-child {
+        p:last-child, div:first-child {
             margin-bottom: 0;
         }
     }
