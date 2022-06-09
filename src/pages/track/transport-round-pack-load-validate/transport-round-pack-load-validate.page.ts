@@ -36,6 +36,7 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
         temperature_range: string;
     }>;
     private round: TransportRound;
+    private unpreparedDeliveries: () => void;
 
     public panelHeaderConfig: {
         title: string;
@@ -60,6 +61,7 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
     public ionViewWillEnter(): void {
         this.packs = this.currentNavParams.get('packs');
         this.round = this.currentNavParams.get('round');
+        this.unpreparedDeliveries = this.currentNavParams.get('unpreparedDeliveries');
         this.resetEmitter$.emit();
         this.panelHeaderConfig = this.createPanelHeaderConfig();
     }
@@ -179,13 +181,17 @@ export class TransportRoundPackLoadValidatePage extends PageComponent {
 
                         this.navService.pop().subscribe(() => {
                             if (this.currentNavParams.get('everythingLoaded')) {
-                                this.navService.pop();
+                                this.navService.pop().subscribe(() => {
+                                    if(this.unpreparedDeliveries) {
+                                        this.unpreparedDeliveries();
+                                    }
+                                });
                             }
                         });
                     }
                 });
             } else {
-                this.toastService.presentToast('Veuillez sélectionner un emplacement')
+                this.toastService.presentToast('Veuillez sélectionner un emplacement');
             }
         } else {
             this.toastService.presentToast('Veuillez vous connecter à internet afin de valider le chargement des colis');
