@@ -4,8 +4,8 @@ import {PageComponent} from '@pages/page.component';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {TransportRound} from '@entities/transport-round';
 import {LoadingService} from '@app/common/services/loading.service';
-import {zip} from 'rxjs';
 import {ApiService} from '@app/common/services/api.service';
+import {Observable, zip} from 'rxjs';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import * as moment from 'moment';
 import {ToastService} from '@app/common/services/toast.service';
@@ -73,28 +73,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
             return;
         }
 
-        if (round.ready_deliveries != round.total_ready_deliveries) {
-            this.alertService.show({
-                header: `Attention`,
-                cssClass: `warning`,
-                message: `Des livraisons ne sont pas encore préparées. Elles seront exclues de cette tournée si vous confirmez son début.`,
-                buttons: [
-                    {
-                        text: 'Annuler',
-                        role: 'cancel'
-                    },
-                    {
-                        text: 'Confirmer',
-                        handler: () => {
-                            this.proceedWithStart(event, round);
-                        },
-                        cssClass: 'alert-success'
-                    }
-                ],
-            });
-        } else {
-            this.proceedWithStart(event, round);
-        }
+        this.proceedWithStart(event, round);
     }
 
     public depositPacks(event: any, round: TransportRound) {
@@ -127,7 +106,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         this.navService.push(NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP, {round})
     }
 
-    proceedWithStart(event: any, round: TransportRound) {
+    proceedWithStart(event: any, round: TransportRound, ignore: boolean = false) {
         if (this.networkService.hasNetwork()) {
             const packs = round.lines
                 .reduce(
@@ -152,9 +131,16 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                             buttons: [{
                                 text: 'Charger',
                                 cssClass: 'alert-success',
-                                handler: () => this.synchronise()
+                                handler: () => {
+                                    this.synchronise((updatedRound: TransportRound) => this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD, {
+                                        round: updatedRound,
+                                        unpreparedDeliveries: () => this.unpreparedDeliveries(event, updatedRound)
+                                    }), round);
+                                }
                             }]
                         });
+                    } else if(!ignore) {
+                        this.unpreparedDeliveries(event, round);
                     } else {
                         const options = {
                             params: {
@@ -191,7 +177,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         }
     }
 
-    public synchronise(): void {
+    public synchronise(callback: (updatedRound: TransportRound) => void = undefined, currentRound: TransportRound = undefined): void {
         if (this.networkService.hasNetwork()) {
             this.loading = true;
             zip(
@@ -224,6 +210,10 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                         return acc;
                     }, {});
                 this.loading = false;
+                if(callback) {
+                    const updatedRound = rounds.find(({id}) => id === currentRound.id);
+                    callback(updatedRound);
+                }
             });
         } else {
             this.loading = false;
@@ -231,4 +221,29 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         }
     }
 
+    public unpreparedDeliveries(event: any, round: TransportRound): void {
+        console.log('callback');
+        if(round.ready_deliveries != round.total_ready_deliveries) {
+            this.alertService.show({
+                header: `Attention`,
+                cssClass: `warning`,
+                message: `Des livraisons ne sont pas encore préparées. Elles seront exclues de cette tournée si vous confirmez son début.`,
+                buttons: [
+                    {
+                        text: 'Annuler',
+                        role: 'cancel'
+                    },
+                    {
+                        text: 'Confirmer',
+                        handler: () => {
+                            this.proceedWithStart(event, round, true);
+                        },
+                        cssClass: 'alert-success'
+                    }
+                ],
+            });
+        } else {
+            this.proceedWithStart(event, round, true);
+        }
+    }
 }

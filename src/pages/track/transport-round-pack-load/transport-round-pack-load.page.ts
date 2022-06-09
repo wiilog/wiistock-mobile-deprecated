@@ -41,6 +41,7 @@ export class TransportRoundPackLoadPage extends PageComponent {
         rejected: boolean;
     }>;
     private packRejectMotives: Array<string>;
+    private unpreparedDeliveries: () => void;
 
     public packsToLoadListConfig: {
         header: HeaderConfig;
@@ -71,6 +72,7 @@ export class TransportRoundPackLoadPage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.round = this.currentNavParams.get('round');
+        this.unpreparedDeliveries = this.currentNavParams.get('unpreparedDeliveries');
         this.packs = this.round.lines.reduce(
             (acc: Array<any>, line: TransportRoundLine) => [...(line.packs || []), ...acc],
             []
@@ -256,6 +258,7 @@ export class TransportRoundPackLoadPage extends PageComponent {
         if (loadedPacks.length > 0) {
             this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD_VALIDATE, {
                 everythingLoaded: loadedPacks.length + this.packs.filter(({loaded}) => loaded).length === this.packs.length,
+                unpreparedDeliveries: this.unpreparedDeliveries,
                 packs: loadedPacks,
                 round: this.round,
                 onValidate: () => {

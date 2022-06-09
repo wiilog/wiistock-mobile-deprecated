@@ -19,7 +19,8 @@
         "wiis:build:prod": "yarn wiis:build --prod --release --buildConfig=build.json",
         "wiis:build": "node scripts/rmdir platforms && yarn wiis:generate:build-json && yarn wiis:generate:dev-credentials && yarn wiis:generate:network-security-config:prod && yarn wiis:clean && ionic cordova build android",
         "wiis:run": "yarn wiis:generate:dev-credentials && node scripts/get-local-address.js && yarn wiis:generate:network-security-config && yarn wiis:clean && yarn ionic cordova run android",
-        "wiis:run:livereload": "yarn wiis:generate:dev-credentials && node scripts/get-local-address.js && yarn wiis:generate:network-security-config && yarn wiis:clean && yarn ionic cordova run android --livereload"
+        "wiis:run:livereload": "yarn wiis:generate:dev-credentials && node scripts/get-local-address.js && yarn wiis:generate:network-security-config && yarn wiis:clean && yarn ionic cordova run android --livereload",
+        "watch": "yarn wiis:run:livereload"
     },
     "dependencies": {
         "@angular/animations": "^13.3.6",
