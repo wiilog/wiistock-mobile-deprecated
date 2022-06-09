@@ -9,14 +9,14 @@
                 <div *ngIf="transport.kind === 'delivery'">
                     <wii-icon class="button-icon" name="delivery-truck.svg" color="black"></wii-icon>
                     <span>Livraison</span>
-                    <ng-container *ngIf="isReadyDelivery(transport)">
-                        <span class="packs-count">{{ transport.packs.length }} colis</span>
-                    </ng-container>
                 </div>
-                <div *ngIf="transport.kind === 'collect'">
+                <div *ngIf="transport.kind === 'collect' || transport.collect">
                     <wii-icon class="button-icon" name="collect-hand.svg" color="black"></wii-icon>
                     Collecte
                 </div>
+                <ng-container *ngIf="isReadyDelivery(transport)">
+                    <span class="packs-count">{{ transport.packs.length }} colis</span>
+                </ng-container>
             </div>
 
             <div class="transport-time">
