@@ -11,24 +11,13 @@ import {TransportRound} from '@entities/transport-round';
 })
 export class TransportService {
 
-    public treatTransport(transport: TransportRoundLine, updated: TransportRound) {
-        const currentRound = transport.round;
-
+    public treatTransport(previousRound: TransportRound, updated: TransportRound) {
         //clear the round
-        for(const key in currentRound) {
-            delete currentRound[key];
+        for(const key in previousRound) {
+            delete previousRound[key];
         }
 
         //update the round's properties
-        Object.assign(currentRound, updated);
-
-        //add back references to the round on the transport
-        for(const transport of currentRound.lines) {
-            transport.round = currentRound;
-            if(transport.collect) {
-                transport.collect.round = currentRound;
-            }
-        }
+        Object.assign(previousRound, updated);
     }
-
 }

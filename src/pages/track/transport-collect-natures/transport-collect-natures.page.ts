@@ -77,6 +77,7 @@ export class TransportCollectNaturesPage extends PageComponent implements ViewWi
         if(this.transport) {
             this.navService.push(NavPathEnum.FINISH_TRANSPORT, {
                 transport: this.transport,
+                round: this.round
             });
         } else {
             const formattedPacks = [];

@@ -48,6 +48,7 @@ export class ApiService {
     public static readonly GET_COLLECTABLE_ARTICLES = {method: GET, service: '/collectable-articles'};
     public static readonly GET_TRANSPORT_ROUNDS = {method: GET, service: '/transport-rounds'};
     public static readonly GET_REJECT_MOTIVES = {method: GET, service: '/reject-motives'};
+    public static readonly GET_END_ROUND_LOCATIONS = {method: GET, service: '/end-round-locations'};
     public static readonly REJECT_PACK = {method: POST, service: '/reject-pack'};
     public static readonly LOAD_PACKS = {method: POST, service: '/load-packs'};
     public static readonly FETCH_ROUND = {method: GET, service: '/fetch-round'};
@@ -58,6 +59,8 @@ export class ApiService {
     public static readonly TRANSPORT_FAILURE = {method: POST, service: '/transport-failure'};
     public static readonly START_DELIVERY_ROUND = {method: POST, service: '/start-round'};
     public static readonly DEPOSIT_TRANSPORT = {method: POST, service: '/deposit-transport-packs'};
+    public static readonly FINISH_ROUND = {method: POST, service: '/finish-round'};
+    public static readonly UNDELIVERED_PACKS_LOCATIONS = {method: GET, service: '/undelivered-packs-locations'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'

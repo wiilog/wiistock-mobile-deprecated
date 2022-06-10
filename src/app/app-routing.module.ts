@@ -329,7 +329,18 @@ const routes: Routes = [
         loadChildren: () => import('@pages/track/transport-deposit-location/transport-deposit-location.module').then(m => m.TransportDepositLocationPageModule)
     },
     {
-        path: 'transport-failure',
+        path: NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP_VALIDATE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-round-finish-pack-drop-validate/transport-round-finish-pack-drop-validate.module').then(m => m.TransportRoundFinishPackDropValidatePageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_ROUND_FINISH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-round-finish/transport-round-finish.module').then(m => m.TransportRoundFinishPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_FAILURE,
+        canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/track/transport-failure/transport-failure.module').then(m => m.TransportFailurePageModule)
     },
     {

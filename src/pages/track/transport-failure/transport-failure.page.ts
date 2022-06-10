@@ -21,6 +21,7 @@ import {HeaderConfig} from '@app/common/components/panel/model/header-config';
 import {FileService} from '@app/common/services/file.service';
 import {flatMap, map} from 'rxjs/operators';
 import {TransportService} from '@app/common/services/transport.service';
+import {TransportRound} from "@entities/transport-round";
 
 @Component({
     selector: 'wii-transport-failure',
@@ -39,6 +40,7 @@ export class TransportFailurePage extends PageComponent {
     private deliveryRejectMotives: Array<any>;
     private collectRejectMotives: Array<any>;
     public transport: TransportRoundLine;
+    public round: TransportRound;
 
     constructor(private apiService: ApiService,
                 private loadingService: LoadingService,
@@ -56,6 +58,7 @@ export class TransportFailurePage extends PageComponent {
             this.deliveryRejectMotives = delivery;
             this.collectRejectMotives = collect;
             this.transport = this.currentNavParams.get('transport');
+            this.round = this.currentNavParams.get('round');
 
             const motives = this.transport.kind === 'collect'
                 ? this.collectRejectMotives
@@ -120,7 +123,7 @@ export class TransportFailurePage extends PageComponent {
 
             const params = {
                 transport: this.transport.id,
-                round: this.transport.round.id,
+                round: this.round.id,
                 motive,
                 comment,
                 ...({
@@ -137,11 +140,11 @@ export class TransportFailurePage extends PageComponent {
                 event: () => this.apiService.requestApi(ApiService.TRANSPORT_FAILURE, {params})
                     .pipe(
                         flatMap((result) => this.apiService.requestApi(ApiService.FETCH_ROUND, {
-                            params: {round: this.transport.round.id},
+                            params: {round: this.round.id},
                         }).pipe(map((round) => [result, round]))),
                     )
             }).subscribe(([result, round]) => {
-                this.transportService.treatTransport(this.transport, round);
+                this.transportService.treatTransport(this.round, round);
                 this.navService.runMultiplePop(2);
             });
         }

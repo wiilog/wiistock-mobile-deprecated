@@ -16,6 +16,8 @@ import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {AlertService} from '@app/common/services/alert.service';
 import {Translations} from '@entities/translation';
 import {TranslationService} from '@app/common/services/translations.service';
+import {Util} from "leaflet";
+import indexOf = Util.indexOf;
 
 @Component({
     selector: 'wii-main-header',
@@ -150,6 +152,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.TRANSPORT_LIST, label: 'Tournée'},
             {pagePath: NavPathEnum.TRANSPORT_DEPOSIT_MENU, label: 'Déposer colis'},
             {pagePath: NavPathEnum.TRANSPORT_DEPOSIT_PACKS, label: 'Déposer colis'},
+            {pagePath: NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP, label: 'Terminer tournée'},
+            {pagePath: NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP_VALIDATE, label: 'Terminer tournée'},
+            {pagePath: NavPathEnum.TRANSPORT_ROUND_FINISH, label: 'Terminer tournée'},
             {
                 pagePath: NavPathEnum.TRANSPORT_COLLECT_NATURES,
                 label: 'Déposer colis',
@@ -377,6 +382,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     }
 
     private findTitleConfig(path: string, paramsId: number): TitleConfig {
+        this.titlesConfig = this.titlesConfig.filter((config, index) =>
+            this.titlesConfig.findIndex(({label}) => label === config.label) === index
+        );
         const currentNavParams = this.navService.getParams(paramsId);
         return this.titlesConfig.find(({pagePath, filter}) => (
             (pagePath === path)

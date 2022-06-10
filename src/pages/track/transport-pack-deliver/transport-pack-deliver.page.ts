@@ -18,6 +18,7 @@ import {ApiService} from "@app/common/services/api.service";
 import {zip} from 'rxjs';
 import {LoadingService} from "@app/common/services/loading.service";
 import {NetworkService} from '@app/common/services/network.service';
+import {TransportRound} from "@entities/transport-round";
 
 @Component({
     selector: 'app-transport-pack-deliver',
@@ -31,6 +32,7 @@ export class TransportPackDeliverPage extends PageComponent {
 
     private natureTranslations: Translations;
     private transport: TransportRoundLine;
+    private round: TransportRound;
     private packs: Array<TransportPack>;
 
     public packsToDeliverListConfig: {
@@ -62,6 +64,7 @@ export class TransportPackDeliverPage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.transport = this.currentNavParams.get('transport');
+        this.round = this.currentNavParams.get('round');
         this.packs = this.transport.packs;
 
         zip(
@@ -224,9 +227,10 @@ export class TransportPackDeliverPage extends PageComponent {
         if (notDeliveredPacks.length === 0) {
             this.navService.push(NavPathEnum.FINISH_TRANSPORT, {
                 transport: this.transport,
+                round: this.round,
             });
         } else {
-            this.toastService.presentToast(`Veuillez déposer les colis pour continuer`);
+            this.toastService.presentToast(`Veuillez déposer les colis pour continuer.`);
         }
     }
 

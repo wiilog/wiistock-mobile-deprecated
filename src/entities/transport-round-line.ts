@@ -59,4 +59,5 @@ export interface TransportPack {
     rejected?: boolean;
     delivered?: boolean;
     returned?: boolean;
+    dropped?: boolean;
 }

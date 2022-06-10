@@ -5,7 +5,6 @@ import {PageComponent} from "@pages/page.component";
 import {TranslationService} from "@app/common/services/translations.service";
 import {IconColor} from "@app/common/components/icon/icon-color";
 import {CardListColorEnum} from "@app/common/components/card-list/card-list-color.enum";
-import {TransportRoundLine} from "@entities/transport-round-line";
 import {HeaderConfig} from "@app/common/components/panel/model/header-config";
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
 import {ToastService} from "@app/common/services/toast.service";
@@ -16,217 +15,216 @@ import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/bar
 import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
 
 @Component({
-	selector: 'wii-transport-round-finish-pack-drop',
-	templateUrl: './transport-round-finish-pack-drop.page.html',
-	styleUrls: ['./transport-round-finish-pack-drop.page.scss'],
+    selector: 'wii-transport-round-finish-pack-drop',
+    templateUrl: './transport-round-finish-pack-drop.page.html',
+    styleUrls: ['./transport-round-finish-pack-drop.page.scss'],
 })
 export class TransportRoundFinishPackDropPage extends PageComponent {
 
-	public readonly listBoldValues = ['code', 'nature', 'temperature_range'];
-	public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.INVISIBLE;
+    public readonly listBoldValues = ['code', 'nature', 'temperature_range'];
+    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.INVISIBLE;
 
-	private natureTranslations: Translations;
-	private round: TransportRound;
-	private packs: Array<{
-		code: string;
-		nature: string;
-		nature_id: number;
+    private natureTranslations: Translations;
+    private round: TransportRound;
+    private packs: Array<{
+        code: string;
+        nature: string;
+        nature_id: number;
         dropped: boolean;
-	}>;
+    }>;
+    private undeliveredPacksLocations: Array<number>;
+    private endRoundLocations: Array<number>;
 
-	public packsToDropListConfig: {
-		header: HeaderConfig;
-		body: Array<ListPanelItemConfig>;
-	};
+    public packsToDropListConfig: {
+        header: HeaderConfig;
+        body: Array<ListPanelItemConfig>;
+    };
 
-	public packsDroppedListConfig: {
-		header: HeaderConfig;
-		body: Array<ListPanelItemConfig>;
-	};
+    public packsDroppedListConfig: {
+        header: HeaderConfig;
+        body: Array<ListPanelItemConfig>;
+    };
 
-	private natureIdsToColors: { [natureId: number]: string };
+    private natureIdsToColors: { [natureId: number]: string };
 
-	@ViewChild('footerScannerComponent', {static: false})
-	public footerScannerComponent: BarcodeScannerComponent;
+    @ViewChild('footerScannerComponent', {static: false})
+    public footerScannerComponent: BarcodeScannerComponent;
 
-	constructor(navService: NavService,
-				private toastService: ToastService,
-				private sqliteService: SqliteService,
-				private translationService: TranslationService) {
-		super(navService);
-		this.natureIdsToColors = {};
-	}
+    constructor(navService: NavService,
+                private toastService: ToastService,
+                private sqliteService: SqliteService,
+                private translationService: TranslationService) {
+        super(navService);
+        this.natureIdsToColors = {};
+    }
 
-	public ionViewWillEnter(): void {
-		this.round = this.currentNavParams.get('round');
-		this.packs = this.round.lines.reduce(
-			(acc: Array<any>, line: TransportRoundLine) => [...(line.packs || []), ...acc],
-			[]
-		);
+    public ionViewWillEnter(): void {
+        this.round = this.currentNavParams.get('round');
+        this.packs = this.currentNavParams.get('packs');
+        this.undeliveredPacksLocations = this.currentNavParams.get('undeliveredPacksLocations');
+        this.endRoundLocations = this.currentNavParams.get('endRoundLocations');
 
-		this.translationService.get('natures').subscribe((natureTranslations) => {
+        this.translationService.get('natures').subscribe((natureTranslations) => {
             this.natureTranslations = natureTranslations;
             this.refreshListToDropConfig();
             this.refreshListDroppedConfig();
-		});
-	}
+        });
+    }
 
-	public ionViewWillLeave(): void {
-		if (this.footerScannerComponent) {
-			this.footerScannerComponent.unsubscribeZebraScan();
-		}
-	}
+    public ionViewWillLeave(): void {
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.unsubscribeZebraScan();
+        }
+    }
 
-	private refreshListToDropConfig(): void {
-		const packsToLoad = this.packs.filter(({dropped}) => !dropped);
-		const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
-		const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
+    private refreshListToDropConfig(): void {
+        const packsToDrop = this.packs.filter(({dropped}) => !dropped);
+        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
+        const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
-		const hasPackToLoad = this.packs && this.packs.some(({dropped}) => !dropped);
-		this.packsToDropListConfig = {
-			header: {
-				title: 'Colis à déposer',
-				info: `${packsToLoad.length} colis`,
-				leftIcon: {
-					name: 'packs-to-load.svg',
-					color: 'list-green-light'
-				},
-				rightIconLayout: 'horizontal',
-				...(hasPackToLoad
-					? {
-						rightIcon: [
-							{
-								color: 'primary',
-								name: 'scan-photo.svg',
-								action: () => {
-									this.footerScannerComponent.scan();
-								}
-							},
-							{
-								name: 'up.svg',
-								action: () => this.loadAll()
-							}
-						]
-					}
-					: {})
-			},
-			body: this.packs.map((pack) => ({
-				...(TransportRoundFinishPackDropPage.packToListItemConfig(pack, natureTranslationCapitalized)),
-				rightIcon: {
-					color: 'grey' as IconColor,
-					name: 'up.svg',
-					action: () => this.loadPack(pack.code)
-				}
-			}))
-		};
-	}
+        const hasPackToDrop = this.packs && this.packs.some(({dropped}) => !dropped);
+        this.packsToDropListConfig = {
+            header: {
+                title: 'Colis à déposer',
+                info: `${packsToDrop.length} colis`,
+                leftIcon: {
+                    name: 'packs-to-load.svg',
+                    color: 'list-green-light'
+                },
+                rightIconLayout: 'horizontal',
+                ...(hasPackToDrop
+                    ? {
+                        rightIcon: [
+                            {
+                                color: 'primary',
+                                name: 'scan-photo.svg',
+                                action: () => {
+                                    this.footerScannerComponent.scan();
+                                }
+                            },
+                            {
+                                name: 'up.svg',
+                                action: () => this.loadAll()
+                            }
+                        ]
+                    }
+                    : {})
+            },
+            body: packsToDrop.map((pack) => ({
+                ...(TransportRoundFinishPackDropPage.packToListItemConfig(pack, natureTranslationCapitalized)),
+                rightIcon: {
+                    color: 'grey' as IconColor,
+                    name: 'up.svg',
+                    action: () => this.loadPack(pack.code)
+                }
+            }))
+        };
+    }
 
-	private refreshListDroppedConfig(): void {
-		const loadedPacks = this.packs.filter(({dropped}) => dropped);
-		const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
-		const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
+    private refreshListDroppedConfig(): void {
+        const droppedPacks = this.packs.filter(({dropped}) => dropped);
+        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
+        const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
-		const plural = loadedPacks.length > 1 ? 's' : '';
-		this.packsDroppedListConfig = {
-			header: {
-				title: 'Colis scannés',
-				info: `${loadedPacks.length} colis scanné${plural}`,
-				leftIcon: {
-					name: 'scanned-pack.svg',
-					color: CardListColorEnum.GREEN
-				}
-			},
-			body: loadedPacks.map((pack) => ({
-				...(TransportRoundFinishPackDropPage.packToListItemConfig(pack, natureTranslationCapitalized)),
-				...({
-						pressAction: () => {
-						},
-						rightIcon: {
-							name: 'trash.svg',
-							color: 'danger',
-							action: () => this.revertPack(pack.code)
-						}
-					}
-				)
-			}))
-		};
-	}
+        const plural = droppedPacks.length > 1 ? 's' : '';
+        this.packsDroppedListConfig = {
+            header: {
+                title: 'Colis scannés',
+                info: `${droppedPacks.length} colis scanné${plural}`,
+                leftIcon: {
+                    name: 'scanned-pack.svg',
+                    color: CardListColorEnum.GREEN
+                }
+            },
+            body: droppedPacks.map((pack) => ({
+                ...(TransportRoundFinishPackDropPage.packToListItemConfig(pack, natureTranslationCapitalized)),
+                ...({
+                        pressAction: () => {
+                        },
+                        rightIcon: {
+                            name: 'trash.svg',
+                            color: 'danger',
+                            action: () => this.revertPack(pack.code)
+                        }
+                    }
+                )
+            }))
+        };
+    }
 
-	public loadPack(barCode: string): void {
-		const selectedIndex = this.packs.findIndex(({code}) => (code === barCode));
-		if (selectedIndex > -1) {
-			const selectedItem = this.packs[selectedIndex];
-			if (selectedItem.dropped) {
-				this.toastService.presentToast(`Vous avez déjà déposé ce colis`);
-			} else {
-				this.packs.splice(selectedIndex, 1);
-				this.packs.unshift(selectedItem);
-				selectedItem.dropped = true;
-				this.refreshListToDropConfig();
-				this.refreshListDroppedConfig();
-			}
-		} else {
-			this.toastService.presentToast(`Le colis scanné n'existe pas dans la liste`);
-		}
-	}
+    public loadPack(barCode: string): void {
+        const selectedIndex = this.packs.findIndex(({code}) => (code === barCode));
+        if (selectedIndex > -1) {
+            const selectedItem = this.packs[selectedIndex];
+            if (selectedItem.dropped) {
+                this.toastService.presentToast(`Vous avez déjà déposé ce colis`);
+            } else {
+                this.packs.splice(selectedIndex, 1);
+                this.packs.unshift(selectedItem);
+                selectedItem.dropped = true;
+                this.refreshListToDropConfig();
+                this.refreshListDroppedConfig();
+            }
+        } else {
+            this.toastService.presentToast(`Le colis scanné n'existe pas dans la liste`);
+        }
+    }
 
-	private loadAll(): void {
-		this.packs
-			.filter(({dropped}) => !dropped)
-			.forEach(({code}) => {
-				this.loadPack(code);
-			});
-	}
+    private loadAll(): void {
+        this.packs
+            .filter(({dropped}) => !dropped)
+            .forEach(({code}) => {
+                this.loadPack(code);
+            });
+    }
 
-	private revertPack(barCode: string): void {
-		const selectedIndex = this.packs.findIndex(({code}) => code === barCode);
-		if (selectedIndex > -1 && this.packs[selectedIndex].dropped) {
-			this.packs[selectedIndex].dropped = false;
+    private revertPack(barCode: string): void {
+        const selectedIndex = this.packs.findIndex(({code}) => code === barCode);
+        if (selectedIndex > -1 && this.packs[selectedIndex].dropped) {
+            this.packs[selectedIndex].dropped = false;
 
-			this.refreshListToDropConfig();
-			this.refreshListDroppedConfig();
-		}
-	}
+            this.refreshListToDropConfig();
+            this.refreshListDroppedConfig();
+        }
+    }
 
-	private static packToListItemConfig({code, nature, color, temperature_range}: any, natureTranslation: string): any {
-		return {
-			infos: {
-				code: {
-					label: 'Colis',
-					value: code
-				},
-				nature: {
-					label: natureTranslation,
-					value: nature
-				},
-				...(temperature_range ? {
-					temperature_range: {
-						label: 'Température',
-						value: temperature_range
-					}
-				} : {})
-			},
-			color: color
-		}
-	}
+    private static packToListItemConfig({code, nature, color, temperature_range}: any, natureTranslation: string): any {
+        return {
+            infos: {
+                code: {
+                    label: 'Colis',
+                    value: code
+                },
+                nature: {
+                    label: natureTranslation,
+                    value: nature
+                },
+                ...(temperature_range ? {
+                    temperature_range: {
+                        label: 'Température',
+                        value: temperature_range
+                    }
+                } : {})
+            },
+            color: color
+        }
+    }
 
-	public validate(): void {
-		const loadedPacks = this.packs.filter(({dropped}) => dropped);
-		if (loadedPacks.length > 0) {
-			this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD_VALIDATE, {
-				everythingLoaded: loadedPacks.length + this.packs.filter(({dropped}) => dropped).length === this.packs.length,
-				packs: loadedPacks,
-				round: this.round,
-				onValidate: () => {
-					for (const pack of loadedPacks) {
-						pack.dropped = true;
-					}
-
-					this.toastService.presentToast('Les colis ont bien été chargés');
-				}
-			});
-		} else {
-			this.toastService.presentToast('Veuillez charger au moins un colis pour continuer');
-		}
-	}
+    public validate(): void {
+        const packsToDrop = this.packs.filter(({dropped}) => !dropped);
+        if (packsToDrop.length === 0) {
+            console.log(this.undeliveredPacksLocations);
+            const options = {
+                params: {
+                    round: this.round,
+                    packs: this.packs,
+                    undeliveredPacksLocations: this.undeliveredPacksLocations,
+                    endRoundLocations: this.endRoundLocations
+                }
+            }
+            this.navService.push(NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP_VALIDATE, options);
+        } else {
+            this.toastService.presentToast('Tous les colis doivent être déposés pour terminer la tournée.');
+        }
+    }
 }
