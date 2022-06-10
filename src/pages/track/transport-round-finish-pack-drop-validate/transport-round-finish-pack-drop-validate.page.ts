@@ -37,6 +37,7 @@ export class TransportRoundFinishPackDropValidatePage extends PageComponent {
     }>;
     private undeliveredPacksLocations: Array<number>;
     private endRoundLocations: Array<number>;
+    private hasPacksToDrop: boolean;
 
     public panelHeaderConfig: {
         title: string;
@@ -62,7 +63,7 @@ export class TransportRoundFinishPackDropValidatePage extends PageComponent {
         this.packs = this.currentNavParams.get('packs');
         this.undeliveredPacksLocations = this.currentNavParams.get('undeliveredPacksLocations');
         this.endRoundLocations = this.currentNavParams.get('endRoundLocations');
-        console.log(this.undeliveredPacksLocations);
+        this.hasPacksToDrop = this.currentNavParams.get('hasPacksToDrop');
 
         this.resetEmitter$.emit();
         this.panelHeaderConfig = this.createPanelHeaderConfig();
@@ -79,11 +80,11 @@ export class TransportRoundFinishPackDropValidatePage extends PageComponent {
             const packsToDrop = this.packs.filter(({dropped}) => !dropped);
             if (packsToDrop.length === 0) {
                 const options = {
-                    params: {
-                        packsDropLocation: this.location,
-                        endRoundLocations: this.endRoundLocations,
-                        packs: packsToDrop
-                    }
+                    packsDropLocation: this.location,
+                    endRoundLocations: this.endRoundLocations,
+                    packs: packsToDrop,
+                    round: this.round,
+                    hasPacksToDrop: this.hasPacksToDrop
                 }
                 this.navService.push(NavPathEnum.TRANSPORT_ROUND_FINISH, options)
             } else {

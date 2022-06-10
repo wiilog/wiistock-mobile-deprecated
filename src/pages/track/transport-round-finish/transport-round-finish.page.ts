@@ -59,40 +59,42 @@ export class TransportRoundFinishPage extends PageComponent {
         };
     }
 
+    public ionViewWillLeave(): void {
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.unsubscribeZebraScan();
+        }
+    }
+
     public selectLocation(location): void {
         this.loadingService.presentLoadingWhile({
             event: () => this.sqliteService.findOneBy(`emplacement`, {label: location})
         }).subscribe((location: Emplacement|null) => {
-            if(location) {
-                if(this.endRoundLocations.includes(location.id)) {
-                    const options = {
-                        params: {
-                            round: this.round.id,
-                            location: location.id,
-                            ...this.packs && this.packsDropLocation
-                                ? {
-                                    packs: this.packs.map(({code}) => code),
-                                    packsDropLocation: this.packsDropLocation.id
-                                }
-                                : {},
-                        }
-                    };
-                    this.loadingService.presentLoadingWhile({
-                        message: `Finalisation de la tournée`,
-                        event: () => this.apiService.requestApi(ApiService.FINISH_ROUND, options)
-                    }).subscribe(({success}) => {
-                        if(success) {
-                            this.toastService.presentToast(`La tournée a bien été finalisée.`)
-                            this.navService.runMultiplePop(this.hasPacksToDrop ? 2 : 1);
-                        } else {
-                            this.toastService.presentToast('Une erreur est survenue')
-                        }
-                    });
-                } else {
-                    this.toastService.presentToast(`L'emplacement scanné ne fait pas partie des emplacements de fin de tournée.`)
-                }
+            if(this.endRoundLocations.includes(location.id)) {
+                const options = {
+                    params: {
+                        round: this.round.id,
+                        location: location.id,
+                        ...this.packs && this.packsDropLocation
+                            ? {
+                                packs: this.packs.map(({code}) => code),
+                                packsDropLocation: this.packsDropLocation.id
+                            }
+                            : {},
+                    }
+                };
+                this.loadingService.presentLoadingWhile({
+                    message: `Finalisation de la tournée`,
+                    event: () => this.apiService.requestApi(ApiService.FINISH_ROUND, options)
+                }).subscribe(({success}) => {
+                    if(success) {
+                        this.toastService.presentToast(`La tournée a bien été finalisée.`)
+                        this.navService.runMultiplePop(this.hasPacksToDrop ? 3 : 1);
+                    } else {
+                        this.toastService.presentToast('Une erreur est survenue')
+                    }
+                });
             } else {
-                this.toastService.presentToast(`L'emplacement scanné n'existe pas.`)
+                this.toastService.presentToast(`L'emplacement scanné ne fait pas partie des emplacements de fin de tournée.`)
             }
         });
     }

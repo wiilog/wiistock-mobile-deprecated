@@ -10,7 +10,6 @@ import {MapLocation} from '@app/common/components/leaflet-map/leaflet-map.compon
 import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
-import {LoadingService} from "@app/common/services/loading.service";
 
 @Component({
     selector: 'wii-transport-list',
@@ -33,8 +32,7 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
     public mapVisible: boolean = false;
 
     public constructor(navService: NavService,
-                       public formatService: FormatService,
-                       private loadingService: LoadingService) {
+                       public formatService: FormatService) {
         super(navService);
     }
 
@@ -104,13 +102,6 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
 
     public toggleMap() {
         this.mapVisible = !this.mapVisible;
-    }
-
-    public updateTransportList(transport: TransportRoundLine|undefined): void {
-        const index = this.round.lines.findIndex((line => line.id === transport.id));
-        this.round.lines[index].failure = true;
-
-        this.refreshMarkers();
     }
 
     public refreshMarkers(): void {
