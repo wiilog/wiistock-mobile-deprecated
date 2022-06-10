@@ -23,6 +23,7 @@ import {PackCountComponent} from '@app/common/components/pack-count/pack-count.c
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
 import {TransportService} from '@app/common/services/transport.service';
+import {TransportRound} from "@entities/transport-round";
 
 @Component({
     selector: 'wii-finish-transport',
@@ -40,6 +41,7 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
     private apiSubscription: Subscription;
 
     public transport: TransportRoundLine;
+    public round: TransportRound;
     public edit: boolean = false;
 
     public constructor(private networkService: NetworkService, private toastService: ToastService,
@@ -50,6 +52,7 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
 
     public ionViewWillEnter() {
         this.transport = this.currentNavParams.get('transport');
+        this.round = this.currentNavParams.get('round');
         this.edit = this.currentNavParams.get('edit');
 
         this.bodyConfig = [{
@@ -126,13 +129,13 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                         }),
                         flatMap(() => this.apiService.requestApi(ApiService.FINISH_TRANSPORT, {params})),
                         flatMap((result) => this.apiService.requestApi(ApiService.FETCH_ROUND, {
-                            params: {round: this.transport.round.id},
+                            params: {round: this.round.id},
                         }).pipe(map((round) => [result, round]))),
                         flatMap((res) => this.dismissLoading().pipe(map(() => res))),
                     )
                     .subscribe(
                         async ([{success, message}, round]) => {
-                            this.transportService.treatTransport(this.transport, round);
+                            this.transportService.treatTransport(this.round, round);
 
                             this.unsubscribeApi();
                             if (success) {
@@ -143,6 +146,7 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
 
                                     this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
                                         transport: this.transport.collect,
+                                        round: this.round,
                                         mode: TransportCardMode.STARTABLE,
                                     })
                                 } else {
@@ -153,7 +157,8 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                                 this.toastService.presentToast(message || "Une erreur s'est produite.");
                             }
                         },
-                        () => {
+                        (a) => {
+                            console.log("catch", a);
                             this.unsubscribeApi();
                             this.dismissLoading();
                             this.toastService.presentToast("Une erreur s'est produite.");

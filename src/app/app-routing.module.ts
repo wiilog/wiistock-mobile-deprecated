@@ -315,6 +315,10 @@ const routes: Routes = [
         loadChildren: () => import('@pages/track/transport-deposit-menu/transport-deposit-menu.module').then(m => m.TransportDepositMenuPageModule)
     },
     {
+        path: NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP,
+        loadChildren: () => import('@pages/track/transport-round-finish-pack-drop/transport-round-finish-pack-drop.module').then(m => m.TransportRoundFinishPackDropPageModule)
+    },
+    {
         path: NavPathEnum.TRANSPORT_DEPOSIT_PACKS,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/track/transport-deposit-packs/transport-deposit-packs.module').then(m => m.TransportDepositPacksPageModule)
@@ -325,15 +329,25 @@ const routes: Routes = [
         loadChildren: () => import('@pages/track/transport-deposit-location/transport-deposit-location.module').then(m => m.TransportDepositLocationPageModule)
     },
     {
+        path: NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP_VALIDATE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-round-finish-pack-drop-validate/transport-round-finish-pack-drop-validate.module').then(m => m.TransportRoundFinishPackDropValidatePageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_ROUND_FINISH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-round-finish/transport-round-finish.module').then(m => m.TransportRoundFinishPageModule)
+    },
+    {
+        path: NavPathEnum.TRANSPORT_FAILURE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/track/transport-failure/transport-failure.module').then(m => m.TransportFailurePageModule)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'
     },
-    {
-        path: 'transport-failure',
-        loadChildren: () => import('@pages/track/transport-failure/transport-failure.module').then(m => m.TransportFailurePageModule)
-    },
-
 ];
 
 @NgModule({

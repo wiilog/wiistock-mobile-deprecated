@@ -46,6 +46,7 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
             if(this.mode === TransportCardMode.STARTABLE && transport.success && transport.collect && !(transport.collect.success || transport.collect.failure)) {
                 this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
                     transport: transport.collect,
+                    round: this.round,
                     mode: TransportCardMode.STARTABLE,
                 });
 
@@ -88,11 +89,13 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
             if(this.mode === TransportCardMode.STARTABLE && transport.collect && transport.success && (!transport.collect.success || !transport.collect.failure)) {
                 this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
                     transport: transport.collect,
+                    round: this.round,
                     mode: this.mode,
                 });
             } else {
                 this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
                     transport,
+                    round: this.round,
                     mode: this.mode,
                 });
             }

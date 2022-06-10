@@ -5,13 +5,13 @@ import {NavService} from '@app/common/services/nav/nav.service';
 import {TransportRound} from '@entities/transport-round';
 import {LoadingService} from '@app/common/services/loading.service';
 import {ApiService} from '@app/common/services/api.service';
-import {Observable, zip} from 'rxjs';
+import {zip} from 'rxjs';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import * as moment from 'moment';
 import {ToastService} from '@app/common/services/toast.service';
 import {NetworkService} from '@app/common/services/network.service';
 import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
-import {TransportRoundLine} from '@entities/transport-round-line';
+import {TransportPack, TransportRoundLine} from '@entities/transport-round-line';
 import {AlertService} from '@app/common/services/alert.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 
@@ -101,10 +101,49 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         }
     }
 
-    public finishRound(event: any, round: TransportRound) {
+    public finishRound(event: any, round: TransportRound): void {
         event.stopPropagation();
+        this.loadingService.presentLoadingWhile({
+            event: () => this.apiService.requestApi(ApiService.GET_END_ROUND_LOCATIONS)
+        }).subscribe(({endRoundLocations}) => {
+            if(endRoundLocations.length > 0) {
+                const packsToDrop = round.lines
+                    .filter(({failure}) => failure)
+                    .reduce(
+                        (acc: Array<any>, line: TransportRoundLine) => [...(line.packs
+                            .filter(({temperature_range, dropped}) => temperature_range && !dropped) || []), ...acc],
+                        []
+                    );
 
-        //TODO: push la route
+                if(packsToDrop.length === 0) {
+                    this.navService.push(NavPathEnum.TRANSPORT_ROUND_FINISH, {
+                        round,
+                        endRoundLocations
+                    });
+                } else {
+                    this.loadingService.presentLoadingWhile({
+                        event: () => this.apiService.requestApi(ApiService.UNDELIVERED_PACKS_LOCATIONS)
+                    }).subscribe(({undeliveredPacksLocations}) => {
+                        if(undeliveredPacksLocations.length > 0) {
+                            console.log(undeliveredPacksLocations);
+                            this.navService.push(NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP, {
+                                round,
+                                packs: packsToDrop,
+                                endRoundLocations,
+                                undeliveredPacksLocations,
+                                hasPacksToDrop: true
+                            });
+                        } else {
+                            this.toastService.presentToast(`Aucun emplacement de retour des colis non livrés n'a été paramétré, vous ne pouvez pas continuer.`)
+                        }
+                    });
+
+                }
+            } else {
+                this.toastService.presentToast(`Aucun emplacement de fin de tournée n'a été paramétré, vous ne pouvez pas continuer.`)
+            }
+        });
+
     }
 
     proceedWithStart(event: any, round: TransportRound, ignore: boolean = false) {
@@ -223,7 +262,6 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
     }
 
     public unpreparedDeliveries(event: any, round: TransportRound): void {
-        console.log('callback');
         if(round.ready_deliveries != round.total_ready_deliveries) {
             this.alertService.show({
                 header: `Attention`,

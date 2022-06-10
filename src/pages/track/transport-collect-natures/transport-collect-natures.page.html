@@ -10,7 +10,7 @@
         </div>
     </ng-container>
 
-    <ng-container *ngIf="round">
+    <ng-container *ngIf="round && !transport">
         <ng-container *ngFor="let transport of round.lines">
             <div *ngFor="let nature of (transport.natures_to_collect || (transport.collect ? transport.collect.natures_to_collect : []))">
                 <wii-number-input [label]="nature.nature"

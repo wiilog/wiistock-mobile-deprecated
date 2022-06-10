@@ -1,10 +1,10 @@
 import {Component, ViewChild} from '@angular/core';
 import {NavService} from "@app/common/services/nav/nav.service";
+import {TransportRound} from "@entities/transport-round";
 import {PageComponent} from "@pages/page.component";
 import {TranslationService} from "@app/common/services/translations.service";
 import {IconColor} from "@app/common/components/icon/icon-color";
 import {CardListColorEnum} from "@app/common/components/card-list/card-list-color.enum";
-import {TransportPack, TransportRoundLine} from '@entities/transport-round-line';
 import {HeaderConfig} from "@app/common/components/panel/model/header-config";
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
 import {ToastService} from "@app/common/services/toast.service";
@@ -13,39 +13,39 @@ import {Translations} from "@entities/translation";
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
 import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
-import {AlertService} from "@app/common/services/alert.service";
-import {ApiService} from "@app/common/services/api.service";
-import {zip} from 'rxjs';
-import {LoadingService} from "@app/common/services/loading.service";
-import {NetworkService} from '@app/common/services/network.service';
-import {TransportRound} from "@entities/transport-round";
 
 @Component({
-    selector: 'app-transport-pack-deliver',
-    templateUrl: './transport-pack-deliver.page.html',
-    styleUrls: ['./transport-pack-deliver.page.scss'],
+    selector: 'wii-transport-round-finish-pack-drop',
+    templateUrl: './transport-round-finish-pack-drop.page.html',
+    styleUrls: ['./transport-round-finish-pack-drop.page.scss'],
 })
-export class TransportPackDeliverPage extends PageComponent {
+export class TransportRoundFinishPackDropPage extends PageComponent {
 
     public readonly listBoldValues = ['code', 'nature', 'temperature_range'];
     public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.INVISIBLE;
 
     private natureTranslations: Translations;
-    private transport: TransportRoundLine;
     private round: TransportRound;
-    private packs: Array<TransportPack>;
+    private packs: Array<{
+        code: string;
+        nature: string;
+        nature_id: number;
+        dropped: boolean;
+    }>;
+    private undeliveredPacksLocations: Array<number>;
+    private endRoundLocations: Array<number>;
 
-    public packsToDeliverListConfig: {
+    public packsToDropListConfig: {
         header: HeaderConfig;
         body: Array<ListPanelItemConfig>;
     };
 
-    public packsDeliveredListConfig: {
+    public packsDroppedListConfig: {
         header: HeaderConfig;
         body: Array<ListPanelItemConfig>;
     };
 
-    private natureIdsToColors: {[natureId: number]: string};
+    private natureIdsToColors: { [natureId: number]: string };
 
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
@@ -53,31 +53,22 @@ export class TransportPackDeliverPage extends PageComponent {
     constructor(navService: NavService,
                 private toastService: ToastService,
                 private sqliteService: SqliteService,
-                private translationService: TranslationService,
-                private alertService: AlertService,
-                private apiService: ApiService,
-                private loadingService: LoadingService,
-                private networkService: NetworkService) {
+                private translationService: TranslationService) {
         super(navService);
         this.natureIdsToColors = {};
     }
 
     public ionViewWillEnter(): void {
-        this.transport = this.currentNavParams.get('transport');
         this.round = this.currentNavParams.get('round');
-        this.packs = this.transport.packs;
+        this.packs = this.currentNavParams.get('packs');
+        this.undeliveredPacksLocations = this.currentNavParams.get('undeliveredPacksLocations');
+        this.endRoundLocations = this.currentNavParams.get('endRoundLocations');
 
-        zip(
-            this.loadingService.presentLoading('Récupération des données en cours'),
-            this.translationService.get('natures')
-        )
-            .subscribe(([loading, natureTranslations]: [HTMLIonLoadingElement, Translations]) => {
-                this.natureTranslations = natureTranslations;
-                loading.dismiss();
-
-                this.refreshListDeliveredConfig();
-                this.refreshListToDeliverConfig();
-            });
+        this.translationService.get('natures').subscribe((natureTranslations) => {
+            this.natureTranslations = natureTranslations;
+            this.refreshListToDropConfig();
+            this.refreshListDroppedConfig();
+        });
     }
 
     public ionViewWillLeave(): void {
@@ -86,22 +77,22 @@ export class TransportPackDeliverPage extends PageComponent {
         }
     }
 
-    private refreshListToDeliverConfig(): void {
-        const packsToDeliver = this.packs.filter(({delivered, rejected}) => (!delivered && !rejected));
+    private refreshListToDropConfig(): void {
+        const packsToDrop = this.packs.filter(({dropped}) => !dropped);
         const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
-        const hasPackToDeliver = this.packs && this.packs.some(({delivered, rejected}) => !delivered && !rejected);
-        this.packsToDeliverListConfig = {
+        const hasPackToDrop = this.packs && this.packs.some(({dropped}) => !dropped);
+        this.packsToDropListConfig = {
             header: {
                 title: 'Colis à déposer',
-                info: `${packsToDeliver.length} colis`,
+                info: `${packsToDrop.length} colis`,
                 leftIcon: {
                     name: 'packs-to-load.svg',
                     color: 'list-green-light'
                 },
                 rightIconLayout: 'horizontal',
-                ...(hasPackToDeliver
+                ...(hasPackToDrop
                     ? {
                         rightIcon: [
                             {
@@ -113,90 +104,87 @@ export class TransportPackDeliverPage extends PageComponent {
                             },
                             {
                                 name: 'up.svg',
-                                action: () => this.deliverAll()
+                                action: () => this.loadAll()
                             }
                         ]
                     }
                     : {})
             },
-            body: packsToDeliver.map((pack) => ({
-                ...(TransportPackDeliverPage.packToListItemConfig(pack, natureTranslationCapitalized)),
+            body: packsToDrop.map((pack) => ({
+                ...(TransportRoundFinishPackDropPage.packToListItemConfig(pack, natureTranslationCapitalized)),
                 rightIcon: {
                     color: 'grey' as IconColor,
                     name: 'up.svg',
-                    action: () => this.deliverPack(pack.code)
-                },
+                    action: () => this.loadPack(pack.code)
+                }
             }))
         };
     }
 
-    private refreshListDeliveredConfig(): void {
-        const deliveredPacks = this.packs.filter(({delivered, rejected}) => delivered && !rejected);
-
+    private refreshListDroppedConfig(): void {
+        const droppedPacks = this.packs.filter(({dropped}) => dropped);
         const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
-        const plural = deliveredPacks.length > 1 ? 's' : '';
-        this.packsDeliveredListConfig = {
+        const plural = droppedPacks.length > 1 ? 's' : '';
+        this.packsDroppedListConfig = {
             header: {
-                title: 'Colis déposés',
-                subtitle: `Emplacement : Patient`,
-                info: `${deliveredPacks.length} colis scanné${plural}`,
+                title: 'Colis scannés',
+                info: `${droppedPacks.length} colis scanné${plural}`,
                 leftIcon: {
                     name: 'scanned-pack.svg',
-                    color: CardListColorEnum.PURPLE
+                    color: CardListColorEnum.GREEN
                 }
             },
-            body: deliveredPacks.map((pack) => ({
-                ...(TransportPackDeliverPage.packToListItemConfig(pack, natureTranslationCapitalized)),
+            body: droppedPacks.map((pack) => ({
+                ...(TransportRoundFinishPackDropPage.packToListItemConfig(pack, natureTranslationCapitalized)),
                 ...({
-                        pressAction: () => {},
+                        pressAction: () => {
+                        },
                         rightIcon: {
                             name: 'trash.svg',
                             color: 'danger',
                             action: () => this.revertPack(pack.code)
                         }
                     }
-                ),
+                )
             }))
         };
     }
 
-    public deliverPack(barCode: string): void {
+    public loadPack(barCode: string): void {
         const selectedIndex = this.packs.findIndex(({code}) => (code === barCode));
         if (selectedIndex > -1) {
             const selectedItem = this.packs[selectedIndex];
-            if (selectedItem.delivered) {
-                this.toastService.presentToast(`Vous avez déjà traité ce colis`);
-            }
-            else {
+            if (selectedItem.dropped) {
+                this.toastService.presentToast(`Vous avez déjà déposé ce colis`);
+            } else {
                 this.packs.splice(selectedIndex, 1);
                 this.packs.unshift(selectedItem);
-                selectedItem.delivered = true;
-                this.refreshListToDeliverConfig();
-                this.refreshListDeliveredConfig();
+                selectedItem.dropped = true;
+                this.refreshListToDropConfig();
+                this.refreshListDroppedConfig();
             }
-        }
-        else {
+        } else {
             this.toastService.presentToast(`Le colis scanné n'existe pas dans la liste`);
         }
     }
 
-    private deliverAll(): void {
+    private loadAll(): void {
         this.packs
-            .filter(({delivered, rejected}) => !delivered && !rejected)
+            .filter(({dropped}) => !dropped)
             .forEach(({code}) => {
-                this.deliverPack(code);
+                this.loadPack(code);
             });
     }
 
     private revertPack(barCode: string): void {
         const selectedIndex = this.packs.findIndex(({code}) => code === barCode);
-        if (selectedIndex > -1 && this.packs[selectedIndex].delivered) {
-            this.packs[selectedIndex].delivered = false;
+        if (selectedIndex > -1 && this.packs[selectedIndex].dropped) {
+            this.packs[selectedIndex].dropped = false;
 
-            this.refreshListToDeliverConfig();
-            this.refreshListDeliveredConfig();
+            this.refreshListToDropConfig();
+            this.refreshListDroppedConfig();
         }
     }
 
@@ -223,15 +211,20 @@ export class TransportPackDeliverPage extends PageComponent {
     }
 
     public validate(): void {
-        const notDeliveredPacks = this.packs.filter(({delivered, rejected}) => !delivered && !rejected);
-        if (notDeliveredPacks.length === 0) {
-            this.navService.push(NavPathEnum.FINISH_TRANSPORT, {
-                transport: this.transport,
-                round: this.round,
-            });
+        const packsToDrop = this.packs.filter(({dropped}) => !dropped);
+        if (packsToDrop.length === 0) {
+            console.log(this.undeliveredPacksLocations);
+            const options = {
+                params: {
+                    round: this.round,
+                    packs: this.packs,
+                    undeliveredPacksLocations: this.undeliveredPacksLocations,
+                    endRoundLocations: this.endRoundLocations
+                }
+            }
+            this.navService.push(NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP_VALIDATE, options);
         } else {
-            this.toastService.presentToast(`Veuillez déposer les colis pour continuer.`);
+            this.toastService.presentToast('Tous les colis doivent être déposés pour terminer la tournée.');
         }
     }
-
 }

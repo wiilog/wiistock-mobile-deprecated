@@ -62,4 +62,7 @@ export enum NavPathEnum {
     TRANSPORT_DEPOSIT_MENU = 'transport-deposit-menu',
     TRANSPORT_DEPOSIT_PACKS = 'transport-deposit-packs',
     TRANSPORT_DEPOSIT_LOCATION = 'transport-deposit-location',
+    TRANSPORT_ROUND_FINISH_PACK_DROP = 'transport-round-finish-pack-drop',
+    TRANSPORT_ROUND_FINISH_PACK_DROP_VALIDATE = 'transport-round-finish-pack-drop-validate',
+    TRANSPORT_ROUND_FINISH = 'transport-round-finish',
 }
