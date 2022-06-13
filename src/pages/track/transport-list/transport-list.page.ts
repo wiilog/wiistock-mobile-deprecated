@@ -81,7 +81,10 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
                     edit: true,
                 });
             } else {
-                //TODO: non livré et non collecté thomas
+                this.navService.push(NavPathEnum.TRANSPORT_FAILURE, {
+                    transport: transport,
+                    round: this.round
+                });
             }
         } else {
             if(this.mode === TransportCardMode.STARTABLE && transport.collect && transport.success && (!transport.collect.success || !transport.collect.failure)) {
