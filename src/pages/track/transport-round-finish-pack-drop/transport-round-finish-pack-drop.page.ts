@@ -13,6 +13,7 @@ import {Translations} from "@entities/translation";
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
 import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
+import {AlertService} from "@app/common/services/alert.service";
 
 @Component({
     selector: 'wii-transport-round-finish-pack-drop',
@@ -34,6 +35,7 @@ export class TransportRoundFinishPackDropPage extends PageComponent {
     }>;
     private undeliveredPacksLocations: Array<number>;
     private endRoundLocations: Array<number>;
+    private hasPacksToDrop: boolean;
 
     public packsToDropListConfig: {
         header: HeaderConfig;
@@ -53,7 +55,8 @@ export class TransportRoundFinishPackDropPage extends PageComponent {
     constructor(navService: NavService,
                 private toastService: ToastService,
                 private sqliteService: SqliteService,
-                private translationService: TranslationService) {
+                private translationService: TranslationService,
+                private alertService: AlertService) {
         super(navService);
         this.natureIdsToColors = {};
     }
@@ -63,6 +66,7 @@ export class TransportRoundFinishPackDropPage extends PageComponent {
         this.packs = this.currentNavParams.get('packs');
         this.undeliveredPacksLocations = this.currentNavParams.get('undeliveredPacksLocations');
         this.endRoundLocations = this.currentNavParams.get('endRoundLocations');
+        this.hasPacksToDrop = this.currentNavParams.get('hasPacksToDrop');
 
         this.translationService.get('natures').subscribe((natureTranslations) => {
             this.natureTranslations = natureTranslations;
@@ -166,7 +170,14 @@ export class TransportRoundFinishPackDropPage extends PageComponent {
                 this.refreshListDroppedConfig();
             }
         } else {
-            this.toastService.presentToast(`Le colis scanné n'existe pas dans la liste`);
+            this.alertService.show({
+                header: 'Erreur',
+                message: `Le colis scanné n'existe pas dans la liste`,
+                buttons: [{
+                    text: 'Fermer',
+                    role: 'cancel'
+                }]
+            });
         }
     }
 
@@ -213,14 +224,12 @@ export class TransportRoundFinishPackDropPage extends PageComponent {
     public validate(): void {
         const packsToDrop = this.packs.filter(({dropped}) => !dropped);
         if (packsToDrop.length === 0) {
-            console.log(this.undeliveredPacksLocations);
             const options = {
-                params: {
-                    round: this.round,
-                    packs: this.packs,
-                    undeliveredPacksLocations: this.undeliveredPacksLocations,
-                    endRoundLocations: this.endRoundLocations
-                }
+                round: this.round,
+                packs: this.packs,
+                undeliveredPacksLocations: this.undeliveredPacksLocations,
+                endRoundLocations: this.endRoundLocations,
+                hasPacksToDrop: this.hasPacksToDrop
             }
             this.navService.push(NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP_VALIDATE, options);
         } else {

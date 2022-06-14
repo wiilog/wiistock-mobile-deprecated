@@ -37,6 +37,7 @@ export interface TransportRoundLine {
     comment: string|null;
     photos: Array<string>|null; // urls des photos
     signature: string|null; // url de la signature
+    reject_motive: string|null;
     requester: string;
     free_fields: Array<{
         id: number,

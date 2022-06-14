@@ -11,7 +11,7 @@ import * as moment from 'moment';
 import {ToastService} from '@app/common/services/toast.service';
 import {NetworkService} from '@app/common/services/network.service';
 import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
-import {TransportPack, TransportRoundLine} from '@entities/transport-round-line';
+import {TransportRoundLine} from '@entities/transport-round-line';
 import {AlertService} from '@app/common/services/alert.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 
@@ -125,7 +125,6 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                         event: () => this.apiService.requestApi(ApiService.UNDELIVERED_PACKS_LOCATIONS)
                     }).subscribe(({undeliveredPacksLocations}) => {
                         if(undeliveredPacksLocations.length > 0) {
-                            console.log(undeliveredPacksLocations);
                             this.navService.push(NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP, {
                                 round,
                                 packs: packsToDrop,
@@ -172,10 +171,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                                 text: 'Charger',
                                 cssClass: 'alert-success',
                                 handler: () => {
-                                    this.synchronise((updatedRound: TransportRound) => this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD, {
-                                        round: updatedRound,
-                                        unpreparedDeliveries: () => this.unpreparedDeliveries(event, updatedRound)
-                                    }), round);
+                                    this.synchronise((updatedRound: TransportRound) => this.pushPackLoadingPage(updatedRound, event), round);
                                 }
                             }]
                         });
@@ -284,5 +280,12 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         } else {
             this.proceedWithStart(event, round, true);
         }
+    }
+
+    private pushPackLoadingPage(updatedRound: TransportRound, event: Event): void {
+        this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD, {
+            round: updatedRound,
+            unpreparedDeliveries: () => this.unpreparedDeliveries(event, updatedRound)
+        })
     }
 }

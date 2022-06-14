@@ -78,6 +78,7 @@ export class TransportFailurePage extends PageComponent {
                     config: {
                         label: 'Motif',
                         name: 'motive',
+                        value: this.transport.reject_motive || '',
                         inputConfig: {
                             required: true,
                             elements: motives.map((label) => ({id: label, label}))
@@ -92,6 +93,7 @@ export class TransportFailurePage extends PageComponent {
                     config: {
                         label: `Commentaire`,
                         name: 'comment',
+                        value: this.transport.comment || '',
                         inputConfig: {
                             required: false,
                             maxLength: '512',

@@ -39,8 +39,7 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
     public constructor(navService: NavService,
                        private alertService: AlertService,
                        private transportService: TransportService,
-                       private formatService: FormatService,
-                       private loadingService: LoadingService) {
+                       private formatService: FormatService) {
         super(navService);
     }
 
@@ -105,7 +104,10 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
                     edit: true,
                 });
             } else {
-                //TODO: non livré et non collecté thomas
+                this.navService.push(NavPathEnum.TRANSPORT_FAILURE, {
+                    transport: transport,
+                    round: this.round
+                });
             }
         } else {
             if(this.mode === TransportCardMode.STARTABLE && transport.collect && transport.success && (!transport.collect.success || !transport.collect.failure)) {
@@ -126,13 +128,6 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
 
     public toggleMap() {
         this.mapVisible = !this.mapVisible;
-    }
-
-    public updateTransportList(transport: TransportRoundLine|undefined): void {
-        const index = this.round.lines.findIndex((line => line.id === transport.id));
-        this.round.lines[index].failure = true;
-
-        this.refreshMarkers();
     }
 
     public refreshMarkers(): void {

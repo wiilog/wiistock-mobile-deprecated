@@ -139,10 +139,11 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
 
                             this.unsubscribeApi();
                             if (success) {
+                                const allTransportsTreated = this.round.lines.every(({failure, success}) => failure || success);
                                 this.toastService.presentToast("Les données ont été sauvegardées");
 
                                 if(!this.edit && this.transport.collect) {
-                                    await this.navService.runMultiplePop(3);
+                                    await this.navService.runMultiplePop(allTransportsTreated ? 4 : 3);
 
                                     this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
                                         transport: this.transport.collect,
@@ -150,15 +151,15 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                                         mode: TransportCardMode.STARTABLE,
                                     })
                                 } else {
-                                    await this.navService.runMultiplePop(this.edit ? 1 : 3);
+                                    const additionalPop = allTransportsTreated ? 1 : 0;
+                                    await this.navService.runMultiplePop(this.edit ? (1 + additionalPop) : (3 + additionalPop));
                                 }
                             }
                             else {
                                 this.toastService.presentToast(message || "Une erreur s'est produite.");
                             }
                         },
-                        (a) => {
-                            console.log("catch", a);
+                        () => {
                             this.unsubscribeApi();
                             this.dismissLoading();
                             this.toastService.presentToast("Une erreur s'est produite.");

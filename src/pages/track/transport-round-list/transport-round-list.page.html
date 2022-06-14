@@ -82,13 +82,17 @@
                             </div>
                         </div>
                         <div class="line">
-                            <ion-button color="primary" size="small" [style.width]="round.status === 'Terminée' ? '100%' : '50%'"
+                            <ion-button color="primary"
+                                        size="small"
+                                        [style.width]="round.status === 'Terminée' ? '100%' : '50%'"
                                         [disabled]="!(round.not_delivered && round.returned_packs != round.packs_to_return) && !(round.done_collects && round.deposited_packs != round.packs_to_deposit)"
-                                                (click)="depositPacks($event, round)">
+                                        (click)="depositPacks($event, round)">
                                 Déposer les colis
                             </ion-button>
-                            <ion-button *ngIf="round.status !== 'Terminée'" color="primary"
-                                        size="small" (click)="finishRound($event, round)">
+                            <ion-button *ngIf="round.status !== 'Terminée'"
+                                        color="primary"
+                                        size="small"
+                                        (click)="finishRound($event, round)">
                                 Terminer la tournée
                             </ion-button>
                         </div>
