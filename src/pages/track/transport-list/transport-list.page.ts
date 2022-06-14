@@ -11,6 +11,8 @@ import {TransportCardMode} from '@app/common/components/transport-card/transport
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {LoadingService} from "@app/common/services/loading.service";
+import {AlertService} from '@app/common/services/alert.service';
+import {TransportService} from '@app/common/services/transport.service';
 
 @Component({
     selector: 'wii-transport-list',
@@ -32,8 +34,12 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
 
     public mapVisible: boolean = false;
 
+    private warningShown: boolean = false;
+
     public constructor(navService: NavService,
-                       public formatService: FormatService,
+                       private alertService: AlertService,
+                       private transportService: TransportService,
+                       private formatService: FormatService,
                        private loadingService: LoadingService) {
         super(navService);
     }
@@ -41,6 +47,22 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
     public ionViewWillEnter(): void {
         this.mode = this.currentNavParams.get('mode');
         this.round = this.currentNavParams.get('round');
+
+        const cancelledTransport = this.currentNavParams.get('cancelledTransport');
+        if(cancelledTransport && !this.warningShown) {
+            this.warningShown = true;
+
+            this.alertService.show({
+                header: `Attention`,
+                cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+                message: `Le prochain point de passage a été annulé. Veuillez ne pas vous y rendre. ` +
+                    `Pensez à retourner les colis à la fin de la tournée s'il s'agit d'une livraison.`,
+                buttons: [{
+                    text: 'OK',
+                    cssClass: 'alert-success',
+                }]
+            });
+        }
 
         for(const transport of this.round.lines) {
             if(this.mode === TransportCardMode.STARTABLE && transport.success && transport.collect && !(transport.collect.success || transport.collect.failure)) {

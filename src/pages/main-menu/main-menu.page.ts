@@ -15,6 +15,7 @@ import {NotificationService} from '@app/common/services/notification.service';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {AlertService} from '@app/common/services/alert.service';
 import {NetworkService} from '@app/common/services/network.service';
+import {ApiService} from '@app/common/services/api.service';
 
 
 @Component({
@@ -44,6 +45,7 @@ export class MainMenuPage extends PageComponent {
     private lastNotificationRedirected: ILocalNotification;
 
     public constructor(private alertService: AlertService,
+                       private apiService: ApiService,
                        private sqliteService: SqliteService,
                        private storageService: StorageService,
                        private localDataManager: LocalDataManagerService,
@@ -253,7 +255,23 @@ export class MainMenuPage extends PageComponent {
             this.lastNotificationRedirected = notification;
             this.ngZone.run(() => {
                 const {data} = notification;
-                if (data.type === 'dispatch') {
+
+                if(data.roundId) {
+                    this.apiService.requestApi(ApiService.FETCH_ROUND, {
+                        params: {round: data.roundId},
+                    }).subscribe(round => {
+                        this.navService
+                            .push(NavPathEnum.TRANSPORT_ROUND_LIST)
+                            .pipe(flatMap(() => this.navService.push(NavPathEnum.TRANSPORT_LIST, {
+                                round,
+                                cancelledTransport: data.transportId,
+                            })))
+                            .subscribe(() => {
+                                this.pageIsRedirecting = false;
+                            });
+                    })
+                }
+                else if (data.type === 'dispatch') {
                     this.pageIsRedirecting = true;
                     const dispatchId = Number(data.id);
                     this.navService
