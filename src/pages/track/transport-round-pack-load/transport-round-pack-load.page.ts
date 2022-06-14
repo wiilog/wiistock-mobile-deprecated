@@ -209,7 +209,14 @@ export class TransportRoundPackLoadPage extends PageComponent {
             }
         }
         else {
-            this.toastService.presentToast(`Le colis scanné n'existe pas dans la liste`);
+            this.alertService.show({
+                header: 'Erreur',
+                message: `Le colis scanné n'existe pas dans la liste`,
+                buttons: [{
+                    text: 'Fermer',
+                    role: 'cancel'
+                }]
+            });
         }
     }
 
