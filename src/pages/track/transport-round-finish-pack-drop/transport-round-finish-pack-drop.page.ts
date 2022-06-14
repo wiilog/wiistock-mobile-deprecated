@@ -13,6 +13,7 @@ import {Translations} from "@entities/translation";
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
 import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
+import {AlertService} from "@app/common/services/alert.service";
 
 @Component({
     selector: 'wii-transport-round-finish-pack-drop',
@@ -54,7 +55,8 @@ export class TransportRoundFinishPackDropPage extends PageComponent {
     constructor(navService: NavService,
                 private toastService: ToastService,
                 private sqliteService: SqliteService,
-                private translationService: TranslationService) {
+                private translationService: TranslationService,
+                private alertService: AlertService) {
         super(navService);
         this.natureIdsToColors = {};
     }
@@ -168,7 +170,14 @@ export class TransportRoundFinishPackDropPage extends PageComponent {
                 this.refreshListDroppedConfig();
             }
         } else {
-            this.toastService.presentToast(`Le colis scanné n'existe pas dans la liste`);
+            this.alertService.show({
+                header: 'Erreur',
+                message: `Le colis scanné n'existe pas dans la liste`,
+                buttons: [{
+                    text: 'Fermer',
+                    role: 'cancel'
+                }]
+            });
         }
     }
 

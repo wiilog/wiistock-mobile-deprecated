@@ -171,10 +171,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                                 text: 'Charger',
                                 cssClass: 'alert-success',
                                 handler: () => {
-                                    this.synchronise((updatedRound: TransportRound) => this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD, {
-                                        round: updatedRound,
-                                        unpreparedDeliveries: () => this.unpreparedDeliveries(event, updatedRound)
-                                    }), round);
+                                    this.synchronise((updatedRound: TransportRound) => this.pushPackLoadingPage(updatedRound, event), round);
                                 }
                             }]
                         });
@@ -283,5 +280,12 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         } else {
             this.proceedWithStart(event, round, true);
         }
+    }
+
+    private pushPackLoadingPage(updatedRound: TransportRound, event: Event): void {
+        this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD, {
+            round: updatedRound,
+            unpreparedDeliveries: () => this.unpreparedDeliveries(event, updatedRound)
+        })
     }
 }

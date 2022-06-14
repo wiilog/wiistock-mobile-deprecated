@@ -159,7 +159,7 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                                 this.toastService.presentToast(message || "Une erreur s'est produite.");
                             }
                         },
-                        (a) => {
+                        () => {
                             this.unsubscribeApi();
                             this.dismissLoading();
                             this.toastService.presentToast("Une erreur s'est produite.");

@@ -16,8 +16,6 @@ import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {AlertService} from '@app/common/services/alert.service';
 import {Translations} from '@entities/translation';
 import {TranslationService} from '@app/common/services/translations.service';
-import {Util} from "leaflet";
-import indexOf = Util.indexOf;
 
 @Component({
     selector: 'wii-main-header',
