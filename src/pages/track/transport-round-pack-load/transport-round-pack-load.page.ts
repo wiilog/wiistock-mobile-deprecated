@@ -197,8 +197,8 @@ export class TransportRoundPackLoadPage extends PageComponent {
         const selectedIndex = this.packs.findIndex(({code}) => (code === barCode));
         if (selectedIndex > -1) {
             const selectedItem = this.packs[selectedIndex];
-            if (selectedItem.loaded) {
-                this.toastService.presentToast(`Vous avez déjà traité ce colis`);
+            if (selectedItem.loading || selectedItem.loaded) {
+                this.toastService.presentToast(`Ce colis est déjà présent dans la liste des colis scannés`);
             }
             else {
                 this.packs.splice(selectedIndex, 1);

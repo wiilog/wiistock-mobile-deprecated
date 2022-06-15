@@ -161,7 +161,7 @@ export class TransportRoundFinishPackDropPage extends PageComponent {
         if (selectedIndex > -1) {
             const selectedItem = this.packs[selectedIndex];
             if (selectedItem.dropped) {
-                this.toastService.presentToast(`Vous avez déjà déposé ce colis`);
+                this.toastService.presentToast(`Ce colis est déjà présent dans la liste des colis scannés`);
             } else {
                 this.packs.splice(selectedIndex, 1);
                 this.packs.unshift(selectedItem);
