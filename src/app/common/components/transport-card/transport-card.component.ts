@@ -4,6 +4,7 @@ import {SimpleCardTitle} from '@app/common/components/simple-card/simple-card.co
 import {Platform} from '@ionic/angular';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {NavService} from '@app/common/services/nav/nav.service';
+import {ToastService} from "@app/common/services/toast.service";
 
 export enum TransportCardMode {
     VIEW,
@@ -25,11 +26,11 @@ export class TransportCardComponent implements OnInit {
     @Input()
     public mode: TransportCardMode;
 
-    public canClick: boolean;
-
     public titles: Array<SimpleCardTitle> = [];
 
-    constructor(private navService: NavService, private platform: Platform) {
+    constructor(private navService: NavService,
+                private platform: Platform,
+                private toastService: ToastService) {
     }
 
     ngOnInit() {
@@ -53,11 +54,15 @@ export class TransportCardComponent implements OnInit {
         }
     }
 
-    public click() {
+    public click(event: any) {
+        event.stopPropagation();
         if(this.mode === TransportCardMode.STARTABLE && !this.transport.cancelled) {
             this.navService.push(NavPathEnum.FINISH_TRANSPORT, {
                 transport: this.transport,
             });
+        } else {
+            const kind = this.transport.kind === 'collect' ? 'collecte' : 'livraison';
+            this.toastService.presentToast(`Cette ${kind} a été annulée, vous ne pouvez pas la visualiser.`)
         }
     }
 
