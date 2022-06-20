@@ -44,6 +44,18 @@ export class TransportCollectNaturesPage extends PageComponent implements ViewWi
         this.round = this.currentNavParams.get('round');
 
         if(this.transport) {
+            for(const nature of this.transport.natures_to_collect) {
+                this.setCollectedQuantity(nature.nature_id, nature.collected_quantity || 1);
+            }
+        } else if(this.round) {
+            for(const transport of this.round.lines) {
+                for(const nature of (transport.natures_to_collect || (transport.collect ? transport.collect.natures_to_collect : []))) {
+                    this.setDepositedQuantity(nature.nature_id, nature.collected_quantity);
+                }
+            }
+        }
+
+        if(this.transport) {
             this.headerConfig = {
                 title: `Collecte`,
                 subtitle: [`ODT${this.transport.number}`],

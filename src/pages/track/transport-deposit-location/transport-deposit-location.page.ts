@@ -208,7 +208,7 @@ export class TransportDepositLocationPage extends PageComponent {
                             onValidate();
                         }
 
-                        this.navService.runMultiplePop( this.everythingReturned ? 3 - Number(this.skippedMenu) : 1);
+                        this.navService.runMultiplePop( this.everythingReturned || this.depositedCollectPacks.length ? 3 - Number(this.skippedMenu) : 1);
                     }
                 });
             } else {
