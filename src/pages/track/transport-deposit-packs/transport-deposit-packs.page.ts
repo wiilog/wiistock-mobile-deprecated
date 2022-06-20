@@ -174,7 +174,24 @@ export class TransportDepositPacksPage extends PageComponent {
         if (selectedIndex > -1) {
             const selectedItem = this.packs[selectedIndex];
             if (selectedItem.returned) {
-                this.toastService.presentToast(`Vous avez déjà traité ce colis`);
+                this.alertService.show({
+                    header: `Erreur`,
+                    message: `Vous avez déjà traité ce colis`,
+                    buttons: [{
+                        text: `Fermer`,
+                        role: `cancel`
+                    }]
+                });
+            }
+            else if(selectedItem.returning) {
+                this.alertService.show({
+                    header: `Erreur`,
+                    message: `Vous avez déjà scanné ce colis`,
+                    buttons: [{
+                        text: `Fermer`,
+                        role: `cancel`
+                    }]
+                });
             }
             else {
                 this.packs.splice(selectedIndex, 1);
@@ -185,7 +202,14 @@ export class TransportDepositPacksPage extends PageComponent {
             }
         }
         else {
-            this.toastService.presentToast(`Le colis scanné n'existe pas dans la liste`);
+            this.alertService.show({
+                header: `Erreur`,
+                message: `Le colis scanné n'existe pas dans la liste`,
+                buttons: [{
+                    text: `Fermer`,
+                    role: `cancel`
+                }]
+            });
         }
     }
 
