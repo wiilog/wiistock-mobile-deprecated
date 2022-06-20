@@ -24,7 +24,9 @@ export class TransportDepositMenuPage extends PageComponent implements ViewWillE
     }
 
     public delivery() {
-        this.toastService.presentToast(`Non implémenté`);
+        this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_PACKS, {
+            round: this.round,
+        });
     }
 
     public collect() {
