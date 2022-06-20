@@ -113,6 +113,10 @@ export class BarcodeScannerComponent implements OnInit, OnDestroy {
         }
     }
 
+    public isSubscribed(): boolean {
+        return this.zebraScanSubscription != undefined;
+    }
+
     @HostBinding('attr.hidden')
     public get attrHidden(): string {
         return this.hidden ? '' : undefined;
