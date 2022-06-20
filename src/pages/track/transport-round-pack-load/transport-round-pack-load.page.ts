@@ -95,6 +95,10 @@ export class TransportRoundPackLoadPage extends PageComponent {
         } else {
             this.toastService.presentToast('Veuillez vous connecter à internet pour continuer');
         }
+
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.fireZebraScan();
+        }
     }
 
     public ionViewWillLeave(): void {
@@ -202,6 +206,16 @@ export class TransportRoundPackLoadPage extends PageComponent {
                 this.alertService.show({
                     header: `Erreur`,
                     message: `Ce colis est déjà chargé`,
+                    buttons: [{
+                        text: `Fermer`,
+                        role: `cancel`
+                    }]
+                });
+            }
+            else if (selectedItem.rejected) {
+                this.alertService.show({
+                    header: `Erreur`,
+                    message: `Ce colis a été rejeté`,
                     buttons: [{
                         text: `Fermer`,
                         role: `cancel`
