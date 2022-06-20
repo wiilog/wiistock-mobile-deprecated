@@ -30,6 +30,7 @@ export class TransportCollectNaturesPage extends PageComponent implements ViewWi
     public round: TransportRound;
 
     private depositedQuantities: {[nature: number]: number} = {};
+    private collectedPacksLocations: Array<number>;
 
     public constructor(navService: NavService) {
         super(navService);
@@ -37,6 +38,7 @@ export class TransportCollectNaturesPage extends PageComponent implements ViewWi
 
     public ionViewWillEnter(): void {
         this.transport = this.currentNavParams.get('transport');
+        this.collectedPacksLocations = this.currentNavParams.get('collectedPacksLocations');
         this.round = this.currentNavParams.get('round');
 
         if(this.transport) {
@@ -103,6 +105,7 @@ export class TransportCollectNaturesPage extends PageComponent implements ViewWi
                 round: this.round,
                 depositedCollectPacks: formattedPacks,
                 skippedMenu: this.currentNavParams.get('skippedMenu'),
+                collectedPacksLocations: this.collectedPacksLocations
             });
         }
     }

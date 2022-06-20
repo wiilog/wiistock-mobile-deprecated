@@ -63,7 +63,7 @@
                         <hr>
                         <div class="line" *ngIf="round.not_delivered && round.returned_packs != round.packs_to_return">
                             <div class="counter">
-                                <img src="assets/icons/collect-hand.svg" width="15">
+                                <img src="assets/icons/cancelled-delivery.svg" width="15">
                                 <span>
                                     <strong>
                                         {{ round.not_delivered }} livraison{{ round.not_delivered > 1 ? 's' : '' }} non livrée{{ round.not_delivered > 1 ? 's' : '' }}
@@ -74,9 +74,9 @@
                         </div>
                         <div class="line" *ngIf="round.done_collects && round.deposited_packs != round.packs_to_deposit">
                             <div class="counter">
-                                <img src="assets/icons/cancelled-delivery.svg" width="15">
+                                <img src="assets/icons/collect-hand.svg" width="15">
                                 <span>
-                                    <strong>{{ round.done_collects }} collectes effectuées</strong>
+                                    <strong>{{ round.done_collects }} collecte{{ round.done_collects > 1 ? 's' : '' }} effectuée{{ round.done_collects > 1 ? 's' : '' }}</strong>
                                     {{ round.deposited_packs }}/{{ round.packs_to_deposit }} objets déposés
                                 </span>
                             </div>

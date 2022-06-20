@@ -60,7 +60,7 @@ export class ApiService {
     public static readonly START_DELIVERY_ROUND = {method: POST, service: '/start-round'};
     public static readonly DEPOSIT_TRANSPORT = {method: POST, service: '/deposit-transport-packs'};
     public static readonly FINISH_ROUND = {method: POST, service: '/finish-round'};
-    public static readonly UNDELIVERED_PACKS_LOCATIONS = {method: GET, service: '/undelivered-packs-locations'};
+    public static readonly PACKS_RETURN_LOCATIONS = {method: GET, service: '/packs-return-locations'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'
