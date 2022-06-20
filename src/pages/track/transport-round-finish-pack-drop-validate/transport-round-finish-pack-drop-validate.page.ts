@@ -184,7 +184,7 @@ export class TransportRoundFinishPackDropValidatePage extends PageComponent {
                     }
                 });
         } else {
-            this.toastService.presentToast(`Erreur : L'emplacement sélectionné ne fait pas partie des emplacements de retour des colis non livrés`)
+            this.toastService.presentToast(`Erreur : L'emplacement sélectionné ne fait pas partie des emplacements de retour des colis non livrés`);
         }
     }
 }

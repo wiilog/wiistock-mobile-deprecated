@@ -40,6 +40,7 @@ export class TransportDepositLocationPage extends PageComponent {
         nature_id: number;
         quantity: number;
     }> = [];
+    private collectedPacksLocations: Array<number>;
 
     private round: TransportRound;
     private skippedMenu: boolean;
@@ -67,8 +68,9 @@ export class TransportDepositLocationPage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.round = this.currentNavParams.get('round');
-        this.depositedDeliveryPacks = this.currentNavParams.get('depositedDeliveryPacks');
-        this.depositedCollectPacks = this.currentNavParams.get('depositedCollectPacks');
+        this.depositedDeliveryPacks = this.currentNavParams.get('depositedDeliveryPacks') || [];
+        this.depositedCollectPacks = this.currentNavParams.get('depositedCollectPacks') || [];
+        this.collectedPacksLocations = this.currentNavParams.get('collectedPacksLocations');
         this.skippedMenu = this.currentNavParams.get('skippedMenu');
         this.everythingReturned = this.currentNavParams.get('everythingReturned');
         this.resetEmitter$.emit();
@@ -140,8 +142,7 @@ export class TransportDepositLocationPage extends PageComponent {
                             });
                             this.resetEmitter$.emit();
                         });
-                }
-                else if (unmatchedTemperatures.length > 0) {
+                } else if (unmatchedTemperatures.length > 0) {
                     let formattedUnmatchedTemperatures = unmatchedTemperatures
                         .map(({code}) => `<li><strong>${code}</strong></li>`)
                         .join(' ');
@@ -160,8 +161,9 @@ export class TransportDepositLocationPage extends PageComponent {
                         ]
                     });
                     this.resetEmitter$.emit();
-                }
-                else {
+                } else if(this.depositedCollectPacks.length > 0 && !this.collectedPacksLocations.includes(location.id)) {
+                    this.toastService.presentToast(`Erreur : L'emplacement sélectionné ne fait pas partie des emplacements de dépose des objets collectés`);
+                } else {
                     this.location = location;
                     this.panelHeaderConfig = this.createPanelHeaderConfig();
                 }

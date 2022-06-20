@@ -88,9 +88,18 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                     skippedMenu: true,
                 });
             } else if (depositedCollects) {
-                this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_PACKS, {
-                    round,
-                    skippedMenu: true,
+                this.loadingService.presentLoadingWhile({
+                    event: () => this.apiService.requestApi(ApiService.PACKS_RETURN_LOCATIONS)
+                }).subscribe(({collectedPacksLocations}) => {
+                    if(collectedPacksLocations.length > 0) {
+                        this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_PACKS, {
+                            round,
+                            collectedPacksLocations,
+                            skippedMenu: true,
+                        });
+                    } else {
+                        this.toastService.presentToast(`Aucun emplacement de dépose des objets collectés n'a été paramétré, vous ne pouvez pas continuer.`)
+                    }
                 });
             } else {
                 this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_MENU, {
@@ -110,8 +119,10 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                 const packsToDrop = round.lines
                     .filter(({failure}) => failure)
                     .reduce(
-                        (acc: Array<any>, line: TransportRoundLine) => [...(line.packs
-                            .filter(({temperature_range, dropped}) => temperature_range && !dropped) || []), ...acc],
+                        (acc: Array<any>, line: TransportRoundLine) => [
+                            ...(line.packs.filter(({temperature_range, dropped}) => temperature_range && !dropped) || []),
+                            ...acc
+                        ],
                         []
                     );
 
@@ -122,7 +133,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                     });
                 } else {
                     this.loadingService.presentLoadingWhile({
-                        event: () => this.apiService.requestApi(ApiService.UNDELIVERED_PACKS_LOCATIONS)
+                        event: () => this.apiService.requestApi(ApiService.PACKS_RETURN_LOCATIONS)
                     }).subscribe(({undeliveredPacksLocations}) => {
                         if(undeliveredPacksLocations.length > 0) {
                             this.navService.push(NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP, {

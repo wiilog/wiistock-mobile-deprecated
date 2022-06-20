@@ -5,7 +5,6 @@ import {NavService} from '@app/common/services/nav/nav.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {TransportRound} from '@entities/transport-round';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
-import {Emplacement} from '@entities/emplacement';
 
 @Component({
     selector: 'wii-transport-deposit-menu',
@@ -33,5 +32,4 @@ export class TransportDepositMenuPage extends PageComponent implements ViewWillE
             round: this.round,
         });
     }
-
 }
