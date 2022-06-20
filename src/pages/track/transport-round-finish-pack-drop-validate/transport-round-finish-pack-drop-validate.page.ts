@@ -82,7 +82,7 @@ export class TransportRoundFinishPackDropValidatePage extends PageComponent {
                 const options = {
                     packsDropLocation: this.location,
                     endRoundLocations: this.endRoundLocations,
-                    packs: packsToDrop,
+                    packs: this.packs,
                     round: this.round,
                     hasPacksToDrop: this.hasPacksToDrop
                 }
