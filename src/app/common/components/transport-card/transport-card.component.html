@@ -14,7 +14,7 @@
                     <wii-icon class="button-icon" name="collect-hand.svg" color="black"></wii-icon>
                     Collecte
                 </div>
-                <ng-container *ngIf="isReadyDelivery(transport)">
+                <ng-container *ngIf="transport.kind !== 'collect'">
                     <span class="packs-count">{{ transport.packs.length }} colis</span>
                 </ng-container>
             </div>
