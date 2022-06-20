@@ -11,14 +11,21 @@ export class AlertService {
 
     private audio: HTMLAudioElement;
 
+    private openAlert: HTMLIonAlertElement = null;
+
     public constructor(private alertController: AlertController) {
         this.audio = new Audio('../../../assets/sounds/Error-sound.mp3');
         this.audio.load();
     }
 
     public async show(options: AlertOptions, onDismiss: () => void = null, sound: boolean = true) {
+        if(this.openAlert) {
+            this.openAlert.dismiss();
+        }
+
         const alert = await this.alertController.create(options);
         if(alert) {
+            this.openAlert = alert;
             alert.onDidDismiss().then(onDismiss);
 
             if(sound) {
