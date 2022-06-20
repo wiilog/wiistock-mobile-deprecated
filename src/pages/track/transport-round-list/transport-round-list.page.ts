@@ -82,31 +82,36 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         const depositedCollects = round.deposited_collect_packs || round.packs_to_deposit === round.deposited_packs;
 
         if (!depositedDeliveries || !depositedCollects) {
-            if (depositedDeliveries) {
-                this.navService.push(NavPathEnum.TRANSPORT_COLLECT_NATURES, {
-                    round,
-                    skippedMenu: true,
-                });
-            } else if (depositedCollects) {
-                this.loadingService.presentLoadingWhile({
-                    event: () => this.apiService.requestApi(ApiService.PACKS_RETURN_LOCATIONS)
-                }).subscribe(({collectedPacksLocations}) => {
-                    if(collectedPacksLocations.length > 0) {
+            this.loadingService.presentLoadingWhile({
+                event: () => this.apiService.requestApi(ApiService.PACKS_RETURN_LOCATIONS)
+            }).subscribe(({collectedPacksLocations, undeliveredPacksLocations}) => {
+                if (collectedPacksLocations.length === 0) {
+                    this.toastService.presentToast(`Aucun emplacement de dépose des objets collectés n'a été paramétré, vous ne pouvez pas continuer.`);
+                } else if (undeliveredPacksLocations.length === 0) {
+                    this.toastService.presentToast(`Aucun emplacement de retour des colis non livrés n'a été paramétré, vous ne pouvez pas continuer.`);
+                } else {
+                    if (depositedDeliveries) {
+                        this.navService.push(NavPathEnum.TRANSPORT_COLLECT_NATURES, {
+                            round,
+                            skippedMenu: true,
+                            collectedPacksLocations
+                        });
+                    } else if (depositedCollects) {
                         this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_PACKS, {
                             round,
-                            collectedPacksLocations,
                             skippedMenu: true,
+                            undeliveredPacksLocations
                         });
                     } else {
-                        this.toastService.presentToast(`Aucun emplacement de dépose des objets collectés n'a été paramétré, vous ne pouvez pas continuer.`)
+                        this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_MENU, {
+                            round,
+                            skippedMenu: false,
+                            collectedPacksLocations,
+                            undeliveredPacksLocations
+                        });
                     }
-                });
-            } else {
-                this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_MENU, {
-                    round,
-                    skippedMenu: false,
-                });
-            }
+                }
+            });
         }
     }
 

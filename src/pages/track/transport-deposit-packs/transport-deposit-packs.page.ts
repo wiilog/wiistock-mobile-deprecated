@@ -40,7 +40,7 @@ export class TransportDepositPacksPage extends PageComponent {
         returned: boolean;
         rejected: boolean;
     }>;
-    private collectedPacksLocations: Array<number>;
+    private undeliveredPacksLocations: Array<number>;
 
     public packsToReturnListConfig: {
         header: HeaderConfig;
@@ -70,7 +70,7 @@ export class TransportDepositPacksPage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.round = this.currentNavParams.get('round');
-        this.collectedPacksLocations = this.currentNavParams.get('collectedPacksLocations');
+        this.undeliveredPacksLocations = this.currentNavParams.get('undeliveredPacksLocations');
         this.packs = this.round.lines
             .filter((line) => line.failure || line.cancelled)
             .reduce((acc: Array<any>, line: TransportRoundLine) => [...(line.packs || []), ...acc], [])
@@ -235,7 +235,7 @@ export class TransportDepositPacksPage extends PageComponent {
             this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_LOCATION, {
                 everythingReturned: returnedPacks.length + this.packs.filter(({returned}) => returned).length === this.packs.length,
                 depositedDeliveryPacks: returnedPacks,
-                collectedPacksLocations: this.collectedPacksLocations,
+                undeliveredPacksLocations: this.undeliveredPacksLocations,
                 round: this.round,
                 skippedMenu: this.currentNavParams.get('skippedMenu'),
                 onValidate: () => {
