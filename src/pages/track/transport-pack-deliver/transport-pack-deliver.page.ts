@@ -34,6 +34,7 @@ export class TransportPackDeliverPage extends PageComponent {
     private transport: TransportRoundLine;
     private round: TransportRound;
     private packs: Array<TransportPack>;
+    public disabled: boolean = true;
 
     public packsToDeliverListConfig: {
         header: HeaderConfig;
@@ -56,8 +57,7 @@ export class TransportPackDeliverPage extends PageComponent {
                 private translationService: TranslationService,
                 private alertService: AlertService,
                 private apiService: ApiService,
-                private loadingService: LoadingService,
-                private networkService: NetworkService) {
+                private loadingService: LoadingService) {
         super(navService);
         this.natureIdsToColors = {};
     }
@@ -173,6 +173,9 @@ export class TransportPackDeliverPage extends PageComponent {
                 this.packs.splice(selectedIndex, 1);
                 this.packs.unshift(selectedItem);
                 selectedItem.delivered = true;
+                if(this.packs.every(({delivered}) => delivered)) {
+                    this.disabled = false;
+                }
                 this.refreshListToDeliverConfig();
                 this.refreshListDeliveredConfig();
             }
@@ -194,7 +197,7 @@ export class TransportPackDeliverPage extends PageComponent {
         const selectedIndex = this.packs.findIndex(({code}) => code === barCode);
         if (selectedIndex > -1 && this.packs[selectedIndex].delivered) {
             this.packs[selectedIndex].delivered = false;
-
+            this.disabled = true;
             this.refreshListToDeliverConfig();
             this.refreshListDeliveredConfig();
         }
@@ -223,15 +226,9 @@ export class TransportPackDeliverPage extends PageComponent {
     }
 
     public validate(): void {
-        const notDeliveredPacks = this.packs.filter(({delivered, rejected}) => !delivered && !rejected);
-        if (notDeliveredPacks.length === 0) {
-            this.navService.push(NavPathEnum.FINISH_TRANSPORT, {
-                transport: this.transport,
-                round: this.round,
-            });
-        } else {
-            this.toastService.presentToast(`Veuillez déposer les colis pour continuer.`);
-        }
+        this.navService.push(NavPathEnum.FINISH_TRANSPORT, {
+            transport: this.transport,
+            round: this.round,
+        });
     }
-
 }

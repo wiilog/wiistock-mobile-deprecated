@@ -1,4 +1,4 @@
-.ion-page {
+ion-page {
     display: block;
     overflow-y: scroll;
 }
@@ -15,5 +15,11 @@
 }
 
 .page-footer {
-    margin-top: 10px;
+}
+
+.page-footer {
+    position: sticky;
+    width: 100%;
+    bottom: 0;
+    z-index: 100;
 }
