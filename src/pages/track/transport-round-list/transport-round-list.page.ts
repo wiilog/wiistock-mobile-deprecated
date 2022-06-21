@@ -82,22 +82,36 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
         const depositedCollects = round.deposited_collect_packs || round.packs_to_deposit === round.deposited_packs;
 
         if (!depositedDeliveries || !depositedCollects) {
-            if (depositedDeliveries) {
-                this.navService.push(NavPathEnum.TRANSPORT_COLLECT_NATURES, {
-                    round,
-                    skippedMenu: true,
-                });
-            } else if (depositedCollects) {
-                this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_PACKS, {
-                    round,
-                    skippedMenu: true,
-                });
-            } else {
-                this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_MENU, {
-                    round,
-                    skippedMenu: false,
-                });
-            }
+            this.loadingService.presentLoadingWhile({
+                event: () => this.apiService.requestApi(ApiService.PACKS_RETURN_LOCATIONS)
+            }).subscribe(({collectedPacksLocations, undeliveredPacksLocations}) => {
+                if (collectedPacksLocations.length === 0) {
+                    this.toastService.presentToast(`Aucun emplacement de dépose des objets collectés n'a été paramétré, vous ne pouvez pas continuer.`);
+                } else if (undeliveredPacksLocations.length === 0) {
+                    this.toastService.presentToast(`Aucun emplacement de retour des colis non livrés n'a été paramétré, vous ne pouvez pas continuer.`);
+                } else {
+                    if (depositedDeliveries) {
+                        this.navService.push(NavPathEnum.TRANSPORT_COLLECT_NATURES, {
+                            round,
+                            skippedMenu: true,
+                            collectedPacksLocations
+                        });
+                    } else if (depositedCollects) {
+                        this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_PACKS, {
+                            round,
+                            skippedMenu: true,
+                            undeliveredPacksLocations
+                        });
+                    } else {
+                        this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_MENU, {
+                            round,
+                            skippedMenu: false,
+                            collectedPacksLocations,
+                            undeliveredPacksLocations
+                        });
+                    }
+                }
+            });
         }
     }
 
@@ -110,8 +124,10 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                 const packsToDrop = round.lines
                     .filter(({failure}) => failure)
                     .reduce(
-                        (acc: Array<any>, line: TransportRoundLine) => [...(line.packs
-                            .filter(({temperature_range, dropped}) => temperature_range && !dropped) || []), ...acc],
+                        (acc: Array<any>, line: TransportRoundLine) => [
+                            ...(line.packs.filter(({temperature_range, dropped}) => temperature_range && !dropped) || []),
+                            ...acc
+                        ],
                         []
                     );
 
@@ -122,7 +138,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                     });
                 } else {
                     this.loadingService.presentLoadingWhile({
-                        event: () => this.apiService.requestApi(ApiService.UNDELIVERED_PACKS_LOCATIONS)
+                        event: () => this.apiService.requestApi(ApiService.PACKS_RETURN_LOCATIONS)
                     }).subscribe(({undeliveredPacksLocations}) => {
                         if(undeliveredPacksLocations.length > 0) {
                             this.navService.push(NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP, {

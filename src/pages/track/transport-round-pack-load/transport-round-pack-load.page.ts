@@ -95,6 +95,10 @@ export class TransportRoundPackLoadPage extends PageComponent {
         } else {
             this.toastService.presentToast('Veuillez vous connecter à internet pour continuer');
         }
+
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.fireZebraScan();
+        }
     }
 
     public ionViewWillLeave(): void {
@@ -195,10 +199,38 @@ export class TransportRoundPackLoadPage extends PageComponent {
 
     public loadPack(barCode: string): void {
         const selectedIndex = this.packs.findIndex(({code}) => (code === barCode));
+        console.log(barCode, selectedIndex);
         if (selectedIndex > -1) {
             const selectedItem = this.packs[selectedIndex];
-            if (selectedItem.loading || selectedItem.loaded) {
-                this.toastService.presentToast(`Ce colis est déjà présent dans la liste des colis scannés`);
+            if(selectedItem.loaded) {
+                this.alertService.show({
+                    header: `Erreur`,
+                    message: `Ce colis est déjà chargé`,
+                    buttons: [{
+                        text: `Fermer`,
+                        role: `cancel`
+                    }]
+                });
+            }
+            else if (selectedItem.rejected) {
+                this.alertService.show({
+                    header: `Erreur`,
+                    message: `Ce colis a été rejeté`,
+                    buttons: [{
+                        text: `Fermer`,
+                        role: `cancel`
+                    }]
+                });
+            }
+            else if (selectedItem.loading) {
+                this.alertService.show({
+                    header: `Erreur`,
+                    message: `Ce colis est déjà présent dans la liste des colis scannés`,
+                    buttons: [{
+                        text: `Fermer`,
+                        role: `cancel`
+                    }]
+                });
             }
             else {
                 this.packs.splice(selectedIndex, 1);
@@ -211,7 +243,7 @@ export class TransportRoundPackLoadPage extends PageComponent {
         else {
             this.alertService.show({
                 header: 'Erreur',
-                message: `Le colis scanné n'existe pas dans la liste`,
+                message: `Le colis a déjà été chargé ou n'est pas présent dans la liste des colis à charger`,
                 buttons: [{
                     text: 'Fermer',
                     role: 'cancel'

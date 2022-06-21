@@ -8,6 +8,7 @@ import {TransportCardMode} from '@app/common/components/transport-card/transport
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {TransportRound} from '@entities/transport-round';
+import {ToastService} from "@app/common/services/toast.service";
 
 @Component({
     selector: 'wii-transport-collect-natures',
@@ -30,14 +31,29 @@ export class TransportCollectNaturesPage extends PageComponent implements ViewWi
     public round: TransportRound;
 
     private depositedQuantities: {[nature: number]: number} = {};
+    private collectedPacksLocations: Array<number>;
 
-    public constructor(navService: NavService) {
+    public constructor(navService: NavService,
+                       private toastService: ToastService) {
         super(navService);
     }
 
     public ionViewWillEnter(): void {
         this.transport = this.currentNavParams.get('transport');
+        this.collectedPacksLocations = this.currentNavParams.get('collectedPacksLocations');
         this.round = this.currentNavParams.get('round');
+
+        if(this.transport) {
+            for(const nature of this.transport.natures_to_collect) {
+                this.setCollectedQuantity(nature.nature_id, nature.collected_quantity || 1);
+            }
+        } else if(this.round) {
+            for(const transport of this.round.lines) {
+                for(const nature of (transport.natures_to_collect || (transport.collect ? transport.collect.natures_to_collect : []))) {
+                    this.setDepositedQuantity(nature.nature_id, nature.collected_quantity);
+                }
+            }
+        }
 
         if(this.transport) {
             this.headerConfig = {
@@ -103,6 +119,10 @@ export class TransportCollectNaturesPage extends PageComponent implements ViewWi
                 round: this.round,
                 depositedCollectPacks: formattedPacks,
                 skippedMenu: this.currentNavParams.get('skippedMenu'),
+                collectedPacksLocations: this.collectedPacksLocations,
+                onValidate: () => {
+                    this.toastService.presentToast('Les objets collectés ont bien été déposés');
+                }
             });
         }
     }

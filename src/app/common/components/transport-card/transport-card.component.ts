@@ -82,9 +82,4 @@ export class TransportCardComponent implements OnInit {
         event.stopPropagation();
     }
 
-    public isReadyDelivery(line: TransportRoundLine) {
-        return line.packs.length > 0
-            && line.packs.every(({loaded}) => loaded);
-    }
-
 }

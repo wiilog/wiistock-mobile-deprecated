@@ -5,7 +5,6 @@ import {NavService} from '@app/common/services/nav/nav.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {TransportRound} from '@entities/transport-round';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
-import {Emplacement} from '@entities/emplacement';
 
 @Component({
     selector: 'wii-transport-deposit-menu',
@@ -15,6 +14,8 @@ import {Emplacement} from '@entities/emplacement';
 export class TransportDepositMenuPage extends PageComponent implements ViewWillEnter {
 
     public round: TransportRound;
+    public collectedPacksLocations: Array<number>;
+    public undeliveredPacksLocations: Array<number>;
 
     public constructor(private toastService: ToastService, navService: NavService) {
         super(navService);
@@ -22,16 +23,21 @@ export class TransportDepositMenuPage extends PageComponent implements ViewWillE
 
     public ionViewWillEnter() {
         this.round = this.currentNavParams.get('round');
+        this.collectedPacksLocations = this.currentNavParams.get('collectedPacksLocations');
+        this.undeliveredPacksLocations = this.currentNavParams.get('undeliveredPacksLocations');
     }
 
     public delivery() {
-        this.toastService.presentToast(`Non implémenté`);
+        this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_PACKS, {
+            round: this.round,
+            undeliveredPacksLocations: this.undeliveredPacksLocations
+        });
     }
 
     public collect() {
         this.navService.push(NavPathEnum.TRANSPORT_COLLECT_NATURES, {
             round: this.round,
+            collectedPacksLocations: this.collectedPacksLocations
         });
     }
-
 }

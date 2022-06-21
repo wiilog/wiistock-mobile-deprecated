@@ -22,6 +22,7 @@ export interface TransportRoundLine {
     expected_at: string;
     expected_time: string;
     estimated_time: string;
+    fulfilled_time: string;
     time_slot: string;
     emergency: string;
     contact: {

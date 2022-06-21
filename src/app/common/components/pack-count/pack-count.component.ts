@@ -67,7 +67,7 @@ export class PackCountComponent implements OnInit {
                     color: nature.color,
                     title: nature.nature,
                     label: `Quantité`,
-                    value: value || `-`,
+                    value: value || `/`,
                 }
 
                 packsCount += value;

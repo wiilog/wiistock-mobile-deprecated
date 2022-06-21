@@ -36,6 +36,7 @@ export class TransportRoundFinishPackDropPage extends PageComponent {
     private undeliveredPacksLocations: Array<number>;
     private endRoundLocations: Array<number>;
     private hasPacksToDrop: boolean;
+    public disabled: boolean = true;
 
     public packsToDropListConfig: {
         header: HeaderConfig;
@@ -137,7 +138,7 @@ export class TransportRoundFinishPackDropPage extends PageComponent {
                 info: `${droppedPacks.length} colis scanné${plural}`,
                 leftIcon: {
                     name: 'scanned-pack.svg',
-                    color: CardListColorEnum.GREEN
+                    color: CardListColorEnum.PURPLE
                 }
             },
             body: droppedPacks.map((pack) => ({
@@ -166,6 +167,7 @@ export class TransportRoundFinishPackDropPage extends PageComponent {
                 this.packs.splice(selectedIndex, 1);
                 this.packs.unshift(selectedItem);
                 selectedItem.dropped = true;
+                this.disabled = false;
                 this.refreshListToDropConfig();
                 this.refreshListDroppedConfig();
             }
@@ -194,6 +196,9 @@ export class TransportRoundFinishPackDropPage extends PageComponent {
         if (selectedIndex > -1 && this.packs[selectedIndex].dropped) {
             this.packs[selectedIndex].dropped = false;
 
+            if(this.packs.every(({dropped}) => !dropped)) {
+                this.disabled = true;
+            }
             this.refreshListToDropConfig();
             this.refreshListDroppedConfig();
         }

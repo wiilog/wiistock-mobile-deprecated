@@ -40,6 +40,8 @@ export class TransportDepositLocationPage extends PageComponent {
         nature_id: number;
         quantity: number;
     }> = [];
+    private collectedPacksLocations: Array<number>;
+    private undeliveredPacksLocations: Array<number>;
 
     private round: TransportRound;
     private skippedMenu: boolean;
@@ -67,8 +69,10 @@ export class TransportDepositLocationPage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.round = this.currentNavParams.get('round');
-        this.depositedDeliveryPacks = this.currentNavParams.get('depositedDeliveryPacks');
-        this.depositedCollectPacks = this.currentNavParams.get('depositedCollectPacks');
+        this.depositedDeliveryPacks = this.currentNavParams.get('depositedDeliveryPacks') || [];
+        this.depositedCollectPacks = this.currentNavParams.get('depositedCollectPacks') || [];
+        this.collectedPacksLocations = this.currentNavParams.get('collectedPacksLocations') || [];
+        this.undeliveredPacksLocations= this.currentNavParams.get('undeliveredPacksLocations') || [];
         this.skippedMenu = this.currentNavParams.get('skippedMenu');
         this.everythingReturned = this.currentNavParams.get('everythingReturned');
         this.resetEmitter$.emit();
@@ -90,82 +94,96 @@ export class TransportDepositLocationPage extends PageComponent {
     }
 
     public selectLocation(location: Emplacement): void {
-        this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + location.id])
-            .subscribe((allowedNatures) => {
-                const allowedNatureIds = allowedNatures.map((allowedNature: AllowedNatureLocation) => allowedNature.nature_id);
-                const unmatchedNatures = [];
-                this.depositedDeliveryPacks.forEach((pack) => {
-                    if (!allowedNatureIds.includes(pack.nature_id)) {
-                        unmatchedNatures.push(pack);
-                    }
-                });
+        if (this.depositedDeliveryPacks.length > 0) {
+            if (this.undeliveredPacksLocations.includes(location.id)) {
+                this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + location.id])
+                    .subscribe((allowedNatures) => {
+                        const allowedNatureIds = allowedNatures.map((allowedNature: AllowedNatureLocation) => allowedNature.nature_id);
+                        const unmatchedNatures = [];
+                        this.depositedDeliveryPacks.forEach((pack) => {
+                            if (!allowedNatureIds.includes(pack.nature_id)) {
+                                unmatchedNatures.push(pack);
+                            }
+                        });
 
-                const temperatureRanges = location.temperature_ranges
-                    ? location.temperature_ranges.split(';')
-                    : [];
-                const unmatchedTemperatures = [];
-                this.depositedDeliveryPacks.forEach((pack) => {
-                    if ((temperatureRanges.length === 0 && pack.temperature_range || !temperatureRanges.includes(pack.temperature_range))) {
-                        unmatchedTemperatures.push(pack);
-                    }
-                });
+                        const temperatureRanges = location.temperature_ranges
+                            ? location.temperature_ranges.split(';')
+                            : [];
+                        const unmatchedTemperatures = [];
+                        this.depositedDeliveryPacks.forEach((pack) => {
+                            if ((temperatureRanges.length === 0 && pack.temperature_range || !temperatureRanges.includes(pack.temperature_range))) {
+                                unmatchedTemperatures.push(pack);
+                            }
+                        });
 
-                if (allowedNatureIds.length !== 0 && unmatchedNatures.length > 0) {
-                    let formattedUnmatchedNatures = unmatchedNatures
-                        .map(({code, nature}) => `<li><strong>${code}</strong> de nature <strong>${nature}</strong></li>`)
-                        .join(' ');
-                    formattedUnmatchedNatures = `<ul>${formattedUnmatchedNatures}</ul>`
-                    const plural = unmatchedNatures.length > 1;
-                    const pluralNatures = allowedNatures.length > 1;
-                    const locationLabel = location.label;
-                    const joinAllowedNatureIds = allowedNatures
-                        .map((nature: AllowedNatureLocation) => nature.nature_id)
-                        .join(',');
+                        if (allowedNatureIds.length !== 0 && unmatchedNatures.length > 0) {
+                            let formattedUnmatchedNatures = unmatchedNatures
+                                .map(({
+                                          code,
+                                          nature
+                                      }) => `<li><strong>${code}</strong> de nature <strong>${nature}</strong></li>`)
+                                .join(' ');
+                            formattedUnmatchedNatures = `<ul>${formattedUnmatchedNatures}</ul>`
+                            const plural = unmatchedNatures.length > 1;
+                            const pluralNatures = allowedNatures.length > 1;
+                            const locationLabel = location.label;
+                            const joinAllowedNatureIds = allowedNatures
+                                .map((nature: AllowedNatureLocation) => nature.nature_id)
+                                .join(',');
 
-                    this.sqliteService.findBy('nature', [`id IN (${joinAllowedNatureIds})`])
-                        .subscribe((natures: Array<Nature>) => {
-                            const joinAllowedNatureLabels = natures
-                                .map((nature: Nature) => `<strong>${nature.label}</strong>`)
-                                .join(', ');
+                            this.sqliteService.findBy('nature', [`id IN (${joinAllowedNatureIds})`])
+                                .subscribe((natures: Array<Nature>) => {
+                                    const joinAllowedNatureLabels = natures
+                                        .map((nature: Nature) => `<strong>${nature.label}</strong>`)
+                                        .join(', ');
+                                    this.alertService.show({
+                                        header: 'Erreur',
+                                        backdropDismiss: false,
+                                        cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+                                        message: `Le${plural ? 's' : ''} colis ${formattedUnmatchedNatures} ne peu${plural ? 'vent' : 't'} pas être déposé${plural ? 's' : ''} sur l'emplacement <strong>${locationLabel}</strong> de nature${pluralNatures ? 's' : ''} ${joinAllowedNatureLabels}.`,
+                                        buttons: [
+                                            {
+                                                text: 'OK',
+                                            },
+                                        ]
+                                    });
+                                    this.resetEmitter$.emit();
+                                });
+                        } else if (unmatchedTemperatures.length > 0) {
+                            let formattedUnmatchedTemperatures = unmatchedTemperatures
+                                .map(({code}) => `<li><strong>${code}</strong></li>`)
+                                .join(' ');
+                            formattedUnmatchedTemperatures = `<ul>${formattedUnmatchedTemperatures}</ul>`
+                            const plural = unmatchedNatures.length > 1;
+                            const locationLabel = location.label;
                             this.alertService.show({
                                 header: 'Erreur',
                                 backdropDismiss: false,
                                 cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
-                                message: `Le${plural ? 's' : ''} colis ${formattedUnmatchedNatures} ne peu${plural ? 'vent' : 't'} pas être déposé${plural ? 's' : ''} sur l'emplacement <strong>${locationLabel}</strong> de nature${pluralNatures ? 's' : ''} ${joinAllowedNatureLabels}.`,
+                                message: `Le${plural ? 's' : ''} colis ${formattedUnmatchedTemperatures} ne peu${plural ? 'vent' : 't'} pas être déposé${plural ? 's' : ''} sur l'emplacement <strong>${locationLabel}</strong> (température non adéquate).`,
                                 buttons: [
                                     {
-                                        text: 'OK',
+                                        text: 'OK'
                                     },
                                 ]
                             });
                             this.resetEmitter$.emit();
-                        });
-                }
-                else if (unmatchedTemperatures.length > 0) {
-                    let formattedUnmatchedTemperatures = unmatchedTemperatures
-                        .map(({code}) => `<li><strong>${code}</strong></li>`)
-                        .join(' ');
-                    formattedUnmatchedTemperatures = `<ul>${formattedUnmatchedTemperatures}</ul>`
-                    const plural = unmatchedNatures.length > 1;
-                    const locationLabel = location.label;
-                    this.alertService.show({
-                        header: 'Erreur',
-                        backdropDismiss: false,
-                        cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
-                        message: `Le${plural ? 's' : ''} colis ${formattedUnmatchedTemperatures} ne peu${plural ? 'vent' : 't'} pas être déposé${plural ? 's' : ''} sur l'emplacement <strong>${locationLabel}</strong> (température non adéquate).`,
-                        buttons: [
-                            {
-                                text: 'OK'
-                            },
-                        ]
+                        } else {
+                            this.location = location;
+                            this.panelHeaderConfig = this.createPanelHeaderConfig();
+                        }
                     });
-                    this.resetEmitter$.emit();
-                }
-                else {
-                    this.location = location;
-                    this.panelHeaderConfig = this.createPanelHeaderConfig();
-                }
-            });
+            } else {
+                this.toastService.presentToast(`Erreur : L'emplacement sélectionné ne fait pas partie des emplacements de retour des colis non livrés`);
+            }
+        } else if (this.depositedCollectPacks.length > 0) {
+            if(!this.collectedPacksLocations.includes(location.id)) {
+                this.toastService.presentToast(`Erreur : L'emplacement sélectionné ne fait pas partie des emplacements de dépose des objets collectés`);
+            } else {
+                this.location = location;
+                this.panelHeaderConfig = this.createPanelHeaderConfig();
+            }
+        }
     }
 
     public validate(): void {
@@ -190,7 +208,7 @@ export class TransportDepositLocationPage extends PageComponent {
                             onValidate();
                         }
 
-                        this.navService.runMultiplePop( this.everythingReturned ? 3 - Number(this.skippedMenu) : 1);
+                        this.navService.runMultiplePop( this.everythingReturned || this.depositedCollectPacks.length ? 3 - Number(this.skippedMenu) : 1);
                     }
                 });
             } else {

@@ -64,7 +64,7 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
         }
 
         for(const transport of this.round.lines) {
-            if(this.mode === TransportCardMode.STARTABLE && transport.success && transport.collect && !(transport.collect.success || transport.collect.failure)) {
+            if(this.mode === TransportCardMode.STARTABLE && !transport.cancelled && transport.success && transport.collect && !(transport.collect.success || transport.collect.failure)) {
                 this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
                     transport: transport.collect,
                     round: this.round,
@@ -97,10 +97,15 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
     }
 
     public showTransport(transport: TransportRoundLine) {
+        if(transport.cancelled) {
+            return;
+        }
+
         if(this.mode === TransportCardMode.STARTABLE && (transport.success || transport.failure)) {
             if(transport.success) {
                 this.navService.push(NavPathEnum.FINISH_TRANSPORT, {
                     transport,
+                    round: this.round,
                     edit: true,
                 });
             } else {

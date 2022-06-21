@@ -40,6 +40,7 @@ export class TransportDepositPacksPage extends PageComponent {
         returned: boolean;
         rejected: boolean;
     }>;
+    private undeliveredPacksLocations: Array<number>;
 
     public packsToReturnListConfig: {
         header: HeaderConfig;
@@ -62,14 +63,14 @@ export class TransportDepositPacksPage extends PageComponent {
                 private translationService: TranslationService,
                 private alertService: AlertService,
                 private apiService: ApiService,
-                private loadingService: LoadingService,
-                private networkService: NetworkService) {
+                private loadingService: LoadingService) {
         super(navService);
         this.natureIdsToColors = {};
     }
 
     public ionViewWillEnter(): void {
         this.round = this.currentNavParams.get('round');
+        this.undeliveredPacksLocations = this.currentNavParams.get('undeliveredPacksLocations');
         this.packs = this.round.lines
             .filter((line) => line.failure || line.cancelled)
             .reduce((acc: Array<any>, line: TransportRoundLine) => [...(line.packs || []), ...acc], [])
@@ -173,7 +174,24 @@ export class TransportDepositPacksPage extends PageComponent {
         if (selectedIndex > -1) {
             const selectedItem = this.packs[selectedIndex];
             if (selectedItem.returned) {
-                this.toastService.presentToast(`Vous avez déjà traité ce colis`);
+                this.alertService.show({
+                    header: `Erreur`,
+                    message: `Vous avez déjà traité ce colis`,
+                    buttons: [{
+                        text: `Fermer`,
+                        role: `cancel`
+                    }]
+                });
+            }
+            else if(selectedItem.returning) {
+                this.alertService.show({
+                    header: `Erreur`,
+                    message: `Vous avez déjà scanné ce colis`,
+                    buttons: [{
+                        text: `Fermer`,
+                        role: `cancel`
+                    }]
+                });
             }
             else {
                 this.packs.splice(selectedIndex, 1);
@@ -184,7 +202,14 @@ export class TransportDepositPacksPage extends PageComponent {
             }
         }
         else {
-            this.toastService.presentToast(`Le colis scanné n'existe pas dans la liste`);
+            this.alertService.show({
+                header: `Erreur`,
+                message: `Le colis scanné n'existe pas dans la liste`,
+                buttons: [{
+                    text: `Fermer`,
+                    role: `cancel`
+                }]
+            });
         }
     }
 
@@ -234,6 +259,7 @@ export class TransportDepositPacksPage extends PageComponent {
             this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_LOCATION, {
                 everythingReturned: returnedPacks.length + this.packs.filter(({returned}) => returned).length === this.packs.length,
                 depositedDeliveryPacks: returnedPacks,
+                undeliveredPacksLocations: this.undeliveredPacksLocations,
                 round: this.round,
                 skippedMenu: this.currentNavParams.get('skippedMenu'),
                 onValidate: () => {

@@ -14,18 +14,21 @@
                     <wii-icon class="button-icon" name="collect-hand.svg" color="black"></wii-icon>
                     Collecte
                 </div>
-                <ng-container *ngIf="isReadyDelivery(transport)">
+                <ng-container *ngIf="transport.kind !== 'collect'">
                     <span class="packs-count">{{ transport.packs.length }} colis</span>
                 </ng-container>
             </div>
 
             <div class="transport-time">
                 <wii-icon class="button-icon" name="clock.svg" color="black"></wii-icon>
-                <span *ngIf="transport.kind === 'delivery'">
+                <span *ngIf="transport.kind === 'delivery' && !transport.fulfilled_time">
                     <b>{{ transport.expected_time }}</b> estimée {{ transport.estimated_time }}
                 </span>
-                <span *ngIf="transport.kind === 'collect'">
+                <span *ngIf="transport.kind === 'collect' && !transport.fulfilled_time">
                      <b>{{ transport.time_slot }}</b> estimée {{ transport.estimated_time }}
+                </span>
+                <span *ngIf="transport.fulfilled_time">
+                     <b>{{ transport.kind === 'collect' ? transport.time_slot : transport.expected_time }}</b> Fait à {{ transport.fulfilled_time }}
                 </span>
             </div>
 

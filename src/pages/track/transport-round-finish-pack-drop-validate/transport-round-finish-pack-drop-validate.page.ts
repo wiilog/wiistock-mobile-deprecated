@@ -82,7 +82,7 @@ export class TransportRoundFinishPackDropValidatePage extends PageComponent {
                 const options = {
                     packsDropLocation: this.location,
                     endRoundLocations: this.endRoundLocations,
-                    packs: packsToDrop,
+                    packs: this.packs,
                     round: this.round,
                     hasPacksToDrop: this.hasPacksToDrop
                 }
@@ -184,7 +184,7 @@ export class TransportRoundFinishPackDropValidatePage extends PageComponent {
                     }
                 });
         } else {
-            this.toastService.presentToast(`Erreur : L'emplacement sélectionné ne fait pas partie des emplacements de retour des colis non livrés`)
+            this.toastService.presentToast(`Erreur : L'emplacement sélectionné ne fait pas partie des emplacements de retour des colis non livrés`);
         }
     }
 }
