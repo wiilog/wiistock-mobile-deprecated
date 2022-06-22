@@ -257,19 +257,25 @@ export class MainMenuPage extends PageComponent {
                 const {data} = notification;
 
                 if(data.roundId) {
-                    this.apiService.requestApi(ApiService.FETCH_ROUND, {
-                        params: {round: data.roundId},
-                    }).subscribe(round => {
-                        this.navService
-                            .push(NavPathEnum.TRANSPORT_ROUND_LIST)
-                            .pipe(flatMap(() => this.navService.push(NavPathEnum.TRANSPORT_LIST, {
-                                round,
-                                cancelledTransport: data.transportId,
-                            })))
-                            .subscribe(() => {
-                                this.pageIsRedirecting = false;
-                            });
-                    })
+                    if(data.transportId) {
+                        this.apiService.requestApi(ApiService.FETCH_ROUND, {
+                            params: {round: data.roundId},
+                        }).subscribe(round => {
+                            this.navService
+                                .push(NavPathEnum.TRANSPORT_ROUND_LIST)
+                                .pipe(flatMap(() => this.navService.push(NavPathEnum.TRANSPORT_LIST, {
+                                    round,
+                                    cancelledTransport: data.transportId,
+                                })))
+                                .subscribe(() => {
+                                    this.pageIsRedirecting = false;
+                                });
+                        });
+                    } else {
+                        this.navService.push(NavPathEnum.TRANSPORT_ROUND_LIST).subscribe(() => {
+                            this.pageIsRedirecting = false;
+                        });
+                    }
                 }
                 else if (data.type === 'dispatch') {
                     this.pageIsRedirecting = true;

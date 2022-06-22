@@ -85,7 +85,7 @@
                             <ion-button color="primary"
                                         size="small"
                                         [style.width]="round.status === 'Terminée' ? '100%' : '50%'"
-                                        [disabled]="!(round.not_delivered && round.returned_packs != round.packs_to_return) && !(round.done_collects && round.deposited_packs != round.packs_to_deposit)"
+                                        [disabled]="!(round.not_delivered && round.returned_packs != round.packs_to_return && round.packs_to_return != 0) && !(round.done_collects && round.deposited_packs != round.packs_to_deposit && round.packs_to_deposit != 0)"
                                         (click)="depositPacks($event, round)">
                                 Déposer les colis
                             </ion-button>
