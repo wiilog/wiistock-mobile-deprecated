@@ -1,7 +1,6 @@
 <wii-simple-card [titles]="titles"
                  color="#6433D7"
                  [disabled]="transport.cancelled || (transport.kind === 'delivery' && transport.packs.length === 0)"
-                 (click)="click($event)"
                  stackedRightContent="true">
     <div class="transport-content">
         <div class="transport-infos">

@@ -2,7 +2,6 @@ import {Component, Input, OnInit} from '@angular/core';
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {SimpleCardTitle} from '@app/common/components/simple-card/simple-card.component';
 import {Platform} from '@ionic/angular';
-import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {NavService} from '@app/common/services/nav/nav.service';
 import {ToastService} from "@app/common/services/toast.service";
 
@@ -54,20 +53,8 @@ export class TransportCardComponent implements OnInit {
         }
     }
 
-    public click(event: any) {
-        event.stopPropagation();
-        if(this.mode === TransportCardMode.STARTABLE && !this.transport.cancelled) {
-            this.navService.push(NavPathEnum.FINISH_TRANSPORT, {
-                transport: this.transport,
-            });
-        } else {
-            const kind = this.transport.kind === 'collect' ? 'collecte' : 'livraison';
-            this.toastService.presentToast(`Cette ${kind} a été annulée, vous ne pouvez pas la visualiser.`)
-        }
-    }
-
     public navigate(event: any) {
-        if(this.mode === this.modeViewOnly) {
+        if(this.mode === this.modeViewOnly || this.transport.cancelled) {
             return;
         }
 
