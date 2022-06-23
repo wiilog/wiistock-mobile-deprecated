@@ -262,7 +262,6 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                         return acc;
                     }, {});
 
-                this.transportRoundsByDates = {};
                 if(Object.keys(this.transportRoundsByDates).length === 0) {
                     this.transportRoundsByDates = null;
                 }
