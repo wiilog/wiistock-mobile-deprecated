@@ -120,9 +120,6 @@ export class TransportCollectNaturesPage extends PageComponent implements ViewWi
                 depositedCollectPacks: formattedPacks,
                 skippedMenu: this.currentNavParams.get('skippedMenu'),
                 collectedPacksLocations: this.collectedPacksLocations,
-                onValidate: () => {
-                    this.toastService.presentToast('Les objets collectés ont bien été déposés');
-                }
             });
         }
     }

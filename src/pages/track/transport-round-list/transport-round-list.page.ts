@@ -78,8 +78,8 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
 
     public depositPacks(event: any, round: TransportRound) {
         event.stopPropagation();
-        const depositedDeliveries = round.deposited_delivery_packs || round.packs_to_return === round.returned_packs;
-        const depositedCollects = round.deposited_collect_packs || round.packs_to_deposit === round.deposited_packs;
+        const depositedDeliveries = round.deposited_delivery_packs || round.packs_to_return === round.returned_packs || round.packs_to_return === 0;
+        const depositedCollects = round.deposited_collect_packs || round.packs_to_deposit === round.deposited_packs || round.packs_to_deposit === 0;
 
         if (!depositedDeliveries || !depositedCollects) {
             this.loadingService.presentLoadingWhile({

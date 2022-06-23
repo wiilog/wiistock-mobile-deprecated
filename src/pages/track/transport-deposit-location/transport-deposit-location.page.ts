@@ -208,7 +208,11 @@ export class TransportDepositLocationPage extends PageComponent {
                             onValidate();
                         }
 
-                        this.navService.runMultiplePop( this.everythingReturned || this.depositedCollectPacks.length ? 3 - Number(this.skippedMenu) : 1);
+                        if(this.depositedCollectPacks.length) {
+                            this.toastService.presentToast('Les objets collectés ont bien été déposés');
+                        }
+
+                        this.navService.runMultiplePop(this.everythingReturned || this.depositedCollectPacks.length ? 3 - Number(this.skippedMenu) : 1);
                     }
                 });
             } else {
