@@ -1,3 +1,7 @@
+<ng-template #noRounds>
+    <div class="no-rounds" *ngIf="!loading">Aucune tournée ne vous a été attribuée</div>
+</ng-template>
+
 <div class="round-container" *ngIf="transportRoundsByDates; else noRounds">
     <div *ngFor="let transportRounds of transportRoundsByDates|keyvalue">
         <div class="round-date">
@@ -111,6 +115,3 @@
         <ion-icon class="big-icon" name="refresh"></ion-icon>
     </ion-fab-button>
 </ion-fab>
-<ng-template #noRounds>
-    <div class="no-rounds" *ngIf="!loading">Aucune tournée ne vous a été attribuée</div>
-</ng-template>

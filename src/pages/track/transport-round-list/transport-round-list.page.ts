@@ -24,7 +24,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
 
     public transportRoundsByDates: {
         [date: string]: Array<TransportRound>
-    };
+    } | null;
 
     public loading: boolean;
 
@@ -261,6 +261,12 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                         (acc[round['date']] = acc[round['date']] || []).push(round);
                         return acc;
                     }, {});
+
+                this.transportRoundsByDates = {};
+                if(Object.keys(this.transportRoundsByDates).length === 0) {
+                    this.transportRoundsByDates = null;
+                }
+
                 this.loading = false;
                 if(callback) {
                     const updatedRound = rounds.find(({id}) => id === currentRound.id);
