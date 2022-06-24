@@ -111,7 +111,7 @@ export class TransportDepositLocationPage extends PageComponent {
                             : [];
                         const unmatchedTemperatures = [];
                         this.depositedDeliveryPacks.forEach((pack) => {
-                            if ((temperatureRanges.length === 0 && pack.temperature_range || !temperatureRanges.includes(pack.temperature_range))) {
+                            if (temperatureRanges.length === 0 && pack.temperature_range || pack.temperature_range && !temperatureRanges.includes(pack.temperature_range)) {
                                 unmatchedTemperatures.push(pack);
                             }
                         });

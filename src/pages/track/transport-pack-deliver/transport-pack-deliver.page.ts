@@ -98,7 +98,7 @@ export class TransportPackDeliverPage extends PageComponent {
                 info: `${packsToDeliver.length} colis`,
                 leftIcon: {
                     name: 'packs-to-load.svg',
-                    color: 'list-green-light'
+                    color: CardListColorEnum.PURPLE,
                 },
                 rightIconLayout: 'horizontal',
                 ...(hasPackToDeliver
@@ -168,6 +168,9 @@ export class TransportPackDeliverPage extends PageComponent {
             const selectedItem = this.packs[selectedIndex];
             if (selectedItem.delivered) {
                 this.toastService.presentToast(`Vous avez déjà traité ce colis`);
+            }
+            else if (selectedItem.rejected) {
+                this.toastService.presentToast(`Ce colis a été rejeté et n'est pas dans la liste`);
             }
             else {
                 this.packs.splice(selectedIndex, 1);

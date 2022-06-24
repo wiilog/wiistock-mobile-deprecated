@@ -86,7 +86,7 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
                     label: `Tournée en cours`,
                     color: {
                         background: `#C4C7D5`,
-                        font: `primary`,
+                        font: `#030f4c`,
                     },
                     inline: true
                 }

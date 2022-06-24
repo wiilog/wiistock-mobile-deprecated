@@ -24,6 +24,7 @@ import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
 import {TransportService} from '@app/common/services/transport.service';
 import {TransportRound} from "@entities/transport-round";
+import {FormPanelTextareaComponent} from '@app/common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component';
 
 @Component({
     selector: 'wii-finish-transport',
@@ -56,7 +57,7 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
         this.edit = this.currentNavParams.get('edit');
 
         this.bodyConfig = [{
-            item: FormPanelInputComponent,
+            item: FormPanelTextareaComponent ,
             config: {
                 label: `Commentaire`,
                 name: 'comment',

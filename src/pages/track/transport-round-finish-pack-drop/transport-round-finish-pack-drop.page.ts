@@ -94,7 +94,7 @@ export class TransportRoundFinishPackDropPage extends PageComponent {
                 info: `${packsToDrop.length} colis`,
                 leftIcon: {
                     name: 'packs-to-load.svg',
-                    color: 'list-green-light'
+                    color: CardListColorEnum.PURPLE,
                 },
                 rightIconLayout: 'horizontal',
                 ...(hasPackToDrop

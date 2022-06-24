@@ -71,6 +71,7 @@ export class TransportDepositPacksPage extends PageComponent {
     public ionViewWillEnter(): void {
         this.round = this.currentNavParams.get('round');
         this.undeliveredPacksLocations = this.currentNavParams.get('undeliveredPacksLocations');
+        console.log(this.round);
         this.packs = this.round.lines
             .filter((line) => line.failure || line.cancelled)
             .reduce((acc: Array<any>, line: TransportRoundLine) => [...(line.packs || []), ...acc], [])
@@ -107,7 +108,7 @@ export class TransportDepositPacksPage extends PageComponent {
                 info: `${packsToReturn.length} colis`,
                 leftIcon: {
                     name: 'packs-to-load.svg',
-                    color: 'list-green-light'
+                    color: CardListColorEnum.PURPLE,
                 },
                 rightIconLayout: 'horizontal',
                 ...(hasPackToReturn
@@ -151,7 +152,7 @@ export class TransportDepositPacksPage extends PageComponent {
                 info: `${returnedPacks.length} colis scanné${plural}`,
                 leftIcon: {
                     name: 'scanned-pack.svg',
-                    color: CardListColorEnum.GREEN
+                    color: CardListColorEnum.PURPLE,
                 }
             },
             body: returnedPacks.map((pack) => ({
