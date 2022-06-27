@@ -97,6 +97,14 @@ ion-fab {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: #666;
+
+    img {
+        margin-bottom: 10px;
+        width: 100px;
+    }
 }
 
 hr {
