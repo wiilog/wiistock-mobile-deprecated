@@ -21,7 +21,7 @@ export class CollecteMenuPage extends PageComponent {
 
     public collectesListConfig: Array<CardListConfig>;
     public readonly collectesListColor = CardListColorEnum.ORANGE;
-    public readonly collectesIconName = 'collecte.svg';
+    public readonly collectesIconName = 'collect.svg';
 
     private goToDrop: () => void;
     private avoidSync: () => void;

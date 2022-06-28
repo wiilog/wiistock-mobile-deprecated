@@ -35,7 +35,6 @@ export enum NavPathEnum {
     PREPARATION_ARTICLE_TAKE = 'preparation-article-take',
     PREPARATION_ARTICLES = 'preparation-articles',
     PREPARATION_MENU = 'preparation-menu',
-    TRANSFER_MENU = 'transfer-menu',
     DISPATCH_MENU = 'dispatch-menu',
     STOCK_MOVEMENT_MENU = 'stock-movement-menu',
     TRACKING_MOVEMENT_MENU = 'tracking-movement-menu',

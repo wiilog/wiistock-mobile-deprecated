@@ -32,6 +32,7 @@ export class StockMenuPage extends PageComponent {
     private avoidSync: boolean;
     private synchronisationSubscription: Subscription;
     private navigationSubscription: Subscription;
+    private deposeAlreadyNavigate: boolean;
 
     public constructor(private platform: Platform,
                        private mainHeaderService: MainHeaderService,
@@ -45,13 +46,6 @@ export class StockMenuPage extends PageComponent {
         this.avoidSync = true;
         const self = this;
         this.menuConfig = [
-            {
-                icon: 'stock-transfer.svg',
-                label: 'Transfert',
-                action: () => {
-                    self.navService.push(NavPathEnum.TRANSFER_MENU);
-                }
-            },
             {
                 icon: 'preparation.svg',
                 label: 'Préparation',
@@ -67,7 +61,28 @@ export class StockMenuPage extends PageComponent {
                 }
             },
             {
-                icon: 'collecte.svg',
+                icon: 'manual-delivery.svg',
+                label: 'Livraison manuelle',
+                action: () => {
+                    self.toastService.presentToast(`Non développé`);
+                }
+            },
+            {
+                icon: 'stock-transfer.svg',
+                label: 'Transfert',
+                action: () => {
+                    this.navService.push(NavPathEnum.TRANSFER_LIST);
+                }
+            },
+            {
+                icon: 'manual-transfer.svg',
+                label: 'Transfert manuel',
+                action: () => {
+                    this.navigateToPriseDeposePage()
+                }
+            },
+            {
+                icon: 'collect.svg',
                 label: 'Collecte',
                 action: () => {
                     this.navService.push(NavPathEnum.COLLECTE_MENU, {
@@ -105,6 +120,14 @@ export class StockMenuPage extends PageComponent {
         else {
             this.setAvoidSync(false);
             this.refreshSlidersData();
+        }
+
+
+        const goToDropDirectly = (!this.deposeAlreadyNavigate && Boolean(this.currentNavParams.get('goToDropDirectly')));
+
+        if (goToDropDirectly) {
+            this.deposeAlreadyNavigate = true;
+            this.navigateToPriseDeposePage(true);
         }
     }
 
@@ -148,7 +171,7 @@ export class StockMenuPage extends PageComponent {
 
     public goToDrop() {
         this.navService
-            .push(NavPathEnum.TRANSFER_MENU, {
+            .push(NavPathEnum.STOCK_MENU, {
                 goToDropDirectly: true
             });
     }
@@ -229,4 +252,14 @@ export class StockMenuPage extends PageComponent {
             ],
         ];
     }
+
+
+    public navigateToPriseDeposePage(goToDropDirectly: boolean = false): void {
+        this.navService
+            .push(NavPathEnum.STOCK_MOVEMENT_MENU, {
+                fromStock: true,
+                goToDropDirectly
+            });
+    }
+
 }

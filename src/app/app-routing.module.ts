@@ -209,11 +209,6 @@ const routes: Routes = [
         loadChildren: () => import('../pages/stock/inventory/inventory-validate/inventory-validate.module').then(m => m.InventoryValidatePageModule)
     },
     {
-        path: NavPathEnum.TRANSFER_MENU,
-        canActivate: [UserConnectedGuard],
-        loadChildren: () => import('@pages/stock/transfer/transfer-menu/transfer-menu.module').then(m => m.TransferMenuPageModule)
-    },
-    {
         path: NavPathEnum.TRANSFER_LIST,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/transfer/transfer-list/transfer-list.module').then(m => m.TransferListPageModule)

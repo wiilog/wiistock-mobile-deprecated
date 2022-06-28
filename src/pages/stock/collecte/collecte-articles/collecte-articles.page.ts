@@ -85,7 +85,7 @@ export class CollecteArticlesPage extends PageComponent implements CanLeave {
         this.goToDrop = this.currentNavParams.get('goToDrop');
 
         this.collecteHeaderConfig = {
-            leftIcon: {name: 'collecte.svg'},
+            leftIcon: {name: 'collect.svg'},
             title: `Collecte ${this.collecte.number}`,
             subtitle: [
                 `Point de collecte : ${this.collecte.location_from ? this.collecte.location_from : ''}`,

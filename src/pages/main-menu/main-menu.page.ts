@@ -277,7 +277,6 @@ export class MainMenuPage extends PageComponent {
                             this.navService
                                 .push(NavPathEnum.STOCK_MENU)
                                 .pipe(
-                                    flatMap(() => this.navService.push(NavPathEnum.TRANSFER_MENU)),
                                     flatMap(() => this.navService.push(NavPathEnum.TRANSFER_LIST, {withoutLoading: true})),
                                     flatMap(() => this.navService.push(NavPathEnum.TRANSFER_ARTICLES, {transferOrder}))
                                 )
@@ -343,10 +342,9 @@ export class MainMenuPage extends PageComponent {
                                         collecte: collect,
                                         goToDrop: () => {
                                             this.navService.pop().subscribe(() => {
-                                                this.navService
-                                                    .push(NavPathEnum.TRANSFER_MENU, {
-                                                        goToDropDirectly: true
-                                                    });
+                                                this.navService.push(NavPathEnum.STOCK_MENU, {
+                                                    goToDropDirectly: true
+                                                });
                                             });
                                         }
                                     }))

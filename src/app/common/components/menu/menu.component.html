@@ -10,11 +10,11 @@
         <span class="menu-label" [innerHTML]="item.label"></span>
         <ion-ripple-effect></ion-ripple-effect>
     </ion-card>
-    <div class="menu-item"
+    <div class="menu-item empty"
          [class.small-column]="columns === ColumnNumber.THREE"
          *ngIf="firstPlaceholderDisplayed">
     </div>
-    <div class="menu-item"
+    <div class="menu-item empty"
          [class.small-column]="columns === ColumnNumber.THREE"
          *ngIf="secondPlaceholderDisplayed">
     </div>

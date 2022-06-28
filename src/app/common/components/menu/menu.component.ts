@@ -16,6 +16,10 @@ export class MenuComponent {
     @Input()
     public columns: number = ColumnNumber.TWO;
 
+    public jsconf(c) {
+        return JSON.stringify(c);
+    }
+
     public get firstPlaceholderDisplayed(): boolean {
         const columnLength = this.columnLength;
         return (
