@@ -41,7 +41,7 @@
             {{ subtitle }}
         </div>
     </nav>
-    <nav class="title-toolbar" *ngIf="currentTitles.length === 0">
+    <nav class="title-toolbar" *ngIf="router.url.startsWith('/main-menu')">
         <div class="main-titles">
             <span>Accueil</span>
         </div>

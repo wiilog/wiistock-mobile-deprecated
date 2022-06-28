@@ -5,7 +5,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
         name: 'emplacement',
         attributes: {
             id: 'INTEGER PRIMARY KEY',
-            label: 'VARCHAR(255)'
+            label: 'VARCHAR(255)',
+            temperature_ranges: 'VARCHAR(255)'
         }
     },
     {
@@ -401,5 +402,25 @@ export const TablesDefinitions: Array<TableDefinition> = [
             comment: 'TEXT',
             date: 'VARCHAR(255)'
         }
-    }
+    },
+    {
+        name: 'transport_round',
+        attributes: {
+            id: 'INTEGER',
+            number: 'VARCHAR(255)',
+            status: 'VARCHAR(255)',
+        }
+    },
+    {
+        name: 'transport_round_line',
+        attributes: {
+            order_id: 'INTEGER',
+            contact_name: 'VARCHAR(255)',
+            contact_address: 'VARCHAR(255)',
+            request_type: 'VARCHAR(255)',
+            priority: 'INTEGER',
+            estimated_at: 'VARCHAR(255)',
+            expected_at: 'VARCHAR(255)',
+        }
+    },
 ];

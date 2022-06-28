@@ -250,6 +250,29 @@ export class SqliteService {
             );
     }
 
+    public importTransportRoundData(data): Observable<any> {
+        const transportRounds = data['transportRounds'];
+        const transportRoundLines = data['transportRoundLines'];
+
+        return zip(
+            this.deleteBy('transport_round'),
+            this.deleteBy('transport_round_line')
+        )
+            .pipe(
+                flatMap(() => (
+                    transportRounds && transportRounds.length > 0
+                        ? this.insert('transport_round', transportRounds)
+                        : of(undefined)
+                )),
+                flatMap(() => (
+                    transportRoundLines && transportRoundLines.length > 0
+                        ? this.insert('transport_round_line', transportRoundLines)
+                        : of(undefined)
+                )),
+                map(() => undefined)
+            );
+    }
+
     public importMouvementTraca(data): Observable<any> {
         const apiTaking = [
             ...(data['trackingTaking'] || []),
@@ -676,6 +699,7 @@ export class SqliteService {
             flatMap(() => this.importDispatchesData(data).pipe(tap(() => {console.log('--- > importDispatchesData')}))),
             flatMap(() => this.importStatusData(data).pipe(tap(() => {console.log('--- > importStatusData')}))),
             flatMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),
+            flatMap(() => this.importTransportRoundData(data).pipe(tap(() => {console.log('--- > importTransportRoundData')}))),
             flatMap(() => (
                 this.storageService.getRight(StorageKeyEnum.RIGHT_INVENTORY_MANAGER).pipe(
                     flatMap((res) => (res

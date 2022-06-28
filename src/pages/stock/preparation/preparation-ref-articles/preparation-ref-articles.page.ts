@@ -108,7 +108,6 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
                     )
                 })
                 .subscribe(([withoutManual, skipQuantities, counter, suggestingArticleList]) => {
-                    console.log(counter)
                     this.loading = false;
                     this.parameterSkipQuantities = skipQuantities as boolean;
                     this.parameterWithoutManual = withoutManual as boolean;

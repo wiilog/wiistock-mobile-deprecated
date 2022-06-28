@@ -3,7 +3,7 @@ import {Injectable} from '@angular/core';
 import {NavController} from '@ionic/angular';
 import {from, Observable} from 'rxjs';
 import {environment} from '@environments/environment';
-import {tap} from 'rxjs/operators';
+import {flatMap, tap} from 'rxjs/operators';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
@@ -95,4 +95,11 @@ export class NavService {
                 this.removeParams(Number(key));
             });
     }
+
+    public async runMultiplePop(popNumber: number): Promise<void> {
+        for(let i = 0; i < popNumber; i++) {
+            await this.pop().toPromise();
+        }
+    }
+
 }

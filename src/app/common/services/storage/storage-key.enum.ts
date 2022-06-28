@@ -3,6 +3,7 @@ export enum StorageKeyEnum {
     RIGHT_INVENTORY_MANAGER = 'inventoryManager',
     RIGHT_DEMANDE = 'demande',
     RIGHT_STOCK = 'stock',
+    RIGHT_TRACK = 'track',
     RIGHT_TRACKING = 'tracking',
     RIGHT_GROUP = 'group',
     RIGHT_UNGROUP = 'ungroup',

@@ -15,6 +15,7 @@ import {NotificationService} from '@app/common/services/notification.service';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {AlertService} from '@app/common/services/alert.service';
 import {NetworkService} from '@app/common/services/network.service';
+import {ApiService} from '@app/common/services/api.service';
 
 
 @Component({
@@ -44,6 +45,7 @@ export class MainMenuPage extends PageComponent {
     private lastNotificationRedirected: ILocalNotification;
 
     public constructor(private alertService: AlertService,
+                       private apiService: ApiService,
                        private sqliteService: SqliteService,
                        private storageService: StorageService,
                        private localDataManager: LocalDataManagerService,
@@ -101,10 +103,11 @@ export class MainMenuPage extends PageComponent {
                             this.storageService.getRight(StorageKeyEnum.RIGHT_DEMANDE),
                             this.storageService.getRight(StorageKeyEnum.RIGHT_TRACKING),
                             this.storageService.getRight(StorageKeyEnum.RIGHT_STOCK),
-                        ).pipe(map(([demande, tracking, stock]) => ({
+                            this.storageService.getRight(StorageKeyEnum.RIGHT_TRACK),
+                        ).pipe(map(([demande, tracking, stock, track]) => ({
                             finished,
                             message,
-                            rights: {demande, tracking, stock}
+                            rights: {demande, tracking, stock, track}
                         })))
                     ))
                 )
@@ -152,6 +155,7 @@ export class MainMenuPage extends PageComponent {
                 buttons: [
                     {
                         text: 'Annuler',
+                        role: 'cancel',
                         handler: () => {
                             this.exitAlert = undefined;
                         }
@@ -168,9 +172,11 @@ export class MainMenuPage extends PageComponent {
         }
     }
 
-    private resetMainMenuConfig(rights: {stock?: boolean, demande?: boolean, tracking?: boolean}) {
+    private resetMainMenuConfig(rights: {stock?: boolean, demande?: boolean, tracking?: boolean, track?: boolean}) {
         this.menuConfig = [];
-        let actions = [];
+
+        const actions = [];
+
         if (rights.tracking) {
             const action = () => {
                 this.navService.push(NavPathEnum.TRACKING_MENU, {
@@ -200,7 +206,7 @@ export class MainMenuPage extends PageComponent {
         if (rights.demande) {
             const action = () => {
                 this.navService.push(NavPathEnum.DEMANDE_MENU);
-            }
+            };
             this.menuConfig.push({
                 icon: 'demande.svg',
                 iconColor: 'success',
@@ -209,6 +215,19 @@ export class MainMenuPage extends PageComponent {
             });
             actions.push(action);
         }
+
+        if (rights.track) {
+            const action = () => {
+                this.navService.push(NavPathEnum.TRANSPORT_ROUND_LIST);
+            };
+            this.menuConfig.push({
+                icon: 'track.svg',
+                label: 'Track',
+                action
+            });
+            actions.push(action);
+        }
+
         if (actions.length === 1) {
             actions[0]();
         }
@@ -236,7 +255,29 @@ export class MainMenuPage extends PageComponent {
             this.lastNotificationRedirected = notification;
             this.ngZone.run(() => {
                 const {data} = notification;
-                if (data.type === 'dispatch') {
+
+                if(data.roundId) {
+                    if(data.transportId) {
+                        this.apiService.requestApi(ApiService.FETCH_ROUND, {
+                            params: {round: data.roundId},
+                        }).subscribe(round => {
+                            this.navService
+                                .push(NavPathEnum.TRANSPORT_ROUND_LIST)
+                                .pipe(flatMap(() => this.navService.push(NavPathEnum.TRANSPORT_LIST, {
+                                    round,
+                                    cancelledTransport: data.transportId,
+                                })))
+                                .subscribe(() => {
+                                    this.pageIsRedirecting = false;
+                                });
+                        });
+                    } else {
+                        this.navService.push(NavPathEnum.TRANSPORT_ROUND_LIST).subscribe(() => {
+                            this.pageIsRedirecting = false;
+                        });
+                    }
+                }
+                else if (data.type === 'dispatch') {
                     this.pageIsRedirecting = true;
                     const dispatchId = Number(data.id);
                     this.navService

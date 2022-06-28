@@ -31,7 +31,13 @@ export class IconComponent {
     public customColor?: string;
 
     @Input()
+    public circle?: string;
+
+    @Input()
     public buttonWithoutRipple?: boolean;
+
+    @Input()
+    public width: string;
 
     @Output()
     public action: EventEmitter<Event>;
@@ -90,6 +96,10 @@ export class IconComponent {
                     svgStrokeElements.forEach((element) => {
                         this.addCustomStyle(element, `stroke: ${this.customColor} !important;`);
                     });
+                }
+
+                if(this.width) {
+                    div.querySelector('svg').style.width = this.width;
                 }
 
                 return this.sanitizeSVG(div.innerHTML);

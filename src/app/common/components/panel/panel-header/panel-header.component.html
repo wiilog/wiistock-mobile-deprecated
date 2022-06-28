@@ -25,33 +25,35 @@
          [style.maxHeight.px]="bodyMaxHeight"
          (click)="toggleTitle()">
         <div #headerBodyWrapper
+             [class.inline-right-badge]="rightBadge && rightBadge.inline"
              class="header-body-wrapper">
-            <div class="header-title" *ngIf="title" [innerHTML]="title"></div>
+            <div>
+                <div class="header-title" *ngIf="title" [innerHTML]="title"></div>
 
-            <wii-list-panel-item *ngIf="item"
-                                 [infos]="item.infos"
-                                 [color]="item.color"
-                                 [backgroundColor]="item.backgroundColor"
-                                 [loading]="item.loading"
-                                 [disabled]="item.disabled"
-                                 [pressAction]="item.pressAction"
-                                 [rightIcon]="item.rightIcon"
-                                 [rightIconBase64]="item.rightIconBase64"
-                                 [boldValues]="[]"
-                                 style="padding-left: 15px">
-            </wii-list-panel-item>
+                <wii-list-panel-item *ngIf="item"
+                                     [infos]="item.infos"
+                                     [color]="item.color"
+                                     [backgroundColor]="item.backgroundColor"
+                                     [loading]="item.loading"
+                                     [disabled]="item.disabled"
+                                     [pressAction]="item.pressAction"
+                                     [rightIcon]="item.rightIcon"
+                                     [rightIconBase64]="item.rightIconBase64"
+                                     [boldValues]="[]"
+                                     style="padding-left: 15px">
+                </wii-list-panel-item>
 
-            <div *ngFor="let partSubTitle of _subtitle"
-                 class="header-subtitle"
-                 [innerHTML]="partSubTitle">
+                <div *ngFor="let partSubTitle of _subtitle"
+                     class="header-subtitle"
+                     [innerHTML]="partSubTitle">
+                </div>
+
+                <div *ngIf="info"
+                     class="header-info"
+                     [innerHTML]="info">
+                </div>
             </div>
-
-            <div *ngIf="info"
-                 class="header-info"
-                 [innerHTML]="info">
-            </div>
-
-            <div class="badges-container">
+            <div *ngIf="leftBadge || rightBadge" class="badges-container">
                 <wii-badge *ngIf="leftBadge"
                            [config]="leftBadge">
                 </wii-badge>

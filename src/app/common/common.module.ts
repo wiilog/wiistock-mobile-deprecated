@@ -39,6 +39,13 @@ import {ServerImageComponent} from '@app/common/components/server-image/server-i
 import {FormViewerTextComponent} from '@app/common/components/panel/form-panel/form-viewer-text/form-viewer-text.component';
 import {FormPanelButtonsComponent} from '@app/common/components/panel/form-panel/form-panel-buttons/form-panel-buttons.component';
 import {BadgeComponent} from '@app/common/components/badge/badge.component';
+import {FormViewerTableComponent} from '@app/common/components/panel/form-panel/form-viewer-table/form-viewer-table.component';
+import {LeafletMapComponent} from '@app/common/components/leaflet-map/leaflet-map.component';
+import {SimpleCardComponent} from '@app/common/components/simple-card/simple-card.component';
+import {TransportCardComponent} from '@app/common/components/transport-card/transport-card.component';
+import {PackCountComponent} from '@app/common/components/pack-count/pack-count.component';
+import {FormPanelTextareaComponent} from "@app/common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component";
+import {NumberInputComponent} from '@app/common/components/number-input/number-input.component';
 
 @NgModule({
     declarations: [
@@ -50,6 +57,7 @@ import {BadgeComponent} from '@app/common/components/badge/badge.component';
         MainLoaderComponent,
         MenuComponent,
         FormPanelInputComponent,
+        FormPanelTextareaComponent,
         FormPanelSigningComponent,
         FormPanelFieldComponent,
         FormPanelCameraComponent,
@@ -60,6 +68,7 @@ import {BadgeComponent} from '@app/common/components/badge/badge.component';
         FormPanelComponent,
         FormViewerAttachmentsComponent,
         FormViewerTextComponent,
+        FormViewerTableComponent,
         ListPanelItemComponent,
         ListPanelComponent,
         PanelHeaderComponent,
@@ -70,7 +79,12 @@ import {BadgeComponent} from '@app/common/components/badge/badge.component';
         StatsSlidersComponent,
         FormPanelDirective,
         FormViewerDirective,
-        ServerImageComponent
+        ServerImageComponent,
+        LeafletMapComponent,
+        SimpleCardComponent,
+        TransportCardComponent,
+        PackCountComponent,
+        NumberInputComponent,
     ],
     imports: [
         AngularCommonModule,
@@ -94,7 +108,12 @@ import {BadgeComponent} from '@app/common/components/badge/badge.component';
         CardListComponent,
         PanelHeaderComponent,
         ListPanelItemComponent,
-        ServerImageComponent
+        ServerImageComponent,
+        LeafletMapComponent,
+        SimpleCardComponent,
+        TransportCardComponent,
+        PackCountComponent,
+        NumberInputComponent,
     ],
     providers: [
         // ionic
@@ -114,7 +133,8 @@ import {BadgeComponent} from '@app/common/components/badge/badge.component';
         FormPanelCalendarComponent,
         FormPanelSelectComponent,
         FormViewerAttachmentsComponent,
-        FormViewerTextComponent
+        FormViewerTextComponent,
+        FormViewerTableComponent,
     ]
 })
 export class CommonModule {
