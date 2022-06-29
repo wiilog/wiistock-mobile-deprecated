@@ -15,6 +15,7 @@ import * as moment from 'moment';
 import {TablesDefinitions} from '@app/common/services/sqlite/tables-definitions';
 import {TableName} from '@app/common/services/sqlite/table-definition';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {DemandeLivraisonArticle} from '@entities/demande-livraison-article';
 
 
 @Injectable({
@@ -760,6 +761,18 @@ export class SqliteService {
         return this.executeQuery(query).pipe(
             map((data) => SqliteService.MultiSelectQueryMapper<any>(data)),
             take(1)
+        );
+    }
+
+    public findArticlesNotInDemandeLivraison(): Observable<Array<DemandeLivraisonArticle>> {
+        const query = (
+            `SELECT demande_livraison_article.* 
+            FROM demande_livraison_article 
+            LEFT JOIN article_in_demande_livraison ON article_in_demande_livraison.article_bar_code = demande_livraison_article.bar_code 
+            WHERE article_in_demande_livraison.demande_id IS NULL`
+        );
+        return this.executeQuery(query).pipe(
+            map((data) => SqliteService.MultiSelectQueryMapper<any>(data)),
         );
     }
 
