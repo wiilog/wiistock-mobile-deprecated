@@ -68,20 +68,6 @@ export class StockMenuPage extends PageComponent {
                 }
             },
             {
-                icon: 'stock-transfer.svg',
-                label: 'Transfert',
-                action: () => {
-                    this.navService.push(NavPathEnum.TRANSFER_LIST);
-                }
-            },
-            {
-                icon: 'manual-transfer.svg',
-                label: 'Transfert manuel',
-                action: () => {
-                    this.navigateToPriseDeposePage()
-                }
-            },
-            {
                 icon: 'collect.svg',
                 label: 'Collecte',
                 action: () => {
@@ -93,6 +79,20 @@ export class StockMenuPage extends PageComponent {
                             self.goToDrop();
                         }
                     });
+                }
+            },
+            {
+                icon: 'stock-transfer.svg',
+                label: 'Transfert',
+                action: () => {
+                    this.navService.push(NavPathEnum.TRANSFER_LIST);
+                }
+            },
+            {
+                icon: 'manual-transfer.svg',
+                label: 'Transfert manuel',
+                action: () => {
+                    this.navigateToPriseDeposePage()
                 }
             },
             {
