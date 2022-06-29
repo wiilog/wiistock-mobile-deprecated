@@ -64,7 +64,7 @@ export class StockMenuPage extends PageComponent {
                 icon: 'manual-delivery.svg',
                 label: 'Livraison manuelle',
                 action: () => {
-                    self.toastService.presentToast(`Non développé`);
+                    self.navService.push(NavPathEnum.MANUAL_DELIVERY);
                 }
             },
             {

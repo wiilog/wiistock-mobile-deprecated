@@ -339,6 +339,11 @@ const routes: Routes = [
         loadChildren: () => import('@pages/track/transport-failure/transport-failure.module').then(m => m.TransportFailurePageModule)
     },
     {
+        path: NavPathEnum.MANUAL_DELIVERY,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/livraison/manual-delivery/manual-delivery.module').then(m => m.ManualDeliveryPageModule)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'

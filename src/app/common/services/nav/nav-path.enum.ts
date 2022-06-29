@@ -64,4 +64,5 @@ export enum NavPathEnum {
     TRANSPORT_ROUND_FINISH_PACK_DROP = 'transport-round-finish-pack-drop',
     TRANSPORT_ROUND_FINISH_PACK_DROP_VALIDATE = 'transport-round-finish-pack-drop-validate',
     TRANSPORT_ROUND_FINISH = 'transport-round-finish',
+    MANUAL_DELIVERY = 'manual-delivery',
 }
