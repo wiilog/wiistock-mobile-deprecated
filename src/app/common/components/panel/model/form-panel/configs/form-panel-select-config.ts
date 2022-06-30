@@ -3,6 +3,7 @@ import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item
 export interface    FormPanelSelectConfig {
     required?: boolean;
     barcodeScanner?: boolean;
+    defaultIfSingle?: boolean;
     searchType?: SelectItemTypeEnum;
     requestParams?: Array<string>;
     label?: string;

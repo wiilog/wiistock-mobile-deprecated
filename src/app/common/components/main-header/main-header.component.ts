@@ -314,6 +314,11 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
     private refreshTitles(navigationId: number, currentPagePath: NavPathEnum, paramsId: number): void {
         if(navigationId && this.lastDirections[navigationId]) {
+            if(this.router.url.startsWith('/main-menu')) {
+                this.pagesInStack = 1;
+                this.pageStack = [];
+            }
+
             if(this.lastDirections[navigationId].value === 'back') {
                 const currentPageIndex = this.findIndexInPageStack(currentPagePath, paramsId);
                 if(currentPageIndex > -1) {

@@ -51,7 +51,9 @@ export class SearchItemComponent implements OnInit, OnDestroy {
 
     private itemsSubscription: Subscription;
 
-    public readonly config: {[type: string]: {[conf: string]: any; databaseTable?: TableName}} = {
+    public readonly config = SearchItemComponent.SEARCH_CONFIGS;
+
+    public static readonly SEARCH_CONFIGS: {[type: string]: {[conf: string]: any; databaseTable?: TableName}} = {
         default: {
             label: 'label',
             valueField: 'id',

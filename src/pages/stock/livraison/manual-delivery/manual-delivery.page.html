@@ -12,13 +12,12 @@
 </div>
 
 <div class="page-footer">
-    <wii-barcode-scanner [mode]="scannerMode" (add)="addArticle($event[0])"></wii-barcode-scanner>
+    <wii-barcode-scanner #footerScannerComponent [mode]="scannerMode" (add)="addArticle($event[0])"></wii-barcode-scanner>
 
     <ion-button class="submit-button larger"
                 color="primary"
                 size="large"
                 expand="full"
-                [hidden]="skipValidation"
                 (click)="validate()">
         Valider
         <wii-icon name="check.svg"
