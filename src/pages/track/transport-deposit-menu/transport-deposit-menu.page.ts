@@ -30,6 +30,7 @@ export class TransportDepositMenuPage extends PageComponent implements ViewWillE
     public delivery() {
         this.navService.push(NavPathEnum.TRANSPORT_DEPOSIT_PACKS, {
             round: this.round,
+            skippedMenu: false,
             undeliveredPacksLocations: this.undeliveredPacksLocations
         });
     }
@@ -37,6 +38,7 @@ export class TransportDepositMenuPage extends PageComponent implements ViewWillE
     public collect() {
         this.navService.push(NavPathEnum.TRANSPORT_COLLECT_NATURES, {
             round: this.round,
+            skippedMenu: false,
             collectedPacksLocations: this.collectedPacksLocations
         });
     }
