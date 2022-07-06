@@ -44,7 +44,7 @@ export class TransportDepositLocationPage extends PageComponent {
     private undeliveredPacksLocations: Array<number>;
 
     private round: TransportRound;
-    private skippedMenu: boolean;
+    private skippedMenu: boolean = false;
     private everythingReturned: boolean;
 
     public panelHeaderConfig: {
@@ -73,7 +73,7 @@ export class TransportDepositLocationPage extends PageComponent {
         this.depositedCollectPacks = this.currentNavParams.get('depositedCollectPacks') || [];
         this.collectedPacksLocations = this.currentNavParams.get('collectedPacksLocations') || [];
         this.undeliveredPacksLocations= this.currentNavParams.get('undeliveredPacksLocations') || [];
-        this.skippedMenu = this.currentNavParams.get('skippedMenu');
+        this.skippedMenu = this.currentNavParams.get('skippedMenu') || false;
         this.everythingReturned = this.currentNavParams.get('everythingReturned');
         this.resetEmitter$.emit();
         this.panelHeaderConfig = this.createPanelHeaderConfig();
@@ -199,7 +199,7 @@ export class TransportDepositLocationPage extends PageComponent {
                 zip(
                     this.loadingService.presentLoading(),
                     this.apiService.requestApi(ApiService.DEPOSIT_TRANSPORT, {params})
-                ).subscribe(([loading, response]: [HTMLIonLoadingElement, any]) => {
+                ).subscribe(async ([loading, response]: [HTMLIonLoadingElement, any]) => {
                     loading.dismiss();
 
                     if (response && response.success) {
@@ -212,7 +212,7 @@ export class TransportDepositLocationPage extends PageComponent {
                             this.toastService.presentToast('Les objets collectés ont bien été déposés');
                         }
 
-                        this.navService.runMultiplePop(this.everythingReturned || this.depositedCollectPacks.length ? 3 - Number(this.skippedMenu) : 1);
+                        await this.navService.runMultiplePop(this.everythingReturned || this.depositedCollectPacks.length ? 3 - (Number(this.skippedMenu) || 0) : 1);
                     }
                 });
             } else {
