@@ -10,7 +10,6 @@ import {MapLocation} from '@app/common/components/leaflet-map/leaflet-map.compon
 import {TransportCardMode} from '@app/common/components/transport-card/transport-card.component';
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
-import {LoadingService} from "@app/common/services/loading.service";
 import {AlertService} from '@app/common/services/alert.service';
 import {TransportService} from '@app/common/services/transport.service';
 
@@ -64,7 +63,11 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
         }
 
         for(const transport of this.round.lines) {
-            if(this.mode === TransportCardMode.STARTABLE && !transport.cancelled && transport.success && transport.collect && !(transport.collect.success || transport.collect.failure)) {
+            if(this.mode === TransportCardMode.STARTABLE
+                && !transport.cancelled
+                && transport.success
+                && transport.collect
+                && !(transport.collect.success || transport.collect.failure)) {
                 this.navService.push(NavPathEnum.TRANSPORT_SHOW, {
                     transport: transport.collect,
                     round: this.round,
