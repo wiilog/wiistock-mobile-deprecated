@@ -10,12 +10,17 @@ import {PageComponent} from '@pages/page.component';
 import {NetworkService} from '@app/common/services/network.service';
 import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {StorageService} from "@app/common/services/storage/storage.service";
-import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
+import {
+    FormPanelSelectComponent
+} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {FormPanelParam} from '@app/common/directives/form-panel/form-panel-param';
-import {FormPanelInputComponent} from '@app/common/components/panel/form-panel/form-panel-input/form-panel-input.component';
+import {
+    FormPanelInputComponent
+} from '@app/common/components/panel/form-panel/form-panel-input/form-panel-input.component';
 import {Emplacement} from '@entities/emplacement';
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
+import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
 
 
 @Component({
@@ -119,17 +124,20 @@ export class ManualDeliveryPage extends PageComponent {
     }
 
     public validate(): void {
-        const error = this.formPanelComponent.firstError;
+        const error = this.selectedArticles.length === 0
+            ? 'Vous devez selectionner au moins un article'
+            : this.formPanelComponent.firstError;
         if (error) {
             this.toastService.presentToast(error)
         } else {
-            let {type, comment} = this.formPanelComponent.values;
+            const {type, comment} = this.formPanelComponent.values;
 
-            //TODO 7544: rediriger vers la bonne page !!
-            this.navService.push(`todo` as any, {
-                type,
-                comment,
-                articles: this.selectedArticles,
+            this.navService.push(NavPathEnum.MANUAL_DELIVERY_LOCATION, {
+                livraison: {
+                    type,
+                    comment,
+                    articles: this.selectedArticles,
+                }
             });
         }
     }
