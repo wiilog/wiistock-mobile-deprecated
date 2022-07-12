@@ -14,6 +14,7 @@ import {TransportCardMode} from '@app/common/components/transport-card/transport
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {AlertService} from '@app/common/services/alert.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
+import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 
 @Component({
     selector: 'wii-transport-round-list',
@@ -31,6 +32,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
     public constructor(navService: NavService,
                        private mainHeaderService: MainHeaderService,
                        private apiService: ApiService,
+                       private localDataService: LocalDataManagerService,
                        private loadingService: LoadingService,
                        private toastService: ToastService,
                        private networkService: NetworkService,
@@ -232,45 +234,51 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
     public synchronise(callback: (updatedRound: TransportRound) => void = undefined, currentRound: TransportRound = undefined): void {
         if (this.networkService.hasNetwork()) {
             this.loading = true;
-            zip(
-                this.loadingService.presentLoading('Récupération des tournées en cours'),
-                this.apiService.requestApi(ApiService.GET_TRANSPORT_ROUNDS)
-            ).subscribe(([loading, rounds]: [HTMLIonLoadingElement, Array<TransportRound>]) => {
-                loading.dismiss();
 
-                for (const round of rounds) {
-                    for (const transport of round.lines) {
-                        transport.round = round;
-                        if (transport.collect) {
-                            transport.collect.round = round;
-                        }
+            this.loadingService.presentLoading('Récupération des tournées en cours').subscribe(loader => {
+                this.localDataService.synchroniseData().subscribe(({finished}) => {
+                    if(!finished) {
+                        return;
                     }
-                }
 
-                this.transportRoundsByDates = rounds
-                    .sort(({date: date1}, {date: date2}) => {
-                        const momentDate1 = moment(date1, 'DD/MM/YYYY')
-                        const momentDate2 = moment(date2, 'DD/MM/YYYY')
-                        return (
-                            momentDate1.isBefore(momentDate2) ? -1 :
-                                momentDate1.isAfter(momentDate2) ? 1 :
-                                    0
-                        );
-                    })
-                    .reduce((acc, round) => {
-                        (acc[round['date']] = acc[round['date']] || []).push(round);
-                        return acc;
-                    }, {});
+                    this.apiService.requestApi(ApiService.GET_TRANSPORT_ROUNDS).subscribe((rounds: Array<TransportRound>) => {
+                        loader.dismiss();
 
-                if(Object.keys(this.transportRoundsByDates).length === 0) {
-                    this.transportRoundsByDates = null;
-                }
+                        for (const round of rounds) {
+                            for (const transport of round.lines) {
+                                transport.round = round;
+                                if (transport.collect) {
+                                    transport.collect.round = round;
+                                }
+                            }
+                        }
 
-                this.loading = false;
-                if(callback) {
-                    const updatedRound = rounds.find(({id}) => id === currentRound.id);
-                    callback(updatedRound);
-                }
+                        this.transportRoundsByDates = rounds
+                            .sort(({date: date1}, {date: date2}) => {
+                                const momentDate1 = moment(date1, 'DD/MM/YYYY')
+                                const momentDate2 = moment(date2, 'DD/MM/YYYY')
+                                return (
+                                    momentDate1.isBefore(momentDate2) ? -1 :
+                                        momentDate1.isAfter(momentDate2) ? 1 :
+                                            0
+                                );
+                            })
+                            .reduce((acc, round) => {
+                                (acc[round['date']] = acc[round['date']] || []).push(round);
+                                return acc;
+                            }, {});
+
+                        if(Object.keys(this.transportRoundsByDates).length === 0) {
+                            this.transportRoundsByDates = null;
+                        }
+
+                        this.loading = false;
+                        if(callback) {
+                            const updatedRound = rounds.find(({id}) => id === currentRound.id);
+                            callback(updatedRound);
+                        }
+                    });
+                });
             });
         } else {
             this.loading = false;
