@@ -1,7 +1,6 @@
 <div class="simple-form-wrapper">
-    <div class="simple-form-icon-container">
-        <wii-icon *ngIf="iconInfo"
-                  class="simple-form-title-icon"
+    <div *ngIf="iconInfo" class="simple-form-icon-container">
+        <wii-icon class="simple-form-title-icon"
                   [name]="iconInfo.name"
                   [color]="iconInfo.color"
                   [customColor]="iconInfo.customColor">
@@ -48,7 +47,7 @@
     <div class="simple-form-footer"
          *ngIf="!hideMainSubmit">
         <ion-button class="submit-button larger"
-                    color="success"
+                    color="primary"
                     size="large"
                     expand="full"
                     (click)="onFormSubmit()">

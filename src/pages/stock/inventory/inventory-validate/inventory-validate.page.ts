@@ -57,6 +57,11 @@ export class InventoryValidatePage extends PageComponent {
         else {
             this.navService.pop().subscribe(() => {
                 this.validateQuantity(quantity);
+
+                const remainingArticles = this.currentNavParams.get('remainingArticles');
+                if(remainingArticles == 0) {
+                    this.navService.pop();
+                }
             });
         }
     }

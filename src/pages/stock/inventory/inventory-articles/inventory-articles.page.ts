@@ -104,6 +104,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
         this.selectItemComponent.closeSearch();
         this.navService.push(NavPathEnum.INVENTORY_VALIDATE, {
             selectedArticle,
+            remainingArticles: 0,
             validateQuantity: (quantity: number) => {
                 if (!this.validateSubscription) {
                     if (!this.anomalyMode
