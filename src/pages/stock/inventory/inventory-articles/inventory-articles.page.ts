@@ -72,6 +72,10 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
             this.requestParams.push(`treated IS NULL`);
         }
 
+        if (this.mission) {
+            this.requestParams.push(`id_mission = ${this.mission}`)
+        }
+
         this.selectItemType = this.anomalyMode
             ? SelectItemTypeEnum.INVENTORY_ANOMALIES_ARTICLE
             : SelectItemTypeEnum.INVENTORY_ARTICLE;
@@ -93,13 +97,6 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
     }
 
     public refreshList() {
-        const params = [
-            `location = '${this.selectedLocation}'`
-        ];
-
-        if (this.mission) {
-            params.push(`id_mission = ${this.mission}`)
-        }
         if (!this.dataSubscription) {
             this.dataSubscription = this.loadingService
                 .presentLoading('Chargement...')
@@ -108,7 +105,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
                         this.refreshSubTitle();
                     }),
                     flatMap((loader) => from(loader.dismiss())),
-                    flatMap(() => this.sqliteService.findBy('article_inventaire', params))
+                    flatMap(() => this.sqliteService.findBy('article_inventaire', this.requestParams))
                 )
                 .subscribe((articles) => {
                     this.articles = articles;
@@ -123,7 +120,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
                                 value: article.barcode
                             }
                         }
-                    }))
+                    }));
                     this.unsubscribeData();
                 });
         }

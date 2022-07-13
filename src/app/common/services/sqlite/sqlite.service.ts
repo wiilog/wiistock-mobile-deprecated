@@ -652,14 +652,15 @@ export class SqliteService {
                             "'" + anomaly.countedQuantity + "', " +
                             "'" + this.escapeQuotes(anomaly.location ? anomaly.location : 'N/A') + "', " +
                             anomaly.isTreatable + ", " +
-                            "'" + anomaly.barCode + "')"
+                            "'" + anomaly.barCode + "', " +
+                            anomaly.mission_id + ")"
                         ));
                     if (anomaliesToInsert.length === 0) {
                         ret$.next(undefined);
                     }
                     else {
                         const anomaliesValuesStr = anomaliesToInsert.join(', ');
-                        let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `countedQuantity`, `location`, `is_treatable`, `barcode`) VALUES ' + anomaliesValuesStr + ';';
+                        let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `countedQuantity`, `location`, `is_treatable`, `barcode`, `id_mission`) VALUES ' + anomaliesValuesStr + ';';
                         this.executeQuery(sqlAnomaliesInventaire).subscribe(() => {
                             ret$.next(true);
                         });
@@ -766,9 +767,9 @@ export class SqliteService {
 
     public findArticlesNotInDemandeLivraison(): Observable<Array<DemandeLivraisonArticle>> {
         const query = (
-            `SELECT demande_livraison_article.* 
-            FROM demande_livraison_article 
-            LEFT JOIN article_in_demande_livraison ON article_in_demande_livraison.article_bar_code = demande_livraison_article.bar_code 
+            `SELECT demande_livraison_article.*
+            FROM demande_livraison_article
+            LEFT JOIN article_in_demande_livraison ON article_in_demande_livraison.article_bar_code = demande_livraison_article.bar_code
             WHERE article_in_demande_livraison.demande_id IS NULL`
         );
         return this.executeQuery(query).pipe(

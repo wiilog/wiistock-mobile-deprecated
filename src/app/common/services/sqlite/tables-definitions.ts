@@ -233,7 +233,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             is_ref: 'INTEGER',
             quantity: 'INTEGER',
             is_treatable: 'INTEGER',
-            countedQuantity: 'INTEGER'
+            countedQuantity: 'INTEGER',
+            id_mission: 'INTEGER'
         }
     },
     {
