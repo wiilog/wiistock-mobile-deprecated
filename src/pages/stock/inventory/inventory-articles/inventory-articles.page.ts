@@ -17,6 +17,10 @@ import {PageComponent} from '@pages/page.component';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {HeaderConfig} from "@app/common/components/panel/model/header-config";
+import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
+import {ArticleCollecte} from "@entities/article-collecte";
+import {IconColor} from "@app/common/components/icon/icon-color";
 
 @Component({
     selector: 'wii-inventory-articles',
@@ -34,12 +38,15 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
     public dataSubscription: Subscription;
     public validateSubscription: Subscription;
     public resetEmitter$: ReplaySubject<void>;
+    public listBoldValues?: Array<string>;
 
     public requestParams: Array<string>;
 
     public selectedLocation: string;
+    public mission?: number;
+    public articles: Array<ArticleInventaire>;
+    public listToInventory?: Array<ListPanelItemConfig>;
 
-    private alreadyInitialized: boolean;
     private anomalyMode: boolean;
 
     public constructor(private sqliteService: SqliteService,
@@ -49,13 +56,14 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
                        private toastService: ToastService,
                        navService: NavService) {
         super(navService);
-        this.alreadyInitialized = false;
         this.resetEmitter$ = new ReplaySubject<void>(1);
     }
 
     public ionViewWillEnter(): void {
         this.selectedLocation = this.currentNavParams.get('selectedLocation');
         this.anomalyMode = this.currentNavParams.get('anomalyMode') || false;
+        this.anomalyMode = this.currentNavParams.get('mission') || null;
+        this.listBoldValues = ['reference', 'barCode'];
 
         this.resetEmitter$.next();
 
@@ -67,22 +75,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
         this.selectItemType = this.anomalyMode
             ? SelectItemTypeEnum.INVENTORY_ANOMALIES_ARTICLE
             : SelectItemTypeEnum.INVENTORY_ARTICLE;
-
-        if (!this.alreadyInitialized && !this.dataSubscription) {
-            this.dataSubscription = this.loadingService
-                .presentLoading('Chargement...')
-                .pipe(
-                    tap(() => {
-                        this.refreshSubTitle();
-                    }),
-                    flatMap((loader) => from(loader.dismiss()))
-                )
-                .subscribe(() => {
-                    this.unsubscribeData();
-                    this.alreadyInitialized = true;
-                });
-        }
-
+        this.refreshList();
         if (this.selectItemComponent) {
             this.selectItemComponent.fireZebraScan();
         }
@@ -99,7 +92,44 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
         return !this.dataSubscription && !this.validateSubscription;
     }
 
-    public navigateToInventoryValidate(selectedArticle: ArticleInventaire&Anomalie): void {
+    public refreshList() {
+        const params = [
+            `location = '${this.selectedLocation}'`
+        ];
+
+        if (this.mission) {
+            params.push(`id_mission = ${this.mission}`)
+        }
+        if (!this.dataSubscription) {
+            this.dataSubscription = this.loadingService
+                .presentLoading('Chargement...')
+                .pipe(
+                    tap(() => {
+                        this.refreshSubTitle();
+                    }),
+                    flatMap((loader) => from(loader.dismiss())),
+                    flatMap(() => this.sqliteService.findBy('article_inventaire', params))
+                )
+                .subscribe((articles) => {
+                    this.articles = articles;
+                    this.listToInventory = this.articles.map((article: ArticleInventaire) => ({
+                        infos: {
+                            reference: {
+                                label: 'Référence',
+                                value: article.reference
+                            },
+                            barCode: {
+                                label: 'Code barre',
+                                value: article.barcode
+                            }
+                        }
+                    }))
+                    this.unsubscribeData();
+                });
+        }
+    }
+
+    public navigateToInventoryValidate(selectedArticle: ArticleInventaire & Anomalie): void {
         const self = this;
         this.selectItemComponent.closeSearch();
         this.navService.push(NavPathEnum.INVENTORY_VALIDATE, {
@@ -135,6 +165,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
                                 }
                                 else {
                                     this.refreshSubTitle();
+                                    this.refreshList();
                                 }
                             });
                     }
@@ -158,7 +189,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
             return this.sqliteService.update('anomalie_inventaire', [{values: {quantity, treated: '1'}, where: [`id = ${selectedArticle.id}`]}]);
         }
         else {
-            let saisieInventaire: SaisieInventaire = {
+            const saisieInventaire: SaisieInventaire = {
                 id: null,
                 id_mission: selectedArticle.id_mission,
                 date: moment().format(),
