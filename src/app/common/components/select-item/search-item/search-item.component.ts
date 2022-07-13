@@ -218,7 +218,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
 
     public reload(): Observable<Array<any>> {
         const $res = new ReplaySubject<Array<any>>(1);
-
+        console.log(this.requestParams);
         (this.elements
             ? of(this.elements)
             : this.sqliteService.findBy(this.config[this.type].databaseTable, this.requestParams, (this.config[this.type] as any).requestOrder || {}))

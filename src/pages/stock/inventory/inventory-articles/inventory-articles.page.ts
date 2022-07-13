@@ -62,7 +62,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
     public ionViewWillEnter(): void {
         this.selectedLocation = this.currentNavParams.get('selectedLocation');
         this.anomalyMode = this.currentNavParams.get('anomalyMode') || false;
-        this.anomalyMode = this.currentNavParams.get('mission') || null;
+        this.mission = this.currentNavParams.get('mission') || null;
         this.listBoldValues = ['reference', 'barCode'];
 
         this.resetEmitter$.next();

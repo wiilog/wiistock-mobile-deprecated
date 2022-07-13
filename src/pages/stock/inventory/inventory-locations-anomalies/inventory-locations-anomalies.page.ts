@@ -27,6 +27,8 @@ export class InventoryLocationsAnomaliesPage extends PageComponent implements Ca
 
     public readonly scannerMode = BarcodeScannerModeEnum.TOOL_SEARCH;
     public readonly selectItemType = SelectItemTypeEnum.INVENTORY_ANOMALIES_LOCATION;
+    public requestParams: Array<string>;
+    public mission?: number;
 
     public resetEmitter$: ReplaySubject<void>;
 
@@ -43,6 +45,11 @@ export class InventoryLocationsAnomaliesPage extends PageComponent implements Ca
 
     public ionViewWillEnter(): void {
         this.resetEmitter$.next();
+        this.mission = this.currentNavParams.get('mission') || null;
+        this.requestParams = [];
+        if (this.mission) {
+            this.requestParams.push(`id_mission = ${this.mission}`)
+        }
         if (!this.dataSubscription) {
             this.dataSubscription = this.loadingService
                 .presentLoading('Chargement...')

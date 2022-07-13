@@ -2,6 +2,7 @@
     <wii-select-item #selectItemComponent
                      [type]="selectItemType"
                      [hidden]="!!dataSubscription"
+                     [requestParams]="requestParams"
                      (itemChange)="selectLocation($event)"
                      [checkBarcodeValidity]="true"
                      [resetEmitter]="resetEmitter$"
