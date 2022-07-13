@@ -109,11 +109,16 @@ export class ManualDeliveryPage extends PageComponent {
         return this.apiService.requestApi(ApiService.GET_ARTICLES, {params})
             .subscribe(response => {
                 if(response.success) {
-                    if(response.article) {
-                        this.selectedArticles.push(response.article);
+                    if(response.article && !response.article.is_ref) {
+                        const existing = this.selectedArticles.find(article => article.barCode == response.article.barCode)
+                        if(existing) {
+                            this.toastService.presentToast(`Vous avez déjà scanné cet article`);
+                        } else {
+                            this.selectedArticles.push(response.article);
 
-                        this.headerConfig = this.createHeaderConfig();
-                        this.listConfig = this.createBodyConfig();
+                            this.headerConfig = this.createHeaderConfig();
+                            this.listConfig = this.createBodyConfig();
+                        }
                     } else {
                         this.toastService.presentToast(`Vous ne pouvez pas ajouter de référence`);
                     }
