@@ -1,9 +1,25 @@
 @import "~theme/variables";
 
 :host {
-    padding-top: $spacer;
 
-    .anomalies-button-container ion-button {
-        margin: $spacerMin;
+
+    ion-button {
+        text-transform: unset;
+        font-weight: unset;
+    }
+
+    .anomalies-button-container {
+        margin-top: $spacerMin;
+        margin-bottom: $spacerMin;
+
+    }
+
+    .page-content {
+        overflow: auto;
+        padding: $spacerMin;
+    }
+
+    .page-footer {
+        padding: 2px;
     }
 }

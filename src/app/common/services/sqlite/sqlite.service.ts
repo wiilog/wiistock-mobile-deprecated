@@ -577,24 +577,28 @@ export class SqliteService {
         let articlesInventaire = data['inventoryMission'];
         return this.deleteBy('article_inventaire')
             .pipe(
-                flatMap(() => {
-                    const articlesInventaireValues = (articlesInventaire && articlesInventaire.length > 0)
-                        ? articlesInventaire.map((article) => (
-                            "(NULL, " +
-                            "'" + article.id_mission + "', " +
-                            "'" + this.escapeQuotes(article.reference) + "', " +
-                            article.is_ref + ", " +
-                            "'" + this.escapeQuotes(article.location ? article.location : 'N/A') + "', " +
-                            "'" + article.barCode + "')"
-                        ))
-                        : [];
-
-                    let articlesInventaireValuesStr = articlesInventaireValues.join(', ');
-                    let sqlArticlesInventaire = 'INSERT INTO `article_inventaire` (`id`, `id_mission`, `reference`, `is_ref`, `location`, `barcode`) VALUES ' + articlesInventaireValuesStr + ';';
-                    return articlesInventaireValues.length > 0
-                        ? this.executeQuery(sqlArticlesInventaire).pipe(map(() => true))
+                flatMap(() => (
+                    (articlesInventaire && articlesInventaire.length > 0)
+                        ? this.insert('article_inventaire', articlesInventaire.map(({
+                                                                                        id_mission,
+                                                                                        reference,
+                                                                                        is_ref,
+                                                                                        location,
+                                                                                        barCode,
+                                                                                        start_mission,
+                                                                                        end_mission,
+                                                                                        name_mission,}) => ({
+                            id_mission,
+                            start_mission,
+                            end_mission,
+                            name_mission,
+                            reference,
+                            is_ref,
+                            location: location ? location : 'N/A',
+                            barcode: barCode
+                        })))
                         : of(undefined)
-                })
+                ))
             );
     }
 

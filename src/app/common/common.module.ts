@@ -46,11 +46,13 @@ import {TransportCardComponent} from '@app/common/components/transport-card/tran
 import {PackCountComponent} from '@app/common/components/pack-count/pack-count.component';
 import {FormPanelTextareaComponent} from "@app/common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component";
 import {NumberInputComponent} from '@app/common/components/number-input/number-input.component';
+import {TabComponent} from '@app/common/components/tab/tab.component';
 
 @NgModule({
     declarations: [
         BarcodeScannerComponent,
         BadgeComponent,
+        TabComponent,
         CardListComponent,
         IconComponent,
         MainHeaderComponent,
@@ -103,6 +105,7 @@ import {NumberInputComponent} from '@app/common/components/number-input/number-i
         ListPanelComponent,
         BarcodeScannerComponent,
         BadgeComponent,
+        TabComponent,
         FormPanelComponent,
         SimpleFormComponent,
         CardListComponent,

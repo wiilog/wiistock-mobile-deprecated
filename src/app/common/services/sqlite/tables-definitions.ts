@@ -178,6 +178,9 @@ export const TablesDefinitions: Array<TableDefinition> = [
             location: 'TEXT',
             barcode: 'TEXT',
             id_mission: 'INTEGER',
+            start_mission: 'VARCHAR(255)',
+            end_mission: 'VARCHAR(255)',
+            name_mission: 'VARCHAR(255)',
             is_ref: 'INTEGER'
         }
     },
