@@ -580,18 +580,18 @@ export class SqliteService {
                 flatMap(() => (
                     (articlesInventaire && articlesInventaire.length > 0)
                         ? this.insert('article_inventaire', articlesInventaire.map(({
-                                                                                        id_mission,
+                                                                                        mission_id,
                                                                                         reference,
                                                                                         is_ref,
                                                                                         location,
                                                                                         barCode,
-                                                                                        start_mission,
-                                                                                        end_mission,
-                                                                                        name_mission,}) => ({
-                            id_mission,
-                            start_mission,
-                            end_mission,
-                            name_mission,
+                                                                                        mission_start,
+                                                                                        mission_end,
+                                                                                        mission_name,}) => ({
+                            mission_id,
+                            mission_start,
+                            mission_end,
+                            mission_name,
                             reference,
                             is_ref,
                             location: location ? location : 'N/A',
@@ -664,7 +664,7 @@ export class SqliteService {
                     }
                     else {
                         const anomaliesValuesStr = anomaliesToInsert.join(', ');
-                        let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `countedQuantity`, `location`, `is_treatable`, `barcode`, `id_mission`) VALUES ' + anomaliesValuesStr + ';';
+                        let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `countedQuantity`, `location`, `is_treatable`, `barcode`, `mission_id`) VALUES ' + anomaliesValuesStr + ';';
                         this.executeQuery(sqlAnomaliesInventaire).subscribe(() => {
                             ret$.next(true);
                         });

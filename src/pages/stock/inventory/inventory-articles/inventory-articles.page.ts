@@ -73,7 +73,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
         }
 
         if (this.mission) {
-            this.requestParams.push(`id_mission = ${this.mission}`)
+            this.requestParams.push(`mission_id = ${this.mission}`)
         }
 
         this.selectItemType = this.anomalyMode
@@ -188,7 +188,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
         else {
             const saisieInventaire: SaisieInventaire = {
                 id: null,
-                id_mission: selectedArticle.id_mission,
+                mission_id: selectedArticle.mission_id,
                 date: moment().format(),
                 bar_code: selectedArticle.barcode,
                 is_ref: selectedArticle.is_ref,

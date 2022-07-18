@@ -9,9 +9,8 @@ import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {PageComponent} from '@pages/page.component';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
-import {flatMap, map, tap} from 'rxjs/operators';
-import {from, Observable, of, ReplaySubject, Subscription, zip} from 'rxjs';
-import {Emplacement} from '@entities/emplacement';
+import {tap} from 'rxjs/operators';
+import {Observable, of, ReplaySubject, Subscription, zip} from 'rxjs';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
@@ -19,6 +18,7 @@ import {TabConfig} from '@app/common/components/tab/tab-config';
 import {ArticleInventaire} from '@entities/article-inventaire';
 import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel/list-panel-item-config';
 import * as moment from 'moment';
+import {Anomalie} from '@entities/anomalie';
 
 enum PageMode {
     LOCATIONS,
@@ -38,6 +38,7 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
     public selectItemComponent: SelectItemComponent;
 
     public currentPageMode: PageMode = PageMode.LOCATIONS;
+    public anomalyMode: boolean;
 
     public tabConfig: TabConfig[] = [
         { label: 'Emplacements', key: PageMode.LOCATIONS },
@@ -46,12 +47,14 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
 
     public locationsListItemBody: Array<ListPanelItemConfig>;
     public missionsListItemBody: Array<ListPanelItemConfig>;
+
     public missionFilter: number;
 
     public isInventoryManager: boolean;
 
     public readonly scannerMode = BarcodeScannerModeEnum.TOOL_SEARCH;
-    public readonly selectItemType = SelectItemTypeEnum.INVENTORY_LOCATION;
+    public selectItemType: SelectItemTypeEnum;
+    public requestParams: Array<string> = [];
 
     public resetEmitter$: ReplaySubject<void>;
 
@@ -70,6 +73,14 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
     public ionViewWillEnter(): void {
         this.missionFilter = undefined;
         this.resetEmitter$.next();
+
+        const missionFilter = this.currentNavParams.get('mission');
+        this.anomalyMode = this.currentNavParams.get('anomaly') || false;
+        this.selectItemType = !this.anomalyMode ? SelectItemTypeEnum.INVENTORY_LOCATION : SelectItemTypeEnum.INVENTORY_ANOMALIES_LOCATION;
+        if (missionFilter) {
+            this.missionFilter = missionFilter;
+        }
+
         if (!this.dataSubscription) {
             this.resetPageMode();
             this.dataSubscription = this.loadingService
@@ -124,7 +135,9 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
     }
 
     public navigateToAnomalies(): void {
-        this.navService.push(NavPathEnum.INVENTORY_LOCATIONS_ANOMALIES);
+        this.navService.push(NavPathEnum.INVENTORY_LOCATIONS_ANOMALIES, {
+            anomaly: true
+        });
     }
 
     private navigateToArticles(selectedLocation: string, missionId?: number): void {
@@ -132,7 +145,7 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
         this.navService.push(NavPathEnum.INVENTORY_ARTICLES, {
             selectedLocation,
             mission: missionId,
-            anomalyMode: false
+            anomalyMode: this.anomalyMode || false
         });
     }
 
@@ -149,19 +162,26 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
 
     public reloadPage(): Observable<void> {
         const res = new ReplaySubject<void>();
+
+        this.requestParams = [];
+        if (this.missionFilter) {
+            this.requestParams.push(`mission_id = ${this.missionFilter}`)
+        }
+
+
         zip(
-            this.sqliteService.findBy('article_inventaire'),
+            this.sqliteService.findBy(this.anomalyMode ? 'anomalie_inventaire' : 'article_inventaire'),
             this.selectItemComponent
                 ? this.selectItemComponent.searchComponent.reload()
                 : of(undefined)
         )
             .subscribe(
-                ([inventoryArticles]: [Array<ArticleInventaire>, any]) => {
+                ([inventoryArticles]: [Array<ArticleInventaire|Anomalie>, any]) => {
                     if (this.currentPageMode === PageMode.LOCATIONS) {
                         this.missionsListItemBody = [];
                         this.locationsListItemBody = inventoryArticles
-                            .filter(({location, id_mission}, index) => (
-                                (!this.missionFilter || (id_mission === this.missionFilter))
+                            .filter(({location, mission_id}, index) => (
+                                (!this.missionFilter || (mission_id === this.missionFilter))
                                 && inventoryArticles.findIndex(({location: location2}) => (location2 === location)) === index
                             ))
                             .map(({location}) => ({
@@ -172,8 +192,7 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                                     color: 'primary',
                                     name: 'arrow-right.svg',
                                     action: () => {
-                                        // TODO add mission filter
-                                        this.selectLocation({label: location});
+                                        this.selectLocation({label: location}, this.missionFilter);
                                     }
                                 }
                             }));
@@ -181,18 +200,18 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                     else { // if (this.currentPageMode === PageMode.MISSIONS) {
                         this.locationsListItemBody = [];
                         this.missionsListItemBody = inventoryArticles
-                            .filter(({id_mission}, index) => inventoryArticles.findIndex(({id_mission: id_mission2}) => (id_mission2 === id_mission)) === index)
-                            .map(({id_mission, name_mission, start_mission, end_mission}) => {
+                            .filter(({mission_id}, index) => inventoryArticles.findIndex(({mission_id: mission_id2}) => (mission_id2 === mission_id)) === index)
+                            .map(({mission_id, mission_name, mission_start, mission_end}) => {
                                 const nbRefInMission = inventoryArticles
-                                    .filter(({id_mission: id_mission_art, is_ref}) => id_mission_art === id_mission && is_ref == 1)
+                                    .filter(({mission_id: mission_id_art, is_ref}) => mission_id_art === mission_id && is_ref == 1)
                                     .length;
                                 const nbArtInMission = inventoryArticles
-                                    .filter(({id_mission: id_mission_art, is_ref}) => id_mission_art === id_mission && is_ref == 0)
+                                    .filter(({mission_id: mission_id_art, is_ref}) => mission_id_art === mission_id && is_ref == 0)
                                     .length;
                                 return {
                                     infos: {
-                                        name_mission: {value: name_mission},
-                                        date: {value: `Du ${moment(start_mission).format('DD/MM/YYYY')} au ${moment(end_mission).format('DD/MM/YYYY')}`},
+                                        name_mission: {value: mission_name},
+                                        date: {value: `Du ${moment(mission_start).format('DD/MM/YYYY')} au ${moment(mission_end).format('DD/MM/YYYY')}`},
                                         toto: {
                                             value: `
                                                 ${nbRefInMission} référence${nbRefInMission > 1 ? 's' : ''},
@@ -204,7 +223,7 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                                         color: 'primary',
                                         name: 'arrow-right.svg',
                                         action: () => {
-                                            this.selectMission(id_mission);
+                                            this.selectMission(mission_id);
                                         }
                                     }
                                 };

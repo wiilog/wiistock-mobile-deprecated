@@ -1,9 +1,9 @@
 export interface ArticleInventaire {
     id: number;
-    id_mission: number;
-    start_mission: string;
-    end_mission: string;
-    name_mission: string;
+    mission_id: number;
+    mission_start: string;
+    mission_end: string;
+    mission_name: string;
     reference: string;
     is_ref: number;
     location: string;
