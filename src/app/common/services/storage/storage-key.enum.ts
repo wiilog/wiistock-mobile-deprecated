@@ -3,6 +3,7 @@ export enum StorageKeyEnum {
     RIGHT_INVENTORY_MANAGER = 'inventoryManager',
     RIGHT_DEMANDE = 'demande',
     RIGHT_STOCK = 'stock',
+    RIGHT_TRACK = 'track',
     RIGHT_TRACKING = 'tracking',
     RIGHT_GROUP = 'group',
     RIGHT_UNGROUP = 'ungroup',
@@ -11,6 +12,7 @@ export enum StorageKeyEnum {
 
     PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER = 'skipValidationsManualTransfer',
     PARAMETER_SKIP_VALIDATION_DELIVERY = 'skipValidationsLivraisons',
+    PARAMETER_SKIP_VALIDATION_MANUAL_DELIVERY = 'manualDeliveryDisableValidations',
     PARAMETER_SKIP_QUANTITIES_DELIVERY = 'skipQuantitiesLivraisons',
     PARAMETER_SKIP_VALIDATION_PREPARATIONS = 'skipValidationsPreparations',
     PARAMETER_SKIP_QUANTITIES_PREPARATIONS = 'skipQuantitiesPreparations',

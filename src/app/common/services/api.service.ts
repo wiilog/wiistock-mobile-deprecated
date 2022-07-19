@@ -36,6 +36,7 @@ export class ApiService {
     public static readonly GET_ARTICLES = {method: GET, service: '/articles'};
     public static readonly GET_TRACKING_DROPS = {method: GET, service: '/tracking-drops'};
     public static readonly POST_DEMANDE_LIVRAISON = {method: POST, service: '/valider-dl'};
+    public static readonly POST_MANUAL_DEMANDE_LIVRAISON = {method: POST, service: '/valider-manual-dl'};
     public static readonly GET_DEMANDE_LIVRAISON_DATA = {method: GET, service: '/demande-livraison-data'};
     public static readonly GET_PACK_DATA = {method: GET, service: '/packs'};
     public static readonly PATCH_DISPATCH = {method: POST, service: '/dispatches'};
@@ -46,6 +47,21 @@ export class ApiService {
     public static readonly POST_GROUP_TRACKINGS = {method: POST, service: '/group-trackings/{mode}'};
     public static readonly POST_EMPTY_ROUND = {method: POST, service: '/empty-round'};
     public static readonly GET_COLLECTABLE_ARTICLES = {method: GET, service: '/collectable-articles'};
+    public static readonly GET_TRANSPORT_ROUNDS = {method: GET, service: '/transport-rounds'};
+    public static readonly GET_REJECT_MOTIVES = {method: GET, service: '/reject-motives'};
+    public static readonly GET_END_ROUND_LOCATIONS = {method: GET, service: '/end-round-locations'};
+    public static readonly REJECT_PACK = {method: POST, service: '/reject-pack'};
+    public static readonly LOAD_PACKS = {method: POST, service: '/load-packs'};
+    public static readonly FETCH_ROUND = {method: GET, service: '/fetch-round'};
+    public static readonly FETCH_TRANSPORT = {method: GET, service: '/fetch-transport'};
+    public static readonly FINISH_TRANSPORT = {method: POST, service: '/finish-transport'};
+    public static readonly HAS_NEW_PACKS = {method: GET, service: '/has-new-packs'};
+    public static readonly PATCH_ROUND_STATUS = {method: POST, service: '/patch-round-status'};
+    public static readonly TRANSPORT_FAILURE = {method: POST, service: '/transport-failure'};
+    public static readonly START_DELIVERY_ROUND = {method: POST, service: '/start-round'};
+    public static readonly DEPOSIT_TRANSPORT = {method: POST, service: '/deposit-transport-packs'};
+    public static readonly FINISH_ROUND = {method: POST, service: '/finish-round'};
+    public static readonly PACKS_RETURN_LOCATIONS = {method: GET, service: '/packs-return-locations'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'

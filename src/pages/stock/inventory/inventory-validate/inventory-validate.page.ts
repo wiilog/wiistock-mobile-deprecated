@@ -51,12 +51,17 @@ export class InventoryValidatePage extends PageComponent {
     public addArticle(data): void {
         const {quantity} = data;
 
-        if (isNaN(quantity) || quantity < 0) {
+        if (!quantity || isNaN(quantity) || quantity < 0) {
             this.toastService.presentToast('Veuillez sélectionner une quantité valide.');
         }
         else {
             this.navService.pop().subscribe(() => {
                 this.validateQuantity(quantity);
+
+                const remainingArticles = this.currentNavParams.get('remainingArticles');
+                if(remainingArticles == 0) {
+                    this.navService.pop();
+                }
             });
         }
     }

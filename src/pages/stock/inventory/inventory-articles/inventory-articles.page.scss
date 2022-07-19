@@ -1,7 +1,17 @@
 @import "~theme/variables";
 
 .page-content {
-    padding-top: $spacer;
-    padding-right: $spacer;
-    padding-left: $spacer;
+    padding-top: 5px;
+}
+
+wii-panel-header {
+    ::ng-deep .list-header-icon {
+        padding-left: 0.7rem !important;
+    }
+}
+wii-list-panel {
+    ::ng-deep wii-list-panel-item {
+        margin-right: 0.7rem !important;
+        margin-left: 0.7rem !important;
+    }
 }

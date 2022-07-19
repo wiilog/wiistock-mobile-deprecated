@@ -15,6 +15,7 @@ import * as moment from 'moment';
 import {TablesDefinitions} from '@app/common/services/sqlite/tables-definitions';
 import {TableName} from '@app/common/services/sqlite/table-definition';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {DemandeLivraisonArticle} from '@entities/demande-livraison-article';
 
 
 @Injectable({
@@ -244,6 +245,29 @@ export class SqliteService {
                 flatMap(() => (
                     transferOrderArticles && transferOrderArticles.length > 0
                         ? this.insert('transfer_order_article', transferOrderArticles)
+                        : of(undefined)
+                )),
+                map(() => undefined)
+            );
+    }
+
+    public importTransportRoundData(data): Observable<any> {
+        const transportRounds = data['transportRounds'];
+        const transportRoundLines = data['transportRoundLines'];
+
+        return zip(
+            this.deleteBy('transport_round'),
+            this.deleteBy('transport_round_line')
+        )
+            .pipe(
+                flatMap(() => (
+                    transportRounds && transportRounds.length > 0
+                        ? this.insert('transport_round', transportRounds)
+                        : of(undefined)
+                )),
+                flatMap(() => (
+                    transportRoundLines && transportRoundLines.length > 0
+                        ? this.insert('transport_round_line', transportRoundLines)
                         : of(undefined)
                 )),
                 map(() => undefined)
@@ -628,14 +652,15 @@ export class SqliteService {
                             "'" + anomaly.countedQuantity + "', " +
                             "'" + this.escapeQuotes(anomaly.location ? anomaly.location : 'N/A') + "', " +
                             anomaly.isTreatable + ", " +
-                            "'" + anomaly.barCode + "')"
+                            "'" + anomaly.barCode + "', " +
+                            anomaly.mission_id + ")"
                         ));
                     if (anomaliesToInsert.length === 0) {
                         ret$.next(undefined);
                     }
                     else {
                         const anomaliesValuesStr = anomaliesToInsert.join(', ');
-                        let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `countedQuantity`, `location`, `is_treatable`, `barcode`) VALUES ' + anomaliesValuesStr + ';';
+                        let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `countedQuantity`, `location`, `is_treatable`, `barcode`, `id_mission`) VALUES ' + anomaliesValuesStr + ';';
                         this.executeQuery(sqlAnomaliesInventaire).subscribe(() => {
                             ret$.next(true);
                         });
@@ -676,6 +701,7 @@ export class SqliteService {
             flatMap(() => this.importDispatchesData(data).pipe(tap(() => {console.log('--- > importDispatchesData')}))),
             flatMap(() => this.importStatusData(data).pipe(tap(() => {console.log('--- > importStatusData')}))),
             flatMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),
+            flatMap(() => this.importTransportRoundData(data).pipe(tap(() => {console.log('--- > importTransportRoundData')}))),
             flatMap(() => (
                 this.storageService.getRight(StorageKeyEnum.RIGHT_INVENTORY_MANAGER).pipe(
                     flatMap((res) => (res
@@ -736,6 +762,18 @@ export class SqliteService {
         return this.executeQuery(query).pipe(
             map((data) => SqliteService.MultiSelectQueryMapper<any>(data)),
             take(1)
+        );
+    }
+
+    public findArticlesNotInDemandeLivraison(): Observable<Array<DemandeLivraisonArticle>> {
+        const query = (
+            `SELECT demande_livraison_article.*
+            FROM demande_livraison_article
+            LEFT JOIN article_in_demande_livraison ON article_in_demande_livraison.article_bar_code = demande_livraison_article.bar_code
+            WHERE article_in_demande_livraison.demande_id IS NULL`
+        );
+        return this.executeQuery(query).pipe(
+            map((data) => SqliteService.MultiSelectQueryMapper<any>(data)),
         );
     }
 

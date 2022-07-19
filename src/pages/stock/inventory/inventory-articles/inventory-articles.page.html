@@ -1,9 +1,16 @@
 <div class="page-content">
     <wii-panel-header *ngIf="selectedLocation"
                       title="Emplacement"
+                      transparent="true"
                       [leftIcon]="{name: 'inventory.svg'}"
                       [subtitle]="selectedLocation">
     </wii-panel-header>
+
+    <wii-list-panel *ngIf="articles"
+                    [header]="null"
+                    [body]="listToInventory"
+                    [boldValues]="listBoldValues">
+    </wii-list-panel>
 </div>
 
 <div class="page-footer">

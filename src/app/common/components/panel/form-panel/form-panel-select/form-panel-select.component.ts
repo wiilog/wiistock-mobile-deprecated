@@ -3,6 +3,7 @@ import {SearchItemComponent} from '@app/common/components/select-item/search-ite
 import {BarcodeScannerComponent} from '@app/common/components/barcode-scanner/barcode-scanner.component';
 import {FormPanelItemComponent} from '@app/common/components/panel/model/form-panel/form-panel-item.component';
 import {FormPanelSelectConfig} from '@app/common/components/panel/model/form-panel/configs/form-panel-select-config';
+import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 
 
 @Component({
@@ -43,16 +44,42 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
 
     public text?: string;
 
-    public constructor() {
+    public constructor(private sqliteService: SqliteService) {
         this.valueChange = new EventEmitter<number>();
     }
 
     public ngOnInit() {
+        if(this.inputConfig && this.inputConfig.defaultIfSingle) {
+            console.log(SearchItemComponent.SEARCH_CONFIGS, this.inputConfig.searchType);
+            const config = SearchItemComponent.SEARCH_CONFIGS[this.inputConfig.searchType];
+            const values = this.sqliteService.findBy(
+                config.databaseTable,
+                this.inputConfig.requestParams,
+                (config as any).requestOrder || {}
+            );
+
+            values.subscribe(values => {
+                setTimeout(() => {
+                    console.log(values);
+                //if(values.length === 1) {
+                    this.value = values[0].id;
+
+                    const item = this.searchComponent.findItem(this.value, this.searchComponent.config[this.searchComponent.smartType].valueField);
+                    if (item) {
+                        this.searchComponent.item = item;
+                        this.initText();
+                    }
+                //}
+                }, 200);
+            })
+        }
+
         setTimeout(() => {
             if (this.searchComponent) {
                 const item = this.searchComponent.findItem(this.value, this.searchComponent.config[this.searchComponent.smartType].valueField);
                 if (item) {
                     this.searchComponent.item = item;
+                    this.initText();
                 }
             }
         }, 200);

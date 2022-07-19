@@ -51,7 +51,9 @@ export class SearchItemComponent implements OnInit, OnDestroy {
 
     private itemsSubscription: Subscription;
 
-    public readonly config: {[type: string]: {[conf: string]: any; databaseTable?: TableName}} = {
+    public readonly config = SearchItemComponent.SEARCH_CONFIGS;
+
+    public static readonly SEARCH_CONFIGS: {[type: string]: {[conf: string]: any; databaseTable?: TableName}} = {
         default: {
             label: 'label',
             valueField: 'id',
@@ -216,7 +218,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
 
     public reload(): Observable<Array<any>> {
         const $res = new ReplaySubject<Array<any>>(1);
-
+        console.log(this.requestParams);
         (this.elements
             ? of(this.elements)
             : this.sqliteService.findBy(this.config[this.type].databaseTable, this.requestParams, (this.config[this.type] as any).requestOrder || {}))

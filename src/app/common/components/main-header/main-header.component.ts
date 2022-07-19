@@ -94,7 +94,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                        private mainHeaderService: MainHeaderService,
                        private activatedRoute: ActivatedRoute,
                        private userService: UserService,
-                       private router: Router,
+                       public router: Router,
                        private alertService: AlertService,
                        private translationService: TranslationService) {
         this.pagesInStack = 0;
@@ -115,9 +115,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             });
 
         this.titlesConfig = [
-            {pagePath: NavPathEnum.MAIN_MENU, label: 'Menu'},
             {pagePath: NavPathEnum.TRACKING_MENU, label: 'Traçabilité'},
             {pagePath: NavPathEnum.DISPATCH_MENU, label: 'Acheminements'},
+            {pagePath: NavPathEnum.STOCK_MENU, label: 'Stock'},
+            {pagePath: NavPathEnum.TRANSPORT_ROUND_LIST, label: 'Track', noBreadcrumb: true},
             {
                 pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Prise',
@@ -136,16 +137,42 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             },
             {pagePath: NavPathEnum.PREPARATION_MENU, label: 'Préparation'},
             {pagePath: NavPathEnum.LIVRAISON_MENU, label: 'Livraison'},
+            {pagePath: NavPathEnum.MANUAL_DELIVERY, label: 'Livraison manuelle'},
+            {pagePath: NavPathEnum.MANUAL_DELIVERY_LOCATION, label: 'Emplacement'},
             {pagePath: NavPathEnum.COLLECTE_MENU, label: 'Collecte'},
             {pagePath: NavPathEnum.INVENTORY_LOCATIONS, label: 'Inventaire'},
             {pagePath: NavPathEnum.INVENTORY_LOCATIONS_ANOMALIES, label: 'Anomalies'},
             {pagePath: NavPathEnum.DEMANDE_MENU, label: 'Demande'},
             {pagePath: NavPathEnum.HANDLING_MENU, label: 'Service'},
             {pagePath: NavPathEnum.DEMANDE_LIVRAISON_MENU, label: 'Livraison'},
-            {pagePath: NavPathEnum.TRANSFER_MENU, label: 'Transfert'},
             {pagePath: NavPathEnum.HANDLING_VALIDATE, label: 'Détails'},
             {pagePath: NavPathEnum.GROUP_SCAN_GROUP, label: 'Groupage'},
             {pagePath: NavPathEnum.UNGROUP_SCAN_LOCATION, label: 'Dégroupage'},
+            {pagePath: NavPathEnum.TRANSPORT_LIST, label: 'Tournée'},
+            {pagePath: NavPathEnum.TRANSPORT_DEPOSIT_MENU, label: 'Déposer colis'},
+            {pagePath: NavPathEnum.TRANSPORT_DEPOSIT_PACKS, label: 'Déposer colis'},
+            {pagePath: NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP, label: 'Terminer tournée'},
+            {pagePath: NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP_VALIDATE, label: 'Terminer tournée'},
+            {pagePath: NavPathEnum.TRANSPORT_ROUND_FINISH, label: 'Terminer tournée'},
+            {
+                pagePath: NavPathEnum.TRANSPORT_COLLECT_NATURES,
+                label: 'Déposer colis',
+                filter: params => params.get('round'),
+            },
+            {
+                pagePath: NavPathEnum.TRANSPORT_SHOW,
+                label: 'Livraison',
+                filter: (params) => (
+                    params.get('transport').kind === 'delivery'
+                )
+            },
+            {
+                pagePath: NavPathEnum.TRANSPORT_SHOW,
+                label: 'Collecte',
+                filter: (params) => (
+                    params.get('transport').kind === 'collect'
+                )
+            },
             {
                 pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Passage à vide',
@@ -270,7 +297,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                 await this.alertService.show({
                     header: 'Déconnexion impossible',
                     message: `Vous ne pouvez pas vous déconnecter car il y a des prises de traçabilité en cours`,
-                    buttons: [`Annuler`]
+                    buttons: [{
+                        text: 'Annuler',
+                        role: 'cancel'
+                    }]
                 });
             } else {
                 this.userService.doLogout();
@@ -286,6 +316,11 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
     private refreshTitles(navigationId: number, currentPagePath: NavPathEnum, paramsId: number): void {
         if(navigationId && this.lastDirections[navigationId]) {
+            if(this.router.url.startsWith('/main-menu')) {
+                this.pagesInStack = 1;
+                this.pageStack = [];
+            }
+
             if(this.lastDirections[navigationId].value === 'back') {
                 const currentPageIndex = this.findIndexInPageStack(currentPagePath, paramsId);
                 if(currentPageIndex > -1) {
@@ -333,7 +368,11 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             if(!currentTitleConfig) {
                 currentTitleConfig = {pagePath: currentPagePath};
             }
-            this.pageStack.push({...currentTitleConfig, stackIndex: this.pagesInStack});
+            if(currentTitleConfig.noBreadcrumb) {
+                this.pageStack = [currentTitleConfig];
+            } else {
+                this.pageStack.push({...currentTitleConfig, stackIndex: this.pagesInStack});
+            }
             this.refreshCurrentTitles();
         }
     }
@@ -347,6 +386,9 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
     }
 
     private findTitleConfig(path: string, paramsId: number): TitleConfig {
+        this.titlesConfig = this.titlesConfig.filter((config, index) =>
+            this.titlesConfig.findIndex(({label}) => label === config.label) === index
+        );
         const currentNavParams = this.navService.getParams(paramsId);
         return this.titlesConfig.find(({pagePath, filter}) => (
             (pagePath === path)

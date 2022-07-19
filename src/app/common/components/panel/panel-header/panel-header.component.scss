@@ -96,6 +96,15 @@
     }
 }
 
+.inline-right-badge {
+    display: flex;
+    justify-content: space-between;
+
+    .badges-container {
+        margin-right: 14px;
+    }
+}
+
 .badges-container {
     display: flex;
     align-items: center;

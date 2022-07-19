@@ -25,6 +25,9 @@ export class ListPanelComponent {
     @Input()
     public identifierName?: string;
 
+    @Input()
+    public sliding?: boolean;
+
     public onHeaderClicked(event: Event): void {
         if (this.header && this.header.action) {
             this.header.action(event);

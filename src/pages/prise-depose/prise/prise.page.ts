@@ -587,6 +587,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                         buttons: [
                             {
                                 text: 'Annuler',
+                                role: 'cancel',
                                 handler: () => {
                                     this.footerScannerComponent.fireZebraScan();
                                 }
