@@ -177,7 +177,6 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
             .subscribe(
                 ([inventoryArticles, anomalies]: [Array<ArticleInventaire|Anomalie>, Array<Anomalie>, any]) => {
                     this.hasAnomalies = anomalies.length > 0;
-                    console.log(inventoryArticles)
                     if (this.currentPageMode === PageMode.LOCATIONS) {
                         this.missionsListItemBody = [];
                         this.locationsListItemBody = inventoryArticles
@@ -234,7 +233,6 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                                 };
                             });
                     }
-
 
                     this.mainHeaderService.emitSubTitle(this.pageSubtitle);
 

@@ -71,7 +71,6 @@ export class TransportDepositPacksPage extends PageComponent {
     public ionViewWillEnter(): void {
         this.round = this.currentNavParams.get('round');
         this.undeliveredPacksLocations = this.currentNavParams.get('undeliveredPacksLocations');
-        console.log(this.round);
         this.packs = this.round.lines
             .filter((line) => line.failure || line.cancelled)
             .reduce((acc: Array<any>, line: TransportRoundLine) => [...(line.packs || []), ...acc], [])

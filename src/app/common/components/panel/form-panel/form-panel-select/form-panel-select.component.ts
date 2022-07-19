@@ -50,7 +50,6 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
 
     public ngOnInit() {
         if(this.inputConfig && this.inputConfig.defaultIfSingle) {
-            console.log(SearchItemComponent.SEARCH_CONFIGS, this.inputConfig.searchType);
             const config = SearchItemComponent.SEARCH_CONFIGS[this.inputConfig.searchType];
             const values = this.sqliteService.findBy(
                 config.databaseTable,
@@ -60,8 +59,6 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
 
             values.subscribe(values => {
                 setTimeout(() => {
-                    console.log(values);
-                //if(values.length === 1) {
                     this.value = values[0].id;
 
                     const item = this.searchComponent.findItem(this.value, this.searchComponent.config[this.searchComponent.smartType].valueField);
@@ -69,7 +66,6 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
                         this.searchComponent.item = item;
                         this.initText();
                     }
-                //}
                 }, 200);
             })
         }

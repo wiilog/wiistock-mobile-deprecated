@@ -119,7 +119,6 @@ export class ManualDeliveryLocationPage extends PageComponent {
                             }
                         },
                         (error) => {
-                            console.log(error);
                             this.handleLivraisonError(error);
                         });
                 } else {
