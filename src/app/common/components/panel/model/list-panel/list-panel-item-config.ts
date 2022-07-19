@@ -4,7 +4,7 @@ import {IconConfig} from '@app/common/components/panel/model/icon-config';
 export interface ListPanelItemConfig {
     infos: {
         [name: string]: {
-            label: string;
+            label?: string;
             value: string;
         };
     };

@@ -2,9 +2,9 @@
     "android": {
         "release": {
             "keystore": "wiistock-key.jks",
-            "storePassword": "Wiistock123!",
+            "storePassword": "",
             "alias": "wiistock",
-            "password": "Wiistock123!",
+            "password": "",
             "keystoreType": ""
         }
     }

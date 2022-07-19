@@ -27,8 +27,11 @@
         <div class="list-element-body-wrapper">
             <div class="list-element-item"
                  *ngFor="let line of infosArray">
-                {{line.label}} : <span class="element-value"
-                                       [class.element-value-bold]="!boldValues || boldValues.indexOf(line.key) > -1">{{line.value}}</span>
+                <ng-container *ngIf="line.label">{{line.label}} :</ng-container>
+                <span class="element-value"
+                      [class.element-value-bold]="!boldValues || boldValues.indexOf(line.key) > -1">
+                    {{ line.value }}
+                </span>
             </div>
         </div>
         <div class="list-element-icon"

@@ -6,9 +6,9 @@
     background-color: $white;
     padding: .5rem 1rem;
     font-size: $normalFontSize;
-    border-radius: 5px;
     border: none;
-    box-shadow: rgb(0 0 0 / 0) 0 3px 1px -2px, rgb(0 0 0 / 10%) 0px 2px 2px 0px, rgb(0 0 0 / 12%) 0px 1px 5px 0px;
+    border-radius: $card-border-radius;
+    box-shadow: $card-box-shadow;
 
     .list-element-color {
         position: absolute;
@@ -16,8 +16,8 @@
         left: 0;
         bottom: 0;
         width: 7px;
-        border-top-left-radius: 5px;
-        border-bottom-left-radius: 5px;
+        border-top-left-radius: $card-border-radius;
+        border-bottom-left-radius: $card-border-radius;
     }
 
     .list-element-wrapper {

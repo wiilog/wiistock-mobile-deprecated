@@ -199,7 +199,6 @@ export class TransportRoundPackLoadPage extends PageComponent {
 
     public loadPack(barCode: string): void {
         const selectedIndex = this.packs.findIndex(({code}) => (code === barCode));
-        console.log(barCode, selectedIndex);
         if (selectedIndex > -1) {
             const selectedItem = this.packs[selectedIndex];
             if(selectedItem.loaded) {
