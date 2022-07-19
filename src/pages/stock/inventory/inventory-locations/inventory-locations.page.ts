@@ -188,6 +188,15 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                                     && location2 === location
                                 )) === index
                             ))
+                            .sort((art1, art2) => {
+                                if(art1.location > art2.location){
+                                    return 1;
+                                } else if (art2.location > art1.location){
+                                    return -1;
+                                } else {
+                                    return 0;
+                                }
+                            })
                             .map(({location}) => ({
                                 infos: {
                                     label: {value: location}
