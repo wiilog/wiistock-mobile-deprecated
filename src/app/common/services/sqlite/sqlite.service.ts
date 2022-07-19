@@ -637,40 +637,34 @@ export class SqliteService {
     }
 
     public importAnomaliesInventaire(data, deleteOldAnomalies: boolean = true): Observable<any> {
-        let ret$: ReplaySubject<any> = new ReplaySubject(1);
         let anomalies = data.anomalies;
 
-        (deleteOldAnomalies
+        return (deleteOldAnomalies
             ? this.deleteBy('anomalie_inventaire').pipe(map(() => ([])))
             : this.findAll('anomalie_inventaire'))
-                .subscribe((oldAnomalies: Array<Anomalie>) => {
-                    const anomaliesToInsert = anomalies
+                .pipe(
+                    mergeMap((oldAnomalies: Array<Anomalie>) => {
                         // we check if anomalies are not already in local database
-                        .filter(({id}) => oldAnomalies.every(({id: oldAnomaliesId}) => (Number(id) !== Number(oldAnomaliesId))))
-                        .map((anomaly) => (
-                            "(" +
-                            anomaly.id + ", " +
-                            "'" + this.escapeQuotes(anomaly.reference) + "', " +
-                            anomaly.is_ref + ", " +
-                            "'" + anomaly.quantity + "', " +
-                            "'" + anomaly.countedQuantity + "', " +
-                            "'" + this.escapeQuotes(anomaly.location ? anomaly.location : 'N/A') + "', " +
-                            anomaly.isTreatable + ", " +
-                            "'" + anomaly.barCode + "', " +
-                            anomaly.mission_id + ")"
-                        ));
-                    if (anomaliesToInsert.length === 0) {
-                        ret$.next(undefined);
-                    }
-                    else {
-                        const anomaliesValuesStr = anomaliesToInsert.join(', ');
-                        let sqlAnomaliesInventaire = 'INSERT INTO `anomalie_inventaire` (`id`, `reference`, `is_ref`, `quantity`, `countedQuantity`, `location`, `is_treatable`, `barcode`, `mission_id`) VALUES ' + anomaliesValuesStr + ';';
-                        this.executeQuery(sqlAnomaliesInventaire).subscribe(() => {
-                            ret$.next(true);
-                        });
-                    }
-                });
-        return ret$;
+                        const anomaliesToInsert = anomalies
+                            .filter(({id}) => oldAnomalies.every(({id: oldAnomaliesId}) => (Number(id) !== Number(oldAnomaliesId))));
+                        return anomaliesToInsert.length > 0
+                            ? this.insert('anomalie_inventaire', anomaliesToInsert.map((anomaly) => ({
+                                location: anomaly.location ? anomaly.location : 'N/A',
+                                is_treatable: anomaly.isTreatable,
+                                barcode: anomaly.barCode,
+                                id: anomaly.id,
+                                reference: anomaly.reference,
+                                mission_id: anomaly.mission_id,
+                                mission_name: anomaly.mission_name,
+                                mission_start: anomaly.mission_start,
+                                mission_end: anomaly.mission_end,
+                                is_ref: anomaly.is_ref,
+                                quantity: anomaly.quantity,
+                                countedQuantity: anomaly.countedQuantity,
+                            })))
+                            : of(undefined);
+                    })
+                );
     }
 
     private importTranslations(data): Observable<any> {

@@ -5,7 +5,7 @@
         <ion-button class="anomalies-button"
                     expand="full"
                     color="primary"
-                    *ngIf="!dataSubscription && isInventoryManager"
+                    *ngIf="!dataSubscription && isInventoryManager && hasAnomalies"
                     (click)="navigateToAnomalies()">
             Anomalies
             <wii-icon name="warning-white.svg"
@@ -40,7 +40,7 @@
                      [scanMode]="scannerMode">
     </wii-select-item>
 
-    <wii-tab *ngIf="!missionFilter && currentPageMode === PageMode.LOCATIONS"
+    <wii-tab *ngIf="!missionFilter"
              [(activeKey)]="currentPageMode"
              (activeKeyChange)="reloadPage()"
              [config]="tabConfig">

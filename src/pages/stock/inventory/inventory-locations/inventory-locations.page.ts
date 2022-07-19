@@ -51,6 +51,7 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
     public missionFilter: number;
 
     public isInventoryManager: boolean;
+    public hasAnomalies: boolean = false;
 
     public readonly scannerMode = BarcodeScannerModeEnum.TOOL_SEARCH;
     public selectItemType: SelectItemTypeEnum;
@@ -72,6 +73,7 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
 
     public ionViewWillEnter(): void {
         this.missionFilter = undefined;
+        this.hasAnomalies = false;
         this.resetEmitter$.next();
 
         const missionFilter = this.currentNavParams.get('mission');
@@ -92,13 +94,6 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                         .pipe(
                             tap(([isInventoryManager]: [boolean, void]) => {
                                 this.isInventoryManager = isInventoryManager;
-
-                                const locationsLength = this.selectItemComponent.dbItemsLength;
-                                this.mainHeaderService.emitSubTitle(
-                                    locationsLength > 0
-                                        ? `${locationsLength} emplacement${locationsLength > 1 ? 's' : ''}`
-                                        : 'Tous les inventaires sont à jour'
-                                );
                             })
                         )
                 })
@@ -136,7 +131,8 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
 
     public navigateToAnomalies(): void {
         this.navService.push(NavPathEnum.INVENTORY_LOCATIONS_ANOMALIES, {
-            anomaly: true
+            anomaly: true,
+            mission: this.missionFilter
         });
     }
 
@@ -168,21 +164,30 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
             this.requestParams.push(`mission_id = ${this.missionFilter}`)
         }
 
-
         zip(
             this.sqliteService.findBy(this.anomalyMode ? 'anomalie_inventaire' : 'article_inventaire'),
+            this.sqliteService.findBy(
+                'anomalie_inventaire',
+                this.missionFilter ? [`mission_id = ${this.missionFilter}`] : []
+            ),
             this.selectItemComponent
                 ? this.selectItemComponent.searchComponent.reload()
                 : of(undefined)
         )
             .subscribe(
-                ([inventoryArticles]: [Array<ArticleInventaire|Anomalie>, any]) => {
+                ([inventoryArticles, anomalies]: [Array<ArticleInventaire|Anomalie>, Array<Anomalie>, any]) => {
+                    this.hasAnomalies = anomalies.length > 0;
+                    console.log(inventoryArticles)
                     if (this.currentPageMode === PageMode.LOCATIONS) {
                         this.missionsListItemBody = [];
                         this.locationsListItemBody = inventoryArticles
                             .filter(({location, mission_id}, index) => (
                                 (!this.missionFilter || (mission_id === this.missionFilter))
-                                && inventoryArticles.findIndex(({location: location2}) => (location2 === location)) === index
+                                // remove duplicate
+                                && inventoryArticles.findIndex(({location: location2, mission_id: mission_id2}) => (
+                                    (!this.missionFilter || (mission_id2 === this.missionFilter))
+                                    && location2 === location
+                                )) === index
                             ))
                             .map(({location}) => ({
                                 infos: {
@@ -229,11 +234,31 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                                 };
                             });
                     }
+
+
+                    this.mainHeaderService.emitSubTitle(this.pageSubtitle);
+
                     res.next();
                 },
                 (err) => {
                     res.error(err);
                 });
         return res;
+    }
+
+    private get pageSubtitle(): string {
+        let subtitle: string;
+        if (this.currentPageMode === PageMode.LOCATIONS) {
+            subtitle = this.locationsListItemBody && this.locationsListItemBody.length > 0
+                ? `${this.locationsListItemBody.length} emplacement${this.locationsListItemBody.length > 1 ? 's' : ''}`
+                : undefined;
+        }
+        else { // if (this.currentPageMode === PageMode.MISSIONS)
+            subtitle = this.missionsListItemBody && this.missionsListItemBody.length > 0
+                ? `${this.missionsListItemBody.length} mission${this.missionsListItemBody.length > 1 ? 's' : ''}`
+                : undefined;
+        }
+        return subtitle
+            || (this.anomalyMode ? 'Toutes les anomalies ont été traitées' : 'Tous les inventaires sont à jour');
     }
 }
