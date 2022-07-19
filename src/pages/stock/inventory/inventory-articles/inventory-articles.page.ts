@@ -9,7 +9,7 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {from, Observable, of, ReplaySubject, Subscription, zip} from 'rxjs';
-import {flatMap, tap} from 'rxjs/operators';
+import {flatMap, mergeMap, tap} from 'rxjs/operators';
 import {SaisieInventaire} from '@entities/saisie-inventaire';
 import * as moment from 'moment';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
@@ -17,10 +17,8 @@ import {PageComponent} from '@pages/page.component';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
-import {HeaderConfig} from "@app/common/components/panel/model/header-config";
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
-import {ArticleCollecte} from "@entities/article-collecte";
-import {IconColor} from "@app/common/components/icon/icon-color";
+
 
 @Component({
     selector: 'wii-inventory-articles',
@@ -73,12 +71,13 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
         }
 
         if (this.mission) {
-            this.requestParams.push(`id_mission = ${this.mission}`)
+            this.requestParams.push(`mission_id = ${this.mission}`)
         }
 
         this.selectItemType = this.anomalyMode
             ? SelectItemTypeEnum.INVENTORY_ANOMALIES_ARTICLE
             : SelectItemTypeEnum.INVENTORY_ARTICLE;
+
         this.refreshList();
         if (this.selectItemComponent) {
             this.selectItemComponent.fireZebraScan();
@@ -98,14 +97,17 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
 
     public refreshList() {
         if (!this.dataSubscription) {
+            const table = this.anomalyMode
+                ? 'anomalie_inventaire'
+                : 'article_inventaire';
             this.dataSubscription = this.loadingService
                 .presentLoading('Chargement...')
                 .pipe(
                     tap(() => {
                         this.refreshSubTitle();
                     }),
-                    flatMap((loader) => from(loader.dismiss())),
-                    flatMap(() => this.sqliteService.findBy('article_inventaire', this.requestParams))
+                    mergeMap((loader) => from(loader.dismiss())),
+                    mergeMap(() => this.sqliteService.findBy(table, this.requestParams))
                 )
                 .subscribe((articles) => {
                     this.articles = articles;
@@ -188,7 +190,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
         else {
             const saisieInventaire: SaisieInventaire = {
                 id: null,
-                id_mission: selectedArticle.id_mission,
+                mission_id: selectedArticle.mission_id,
                 date: moment().format(),
                 bar_code: selectedArticle.barcode,
                 is_ref: selectedArticle.is_ref,

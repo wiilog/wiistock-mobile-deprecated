@@ -23,7 +23,9 @@
 
     &:not(.transparent-panel-header) {
         background-color: $white;
-        border: 1px solid $lightBlue;
+        border: none;
+        border-radius: $card-border-radius;
+        box-shadow: $card-box-shadow;
     }
 
     .list-header-wrapper {

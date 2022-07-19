@@ -177,8 +177,11 @@ export const TablesDefinitions: Array<TableDefinition> = [
             reference: 'TEXT',
             location: 'TEXT',
             barcode: 'TEXT',
-            id_mission: 'INTEGER',
-            is_ref: 'INTEGER'
+            mission_id: 'INTEGER',
+            mission_start: 'VARCHAR(255)',
+            mission_end: 'VARCHAR(255)',
+            mission_name: 'VARCHAR(255)',
+            is_ref: 'INTEGER',
         }
     },
     {
@@ -216,7 +219,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             bar_code: 'VARCHAR(255)',
             date: 'TEXT',
             location: 'TEXT',
-            id_mission: 'INTEGER',
+            mission_id: 'INTEGER',
             is_ref: 'INTEGER',
             quantity: 'INTEGER'
         }
@@ -234,7 +237,10 @@ export const TablesDefinitions: Array<TableDefinition> = [
             quantity: 'INTEGER',
             is_treatable: 'INTEGER',
             countedQuantity: 'INTEGER',
-            id_mission: 'INTEGER'
+            mission_id: 'INTEGER',
+            mission_start: 'VARCHAR(255)',
+            mission_end: 'VARCHAR(255)',
+            mission_name: 'VARCHAR(255)',
         }
     },
     {

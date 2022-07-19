@@ -28,8 +28,10 @@
     }
 
     wii-list-panel-item {
-        margin-right: $spacer * 1.2;
-        margin-left: $spacer * 1.2;
+        &.sub-list {
+            margin-right: $spacer * 1.2;
+            margin-left: $spacer * 1.2;
+        }
 
         &:not(:last-child) {
             margin-bottom: .35rem;

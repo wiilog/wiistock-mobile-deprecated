@@ -198,7 +198,7 @@ const routes: Routes = [
     {
         path: NavPathEnum.INVENTORY_LOCATIONS_ANOMALIES,
         canActivate: [UserConnectedGuard],
-        loadChildren: () => import('@pages/stock/inventory/inventory-locations-anomalies/inventory-locations-anomalies.module').then(m => m.InventoryLocationsAnomaliesPageModule)
+        loadChildren: () => import('@pages/stock/inventory/inventory-locations/inventory-locations-anomalies/inventory-locations-anomalies.module').then(m => m.InventoryLocationsAnomaliesPageModule)
     },
     {
         path: NavPathEnum.INVENTORY_ARTICLES,
