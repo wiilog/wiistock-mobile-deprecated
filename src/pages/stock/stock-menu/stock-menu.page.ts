@@ -171,7 +171,8 @@ export class StockMenuPage extends PageComponent {
 
     public goToDrop() {
         this.navService
-            .push(NavPathEnum.STOCK_MENU, {
+            .push(NavPathEnum.STOCK_MOVEMENT_MENU, {
+                fromStock: true,
                 goToDropDirectly: true
             });
     }
