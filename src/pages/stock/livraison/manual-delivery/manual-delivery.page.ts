@@ -21,6 +21,7 @@ import {
 import {Emplacement} from '@entities/emplacement';
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
 import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
+import {ViewWillEnter, ViewWillLeave} from "@ionic/angular";
 
 
 @Component({
@@ -28,7 +29,7 @@ import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
     templateUrl: './manual-delivery.page.html',
     styleUrls: ['./manual-delivery.page.scss'],
 })
-export class ManualDeliveryPage extends PageComponent {
+export class ManualDeliveryPage extends PageComponent implements ViewWillEnter, ViewWillLeave {
 
     @ViewChild('formPanelComponent', {static: false})
     public formPanelComponent: FormPanelComponent;
@@ -66,6 +67,7 @@ export class ManualDeliveryPage extends PageComponent {
     public ionViewWillEnter(): void {
         this.listBoldValues = ['reference', 'label', 'barCode', 'location', 'quantity'];
 
+        this.footerScannerComponent.fireZebraScan();
         this.selectedArticles = [];
         this.headerConfig = this.createHeaderConfig();
         this.listConfig = this.createBodyConfig();
@@ -99,6 +101,10 @@ export class ManualDeliveryPage extends PageComponent {
                 }
             },
         ];
+    }
+
+    public ionViewWillLeave(): void {
+        this.footerScannerComponent.unsubscribeZebraScan();
     }
 
     public addArticle(article: string) {
