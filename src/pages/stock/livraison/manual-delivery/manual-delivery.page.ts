@@ -67,7 +67,9 @@ export class ManualDeliveryPage extends PageComponent implements ViewWillEnter, 
     public ionViewWillEnter(): void {
         this.listBoldValues = ['reference', 'label', 'barCode', 'location', 'quantity'];
 
-        this.footerScannerComponent.fireZebraScan();
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.fireZebraScan();
+        }
         this.selectedArticles = [];
         this.headerConfig = this.createHeaderConfig();
         this.listConfig = this.createBodyConfig();
@@ -104,7 +106,9 @@ export class ManualDeliveryPage extends PageComponent implements ViewWillEnter, 
     }
 
     public ionViewWillLeave(): void {
-        this.footerScannerComponent.unsubscribeZebraScan();
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.unsubscribeZebraScan();
+        }
     }
 
     public addArticle(article: string) {
