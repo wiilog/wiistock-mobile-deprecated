@@ -15,6 +15,7 @@ import {DemandeLivraisonArticleSelected} from '@entities/demande-livraison-artic
 import {TransferOrder} from '@entities/transfer-order';
 import {AlertService} from '@app/common/services/alert.service';
 import {TranslationService} from '@app/common/services/translations.service';
+import {DispatchPack} from '@entities/dispatch-pack';
 
 
 type Process = 'preparation' | 'livraison' | 'collecte' | 'inventory' | 'inventoryAnomalies' | 'dispatch' | 'transfer' | 'empty_round';
@@ -294,7 +295,7 @@ export class LocalDataManagerService {
                     map(([dispatches, dispatchPacks]) => ({
                         paramName: 'dispatches',
                         dispatches: dispatches.map(({id, treatedStatusId}) => ({id, treatedStatusId})),
-                        dispatchPacks: dispatchPacks.map(({id, natureId, quantity, dispatchId}) => ({id, natureId, quantity, dispatchId}))
+                        ...this.mapDispatchPacks(dispatchPacks)
                     }))),
                 deleteSucceed: ({entireTreatedDispatch}) => zip(
                     (entireTreatedDispatch && entireTreatedDispatch.length > 0)
@@ -693,8 +694,43 @@ export class LocalDataManagerService {
                 const date2 = new Date(dateStr2.split('_')[0]);
                 return date1.getTime() <= date2.getTime()
                     ? -1
-                    : 1
+                    : 1;
             });
+    }
+
+    public mapDispatchPacks(packs: Array<DispatchPack>) {
+        const packsWithFiles = packs
+            .map(({photo1, photo2, id, natureId, quantity, dispatchId, code}) => ({
+                id,
+                natureId,
+                quantity,
+                dispatchId,
+                code,
+                photo1: photo1
+                    ? this.fileService.createFile(
+                        photo1,
+                        FileService.SIGNATURE_IMAGE_EXTENSION,
+                        FileService.SIGNATURE_IMAGE_TYPE,
+                        `${code}_photo1`
+                    )
+                    : undefined,
+                photo2: photo2
+                    ? this.fileService.createFile(
+                        photo2,
+                        FileService.SIGNATURE_IMAGE_EXTENSION,
+                        FileService.SIGNATURE_IMAGE_TYPE,
+                        `${code}_photo2`
+                    )
+                    : undefined
+            }) as any);
+        return {
+            dispatchPacks: packsWithFiles.map(({photo1, photo2, code, ...pack}) => pack),
+            ...(packsWithFiles.reduce((acc, {photo1, photo2, code}, currentIndex) => ({
+                ...acc,
+                ...(photo1 ? {[`${code}_photo1`]: photo1} : {}),
+                ...(photo2 ? {[`${code}_photo2`]: photo2} : {}),
+            }), {})),
+        };
     }
 
     public extractTrackingMovementFiles(movements: Array<MouvementTraca<File> & {subPacks?: any}>) {
@@ -708,7 +744,7 @@ export class LocalDataManagerService {
                 ...acc,
                 ...(photo ? {[`photo_${currentIndex}`]: photo} : {})
             }), {}))
-        }
+        };
     }
 
     private updateSucceedTracking(refArticlesErrors, mouvements) {

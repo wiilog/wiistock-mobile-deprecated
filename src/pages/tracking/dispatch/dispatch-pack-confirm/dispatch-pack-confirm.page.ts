@@ -18,6 +18,9 @@ import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-p
 import {Nature} from '@entities/nature';
 import {FormViewerParam} from '@app/common/directives/form-viewer/form-viewer-param';
 import {FormViewerTextComponent} from '@app/common/components/panel/form-panel/form-viewer-text/form-viewer-text.component';
+import {
+    FormPanelCameraComponent
+} from '@app/common/components/panel/form-panel/form-panel-camera/form-panel-camera.component';
 
 
 @Component({
@@ -65,6 +68,14 @@ export class DispatchPackConfirmPage extends PageComponent {
             }
         };
 
+        const photos = [];
+        if (this.pack.photo1) {
+            photos.push(this.pack.photo1);
+        }
+        if (this.pack.photo2) {
+            photos.push(this.pack.photo2);
+        }
+
         this.bodyConfig = [
             {
                 item: FormPanelSelectComponent,
@@ -89,7 +100,19 @@ export class DispatchPackConfirmPage extends PageComponent {
                         type: 'number'
                     }
                 }
-            }
+            },
+            {
+                item: FormPanelCameraComponent,
+                config: {
+                    label: 'Photos',
+                    name: 'photos',
+                    value: photos,
+                    inputConfig: {
+                        multiple: true,
+                        max: 2,
+                    }
+                }
+            },
         ];
 
         this.detailsConfig = this.pack.comment
@@ -110,10 +133,14 @@ export class DispatchPackConfirmPage extends PageComponent {
             this.toastService.presentToast(this.formPanelComponent.firstError);
         }
         else {
-            const {quantity, natureId} = this.formPanelComponent.values;
+            const {quantity, natureId, photos} = this.formPanelComponent.values;
+            const photo1 = photos ? photos[0] : undefined;
+            const photo2 = photos ? photos[1] : undefined;
             this.confirmPack({
                 ...this.pack,
                 quantity,
+                photo1,
+                photo2,
                 natureId
             });
             this.navService.pop();

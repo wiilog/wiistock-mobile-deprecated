@@ -387,7 +387,9 @@ export const TablesDefinitions: Array<TableDefinition> = [
             lastLocation: 'VARCHAR(255)',
             treated: 'INTEGER',
             already_treated: 'INTEGER',
-            comment: 'VARCHAR(255)'
+            comment: 'VARCHAR(255)',
+            photo1: 'TEXT',
+            photo2: 'TEXT',
         }
     },
     {

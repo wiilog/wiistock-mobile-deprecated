@@ -93,11 +93,12 @@ export class FormPanelCameraComponent implements FormPanelItemComponent<FormPane
     }
 
     public get displayCameraButton(): boolean {
+        const max = this.inputConfig.max || FormPanelCameraComponent.MAX_MULTIPLE_PHOTO;
         return (
             (
                 this.inputConfig.multiple
                 && this.value
-                && (this.value as Array<string>).length < FormPanelCameraComponent.MAX_MULTIPLE_PHOTO
+                && (this.value as Array<string>).length < max
             )
             || !this.value
         );

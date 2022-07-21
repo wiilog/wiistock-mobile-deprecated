@@ -213,10 +213,10 @@ export class DispatchValidatePage extends PageComponent {
                                 }]
                             ),
                             ...(treatedDispatchPacks
-                                .map(({id, natureId, quantity, treated}) => this.sqliteService.update(
+                                .map(({id, natureId, quantity, treated, photo1, photo2}) => this.sqliteService.update(
                                     'dispatch_pack',
                                     [{
-                                        values: {natureId, quantity, treated},
+                                        values: {natureId, quantity, treated, photo1, photo2},
                                         where: [`id = ${id}`]
                                     }]
                                 )))

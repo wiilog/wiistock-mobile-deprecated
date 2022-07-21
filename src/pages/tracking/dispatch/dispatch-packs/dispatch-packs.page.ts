@@ -328,11 +328,13 @@ export class DispatchPacksPage extends PageComponent {
         }
     }
 
-    private confirmPack({id: packIdToConfirm, natureId, quantity}: DispatchPack): void {
+    private confirmPack({id: packIdToConfirm, natureId, quantity, photo1, photo2}: DispatchPack): void {
         const packIndexToConfirm = this.dispatchPacks.findIndex(({id}) => (id === packIdToConfirm));
         if (packIndexToConfirm > -1) {
             this.dispatchPacks[packIndexToConfirm].natureId = Number(natureId);
             this.dispatchPacks[packIndexToConfirm].quantity = Number(quantity);
+            this.dispatchPacks[packIndexToConfirm].photo1 = photo1;
+            this.dispatchPacks[packIndexToConfirm].photo2 = photo2;
             this.refreshListTreatedConfig();
         }
     }
