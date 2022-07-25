@@ -14,7 +14,7 @@
                     Collecte
                 </div>
                 <ng-container *ngIf="transport.kind !== 'collect'">
-                    <span class="packs-count">{{ transport.packs.length }} colis</span>
+                    <span class="packs-count">{{ notRejectedPacks }} colis</span>
                 </ng-container>
             </div>
 

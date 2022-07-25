@@ -27,12 +27,16 @@ export class TransportCardComponent implements OnInit {
 
     public titles: Array<SimpleCardTitle> = [];
 
+    public notRejectedPacks: number;
+
     constructor(private navService: NavService,
                 private platform: Platform,
                 private toastService: ToastService) {
     }
 
     ngOnInit() {
+        this.notRejectedPacks = this.transport.packs.filter(pack => !pack.rejected).length;
+
         this.titles.push({
             title: `${this.transport.priority}. ${this.transport.contact.name}`,
             position: `left`,
