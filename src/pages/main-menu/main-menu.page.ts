@@ -381,7 +381,7 @@ export class MainMenuPage extends PageComponent {
                                         collecte: collect,
                                         goToDrop: () => {
                                             this.navService.pop().subscribe(() => {
-                                                this.navService.push(NavPathEnum.STOCK_MENU, {
+                                                this.navService.push(NavPathEnum.STOCK_MOVEMENT_MENU, {
                                                     goToDropDirectly: true
                                                 });
                                             });
