@@ -204,9 +204,9 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                                 rightIcon: {
                                     color: 'primary',
                                     name: 'arrow-right.svg',
-                                    action: () => {
-                                        this.selectLocation({label: location}, this.missionFilter);
-                                    }
+                                },
+                                pressAction: () => {
+                                    this.selectLocation({label: location}, this.missionFilter);
                                 }
                             }));
                     }
@@ -235,9 +235,9 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                                     rightIcon: {
                                         color: 'primary',
                                         name: 'arrow-right.svg',
-                                        action: () => {
-                                            this.selectMission(mission_id);
-                                        }
+                                    },
+                                    pressAction: () => {
+                                        this.selectMission(mission_id);
                                     }
                                 };
                             });
