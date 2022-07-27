@@ -23,6 +23,7 @@ export enum NavPathEnum {
     INVENTORY_VALIDATE = 'inventory-validate',
     INVENTORY_ARTICLES = 'inventory-articles',
     INVENTORY_LOCATIONS_ANOMALIES = 'inventory-locations-anomalies',
+    INVENTORY_LOCATIONS_MISSIONS = 'inventory-locations-missions',
     INVENTORY_LOCATIONS = 'inventory-locations',
     LIVRAISON_EMPLACEMENT = 'livraison-emplacement',
     LIVRAISON_ARTICLE_TAKE = 'livraison-article-take',

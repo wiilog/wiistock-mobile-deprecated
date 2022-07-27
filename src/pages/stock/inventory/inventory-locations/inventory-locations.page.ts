@@ -21,8 +21,8 @@ import * as moment from 'moment';
 import {Anomalie} from '@entities/anomalie';
 
 enum PageMode {
-    LOCATIONS,
-    MISSIONS,
+    LOCATIONS = 1,
+    MISSIONS = 2,
 }
 
 @Component({
@@ -37,7 +37,7 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
 
-    public currentPageMode: PageMode = PageMode.LOCATIONS;
+    public currentPageMode: PageMode;
     public anomalyMode: boolean;
 
     public tabConfig: TabConfig[] = [
@@ -78,13 +78,16 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
 
         const missionFilter = this.currentNavParams.get('mission');
         this.anomalyMode = this.currentNavParams.get('anomaly') || false;
+        this.missionFilter = this.currentNavParams.get('missionFilter') || null;
+        if(!this.currentPageMode) {
+            this.currentPageMode = this.currentNavParams.get('currentPageMode') || PageMode.LOCATIONS;
+        }
         this.selectItemType = !this.anomalyMode ? SelectItemTypeEnum.INVENTORY_LOCATION : SelectItemTypeEnum.INVENTORY_ANOMALIES_LOCATION;
         if (missionFilter) {
             this.missionFilter = missionFilter;
         }
 
         if (!this.dataSubscription) {
-            this.resetPageMode();
             this.dataSubscription = this.loadingService
                 .presentLoadingWhile({
                     event: () => zip(
@@ -124,9 +127,11 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
     }
 
     public selectMission(missionId: number): void {
-        this.missionFilter = missionId;
-        this.currentPageMode = PageMode.LOCATIONS;
         this.reloadPage();
+        this.navService.push(NavPathEnum.INVENTORY_LOCATIONS_MISSIONS, {
+            missionFilter: missionId,
+            currentPageMode: PageMode.LOCATIONS,
+        });
     }
 
     public navigateToAnomalies(): void {
@@ -215,12 +220,22 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                         this.missionsListItemBody = inventoryArticles
                             .filter(({mission_id}, index) => inventoryArticles.findIndex(({mission_id: mission_id2}) => (mission_id2 === mission_id)) === index)
                             .map(({mission_id, mission_name, mission_start, mission_end}) => {
-                                const nbRefInMission = inventoryArticles
-                                    .filter(({mission_id: mission_id_art, is_ref}) => mission_id_art === mission_id && is_ref == 1)
+                                const notUniqueReferences = inventoryArticles
+                                    .filter(({mission_id: missionIdArt, is_ref}) => missionIdArt === mission_id && is_ref === 0)
+                                    .map(line => line.reference);
+
+                                const nbRefFromArtInMission = notUniqueReferences
+                                    .filter((reference, index, self) => self.indexOf(reference) === index)
                                     .length;
+
+                                const nbRefInMission = nbRefFromArtInMission + inventoryArticles
+                                    .filter(({mission_id: missionIdArt, is_ref}) => missionIdArt === mission_id && is_ref === 1)
+                                    .length;
+
                                 const nbArtInMission = inventoryArticles
-                                    .filter(({mission_id: mission_id_art, is_ref}) => mission_id_art === mission_id && is_ref == 0)
+                                    .filter(({mission_id: missionIdArt, is_ref}) => missionIdArt === mission_id && is_ref === 0)
                                     .length;
+
                                 return {
                                     infos: {
                                         name_mission: {value: mission_name},
