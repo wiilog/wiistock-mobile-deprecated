@@ -14,7 +14,7 @@ const POST = 'post';
     providedIn: 'root'
 })
 export class ApiService {
-    public static readonly GET_NOMADE_VERSIONS = {method: GET, service: '/nomade-versions'};
+    public static readonly CHECK_NOMADE_VERSIONS = {method: GET, service: '/nomade-versions'};
     public static readonly GET_PING = {method: GET, service: '/ping'};
 
     public static readonly BEGIN_PREPA = {method: POST, service: '/beginPrepa'};
