@@ -23,6 +23,8 @@
 
 <ng-template #content>
     <div class="list-element-wrapper"
+         [class.ion-activatable]="(!rightIcon || !rightIcon.action) && pressAction"
+         [class.ripple-parent]="(!rightIcon || !rightIcon.action) && pressAction"
          (click)="onPress()">
         <div class="list-element-body-wrapper">
             <div class="list-element-item"
@@ -39,7 +41,8 @@
             <wii-icon *ngIf="rightIcon && !loading"
                       [name]="rightIcon.name"
                       [color]="rightIcon.color"
-                      (action)="rightIcon.action()">
+                      (action)="rightIcon.action()"
+                      [buttonWithoutRipple]="!rightIcon.action">
             </wii-icon>
             <img *ngIf="rightIconBase64 && !loading"
                  alt=""
@@ -48,6 +51,8 @@
                          name="dots">
             </ion-spinner>
         </div>
+
+        <ion-ripple-effect *ngIf="(!rightIcon || !rightIcon.action) && pressAction"></ion-ripple-effect>
     </div>
 
     <div class="list-element-disabled"
