@@ -295,7 +295,7 @@ export class TransportRoundPackLoadPage extends PageComponent {
         const loadedPacks = this.packs.filter(({loaded, loading, rejected}) => !loaded && loading && !rejected);
         if (loadedPacks.length > 0) {
             this.navService.push(NavPathEnum.TRANSPORT_ROUND_PACK_LOAD_VALIDATE, {
-                everythingLoaded: loadedPacks.length + this.packs.filter(({loaded}) => loaded).length === this.packs.length,
+                everythingLoaded: loadedPacks.length + this.packs.filter(({loaded, rejected}) => loaded && !rejected).length === this.packs.filter(({rejected}) => !rejected).length,
                 unpreparedDeliveries: this.unpreparedDeliveries,
                 packs: loadedPacks,
                 round: this.round,
