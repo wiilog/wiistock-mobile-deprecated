@@ -153,7 +153,7 @@ export class FinishTransportPage extends PageComponent implements ViewWillEnter 
                                     })
                                 } else {
                                     const additionalPop = allTransportsTreated ? 1 : 0;
-                                    await this.navService.runMultiplePop(this.edit ? (1 + additionalPop) : (3 + additionalPop));
+                                    await this.navService.runMultiplePop(this.edit ? 1 : (3 + additionalPop));
                                 }
                             }
                             else {

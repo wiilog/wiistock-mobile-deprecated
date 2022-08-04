@@ -114,7 +114,8 @@ export class TransportListPage extends PageComponent implements ViewWillEnter {
             } else {
                 this.navService.push(NavPathEnum.TRANSPORT_FAILURE, {
                     transport: transport,
-                    round: this.round
+                    round: this.round,
+                    edit: true,
                 });
             }
         } else {

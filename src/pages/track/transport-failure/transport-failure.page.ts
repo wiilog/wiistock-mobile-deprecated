@@ -42,6 +42,8 @@ export class TransportFailurePage extends PageComponent {
     public transport: TransportRoundLine;
     public round: TransportRound;
 
+    public edit: boolean = false;
+
     constructor(private apiService: ApiService,
                 private loadingService: LoadingService,
                 private toastService: ToastService,
@@ -52,6 +54,8 @@ export class TransportFailurePage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
+        this.edit = this.currentNavParams.get('edit');
+
         this.loadingService.presentLoadingWhile({
             event: () => this.apiService.requestApi(ApiService.GET_REJECT_MOTIVES)
         }).subscribe(({delivery, collect}: { delivery: Array<string>; collect: Array<string> }) => {
@@ -145,9 +149,16 @@ export class TransportFailurePage extends PageComponent {
                             params: {round: this.round.id},
                         }).pipe(map((round) => [result, round]))),
                     )
-            }).subscribe(([result, round]) => {
+            }).subscribe(async ([result, round]) => {
                 this.transportService.treatTransport(this.round, round);
-                this.navService.runMultiplePop(2);
+
+                if (result.success) {
+                    const allTransportsTreated = this.round.lines.every(({failure, success}) => failure || success);
+                    this.toastService.presentToast("Les données ont été sauvegardées");
+
+                    const additionalPop = allTransportsTreated ? 1 : 0;
+                    await this.navService.runMultiplePop(this.edit ? 1 : (3 + additionalPop));
+                }
             });
         }
     }
