@@ -43,7 +43,10 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
     public selectedLocation: string;
     public mission?: number;
     public articles: Array<ArticleInventaire>;
-    public listToInventory?: Array<ListPanelItemConfig>;
+    public suggestionListConfig: Array<Array<{
+        name: string;
+        value: string;
+    }>>;
 
     private anomalyMode: boolean;
 
@@ -111,18 +114,15 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
                 )
                 .subscribe((articles) => {
                     this.articles = articles;
-                    this.listToInventory = this.articles.map((article: ArticleInventaire) => ({
-                        infos: {
-                            reference: {
-                                label: 'Référence',
-                                value: article.reference
-                            },
-                            barCode: {
-                                label: 'Code barre',
-                                value: article.barcode
-                            }
-                        }
-                    }));
+                    this.suggestionListConfig = this.articles.map((article: ArticleInventaire) => {
+                        return [{
+                            name: `Référence`,
+                            value: article.reference
+                        }, {
+                            name: `Code barre`,
+                            value: article.barcode
+                        }]
+                    });
                     this.unsubscribeData();
                 });
         }

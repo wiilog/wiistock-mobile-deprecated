@@ -69,6 +69,9 @@ export class PanelHeaderComponent {
     @Input()
     public rightIconLayout?: 'vertical'|'horizontal' = 'vertical';
 
+    @Input()
+    public light: boolean = false;
+
     @Output()
     public mainButtonAction: EventEmitter<boolean>;
 
