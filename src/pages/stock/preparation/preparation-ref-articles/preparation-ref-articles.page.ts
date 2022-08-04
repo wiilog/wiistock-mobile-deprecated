@@ -60,6 +60,11 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
         transparent: boolean;
     };
 
+    public suggestionListConfig: Array<Array<{
+        name: string;
+        value: string|number;
+    }>>;
+
     public constructor(private toastService: ToastService,
                        private loadingService: LoadingService,
                        private sqliteService: SqliteService,
@@ -69,13 +74,6 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
         this.loading = true;
         this.pageHasLoadedOnce = false;
         this.resetEmitter$ = new EventEmitter<void>();
-        this.panelHeaderConfig = {
-            title: 'Sélectionner un article',
-            transparent: true,
-            leftIcon: {
-                name: 'preparation.svg'
-            }
-        };
     }
 
     public wiiCanLeave(): boolean {
@@ -113,6 +111,34 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
                     this.parameterWithoutManual = withoutManual as boolean;
                     this.suggestingArticleList = suggestingArticleList as Array<ArticlePrepaByRefArticle>;
                     this.suggestingListOffset = PreparationRefArticlesPage.SUGGESTING_LIST_LIMIT;
+
+                    this.panelHeaderConfig = {
+                        title: withoutManual ? 'Flasher un article' : 'Sélectionner un article',
+                        transparent: true,
+                        leftIcon: {
+                            name: 'preparation.svg'
+                        }
+                    };
+
+                    this.suggestionListConfig = this.suggestingArticleList.map((preparationArticle: ArticlePrepaByRefArticle) => {
+                        return [{
+                            name: `Article`,
+                            value: preparationArticle.barcode
+                        }, ...(preparationArticle.location !== `null` ? [{
+                            name: `Emplacement`,
+                            value: preparationArticle.location
+                        }] : []), ...(preparationArticle.quantity ? [{
+                            name: `Quantité restante`,
+                            value: preparationArticle.quantity
+                        }] : []), ...(preparationArticle.management ? [{
+                            name: (preparationArticle.management === `FIFO`
+                                ? `Date d'entrée en stock`
+                                : (preparationArticle.management === `FEFO`
+                                    ? `Date d'expiration`
+                                    : 'Date')),
+                            value: preparationArticle.management_date
+                        }] : [])]
+                    });
 
                     this.scannerMode = this.parameterWithoutManual ? BarcodeScannerModeEnum.ONLY_SCAN : BarcodeScannerModeEnum.TOOL_SEARCH;
                     if (!counter || counter <= 0) {
@@ -181,11 +207,11 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
             : of([]);
     }
 
-    public loadMore(): void {
+    public loadMore(infiniteScroll: IonInfiniteScroll): void {
         this.unsubscribeLoadMore();
         this.loadMoreSubscription = this.findSuggestingArticleList(this.parameterWithoutManual)
             .subscribe((following: Array<ArticlePrepaByRefArticle>) => {
-                this.infiniteScroll.complete();
+                infiniteScroll.complete();
                 if (following.length > 0) {
                     this.suggestingArticleList = [
                         ...this.suggestingArticleList,
@@ -194,12 +220,12 @@ export class PreparationRefArticlesPage extends PageComponent implements CanLeav
                     this.suggestingListOffset += PreparationRefArticlesPage.SUGGESTING_LIST_LIMIT;
                 }
                 else {
-                    this.infiniteScroll.disabled = true;
+                    infiniteScroll.disabled = true;
                 }
             });
     }
 
-    private unsubscribeLoadMore() {
+    public unsubscribeLoadMore() {
         if (this.loadMoreSubscription && !this.loadMoreSubscription.closed) {
             this.loadMoreSubscription.unsubscribe();
         }
