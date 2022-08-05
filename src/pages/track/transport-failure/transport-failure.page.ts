@@ -157,7 +157,7 @@ export class TransportFailurePage extends PageComponent {
                     this.toastService.presentToast("Les données ont été sauvegardées");
 
                     const additionalPop = allTransportsTreated ? 1 : 0;
-                    await this.navService.runMultiplePop(this.edit ? 1 : (3 + additionalPop));
+                    await this.navService.runMultiplePop(this.edit ? 1 : (2 + additionalPop));
                 }
             });
         }
