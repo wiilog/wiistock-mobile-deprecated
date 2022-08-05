@@ -1,27 +1,25 @@
-<div class="page-content">
+<ion-content>
     <wii-panel-header *ngIf="selectedLocation"
                       title="Emplacement"
                       transparent="true"
                       [leftIcon]="{name: 'inventory.svg'}"
-                      [subtitle]="selectedLocation">
+                      [subtitle]="selectedLocation"
+                      light="true">
     </wii-panel-header>
 
-    <wii-list-panel *ngIf="articles"
-                    [header]="null"
-                    [body]="listToInventory"
-                    [boldValues]="listBoldValues">
-    </wii-list-panel>
-</div>
+    <wii-suggestion-list [elements]="suggestionListConfig">
+    </wii-suggestion-list>
 
-<div class="page-footer">
-    <wii-select-item #selectItemComponent
-                     [hidden]="!!dataSubscription"
-                     *ngIf="selectItemType !== undefined && requestParams"
-                     [type]="selectItemType"
-                     (itemChange)="navigateToInventoryValidate($event)"
-                     [checkBarcodeValidity]="true"
-                     [resetEmitter]="resetEmitter$"
-                     [requestParams]="requestParams"
-                     [scanMode]="scannerMode">
-    </wii-select-item>
-</div>
+    <div slot="fixed" class="page-footer">
+        <wii-select-item #selectItemComponent
+                         [hidden]="!!dataSubscription"
+                         *ngIf="selectItemType !== undefined && requestParams"
+                         [type]="selectItemType"
+                         (itemChange)="navigateToInventoryValidate($event)"
+                         [checkBarcodeValidity]="true"
+                         [resetEmitter]="resetEmitter$"
+                         [requestParams]="requestParams"
+                         [scanMode]="scannerMode">
+        </wii-select-item>
+    </div>
+</ion-content>

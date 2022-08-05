@@ -47,6 +47,7 @@ import {PackCountComponent} from '@app/common/components/pack-count/pack-count.c
 import {FormPanelTextareaComponent} from "@app/common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component";
 import {NumberInputComponent} from '@app/common/components/number-input/number-input.component';
 import {TabComponent} from '@app/common/components/tab/tab.component';
+import {SuggestionListComponent} from "@app/common/components/suggestion-list/suggestion-list.component";
 
 @NgModule({
     declarations: [
@@ -78,6 +79,7 @@ import {TabComponent} from '@app/common/components/tab/tab.component';
         SelectItemComponent,
         SignaturePadComponent,
         SimpleFormComponent,
+        SuggestionListComponent,
         StatsSlidersComponent,
         FormPanelDirective,
         FormViewerDirective,
@@ -108,6 +110,7 @@ import {TabComponent} from '@app/common/components/tab/tab.component';
         TabComponent,
         FormPanelComponent,
         SimpleFormComponent,
+        SuggestionListComponent,
         CardListComponent,
         PanelHeaderComponent,
         ListPanelItemComponent,

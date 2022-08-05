@@ -12,6 +12,11 @@
         width: 5px;
     }
 
+    &.light {
+        margin-bottom: 0 !important;
+        margin-top: 10px !important;
+    }
+
     &.collapse {
         transition: box-shadow 300ms ease-in-out;
 
@@ -35,6 +40,13 @@
 
         &.list-header-wrapper-gutter {
             padding: 10px;
+        }
+
+        &.light {
+            background-color: $white;
+            margin-left: 5px;
+            margin-right: 5px;
+            box-shadow: 2px 2px 5px rgb(51 51 51 / 10%);
         }
 
         .header-body,

@@ -5,7 +5,7 @@
      [ngStyle]="{'background-color': color}">
 </div>
 
-<div class="list-header-wrapper"
+<div class="list-header-wrapper" [class.light]="light"
      [class.list-header-wrapper-gutter]="!leftIcon && (!_rightIcons || _rightIcons.length === 0)"
      [style.padding-left]="!leftIcon ? '15px' : '0'">
     <!-- Left icon -->
