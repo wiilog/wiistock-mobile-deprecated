@@ -75,7 +75,7 @@
                                     <strong>
                                         {{ round.not_delivered }} livraison{{ round.not_delivered > 1 ? 's' : '' }} non livrée{{ round.not_delivered > 1 ? 's' : '' }}
                                     </strong>
-                                    {{ round.returned_packs }}/{{ round.packs_to_return }} colis retournés
+                                    {{ round.returned_packs }}/{{ round.packs_to_return }} colis retourné{{ round.packs_to_return > 1 ? 's' : '' }}
                                 </span>
                             </div>
                         </div>
@@ -84,7 +84,7 @@
                                 <img src="assets/icons/collect-hand.svg" width="15">
                                 <span>
                                     <strong>{{ round.done_collects }} collecte{{ round.done_collects > 1 ? 's' : '' }} effectuée{{ round.done_collects > 1 ? 's' : '' }}</strong>
-                                    {{ round.deposited_packs }}/{{ round.packs_to_deposit }} objets déposés
+                                    {{ round.deposited_packs }}/{{ round.packs_to_deposit }} objet{{ round.packs_to_deposit > 1 ? 's' : '' }} déposé{{ round.packs_to_deposit > 1 ? 's' : '' }}
                                 </span>
                             </div>
                         </div>
