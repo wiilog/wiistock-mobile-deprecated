@@ -14,6 +14,7 @@ import {environment} from "@environments/environment";
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {NotificationService} from '@app/common/services/notification.service';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
+import {NetworkService} from '@app/common/services/network.service';
 
 
 @Component({
@@ -35,6 +36,7 @@ export class ParamsPage extends PageComponent implements CanLeave {
                        private sqliteService: SqliteService,
                        private toastService: ToastService,
                        private notificationService: NotificationService,
+                       private networkService: NetworkService,
                        navService: NavService) {
         super(navService);
         this.URL = '';
@@ -66,35 +68,40 @@ export class ParamsPage extends PageComponent implements CanLeave {
     }
 
     public registerURL(): void {
-        if (!this.isLoading) {
-            this.isLoading = true;
-            let loadingComponent: HTMLIonLoadingElement;
-            this.loadingService
-                .presentLoading('Vérification de l\'URL...')
-                .pipe(
-                    flatMap((loading) =>  {
-                        loadingComponent = loading;
-                        return this.apiService.getApiUrl(ApiService.GET_PING, {newUrl: this.URL});
-                    }),
-                    flatMap((pingURL: string) => this.apiService.pingApi(pingURL)),
-                    flatMap(() => this.storageService.setItem(StorageKeyEnum.URL_SERVER, this.URL)),
-                    flatMap(() => this.sqliteService.resetDataBase(true)),
-                    flatMap(() => from(loadingComponent.dismiss())),
-                    flatMap(() => this.toastService.presentToast('URL enregistrée')),
+        if (this.networkService.hasNetwork()) {
+            if (!this.isLoading) {
+                this.isLoading = true;
+                let loadingComponent: HTMLIonLoadingElement;
+                this.loadingService
+                    .presentLoading('Vérification de l\'URL...')
+                    .pipe(
+                        flatMap((loading) =>  {
+                            loadingComponent = loading;
+                            return this.apiService.getApiUrl(ApiService.GET_PING, {newUrl: this.URL});
+                        }),
+                        flatMap((pingURL: string) => this.apiService.pingApi(pingURL)),
+                        flatMap(() => this.storageService.setItem(StorageKeyEnum.URL_SERVER, this.URL)),
+                        flatMap(() => this.sqliteService.resetDataBase(true)),
+                        flatMap(() => from(loadingComponent.dismiss())),
+                        flatMap(() => this.toastService.presentToast('URL enregistrée')),
 
-                )
-                .subscribe(
-                    () => {
-                        this.isLoading = false;
-                        this.navService.setRoot(NavPathEnum.LOGIN);
-                    },
-                    () => {
-                        from(loadingComponent.dismiss()).subscribe(() => {
+                    )
+                    .subscribe(
+                        () => {
                             this.isLoading = false;
-                            this.toastService.presentToast('URL invalide');
-                        });
-                    }
-                );
+                            this.navService.setRoot(NavPathEnum.LOGIN);
+                        },
+                        () => {
+                            from(loadingComponent.dismiss()).subscribe(() => {
+                                this.isLoading = false;
+                                this.toastService.presentToast('URL invalide');
+                            });
+                        }
+                    );
+            }
+        }
+        else {
+            this.toastService.presentToast('Serveur inaccessible, vérifier votre connexion ou l’URL saisie.');
         }
     }
 }
