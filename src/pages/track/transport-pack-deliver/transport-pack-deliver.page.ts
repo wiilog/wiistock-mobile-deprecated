@@ -176,7 +176,7 @@ export class TransportPackDeliverPage extends PageComponent {
                 this.packs.splice(selectedIndex, 1);
                 this.packs.unshift(selectedItem);
                 selectedItem.delivered = true;
-                if(this.packs.every(({delivered}) => delivered)) {
+                if(this.packs.every(({delivered, rejected}) => delivered || rejected)) {
                     this.disabled = false;
                 }
                 this.refreshListToDeliverConfig();
