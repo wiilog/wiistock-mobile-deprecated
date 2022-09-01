@@ -51,7 +51,7 @@ export class InventoryValidatePage extends PageComponent {
     public addArticle(data): void {
         const {quantity} = data;
 
-        if (quantity === '' || isNaN(quantity) || quantity < 0) {
+        if (quantity < 0 || quantity === '' || quantity === undefined || quantity === null || isNaN(quantity)) {
             this.toastService.presentToast('Veuillez sélectionner une quantité valide.');
         } else {
             this.navService.pop().subscribe(() => {
