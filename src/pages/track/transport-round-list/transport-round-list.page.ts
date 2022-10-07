@@ -5,7 +5,6 @@ import {NavService} from '@app/common/services/nav/nav.service';
 import {TransportRound} from '@entities/transport-round';
 import {LoadingService} from '@app/common/services/loading.service';
 import {ApiService} from '@app/common/services/api.service';
-import {zip} from 'rxjs';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import * as moment from 'moment';
 import {ToastService} from '@app/common/services/toast.service';
@@ -93,6 +92,8 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                     this.toastService.presentToast(`Aucun emplacement de retour des colis non livrés n'a été paramétré, vous ne pouvez pas continuer.`);
                 } else {
                     if (depositedDeliveries) {
+                        round.lines = round.lines.filter((line: TransportRoundLine) => !line.collect.failure);
+
                         this.navService.push(NavPathEnum.TRANSPORT_COLLECT_NATURES, {
                             round,
                             skippedMenu: true,

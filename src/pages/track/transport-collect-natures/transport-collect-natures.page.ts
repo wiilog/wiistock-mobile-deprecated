@@ -8,7 +8,6 @@ import {TransportCardMode} from '@app/common/components/transport-card/transport
 import {TransportRoundLine} from '@entities/transport-round-line';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {TransportRound} from '@entities/transport-round';
-import {ToastService} from "@app/common/services/toast.service";
 
 @Component({
     selector: 'wii-transport-collect-natures',
@@ -33,8 +32,7 @@ export class TransportCollectNaturesPage extends PageComponent implements ViewWi
     private depositedQuantities: {[nature: number]: number} = {};
     private collectedPacksLocations: Array<number>;
 
-    public constructor(navService: NavService,
-                       private toastService: ToastService) {
+    public constructor(navService: NavService) {
         super(navService);
     }
 
