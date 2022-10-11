@@ -94,7 +94,7 @@ export class DispatchPacksPage extends PageComponent {
                         this.sqliteService.findOneBy('dispatch', {id: dispatchId}),
                         this.sqliteService.findBy('dispatch_pack', [`dispatchId = ${dispatchId}`]),
                         this.sqliteService.findAll('nature'),
-                        this.translationService.get('natures')
+                        this.translationService.get(null, `Traçabilité`, `Général`)
                     ).pipe(
                         flatMap((data) => this.sqliteService
                             .findBy('status', [`category = 'acheminement'`, `state = 'partial'`, `typeId = ${data[0].typeId}`])
@@ -172,11 +172,11 @@ export class DispatchPacksPage extends PageComponent {
     }
 
     private refreshHeaderPanelConfigFromDispatch(): void {
-        this.translationService.get('acheminement').subscribe((dispatch) => {
+        this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`).subscribe((dispatch) => {
             this.dispatchHeaderConfig = {
                 title: `Demande N°${this.dispatch.number}`,
                 subtitle: [
-                    TranslationService.Translate(dispatch, 'Emplacement prise') + ' : ' + this.dispatch.locationFromLabel,
+                    TranslationService.Translate(dispatch, 'Emplacement de prise') + ' : ' + this.dispatch.locationFromLabel,
                     this.dispatch.destination ? `Destination : ${this.dispatch.destination}` : ''
                 ],
                 info: `Type ${this.dispatch.typeLabel}`,
@@ -192,7 +192,7 @@ export class DispatchPacksPage extends PageComponent {
 
     private refreshListToTreatConfig(): void {
         const packsToTreat = this.dispatchPacks.filter(({treated, already_treated}) => (!already_treated && !treated));
-        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
+        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'Nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
         const plural = packsToTreat.length > 1 ? 's' : '';
@@ -237,7 +237,7 @@ export class DispatchPacksPage extends PageComponent {
 
     private refreshListTreatedConfig(): void {
         const packsTreated = this.dispatchPacks.filter(({treated, already_treated}) => (already_treated || treated));
-        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
+        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'Nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
         const plural = packsTreated.length > 1 ? 's' : '';

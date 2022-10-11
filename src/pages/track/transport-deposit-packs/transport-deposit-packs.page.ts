@@ -78,7 +78,7 @@ export class TransportDepositPacksPage extends PageComponent {
 
         zip(
             this.loadingService.presentLoading('Récupération des données en cours'),
-            this.translationService.get('natures')
+            this.translationService.get(null, `Traçabilité`, `Général`)
         )
             .subscribe(([loading, natureTranslations]: [HTMLIonLoadingElement, Translations]) => {
                 this.natureTranslations = natureTranslations;
@@ -97,7 +97,7 @@ export class TransportDepositPacksPage extends PageComponent {
 
     private refreshListToReturnConfig(): void {
         const packsToReturn = this.packs.filter(({returning, returned}) => (!returning && !returned));
-        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
+        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'Nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
         const hasPackToReturn = this.packs && this.packs.some(({returning, returned}) => !returning && !returned);
@@ -141,7 +141,7 @@ export class TransportDepositPacksPage extends PageComponent {
 
     private refreshListReturnedConfig(): void {
         const returnedPacks = this.packs.filter(({returning, returned}) => returning && !returned);
-        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
+        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'Nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
         const plural = returnedPacks.length > 1 ? 's' : '';

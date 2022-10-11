@@ -80,7 +80,7 @@ export class DispatchMenuPage extends PageComponent {
                     tap(loader => loaderElement = loader),
                     flatMap(() => zip(
                         this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL OR partial = 1']),
-                        this.translationService.get('acheminement')
+                        this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`)
                     ))
                 )
                 .subscribe(([dispatches, translations]: [Array<Dispatch>, Translations]) => {
@@ -163,11 +163,11 @@ export class DispatchMenuPage extends PageComponent {
                         value: dispatch.startDate && dispatch.endDate ? `Du ${dispatch.startDate} au ${dispatch.endDate}` : ''
                     },
                     {
-                        label: TranslationService.Translate(this.dispatchTranslations, "Emplacement prise"),
+                        label: TranslationService.Translate(this.dispatchTranslations, "Emplacement de prise"),
                         value: dispatch.locationFromLabel || ''
                     },
                     {
-                        label: TranslationService.Translate(this.dispatchTranslations, "Emplacement dépose"),
+                        label: TranslationService.Translate(this.dispatchTranslations, "Emplacement de dépose"),
                         value: dispatch.locationToLabel || ''
                     },
                     (dispatch.emergency

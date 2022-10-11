@@ -675,7 +675,7 @@ export class SqliteService {
                 flatMap(() => (
                     translations.length === 0
                         ? of(undefined)
-                        : this.insert('translations', translations.map(({menu, label, translation}) => ({menu, label, translation})))
+                        : this.insert('translations', translations.map(({topMenu, subMenu, menu, label, translation}) => ({topMenu, subMenu, menu, label, translation})))
                             .pipe(map(() => true))
                 ))
             );

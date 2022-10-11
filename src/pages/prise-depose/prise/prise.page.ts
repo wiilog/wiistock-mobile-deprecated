@@ -107,7 +107,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                 ? this.apiService.requestApi(ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})
                 : of({trackingDrops: []})),
             !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
-            this.translationService.get('natures')
+            this.translationService.get(null, `Traçabilité`, `Général`)
         )
             .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures, natureTranslations]) => {
                 this.operator = operator;
@@ -311,7 +311,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     }
 
     private refreshListComponent(): void {
-        const natureLabel = TranslationService.Translate(this.natureTranslations, 'nature');
+        const natureLabel = TranslationService.Translate(this.natureTranslations, 'Nature');
         const {header: listTakingHeader, body: listTakingBody} = this.trackingListFactory.createListConfig(
             this.colisPrise,
             TrackingListFactoryService.LIST_TYPE_TAKING_MAIN,

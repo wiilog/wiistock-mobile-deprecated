@@ -351,6 +351,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
         name: 'translations',
         attributes: {
             id: 'INTEGER PRIMARY KEY',
+            topMenu: 'VARCHAR(255)',
+            subMenu: 'VARCHAR(255)',
             menu: 'VARCHAR(255)',
             label: 'VARCHAR(255)',
             translation: 'VARCHAR(255)'

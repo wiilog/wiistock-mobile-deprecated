@@ -82,7 +82,7 @@ export class TransportRoundPackLoadPage extends PageComponent {
             zip(
                 this.loadingService.presentLoading('Récupération des données en cours'),
                 this.apiService.requestApi(ApiService.GET_REJECT_MOTIVES),
-                this.translationService.get('natures')
+                this.translationService.get(null, `Traçabilité`, `Général`)
             )
                 .subscribe(([loading, {pack}, natureTranslations]: [HTMLIonLoadingElement, any, Translations]) => {
                     this.packRejectMotives = pack;
@@ -109,7 +109,7 @@ export class TransportRoundPackLoadPage extends PageComponent {
 
     private refreshListToLoadConfig(): void {
         const packsToLoad = this.packs.filter(({loaded, loading, rejected}) => (!loaded && !loading && !rejected));
-        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
+        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'Nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
         const hasPackToLoad = this.packs && this.packs.some(({loaded, loading, rejected}) => !loaded && !loading && !rejected);
@@ -161,7 +161,7 @@ export class TransportRoundPackLoadPage extends PageComponent {
 
     private refreshListLoadedConfig(): void {
         const loadedPacks = this.packs.filter(({loaded, loading, rejected}) => !loaded && loading && !rejected);
-        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
+        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'Nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
         const plural = loadedPacks.length > 1 ? 's' : '';
