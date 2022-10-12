@@ -83,9 +83,8 @@ export class HandlingValidatePage extends PageComponent {
                     this.handling.statusId ? this.sqliteService.findOneBy('status', {id: this.handling.statusId}) : of(undefined),
                     this.sqliteService.findBy('handling_attachment', [`handlingId = ${this.handling.id}`]),
                     this.sqliteService.findBy('free_field', [`categoryType = '${FreeFieldType.HANDLING}'`]),
-                    this.translationService.get('services')
+                    this.translationService.get(null, `Demande`, `Services`)
                 )),
-
             )
             .subscribe(([currentStatus, handlingAttachment, freeFields, handlingsTranslations]: [Status, Array<HandlingAttachment>, Array<FreeField>, Translations]) => {
                 this.dismissLoading();

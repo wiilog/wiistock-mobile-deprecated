@@ -69,7 +69,7 @@ export class TransportPackDeliverPage extends PageComponent {
 
         zip(
             this.loadingService.presentLoading('Récupération des données en cours'),
-            this.translationService.get('natures')
+            this.translationService.get(null, `Traçabilité`, `Général`)
         )
             .subscribe(([loading, natureTranslations]: [HTMLIonLoadingElement, Translations]) => {
                 this.natureTranslations = natureTranslations;
@@ -88,7 +88,7 @@ export class TransportPackDeliverPage extends PageComponent {
 
     private refreshListToDeliverConfig(): void {
         const packsToDeliver = this.packs.filter(({delivered, rejected}) => (!delivered && !rejected));
-        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
+        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'Nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
         const hasPackToDeliver = this.packs && this.packs.some(({delivered, rejected}) => !delivered && !rejected);
@@ -133,7 +133,7 @@ export class TransportPackDeliverPage extends PageComponent {
     private refreshListDeliveredConfig(): void {
         const deliveredPacks = this.packs.filter(({delivered, rejected}) => delivered && !rejected);
 
-        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
+        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'Nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
         const plural = deliveredPacks.length > 1 ? 's' : '';

@@ -69,7 +69,7 @@ export class TransportRoundFinishPackDropPage extends PageComponent {
         this.endRoundLocations = this.currentNavParams.get('endRoundLocations');
         this.hasPacksToDrop = this.currentNavParams.get('hasPacksToDrop');
 
-        this.translationService.get('natures').subscribe((natureTranslations) => {
+        this.translationService.get(null, `Traçabilité`, `Général`).subscribe((natureTranslations) => {
             this.natureTranslations = natureTranslations;
             this.refreshListToDropConfig();
             this.refreshListDroppedConfig();
@@ -84,7 +84,7 @@ export class TransportRoundFinishPackDropPage extends PageComponent {
 
     private refreshListToDropConfig(): void {
         const packsToDrop = this.packs.filter(({dropped}) => !dropped);
-        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
+        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'Nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
         const hasPackToDrop = this.packs && this.packs.some(({dropped}) => !dropped);
@@ -128,7 +128,7 @@ export class TransportRoundFinishPackDropPage extends PageComponent {
 
     private refreshListDroppedConfig(): void {
         const droppedPacks = this.packs.filter(({dropped}) => dropped);
-        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'nature')
+        const natureTranslation = TranslationService.Translate(this.natureTranslations, 'Nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
         const plural = droppedPacks.length > 1 ? 's' : '';

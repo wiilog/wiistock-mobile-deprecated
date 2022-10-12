@@ -27,9 +27,11 @@ export class TranslationService {
         }), {});
     }
 
-    public get(entity?: string): Observable<Translations> {
+    public get(...args): Observable<Translations> {
         return this.sqliteService
-            .findBy('translations', entity ? [`menu LIKE '${entity}'`] : [])
+            .findBy('translations', args.length > 0
+                ? [`topMenu LIKE '${args[0] || ``}' AND menu LIKE '${args[1] || ``}' AND subMenu LIKE '${args[2] || ``}'`]
+                : [])
             .pipe(
                 map((translations: Array<Translation>) => TranslationService.CreateTranslationDictionaryFromArray(translations))
             );

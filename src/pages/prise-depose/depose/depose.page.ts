@@ -313,7 +313,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                 }
             }
             else {
-                const natureLabel = TranslationService.Translate(this.natureTranslations, 'nature');
+                const natureLabel = TranslationService.Translate(this.natureTranslations, 'Nature').toLowerCase();
                 const {ref_article, nature_id} = this.colisPrise[pickingIndexes[0]] || {};
                 const nature = this.natureIdsToConfig[nature_id];
                 const natureValue = (nature ? nature.label : 'non défini');
@@ -362,7 +362,7 @@ export class DeposePage extends PageComponent implements CanLeave {
     }
 
     private refreshPriseListComponent(): void {
-        const natureLabel = TranslationService.Translate(this.natureTranslations, 'nature');
+        const natureLabel = TranslationService.Translate(this.natureTranslations, 'Nature');
         this.priseListConfig = this.trackingListFactory.createListConfig(
             this.colisPrise.filter(({hidden, packParent}) => (!hidden && !packParent)),
             TrackingListFactoryService.LIST_TYPE_DROP_SUB,
@@ -400,7 +400,7 @@ export class DeposePage extends PageComponent implements CanLeave {
     }
 
     private refreshDeposeListComponent(): void {
-        const natureLabel = TranslationService.Translate(this.natureTranslations, 'nature');
+        const natureLabel = TranslationService.Translate(this.natureTranslations, 'Nature');
         this.deposeListConfig = this.trackingListFactory.createListConfig(
             this.colisDepose,
             TrackingListFactoryService.LIST_TYPE_DROP_MAIN,
@@ -468,7 +468,7 @@ export class DeposePage extends PageComponent implements CanLeave {
             this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER),
             !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
             !this.fromStock ? this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + this.emplacement.id]) : of([]),
-            this.translationService.get('natures')
+            this.translationService.get(null, `Traçabilité`, `Général`)
         )
             .subscribe(([colisPrise, operator, skipValidation, natures, allowedNatureLocationArray, natureTranslations]) => {
                 this.colisPrise = colisPrise.map(({subPacks, ...tracking}) => ({

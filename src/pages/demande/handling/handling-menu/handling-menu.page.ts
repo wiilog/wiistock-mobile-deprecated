@@ -53,7 +53,7 @@ export class HandlingMenuPage extends PageComponent {
         if (!this.firstLaunch || !withoutLoading) {
             zip(
                 this.sqliteService.findAll('handling'),
-                this.translationService.get('services')
+                this.translationService.get(null, `Demande`, `Services`)
             )
                 .subscribe(([handlings, handlingsTranslations]: [Array<Handling>, Translations]) => {
                     this.handlingsTranslations = handlingsTranslations;
