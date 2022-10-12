@@ -28,9 +28,10 @@ export class TranslationService {
     }
 
     public get(...args): Observable<Translations> {
+        const [topMenu, menu, subMenu] = args;
         return this.sqliteService
             .findBy('translations', args.length > 0
-                ? [`topMenu LIKE '${args[0] || ``}' AND menu LIKE '${args[1] || ``}' AND subMenu LIKE '${args[2] || ``}'`]
+                ? [`topMenu LIKE '${topMenu || ``}' AND menu LIKE '${menu || ``}' AND subMenu LIKE '${subMenu || ``}'`]
                 : [])
             .pipe(
                 map((translations: Array<Translation>) => TranslationService.CreateTranslationDictionaryFromArray(translations))
