@@ -92,7 +92,7 @@ export class TransportRoundListPage extends PageComponent implements ViewWillEnt
                     this.toastService.presentToast(`Aucun emplacement de retour des colis non livrés n'a été paramétré, vous ne pouvez pas continuer.`);
                 } else {
                     if (depositedDeliveries) {
-                        round.lines = round.lines.filter((line: TransportRoundLine) => !line.collect.failure);
+                        round.lines = round.lines.filter((line: TransportRoundLine) => !line.collect || !line.collect.failure);
 
                         this.navService.push(NavPathEnum.TRANSPORT_COLLECT_NATURES, {
                             round,
