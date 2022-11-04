@@ -4,15 +4,17 @@
     .files-wrapper {
         overflow: hidden;
         flex: 1;
-        a {
+
+        button {
             flex: 1;
             display: flex;
             text-decoration: none;
             color: $dark;
-            background-color: $lightBlue;
+            background: $lightBlue;
             padding: $spacerMin;
             margin: $spacerMin / 2;
             border-radius: 8px;
+            border: none;
 
             .link-wrapper {
                 flex: 1;

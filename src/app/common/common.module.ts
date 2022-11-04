@@ -95,7 +95,7 @@ import {SuggestionListComponent} from "@app/common/components/suggestion-list/su
         HttpClientModule,
         IonicModule,
         IonicSelectableModule,
-        FormsModule
+        FormsModule,
     ],
     exports: [
         MainLoaderComponent,
