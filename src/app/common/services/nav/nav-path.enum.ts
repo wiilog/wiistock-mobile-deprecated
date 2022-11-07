@@ -1,4 +1,5 @@
 export enum NavPathEnum {
+    IMAGE_VIEWER = 'image-viewer',
     COLLECTE_ARTICLE_TAKE = 'collecte-article-take',
     COLLECTE_ARTICLE_PICKING = 'collecte-article-picking',
     LIVRAISON_MENU = 'livraison-menu',

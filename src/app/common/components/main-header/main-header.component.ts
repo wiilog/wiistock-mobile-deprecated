@@ -44,21 +44,22 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
 
     public readonly iconMenuHide: Array<NavPathEnum> = [
         NavPathEnum.MAIN_MENU,
-        NavPathEnum.PARAMS
+        NavPathEnum.PARAMS,
     ];
 
     public readonly iconLogoutShow: Array<NavPathEnum> = [
-        NavPathEnum.MAIN_MENU
+        NavPathEnum.MAIN_MENU,
     ];
 
     public readonly iconLeftHide: Array<string> = [];
 
     public readonly userHide: Array<NavPathEnum> = [
-        NavPathEnum.PARAMS
+        NavPathEnum.PARAMS,
     ];
 
     public readonly headerHide: Array<NavPathEnum> = [
-        NavPathEnum.LOGIN
+        NavPathEnum.LOGIN,
+        NavPathEnum.IMAGE_VIEWER,
     ];
 
     public currentPagePath: NavPathEnum;

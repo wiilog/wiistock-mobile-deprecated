@@ -18,6 +18,10 @@ const routes: Routes = [
         loadChildren: () => import('@pages/login/login.module').then(m => m.LoginPageModule)
     },
     {
+        path: NavPathEnum.IMAGE_VIEWER,
+        loadChildren: () => import('@pages/image-viewer/image-viewer.module').then(m => m.ImageViewerPageModule)
+    },
+    {
         path: NavPathEnum.MAIN_MENU,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/main-menu/main-menu.module').then(m => m.MainMenuPageModule)
