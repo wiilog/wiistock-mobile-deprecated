@@ -232,16 +232,37 @@ export class PrisePage extends PageComponent implements CanLeave {
                             loader = presentedLoader;
                         }),
                         flatMap(() => this.checkArticleOnLocation(barCode)),
-                        flatMap((quantity) => from(loader.dismiss()).pipe(
+                        flatMap(({res, quantity}) => from(loader.dismiss()).pipe(
                             tap(() => {
                                 loader = undefined;
                             }),
-                            map(() => quantity)
+                            map(() => ({res, quantity}))
                         ))
                     )
                     .subscribe(
-                        (quantity) => {
-                            this.processTackingBarCode(barCode, isManualAdd, quantity);
+                        ({res, quantity}) => {
+                            const article = (
+                                res
+                                && res.success
+                                && res.article
+                            );
+
+                            if(article && quantity > 0 && article.currentLogisticUnitId) {
+                                this.alertService.show({
+                                    message: `L'article ${article.barCode} sera enlevé de l'unité logistique ${article.currentLogisticUnitCode}`,
+                                    buttons: [{
+                                        text: 'Annuler',
+                                        role: 'cancel',
+                                        handler: () => this.barcodeCheckLoading = false,
+                                    }, {
+                                        text: 'Confirmer',
+                                        cssClass: 'alert-success',
+                                        handler: () => this.processTackingBarCode(barCode, isManualAdd, quantity),
+                                    }]
+                                })
+                            } else {
+                                this.processTackingBarCode(barCode, isManualAdd, quantity);
+                            }
                         },
                         () => {
                             if (loader) {
@@ -432,7 +453,7 @@ export class PrisePage extends PageComponent implements CanLeave {
         this.footerScannerComponent.fireZebraScan();
     }
 
-    private checkArticleOnLocation(barCode: string): Observable<number> {
+    private checkArticleOnLocation(barCode: string): Observable<{res: any, quantity: number}> {
         return this.apiService
             .requestApi(ApiService.GET_ARTICLES, {
                 params: {
@@ -462,8 +483,9 @@ export class PrisePage extends PageComponent implements CanLeave {
                         );
                     }
                 }),
-                map((res) => (
-                    (
+                map((res) => ({
+                    res,
+                    quantity: (
                         res
                         && res.success
                         && res.article
@@ -471,7 +493,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                         && res.article.quantity
                     )
                     || -1
-                )),
+                })),
             );
     }
 
@@ -578,30 +600,8 @@ export class PrisePage extends PageComponent implements CanLeave {
                 }
                 else {
                     this.footerScannerComponent.unsubscribeZebraScan();
-                    const quantitySuffix = (typeof quantity === 'number')
-                        ? ` en quantité de ${quantity}`
-                        : '';
-
-                    this.alertService.show({
-                        header: `Prise de ${barCode}${quantitySuffix}`,
-                        buttons: [
-                            {
-                                text: 'Annuler',
-                                role: 'cancel',
-                                handler: () => {
-                                    this.footerScannerComponent.fireZebraScan();
-                                }
-                            },
-                            {
-                                text: 'Confirmer',
-                                handler: () => {
-                                    this.saveTrackingMovement(barCode, quantity);
-                                    this.footerScannerComponent.fireZebraScan();
-                                },
-                                cssClass: 'alert-success'
-                            }
-                        ]
-                    });
+                    this.saveTrackingMovement(barCode, quantity);
+                    this.footerScannerComponent.fireZebraScan();
                 }
             }
         }
