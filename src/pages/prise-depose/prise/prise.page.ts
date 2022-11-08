@@ -246,7 +246,6 @@ export class PrisePage extends PageComponent implements CanLeave {
                                 && res.success
                                 && res.article
                             );
-
                             if(article && quantity > 0 && article.currentLogisticUnitId) {
                                 this.alertService.show({
                                     message: `L'article ${article.barCode} sera enlevé de l'unité logistique ${article.currentLogisticUnitCode}`,
