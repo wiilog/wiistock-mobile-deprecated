@@ -218,7 +218,6 @@ export class PrisePage extends PageComponent implements CanLeave {
     }
 
     public testIfBarcodeEquals(barCode: string, isManualAdd: boolean = false): void {
-        console.log('AGOUGOU');
         if (!this.barcodeCheckLoading) {
             if (!this.fromStock) {
                 this.processTackingBarCode(barCode, isManualAdd, 1);
