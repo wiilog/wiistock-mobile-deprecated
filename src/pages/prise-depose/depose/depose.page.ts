@@ -232,7 +232,7 @@ export class DeposePage extends PageComponent implements CanLeave {
     }
 
     public get objectLabel(): string {
-        return TrackingListFactoryService.GetObjectLabel(this.fromStock);
+        return `objet`;
     }
 
     public get displayPrisesList(): boolean {

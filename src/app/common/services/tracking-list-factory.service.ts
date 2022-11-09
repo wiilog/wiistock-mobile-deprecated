@@ -79,12 +79,6 @@ export class TrackingListFactoryService {
         }
     }
 
-    public static GetObjectLabel(fromStock: boolean): string {
-        return fromStock
-            ? 'article'
-            : 'objet';
-    }
-
     private createConfirmationBoxAlert(message?: string, removeItem?: (info: { [name: string]: { value?: string } }) => void): void {
         if(!this.actionsDisabled && !this._alertPresented) {
             this._alertPresented = true;
@@ -180,7 +174,7 @@ export class TrackingListFactoryService {
                         : {}
                 )
             },
-            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, loading, isGroup, subPacks}) => {
+            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, articles, loading, isGroup, subPacks}) => {
                 const natureConfig = (natureIdsToConfig && nature_id && natureIdsToConfig[nature_id]);
 
                 let quantityRow = {};
@@ -202,12 +196,23 @@ export class TrackingListFactoryService {
                             : {}));
                 }
 
+                let articlesCount = {};
+                if(articles) {
+                    articlesCount = {
+                        articlesCount: {
+                            label: `Nombre d'articles`,
+                            value: articles.length,
+                        }
+                    }
+                }
+
                 const infos = {
                     [TrackingListFactoryService.TRACKING_IDENTIFIER_NAME]: {
                         label: 'Objet',
                         value: ref_article
                     },
                     ...quantityRow,
+                    ...articlesCount,
                     date: {
                         label: 'Date / Heure',
                         value: moment(date, moment.defaultFormat).format('DD/MM/YYYY HH:mm:ss')

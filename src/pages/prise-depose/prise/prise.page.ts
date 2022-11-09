@@ -42,7 +42,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     public footerScannerComponent: BarcodeScannerComponent;
 
     public emplacement: Emplacement;
-    public colisPrise: Array<MouvementTraca & {loading?: boolean; subPacks?: Array<MouvementTraca>;}>;
+    public colisPrise: Array<MouvementTraca & {loading?: boolean; subPacks?: Array<MouvementTraca>; articles: Array<string>;}>;
     public currentPacksOnLocation: Array<MouvementTraca&{hidden?: boolean}>;
     public colisPriseAlreadySaved: Array<MouvementTraca>;
 
@@ -106,7 +106,7 @@ export class PrisePage extends PageComponent implements CanLeave {
             (this.networkService.hasNetwork() && this.emplacement && !this.fromStock
                 ? this.apiService.requestApi(ApiService.GET_TRACKING_DROPS, {params: {location: this.emplacement.label}})
                 : of({trackingDrops: []})),
-            !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
+            this.sqliteService.findAll('nature'),
             this.translationService.get(null, `Traçabilité`, `Général`)
         )
             .subscribe(([operator, colisPriseAlreadySaved, {trackingDrops}, natures, natureTranslations]) => {
@@ -168,7 +168,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                             message: multiPrise ? 'Envoi des prises en cours...' : 'Envoi de la prise en cours...',
                             event: () => {
                                 return this.localDataManager
-                                    .saveTrackingMovements(movementsToSave.map(({loading, ...tracking}) => tracking))
+                                    .saveTrackingMovements(movementsToSave.map(({loading, articles, ...tracking}) => tracking))
                                     .pipe(
                                         flatMap(() => (
                                             online
@@ -256,11 +256,11 @@ export class PrisePage extends PageComponent implements CanLeave {
                                     }, {
                                         text: 'Confirmer',
                                         cssClass: 'alert-success',
-                                        handler: () => this.processTackingBarCode(barCode, isManualAdd, quantity),
+                                        handler: () => this.processTackingBarCode(barCode, isManualAdd, quantity, article),
                                     }]
                                 })
                             } else {
-                                this.processTackingBarCode(barCode, isManualAdd, quantity);
+                                this.processTackingBarCode(barCode, isManualAdd, quantity, article);
                             }
                         },
                         () => {
@@ -282,7 +282,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     }
 
     public get objectLabel(): string {
-        return TrackingListFactoryService.GetObjectLabel(this.fromStock);
+        return `objet`;
     }
 
     private get toTakeOngoingPacks() {
@@ -300,7 +300,7 @@ export class PrisePage extends PageComponent implements CanLeave {
         return this.currentPacksOnLocation && this.toTakeOngoingPacks.length > 0;
     }
 
-    private saveTrackingMovement(barCode: string, quantity: number, loading: boolean = false): void {
+    private saveTrackingMovement(barCode: string, quantity: number, loading: boolean = false, articles: Array<string> = null): void {
         this.colisPrise.unshift({
             ref_article: barCode,
             type: PrisePage.MOUVEMENT_TRACA_PRISE,
@@ -310,7 +310,8 @@ export class PrisePage extends PageComponent implements CanLeave {
             loading,
             fromStock: Number(this.fromStock),
             quantity,
-            date: moment().format()
+            date: moment().format(),
+            articles,
         });
         this.setPackOnLocationHidden(barCode, true);
         this.refreshListComponent();
@@ -517,7 +518,7 @@ export class PrisePage extends PageComponent implements CanLeave {
         );
     }
 
-    private processTackingBarCode(barCode: string, isManualAdd: boolean, quantity: number) {
+    private processTackingBarCode(barCode: string, isManualAdd: boolean, quantity: number, article: any = null) {
         this.barcodeCheckLoading = false;
         if (quantity > 0) {
             if (this.colisPrise &&
@@ -528,79 +529,91 @@ export class PrisePage extends PageComponent implements CanLeave {
                 this.toastService.presentToast('Cette prise a déjà été effectuée', {audio: true});
             }
             else {
-                if (isManualAdd || !this.fromStock) {
-                    const needNatureChecks = (!this.fromStock && this.networkService.hasNetwork());
-                    this.saveTrackingMovement(barCode, quantity, needNatureChecks);
+                const needNatureChecks = this.networkService.hasNetwork() && (!article || article.is_lu);
+                this.saveTrackingMovement(barCode, quantity, needNatureChecks, article ? article.articles : null);
 
-                    if (needNatureChecks) {
-                        this.apiService
-                            .requestApi(ApiService.GET_PACK_DATA, {
-                                params: {
-                                    code: barCode,
-                                    nature: 1,
-                                    group: 1
+                if (needNatureChecks) {
+                    this.apiService
+                        .requestApi(ApiService.GET_PACK_DATA, {
+                            params: {
+                                code: barCode,
+                                nature: 1,
+                                group: 1
+                            }
+                        })
+                        .pipe(
+                            flatMap(({nature, group, isPack, isGroup}) => (
+                                nature
+                                    ? this.sqliteService.importNaturesData({natures: [nature]}, false).pipe(map(() => ({nature, group, isPack, isGroup})))
+                                    : of({nature, group, isPack, isGroup})
+                            )),
+                            tap(({nature}) => {
+                                if (nature) {
+                                    const {id, color, label} = nature;
+                                    this.natureIdsToConfig[id] = {label, color};
                                 }
-                            })
-                            .pipe(
-                                flatMap(({nature, group, isPack, isGroup}) => (
-                                    nature
-                                        ? this.sqliteService.importNaturesData({natures: [nature]}, false).pipe(map(() => ({nature, group, isPack, isGroup})))
-                                        : of({nature, group, isPack, isGroup})
-                                )),
-                                tap(({nature}) => {
-                                    if (nature) {
-                                        const {id, color, label} = nature;
-                                        this.natureIdsToConfig[id] = {label, color};
-                                    }
-                                }),
-                                filter(() => this.viewEntered)
-                            )
-                            .subscribe(
-                                ({nature, group, isPack, isGroup}) => {
-                                    if (isPack || !isGroup) {
-                                        if (group) {
-                                            this.alertService.show({
-                                                header: 'Confirmation',
-                                                backdropDismiss: false,
-                                                cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
-                                                message: `Le colis ${barCode} est contenu dans le groupe ${group.code}.
-                                                      Confirmer la prise l'enlèvera du groupe.`,
-                                                buttons: [
-                                                    {
-                                                        text: 'Confirmer',
-                                                        cssClass: 'alert-success',
-                                                        handler: () => {
-                                                            this.updateTrackingMovementNature(barCode, nature && nature.id);
-                                                        }
-                                                    },
-                                                    {
-                                                        text: 'Annuler',
-                                                        cssClass: 'alert-danger',
-                                                        role: 'cancel',
-                                                        handler: () => {
-                                                            const cancelPicking = this.cancelPickingAction();
-                                                            cancelPicking({object: {value: barCode, label: barCode}});
-                                                        }
+                            }),
+                            filter(() => this.viewEntered)
+                        )
+                        .subscribe(
+                            ({nature, group, isPack, isGroup}) => {
+                                if(this.fromStock && isGroup) {
+                                    const cancelPicking = this.cancelPickingAction();
+                                    cancelPicking({object: {value: barCode, label: barCode}});
+
+                                    this.alertService.show({
+                                        header: 'Transfert impossible',
+                                        backdropDismiss: false,
+                                        cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+                                        message: `Vous ne pouvez pas transférer l'unité logistique ${barCode} car c'est un groupe`,
+                                        buttons: [
+                                            {
+                                                text: 'Annuler',
+                                                cssClass: 'alert-danger',
+                                                role: 'cancel',
+                                            }
+                                        ]
+                                    });
+                                }
+
+                                if (isPack || !isGroup) {
+                                    if (group) {
+                                        this.alertService.show({
+                                            header: 'Confirmation',
+                                            backdropDismiss: false,
+                                            cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+                                            message: `Le colis ${barCode} est contenu dans le groupe ${group.code}.
+                                                  Confirmer la prise l'enlèvera du groupe.`,
+                                            buttons: [
+                                                {
+                                                    text: 'Confirmer',
+                                                    cssClass: 'alert-success',
+                                                    handler: () => {
+                                                        this.updateTrackingMovementNature(barCode, nature && nature.id);
                                                     }
-                                                ]
-                                            });
-                                        }
-                                        else {
-                                            this.updateTrackingMovementNature(barCode, nature && nature.id);
-                                        }
+                                                },
+                                                {
+                                                    text: 'Annuler',
+                                                    cssClass: 'alert-danger',
+                                                    role: 'cancel',
+                                                    handler: () => {
+                                                        const cancelPicking = this.cancelPickingAction();
+                                                        cancelPicking({object: {value: barCode, label: barCode}});
+                                                    }
+                                                }
+                                            ]
+                                        });
                                     }
-                                    else { // isGroup === true
-                                        this.updateTrackingMovementNature(barCode, nature && nature.id, group);
+                                    else {
+                                        this.updateTrackingMovementNature(barCode, nature && nature.id);
                                     }
-                                },
-                                () => this.updateTrackingMovementNature(barCode)
-                            );
-                    }
-                }
-                else {
-                    this.footerScannerComponent.unsubscribeZebraScan();
-                    this.saveTrackingMovement(barCode, quantity);
-                    this.footerScannerComponent.fireZebraScan();
+                                }
+                                else { // isGroup === true
+                                    this.updateTrackingMovementNature(barCode, nature && nature.id, group);
+                                }
+                            },
+                            () => this.updateTrackingMovementNature(barCode)
+                        );
                 }
             }
         }
