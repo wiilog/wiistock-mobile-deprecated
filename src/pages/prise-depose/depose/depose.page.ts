@@ -279,7 +279,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                             ref_emplacement: this.emplacement.label,
                             date: moment().format(),
                             freeFields: picking.freeFields,
-                            packParent: picking.packParent
+                            packParent: picking.packParent,
                         });
 
                         const remover = TrackingListFactoryService.CreateRemoveItemFromListHandler(

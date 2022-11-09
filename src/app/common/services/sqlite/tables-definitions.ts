@@ -28,7 +28,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             id_livraison: 'INTEGER',
             id_article_collecte: 'INTEGER',
             id_collecte: 'INTEGER',
-            selected_by_article: 'INTEGER'
+            selected_by_article: 'INTEGER',
         }
     },
     {

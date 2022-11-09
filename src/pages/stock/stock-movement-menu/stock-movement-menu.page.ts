@@ -76,7 +76,12 @@ export class StockMovementMenuPage extends PageComponent implements CanLeave {
                         fromStock
                     ))
                     .length;
-
+console.log(mouvementTraca
+    .filter(({finished, type, fromStock}) => (
+        type === 'prise' &&
+        !finished &&
+        fromStock
+    )));
                 this.statsSlidersData = this.createStatsSlidersData(this.nbDrop);
 
                 loading.dismiss();
