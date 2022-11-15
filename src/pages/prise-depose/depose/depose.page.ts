@@ -442,8 +442,8 @@ export class DeposePage extends PageComponent implements CanLeave {
             ),
             this.storageService.getString(StorageKeyEnum.OPERATOR),
             this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER),
-            !this.fromStock ? this.sqliteService.findAll('nature') : of([]),
-            !this.fromStock ? this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + this.emplacement.id]) : of([]),
+            this.sqliteService.findAll('nature'),
+            this.sqliteService.findBy('allowed_nature_location', ['location_id = ' + this.emplacement.id]),
             this.translationService.get(null, `Traçabilité`, `Général`)
         )
             .subscribe(([colisPrise, operator, skipValidation, natures, allowedNatureLocationArray, natureTranslations]) => {

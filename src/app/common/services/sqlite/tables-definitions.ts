@@ -51,6 +51,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             isGroup: 'INTEGER',
             subPacks: 'TEXT',
             packParent: 'VARCHAR(255)',
+            articles: 'JSON',
         }
     },
     {
