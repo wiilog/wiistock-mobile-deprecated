@@ -200,31 +200,7 @@ export class DeposePage extends PageComponent implements CanLeave {
     public testColisDepose(barCode: string, isManualInput: boolean = false): void {
         const pickingIndexes = this.findPickingIndexes(barCode);
         if (pickingIndexes.length > 0) {
-            if (isManualInput || !this.fromStock) {
-                this.saveMouvementTraca(pickingIndexes);
-            }
-            else {
-                this.footerScannerComponent.unsubscribeZebraScan();
-                this.alertService.show({
-                    header: `Vous avez sélectionné l'${this.objectLabel} ${barCode}`,
-                    buttons: [
-                        {
-                            text: 'Annuler',
-                            role: 'cancel',
-                            handler: () => {
-                                this.footerScannerComponent.fireZebraScan();
-                            },
-                        },
-                        {
-                            text: 'Confirmer',
-                            handler: () => {
-                                this.saveMouvementTraca(pickingIndexes);
-                            },
-                            cssClass: 'alert-success'
-                        }
-                    ]
-                });
-            }
+            this.saveMouvementTraca(pickingIndexes);
         }
         else {
             this.toastService.presentToast(`Cet ${this.objectLabel} ne correspond à aucune prise`, {audio: true});

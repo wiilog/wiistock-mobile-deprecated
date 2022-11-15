@@ -178,7 +178,7 @@ export class TrackingListFactoryService {
                 const natureConfig = (natureIdsToConfig && nature_id && natureIdsToConfig[nature_id]);
 
                 let quantityRow = {};
-                if (!loading) {
+                if (!articles && !loading) {
                     quantityRow = isGroup
                         ? {
                             quantity: {
