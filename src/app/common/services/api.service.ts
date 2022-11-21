@@ -34,6 +34,7 @@ export class ApiService {
     public static readonly GET_PREVIOUS_OPERATOR_MOVEMENTS = {method: GET, service: '/previous-operator-movements'};
     public static readonly NEW_EMP = {method: POST, service: '/emplacement'};
     public static readonly GET_ARTICLES = {method: GET, service: '/articles'};
+    public static readonly DROP_IN_LU = {method: POST, service: '/drop-in-lu'};
     public static readonly GET_TRACKING_DROPS = {method: GET, service: '/tracking-drops'};
     public static readonly POST_DEMANDE_LIVRAISON = {method: POST, service: '/valider-dl'};
     public static readonly POST_MANUAL_DEMANDE_LIVRAISON = {method: POST, service: '/valider-manual-dl'};
