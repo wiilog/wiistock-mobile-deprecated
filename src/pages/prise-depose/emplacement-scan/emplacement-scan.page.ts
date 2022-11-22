@@ -32,6 +32,7 @@ export class EmplacementScanPage extends PageComponent {
 
     public loading: boolean;
     public isDemoMode: boolean;
+    public customAction?: (location) => void;
 
     public constructor(private networkService: NetworkService,
                        private toastService: ToastService,
@@ -48,6 +49,7 @@ export class EmplacementScanPage extends PageComponent {
             this.fromDepose = Boolean(this.currentNavParams.get('fromDepose'));
             this.fromStock = Boolean(this.currentNavParams.get('fromStock'));
             this.fromEmptyRound = Boolean(this.currentNavParams.get('fromEmptyRound'));
+            this.customAction = this.currentNavParams.get('customAction');
             this.loading = false;
             this.isDemoMode = isDemoMode;
             this.barcodeScannerMode = this.fromStock || !isDemoMode
@@ -81,18 +83,23 @@ export class EmplacementScanPage extends PageComponent {
 
     public selectLocation(emplacement: Emplacement) {
         this.testNetwork(() => {
-            const nextPagePath = this.fromDepose
-                ? NavPathEnum.DEPOSE
-                : (this.fromEmptyRound
-                    ? NavPathEnum.EMPTY_ROUND
-                    : NavPathEnum.PRISE);
-            this.navService.push(nextPagePath, {
-                emplacement: emplacement,
-                fromStock: this.fromStock,
-                finishAction: () => {
-                    this.navService.pop();
-                }
-            });
+            console.log(this.customAction);
+            if (this.customAction) {
+                this.navService.pop().toPromise().then((_) => this.customAction(emplacement.label));
+            } else {
+                const nextPagePath = this.fromDepose
+                    ? NavPathEnum.DEPOSE
+                    : (this.fromEmptyRound
+                        ? NavPathEnum.EMPTY_ROUND
+                        : NavPathEnum.PRISE);
+                this.navService.push(nextPagePath, {
+                    emplacement,
+                    fromStock: this.fromStock,
+                    finishAction: () => {
+                        this.navService.pop();
+                    }
+                });
+            }
         });
     }
 

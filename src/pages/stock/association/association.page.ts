@@ -21,6 +21,7 @@ import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel
 import {IconConfig} from "@app/common/components/panel/model/icon-config";
 import {flatMap, map, tap} from "rxjs/operators";
 import {TransferOrderArticle} from "@entities/transfer-order-article";
+import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
 
 
 @Component({
@@ -100,16 +101,29 @@ export class AssociationPage extends PageComponent implements CanLeave {
     }
 
     public finish() {
-        const articlesWithLogisticUnits = this.articlesList.filter((article) => article.currentLogisticUnitCode);
         const logisticUnit = this.articlesList.filter((article) => article.is_lu)[0];
-        const articlesToDrop = this.articlesList.filter((article) => !article.is_lu);
         const needsLocationPicking = !logisticUnit.location;
+        const articlesWithLogisticUnits = this.articlesList.filter((article) => article.currentLogisticUnitCode);
 
-        console.log('Articles to verify :', articlesWithLogisticUnits.map((article) => article.barCode));
-        console.log('Articles to send', articlesToDrop.map((article) => article.barCode));
-        console.log('LU to drop in', logisticUnit.barCode);
-        console.log('Need location select', needsLocationPicking);
+        if (needsLocationPicking) {
+            this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
+                fromDepose: false,
+                fromStock: true,
+                customAction: (location) => this.locationSelectCallback(location)
+            });
+        } else {
+            this.doAPICall(logisticUnit);
+        }
+    }
 
+    public locationSelectCallback(location) {
+        const logisticUnit = this.articlesList.filter((article) => article.is_lu)[0];
+        logisticUnit.location = location;
+        this.doAPICall(logisticUnit);
+    }
+
+    public doAPICall(logisticUnit) {
+        const articlesToDrop = this.articlesList.filter((article) => !article.is_lu);
         if (this.networkService.hasNetwork()) {
             this.barcodeCheckLoading = true;
             let loader: HTMLIonLoadingElement;
@@ -123,7 +137,8 @@ export class AssociationPage extends PageComponent implements CanLeave {
                         .requestApi(ApiService.DROP_IN_LU, {
                             params: {
                                 articles: articlesToDrop.map((article) => article.barCode),
-                                lu: logisticUnit.barCode
+                                lu: logisticUnit.barCode,
+                                location: logisticUnit.location
                             }
                         })),
                     flatMap((res) => from(loader.dismiss()).pipe(
