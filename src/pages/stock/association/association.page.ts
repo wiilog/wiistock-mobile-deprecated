@@ -109,6 +109,49 @@ export class AssociationPage extends PageComponent implements CanLeave {
         console.log('Articles to send', articlesToDrop.map((article) => article.barCode));
         console.log('LU to drop in', logisticUnit.barCode);
         console.log('Need location select', needsLocationPicking);
+
+        if (this.networkService.hasNetwork()) {
+            this.barcodeCheckLoading = true;
+            let loader: HTMLIonLoadingElement;
+            this.loadingService
+                .presentLoading('Vérification...')
+                .pipe(
+                    tap((presentedLoader) => {
+                        loader = presentedLoader;
+                    }),
+                    flatMap(() => this.apiService
+                        .requestApi(ApiService.DROP_IN_LU, {
+                            params: {
+                                articles: articlesToDrop.map((article) => article.barCode),
+                                lu: logisticUnit.barCode
+                            }
+                        })),
+                    flatMap((res) => from(loader.dismiss()).pipe(
+                        tap(() => {
+                            loader = undefined;
+                        }),
+                        map(() => (res))
+                    ))
+                )
+                .subscribe(
+                    (res) => {
+                        console.log(res);
+                        this.toastService.presentToast('Association UL - Articles effectuée.')
+                            .toPromise()
+                            .then((_: void) => this.navService.pop());
+                    },
+                    () => {
+                        if (loader) {
+                            loader.dismiss();
+                        }
+                        this.barcodeCheckLoading = false;
+                        this.toastService.presentToast('Erreur serveur');
+                    }
+                );
+        }
+        else {
+            this.toastService.presentToast('Vous devez être connecté à internet pour effectuer une prise');
+        }
     }
 
     public scan(barCode: string) {
