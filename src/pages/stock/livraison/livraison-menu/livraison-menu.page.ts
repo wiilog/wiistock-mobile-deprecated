@@ -14,6 +14,7 @@ import {Subscription} from 'rxjs';
 import {flatMap, map} from 'rxjs/operators';
 import {LoadingService} from '@app/common/services/loading.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import * as moment from "moment";
 
 
 @Component({
@@ -72,6 +73,15 @@ export class LivraisonMenuPage extends PageComponent {
                 .subscribe(([loader, deliveries]: [HTMLIonLoadingElement, Array<Livraison>]) => {
                     this.loader = loader;
                     this.deliveryOrders = deliveries.filter(({date_end}) => (date_end === null));
+                    this.deliveryOrders = deliveries.sort((a, b) => {
+                        const momentExpectedDate1 = moment(a.expectedAt, 'DD/MM/YYYY HH:mm:ss')
+                        const momentExpectedDate2 = moment(b.expectedAt, 'DD/MM/YYYY HH:mm:ss')
+                        return (
+                            momentExpectedDate1.isBefore(momentExpectedDate2) ? -1 :
+                                momentExpectedDate1.isAfter(momentExpectedDate2) ? 1 :
+                                    0
+                        );
+                    });
                     const preparationLocationsStr = deliveries
                         .reduce((acc: Array<string>, {preparationLocation}) => {
                             if (preparationLocation && acc.indexOf(preparationLocation) === -1) {
@@ -125,6 +135,7 @@ export class LivraisonMenuPage extends PageComponent {
                     label: 'Demandeur',
                     value: livraison.requester
                 },
+                customColor: livraison.color,
                 content: [
                     {
                         label: 'Numéro',
@@ -147,6 +158,22 @@ export class LivraisonMenuPage extends PageComponent {
                             ? [{
                                 label: 'Emplacement de préparation',
                                 value: livraison.preparationLocation
+                            }]
+                            : []
+                    ),
+                    ...(
+                        livraison.expectedAt
+                            ? [{
+                                label: 'Date attendue',
+                                value: livraison.expectedAt
+                            }]
+                            : []
+                    ),
+                    ...(
+                        livraison.project
+                            ? [{
+                                label: 'Projet',
+                                value: livraison.project
                             }]
                             : []
                     )

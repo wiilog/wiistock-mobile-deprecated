@@ -116,7 +116,10 @@ export const TablesDefinitions: Array<TableDefinition> = [
             requester: 'VARCHAR(255)',
             type: 'VARCHAR(255)',
             preparationLocation: 'VARCHAR(255)',
-            comment: 'TEXT'
+            comment: 'TEXT',
+            expectedAt: 'TEXT',
+            color: 'VARCHAR(255)',
+            project: 'VARCHAR(255)'
         }
     },
     {
