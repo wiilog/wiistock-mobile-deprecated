@@ -7,4 +7,7 @@ export interface Livraison {
     requester: string;
     type: string;
     comment: string
+    expectedAt: string
+    color: string
+    project: string
 }
