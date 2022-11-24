@@ -143,7 +143,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                     params.get('fromDepose') && !params.get('customAction')
                 )
             },
-            {pagePath: NavPathEnum.STOCK_MOVEMENT_MENU, label: 'Transfert'},
+            {pagePath: NavPathEnum.STOCK_MOVEMENT_MENU, label: 'Transfert manuel'},
             {pagePath: NavPathEnum.PREPARATION_MENU, label: 'Préparation'},
             {pagePath: NavPathEnum.LIVRAISON_MENU, label: 'Livraison'},
             {pagePath: NavPathEnum.MANUAL_DELIVERY, label: 'Livraison manuelle'},
