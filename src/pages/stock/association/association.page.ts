@@ -22,6 +22,8 @@ import {IconConfig} from "@app/common/components/panel/model/icon-config";
 import {flatMap, map, tap} from "rxjs/operators";
 import {TransferOrderArticle} from "@entities/transfer-order-article";
 import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
+import {CardListConfig} from "@app/common/components/card-list/card-list-config";
+import {CardListColorEnum} from "@app/common/components/card-list/card-list-color.enum";
 
 
 @Component({
@@ -38,7 +40,7 @@ export class AssociationPage extends PageComponent implements CanLeave {
     public loading: boolean = false;
     public barcodeCheckLoading: boolean = false;
     public listBoldValues?: Array<string>;
-    public listBody: Array<ListPanelItemConfig>;
+    public listBody: Array<CardListConfig>;
     public articlesList: Array<{
         barCode: string,
         label: string,
@@ -100,19 +102,39 @@ export class AssociationPage extends PageComponent implements CanLeave {
         }
     }
 
-    public finish() {
+    public finish(needsCheck = true) {
         const logisticUnit = this.articlesList.filter((article) => article.is_lu)[0];
         const needsLocationPicking = !logisticUnit.location;
-        const articlesWithLogisticUnits = this.articlesList.filter((article) => article.currentLogisticUnitCode);
-
-        if (needsLocationPicking) {
-            this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
-                fromDepose: false,
-                fromStock: true,
-                customAction: (location) => this.locationSelectCallback(location)
+        const articlesWithLogisticUnit = this.articlesList.filter((article) => article.currentLogisticUnitCode);
+        const articlesWithLogisticUnitContent = articlesWithLogisticUnit
+            .map((articleWithLogisticUnit) => `<strong>${articleWithLogisticUnit.barCode}</strong> de ${articleWithLogisticUnit.currentLogisticUnitCode}`)
+            .join(`<br>`)
+        if (articlesWithLogisticUnit.length > 0 && needsCheck) {
+            this.alertService.show({
+                header: 'Les articles suivants seront enlevés de leur unité logistique :',
+                message: articlesWithLogisticUnitContent,
+                buttons: [
+                    {
+                        text: 'Annuler',
+                        role: 'cancel'
+                    },
+                    {
+                        text: 'Confirmer',
+                        cssClass: 'alert-success',
+                        handler: () => this.finish(false)
+                    }
+                ]
             });
         } else {
-            this.doAPICall(logisticUnit);
+            if (needsLocationPicking) {
+                this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
+                    fromDepose: false,
+                    fromStock: true,
+                    customAction: (location) => this.locationSelectCallback(location)
+                });
+            } else {
+                this.doAPICall(logisticUnit);
+            }
         }
     }
 
@@ -235,7 +257,7 @@ export class AssociationPage extends PageComponent implements CanLeave {
     public refreshHeader() {
         this.headerConfig = {
             leftIcon: {
-                name: 'transfer.svg',
+                name: 'association.svg',
                 color: 'tertiary'
             },
             rightIcon: {
@@ -253,8 +275,15 @@ export class AssociationPage extends PageComponent implements CanLeave {
     }
 
     public refreshList() {
-        this.listBody = this.articlesList.map((article) => ({
-            infos: this.createArticleInfo(article),
+        this.listBody = this.articlesList
+            .sort((article) => article.is_lu ? -1 : 1)
+            .map((article) => ({
+            ...article.is_lu ? {title: {
+                    label: 'Unité logistique',
+                    value: article.barCode
+                }} : {} as any,
+            customColor: '#2DBDB8',
+            content: this.createArticleInfo(article),
             rightIcon: {
                 name: 'trash.svg',
                 color: 'danger',
@@ -262,7 +291,8 @@ export class AssociationPage extends PageComponent implements CanLeave {
                     this.removeArticle(article);
                 }
             }
-        }))
+        }));
+        console.log(this.listBody);
     }
 
     public removeArticle(article) {
@@ -271,25 +301,29 @@ export class AssociationPage extends PageComponent implements CanLeave {
         this.refreshHeader();
     }
 
-    public createArticleInfo(articleOrPack): {[name: string]: { label: string; value: string; }} {
-        return {
-            label: {
+    public createArticleInfo(articleOrPack): Array<{ label?: string; value?: string; itemConfig?: ListPanelItemConfig; }> {
+        const infos = [
+            {
                 label: articleOrPack.is_lu ? 'Projet' : 'Libellé',
                 value: articleOrPack.is_lu ? articleOrPack.project : articleOrPack.label
             },
-            barCode: {
-                label: 'Code barre',
-                value: articleOrPack.barCode
-            },
-            location: {
+            {
                 label: 'Emplacement',
                 value: articleOrPack.location
             },
-            quantity: {
+            {
                 label: articleOrPack.is_lu ? 'Nombre d\'article(s)' : 'Quantité',
                 value: articleOrPack.is_lu ? (articleOrPack.articles ? articleOrPack.articles.length : 0) : articleOrPack.quantity,
             }
-        };
+        ];
+
+        if (!articleOrPack.is_lu) {
+            infos.push({
+                label: 'Code barre',
+                value: articleOrPack.barCode
+            })
+        }
+        return infos;
     }
 
 }

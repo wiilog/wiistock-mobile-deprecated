@@ -103,7 +103,7 @@ export class StockMenuPage extends PageComponent {
                 }
             },
             {
-                icon: 'inventory.svg',
+                icon: 'association.svg',
                 label: 'Association Articles - UL',
                 action: () => {
                     self.navService.push(NavPathEnum.ASSOCIATION);

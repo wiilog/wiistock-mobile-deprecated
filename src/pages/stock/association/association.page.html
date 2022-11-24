@@ -5,7 +5,7 @@
          scroll-y="true"
          *ngIf="!loading">
 
-        <wii-panel-header *ngIf="articlesList.length === 0"
+        <wii-panel-header [rightIcons]="headerConfig.rightIcon"
                           [leftIcon]="headerConfig.leftIcon"
                           [title]="headerConfig.title"
                           [subtitle]="headerConfig.subtitle"
@@ -13,11 +13,9 @@
                           class="page-header">
         </wii-panel-header>
 
-        <wii-list-panel *ngIf="listBody && articlesList.length > 0"
-                        [header]="headerConfig"
-                        [body]="listBody"
-                        [boldValues]="listBoldValues">
-        </wii-list-panel>
+        <wii-card-list *ngIf="listBody && articlesList.length > 0"
+                       [config]="listBody">
+        </wii-card-list>
     </div>
 
     <div class="page-footer persisted-page-footer">
