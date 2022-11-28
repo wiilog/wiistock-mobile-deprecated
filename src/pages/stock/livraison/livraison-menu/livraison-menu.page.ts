@@ -76,10 +76,6 @@ export class LivraisonMenuPage extends PageComponent {
                     this.deliveryOrders = deliveries.sort((a, b) => {
                         const momentExpectedDate1 = moment(a.expectedAt, 'DD/MM/YYYY HH:mm:ss')
                         const momentExpectedDate2 = moment(b.expectedAt, 'DD/MM/YYYY HH:mm:ss')
-                        console.log(momentExpectedDate1)
-                        console.log(momentExpectedDate2)
-                        console.log(momentExpectedDate1.isBefore(momentExpectedDate2))
-                        console.log(momentExpectedDate1.isAfter(momentExpectedDate2))
                         return (
                             (momentExpectedDate1.isValid() && !momentExpectedDate2.isValid()) || momentExpectedDate1.isBefore(momentExpectedDate2) ? -1 :
                                 (!momentExpectedDate1.isValid() && momentExpectedDate2.isValid()) || momentExpectedDate1.isAfter(momentExpectedDate2) ? 1 :

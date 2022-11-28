@@ -83,7 +83,6 @@ export class EmplacementScanPage extends PageComponent {
 
     public selectLocation(emplacement: Emplacement) {
         this.testNetwork(() => {
-            console.log(this.customAction);
             if (this.customAction) {
                 this.navService.pop().toPromise().then((_) => this.customAction(emplacement.label));
             } else {

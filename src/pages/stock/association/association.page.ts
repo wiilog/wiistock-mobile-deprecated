@@ -172,7 +172,6 @@ export class AssociationPage extends PageComponent implements CanLeave {
                 )
                 .subscribe(
                     (res) => {
-                        console.log(res);
                         this.toastService.presentToast('Association UL - Articles effectuée.')
                             .toPromise()
                             .then((_: void) => this.navService.pop());
@@ -192,7 +191,6 @@ export class AssociationPage extends PageComponent implements CanLeave {
     }
 
     public scan(barCode: string) {
-        console.log(barCode);
         if (this.networkService.hasNetwork()) {
             this.barcodeCheckLoading = true;
             let loader: HTMLIonLoadingElement;
@@ -218,13 +216,11 @@ export class AssociationPage extends PageComponent implements CanLeave {
                 )
                 .subscribe(
                     (res) => {
-                        console.log(res);
                         const article = (
                             res
                             && res.success
                             && res.article
                         );
-                        console.log(article);
                         const existing = this.articlesList.some((articleElement) => articleElement.barCode === article.barCode);
                         if (existing) {
                             this.toastService.presentToast('Vous avez déjà scanné cet article ou cette unité logistique.');
@@ -289,10 +285,10 @@ export class AssociationPage extends PageComponent implements CanLeave {
                 color: 'danger',
                 action: () => {
                     this.removeArticle(article);
+                    this.toastService.presentToast(article.is_lu ? `L'unité logistique a bien été supprimée.` : `L'article a bien été supprimé.`);
                 }
             }
         }));
-        console.log(this.listBody);
     }
 
     public removeArticle(article) {
@@ -303,10 +299,17 @@ export class AssociationPage extends PageComponent implements CanLeave {
 
     public createArticleInfo(articleOrPack): Array<{ label?: string; value?: string; itemConfig?: ListPanelItemConfig; }> {
         const infos = [
-            {
-                label: articleOrPack.is_lu ? 'Projet' : 'Libellé',
-                value: articleOrPack.is_lu ? articleOrPack.project : articleOrPack.label
-            },
+            ...(
+                articleOrPack.is_lu && articleOrPack.project
+                    ? [{
+                        label: 'Projet',
+                        value: articleOrPack.project
+                    }]
+                    : (!articleOrPack.is_lu ? [{
+                        label: 'Libellé',
+                        value: articleOrPack.label
+                    }] : [{}])
+            ),
             {
                 label: 'Emplacement',
                 value: articleOrPack.location
