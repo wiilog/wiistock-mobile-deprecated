@@ -11,4 +11,7 @@ export interface Preparation {
     type: string;
 
     comment: string; // Commentaire de la demande de livraison
+    expectedAt: string;
+    color: string;
+    project: string;
 }

@@ -65,7 +65,10 @@ export const TablesDefinitions: Array<TableDefinition> = [
             started: 'INTEGER',
             requester: 'VARCHAR(255)',
             type: 'VARCHAR(255)',
-            comment: 'TEXT'
+            comment: 'TEXT',
+            expectedAt: 'TEXT',
+            color: 'VARCHAR(255)',
+            project: 'VARCHAR(255)'
         }
     },
     {
