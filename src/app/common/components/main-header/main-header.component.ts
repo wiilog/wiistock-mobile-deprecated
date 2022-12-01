@@ -122,10 +122,17 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.TRANSPORT_ROUND_LIST, label: 'Track', noBreadcrumb: true},
             {
                 pagePath: NavPathEnum.EMPLACEMENT_SCAN,
+                label: 'Association UL - Articles',
+                filter: (params) => (
+                    params.get('customAction')
+                )
+            },
+            {
+                pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Prise',
                 filter: (params) => (
                     (typeof params.get('fromDepose') === 'boolean') &&
-                    !params.get('fromDepose')
+                    !params.get('fromDepose') && !params.get('customAction')
                 )
             },
             {
@@ -133,10 +140,10 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                 label: 'Dépose',
                 filter: (params) => (
                     (typeof params.get('fromDepose') === 'boolean') &&
-                    params.get('fromDepose')
+                    params.get('fromDepose') && !params.get('customAction')
                 )
             },
-            {pagePath: NavPathEnum.STOCK_MOVEMENT_MENU, label: 'Transfert'},
+            {pagePath: NavPathEnum.STOCK_MOVEMENT_MENU, label: 'Transfert manuel'},
             {pagePath: NavPathEnum.PREPARATION_MENU, label: 'Préparation'},
             {pagePath: NavPathEnum.LIVRAISON_MENU, label: 'Livraison'},
             {pagePath: NavPathEnum.MANUAL_DELIVERY, label: 'Livraison manuelle'},

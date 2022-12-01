@@ -200,6 +200,11 @@ const routes: Routes = [
         loadChildren: () => import('@pages/stock/inventory/inventory-locations/inventory-locations.module').then(m => m.InventoryLocationsPageModule)
     },
     {
+        path: NavPathEnum.ASSOCIATION,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/association/association.module').then(m => m.AssociationModule)
+    },
+    {
         path: NavPathEnum.INVENTORY_LOCATIONS_ANOMALIES,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/inventory/inventory-locations/inventory-locations-anomalies/inventory-locations-anomalies.module').then(m => m.InventoryLocationsAnomaliesPageModule)
