@@ -298,7 +298,6 @@ export class AssociationPage extends PageComponent implements CanLeave {
     }
 
     public createArticleInfo(articleOrPack): Array<{ label?: string; value?: string; itemConfig?: ListPanelItemConfig; }> {
-        const label = articleOrPack.label.length > 28 ? articleOrPack.label.substring(0, 25) + '...' : articleOrPack.label;
         const infos = [
             ...(
                 articleOrPack.is_lu && articleOrPack.project
@@ -308,7 +307,7 @@ export class AssociationPage extends PageComponent implements CanLeave {
                     }]
                     : (!articleOrPack.is_lu ? [{
                         label: 'Libellé',
-                        value: label
+                        value: articleOrPack.label && articleOrPack.label.length > 28 ? articleOrPack.label.substring(0, 25) + '...' : articleOrPack.label
                     }] : [{}])
             ),
             {
