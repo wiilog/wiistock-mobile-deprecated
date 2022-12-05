@@ -7,6 +7,7 @@ import {MainHeaderService} from '@app/common/services/main-header.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import * as moment from "moment";
 
 @Component({
     selector: 'wii-preparation-menu',
@@ -38,13 +39,22 @@ export class PreparationMenuPage extends PageComponent {
                 this.preparations = preparations
                     .filter(p => (p.date_end === null))
                     // sort in APi side too
-                    .sort(({type: type1}, {type: type2}) => (type1 > type2) ? 1 : ((type2 > type1) ? -1 : 0));
+                    .sort((a, b) => {
+                        const momentExpectedDate1 = moment(a.expectedAt, 'DD/MM/YYYY HH:mm:ss');
+                        const momentExpectedDate2 = moment(b.expectedAt, 'DD/MM/YYYY HH:mm:ss');
+                        return (
+                            (momentExpectedDate1.isValid() && !momentExpectedDate2.isValid()) || momentExpectedDate1.isBefore(momentExpectedDate2) ? -1 :
+                                (!momentExpectedDate1.isValid() && momentExpectedDate2.isValid()) || momentExpectedDate1.isAfter(momentExpectedDate2) ? 1 :
+                                    0
+                        );
+                    });
 
                 this.preparationsListConfig = this.preparations.map((preparation: Preparation) => ({
                     title: {
                         label: 'Demandeur',
                         value: preparation.requester
                     },
+                    customColor: preparation.color,
                     content: [
                         {
                             label: 'Numéro',
@@ -61,7 +71,23 @@ export class PreparationMenuPage extends PageComponent {
                         {
                             label: 'Commentaire',
                             value: preparation.comment
-                        }
+                        },
+                        ...(
+                            preparation.expectedAt
+                                ? [{
+                                    label: 'Date attendue',
+                                    value: preparation.expectedAt
+                                }]
+                                : []
+                        ),
+                        ...(
+                            preparation.project
+                                ? [{
+                                    label: 'Projet',
+                                    value: preparation.project
+                                }]
+                                : []
+                        )
                     ],
                     action: () => {
                         this.navService.push(NavPathEnum.PREPARATION_ARTICLES, {preparation});
