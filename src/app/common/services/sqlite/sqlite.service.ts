@@ -146,7 +146,6 @@ export class SqliteService {
     }
 
     public importPreparations(data, deleteOld: boolean = true): Observable<any> {
-        console.log(data['preparations']);
         const preparations = (data['preparations'] || []);
         const articlesPrepaApi = (data['articlesPrepa'] || []);
         const preparationIds = preparations.map(({id}) => id);
