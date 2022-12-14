@@ -27,5 +27,6 @@ export interface ListPanelItemConfig {
             color: string,
             action: () => void
         }>,
-    }
+    },
+    selected?: boolean;
 }

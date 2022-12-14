@@ -33,6 +33,10 @@
             margin-left: $spacer * 1.2;
         }
 
+        &.selected {
+            border: 2px solid #D73353 !important;
+        }
+
         &:not(:last-child) {
             margin-bottom: .35rem;
         }
