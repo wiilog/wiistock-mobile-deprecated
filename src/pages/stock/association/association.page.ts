@@ -176,7 +176,6 @@ export class AssociationPage extends PageComponent implements CanLeave {
                             .toPromise()
                             .then((_: void) => {
                                 this.navService.pop();
-                                console.log(this.currentNavParams);
                                 this.navService.push(NavPathEnum.LIVRAISON_ARTICLES, {
                                     livraison: this.currentNavParams.get('livraisonToRedirect')
                                 })

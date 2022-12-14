@@ -258,7 +258,6 @@ export class LivraisonArticlesPage extends PageComponent {
             this.apiService.requestApi(ApiService.CHECK_LOGISTIC_UNIT_CONTENT, {params: options})
                 .subscribe(({articles}: any) => {
                     if(articles){
-                        console.log(articles);
                         this.alertService.show({
                             message: `Cette unité logistique contient des articles non demandés. Elle ne peut pas être livrée en état.`,
                             buttons: [{
