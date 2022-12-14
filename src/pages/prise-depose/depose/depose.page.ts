@@ -34,7 +34,7 @@ import {NetworkService} from '@app/common/services/network.service';
 })
 export class DeposePage extends PageComponent implements CanLeave {
 
-    private static readonly MOUVEMENT_TRACA_DEPOSE = 'depose';
+    static readonly MOUVEMENT_TRACA_DEPOSE = 'depose';
 
     public readonly listIdentifierName;
 
@@ -127,7 +127,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                 const online = this.networkService.hasNetwork();
 
                 if (!this.fromStock || online) {
-                    const takingToFinish = this.colisPrise
+                    const takingToFinish = this.currentNavParams.get('articlesList') ? [] : this.colisPrise
                         .filter(({hidden}) => hidden)
                         .map(({id}) => id);
 
@@ -189,7 +189,15 @@ export class DeposePage extends PageComponent implements CanLeave {
             this.navService
                 .pop()
                 .subscribe(() => {
-                    this.finishAction();
+                    if(this.currentNavParams.get('articlesList')){
+                        this.navService.runMultiplePop(1).then(() => {
+                            this.navService.push(NavPathEnum.LIVRAISON_ARTICLES, {
+                                livraison: this.currentNavParams.get('livraisonToRedirect')
+                            });
+                        });
+                    } else {
+                        this.finishAction();
+                    }
                 });
         } else {
             this.init();
@@ -447,7 +455,7 @@ export class DeposePage extends PageComponent implements CanLeave {
             this.translationService.get(null, `Traçabilité`, `Général`)
         )
             .subscribe(([colisPrise, operator, skipValidation, natures, allowedNatureLocationArray, natureTranslations]) => {
-                this.colisPrise = colisPrise.map(({subPacks, ...tracking}) => ({
+                this.colisPrise = this.currentNavParams.get('articlesList') || colisPrise.map(({subPacks, ...tracking}) => ({
                     ...tracking,
                     subPacks: subPacks ? JSON.parse(subPacks) : []
                 }));

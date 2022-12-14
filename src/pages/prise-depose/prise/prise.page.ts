@@ -36,7 +36,7 @@ import {NetworkService} from '@app/common/services/network.service';
 })
 export class PrisePage extends PageComponent implements CanLeave {
 
-    private static readonly MOUVEMENT_TRACA_PRISE = 'prise';
+    static readonly MOUVEMENT_TRACA_PRISE = 'prise';
 
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
@@ -66,6 +66,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     private saveSubscription: Subscription;
 
     private finishAction: () => void;
+    private goToDepose: boolean;
     private operator: string;
     private natureTranslations: Translations;
 
@@ -96,9 +97,14 @@ export class PrisePage extends PageComponent implements CanLeave {
     public ionViewWillEnter(): void {
         this.init(false);
         this.finishAction = this.currentNavParams.get('finishAction');
+        this.goToDepose = Boolean(this.currentNavParams.get('goToDepose'));
         this.emplacement = this.currentNavParams.get('emplacement');
         this.fromStock = Boolean(this.currentNavParams.get('fromStock'));
         this.trackingListFactory.enableActions();
+
+        if(Boolean(this.currentNavParams.get('fromStockLivraison'))){
+            this.colisPrise = this.currentNavParams.get('articlesList');
+        }
 
         zip(
             this.storageService.getString(StorageKeyEnum.OPERATOR),
@@ -195,7 +201,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                         .subscribe(
                             () => {
                                 this.unsubscribeSaveSubscription();
-                                this.redirectAfterTake();
+                                this.redirectAfterTake(movementsToSave.map(({loading, articles, ...tracking}) => tracking));
                             },
                             (error) => {
                                 this.unsubscribeSaveSubscription();
@@ -209,11 +215,23 @@ export class PrisePage extends PageComponent implements CanLeave {
         }
     }
 
-    public redirectAfterTake(): void {
+    public redirectAfterTake(prisesToDepose: MouvementTraca<string>[]): void {
         this.navService
             .pop()
             .subscribe(() => {
-                this.finishAction();
+                if(this.goToDepose){
+                    this.navService.pop().subscribe(() => {
+                        this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
+                            fromStock: true,
+                            fromDepose: true,
+                            articlesList: prisesToDepose,
+                            priseMovements: prisesToDepose,
+                            livraisonToRedirect: this.currentNavParams.get('livraisonToRedirect')
+                        });
+                    });
+                } else {
+                    this.finishAction();
+                }
             });
     }
 

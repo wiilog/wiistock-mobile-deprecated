@@ -20,6 +20,8 @@ import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/bar
 import {StorageService} from "@app/common/services/storage/storage.service";
 import {StorageKeyEnum} from "@app/common/services/storage/storage-key.enum";
 import {zip} from "rxjs";
+import {PrisePage} from "@pages/prise-depose/prise/prise.page";
+import {AlertService} from "@app/common/services/alert.service";
 
 
 @Component({
@@ -60,6 +62,7 @@ export class LivraisonArticlesPage extends PageComponent {
                        private networkService: NetworkService,
                        private apiService: ApiService,
                        private storageService: StorageService,
+                       private alertService: AlertService,
                        navService: NavService) {
         super(navService);
         this.loadingStartLivraison = false;
@@ -248,15 +251,73 @@ export class LivraisonArticlesPage extends PageComponent {
         if ((this.articlesNT.length > 0) ||
             (this.articlesT.length === 0)) {
             this.toastService.presentToast('Veuillez traiter tous les articles concernés');
+        } else {
+            const options = {
+                logisticUnits: ['thomas', 'REF191000006822']
+            };
+            this.apiService.requestApi(ApiService.CHECK_LOGISTIC_UNIT_CONTENT, {params: options})
+                .subscribe(({articles}: any) => {
+                    if(articles){
+                        console.log(articles);
+                        this.alertService.show({
+                            message: `Cette unité logistique contient des articles non demandés. Elle ne peut pas être livrée en état.`,
+                            buttons: [{
+                                text: 'Faire une dépose',
+                                handler: () => this.redirectToDeposeOrUlAssociation(NavPathEnum.EMPLACEMENT_SCAN, this.livraison, articles),
+                            }, {
+                                text: 'Faire association UL',
+                                handler: () => this.redirectToDeposeOrUlAssociation(NavPathEnum.ASSOCIATION, this.livraison, articles),
+                            }]
+                        })
+                    } else {
+                        this.navService.push(NavPathEnum.LIVRAISON_EMPLACEMENT, {
+                            livraison: this.livraison,
+                            validateLivraison: () => {
+                                this.navService.pop();
+                            }
+                        });
+                    }
+                });
         }
-        else {
-            this.navService.push(NavPathEnum.LIVRAISON_EMPLACEMENT, {
-                livraison: this.livraison,
-                validateLivraison: () => {
-                    this.navService.pop();
-                }
+    }
+
+    public redirectToDeposeOrUlAssociation(redirectionRoute: NavPathEnum,
+                                           livraisonToRedirect: Livraison,
+                                           articles: Array<{barcode: string; reference: string; label: string; quantity: number; location: string; currentLogisticUnitCode: string}>): void {
+        let $articlesList = [];
+        console.log(articles);
+        const date = moment().format();
+        if (redirectionRoute === 'emplacement-scan'){
+            $articlesList = articles.map((article) => ({
+                ref_article: article.reference,
+                type: PrisePage.MOUVEMENT_TRACA_PRISE,
+                finished: 0,
+                quantity: article.quantity,
+                date,
+            }));
+        } else if(redirectionRoute === 'association') {
+            $articlesList = articles.map((article) => ({
+                barCode: article.barcode,
+                label: article.label,
+                quantity: article.quantity,
+                location: article.location,
+                reference: article.reference,
+                ref_article: article.reference,
+                // currentLogisticUnitCode: article.currentLogisticUnitCode,
+                is_lu: false,
+                date
+            }));
+        }
+        console.log($articlesList);
+        this.navService.pop().subscribe(() => {
+            this.navService.push(redirectionRoute, {
+                articlesList: $articlesList,
+                livraisonToRedirect,
+                fromStock: true,
+                fromStockLivraison: true,
+                goToDepose: true,
             });
-        }
+        });
     }
 
     public testIfBarcodeEquals(text, fromText: boolean = true): void {
