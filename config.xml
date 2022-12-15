@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.wiilog.wiistock" version="6.17.0#terega" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="com.wiilog.wiistock" version="6.17.4#terega" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Follow GT</name>
     <description>Follow your supply chain with GT Logistics.</description>
     <author email="bonjour@wiilog.fr" href="http://wiilog.fr/">Wiilog Team</author>
