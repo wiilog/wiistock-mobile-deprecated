@@ -102,7 +102,7 @@ export class EmplacementScanPage extends PageComponent {
                     fromStockLivraison: Boolean(this.currentNavParams.get('articlesList')),
                     livraisonToRedirect: this.livraisonToRedirect,
                     fromStock: this.fromStock,
-                    goToDepose: Boolean(this.currentNavParams.get('goToDepose')),
+                    createTakeAndDrop: this.currentNavParams.get('createTakeAndDrop') || false,
                     finishAction: () => this.finishAction
                 });
             }
