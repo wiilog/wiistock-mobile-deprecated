@@ -253,7 +253,7 @@ export class LivraisonArticlesPage extends PageComponent {
             this.toastService.presentToast('Veuillez traiter tous les articles concernés');
         } else {
             const options = {
-                logisticUnits: ['thomas', 'REF191000006822']
+                logisticUnit: ['thomas', 'REF191000006822']
             };
             this.apiService.requestApi(ApiService.CHECK_LOGISTIC_UNIT_CONTENT, {params: options})
                 .subscribe(({articles}: any) => {
