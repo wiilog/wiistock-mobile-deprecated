@@ -174,7 +174,7 @@ export class AssociationPage extends PageComponent implements CanLeave {
                     (res) => {
                         this.toastService.presentToast('Association UL - Articles effectuée.')
                             .toPromise()
-                            .then((_: void) => this.navService.pop());
+                            .then(() => this.navService.pop());
                     },
                     () => {
                         if (loader) {
@@ -224,7 +224,11 @@ export class AssociationPage extends PageComponent implements CanLeave {
                         const existing = this.articlesList.some((articleElement) => articleElement.barCode === article.barCode);
                         if (existing) {
                             this.toastService.presentToast('Vous avez déjà scanné cet article ou cette unité logistique.');
-                        } else if (article && (!article.is_lu || this.articlesList.every((articleElement) => !articleElement.is_lu))) {
+                        }
+                        else if (!article && !res.can_associate) {
+                            this.toastService.presentToast(`L'article scanné n'est pas en statut disponible.`);
+                        }
+                        else if (article && (!article.is_lu || this.articlesList.every((articleElement) => !articleElement.is_lu))) {
                             if (article.is_ref) {
                                 this.toastService.presentToast('Vous ne pouvez pas scanner une référence.');
                             } else {
