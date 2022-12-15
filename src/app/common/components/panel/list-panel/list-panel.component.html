@@ -28,6 +28,7 @@
 
 <wii-list-panel-item *ngFor="let object of body; trackBy: trackByGenerator"
                      [class.sub-list]="header"
+                     [class.selected]="object.selected"
                      [infos]="object.infos"
                      [color]="object.color"
                      [backgroundColor]="object.backgroundColor"

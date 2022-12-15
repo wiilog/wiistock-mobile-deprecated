@@ -363,6 +363,11 @@ const routes: Routes = [
         loadChildren: () => import('@pages/stock/livraison/manual-delivery-location/manual-delivery-location.module').then(m => m.ManualDeliveryLocationModule)
     },
     {
+        path: NavPathEnum.DELIVERY_LOGISTIC_UNIT_CONTENT,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/livraison/delivery-logistic-unit-content/delivery-logistic-unit-content.module').then(m => m.DeliveryLogisticUnitContentModule)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'

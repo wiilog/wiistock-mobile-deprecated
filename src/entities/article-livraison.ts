@@ -9,4 +9,8 @@ export interface ArticleLivraison {
     location: string;
     barcode?: string;
     targetLocationPicking?: string;
+    currentLogisticUnitId?: number;
+    currentLogisticUnitCode?: string;
+    currentLogisticUnitNatureId?: string;
+    currentLogisticUnitLocation?: string;
 }

@@ -174,7 +174,11 @@ export const TablesDefinitions: Array<TableDefinition> = [
             is_ref: 'INTEGER',
             id_livraison: 'INTEGER',
             has_moved: 'INTEGER',
-            targetLocationPicking: 'TEXT'
+            targetLocationPicking: 'TEXT',
+            currentLogisticUnitId: 'INTEGER',
+            currentLogisticUnitCode: 'TEXT',
+            currentLogisticUnitNatureId: 'TEXT',
+            currentLogisticUnitLocation: 'TEXT',
         }
     },
     {
