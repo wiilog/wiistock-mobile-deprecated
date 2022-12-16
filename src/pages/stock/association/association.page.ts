@@ -302,7 +302,7 @@ export class AssociationPage extends PageComponent implements CanLeave {
     }
 
     public createArticleInfo(articleOrPack): Array<{ label?: string; value?: string; itemConfig?: ListPanelItemConfig; }> {
-        const infos = [
+        return [
             ...(
                 articleOrPack.is_lu && articleOrPack.project
                     ? [{
@@ -314,6 +314,11 @@ export class AssociationPage extends PageComponent implements CanLeave {
                         value: articleOrPack.label && articleOrPack.label.length > 28 ? articleOrPack.label.substring(0, 25) + '...' : articleOrPack.label
                     }] : [{}])
             ),
+            ...!articleOrPack.is_lu
+                ? [{
+                    label: 'Code barre',
+                    value: articleOrPack.barCode
+                }] : [{}],
             {
                 label: 'Emplacement',
                 value: articleOrPack.location
@@ -323,14 +328,6 @@ export class AssociationPage extends PageComponent implements CanLeave {
                 value: articleOrPack.is_lu ? (articleOrPack.articles ? articleOrPack.articles.length : 0) : articleOrPack.quantity,
             }
         ];
-
-        if (!articleOrPack.is_lu) {
-            infos.push({
-                label: 'Code barre',
-                value: articleOrPack.barCode
-            })
-        }
-        return infos;
     }
 
 }
