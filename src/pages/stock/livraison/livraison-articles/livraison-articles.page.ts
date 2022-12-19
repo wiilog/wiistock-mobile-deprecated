@@ -282,12 +282,12 @@ export class LivraisonArticlesPage extends PageComponent {
     }
 
     public testIfBarcodeEquals(text, fromText: boolean = true): void {
-        const logisticUnits = this.articlesNT
+        const logisticUnits = (articles: Array<ArticleLivraison>) => articles
             .filter((article: ArticleLivraison) => article.currentLogisticUnitCode)
             .map((article: ArticleLivraison) => article.currentLogisticUnitCode)
             .filter((code: string, index, logisticUnitCodes) => index === logisticUnitCodes.indexOf(code));
 
-        const logisticUnit = logisticUnits.find((logisticUnit: string) => logisticUnit === text);
+        const logisticUnit = logisticUnits(this.articlesNT).find((logisticUnit: string) => logisticUnit === text);
 
         const article = fromText
             ? this.articlesNT.find((article) => (article.barcode === text))
@@ -312,9 +312,14 @@ export class LivraisonArticlesPage extends PageComponent {
                         }
                     });
                 }
-
             } else {
-                this.toastService.presentToast('L\'article scanné n\'est pas dans la liste.');
+                const treatedArticleIndex = this.articlesT.findIndex((article) => (article.barcode === text));
+                const treatedLogisticUnitIndex = logisticUnits(this.articlesT).findIndex((logisticUnit: string) => logisticUnit === text);
+                if(treatedArticleIndex !== -1 || treatedLogisticUnitIndex !== -1) {
+                    this.toastService.presentToast(`L'objet <strong>${text}</strong> a déjà été scanné.`);
+                } else {
+                    this.toastService.presentToast(`L'objet <strong>${text}</strong> n'est pas dans la liste.`);
+                }
             }
         }
     }
@@ -519,8 +524,8 @@ export class LivraisonArticlesPage extends PageComponent {
                 this.sqliteService.findOneBy(`nature`, {id: firstArticle.currentLogisticUnitNatureId})
                     .subscribe((nature: Nature) => {
                         bodyConfig.push({
-                            infos: this.createLogisticUnitInfo(articles, logisticUnit, nature.label, firstArticle.currentLogisticUnitLocation),
-                            color: nature.color,
+                            infos: this.createLogisticUnitInfo(articles, logisticUnit, nature ? nature.label : undefined, firstArticle.currentLogisticUnitLocation),
+                            color: nature ? nature.color : '',
                             ...notTreatedList ? ({
                                 rightIcon: {
                                     color: 'grey' as IconColor,
@@ -580,10 +585,10 @@ export class LivraisonArticlesPage extends PageComponent {
                 label: `Emplacement`,
                 value: location
             },
-            nature: {
+            /*nature: {
                 label: `Nature`,
                 value: natureLabel
-            },
+            },*/
         }
     }
 }
