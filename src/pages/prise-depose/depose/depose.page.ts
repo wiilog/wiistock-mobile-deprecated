@@ -92,7 +92,11 @@ export class DeposePage extends PageComponent implements CanLeave {
         this.listIdentifierName = TrackingListFactoryService.TRACKING_IDENTIFIER_NAME;
         this.init();
         this.listBoldValues = [
-            'object'
+            'object',
+            'quantity',
+            'articlesCount',
+            'date',
+            'nature'
         ];
     }
 
@@ -251,6 +255,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                         picking.hidden = true;
 
                         this.colisDepose.unshift({
+                            articles: picking.articles,
                             ref_article: picking.ref_article,
                             nature_id: picking.nature_id,
                             comment: picking.comment,
@@ -266,6 +271,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                             date: moment().format(),
                             freeFields: picking.freeFields,
                             packParent: picking.packParent,
+                            containsArticle: picking.containsArticle
                         });
 
                         const remover = TrackingListFactoryService.CreateRemoveItemFromListHandler(
