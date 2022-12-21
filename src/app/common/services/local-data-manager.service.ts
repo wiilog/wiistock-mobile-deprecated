@@ -9,7 +9,7 @@ import {FileService} from "@app/common/services/file.service";
 import {StorageService} from "@app/common/services/storage/storage.service";
 import {Observable, of, ReplaySubject, Subject, zip} from 'rxjs';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {catchError, flatMap, map} from 'rxjs/operators';
+import {catchError, flatMap, map, tap} from 'rxjs/operators';
 import {DemandeLivraison} from '@entities/demande-livraison';
 import {DemandeLivraisonArticleSelected} from '@entities/demande-livraison-article-selected';
 import {TransferOrder} from '@entities/transfer-order';
@@ -426,7 +426,7 @@ export class LocalDataManagerService {
             );
     }
 
-    public sendMouvementTraca(sendFromStock: boolean): Observable<any> {
+    public sendMouvementTraca(sendFromStock: boolean, createTakeAndDrop: boolean = false): Observable<any> {
         return this.sqliteService.findAll('mouvement_traca')
             .pipe(
                 map((mouvements: Array<MouvementTraca & {subPacks: any}>) => (
@@ -438,7 +438,7 @@ export class LocalDataManagerService {
                             this.apiService
                                 .requestApi(
                                     sendFromStock ? ApiService.POST_STOCK_MOVEMENTS : ApiService.POST_TRACKING_MOVEMENTS,
-                                    {params: this.extractTrackingMovementFiles(mouvements)})
+                                    {params: this.extractTrackingMovementFiles(mouvements, createTakeAndDrop)})
                                 .pipe(
                                     map((apiResponse) => [apiResponse, mouvements]),
                                     flatMap(([apiResponse, mouvements]) => {
@@ -733,7 +733,7 @@ export class LocalDataManagerService {
         };
     }
 
-    public extractTrackingMovementFiles(movements: Array<MouvementTraca<File> & {subPacks?: any}>) {
+    public extractTrackingMovementFiles(movements: Array<MouvementTraca<File> & {subPacks?: any}>, createTakeAndDrop: boolean = false) {
         return {
             mouvements: movements.map(({signature, photo, ...mouvement}) => mouvement),
             ...(movements.reduce((acc, {signature}, currentIndex) => ({
@@ -743,7 +743,8 @@ export class LocalDataManagerService {
             ...(movements.reduce((acc, {photo}, currentIndex) => ({
                 ...acc,
                 ...(photo ? {[`photo_${currentIndex}`]: photo} : {})
-            }), {}))
+            }), {})),
+            createTakeAndDrop
         };
     }
 

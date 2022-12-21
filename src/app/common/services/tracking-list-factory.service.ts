@@ -174,10 +174,11 @@ export class TrackingListFactoryService {
                         : {}
                 )
             },
-            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, articles, loading, isGroup, subPacks, fromStock}) => {
+            body: notDuplicateArticles.map(({date, ref_article, quantity, quantite, nature_id, articles, loading, isGroup, subPacks, fromStock, containsArticle}) => {
                 const natureConfig = (natureIdsToConfig && nature_id && natureIdsToConfig[nature_id]);
 
                 let quantityRow = {};
+                articles = typeof articles === 'string' ? JSON.parse(articles) : articles;
                 if (!articles && !loading) {
                     quantityRow = isGroup
                         ? {
@@ -189,8 +190,8 @@ export class TrackingListFactoryService {
                         : ((quantity || quantite
                             ? {
                                 quantity: {
-                                    label: fromStock ? `Nombre d'articles` : `Quantité`,
-                                    value: String(quantity || quantite)
+                                    label: Boolean(containsArticle) || subPacks ? `Nombre d'articles` : `Quantité`,
+                                    value: Boolean(containsArticle) ? '0' : String(quantity || quantite)
                                 }
                             }
                             : {}));

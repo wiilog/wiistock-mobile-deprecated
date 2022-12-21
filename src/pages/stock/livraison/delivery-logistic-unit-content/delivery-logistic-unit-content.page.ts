@@ -28,10 +28,9 @@ export class DeliveryLogisticUnitContentPage extends PageComponent implements Vi
         body: Array<ListPanelItemConfig>;
     };
 
-    private callback: () => void;
+    public extraArticles: Array<any> = [];
 
-    public extraArticles: Array<string> = [];
-
+    private callback: (articles) => void;
 
     public constructor(navService: NavService) {
         super(navService);
@@ -40,8 +39,10 @@ export class DeliveryLogisticUnitContentPage extends PageComponent implements Vi
     public ionViewWillEnter(): void {
         this.articles = this.currentNavParams.get(`articles`);
         this.logisticUnit = this.currentNavParams.get(`logisticUnit`);
-        this.callback = this.currentNavParams.get(`callback`);
+        this.extraArticles = this.currentNavParams.get(`extraArticles`) || [];
+        this.callback = this.currentNavParams.get('callback');
 
+        this.articles = this.articles.concat(this.extraArticles);
         this.logisticUnitHeaderConfig = {
             leftIcon: {
                 name: `logistic-unit.svg`
@@ -56,7 +57,7 @@ export class DeliveryLogisticUnitContentPage extends PageComponent implements Vi
     public refreshArticlesConfig(): void {
         this.articlesConfig = {
             body: this.articles
-                .map((article: ArticleLivraison|ArticlePrepa) => ({
+                .map((article: any) => ({
                     infos: {
                         label: {
                             label: 'Libellé',
@@ -75,15 +76,15 @@ export class DeliveryLogisticUnitContentPage extends PageComponent implements Vi
                             value: `${'quantity' in article ? article.quantity : article.quantite}`
                         }
                     },
-                    ...(this.extraArticles.includes(article.barcode)
-                        ? {selected: true}
-                        : {})
+                    selected: article.selected || false,
                 }))
                 .sort((article) => article.selected ? -1 : 1)
         }
     }
 
     public back() {
-        this.navService.pop();
+        this.navService.pop().subscribe(() => {
+            this.callback(this.extraArticles);
+        })
     }
 }

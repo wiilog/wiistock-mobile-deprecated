@@ -64,6 +64,7 @@ export class ApiService {
     public static readonly FINISH_ROUND = {method: POST, service: '/finish-round'};
     public static readonly PACKS_RETURN_LOCATIONS = {method: GET, service: '/packs-return-locations'};
     public static readonly LOGISTIC_UNIT_ARTICLES = {method: GET, service: '/logistic-unit/articles'};
+    public static readonly CHECK_LOGISTIC_UNIT_CONTENT = {method: GET, service: '/check-logistic-unit-content'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'

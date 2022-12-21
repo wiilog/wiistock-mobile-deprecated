@@ -16,14 +16,12 @@ import {AlertService} from '@app/common/services/alert.service';
 import {NetworkService} from '@app/common/services/network.service';
 import {from, Observable} from 'rxjs';
 import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
-import {HeaderConfig} from "@app/common/components/panel/model/header-config";
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
 import {IconConfig} from "@app/common/components/panel/model/icon-config";
 import {flatMap, map, tap} from "rxjs/operators";
-import {TransferOrderArticle} from "@entities/transfer-order-article";
 import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
 import {CardListConfig} from "@app/common/components/card-list/card-list-config";
-import {CardListColorEnum} from "@app/common/components/card-list/card-list-color.enum";
+import {Livraison} from "@entities/livraison";
 
 
 @Component({
@@ -59,6 +57,7 @@ export class AssociationPage extends PageComponent implements CanLeave {
         subtitle?: Array<string>;
         info?: string;
     };
+    private livraisonToRedirect: Livraison;
 
     public constructor(private networkService: NetworkService,
                        private apiService: ApiService,
@@ -77,9 +76,10 @@ export class AssociationPage extends PageComponent implements CanLeave {
     }
 
     public ionViewWillEnter(): void {
-        this.articlesList = [];
+        this.articlesList = this.currentNavParams.get('articlesList') || [];
         this.listBoldValues = ['barCode', 'label', 'location', 'quantity'];
         this.refreshHeader();
+        this.refreshList();
     }
 
     public ionViewWillLeave(): void {
@@ -174,7 +174,12 @@ export class AssociationPage extends PageComponent implements CanLeave {
                     (res) => {
                         this.toastService.presentToast('Association UL - Articles effectuée.')
                             .toPromise()
-                            .then(() => this.navService.pop());
+                            .then((_: void) => {
+                                this.navService.pop();
+                                this.navService.push(NavPathEnum.LIVRAISON_ARTICLES, {
+                                    livraison: this.currentNavParams.get('livraisonToRedirect')
+                                })
+                            });
                     },
                     () => {
                         if (loader) {
@@ -224,11 +229,9 @@ export class AssociationPage extends PageComponent implements CanLeave {
                         const existing = this.articlesList.some((articleElement) => articleElement.barCode === article.barCode);
                         if (existing) {
                             this.toastService.presentToast('Vous avez déjà scanné cet article ou cette unité logistique.');
-                        }
-                        else if (!article && !res.can_associate) {
+                        } else if (!article && !res.can_associate) {
                             this.toastService.presentToast(`L'article scanné n'est pas en statut disponible.`);
-                        }
-                        else if (article && (!article.is_lu || this.articlesList.every((articleElement) => !articleElement.is_lu))) {
+                        } else if (article && (!article.is_lu || this.articlesList.every((articleElement) => !articleElement.is_lu))) {
                             if (article.is_ref) {
                                 this.toastService.presentToast('Vous ne pouvez pas scanner une référence.');
                             } else {

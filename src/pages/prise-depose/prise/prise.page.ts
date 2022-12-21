@@ -36,7 +36,7 @@ import {NetworkService} from '@app/common/services/network.service';
 })
 export class PrisePage extends PageComponent implements CanLeave {
 
-    private static readonly MOUVEMENT_TRACA_PRISE = 'prise';
+    static readonly MOUVEMENT_TRACA_PRISE = 'prise';
 
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;
@@ -89,7 +89,11 @@ export class PrisePage extends PageComponent implements CanLeave {
         super(navService);
         this.init();
         this.listBoldValues = [
-            'object'
+            'object',
+            'quantity',
+            'articlesCount',
+            'date',
+            'nature'
         ];
     }
 
@@ -168,7 +172,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                             message: multiPrise ? 'Envoi des prises en cours...' : 'Envoi de la prise en cours...',
                             event: () => {
                                 return this.localDataManager
-                                    .saveTrackingMovements(movementsToSave.map(({loading, articles, ...tracking}) => tracking))
+                                    .saveTrackingMovements(movementsToSave.map(({loading, ...tracking}) => tracking))
                                     .pipe(
                                         flatMap(() => (
                                             online
@@ -300,7 +304,7 @@ export class PrisePage extends PageComponent implements CanLeave {
         return this.currentPacksOnLocation && this.toTakeOngoingPacks.length > 0;
     }
 
-    private saveTrackingMovement(barCode: string, quantity: number, loading: boolean = false, articles: Array<string> = null): void {
+    private saveTrackingMovement(barCode: string, quantity: number, loading: boolean = false, articles: Array<string> = null, containsArticle?: boolean): void {
         this.colisPrise.unshift({
             ref_article: barCode,
             type: PrisePage.MOUVEMENT_TRACA_PRISE,
@@ -312,6 +316,7 @@ export class PrisePage extends PageComponent implements CanLeave {
             quantity,
             date: moment().format(),
             articles,
+            containsArticle
         });
         this.setPackOnLocationHidden(barCode, true);
         this.refreshListComponent();
@@ -530,7 +535,7 @@ export class PrisePage extends PageComponent implements CanLeave {
             }
             else {
                 const needNatureChecks = this.networkService.hasNetwork() && (!article || article.is_lu);
-                this.saveTrackingMovement(barCode, quantity, needNatureChecks, article ? article.articles : null);
+                this.saveTrackingMovement(barCode, quantity, needNatureChecks, article ? article.articles : null, article ? article.is_lu : false);
 
                 if (needNatureChecks) {
                     this.apiService

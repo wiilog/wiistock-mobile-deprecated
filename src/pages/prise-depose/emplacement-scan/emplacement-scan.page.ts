@@ -10,6 +10,7 @@ import {StorageService} from '@app/common/services/storage/storage.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {NetworkService} from '@app/common/services/network.service';
+import {Livraison} from "@entities/livraison";
 
 @Component({
     selector: 'wii-emplacement-scan',
@@ -26,6 +27,8 @@ export class EmplacementScanPage extends PageComponent {
     public fromStock: boolean;
     public fromEmptyRound: boolean;
 
+    private livraisonToRedirect?: Livraison;
+
     public barcodeScannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.TOOL_SEARCH;
 
     public resetEmitter$: EventEmitter<void>;
@@ -33,6 +36,7 @@ export class EmplacementScanPage extends PageComponent {
     public loading: boolean;
     public isDemoMode: boolean;
     public customAction?: (location) => void;
+    public finishAction?: () => void;
 
     public constructor(private networkService: NetworkService,
                        private toastService: ToastService,
@@ -45,6 +49,7 @@ export class EmplacementScanPage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.loading = true;
+        this.livraisonToRedirect = this.currentNavParams.get('livraisonToRedirect') || null;
         this.storageService.getRight(StorageKeyEnum.DEMO_MODE).subscribe((isDemoMode) => {
             this.fromDepose = Boolean(this.currentNavParams.get('fromDepose'));
             this.fromStock = Boolean(this.currentNavParams.get('fromStock'));
@@ -93,10 +98,12 @@ export class EmplacementScanPage extends PageComponent {
                         : NavPathEnum.PRISE);
                 this.navService.push(nextPagePath, {
                     emplacement,
+                    articlesList: this.currentNavParams.get('articlesList'),
+                    fromStockLivraison: Boolean(this.currentNavParams.get('articlesList')),
+                    livraisonToRedirect: this.livraisonToRedirect,
                     fromStock: this.fromStock,
-                    finishAction: () => {
-                        this.navService.pop();
-                    }
+                    createTakeAndDrop: this.currentNavParams.get('createTakeAndDrop') || false,
+                    finishAction: () => this.finishAction
                 });
             }
         });

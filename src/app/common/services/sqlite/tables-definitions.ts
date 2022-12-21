@@ -52,6 +52,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             subPacks: 'TEXT',
             packParent: 'VARCHAR(255)',
             articles: 'JSON',
+            containsArticle: 'INTEGER',
         }
     },
     {
