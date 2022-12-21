@@ -220,7 +220,6 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                         this.missionsListItemBody = inventoryArticles
                             .filter(({mission_id}, index) => inventoryArticles.findIndex(({mission_id: mission_id2}) => (mission_id2 === mission_id)) === index)
                             .map(({mission_id, mission_name, mission_start, mission_end}) => {
-                                console.log(inventoryArticles);
 
                                 const logisticUnits = inventoryArticles
                                     .filter((article) => article.logistic_unit_code)

@@ -143,7 +143,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
                             value: article.logistic_unit_code || article.reference
                         }, {
                             name: article.logistic_unit_code ? `Nature` : 'Code barre',
-                            value: article.logistic_unit_nature || article.barcode
+                            value: article.logistic_unit_code ? article.logistic_unit_nature : article.barcode
                         }]
                     });
                     this.unsubscribeData();
