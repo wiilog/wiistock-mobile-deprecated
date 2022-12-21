@@ -220,6 +220,15 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                         this.missionsListItemBody = inventoryArticles
                             .filter(({mission_id}, index) => inventoryArticles.findIndex(({mission_id: mission_id2}) => (mission_id2 === mission_id)) === index)
                             .map(({mission_id, mission_name, mission_start, mission_end}) => {
+                                console.log(inventoryArticles);
+
+                                const logisticUnits = inventoryArticles
+                                    .filter((article) => article.logistic_unit_code)
+                                    .map((article) => article.logistic_unit_code)
+                                    .filter((article1, article2, articles) => articles.indexOf(article1) === article2);
+
+                                const nbLogisticUnits = logisticUnits.length;
+
                                 const notUniqueReferences = inventoryArticles
                                     .filter(({mission_id: missionIdArt, is_ref}) => missionIdArt === mission_id && is_ref === 0)
                                     .map(line => line.reference);
@@ -242,8 +251,9 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                                         date: {value: `Du ${moment(mission_start).format('DD/MM/YYYY')} au ${moment(mission_end).format('DD/MM/YYYY')}`},
                                         toto: {
                                             value: `
+                                                ${nbLogisticUnits} unité(s) logistique(s),
                                                 ${nbRefInMission} référence${nbRefInMission > 1 ? 's' : ''},
-                                                ${nbArtInMission} article${nbArtInMission > 1 ? 's' : ''}
+                                                ${nbArtInMission} article${nbArtInMission > 1 ? 's' : ''},
                                             `
                                         }
                                     },

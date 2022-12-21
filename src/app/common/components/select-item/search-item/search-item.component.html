@@ -37,8 +37,22 @@
                              let-article="item"
                              *ngIf="config[smartType].templateIndex === 'article-inventory'">
                     <div class="ionic-selectable-item-wrapper">
-                        <p>Référence : {{article.reference}}</p>
-                        <p>Code barre : {{article.barcode}}</p>
+                        <p>{{
+                                !this.hasParam('logistic_unit_code') &&
+                                article.logistic_unit_code ? 'Unité Logistique' : 'Référence'
+                            }} :
+                            {{
+                                !this.hasParam('logistic_unit_code') &&
+                                article.logistic_unit_code ? article.logistic_unit_code : article.reference
+                            }}</p>
+                        <p>{{
+                                !this.hasParam('logistic_unit_code') &&
+                                article.logistic_unit_code ? 'Nature' : 'Code barre'
+                            }} :
+                            {{
+                                !this.hasParam('logistic_unit_code') &&
+                                article.logistic_unit_code ? article.logistic_unit_nature : article.barcode
+                            }}</p>
                     </div>
                 </ng-template>
                 <ng-template ionicSelectableItemTemplate

@@ -13,4 +13,7 @@ export interface Anomalie {
     mission_start: string;
     mission_end: string;
     mission_name: string;
+    logistic_unit_code?: string;
+    logistic_unit_nature?: string;
+    logistic_unit_id?: number;
 }
