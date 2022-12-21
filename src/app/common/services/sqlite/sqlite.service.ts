@@ -591,7 +591,11 @@ export class SqliteService {
                                                                                         barCode,
                                                                                         mission_start,
                                                                                         mission_end,
-                                                                                        mission_name,}) => ({
+                                                                                        mission_name,
+                                                                                        logistic_unit_code,
+                                                                                        logistic_unit_id,
+                                                                                        logistic_unit_nature,
+                                                                                    }) => ({
                             mission_id,
                             mission_start,
                             mission_end,
@@ -599,7 +603,10 @@ export class SqliteService {
                             reference,
                             is_ref,
                             location: location ? location : 'N/A',
-                            barcode: barCode
+                            barcode: barCode,
+                            logistic_unit_code,
+                            logistic_unit_id,
+                            logistic_unit_nature,
                         })))
                         : of(undefined)
                 ))

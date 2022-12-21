@@ -8,4 +8,7 @@ export interface ArticleInventaire {
     is_ref: number;
     location: string;
     barcode?: string;
+    logistic_unit_code?: string;
+    logistic_unit_id?: number;
+    logistic_unit_nature?: string;
 }

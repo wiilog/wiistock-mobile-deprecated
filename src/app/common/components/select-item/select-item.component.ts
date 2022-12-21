@@ -138,6 +138,11 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
         this.createItem.emit(true);
     }
 
+    public reload(): Observable<Array<any>> {
+        this.searchComponent.clear();
+        return this.searchComponent.reload();
+    }
+
     public openSearch(): void {
         setTimeout(() => {
             if (this.searchComponent
@@ -205,7 +210,7 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
         }
     }
 
-    private resetSearchComponent(): void {
+    public resetSearchComponent(): void {
         this.searchComponent.clear();
         this.changeDetector.detectChanges();
     }

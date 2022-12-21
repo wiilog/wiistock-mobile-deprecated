@@ -198,6 +198,9 @@ export const TablesDefinitions: Array<TableDefinition> = [
             mission_end: 'VARCHAR(255)',
             mission_name: 'VARCHAR(255)',
             is_ref: 'INTEGER',
+            logistic_unit_code: 'VARCHAR(255)',
+            logistic_unit_nature: 'VARCHAR(255)',
+            logistic_unit_id: 'INTEGER',
         }
     },
     {

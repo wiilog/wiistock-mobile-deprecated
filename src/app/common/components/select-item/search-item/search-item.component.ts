@@ -171,16 +171,16 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             templateIndex: 'article-inventory',
             databaseTable: anomalyMode ? 'anomalie_inventaire' : 'article_inventaire',
             placeholder: 'Sélectionnez un article',
-            reducer: anomalyMode
-                ? (acc: Array<any>, current: any) => {
-                    const {barcode: currentBarcode} = current;
-                    const alreadyInsertedIndex = acc.findIndex(({barcode}) => (barcode === currentBarcode))
-                    if (alreadyInsertedIndex === -1) {
-                        acc.push(current);
-                    }
-                    return acc;
+            reducer: (acc: Array<any>, current: any) => {
+                const {barcode: currentBarcode, logistic_unit_code: currentLogisticUnitCode} = current;
+                const alreadyInsertedIndex = currentLogisticUnitCode
+                    ? acc.findIndex(({logistic_unit_code}) => (logistic_unit_code === currentLogisticUnitCode))
+                    : acc.findIndex(({barcode}) => (barcode === currentBarcode))
+                if (alreadyInsertedIndex === -1) {
+                    acc.push(current);
                 }
-                : undefined
+                return acc;
+            }
         };
     }
 
@@ -230,7 +230,12 @@ export class SearchItemComponent implements OnInit, OnDestroy {
                         : list;
                 }),
                 tap((list) => {
-                    if (this.config[this.smartType].reducer) {
+                    if (this.config[this.smartType].reducer
+                        && (
+                            this.smartType !== SelectItemTypeEnum.INVENTORY_ARTICLE ||
+                            !this.hasParam('logistic_unit_code')
+                        ))
+                    {
                         list = list.reduce(this.config[this.smartType].reducer, []);
                     }
 
@@ -253,6 +258,10 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             this.itemsSubscription.unsubscribe();
             this.itemsSubscription = undefined;
         }
+    }
+
+    public hasParam(param): boolean {
+        return this.requestParams && this.requestParams.some((element) => element.startsWith(param));
     }
 
     public loadMore(search?: string): void {

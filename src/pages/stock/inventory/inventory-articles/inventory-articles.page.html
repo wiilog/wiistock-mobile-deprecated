@@ -1,9 +1,9 @@
 <ion-content>
     <wii-panel-header *ngIf="selectedLocation"
-                      title="Emplacement"
+                      [title]="titleConfig"
                       transparent="true"
-                      [leftIcon]="{name: 'inventory.svg'}"
-                      [subtitle]="selectedLocation"
+                      [leftIcon]="iconConfig"
+                      [subtitle]="subtitleConfig"
                       light="true">
     </wii-panel-header>
 
