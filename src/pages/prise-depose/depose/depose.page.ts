@@ -13,7 +13,7 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {TrackingListFactoryService} from '@app/common/services/tracking-list-factory.service';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {NavService} from '@app/common/services/nav/nav.service';
-import {flatMap, map, tap} from 'rxjs/operators';
+import {flatMap, map, mergeMap, tap} from 'rxjs/operators';
 import * as moment from 'moment';
 import {PageComponent} from '@pages/page.component';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
@@ -34,7 +34,7 @@ import {NetworkService} from '@app/common/services/network.service';
 })
 export class DeposePage extends PageComponent implements CanLeave {
 
-    private static readonly MOUVEMENT_TRACA_DEPOSE = 'depose';
+    static readonly MOUVEMENT_TRACA_DEPOSE = 'depose';
 
     public readonly listIdentifierName;
 
@@ -62,6 +62,7 @@ export class DeposePage extends PageComponent implements CanLeave {
     public loading: boolean;
 
     public fromStock: boolean;
+    private createTakeAndDrop: boolean = false;
 
     private saveSubscription: Subscription;
 
@@ -97,6 +98,7 @@ export class DeposePage extends PageComponent implements CanLeave {
 
     public ionViewWillEnter(): void {
         this.trackingListFactory.enableActions();
+        this.createTakeAndDrop = this.currentNavParams.get('createTakeAndDrop');
         if (!this.operator) {
             this.init();
             this.emplacement = this.currentNavParams.get('emplacement');
@@ -127,7 +129,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                 const online = this.networkService.hasNetwork();
 
                 if (!this.fromStock || online) {
-                    const takingToFinish = this.colisPrise
+                    const takingToFinish = this.currentNavParams.get('articlesList') ? [] : this.colisPrise
                         .filter(({hidden}) => hidden)
                         .map(({id}) => id);
 
@@ -146,10 +148,10 @@ export class DeposePage extends PageComponent implements CanLeave {
                                 return this.localDataManager
                                     .saveTrackingMovements(this.colisDepose, takingToFinish)
                                     .pipe(
-                                        flatMap((): Observable<{ online: boolean; apiResponse?: { [x: string]: any } }> => (
+                                        mergeMap((): Observable<{ online: boolean; apiResponse?: { [x: string]: any } }> => (
                                             online
                                                 ? this.localDataManager
-                                                    .sendMouvementTraca(this.fromStock)
+                                                    .sendMouvementTraca(this.fromStock, this.createTakeAndDrop)
                                                     .pipe(
                                                         flatMap((apiResponse) => (
                                                             !this.fromStock && groupingMovements.length > 0
@@ -160,7 +162,7 @@ export class DeposePage extends PageComponent implements CanLeave {
                                                     )
                                                 : of({online})
                                         )),
-                                        flatMap((a) => this.treatApiResponse(a.online, a.apiResponse, multiDepose))
+                                        flatMap((a) => this.treatApiResponse(a.online, a.apiResponse, multiDepose)),
                                     )
                             }
                         })
@@ -189,7 +191,15 @@ export class DeposePage extends PageComponent implements CanLeave {
             this.navService
                 .pop()
                 .subscribe(() => {
-                    this.finishAction();
+                    if(this.currentNavParams.get('articlesList')){
+                        this.navService.runMultiplePop(1).then(() => {
+                            this.navService.push(NavPathEnum.LIVRAISON_ARTICLES, {
+                                livraison: this.currentNavParams.get('livraisonToRedirect')
+                            });
+                        });
+                    } else {
+                        this.finishAction();
+                    }
                 });
         } else {
             this.init();
@@ -447,7 +457,7 @@ export class DeposePage extends PageComponent implements CanLeave {
             this.translationService.get(null, `Traçabilité`, `Général`)
         )
             .subscribe(([colisPrise, operator, skipValidation, natures, allowedNatureLocationArray, natureTranslations]) => {
-                this.colisPrise = colisPrise.map(({subPacks, ...tracking}) => ({
+                this.colisPrise = this.currentNavParams.get('articlesList') || colisPrise.map(({subPacks, ...tracking}) => ({
                     ...tracking,
                     subPacks: subPacks ? JSON.parse(subPacks) : []
                 }));

@@ -36,7 +36,7 @@ import {NetworkService} from '@app/common/services/network.service';
 })
 export class PrisePage extends PageComponent implements CanLeave {
 
-    private static readonly MOUVEMENT_TRACA_PRISE = 'prise';
+    static readonly MOUVEMENT_TRACA_PRISE = 'prise';
 
     @ViewChild('footerScannerComponent', {static: false})
     public footerScannerComponent: BarcodeScannerComponent;

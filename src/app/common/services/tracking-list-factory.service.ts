@@ -189,7 +189,7 @@ export class TrackingListFactoryService {
                         : ((quantity || quantite
                             ? {
                                 quantity: {
-                                    label: fromStock ? `Nombre d'articles` : `Quantité`,
+                                    label: fromStock && subPacks ? `Nombre d'articles` : `Quantité`,
                                     value: String(quantity || quantite)
                                 }
                             }

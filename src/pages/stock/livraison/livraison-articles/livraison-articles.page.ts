@@ -20,6 +20,8 @@ import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/bar
 import {StorageService} from "@app/common/services/storage/storage.service";
 import {StorageKeyEnum} from "@app/common/services/storage/storage-key.enum";
 import {Observable, of, zip} from "rxjs";
+import {PrisePage} from "@pages/prise-depose/prise/prise.page";
+import {AlertService} from "@app/common/services/alert.service";
 import {Nature} from "@entities/nature";
 import {LoadingService} from "@app/common/services/loading.service";
 
@@ -63,6 +65,7 @@ export class LivraisonArticlesPage extends PageComponent {
                        private networkService: NetworkService,
                        private apiService: ApiService,
                        private storageService: StorageService,
+                       private alertService: AlertService,
                        navService: NavService,
                        private loadingService: LoadingService) {
         super(navService);
@@ -281,6 +284,42 @@ export class LivraisonArticlesPage extends PageComponent {
         }
     }
 
+    public redirectToDeposeOrUlAssociation(redirectionRoute: NavPathEnum,
+                                           livraisonToRedirect: Livraison,
+                                           articles: Array<{barcode: string; reference: string; label: string; quantity: number; location: string; currentLogisticUnitCode: string}>): void {
+        let $articlesList = [];
+        const date = moment().format();
+        if (redirectionRoute === 'emplacement-scan'){
+            $articlesList = articles.map((article) => ({
+                ref_article: article.barcode,
+                quantity: article.quantity,
+                date,
+            }));
+        } else if(redirectionRoute === 'association') {
+            $articlesList = articles.map((article) => ({
+                barCode: article.barcode,
+                label: article.label,
+                quantity: article.quantity,
+                location: article.location,
+                reference: article.reference,
+                ref_article: article.reference,
+                currentLogisticUnitCode: article.currentLogisticUnitCode,
+                is_lu: false,
+                date
+            }));
+        }
+        this.navService.pop().subscribe(() => {
+            this.navService.push(redirectionRoute, {
+                articlesList: $articlesList,
+                livraisonToRedirect,
+                fromStock: false,
+                fromStockLivraison: true,
+                fromDepose: true,
+                createTakeAndDrop: true
+            });
+        });
+    }
+
     public testIfBarcodeEquals(text, fromText: boolean = true): void {
         const logisticUnits = this.articlesNT
             .filter((article: ArticleLivraison) => article.currentLogisticUnitCode)
@@ -294,13 +333,25 @@ export class LivraisonArticlesPage extends PageComponent {
             : text;
 
         if (article && article.currentLogisticUnitId) {
-            this.toastService.presentToast(`Cet article est présent dans l'unité logistique <strong>${article.currentLogisticUnitCode}</strong>, vous ne pouvez pas le livrer seul.`)
+            this.toastService.presentToast(`Cet article est présent dans l'unité logistique <strong>${article.currentLogisticUnitCode}</strong>, vous ne pouvez pas le livrer seul.`);
         } else {
             if (article || logisticUnit) {
                 if (logisticUnit || this.skipQuantities) {
                     if (logisticUnit) {
-                        const articles = this.articlesNT.filter((article: ArticleLivraison) => article.currentLogisticUnitCode === logisticUnit);
-                        this.selectArticle(articles);
+                        const options = {
+                            logisticUnit
+                        };
+                        this.loadingService.presentLoadingWhile({
+                            event: () => this.apiService.requestApi(ApiService.CHECK_LOGISTIC_UNIT_CONTENT, {params: options}),
+                            message: 'Chargement en cours...'
+                        }).subscribe(({extraArticles}: any) => {
+                            if (extraArticles.length > 0) {
+                                this.openModalRemoveArticles(extraArticles)
+                            } else {
+                                const articles = this.articlesNT.filter((article: ArticleLivraison) => article.currentLogisticUnitCode === logisticUnit);
+                                this.selectArticle(articles);
+                            }
+                        });
                     } else {
                         this.selectArticle(article);
                     }
@@ -396,7 +447,7 @@ export class LivraisonArticlesPage extends PageComponent {
             : undefined;
     }
 
-    private ceateListTreatedConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
+    private createListTreatedConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
         const articlesCount = this.articlesT
             ? this.articlesT.filter((article: ArticleLivraison) => !article.is_ref && !article.currentLogisticUnitId).length
             : 0;
@@ -490,7 +541,7 @@ export class LivraisonArticlesPage extends PageComponent {
         this.articlesT = articles.filter(({has_moved}) => (has_moved === 1));
 
         this.listToTreatConfig = this.createListToTreatConfig();
-        this.listTreatedConfig = this.ceateListTreatedConfig();
+        this.listTreatedConfig = this.createListTreatedConfig();
 
         if (!isInit) {
             if (this.articlesNT.length === 0) {
@@ -519,8 +570,10 @@ export class LivraisonArticlesPage extends PageComponent {
                 this.sqliteService.findOneBy(`nature`, {id: firstArticle.currentLogisticUnitNatureId})
                     .subscribe((nature: Nature) => {
                         bodyConfig.push({
-                            infos: this.createLogisticUnitInfo(articles, logisticUnit, nature.label, firstArticle.currentLogisticUnitLocation),
-                            color: nature.color,
+                            infos: this.createLogisticUnitInfo(articles, logisticUnit, nature ? nature.label : undefined, firstArticle.currentLogisticUnitLocation),
+                            ...nature ? ({
+                                    color: nature.color
+                                }) : {},
                             ...notTreatedList ? ({
                                 rightIcon: {
                                     color: 'grey' as IconColor,
@@ -532,7 +585,7 @@ export class LivraisonArticlesPage extends PageComponent {
                                 pressAction: () => this.showLogisticUnitContent(articles, logisticUnit)
                             }) : {},
                         })
-                    })
+                    });
             } else {
                 articles.forEach((article) => {
                     bodyConfig.push({
@@ -555,16 +608,29 @@ export class LivraisonArticlesPage extends PageComponent {
     }
 
     private showLogisticUnitContent(articles: Array<ArticleLivraison>, logisticUnit: string): void {
-        const filteredArticles = articles.filter((article: ArticleLivraison) => article.currentLogisticUnitCode === logisticUnit);
-        const options = {
-            articles: filteredArticles,
-            logisticUnit,
-            callback: () => this.updateList(this.articles, true)
+        if(this.networkService.hasNetwork()){
+            const checkLogisticUnitContentOptions = {
+                logisticUnit
+            };
+            this.loadingService.presentLoadingWhile({
+                event: () => this.apiService.requestApi(ApiService.CHECK_LOGISTIC_UNIT_CONTENT, {params: checkLogisticUnitContentOptions}),
+                message: "Récupération des informations de l'unité logistique en cours..."
+            }).subscribe(({extraArticles}: any) => {
+                const filteredArticles = articles.filter((article: ArticleLivraison) => article.currentLogisticUnitCode === logisticUnit);
+                const options = {
+                    articles: filteredArticles,
+                    extraArticles,
+                    logisticUnit,
+                    callback: (articles) => this.openModalRemoveArticles(articles)
+                };
+                this.navService.push(NavPathEnum.DELIVERY_LOGISTIC_UNIT_CONTENT, options)
+            });
+        } else {
+            this.toastService.presentToast('Vous devez être connecté à internet pour pouvoir effectuer cette action.');
         }
-        this.navService.push(NavPathEnum.DELIVERY_LOGISTIC_UNIT_CONTENT, options)
     }
 
-    private createLogisticUnitInfo(articles: Array<ArticleLivraison>, logisticUnit: string, natureLabel: string, location: string) {
+    private createLogisticUnitInfo(articles: Array<ArticleLivraison>, logisticUnit: string, natureLabel: string|undefined, location: string) {
         const articlesCount = articles.length;
 
         return {
@@ -580,10 +646,25 @@ export class LivraisonArticlesPage extends PageComponent {
                 label: `Emplacement`,
                 value: location
             },
-            nature: {
-                label: `Nature`,
-                value: natureLabel
-            },
+            ...natureLabel ? ({
+                    nature: {
+                        label: `Nature`,
+                        value: natureLabel
+                    }
+                }) : {},
         }
+    }
+
+    private openModalRemoveArticles(articles: Array<any>){
+        this.alertService.show({
+            message: `Cette unité logistique contient des articles non demandés. Elle ne peut pas être livrée en état.`,
+            buttons: [{
+                text: 'Faire une dépose',
+                handler: () => this.redirectToDeposeOrUlAssociation(NavPathEnum.EMPLACEMENT_SCAN, this.livraison, articles),
+            }, {
+                text: 'Faire association UL',
+                handler: () => this.redirectToDeposeOrUlAssociation(NavPathEnum.ASSOCIATION, this.livraison, articles),
+            }]
+        });
     }
 }
