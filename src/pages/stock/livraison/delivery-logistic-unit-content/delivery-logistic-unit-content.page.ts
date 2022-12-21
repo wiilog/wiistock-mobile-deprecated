@@ -5,9 +5,7 @@ import {ViewWillEnter} from '@ionic/angular';
 import {ArticleLivraison} from "@entities/article-livraison";
 import {IconConfig} from "@app/common/components/panel/model/icon-config";
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
-import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
-import {LoadingService} from "@app/common/services/loading.service";
-import {ToastService} from "@app/common/services/toast.service";
+import {ArticlePrepa} from "@entities/article-prepa";
 
 @Component({
     selector: 'wii-delivery-logistic-unit-content',
@@ -16,7 +14,7 @@ import {ToastService} from "@app/common/services/toast.service";
 })
 export class DeliveryLogisticUnitContentPage extends PageComponent implements ViewWillEnter {
 
-    public articles: Array<ArticleLivraison>;
+    public articles: Array<ArticleLivraison|ArticlePrepa>;
     public logisticUnit: string;
     public listBoldValues?: Array<string> = ['label', 'barcode', 'location', 'quantity'];
 
@@ -58,7 +56,7 @@ export class DeliveryLogisticUnitContentPage extends PageComponent implements Vi
     public refreshArticlesConfig(): void {
         this.articlesConfig = {
             body: this.articles
-                .map((article: ArticleLivraison) => ({
+                .map((article: ArticleLivraison|ArticlePrepa) => ({
                     infos: {
                         label: {
                             label: 'Libellé',
@@ -70,11 +68,11 @@ export class DeliveryLogisticUnitContentPage extends PageComponent implements Vi
                         },
                         location: {
                             label: `Emplacement`,
-                            value: article.location
+                            value: `location` in article ? article.location : article.emplacement
                         },
                         quantity: {
                             label: `Quantité`,
-                            value: `${article.quantity}`
+                            value: `${'quantity' in article ? article.quantity : article.quantite}`
                         }
                     },
                     ...(this.extraArticles.includes(article.barcode)

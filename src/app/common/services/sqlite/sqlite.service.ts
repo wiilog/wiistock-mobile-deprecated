@@ -183,6 +183,10 @@ export class SqliteService {
                                         original_quantity: toInsert.quantity,
                                         reference_article_reference: toInsert.reference_article_reference,
                                         targetLocationPicking: toInsert.targetLocationPicking,
+                                        lineLogisticUnitId: toInsert.lineLogisticUnitId,
+                                        lineLogisticUnitCode: toInsert.lineLogisticUnitCode,
+                                        lineLogisticUnitNatureId: toInsert.lineLogisticUnitNatureId,
+                                        lineLogisticUnitLocation: toInsert.lineLogisticUnitLocation,
                                     }))
                                 ;
 

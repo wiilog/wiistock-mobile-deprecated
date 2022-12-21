@@ -88,7 +88,11 @@ export const TablesDefinitions: Array<TableDefinition> = [
             isSelectableByUser: 'INTEGER',
             original_quantity: 'INTEGER',
             deleted: 'INTEGER DEFAULT 0',
-            targetLocationPicking: 'TEXT'
+            targetLocationPicking: 'TEXT',
+            lineLogisticUnitId: 'INTEGER',
+            lineLogisticUnitCode: 'TEXT',
+            lineLogisticUnitNatureId: 'INTEGER',
+            lineLogisticUnitLocation: 'TEXT',
         }
     },
     {

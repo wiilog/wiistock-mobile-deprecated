@@ -294,7 +294,7 @@ export class LivraisonArticlesPage extends PageComponent {
             : text;
 
         if (article && article.currentLogisticUnitId) {
-            this.toastService.presentToast(`Cet article est présent dans l'unité logistique <strong>${article.currentLogisticUnitCode}</strong>, vous ne pouvez pas le livrer seul.`)
+            this.toastService.presentToast(`Cet article est présent dans l'unité logistique <strong>${article.currentLogisticUnitCode}</strong>, vous ne pouvez pas le livrer seul.`);
         } else {
             if (article || logisticUnit) {
                 if (logisticUnit || this.skipQuantities) {
@@ -559,7 +559,6 @@ export class LivraisonArticlesPage extends PageComponent {
         const options = {
             articles: filteredArticles,
             logisticUnit,
-            callback: () => this.updateList(this.articles, true)
         }
         this.navService.push(NavPathEnum.DELIVERY_LOGISTIC_UNIT_CONTENT, options)
     }

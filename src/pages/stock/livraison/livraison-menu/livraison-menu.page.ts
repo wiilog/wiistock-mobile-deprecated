@@ -72,16 +72,17 @@ export class LivraisonMenuPage extends PageComponent {
                 )
                 .subscribe(([loader, deliveries]: [HTMLIonLoadingElement, Array<Livraison>]) => {
                     this.loader = loader;
-                    this.deliveryOrders = deliveries.filter(({date_end}) => (date_end === null));
-                    this.deliveryOrders = deliveries.sort((a, b) => {
-                        const momentExpectedDate1 = moment(a.expectedAt, 'DD/MM/YYYY HH:mm:ss')
-                        const momentExpectedDate2 = moment(b.expectedAt, 'DD/MM/YYYY HH:mm:ss')
-                        return (
-                            (momentExpectedDate1.isValid() && !momentExpectedDate2.isValid()) || momentExpectedDate1.isBefore(momentExpectedDate2) ? -1 :
-                                (!momentExpectedDate1.isValid() && momentExpectedDate2.isValid()) || momentExpectedDate1.isAfter(momentExpectedDate2) ? 1 :
-                                    0
-                        );
-                    });
+                    this.deliveryOrders = deliveries
+                        .filter(({date_end}) => (date_end === null))
+                        .sort((a, b) => {
+                            const momentExpectedDate1 = moment(a.expectedAt, 'DD/MM/YYYY HH:mm:ss')
+                            const momentExpectedDate2 = moment(b.expectedAt, 'DD/MM/YYYY HH:mm:ss')
+                            return (
+                                (momentExpectedDate1.isValid() && !momentExpectedDate2.isValid()) || momentExpectedDate1.isBefore(momentExpectedDate2) ? -1 :
+                                    (!momentExpectedDate1.isValid() && momentExpectedDate2.isValid()) || momentExpectedDate1.isAfter(momentExpectedDate2) ? 1 :
+                                        0
+                            );
+                        });
                     const preparationLocationsStr = deliveries
                         .reduce((acc: Array<string>, {preparationLocation}) => {
                             if (preparationLocation && acc.indexOf(preparationLocation) === -1) {

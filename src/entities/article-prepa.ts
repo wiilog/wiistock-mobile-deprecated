@@ -14,4 +14,8 @@ export interface ArticlePrepa {
     isSelectableByUser?: number;
     reference_article?: string;
     targetLocationPicking?: string;
+    lineLogisticUnitId?: number;
+    lineLogisticUnitCode?: string;
+    lineLogisticUnitNatureId?: string;
+    lineLogisticUnitLocation?: string;
 }

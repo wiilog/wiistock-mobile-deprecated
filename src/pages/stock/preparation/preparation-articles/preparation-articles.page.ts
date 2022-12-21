@@ -21,6 +21,9 @@ import {NetworkService} from '@app/common/services/network.service';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
+import {Nature} from "@entities/nature";
+import {LoadingService} from "@app/common/services/loading.service";
+import {ArticleLivraison} from "@entities/article-livraison";
 
 
 @Component({
@@ -62,6 +65,7 @@ export class PreparationArticlesPage extends PageComponent {
                        private networkService: NetworkService,
                        private apiService: ApiService,
                        private storageService: StorageService,
+                       private loadingService: LoadingService,
                        navService: NavService) {
         super(navService);
         this.loadingStartPreparation = false;
@@ -79,7 +83,7 @@ export class PreparationArticlesPage extends PageComponent {
             info: `Flux : ${this.preparation.type}`
         };
 
-        this.listBoldValues = ['reference', 'referenceArticleReference', 'label', 'barCode', 'location', 'quantity', 'targetLocationPicking'];
+        this.listBoldValues = ['reference', 'referenceArticleReference', 'label', 'barCode', 'location', 'quantity', 'targetLocationPicking', 'logisticUnit', 'articlesCount', 'nature'];
 
         zip(
             this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_PREPARATIONS),
@@ -104,7 +108,7 @@ export class PreparationArticlesPage extends PageComponent {
         }
     }
 
-    public saveSelectedArticle(selectedArticle: ArticlePrepa | ArticlePrepaByRefArticle, selectedQuantity: number): void {
+    public saveSelectedArticle(selectedArticle: ArticlePrepa | ArticlePrepaByRefArticle, selectedQuantity: number): Observable<any> {
         const validateAfterSelect = () => {
             if (this.skipValidation
                 && this.articlesT.length > 0
@@ -136,38 +140,31 @@ export class PreparationArticlesPage extends PageComponent {
                 if (articleAlready) {
                     // we update the quantity in the list of treated article
                     // then we update quantity in the list of untreated articles
-                    of(undefined)
+                    return of(undefined)
                         .pipe(
                             mergeMap(() => this.sqliteService.updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), Number(selectedQuantity) + Number(articleAlready.quantite))),
                             mergeMap(() => this.sqliteService.updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), (selectedArticle as ArticlePrepa).quantite - selectedQuantity)),
-                            mergeMap(() => this.updateViewLists())
-                        )
-                        .subscribe(() => {
-                            validateAfterSelect();
-                        });
+                            mergeMap(() => this.updateViewLists()),
+                            tap(() => validateAfterSelect())
+                        );
                 }
 
                 // the selection is a picking
                 else if (isSelectableByUser) {
-                    this.moveArticle(selectedArticle, selectedQuantity)
+                    return this.moveArticle(selectedArticle, selectedQuantity)
                         .pipe(
-                            mergeMap(() => this.updateViewLists())
-                        )
-                        .subscribe(() => {
-                            validateAfterSelect();
-                        });
-                }
-                else {
+                            mergeMap(() => this.updateViewLists()),
+                            tap(() => validateAfterSelect())
+                        );
+                } else {
                     // we update value quantity of selected article
-                    this.sqliteService
+                    return this.sqliteService
                         .updateArticlePrepaQuantity(reference, id_prepa, Number(is_ref), (selectedArticle as ArticlePrepa).quantite - selectedQuantity)
                         .pipe(
                             mergeMap(() => this.moveArticle(selectedArticle, selectedQuantity)),
-                            mergeMap(() => this.updateViewLists())
-                        )
-                        .subscribe(() => {
-                            validateAfterSelect();
-                        })
+                            mergeMap(() => this.updateViewLists()),
+                            tap(() => validateAfterSelect())
+                        );
                 }
             }
             // if we select all the article
@@ -209,55 +206,69 @@ export class PreparationArticlesPage extends PageComponent {
 
                 if (articleAlready) {
                     // we don't enter here if it's an article selected by the user in the liste of article_prepa_by_ref_article
-                    this.sqliteService
+                    return this.sqliteService
                         .updateArticlePrepaQuantity(articleAlready.reference, articleAlready.id_prepa, Number(articleAlready.is_ref), mouvement.quantity + articleAlready.quantite)
                         .pipe(
                             mergeMap(() => this.sqliteService.deleteArticlePrepa(articleAlready.reference, articleAlready.id_prepa, Number(articleAlready.is_ref))),
-                            mergeMap(() => this.updateViewLists())
-                        )
-                        .subscribe(() => {
-                            validateAfterSelect();
-                        });
+                            mergeMap(() => this.updateViewLists()),
+                            tap(() => validateAfterSelect())
+                        );
                 } else {
-                    this.moveArticle(selectedArticle)
+                    return this.moveArticle(selectedArticle)
                         .pipe(
-                            mergeMap(() => this.updateViewLists())
-                        )
-                        .subscribe(() => {
-                            validateAfterSelect();
-                        });
+                            mergeMap(() => this.updateViewLists()),
+                            tap(() => validateAfterSelect())
+                        );
                 }
             }
+        } else {
+            return of(undefined);
         }
     }
 
-    private selectArticle(selectedArticle: ArticlePrepa | ArticlePrepaByRefArticle, selectedQuantity: number): void {
-        if (selectedArticle && selectedQuantity) {
+    private selectArticle(selectedArticle, selectedQuantity: number = undefined): void {
+        const articles = Array.isArray(selectedArticle) ? selectedArticle : [selectedArticle];
+
+        if (selectedArticle) {
             // we start preparation
             if (!this.started) {
                 if (this.networkService.hasNetwork()) {
                     this.loadingStartPreparation = true;
-                    this.apiService.requestApi(ApiService.BEGIN_PREPA, {params: {id: this.preparation.id}}).subscribe((resp) => {
-                        if (resp.success) {
-                            this.started = true;
-                            this.isValid = true;
-                            this.sqliteService.startPrepa(this.preparation.id).subscribe(() => {
-                                this.toastService.presentToast('Préparation commencée.');
-                                this.saveSelectedArticle(selectedArticle, selectedQuantity);
-                            });
-                        }
-                        else {
-                            this.isValid = false;
-                            this.loadingStartPreparation = false;
-                            this.toastService.presentToast(resp.msg);
-                        }
+                    this.loadingService.presentLoadingWhile({
+                        event: () => (
+                            this.apiService
+                                .requestApi(ApiService.BEGIN_PREPA, {params: {id: this.preparation.id}})
+                                .pipe(
+                                    mergeMap(({success, msg}) => {
+                                        if (success) {
+                                            this.started = true;
+                                            this.isValid = true;
+
+                                            return this.sqliteService.startPrepa(this.preparation.id)
+                                                .pipe(
+                                                    mergeMap(() => zip(
+                                                        ...articles
+                                                            .map((article: ArticlePrepa | ArticlePrepaByRefArticle) =>
+                                                                this.saveSelectedArticle(article, selectedQuantity || (`quantity` in article ? article.quantity : article.quantite))))),
+                                                    map(() => `Préparation commencée`)
+                                                );
+                                        } else {
+                                            this.isValid = false;
+                                            this.loadingStartPreparation = false;
+                                            return of(msg);
+                                        }
+                                    })
+                                )
+                        )
+                    }).subscribe((resp) => {
+                        this.toastService.presentToast(resp);
                     });
-                }
-                else {
+                } else {
                     this.toastService.presentToast('Vous devez être connecté à internet pour commencer la préparation');
                 }
             } else {
-                this.saveSelectedArticle(selectedArticle, selectedQuantity);
+                this.saveSelectedArticle(selectedArticle, selectedQuantity)
+                    .subscribe(() => {/*Keep subscribe*/});
             }
         }
     }
@@ -266,8 +277,7 @@ export class PreparationArticlesPage extends PageComponent {
         if ((this.articlesT.length === 0) ||
             this.articlesT.every(({quantite}) => (!quantite || quantite === 0))) {
             this.toastService.presentToast('Veuillez traiter au moins un article');
-        }
-        else {
+        } else {
             this.navService.push(NavPathEnum.PREPARATION_EMPLACEMENT, {
                 preparation: this.preparation,
                 validatePrepa: () => {
@@ -278,35 +288,46 @@ export class PreparationArticlesPage extends PageComponent {
     }
 
     public testIfBarcodeEquals(selectedArticleGiven: ArticlePrepa | string, fromClick = false): void {
+        const logisticUnits = (articles) => articles
+            .filter((article: ArticlePrepa) => article.lineLogisticUnitCode)
+            .map((article: ArticlePrepa) => article.lineLogisticUnitCode)
+            .filter((code: string, index, logisticUnitCodes) => index === logisticUnitCodes.indexOf(code));
+
+        const logisticUnit = logisticUnits(this.articlesNT).find((logisticUnit: string) => logisticUnit === selectedArticleGiven);
+
         let selectedArticle: ArticlePrepa = (
             !fromClick // selectedArticleGiven is a barcode
                 ? this.articlesNT.find(article => ((article.barcode === selectedArticleGiven)))
                 : (selectedArticleGiven as ArticlePrepa) // if it's a click we have the article directly
         );
 
-        // if we scan an article which is not in the list
-        // Then we check if it's linked to a refArticle in the list
-        if (!fromClick && !selectedArticle) {
-            this.getArticleByBarcode(selectedArticleGiven as string).subscribe((result) => {
-                // result = {selectedArticle, refArticle}
-                this.navigateToPreparationTake(result);
-            });
-        }
-        else if (selectedArticle && (selectedArticle as ArticlePrepa).type_quantite === 'article') {
-            this.navService.push(NavPathEnum.PREPARATION_REF_ARTICLES, {
-                article: selectedArticle,
-                preparation: this.preparation,
-                started: this.started,
-                valid: this.isValid,
-                getArticleByBarcode: (barcode: string) => this.getArticleByBarcode(barcode),
-                selectArticle: (selectedQuantity: number, selectedArticleByRef: ArticlePrepaByRefArticle) => this.selectArticle(selectedArticleByRef, selectedQuantity)
-            });
-        }
-        else if (this.skipQuantities) {
-            this.selectArticle(selectedArticle, selectedArticle.quantite);
-        }
-        else {
-            this.navigateToPreparationTake({selectedArticle: (selectedArticle as ArticlePrepa)});
+        if (selectedArticle && selectedArticle.lineLogisticUnitId) {
+            this.toastService.presentToast(`Cet article est présent dans l'unité logistique <strong>${selectedArticle.lineLogisticUnitCode}</strong>, vous ne pouvez pas le préparer seul.`);
+        } else {
+            if (logisticUnit) {
+                const articles = this.articlesNT.filter((article: ArticlePrepa) => article.lineLogisticUnitCode === logisticUnit);
+                this.selectArticle(articles);
+            } else if (!fromClick && !selectedArticle) {
+                // if we scan an article which is not in the list
+                // Then we check if it's linked to a refArticle in the list
+                this.getArticleByBarcode(selectedArticleGiven as string).subscribe((result) => {
+                    // result = {selectedArticle, refArticle}
+                    this.navigateToPreparationTake(result);
+                });
+            } else if (selectedArticle && (selectedArticle as ArticlePrepa).type_quantite === 'article') {
+                this.navService.push(NavPathEnum.PREPARATION_REF_ARTICLES, {
+                    article: selectedArticle,
+                    preparation: this.preparation,
+                    started: this.started,
+                    valid: this.isValid,
+                    getArticleByBarcode: (barcode: string) => this.getArticleByBarcode(barcode),
+                    selectArticle: (selectedQuantity: number, selectedArticleByRef: ArticlePrepaByRefArticle) => this.selectArticle(selectedArticleByRef, selectedQuantity)
+                });
+            } else if (this.skipQuantities) {
+                this.selectArticle(selectedArticle, selectedArticle.quantite);
+            } else {
+                this.navigateToPreparationTake({selectedArticle: (selectedArticle as ArticlePrepa)});
+            }
         }
     }
 
@@ -323,7 +344,11 @@ export class PreparationArticlesPage extends PageComponent {
                     ? of({selectedArticle})
                     : (
                         this.sqliteService
-                            .findOneBy('article_prepa', {reference: selectedArticle.reference_article, is_ref: 1, id_prepa: this.preparation.id}, 'AND')
+                            .findOneBy('article_prepa', {
+                                reference: selectedArticle.reference_article,
+                                is_ref: 1,
+                                id_prepa: this.preparation.id
+                            }, 'AND')
                             .pipe(map((refArticle) => (
                                     refArticle
                                         ? ({selectedArticle, refArticle})
@@ -343,8 +368,7 @@ export class PreparationArticlesPage extends PageComponent {
                         ? Math.min((selectedArticle as ArticlePrepaByRefArticle).quantity, refArticle.quantite)
                         : (selectedArticle as ArticlePrepaByRefArticle).quantity;
                     this.selectArticle(selectedArticle, quantityToSelect);
-                }
-                else {
+                } else {
                     this.navService.push(NavPathEnum.PREPARATION_ARTICLE_TAKE, {
                         article: selectedArticle,
                         refArticle,
@@ -354,8 +378,7 @@ export class PreparationArticlesPage extends PageComponent {
                         selectArticle: (selectedQuantity: number) => this.selectArticle(selectedArticle, selectedQuantity)
                     });
                 }
-            }
-            else {
+            } else {
                 this.toastService.presentToast(`Aucune quantité à préparer pour cette référence`);
             }
         } else {
@@ -488,13 +511,37 @@ export class PreparationArticlesPage extends PageComponent {
     }
 
     private createListToTreatConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
-        const articlesNumber = (this.articlesNT ? this.articlesNT.length : 0);
-        const articlesPlural = articlesNumber > 1 ? 's' : '';
-        return articlesNumber > 0
+        const articlesCount = this.articlesNT
+            ? this.articlesNT.filter((article: ArticlePrepa) => !article.is_ref && !article.lineLogisticUnitId).length
+            : 0;
+        const referencesCount = this.articlesNT
+            ? this.articlesNT.filter((article: ArticlePrepa) => article.is_ref).length
+            : 0;
+        const logisiticUnitsCount = this.articlesNT
+            ? this.articlesNT
+                .filter((article: ArticlePrepa) => article.lineLogisticUnitId)
+                .map((article: ArticlePrepa) => article.lineLogisticUnitId)
+                .filter((id: number, index, logisticUnitIds) => index === logisticUnitIds.indexOf(id))
+                .length
+            : 0;
+        const articlesInLogisticUnitCount = this.articlesNT
+            ? this.articlesNT
+                .filter((article: ArticlePrepa) => article.lineLogisticUnitId)
+                .length
+            : 0;
+
+        const content = [
+            `${articlesCount} article${articlesCount > 1 ? 's' : ''} à scanner`,
+            `${referencesCount} référence${referencesCount > 1 ? 's' : ''} à scanner`,
+            `${logisiticUnitsCount} UL à scanner`,
+            `${articlesInLogisticUnitCount} article${articlesInLogisticUnitCount > 1 ? 's' : ''} contenu${articlesInLogisticUnitCount > 1 ? 's' : ''}`
+        ];
+
+        return articlesCount > 0 || referencesCount > 0 || logisiticUnitsCount > 0 || articlesInLogisticUnitCount > 0
             ? {
                 header: {
                     title: 'À préparer',
-                    info: `${articlesNumber} article${articlesPlural} à scanner`,
+                    info: `${content.join(', ')}`,
                     leftIcon: {
                         name: 'download.svg',
                         color: 'list-blue-light'
@@ -507,39 +554,51 @@ export class PreparationArticlesPage extends PageComponent {
                         }
                     }
                 },
-                body: this.articlesNT.map((articlePrepa: ArticlePrepa) => ({
-                    infos: this.createArticleInfo(articlePrepa),
-                    rightIcon: {
-                        color: 'grey' as IconColor,
-                        name: 'up.svg',
-                        action: () => {
-                            this.testIfBarcodeEquals(articlePrepa, true)
-                        }
-                    }
-                }))
-            }
-            : undefined;
+                body: this.getBodyConfig(this.articlesNT, true)
+            } : undefined;
     }
 
     private createListTreatedConfig(): { header: HeaderConfig; body: Array<ListPanelItemConfig>; } {
-        const pickedArticlesNumber = (this.articlesT ? this.articlesT.length : 0);
-        const pickedArticlesPlural = pickedArticlesNumber > 1 ? 's' : '';
+        const articlesCount = this.articlesT
+            ? this.articlesT.filter((article: ArticlePrepa) => !article.is_ref && !article.lineLogisticUnitId).length
+            : 0;
+        const referencesCount = this.articlesT
+            ? this.articlesT.filter((article: ArticlePrepa) => article.is_ref).length
+            : 0;
+        const logisiticUnitsCount = this.articlesT
+            ? this.articlesT
+                .filter((article: ArticlePrepa) => article.lineLogisticUnitId)
+                .map((article: ArticlePrepa) => article.lineLogisticUnitId)
+                .filter((id: number, index, articleIds) => index === articleIds.indexOf(id))
+                .length
+            : 0;
+        const articlesInLogisticUnitCount = this.articlesT
+            ? this.articlesT
+                .filter((article: ArticlePrepa) => article.lineLogisticUnitId)
+                .length
+            : 0;
+
+        const content = [
+            `${articlesCount} article${articlesCount > 1 ? 's' : ''} scanné${articlesCount > 1 ? 's' : ''}`,
+            `${referencesCount} référence${referencesCount > 1 ? 's' : ''} scannée${referencesCount > 1 ? 's' : ''}`,
+            `${logisiticUnitsCount} UL scannée${logisiticUnitsCount > 1 ? 's' : ''}`,
+            `${articlesInLogisticUnitCount} article${articlesInLogisticUnitCount > 1 ? 's' : ''} contenu${articlesInLogisticUnitCount > 1 ? 's' : ''}`
+        ];
+
         return {
             header: {
                 title: 'Préparé',
-                info: `${pickedArticlesNumber} article${pickedArticlesPlural} scanné${pickedArticlesPlural}`,
+                info: `${content.join(', ')}`,
                 leftIcon: {
                     name: 'upload.svg',
                     color: 'list-blue'
                 }
             },
-            body: this.articlesT.map((articlePrepa: ArticlePrepa) => ({
-                infos: this.createArticleInfo(articlePrepa)
-            }))
+            body: this.getBodyConfig(this.articlesT)
         };
     }
 
-    private createArticleInfo({reference, is_ref, reference_article_reference, label,  barcode, emplacement, quantite, targetLocationPicking}: ArticlePrepa): {[name: string]: { label: string; value: string; }} {
+    private createArticleInfo({reference, is_ref, reference_article_reference, label, barcode, emplacement, quantite, targetLocationPicking}: ArticlePrepa): { [name: string]: { label: string; value: string; } } {
         return {
             reference: {
                 label: 'Référence',
@@ -600,6 +659,96 @@ export class PreparationArticlesPage extends PageComponent {
                     : {}
             )
         };
+    }
+
+    private getBodyConfig(articles: Array<ArticlePrepa>, notTreatedList: boolean = false) {
+        const groupedArticlesByLogisticUnit = articles
+            .reduce((acc, article) => {
+                (acc[article['lineLogisticUnitCode']] = acc[article['lineLogisticUnitCode']] || []).push(article);
+                return acc;
+            }, {});
+
+        let bodyConfig = [];
+        Object.keys(groupedArticlesByLogisticUnit).map((logisticUnit?: string) => {
+            const articles = groupedArticlesByLogisticUnit[logisticUnit];
+
+            if (logisticUnit !== `null`) {
+                const firstArticle = articles[0];
+
+                this.sqliteService.findOneBy(`nature`, {id: firstArticle.lineLogisticUnitNatureId})
+                    .subscribe((nature: Nature) => {
+                        bodyConfig.push({
+                            infos: this.createLogisticUnitInfo(articles, logisticUnit, nature ? nature.label : undefined, firstArticle.lineLogisticUnitLocation),
+                            ...nature ? ({
+                                color: nature.color
+                            }) : {},
+                            ...notTreatedList ? ({
+                                rightIcon: {
+                                    color: 'grey' as IconColor,
+                                    name: 'up.svg',
+                                    action: () => {
+                                        this.testIfBarcodeEquals(logisticUnit, false)
+                                    }
+                                },
+                                pressAction: () => this.showLogisticUnitContent(articles, logisticUnit)
+                            }) : {},
+                        })
+                    })
+            } else {
+                articles.forEach((article) => {
+                    bodyConfig.push({
+                        infos: this.createArticleInfo(article),
+                        ...notTreatedList ? ({
+                            rightIcon: {
+                                color: 'grey' as IconColor,
+                                name: 'up.svg',
+                                action: () => {
+                                    this.testIfBarcodeEquals(article.barcode, false)
+                                }
+                            },
+                        }) : {},
+                    })
+                });
+            }
+        });
+
+        return bodyConfig;
+    }
+
+    private createLogisticUnitInfo(articles: Array<ArticlePrepa>, logisticUnit: string, natureLabel: string, location: string) {
+        const articlesCount = articles.length;
+
+        return {
+            logisticUnit: {
+                label: 'Objet',
+                value: logisticUnit
+            },
+            articlesCount: {
+                label: `Nombre d'articles`,
+                value: articlesCount
+            },
+            ...location ? ({
+                location: {
+                    label: `Emplacement`,
+                    value: location
+                }
+            }) : {},
+            ...natureLabel ? ({
+                nature: {
+                    label: `Nature`,
+                    value: natureLabel
+                }
+            }) : {}
+        }
+    }
+
+    private showLogisticUnitContent(articles: Array<ArticlePrepa>, logisticUnit: string): void {
+        const filteredArticles = articles.filter((article: ArticlePrepa) => article.lineLogisticUnitCode === logisticUnit);
+        const options = {
+            articles: filteredArticles,
+            logisticUnit,
+        }
+        this.navService.push(NavPathEnum.DELIVERY_LOGISTIC_UNIT_CONTENT, options);
     }
 
 }
