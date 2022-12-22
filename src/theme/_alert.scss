@@ -63,12 +63,12 @@
             margin-right: 0;
             width: 45%;
             border-radius: 0;
+            text-transform: none!important;
 
             span {
                 width: fit-content;
                 font-size: 12px;
                 font-weight: bold;
-                text-transform: capitalize;
             }
 
             &.alert-button-role-cancel {
@@ -87,6 +87,11 @@
     li {
         text-align: left;
     }
+}
+
+.full-width {
+    width: 95% !important;
+    margin-bottom: 10px !important;
 }
 
 .warning {

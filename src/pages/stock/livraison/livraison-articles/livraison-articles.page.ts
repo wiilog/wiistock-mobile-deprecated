@@ -576,8 +576,8 @@ export class LivraisonArticlesPage extends PageComponent {
                         bodyConfig.push({
                             infos: this.createLogisticUnitInfo(articles, logisticUnit, nature ? nature.label : undefined, firstArticle.currentLogisticUnitLocation),
                             ...nature ? ({
-                                    color: nature.color
-                                }) : {},
+                                color: nature.color
+                            }) : {},
                             ...notTreatedList ? ({
                                 rightIcon: {
                                     color: 'grey' as IconColor,
@@ -664,9 +664,11 @@ export class LivraisonArticlesPage extends PageComponent {
             message: `Cette unité logistique contient des articles non demandés. Elle ne peut pas être livrée en état.`,
             buttons: [{
                 text: 'Faire une dépose',
+                cssClass: 'full-width',
                 handler: () => this.redirectToDeposeOrUlAssociation(NavPathEnum.EMPLACEMENT_SCAN, this.livraison, articles),
             }, {
-                text: 'Faire association UL',
+                text: 'Faire une association UL',
+                cssClass: 'full-width',
                 handler: () => this.redirectToDeposeOrUlAssociation(NavPathEnum.ASSOCIATION, this.livraison, articles),
             }]
         });
