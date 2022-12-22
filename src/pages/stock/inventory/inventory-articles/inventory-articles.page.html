@@ -15,6 +15,7 @@
                          [hidden]="!!dataSubscription"
                          *ngIf="selectItemType !== undefined && requestParams"
                          [type]="selectItemType"
+                         [customBarcodeValidator]="barcodeValidator"
                          (itemChange)="navigateToInventoryValidate($event)"
                          [checkBarcodeValidity]="true"
                          [resetEmitter]="resetEmitter$"

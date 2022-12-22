@@ -9,7 +9,7 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {from, Observable, of, ReplaySubject, Subscription, zip} from 'rxjs';
-import {flatMap, mergeMap, tap} from 'rxjs/operators';
+import {flatMap, map, mergeMap, tap} from 'rxjs/operators';
 import {SaisieInventaire} from '@entities/saisie-inventaire';
 import * as moment from 'moment';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
@@ -18,6 +18,8 @@ import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
+import {ArticleCollecte} from "@entities/article-collecte";
+import {ApiService} from "@app/common/services/api.service";
 
 
 @Component({
@@ -41,6 +43,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
     public listBoldValues?: Array<string>;
     public subtitleConfig = null;
     public requestParams: Array<string>;
+    public barcodeValidator = (barcode: string) => this.validateBarcode(barcode);
 
     public selectedLocation: string;
     public mission?: number;
@@ -260,5 +263,25 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
             this.validateSubscription.unsubscribe();
             this.validateSubscription = undefined;
         }
+    }
+
+    public validateBarcode(barcode: string): Observable<ArticleInventaire> {
+        return this.loadingService
+            .presentLoadingWhile({
+                event: () => {
+                    let articles = this.articles.filter((article) => article.barcode === barcode);
+                    if (articles.length) {
+                        return of(articles[0]);
+                    }
+                    articles = this.articles.filter((article) => article.logistic_unit_code === barcode);
+                    if (articles.length) {
+                        return of(articles[0]);
+                    }
+                    return of(null);
+                }
+            })
+            .pipe(
+                map((item) => item)
+            );
     }
 }
