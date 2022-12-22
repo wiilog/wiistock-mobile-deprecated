@@ -14,7 +14,7 @@ import {PageComponent} from '@pages/page.component';
 import {TranslationService} from '@app/common/services/translations.service';
 import {AlertService} from '@app/common/services/alert.service';
 import {NetworkService} from '@app/common/services/network.service';
-import {from, Observable} from 'rxjs';
+import {from, Observable, zip} from 'rxjs';
 import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
 import {IconConfig} from "@app/common/components/panel/model/icon-config";
@@ -170,16 +170,18 @@ export class AssociationPage extends PageComponent implements CanLeave {
                         map(() => (res))
                     ))
                 )
-                .subscribe(
-                    (res) => {
-                        this.toastService.presentToast('Association UL - Articles effectuée.')
-                            .toPromise()
-                            .then((_: void) => {
-                                this.navService.pop();
+                .subscribe(() => {
+                        zip(
+                            this.toastService.presentToast('Association UL - Articles effectuée.'),
+                            this.navService.pop(),
+                        ).subscribe(() => {
+                            const livraisonToRedirect = this.currentNavParams.get('livraisonToRedirect') || undefined;
+                            if (livraisonToRedirect) {
                                 this.navService.push(NavPathEnum.LIVRAISON_ARTICLES, {
-                                    livraison: this.currentNavParams.get('livraisonToRedirect')
-                                })
-                            });
+                                    livraison: livraisonToRedirect
+                                });
+                            }
+                        });
                     },
                     () => {
                         if (loader) {
@@ -189,9 +191,8 @@ export class AssociationPage extends PageComponent implements CanLeave {
                         this.toastService.presentToast('Erreur serveur');
                     }
                 );
-        }
-        else {
-            this.toastService.presentToast('Vous devez être connecté à internet pour effectuer une prise');
+        } else {
+            this.toastService.presentToast('Vous devez être connecté à internet pour effectuer une prise.');
         }
     }
 

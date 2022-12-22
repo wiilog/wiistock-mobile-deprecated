@@ -20,7 +20,6 @@ import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/bar
 import {StorageService} from "@app/common/services/storage/storage.service";
 import {StorageKeyEnum} from "@app/common/services/storage/storage-key.enum";
 import {Observable, of, zip} from "rxjs";
-import {PrisePage} from "@pages/prise-depose/prise/prise.page";
 import {AlertService} from "@app/common/services/alert.service";
 import {Nature} from "@entities/nature";
 import {LoadingService} from "@app/common/services/loading.service";
