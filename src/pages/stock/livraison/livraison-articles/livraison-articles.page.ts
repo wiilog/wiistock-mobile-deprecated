@@ -40,6 +40,8 @@ export class LivraisonArticlesPage extends PageComponent {
     public articlesT: Array<ArticleLivraison>;
     public articles: Array<ArticleLivraison>;
 
+    public numberArticlesInLU?: any;
+
     public listBoldValues?: Array<string>;
     public listToTreatConfig?: { header: HeaderConfig; body: Array<ListPanelItemConfig>; };
     public listTreatedConfig?: { header: HeaderConfig; body: Array<ListPanelItemConfig>; };
@@ -89,21 +91,30 @@ export class LivraisonArticlesPage extends PageComponent {
             this.footerScannerComponent.fireZebraScan();
         }
 
-        zip(
-            this.sqliteService.findBy('article_livraison', [`id_livraison = ${this.livraison.id}`]),
-            this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_DELIVERY),
-            this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_QUANTITIES_DELIVERY),
-            this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_TARGET_LOCATION_PICKING)
-        ).subscribe(([articles, skipValidation, skipQuantities, displayTargetLocationPicking]: [Array<ArticleLivraison>, boolean, boolean, boolean]) => {
-            this.skipValidation = skipValidation;
-            this.skipQuantities = skipQuantities;
-            this.displayTargetLocationPicking = displayTargetLocationPicking;
-            this.articles = articles;
+        this.loadingService
+            .presentLoadingWhile({
+                message: 'Récupération des données en cours...' ,
+                event: () => {
+                    return this.apiService.requestApi(ApiService.CHECK_DELIVERY_LOGISTIC_UNIT_CONTENT, {params: {livraisonId: this.livraison.id}})
+            }}
+        ).subscribe((data) => {
+            this.numberArticlesInLU = data.numberArticlesInLU;
+            zip(
+                this.sqliteService.findBy('article_livraison', [`id_livraison = ${this.livraison.id}`]),
+                this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_VALIDATION_DELIVERY),
+                this.storageService.getRight(StorageKeyEnum.PARAMETER_SKIP_QUANTITIES_DELIVERY),
+                this.storageService.getRight(StorageKeyEnum.PARAMETER_DISPLAY_TARGET_LOCATION_PICKING)
+            ).subscribe(([articles, skipValidation, skipQuantities, displayTargetLocationPicking]: [Array<ArticleLivraison>, boolean, boolean, boolean]) => {
+                this.skipValidation = skipValidation;
+                this.skipQuantities = skipQuantities;
+                this.displayTargetLocationPicking = displayTargetLocationPicking;
+                this.articles = articles;
 
-            this.updateList(articles, true);
-            if (this.articlesT.length > 0) {
-                this.started = true;
-            }
+                this.updateList(articles, true);
+                if (this.articlesT.length > 0) {
+                    this.started = true;
+                }
+            })
         });
     }
 
@@ -644,7 +655,7 @@ export class LivraisonArticlesPage extends PageComponent {
             },
             articlesCount: {
                 label: `Nombre d'articles`,
-                value: articlesCount
+                value: this.numberArticlesInLU[logisticUnit] || articlesCount
             },
             location: {
                 label: `Emplacement`,
