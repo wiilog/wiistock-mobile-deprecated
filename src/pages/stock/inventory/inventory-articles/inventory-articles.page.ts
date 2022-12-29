@@ -17,9 +17,6 @@ import {PageComponent} from '@pages/page.component';
 import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {SelectItemComponent} from '@app/common/components/select-item/select-item.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
-import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
-import {ArticleCollecte} from "@entities/article-collecte";
-import {ApiService} from "@app/common/services/api.service";
 
 
 @Component({
@@ -36,7 +33,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
     public selectItemType: SelectItemTypeEnum;
     public iconConfig = null;
     public titleConfig = null;
-    public logisticView = false;
+    public logisticUnit = null;
     public dataSubscription: Subscription;
     public validateSubscription: Subscription;
     public resetEmitter$: ReplaySubject<void>;
@@ -67,13 +64,31 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
 
     public ionViewWillEnter(): void {
         this.selectedLocation = this.currentNavParams.get('selectedLocation');
-        this.subtitleConfig = this.selectedLocation;
         this.anomalyMode = this.currentNavParams.get('anomalyMode') || false;
         this.mission = this.currentNavParams.get('mission') || null;
+        this.initRegularView();
+        if (this.selectItemComponent) {
+            this.selectItemComponent.fireZebraScan();
+        }
+    }
+
+    public ionViewWillLeave(): void {
+        this.resetEmitter$.next();
+        if (this.selectItemComponent) {
+            this.selectItemComponent.unsubscribeZebraScan();
+        }
+    }
+
+    public wiiCanLeave(): boolean {
+        return !this.dataSubscription && !this.validateSubscription;
+    }
+
+    public initRegularView() {
+        this.subtitleConfig = this.selectedLocation;
         this.listBoldValues = ['reference', 'barCode'];
         this.iconConfig = {name: 'inventory.svg'};
         this.titleConfig = 'Emplacement';
-        this.logisticView = false;
+        this.logisticUnit = null;
         this.resetEmitter$.next();
 
         this.requestParams = [`location = '${this.selectedLocation}'`];
@@ -90,20 +105,6 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
             : SelectItemTypeEnum.INVENTORY_ARTICLE;
 
         this.refreshList();
-        if (this.selectItemComponent) {
-            this.selectItemComponent.fireZebraScan();
-        }
-    }
-
-    public ionViewWillLeave(): void {
-        this.resetEmitter$.next();
-        if (this.selectItemComponent) {
-            this.selectItemComponent.unsubscribeZebraScan();
-        }
-    }
-
-    public wiiCanLeave(): boolean {
-        return !this.dataSubscription && !this.validateSubscription;
     }
 
     public refreshList() {
@@ -122,7 +123,7 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
                 )
                 .subscribe((articlesFromDB) => {
                     this.articles = articlesFromDB;
-
+                    console.log(articlesFromDB);
                     // this map creates an array with unique logistic unit code
                     const logisticUnitsUnique = [];
                     articlesFromDB
@@ -140,43 +141,51 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
                             return 1;
                         }
                     });
-                    this.suggestionListConfig = iterator.map((article: any) => {
-                        return [{
-                            name: article.logistic_unit_code ? `Unité logistique` : 'Référence',
-                            value: article.logistic_unit_code || article.reference
-                        }, {
-                            name: article.logistic_unit_code ? `Nature` : 'Code barre',
-                            value: article.logistic_unit_code ? article.logistic_unit_nature : article.barcode
-                        }]
-                    });
+                    if (this.logisticUnit && this.articles.some((articleToTest) => articleToTest.logistic_unit_code === this.logisticUnit)) {
+                        this.initLogisticView(this.logisticUnit);
+                    } else {
+                        this.suggestionListConfig = iterator.map((article: any) => {
+                            return [{
+                                name: article.logistic_unit_code ? `Unité logistique` : 'Référence',
+                                value: article.logistic_unit_code || article.reference
+                            }, {
+                                name: article.logistic_unit_code ? `Nature` : 'Code barre',
+                                value: article.logistic_unit_code ? article.logistic_unit_nature : article.barcode
+                            }]
+                        });
+                    }
                     this.unsubscribeData();
                 });
         }
     }
 
+    public initLogisticView(logisticUnit) {
+        this.suggestionListConfig = this.articles
+            .filter((article) => article.logistic_unit_code === logisticUnit)
+            .map((article: any) => {
+                return [{
+                    name: 'Référence',
+                    value: article.reference
+                }, {
+                    name:'Code barre',
+                    value: article.barcode
+                }]
+            });
+        this.titleConfig = 'Unité logistique';
+        this.iconConfig = {name: 'logistic-unit.svg'};
+        this.logisticUnit = logisticUnit;
+        this.subtitleConfig = logisticUnit;
+        this.requestParams.push(`logistic_unit_code = '${logisticUnit}'`);
+        this.selectItemComponent.reload().subscribe(() => {
+            this.refreshSubTitle();
+        });
+    }
+
     public navigateToInventoryValidate(selectedArticle: ArticleInventaire & Anomalie): void {
         const self = this;
         this.selectItemComponent.closeSearch();
-        if (selectedArticle.logistic_unit_code && !this.logisticView) {
-            this.suggestionListConfig = this.articles
-                .filter((article) => article.logistic_unit_code === selectedArticle.logistic_unit_code)
-                .map((article: any) => {
-                    return [{
-                        name: 'Référence',
-                        value: article.reference
-                    }, {
-                        name:'Code barre',
-                        value: article.barcode
-                    }]
-                });
-            this.titleConfig = 'Unité logistique';
-            this.iconConfig = {name: 'logistic-unit.svg'};
-            this.logisticView = true;
-            this.subtitleConfig = selectedArticle.logistic_unit_code;
-            this.requestParams.push(`logistic_unit_code = '${selectedArticle.logistic_unit_code}'`);
-            this.selectItemComponent.reload().subscribe(() => {
-                this.refreshSubTitle();
-            });
+        if (selectedArticle.logistic_unit_code && !this.logisticUnit) {
+            this.initLogisticView(selectedArticle.logistic_unit_code);
         } else {
             this.navService.push(NavPathEnum.INVENTORY_VALIDATE, {
                 selectedArticle,
@@ -210,7 +219,12 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
                                         this.navService.pop();
                                     } else {
                                         this.refreshSubTitle();
-                                        this.refreshList();
+                                        this.logisticUnit = selectedArticle.logistic_unit_code;
+                                        if (this.logisticUnit && this.articles.some((articleToTest) => articleToTest.logistic_unit_code === this.logisticUnit)) {
+                                            this.initLogisticView(this.logisticUnit);
+                                        } else {
+                                            this.initRegularView();
+                                        }
                                     }
                                 });
                         } else {
@@ -223,10 +237,10 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
     }
 
     public refreshSubTitle(): void {
-        const articlesLength = this.selectItemComponent.dbItemsLength;
+        const articlesLength = this.selectItemComponent ? this.selectItemComponent.dbItemsLength : 0;
         this.mainHeaderService.emitSubTitle(articlesLength === 0
             ? 'Les inventaires pour cet emplacements sont à jour'
-            : `${articlesLength} ${this.logisticView ? 'article' : 'unité(s) logistique'}${articlesLength > 1 ? 's' : ''}`)
+            : `${articlesLength} ${this.logisticUnit ? 'article' : 'unité(s) logistique'}${articlesLength > 1 ? 's' : ''}`)
     }
 
     public validateQuantity(selectedArticle: ArticleInventaire&Anomalie, quantity: number): Observable<any> {
