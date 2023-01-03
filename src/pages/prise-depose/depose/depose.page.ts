@@ -20,7 +20,7 @@ import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {MovementConfirmType} from '@pages/prise-depose/movement-confirm/movement-confirm-type';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {ApiService} from '@app/common/services/api.service';
-import {TranslationService} from "@app/common/services/translations.service";
+import {TranslationService} from '@app/common/services/translations.service';
 import {Nature} from '@entities/nature';
 import {Translations} from '@entities/translation';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';

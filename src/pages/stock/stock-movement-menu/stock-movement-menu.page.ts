@@ -93,7 +93,8 @@ export class StockMovementMenuPage extends PageComponent implements CanLeave {
         if (this.networkService.hasNetwork()) {
             this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
                 fromDepose: false,
-                fromStock: true
+                fromStock: true,
+                finishAction: () => this.navService.pop()
             });
         }
         else {
@@ -106,7 +107,8 @@ export class StockMovementMenuPage extends PageComponent implements CanLeave {
             if (this.canNavigateToDepose) {
                 this.navService.push(NavPathEnum.EMPLACEMENT_SCAN, {
                     fromDepose: true,
-                    fromStock: true
+                    fromStock: true,
+                    finishAction: () => this.navService.pop()
                 });
             }
             else {

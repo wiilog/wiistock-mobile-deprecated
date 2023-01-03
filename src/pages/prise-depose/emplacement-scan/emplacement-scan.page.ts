@@ -55,6 +55,7 @@ export class EmplacementScanPage extends PageComponent {
             this.fromStock = Boolean(this.currentNavParams.get('fromStock'));
             this.fromEmptyRound = Boolean(this.currentNavParams.get('fromEmptyRound'));
             this.customAction = this.currentNavParams.get('customAction');
+            this.finishAction = this.currentNavParams.get('finishAction');
             this.loading = false;
             this.isDemoMode = isDemoMode;
             this.barcodeScannerMode = this.fromStock || !isDemoMode
@@ -103,7 +104,7 @@ export class EmplacementScanPage extends PageComponent {
                     livraisonToRedirect: this.livraisonToRedirect,
                     fromStock: this.fromStock,
                     createTakeAndDrop: this.currentNavParams.get('createTakeAndDrop') || false,
-                    finishAction: () => this.finishAction
+                    finishAction: this.finishAction
                 });
             }
         });
