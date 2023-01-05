@@ -70,4 +70,5 @@ export enum NavPathEnum {
     MANUAL_DELIVERY = 'manual-delivery',
     MANUAL_DELIVERY_LOCATION = 'manual-delivery-location',
     DELIVERY_LOGISTIC_UNIT_CONTENT = 'delivery-logistic-unit-content',
+    PRISE_UL_DETAILS = 'prise-ul-details',
 }

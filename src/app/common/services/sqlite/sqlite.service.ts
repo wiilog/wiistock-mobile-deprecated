@@ -426,6 +426,18 @@ export class SqliteService {
         );
     }
 
+    public importProjects(data): Observable<void> {
+        const projects = data['projects'] || [];
+        return this.deleteBy('project').pipe(
+            flatMap(() => (
+                projects.length > 0
+                    ? this.insert('project', projects)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
     public importFreeFieldsData(data): Observable<void> {
         // for multiple types
         const freeFields = data['freeFields'] || [];
@@ -704,6 +716,7 @@ export class SqliteService {
             flatMap(() => this.importMouvementTraca(data).pipe(tap(() => {console.log('--- > importMouvementTraca')}))),
             flatMap(() => this.importDemandesLivraisonData(data).pipe(tap(() => {console.log('--- > importDemandeLivraisonData')}))),
             flatMap(() => this.importNaturesData(data).pipe(tap(() => {console.log('--- > importNaturesData')}))),
+            flatMap(() => this.importProjects(data).pipe(tap(() => {console.log('--- > importProjects')}))),
             flatMap(() => this.importAllowedNaturesData(data).pipe(tap(() => {console.log('--- > importAllowedNaturesData')}))),
             flatMap(() => this.importFreeFieldsData(data).pipe(tap(() => {console.log('--- > importFreeFieldData')}))),
             flatMap(() => this.importTranslations(data).pipe(tap(() => {console.log('--- > importTranslations')}))),

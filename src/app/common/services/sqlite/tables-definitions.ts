@@ -53,6 +53,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             packParent: 'VARCHAR(255)',
             articles: 'JSON',
             containsArticle: 'INTEGER',
+            projectId: 'INTEGER'
         }
     },
     {
@@ -453,4 +454,11 @@ export const TablesDefinitions: Array<TableDefinition> = [
             expected_at: 'VARCHAR(255)',
         }
     },
+    {
+        name: 'project',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            code: 'VARCHAR(255)'
+        }
+    }
 ];

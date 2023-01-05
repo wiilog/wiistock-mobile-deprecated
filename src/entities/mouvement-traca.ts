@@ -10,6 +10,8 @@ export interface MouvementTraca<FileType = string> {
     containsArticle?: boolean;
 
     articles?: Array<string>
+
+    projectId?: number;
     //transfer
     fromStock?: number;
 
