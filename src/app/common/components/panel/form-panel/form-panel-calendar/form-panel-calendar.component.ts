@@ -39,8 +39,6 @@ export class FormPanelCalendarComponent implements FormPanelItemComponent<FormPa
         this.valueChange = new EventEmitter<string>();
     }
 
-    private static ValueTo
-
     public get error(): string {
         return (this.inputConfig.required && !this.value)
             ? (this.errors && this.errors.required)

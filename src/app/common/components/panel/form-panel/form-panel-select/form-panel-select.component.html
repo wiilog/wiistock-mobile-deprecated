@@ -1,6 +1,7 @@
 <wii-form-field [label]="label"
                 [required]="inputConfig.required"
-                [inline]="inline">
+                [inline]="inline"
+                [disabled]="inputConfig.disabled">
     <div class="wrapper" [class.field-blocked]="inline === false" field>
         <wii-search-item #searchComponent
                          [type]="inputConfig.searchType"

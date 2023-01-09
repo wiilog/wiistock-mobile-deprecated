@@ -39,6 +39,9 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
     @Input()
     public inline?: boolean;
 
+    @Input()
+    public disabled?: boolean;
+
     @Output()
     public valueChange: EventEmitter<number>;
 
@@ -49,7 +52,7 @@ export class FormPanelSelectComponent implements FormPanelItemComponent<FormPane
     }
 
     public ngOnInit() {
-        if(this.inputConfig && this.inputConfig.defaultIfSingle) {
+        if (this.inputConfig && this.inputConfig.defaultIfSingle) {
             const config = SearchItemComponent.SEARCH_CONFIGS[this.inputConfig.searchType];
             const values = this.sqliteService.findBy(
                 config.databaseTable,

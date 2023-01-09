@@ -34,6 +34,8 @@ export class ManualDeliveryLocationPage extends PageComponent {
     public livraison: {
         type,
         comment,
+        expectedAt,
+        project,
         articles
     };
 
@@ -111,11 +113,11 @@ export class ManualDeliveryLocationPage extends PageComponent {
                             }
                         }
                     ).subscribe(
-                        (response) => {
-                            if (response.success) {
+                        ({success, nomadMessage, msg}) => {
+                            if (success) {
                                 this.handleLivraisonSuccess();
                             } else {
-                                this.handleLivraisonError(response.error);
+                                this.handleLivraisonError(`${nomadMessage}. ${msg}`);
                             }
                         },
                         (error) => {

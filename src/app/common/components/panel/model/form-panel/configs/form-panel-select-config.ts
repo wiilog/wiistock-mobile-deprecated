@@ -11,4 +11,5 @@ export interface    FormPanelSelectConfig {
     isMultiple?: boolean;
     filterItem?: (item: any) => boolean;
     onChange?: (item: any) => void;
+    disabled?: boolean;
 }

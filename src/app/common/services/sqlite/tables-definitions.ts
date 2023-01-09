@@ -453,4 +453,11 @@ export const TablesDefinitions: Array<TableDefinition> = [
             expected_at: 'VARCHAR(255)',
         }
     },
+    {
+        name: 'project',
+        attributes: {
+            id: 'INTEGER',
+            code: 'VARCHAR(255)',
+        }
+    },
 ];
