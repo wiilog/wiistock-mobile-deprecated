@@ -598,7 +598,18 @@ export class LivraisonArticlesPage extends PageComponent {
                                     }
                                 },
                                 pressAction: () => this.showLogisticUnitContent(articles, logisticUnit)
-                            }) : {},
+                            }) : {
+                                rightIcon: {
+                                    name: 'trash.svg',
+                                    color: 'danger' as IconColor,
+                                    action: () => {
+                                        articles
+                                            .filter((article) => article.currentLogisticUnitCode === logisticUnit)
+                                            .forEach((article) => article.has_moved = 0);
+                                        this.updateList(articles)
+                                    }
+                                }
+                            },
                         })
                     });
             } else {
@@ -613,7 +624,16 @@ export class LivraisonArticlesPage extends PageComponent {
                                     this.testIfBarcodeEquals(article, false)
                                 }
                             },
-                        }) : {},
+                        }) : {
+                            rightIcon: {
+                                name: 'trash.svg',
+                                color: 'danger' as IconColor,
+                                action: () => {
+                                    article.has_moved = 0;
+                                    this.updateList(articles)
+                                }
+                            }
+                        },
                     })
                 });
             }
