@@ -64,6 +64,7 @@ export class ManualDeliveryPage extends PageComponent implements ViewWillEnter, 
         articles?: string;
         lastTrackingDate?: string;
         project?: string;
+        articlesCount?: number;
     }> = [];
 
     public listBoldValues?: Array<string>;
@@ -234,13 +235,13 @@ export class ManualDeliveryPage extends PageComponent implements ViewWillEnter, 
                             this.headerConfig = this.createHeaderConfig();
                             this.listConfig = this.createBodyConfig();
 
-                            if (project.id) {
+                            if (project && project.id) {
                                 this.getFormConfig(project.id);
                             }
                         }
 
                         const values = this.formPanelComponent.values;
-                        if (response.article.is_lu && values.project && values.project != project.id) {
+                        if (response.article.is_lu && project && values.project && values.project != project.id) {
                             this.toastService.presentToast(`Vous ne pouvez pas scanner une unité logistique avec un projet différent de celui sélectionné.`);
                         } else if (response.article.currentLogisticUnitId) {
                             this.alertService.show({
@@ -350,7 +351,7 @@ export class ManualDeliveryPage extends PageComponent implements ViewWillEnter, 
                     : {}),
                 quantity: {
                     label: article.is_lu ? `Nombre d'articles` : `Quantité`,
-                    value: `${article.quantity}`,
+                    value: `${article.articlesCount || 0}`,
                 },
                 ...(article.is_lu && article.natureCode ? {
                     nature: {
