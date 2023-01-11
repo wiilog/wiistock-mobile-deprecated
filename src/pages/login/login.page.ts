@@ -192,12 +192,12 @@ export class LoginPage extends PageComponent {
                     .pipe(
                         flatMap(({data, success}) => {
                             if(success) {
-                                const {apiKey, rights, userId, username, notificationChannels, parameters} = data;
+                                const {apiKey, rights, userId, username, notificationChannels, parameters, fieldsParam} = data;
 
                                 return this.sqliteService
                                     .resetDataBase()
                                     .pipe(
-                                        flatMap(() => this.storageService.initStorage(apiKey, username, userId, rights, notificationChannels, parameters)),
+                                        flatMap(() => this.storageService.initStorage(apiKey, username, userId, rights, notificationChannels, parameters, fieldsParam)),
                                         tap(() => {
                                             this.loginKey = '';
                                         }),

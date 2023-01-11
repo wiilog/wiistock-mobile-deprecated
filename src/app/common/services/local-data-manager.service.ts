@@ -422,6 +422,11 @@ export class LocalDataManagerService {
                         .updateParameters(data.parameters || {})
                         .pipe(map(() => ({data})))
                 )),
+                flatMap(({data}) => (
+                    this.storageService
+                        .updateFieldParams(data.fieldsParam || {})
+                        .pipe(map(() => ({data})))
+                )),
                 flatMap(({data}) => this.sqliteService.importData(data))
             );
     }

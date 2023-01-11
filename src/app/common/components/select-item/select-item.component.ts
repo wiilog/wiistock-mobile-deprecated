@@ -94,6 +94,9 @@ export class SelectItemComponent implements AfterViewInit, OnDestroy {
         [SelectItemTypeEnum.COLLECTABLE_ARTICLES]: {
             invalidMessage: 'L\'article n\'est pas dans la liste',
         },
+        [SelectItemTypeEnum.PROJECTS]: {
+            invalidMessage: 'Le project scanné n\'est pas dans la liste',
+        },
     }
 
     public constructor(private toastService: ToastService,

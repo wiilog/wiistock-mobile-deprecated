@@ -458,7 +458,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
         name: 'project',
         attributes: {
             id: 'INTEGER PRIMARY KEY',
-            code: 'VARCHAR(255)'
-        }
-    }
+            code: 'VARCHAR(255)',
+        },
+    },
 ];

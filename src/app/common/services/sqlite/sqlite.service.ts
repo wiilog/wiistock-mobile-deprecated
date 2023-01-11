@@ -278,6 +278,22 @@ export class SqliteService {
             );
     }
 
+    public importProjects(data): Observable<any> {
+        const projects = data['projects'];
+
+        return zip(
+            this.deleteBy('project'),
+        )
+            .pipe(
+                mergeMap(() => (
+                    projects
+                        ? this.insert('project', projects)
+                        : of(undefined)
+                )),
+                map(() => undefined)
+            );
+    }
+
     public importMouvementTraca(data): Observable<any> {
         const apiTaking = [
             ...(data['trackingTaking'] || []),
@@ -724,6 +740,7 @@ export class SqliteService {
             flatMap(() => this.importStatusData(data).pipe(tap(() => {console.log('--- > importStatusData')}))),
             flatMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),
             flatMap(() => this.importTransportRoundData(data).pipe(tap(() => {console.log('--- > importTransportRoundData')}))),
+            flatMap(() => this.importProjects(data).pipe(tap(() => {console.log('--- > importProjects')}))),
             flatMap(() => (
                 this.storageService.getRight(StorageKeyEnum.RIGHT_INVENTORY_MANAGER).pipe(
                     flatMap((res) => (res

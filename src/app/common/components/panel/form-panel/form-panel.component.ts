@@ -146,6 +146,21 @@ export class FormPanelComponent implements AfterViewInit {
         }
     }
 
+    public updateFieldValue(name: string, value: any): void {
+        const param = this.body.find(({config}) => config.name === name);
+        if(param) {
+            param.config.value = value;
+            if (this.formElements) {
+                this.formElements.forEach((element) => {
+                    const currentName = element && element.param && element.param.config.name;
+                    if (currentName === name) {
+                        element.reloadInstance();
+                    }
+                });
+            }
+        }
+    }
+
     private getInstanceForZebraInit(): Array<FormPanelSelectComponent> {
         if(this.formElements) {
             return this.formElements

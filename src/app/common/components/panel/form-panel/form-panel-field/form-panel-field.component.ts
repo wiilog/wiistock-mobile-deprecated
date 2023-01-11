@@ -16,4 +16,7 @@ export class FormPanelFieldComponent {
     @Input()
     public inline?: boolean;
 
+    @Input()
+    public disabled?: boolean;
+
 }

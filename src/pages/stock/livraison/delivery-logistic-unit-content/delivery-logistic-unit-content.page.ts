@@ -16,7 +16,7 @@ export class DeliveryLogisticUnitContentPage extends PageComponent implements Vi
 
     public articles: Array<ArticleLivraison|ArticlePrepa>;
     public logisticUnit: string;
-    public listBoldValues?: Array<string> = ['label', 'barcode', 'location', 'quantity'];
+    public listBoldValues?: Array<string> = ['label', 'barcode', 'location', 'quantity', 'reference'];
 
     public logisticUnitHeaderConfig?: {
         leftIcon: IconConfig;
@@ -59,22 +59,32 @@ export class DeliveryLogisticUnitContentPage extends PageComponent implements Vi
             body: this.articles
                 .map((article: any) => ({
                     infos: {
-                        label: {
-                            label: 'Libellé',
-                            value: article.label
-                        },
+                        ...(article.label ? ({
+                            label: {
+                                label: 'Libellé',
+                                value: article.label
+                            }
+                        }) : {}),
                         barcode: {
                             label: `Code barre`,
                             value: article.barcode
                         },
-                        location: {
-                            label: `Emplacement`,
-                            value: `location` in article ? article.location : article.emplacement
-                        },
+                        ...(article.location || article.emplacement ? ({
+                            location: {
+                                label: `Emplacement`,
+                                value: `location` in article ? article.location : article.emplacement
+                            }
+                        }) : {}),
                         quantity: {
                             label: `Quantité`,
                             value: `${'quantity' in article ? article.quantity : article.quantite}`
-                        }
+                        },
+                        ...(article.reference ? ({
+                            reference: {
+                                label: 'Référence',
+                                value: article.reference
+                            }
+                        }) : {})
                     },
                     selected: article.selected || false,
                 }))
