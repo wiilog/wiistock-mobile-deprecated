@@ -123,7 +123,6 @@ export class InventoryArticlesPage extends PageComponent implements CanLeave {
                 )
                 .subscribe((articlesFromDB) => {
                     this.articles = articlesFromDB;
-                    console.log(articlesFromDB);
                     // this map creates an array with unique logistic unit code
                     const logisticUnitsUnique = [];
                     articlesFromDB

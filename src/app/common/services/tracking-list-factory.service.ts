@@ -106,7 +106,7 @@ export class TrackingListFactoryService {
 
     public createListConfig(articles: Array<MouvementTraca & {loading?: boolean; isGroup?: number|boolean; subPacks?: Array<MouvementTraca>;}>,
                             listType: number,
-                            {location, objectLabel,  validate, rightIcon, confirmItem, natureIdsToConfig, natureTranslation, headerRightIcon}: {
+                            {location, objectLabel,  validate, rightIcon, confirmItem, natureIdsToConfig, natureTranslation, headerRightIcon, pressAction}: {
                                 location?: Emplacement;
                                 natureIdsToConfig?: {[id: number]: { label: string; color?: string; }};
                                 validate?: () => void;
@@ -118,6 +118,7 @@ export class TrackingListFactoryService {
                                 confirmItem?: (info: { [name: string]: { label: string; value?: string; } }) => void;
                                 objectLabel: string;
                                 natureTranslation?: string;
+                                pressAction?: (barCode: string) => void
                             }): ListConfig {
 
         const notDuplicateArticles = articles.reduce(
@@ -231,10 +232,14 @@ export class TrackingListFactoryService {
                 return {
                     infos,
                     color: natureConfig && natureConfig.color,
-                    pressAction: confirmItem
+                    pressAction: confirmItem || (pressAction && Boolean(containsArticle))
                         ? (info) => {
                             if (!this._alertPresented && !this.actionsDisabled) {
-                                confirmItem(info);
+                                if(confirmItem){
+                                    confirmItem(info);
+                                } else if(pressAction && Boolean(containsArticle)){
+                                    pressAction(ref_article);
+                                }
                             }
                         }
                         : undefined,
@@ -266,7 +271,7 @@ export class TrackingListFactoryService {
                                     : undefined
                             }
                         }
-                        : {})
+                        : {}),
                 };
             })
         }
