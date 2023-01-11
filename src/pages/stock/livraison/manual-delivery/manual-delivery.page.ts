@@ -164,7 +164,7 @@ export class ManualDeliveryPage extends PageComponent implements ViewWillEnter, 
                     value: Number(logisticUnitProject) || project,
                     inputConfig: {
                         required: this.fieldParams.needsProject,
-                        searchType: SelectItemTypeEnum.PROJECTS,
+                        searchType: SelectItemTypeEnum.PROJECT,
                         label: `code`,
                         disabled: !!logisticUnitProject
                     },
