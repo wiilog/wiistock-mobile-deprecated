@@ -417,71 +417,78 @@ export class PreparationArticlesPage extends PageComponent {
     }
 
     private moveArticle(selectedArticle, selectedQuantity?: number): Observable<any> {
-        const selectedQuantityValid = selectedQuantity ? selectedQuantity : (selectedArticle as ArticlePrepaByRefArticle).quantity;
-        let articleToInsert: ArticlePrepa = {
-            label: (selectedArticle as ArticlePrepaByRefArticle).label,
-            reference: (selectedArticle as ArticlePrepaByRefArticle).reference,
-            is_ref: 1,
-            has_moved: 1,
-            id_prepa: this.preparation.id,
-            isSelectableByUser: 1,
-            emplacement: (selectedArticle as ArticlePrepaByRefArticle).location,
-            quantite: selectedQuantityValid,
-            reference_article_reference: selectedArticle.reference_article_reference,
-        };
-        return ((selectedArticle as ArticlePrepaByRefArticle).isSelectableByUser)
-            ? of(undefined)
-                .pipe(
-                    flatMap(() => this.sqliteService.insert('article_prepa', articleToInsert)),
-                    flatMap((insertId) => (
-                        this.insertMouvement(
-                            selectedArticle as ArticlePrepaByRefArticle & ArticlePrepa,
-                            selectedQuantityValid,
-                            insertId
-                        )
-                    )),
-                    flatMap(() => this.sqliteService.deleteBy('article_prepa_by_ref_article', [`id = ${selectedArticle.id}`])),
-                    flatMap(() => this.updateLists()),
+        if (Array.isArray(selectedArticle)) {
+            return zip(
+                ...selectedArticle
+                    .map((article: ArticlePrepa | ArticlePrepaByRefArticle) =>
+                        this.saveSelectedArticle(article, selectedQuantity || (`quantity` in article ? article.quantity : article.quantite))));
+        } else {
+            const selectedQuantityValid = selectedQuantity ? selectedQuantity : (selectedArticle as ArticlePrepaByRefArticle).quantity;
+            let articleToInsert: ArticlePrepa = {
+                label: (selectedArticle as ArticlePrepaByRefArticle).label,
+                reference: (selectedArticle as ArticlePrepaByRefArticle).reference,
+                is_ref: 1,
+                has_moved: 1,
+                id_prepa: this.preparation.id,
+                isSelectableByUser: 1,
+                emplacement: (selectedArticle as ArticlePrepaByRefArticle).location,
+                quantite: selectedQuantityValid,
+                reference_article_reference: selectedArticle.reference_article_reference,
+            };
+            return ((selectedArticle as ArticlePrepaByRefArticle).isSelectableByUser)
+                ? of(undefined)
+                    .pipe(
+                        flatMap(() => this.sqliteService.insert('article_prepa', articleToInsert)),
+                        flatMap((insertId) => (
+                            this.insertMouvement(
+                                selectedArticle as ArticlePrepaByRefArticle & ArticlePrepa,
+                                selectedQuantityValid,
+                                insertId
+                            )
+                        )),
+                        flatMap(() => this.sqliteService.deleteBy('article_prepa_by_ref_article', [`id = ${selectedArticle.id}`])),
+                        flatMap(() => this.updateLists()),
 
-                    // delete articlePrepa if all quantity has been selected
-                    flatMap(() => (
-                        this.sqliteService.findOneBy('article_prepa', {
-                            reference: (selectedArticle as ArticlePrepaByRefArticle).reference_article,
-                            is_ref: 1,
-                            id_prepa: this.preparation.id
-                        }, 'AND')
-                    )),
-                    flatMap((referenceArticle) => {
+                        // delete articlePrepa if all quantity has been selected
+                        flatMap(() => (
+                            this.sqliteService.findOneBy('article_prepa', {
+                                reference: (selectedArticle as ArticlePrepaByRefArticle).reference_article,
+                                is_ref: 1,
+                                id_prepa: this.preparation.id
+                            }, 'AND')
+                        )),
+                        flatMap((referenceArticle) => {
 
-                        // we get all quantity picked for this refArticle plus the current quantity which is selected
-                        const quantityPicked = this.articlesT.reduce((acc: number, article: ArticlePrepa) => (
-                            acc +
-                            ((article.isSelectableByUser && ((selectedArticle as ArticlePrepaByRefArticle).reference_article === article.reference))
-                                ? Number(article.quantite)
-                                : 0)
-                        ), selectedQuantityValid);
+                            // we get all quantity picked for this refArticle plus the current quantity which is selected
+                            const quantityPicked = this.articlesT.reduce((acc: number, article: ArticlePrepa) => (
+                                acc +
+                                ((article.isSelectableByUser && ((selectedArticle as ArticlePrepaByRefArticle).reference_article === article.reference))
+                                    ? Number(article.quantite)
+                                    : 0)
+                            ), selectedQuantityValid);
 
-                        return (referenceArticle.quantite === quantityPicked)
-                            ? this.sqliteService.deleteArticlePrepa(referenceArticle.reference, referenceArticle.id_prepa, 1)
-                            : this.sqliteService.updateArticlePrepaQuantity(referenceArticle.reference, referenceArticle.id_prepa, 1, referenceArticle.quantite - selectedQuantityValid)
-                    })
-                )
-            : (selectedQuantity
-                    ? of(undefined)
-                        .pipe(
-                            flatMap(() => this.sqliteService.insert('article_prepa', articleToInsert)),
-                            flatMap((insertId) => (
-                                    this.insertMouvement(selectedArticle as ArticlePrepaByRefArticle & ArticlePrepa, selectedQuantityValid, insertId).pipe(
-                                        flatMap(() => this.sqliteService.moveArticle(insertId))
+                            return (referenceArticle.quantite === quantityPicked)
+                                ? this.sqliteService.deleteArticlePrepa(referenceArticle.reference, referenceArticle.id_prepa, 1)
+                                : this.sqliteService.updateArticlePrepaQuantity(referenceArticle.reference, referenceArticle.id_prepa, 1, referenceArticle.quantite - selectedQuantityValid)
+                        })
+                    )
+                : (selectedQuantity
+                        ? of(undefined)
+                            .pipe(
+                                flatMap(() => this.sqliteService.insert('article_prepa', articleToInsert)),
+                                flatMap((insertId) => (
+                                        this.insertMouvement(selectedArticle as ArticlePrepaByRefArticle & ArticlePrepa, selectedQuantityValid, insertId).pipe(
+                                            flatMap(() => this.sqliteService.moveArticle(insertId))
+                                        )
                                     )
-                                )
-                            ))
-                    : of(undefined)
-                        .pipe(
-                            flatMap(() => this.insertMouvement(selectedArticle as ArticlePrepaByRefArticle & ArticlePrepa, selectedQuantityValid)),
-                            flatMap(() => this.sqliteService.moveArticle((selectedArticle as ArticlePrepa).id))
-                        )
-            )
+                                ))
+                        : of(undefined)
+                            .pipe(
+                                flatMap(() => this.insertMouvement(selectedArticle as ArticlePrepaByRefArticle & ArticlePrepa, selectedQuantityValid)),
+                                flatMap(() => this.sqliteService.moveArticle((selectedArticle as ArticlePrepa).id))
+                            )
+                )
+        }
     }
 
     private insertMouvement(selectedArticle: ArticlePrepaByRefArticle & ArticlePrepa, quantity: number, insertId?: number): Observable<number> {
