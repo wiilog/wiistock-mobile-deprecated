@@ -368,6 +368,11 @@ const routes: Routes = [
         loadChildren: () => import('@pages/stock/livraison/delivery-logistic-unit-content/delivery-logistic-unit-content.module').then(m => m.DeliveryLogisticUnitContentModule)
     },
     {
+        path: NavPathEnum.PRISE_UL_DETAILS,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/prise-depose/prise-ul-details/prise-ul-details.module').then(m => m.PriseUlDetailsPageModule)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'

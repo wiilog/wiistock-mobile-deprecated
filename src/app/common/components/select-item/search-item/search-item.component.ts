@@ -134,6 +134,13 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             databaseTable: 'picking_article_collecte',
             placeholder: 'Sélectionnez un article',
         },
+        [SelectItemTypeEnum.PROJECT]: {
+            label: 'code',
+            valueField: 'id',
+            templateIndex: 'default',
+            databaseTable: 'project',
+            placeholder: 'Sélectionnez un projet',
+        },
     }
 
     public constructor(private sqliteService: SqliteService,

@@ -386,6 +386,30 @@ export class PrisePage extends PageComponent implements CanLeave {
                 rightIcon: {
                     mode: 'remove',
                     action: this.cancelPickingAction()
+                },
+                pressAction: (barCode) => {
+                    const [dropIndex] = this.findTakingIndexes(barCode);
+                    if (dropIndex !== undefined) {
+                        const {comment, signature, photo, nature_id: natureId, projectId} = this.colisPrise[dropIndex];
+                        this.trackingListFactory.disableActions();
+                        this.navService.push(NavPathEnum.PRISE_UL_DETAILS, {
+                            fromStock: this.fromStock,
+                            location: this.emplacement,
+                            headerConfig: listTakingHeader,
+                            barCode,
+                            values: {
+                                comment,
+                                signature,
+                                natureId,
+                                photo,
+                                projectId
+                            },
+                            validate: (values) => {
+                                this.updatePicking(barCode, values);
+                            },
+                            movementType: MovementConfirmType.TAKE,
+                        });
+                    }
                 }
             }
         );
@@ -439,7 +463,7 @@ export class PrisePage extends PageComponent implements CanLeave {
     }
 
     private updatePicking(barCode: string,
-                          {quantity, comment, signature, photo, natureId, freeFields, subPacks}: {quantity: number; comment?: string; signature?: string; photo?: string; natureId: number; freeFields: string; subPacks: any;}): void {
+                          {quantity, comment, signature, photo, projectId, natureId, freeFields, subPacks}: {quantity?: number; comment?: string; signature?: string; photo?: string; projectId?: number; natureId: number; freeFields: string; subPacks: any;}): void {
         const dropIndexes = this.findTakingIndexes(barCode);
         if (dropIndexes.length > 0) {
             for(const dropIndex of dropIndexes) {
@@ -449,6 +473,7 @@ export class PrisePage extends PageComponent implements CanLeave {
                 this.colisPrise[dropIndex].comment = comment;
                 this.colisPrise[dropIndex].signature = signature;
                 this.colisPrise[dropIndex].photo = photo;
+                this.colisPrise[dropIndex].projectId = projectId;
                 this.colisPrise[dropIndex].nature_id = natureId;
                 this.colisPrise[dropIndex].freeFields = freeFields;
                 this.colisPrise[dropIndex].subPacks = subPacks;
