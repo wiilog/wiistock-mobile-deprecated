@@ -128,28 +128,6 @@ export class DispatchRequestMenuPage extends PageComponent implements CanLeave {
             this.dispatches = dispatches;
 
             this.dispatchListConfig = this.dispatches.map((dispatch: Dispatch): CardListConfig => {
-                console.log({
-                    title: {
-                        label: 'Numéro',
-                        value: dispatch.number
-                    },
-                    content: [
-                        {label: 'Numéro de tracking', value: dispatch.trackingNumber || ''},
-                        {label: 'Type', value: dispatch.typeLabel || ''},
-                        {
-                            label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de prise'),
-                            value: dispatch.locationFromLabel || ''
-                        },
-                        {
-                            label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de dépose'),
-                            value: dispatch.locationToLabel || ''
-                        },
-                        {label: 'Commentaire', value: dispatch.comment || ''},
-                        (dispatch.emergency
-                            ? {label: 'Urgence', value: dispatch.emergency || ''}
-                            : undefined)
-                    ].filter((item) => item && item.value),
-                });
                 return {
                     title: {
                         label: 'Numéro',
