@@ -31,8 +31,8 @@ import {Translations} from "@entities/translation";
 export class DispatchRequestMenuPage extends PageComponent implements CanLeave {
     public hasLoaded: boolean;
 
-    public readonly dispatchListColor = CardListColorEnum.YELLOW;
-    public readonly dispatchIconName = 'demande.svg';
+    public readonly dispatchListColor = CardListColorEnum.BLUE;
+    public readonly dispatchIconName = 'transfer.svg';
 
     public dispatchListConfig: Array<CardListConfig>;
     public dispatches: Array<Dispatch>;
@@ -60,9 +60,29 @@ export class DispatchRequestMenuPage extends PageComponent implements CanLeave {
 
     public ionViewWillEnter(): void {
         this.fabListActivated = false
-        this.hasLoaded = false;
 
-        this.dispatches = []
+        this.dispatches = [
+            {
+                number: 'A-20221236545',
+                trackingNumber: 'TR-456789321',
+                typeLabel: 'Standard',
+                locationFromLabel: 'Enlèvement 1',
+                locationToLabel: 'Livraison 1',
+                comment: 'Commentaire',
+                emergency: '',
+            } as any,
+            {
+                number: 'A-20221236123165',
+                trackingNumber: 'TR-4567800001',
+                typeLabel: 'Urgence',
+                locationFromLabel: 'Enlèvement 2',
+                locationToLabel: 'Livraison 2',
+                comment: 'Commentaire 2',
+                emergency: 'Oui',
+            } as any
+        ]
+        this.refreshPageList(this.dispatches);
+
     }
 
     public wiiCanLeave(): boolean {
@@ -108,6 +128,28 @@ export class DispatchRequestMenuPage extends PageComponent implements CanLeave {
             this.dispatches = dispatches;
 
             this.dispatchListConfig = this.dispatches.map((dispatch: Dispatch): CardListConfig => {
+                console.log({
+                    title: {
+                        label: 'Numéro',
+                        value: dispatch.number
+                    },
+                    content: [
+                        {label: 'Numéro de tracking', value: dispatch.trackingNumber || ''},
+                        {label: 'Type', value: dispatch.typeLabel || ''},
+                        {
+                            label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de prise'),
+                            value: dispatch.locationFromLabel || ''
+                        },
+                        {
+                            label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de dépose'),
+                            value: dispatch.locationToLabel || ''
+                        },
+                        {label: 'Commentaire', value: dispatch.comment || ''},
+                        (dispatch.emergency
+                            ? {label: 'Urgence', value: dispatch.emergency || ''}
+                            : undefined)
+                    ].filter((item) => item && item.value),
+                });
                 return {
                     title: {
                         label: 'Numéro',
@@ -139,8 +181,8 @@ export class DispatchRequestMenuPage extends PageComponent implements CanLeave {
                         : {}),
                 };
             });
-
             this.refreshSubTitle();
+            this.hasLoaded = true;
         })
     }
 }
