@@ -58,6 +58,14 @@ export class DemandeMenuPage extends PageComponent {
                 action: () => {
                     self.navService.push(NavPathEnum.DEMANDE_LIVRAISON_MENU);
                 }
+            },
+            {
+                icon: 'transfer.svg',
+                iconColor: 'list-blue',
+                label: 'Acheminement',
+                action: () => {
+                    self.navService.push(NavPathEnum.DISPATCH_REQUEST_MENU);
+                }
             }
         ];
     }
