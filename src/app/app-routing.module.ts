@@ -37,6 +37,11 @@ const routes: Routes = [
         loadChildren: () => import('@pages/tracking/dispatch/dispatch-menu/dispatch-menu.module').then(m => m.DispatchMenuPageModule)
     },
     {
+        path: NavPathEnum.DISPATCH_FILTER,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-filter/dispatch-filter-page.module').then(m => m.DispatchFilterPageModule)
+    },
+    {
         path: NavPathEnum.DISPATCH_PACKS,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/tracking/dispatch/dispatch-packs/dispatch-packs.module').then(m => m.DispatchPacksPageModule)

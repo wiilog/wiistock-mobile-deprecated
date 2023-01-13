@@ -118,6 +118,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.titlesConfig = [
             {pagePath: NavPathEnum.TRACKING_MENU, label: 'Traçabilité'},
             {pagePath: NavPathEnum.DISPATCH_MENU, label: 'Acheminements'},
+            {pagePath: NavPathEnum.DISPATCH_FILTER, label: 'Filtre'},
             {pagePath: NavPathEnum.STOCK_MENU, label: 'Stock'},
             {pagePath: NavPathEnum.TRANSPORT_ROUND_LIST, label: 'Track', noBreadcrumb: true},
             {

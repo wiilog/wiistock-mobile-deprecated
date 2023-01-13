@@ -1,3 +1,15 @@
+<ion-button class="submit-button larger"
+            color="primary"
+            size="large"
+            expand="full"
+            [hidden]="false"
+            (click)="filter()">
+    Filtre
+    <wii-icon name="check.svg"
+              class="button-icon"
+              color="white">
+    </wii-icon>
+</ion-button>
 <div *ngIf="!loading && dispatchesListConfig && dispatchesListConfig.length > 0"
      scroll-y="true"
      class="page-content">

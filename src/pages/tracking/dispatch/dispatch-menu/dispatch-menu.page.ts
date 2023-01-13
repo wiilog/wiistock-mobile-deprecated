@@ -163,11 +163,11 @@ export class DispatchMenuPage extends PageComponent {
                         value: dispatch.startDate && dispatch.endDate ? `Du ${dispatch.startDate} au ${dispatch.endDate}` : ''
                     },
                     {
-                        label: TranslationService.Translate(this.dispatchTranslations, "Emplacement de prise"),
+                        label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de prise'),
                         value: dispatch.locationFromLabel || ''
                     },
                     {
-                        label: TranslationService.Translate(this.dispatchTranslations, "Emplacement de dépose"),
+                        label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de dépose'),
                         value: dispatch.locationToLabel || ''
                     },
                     (dispatch.emergency
@@ -189,5 +189,13 @@ export class DispatchMenuPage extends PageComponent {
                 }
             };
         });
+    }
+
+    public filter() {
+        this.navService.push(NavPathEnum.DISPATCH_FILTER, {
+            afterValidate: () => {
+                console.log('VALIDER');
+            }
+        })
     }
 }
