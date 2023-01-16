@@ -39,9 +39,16 @@ export class DispatchMenuPage extends PageComponent {
 
     public dispatchesListConfig: Array<CardListConfig>;
     public readonly dispatchesListColor = CardListColorEnum.GREEN;
-    public readonly dispatchesIconName = 'stock-transfer.svg';
+    public dispatchesIconName?: string = 'stock-transfer.svg';
 
-    private dispatchTranslations: Translations;
+    public dispatchTranslations: Translations;
+    public labelFrom: string;
+    public labelTo: string;
+    public filters: {
+        status?: { id: number; text: string };
+        from?: { id: number; text: string };
+        to?: { id: number; text: string };
+    };
 
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
@@ -53,6 +60,11 @@ export class DispatchMenuPage extends PageComponent {
         this.resetEmitter$ = new EventEmitter<void>();
         this.loading = true;
         this.firstLaunch = true;
+        this.filters = {
+            status: null,
+            from: null,
+            to: null,
+        }
     }
 
 
@@ -75,11 +87,30 @@ export class DispatchMenuPage extends PageComponent {
 
         const withoutLoading = this.currentNavParams.get('withoutLoading');
         if (!this.firstLaunch || !withoutLoading) {
+            const filtersSQL = [];
+            this.dispatchesIconName = 'stock-transfer.svg';
+            if (this.filters.from) {
+                this.dispatchesIconName = null;
+                filtersSQL.push(`locationFromLabel = '${this.filters.from.text}'`)
+            }
+            if (this.filters.to) {
+                this.dispatchesIconName = null;
+                filtersSQL.push(`locationToLabel = '${this.filters.to.text}'`)
+            }
+            if (this.filters.status) {
+                this.dispatchesIconName = null;
+                filtersSQL.push(`statusId = '${this.filters.status.id}'`)
+            }
             this.loadingSubscription = this.loadingService.presentLoading()
                 .pipe(
                     tap(loader => loaderElement = loader),
                     flatMap(() => zip(
-                        this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL OR partial = 1']),
+                        this.sqliteService.findBy('dispatch',
+                            [
+                                'treatedStatusId IS NULL OR partial = 1',
+                                ...filtersSQL
+                            ]
+                        ),
                         this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`)
                     ))
                 )
@@ -130,7 +161,8 @@ export class DispatchMenuPage extends PageComponent {
 
     private refreshDispatchesListConfig(dispatches: Array<Dispatch>, translations: Translations): void {
         this.dispatchTranslations = translations;
-
+        this.labelFrom = TranslationService.Translate(this.dispatchTranslations, 'Emplacement de prise');
+        this.labelTo = TranslationService.Translate(this.dispatchTranslations, 'Emplacement de dépose');
         this.dispatchesListConfig = dispatches
             .sort(({startDate: startDate1}, {startDate: startDate2}) => {
                 const momentDesiredDate1 = moment(startDate1, 'DD/MM/YYYY HH:mm:ss')
@@ -163,16 +195,16 @@ export class DispatchMenuPage extends PageComponent {
                         value: dispatch.startDate && dispatch.endDate ? `Du ${dispatch.startDate} au ${dispatch.endDate}` : ''
                     },
                     {
-                        label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de prise'),
+                        label: this.labelFrom,
                         value: dispatch.locationFromLabel || ''
                     },
                     {
-                        label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de dépose'),
+                        label: this.labelTo,
                         value: dispatch.locationToLabel || ''
                     },
                     (dispatch.emergency
                         ? {label: 'Urgence', value: dispatch.emergency || ''}
-                        : undefined)
+                        : {label: 'Urgence', value: 'Non'})
                 ].filter((item) => item && item.value),
                 ...(dispatch.emergency
                     ? {
@@ -193,8 +225,10 @@ export class DispatchMenuPage extends PageComponent {
 
     public filter() {
         this.navService.push(NavPathEnum.DISPATCH_FILTER, {
-            afterValidate: () => {
-                console.log('VALIDER');
+            ...this.filters,
+            afterValidate: (values) => {
+                this.filters = values;
+                this.updateDispatchList();
             }
         })
     }
