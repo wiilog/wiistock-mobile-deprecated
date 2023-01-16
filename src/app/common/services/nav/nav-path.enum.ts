@@ -69,4 +69,5 @@ export enum NavPathEnum {
     TRANSPORT_ROUND_FINISH = 'transport-round-finish',
     MANUAL_DELIVERY = 'manual-delivery',
     MANUAL_DELIVERY_LOCATION = 'manual-delivery-location',
+    DISPATCH_NEW = 'dispatch-new',
 }

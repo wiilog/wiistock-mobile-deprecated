@@ -10,6 +10,8 @@ import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 })
 export class StorageService {
 
+    private static FIELD_TYPES_TO_KEEP = ['displayedCreate', 'requiredCreate'];
+
     public constructor(private storage: Storage) {}
 
     public initStorage(apiKey: string,
@@ -17,7 +19,8 @@ export class StorageService {
                        operatorId: number,
                        rights: {[name: string]: boolean},
                        notificationChannels: [string],
-                       parameters: {[name: string]: boolean}): Observable<any> {
+                       parameters: {[name: string]: boolean},
+                       fieldParams: {[entity: string]: any}): Observable<any> {
         return this.getString(StorageKeyEnum.URL_SERVER)
             .pipe(
                 flatMap((serverUrl) => from(this.storage.clear()).pipe(map(() => serverUrl))),
@@ -30,6 +33,7 @@ export class StorageService {
                     this.resetCounters(),
                     this.updateRights(rights),
                     this.updateParameters(parameters),
+                    this.updateFieldParams(fieldParams),
                 ))
             );
     }
@@ -62,6 +66,25 @@ export class StorageService {
             : of(undefined);
     }
 
+    public updateFieldParams(fieldParams: { [entity: string]: any }): Observable<any> {
+        const fieldParamKeys = Object.keys(fieldParams);
+        const storageService = this;
+        return fieldParamKeys.length > 0
+            ? zip(...(fieldParamKeys.map(function (entity) {
+                Object.keys(fieldParams[entity]).forEach((field) => {
+                    Object.keys(fieldParams[entity][field]).forEach((condition) => {
+                        if (StorageService.FIELD_TYPES_TO_KEEP.includes(condition)) {
+                            const storageKey = `${entity}.${field}.${condition}`;
+                            return from(storageService.storage.set(storageKey, Number(Boolean(fieldParams[entity][field][condition]))));
+                        }
+                    })
+                });
+
+                return of(undefined);
+            })))
+            : of(undefined);
+    }
+
     public updateParameters(parameters: {[name: string]: boolean}): Observable<any> {
         const parameterKeys = Object.keys(parameters);
         return parameterKeys.length > 0
@@ -80,7 +103,7 @@ export class StorageService {
             );
     }
 
-    public getNumber(key: StorageKeyEnum): Observable<number> {
+    public getNumber(key: StorageKeyEnum|string): Observable<number> {
         return from(this.storage.get(key)).pipe(map(Number));
     }
 

@@ -62,6 +62,8 @@ export class ApiService {
     public static readonly DEPOSIT_TRANSPORT = {method: POST, service: '/deposit-transport-packs'};
     public static readonly FINISH_ROUND = {method: POST, service: '/finish-round'};
     public static readonly PACKS_RETURN_LOCATIONS = {method: GET, service: '/packs-return-locations'};
+    public static readonly GET_DISPATCH_EMERGENCIES = {method: GET, service: '/dispatch-emergencies'};
+    public static readonly NEW_DISPATCH = {method: POST, service: '/new-dispatch'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'

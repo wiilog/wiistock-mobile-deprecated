@@ -410,6 +410,30 @@ export class SqliteService {
         );
     }
 
+    public importDispatchTypes(data): Observable<void> {
+        const dispatchTypes = data['dispatchTypes'] || [];
+        return this.deleteBy('dispatch_type').pipe(
+            flatMap(() => (
+                dispatchTypes.length > 0
+                    ? this.insert('dispatch_type', dispatchTypes)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
+    public importUsers(data): Observable<void> {
+        const users = data['users'] || [];
+        return this.deleteBy('user').pipe(
+            flatMap(() => (
+                users.length > 0
+                    ? this.insert('user', users)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
     public importStatusData(data): Observable<void> {
         const status = data['status'] || [];
         return this.deleteBy('status').pipe(
@@ -700,6 +724,8 @@ export class SqliteService {
             flatMap(() => this.importStatusData(data).pipe(tap(() => {console.log('--- > importStatusData')}))),
             flatMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),
             flatMap(() => this.importTransportRoundData(data).pipe(tap(() => {console.log('--- > importTransportRoundData')}))),
+            flatMap(() => this.importDispatchTypes(data).pipe(tap(() => {console.log('--- > importDispatchTypesData')}))),
+            flatMap(() => this.importUsers(data).pipe(tap(() => {console.log('--- > importUsersData')}))),
             flatMap(() => (
                 this.storageService.getRight(StorageKeyEnum.RIGHT_INVENTORY_MANAGER).pipe(
                     flatMap((res) => (res

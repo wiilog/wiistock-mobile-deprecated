@@ -1,21 +1,16 @@
 import {Component} from '@angular/core';
-import {from, Observable, of, zip} from 'rxjs';
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
-import {DemandeLivraison} from '@entities/demande-livraison';
-import {DemandeLivraisonType} from '@entities/demande-livraison-type';
 import {CardListConfig} from '@app/common/components/card-list/card-list-config';
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {NavService} from '@app/common/services/nav/nav.service';
-import {flatMap, map, tap} from 'rxjs/operators';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
 import {ToastService} from '@app/common/services/toast.service';
 import {CanLeave} from '@app/guards/can-leave/can-leave';
 import {LoadingService} from '@app/common/services/loading.service';
 import {PageComponent} from '@pages/page.component';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
-import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {AlertService} from '@app/common/services/alert.service';
 import {NetworkService} from '@app/common/services/network.service';
 import {Dispatch} from "@entities/dispatch";
@@ -118,6 +113,7 @@ export class DispatchRequestMenuPage extends PageComponent implements CanLeave {
     }
 
     public onAddClick(): void {
+        this.navService.push(NavPathEnum.DISPATCH_NEW);
     }
 
     private refreshPageList(dispatches: Array<Dispatch>) {
