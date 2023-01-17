@@ -346,4 +346,10 @@ export class DispatchPacksPage extends PageComponent {
                 this.takePack(code);
             });
     }
+
+    public goToWayBill() {
+        this.navService.push(NavPathEnum.DISPATCH_WAYBILL, {
+            dispatchId: this.dispatch.id
+        });
+    }
 }

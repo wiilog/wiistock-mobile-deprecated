@@ -14,6 +14,7 @@ export enum NavPathEnum {
     MOVEMENT_CONFIRM = 'movement-confirm',
     MOVEMENT_CONFIRM_SUB_PACK = 'movement-confirm-sub-pack',
     DISPATCH_PACKS = 'dispatch-packs',
+    DISPATCH_WAYBILL = 'dispatch-waybill',
     DISPATCH_PACK_CONFIRM = 'dispatch-pack-confirm',
     DISPATCH_VALIDATE = 'dispatch-validate',
     NEW_EMPLACEMENT = 'new-emplacement',
