@@ -87,7 +87,7 @@ export class DispatchWaybillPage extends PageComponent {
             {
                 item: FormPanelInputComponent,
                 config: {
-                    label: 'Nom',
+                    label: 'Expéditeur - Nom',
                     name: 'consignorUsername',
                     inputConfig: {
                         type: 'text',
@@ -97,7 +97,7 @@ export class DispatchWaybillPage extends PageComponent {
             {
                 item: FormPanelInputComponent,
                 config: {
-                    label: 'Téléphone - Email',
+                    label: 'Expéditeur - Téléphone - Email',
                     name: 'consignorEmail',
                     inputConfig: {
                         type: 'text',
@@ -107,7 +107,7 @@ export class DispatchWaybillPage extends PageComponent {
             {
                 item: FormPanelInputComponent,
                 config: {
-                    label: 'Nom',
+                    label: 'Destinataire - Nom',
                     name: 'receiverUsername',
                     inputConfig: {
                         type: 'text',
@@ -117,7 +117,7 @@ export class DispatchWaybillPage extends PageComponent {
             {
                 item: FormPanelInputComponent,
                 config: {
-                    label: 'Téléphone - Email',
+                    label: 'Destinataire - Téléphone - Email',
                     name: 'receiverEmail',
                     inputConfig: {
                         type: 'text',
