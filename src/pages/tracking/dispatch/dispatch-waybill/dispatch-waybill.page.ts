@@ -169,7 +169,9 @@ export class DispatchWaybillPage extends PageComponent {
             }
         }).subscribe((response) => {
             this.storageService.getString(StorageKeyEnum.URL_SERVER).subscribe((url) => {
-                this.iab.create(url + response.filePath, '_system');
+                this.navService.pop().subscribe(() => {
+                    this.iab.create(url + response.filePath, '_system');
+                });
             })
         })
     }
