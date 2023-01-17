@@ -1,14 +1,15 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpResponse} from '@angular/common/http';
+import {HttpClient, HttpResponse, HttpParams} from '@angular/common/http';
 import {from, Observable, of, throwError, zip} from 'rxjs';
 import {StorageService} from '@app/common/services/storage/storage.service';
-import {catchError, filter, flatMap, map, tap, timeout} from "rxjs/operators";
-import {UserService} from "@app/common/services/user.service";
+import {catchError, filter, flatMap, map, tap, timeout} from 'rxjs/operators';
+import {UserService} from '@app/common/services/user.service';
 import {AppVersion} from '@ionic-native/app-version/ngx';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 
 const GET = 'get';
 const POST = 'post';
+const DELETE = 'delete';
 
 @Injectable({
     providedIn: 'root'
@@ -99,8 +100,6 @@ export class ApiService {
                           secured?: boolean;
                           timeout?: boolean;
                       } = {params: {}, pathParams: {}, secured: true, timeout: false}): Observable<any> {
-        params = ApiService.ObjectToHttpParams(params);
-
         let requestResponse = zip(
             this.getApiUrl({service}, {pathParams}),
             from(this.appVersion.getVersionNumber()),
@@ -113,21 +112,17 @@ export class ApiService {
                     }
                 }),
                 flatMap(([url, currentVersion, apiKey]: [string, string, string]) => {
-                    const keyParam = (method === GET || method === 'delete')
+                    const keyParam = (method === GET || method === DELETE)
                         ? 'params'
                         : 'body';
 
-                    let smartParams = (method === POST)
-                        ? ApiService.ObjectToFormData(params)
-                        : params;
-
                     const options = {
-                        [keyParam]: smartParams,
+                        [keyParam]: ApiService.ObjectToHttpParams(method, params),
                         responseType: 'json' as 'json',
                         observe: 'response' as 'response',
                         headers: {
                             'X-App-Version': currentVersion,
-                            ...(secured && apiKey ? {"X-Authorization": `Bearer ${apiKey}`} : {}),
+                            ...(secured && apiKey ? {'X-Authorization': `Bearer ${apiKey}`} : {}),
                             ...ApiService.DEFAULT_HEADERS
                         }
                     };
@@ -135,7 +130,7 @@ export class ApiService {
                     return this.httpClient.request(method, url, options);
                 }),
                 catchError((response: HttpResponse<any>) => {
-                    if(response.status == 401) {
+                    if(response.status === 401) {
                         this.userService.doLogout();
                         return of(response);
                     }
@@ -143,7 +138,7 @@ export class ApiService {
                         return throwError(response);
                     }
                 }),
-                filter((response: HttpResponse<any>) => (response.status != 401)),
+                filter((response: HttpResponse<any>) => (response.status !== 401)),
                 map((response: HttpResponse<any>) => response.body)
             );
 
@@ -181,8 +176,9 @@ export class ApiService {
         return formData;
     }
 
-    private static ObjectToHttpParams(object: { [x: string]: any }): { [x: string]: string | number } {
-        return Object
+    private static ObjectToHttpParams(method: string,
+                                      object: { [x: string]: any }): HttpParams|FormData {
+        const paramsObject = Object
             .keys(object)
             .reduce((acc, key) => ({
                 ...acc,
@@ -190,6 +186,20 @@ export class ApiService {
                     ? JSON.stringify(object[key])
                     : object[key]
             }), {});
-    }
 
+        if (method === POST) {
+            return ApiService.ObjectToFormData(paramsObject);
+        }
+        else {
+            return new HttpParams({
+                fromObject: paramsObject,
+                encoder: {
+                    encodeKey: (key: string): string => encodeURIComponent(key),
+                    encodeValue: (key: string): string => encodeURIComponent(key),
+                    decodeKey: (value: string): string => decodeURIComponent(value),
+                    decodeValue: (value: string): string => decodeURIComponent(value)
+                },
+            });
+        }
+    }
 }
