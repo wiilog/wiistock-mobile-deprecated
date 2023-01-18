@@ -92,6 +92,11 @@ const routes: Routes = [
         loadChildren: () => import('@pages/demande/demande-menu/demande-menu.module').then(m => m.DemandeMenuPageModule)
     },
     {
+        path: NavPathEnum.DISPATCH_REQUEST_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/demande/dispatch/dispatch-request-menu/dispatch-request-menu.module').then(m => m.DispatchRequestMenuModule)
+    },
+    {
         path: NavPathEnum.DEMANDE_LIVRAISON_MENU,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/demande/demande-livraison/demande-livraison-menu/demande-livraison-menu.module').then(m => m.DemandeLivraisonMenuPageModule)
