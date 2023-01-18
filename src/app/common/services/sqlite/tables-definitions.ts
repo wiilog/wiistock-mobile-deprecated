@@ -364,6 +364,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             id: 'INTEGER PRIMARY KEY',
             requester: 'VARCHAR(255)',
             number: 'VARCHAR(255)',
+            statusId: 'INTEGER',
             startDate: 'VARCHAR(255)',
             endDate: 'VARCHAR(255)',
             emergency: 'VARCHAR(255)',
