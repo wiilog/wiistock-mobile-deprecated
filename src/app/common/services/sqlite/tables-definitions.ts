@@ -373,7 +373,6 @@ export const TablesDefinitions: Array<TableDefinition> = [
             typeId: 'INTEGER',
             typeLabel: 'VARCHAR(255)',
             statusLabel: 'VARCHAR(255)',
-            statusId: 'INTEGER',
             treatedStatusId: 'INTEGER',
             partial: 'INTEGER',
             color: 'VARCHAR(255)',

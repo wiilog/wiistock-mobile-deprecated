@@ -67,23 +67,22 @@ export class StorageService {
     }
 
     public updateFieldParams(fieldParams: { [entity: string]: any }): Observable<any> {
-        console.log(fieldParams)
-        const fieldParamsToStore = [];
-        Object.keys(fieldParams).forEach((entity) => {
+        const fieldParamKeys = Object.keys(fieldParams);
+        const storageService = this;
+        const storageObservables = [];
+        fieldParamKeys.forEach((entity) => {
             Object.keys(fieldParams[entity]).forEach((field) => {
                 Object.keys(fieldParams[entity][field]).forEach((condition) => {
-                    const storageKey = `${entity}.${field}.${condition}`;
-                    fieldParamsToStore[storageKey] = fieldParams[entity][field][condition]
-                });
-            });
-        });
+                    if (StorageService.FIELD_TYPES_TO_KEEP.includes(condition)) {
+                        const storageKey = `${entity}.${field}.${condition}`;
+                        storageObservables.push(from(storageService.storage.set(storageKey, Number(Boolean(fieldParams[entity][field][condition])))));
+                    }
+                })
+            })
+        })
 
-        const fieldParamKeysToStore = Object.keys(fieldParamsToStore);
-
-        return fieldParamKeysToStore.length > 0
-            ? zip(...(Object.keys(fieldParamKeysToStore).map((storageKey) => (
-                from(this.storage.set(storageKey, Number(Boolean(fieldParamsToStore[storageKey]))))
-            ))))
+        return storageObservables.length > 0
+            ? zip(...storageObservables)
             : of(undefined);
     }
 

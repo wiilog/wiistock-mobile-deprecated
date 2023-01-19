@@ -20,9 +20,11 @@ import {ToastService} from '@app/common/services/toast.service';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {TranslationService} from "@app/common/services/translations.service";
-import {Reference} from "@entities/reference";
 import {ApiService} from "@app/common/services/api.service";
 import {FileService} from "@app/common/services/file.service";
+import {StorageKeyEnum} from "@app/common/services/storage/storage-key.enum";
+import {StorageService} from "@app/common/services/storage/storage.service";
+import {InAppBrowser} from "@ionic-native/in-app-browser/ngx";
 
 @Component({
     selector: 'wii-dispatch-packs',
@@ -35,7 +37,8 @@ export class DispatchPacksPage extends PageComponent {
     public footerScannerComponent: BarcodeScannerComponent;
 
     public loading: boolean;
-
+    public wayBillData = {};
+    public hasWayBillData = false;
     public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.INVISIBLE;
 
     public dispatchHeaderConfig: {
@@ -60,6 +63,7 @@ export class DispatchPacksPage extends PageComponent {
 
     private dispatch: Dispatch;
     public fromCreate: boolean = false;
+    public ableToCreateWaybill: boolean = false;
     private dispatchPacks: Array<DispatchPack>;
 
     private typeHasNoPartialStatuses: boolean;
@@ -78,6 +82,8 @@ export class DispatchPacksPage extends PageComponent {
                        private translationService: TranslationService,
                        private apiService: ApiService,
                        private fileService: FileService,
+                       private storage: StorageService,
+                       public iab: InAppBrowser,
                        navService: NavService) {
         super(navService);
         this.loading = true;
@@ -259,6 +265,8 @@ export class DispatchPacksPage extends PageComponent {
         const natureTranslation = TranslationService.Translate(this.natureTranslations, 'Nature')
         const natureTranslationCapitalized = natureTranslation.charAt(0).toUpperCase() + natureTranslation.slice(1);
 
+        this.ableToCreateWaybill = packsTreated.length > 0;
+
         const plural = packsTreated.length > 1 ? 's' : '';
         this.packsTreatedListConfig = {
             header: {
@@ -397,7 +405,20 @@ export class DispatchPacksPage extends PageComponent {
                         )
                 }).subscribe(({success, msg}) => {
                     if(success) {
-                        this.navService.runMultiplePop(2);
+                        this.loadingService.presentLoadingWhile({
+                            event: () => {
+                                return this.apiService.requestApi(ApiService.DISPATCH_WAYBILL, {
+                                    pathParams: {dispatch: this.dispatch.id},
+                                    params: this.wayBillData
+                                });
+                            }
+                        }).subscribe((response) => {
+                            this.storage.getString(StorageKeyEnum.URL_SERVER).subscribe((url) => {
+                                this.navService.runMultiplePop(2).then(() => {
+                                    this.iab.create(url + response.filePath, '_system');
+                                });
+                            })
+                        });
                     } else {
                         this.toastService.presentToast(msg);
                     }
@@ -443,7 +464,13 @@ export class DispatchPacksPage extends PageComponent {
 
     public goToWayBill() {
         this.navService.push(NavPathEnum.DISPATCH_WAYBILL, {
-            dispatchId: this.dispatch.id
+            dispatchId: this.dispatch.id,
+            dispatchPacks: this.dispatchPacks,
+            data: this.wayBillData,
+            afterValidate: (data) => {
+                this.wayBillData = data;
+                this.hasWayBillData = true;
+            }
         });
     }
 }
