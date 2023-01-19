@@ -37,6 +37,11 @@ const routes: Routes = [
         loadChildren: () => import('@pages/tracking/dispatch/dispatch-menu/dispatch-menu.module').then(m => m.DispatchMenuPageModule)
     },
     {
+        path: NavPathEnum.DISPATCH_FILTER,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-filter/dispatch-filter-page.module').then(m => m.DispatchFilterPageModule)
+    },
+    {
         path: NavPathEnum.DISPATCH_PACKS,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/tracking/dispatch/dispatch-packs/dispatch-packs.module').then(m => m.DispatchPacksPageModule)
@@ -361,6 +366,21 @@ const routes: Routes = [
         path: NavPathEnum.MANUAL_DELIVERY_LOCATION,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/livraison/manual-delivery-location/manual-delivery-location.module').then(m => m.ManualDeliveryLocationModule)
+    },
+    {
+        path: NavPathEnum.DISPATCH_GROUPED_SIGNATURE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-grouped-signature/dispatch-grouped-signature.module').then(m => m.DispatchGroupedSignaturePageModule)
+    },
+    {
+        path: NavPathEnum.DISPATCH_GROUPED_SIGNATURE_VALIDATE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-grouped-signature-validate/dispatch-grouped-signature-validate.module').then(m => m.DispatchGroupedSignatureValidatePageModule)
+    },
+    {
+        path: NavPathEnum.DISPATCH_GROUPED_SIGNATURE_FINISH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-grouped-signature-finish/dispatch-grouped-signature-finish.module').then(m => m.DispatchGroupedSignatureFinishPageModule)
     },
     {
         path: '',

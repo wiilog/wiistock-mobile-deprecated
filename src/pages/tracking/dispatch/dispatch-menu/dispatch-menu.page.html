@@ -1,7 +1,7 @@
-<div *ngIf="!loading && dispatchesListConfig && dispatchesListConfig.length > 0"
-     scroll-y="true"
+<div scroll-y="true"
      class="page-content">
-    <wii-card-list [listIconName]="dispatchesIconName"
+    <wii-card-list  *ngIf="!loading && dispatchesListConfig && dispatchesListConfig.length > 0"
+                   [listIconName]="dispatchesIconName"
                    [color]="dispatchesListColor"
                    [config]="dispatchesListConfig">
     </wii-card-list>
@@ -14,3 +14,15 @@
                  [resetEmitter]="resetEmitter$"
                  [scanMode]="barcodeScannerSearchMode">
 </wii-select-item>
+<ion-button *ngIf="hasRightDisplayGroupedSignatureButton"
+            class="submit-button larger"
+            color="primary"
+            size="large"
+            expand="full"
+            (click)="goToGroupedSignature()">
+    Signature groupée
+    <wii-icon name="check.svg"
+              class="button-icon"
+              color="white">
+    </wii-icon>
+</ion-button>

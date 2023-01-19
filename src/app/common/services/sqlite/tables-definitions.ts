@@ -372,6 +372,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             locationToLabel: 'VARCHAR(255)',
             typeId: 'INTEGER',
             typeLabel: 'VARCHAR(255)',
+            statusId: 'INTEGER',
             statusLabel: 'VARCHAR(255)',
             treatedStatusId: 'INTEGER',
             partial: 'INTEGER',
@@ -433,6 +434,14 @@ export const TablesDefinitions: Array<TableDefinition> = [
             priority: 'INTEGER',
             estimated_at: 'VARCHAR(255)',
             expected_at: 'VARCHAR(255)',
+        }
+    },
+    {
+        name: 'dispatch_type',
+        keepOnConnection: true,
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            label: 'VARCHAR(255)',
         }
     },
 ];

@@ -38,4 +38,5 @@ export type TableName = 'emplacement'
                       | 'empty_round'
                       | 'picking_article_collecte'
                       | 'transport_round'
-                      | 'transport_round_line';
+                      | 'transport_round_line'
+                      | 'dispatch_type';

@@ -123,6 +123,18 @@ export class SqliteService {
             : of(undefined);
     }
 
+    public importDispatchTypes(data): Observable<void> {
+        const dispatchTypes = data['dispatchTypes'] || [];
+        return this.deleteBy('dispatch_type').pipe(
+            flatMap(() => (
+                dispatchTypes.length > 0
+                    ? this.insert('dispatch_type', dispatchTypes)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
     private importDispatchesData(data): Observable<any> {
         const dispatches = data['dispatches'] || [];
         const dispatchPacks = data['dispatchPacks'] || [];
@@ -696,6 +708,7 @@ export class SqliteService {
             flatMap(() => this.importAllowedNaturesData(data).pipe(tap(() => {console.log('--- > importAllowedNaturesData')}))),
             flatMap(() => this.importFreeFieldsData(data).pipe(tap(() => {console.log('--- > importFreeFieldData')}))),
             flatMap(() => this.importTranslations(data).pipe(tap(() => {console.log('--- > importTranslations')}))),
+            flatMap(() => this.importDispatchTypes(data).pipe(tap(() => {console.log('--- > importDispatchTypes')}))),
             flatMap(() => this.importDispatchesData(data).pipe(tap(() => {console.log('--- > importDispatchesData')}))),
             flatMap(() => this.importStatusData(data).pipe(tap(() => {console.log('--- > importStatusData')}))),
             flatMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),
