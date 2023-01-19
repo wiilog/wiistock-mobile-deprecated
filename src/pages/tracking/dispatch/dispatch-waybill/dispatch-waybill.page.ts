@@ -14,11 +14,8 @@ import {
 import {
     FormPanelCalendarMode
 } from "@app/common/components/panel/form-panel/form-panel-calendar/form-panel-calendar-mode";
-import {HttpClient} from "@angular/common/http";
 import {StorageService} from "@app/common/services/storage/storage.service";
-import {StorageKeyEnum} from "@app/common/services/storage/storage-key.enum";
-import {InAppBrowser} from "@ionic-native/in-app-browser/ngx";
-import {DispatchPack} from "@entities/dispatch-pack";
+import {ToastService} from "@app/common/services/toast.service";
 
 @Component({
     selector: 'wii-dispatch-packs',
@@ -35,12 +32,13 @@ export class DispatchWaybillPage extends PageComponent {
     public dispatchId: number;
 
     public afterValidate: (data) => void;
-    public data = {} as any;
+    public data: any = {};
 
     public constructor(navService: NavService,
                        public apiService: ApiService,
                        public loading: LoadingService,
-                       public storageService: StorageService,) {
+                       public storageService: StorageService,
+                       private toastService: ToastService) {
         super(navService);
     }
 
@@ -57,6 +55,10 @@ export class DispatchWaybillPage extends PageComponent {
                     value: this.data.carrier || null,
                     inputConfig: {
                         type: 'text',
+                        required: true,
+                    },
+                    errors: {
+                        required: `Vous devez renseigner un transporteur.`
                     }
                 }
             },
@@ -68,6 +70,10 @@ export class DispatchWaybillPage extends PageComponent {
                     name: 'consignor',
                     inputConfig: {
                         type: 'text',
+                        required: true,
+                    },
+                    errors: {
+                        required: `Vous devez renseigner un expéditeur.`
                     }
                 }
             },
@@ -79,6 +85,10 @@ export class DispatchWaybillPage extends PageComponent {
                     name: 'receiver',
                     inputConfig: {
                         type: 'text',
+                        required: true,
+                    },
+                    errors: {
+                        required: `Vous devez renseigner un destinataire.`
                     }
                 }
             },
@@ -90,6 +100,10 @@ export class DispatchWaybillPage extends PageComponent {
                     name: 'dispatchDate',
                     inputConfig: {
                         mode: FormPanelCalendarMode.DATETIME,
+                        required: true,
+                    },
+                    errors: {
+                        required: `Vous devez renseigner une date d'acheminement.`
                     }
                 }
             },
@@ -101,6 +115,10 @@ export class DispatchWaybillPage extends PageComponent {
                     name: 'consignorUsername',
                     inputConfig: {
                         type: 'text',
+                        required: true,
+                    },
+                    errors: {
+                        required: `Vous devez renseigner le champ Expéditeur - Nom.`
                     }
                 }
             },
@@ -112,6 +130,10 @@ export class DispatchWaybillPage extends PageComponent {
                     name: 'consignorEmail',
                     inputConfig: {
                         type: 'text',
+                        required: true,
+                    },
+                    errors: {
+                        required: `Vous devez renseigner le champ Expéditeur - Téléphone - Email.`
                     }
                 }
             },
@@ -123,6 +145,10 @@ export class DispatchWaybillPage extends PageComponent {
                     name: 'receiverUsername',
                     inputConfig: {
                         type: 'text',
+                        required: true,
+                    },
+                    errors: {
+                        required: `Vous devez renseigner le champ Destinataire - Nom.`
                     }
                 }
             },
@@ -134,6 +160,10 @@ export class DispatchWaybillPage extends PageComponent {
                     name: 'receiverEmail',
                     inputConfig: {
                         type: 'text',
+                        required: true,
+                    },
+                    errors: {
+                        required: `Vous devez renseigner le champ Destinataire - Téléphone - Email.`
                     }
                 }
             },
@@ -145,6 +175,10 @@ export class DispatchWaybillPage extends PageComponent {
                     name: 'locationFrom',
                     inputConfig: {
                         type: 'text',
+                        required: true,
+                    },
+                    errors: {
+                        required: `Vous devez renseigner un lieu de chargement.`
                     }
                 }
             },
@@ -156,6 +190,10 @@ export class DispatchWaybillPage extends PageComponent {
                     name: 'locationTo',
                     inputConfig: {
                         type: 'text',
+                        required: true,
+                    },
+                    errors: {
+                        required: `Vous devez renseigner un lieu de déchargement.`
                     }
                 }
             },
@@ -167,17 +205,26 @@ export class DispatchWaybillPage extends PageComponent {
                     name: 'notes',
                     inputConfig: {
                         type: 'text',
+                        required: true,
+                    },
+                    errors: {
+                        required: `Vous devez renseigner une note de bas de page.`
                     }
                 }
             },
         ]
     }
 
-    public validate() {
-        const values = this.formPanelComponent.values;
-        values.fromNomade = true;
-        this.navService.pop().subscribe(() => {
-            this.afterValidate(values);
-        })
+    public validate(): void {
+        if(this.formPanelComponent.firstError) {
+            this.toastService.presentToast(this.formPanelComponent.firstError);
+        } else {
+            const values = this.formPanelComponent.values;
+            values.fromNomade = true;
+            this.navService.pop().subscribe(() => {
+                this.afterValidate(values);
+                this.toastService.presentToast(`La lettre de voitre est prête à être générée. Validez la demande pour procéder au téléchargement.`)
+            });
+        }
     }
 }
