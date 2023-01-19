@@ -1056,6 +1056,13 @@
   dependencies:
     "@types/cordova" latest
 
+"@ionic-native/in-app-browser@^5.36.0":
+  version "5.36.0"
+  resolved "https://registry.yarnpkg.com/@ionic-native/in-app-browser/-/in-app-browser-5.36.0.tgz#b28b6e4306e12028735c0f9dbe7b66b279bb44db"
+  integrity sha512-tX/FBT0jpkgEefZ8iorv5eDKfgP/ExbYr1AWg6okORQ0dwLfXsD5KDJgKHN9GFZvyuLNeaLpC1mN7CvwvLvmgA==
+  dependencies:
+    "@types/cordova" latest
+
 "@ionic-native/local-notifications@^5.34.0":
   version "5.36.0"
   resolved "https://registry.yarnpkg.com/@ionic-native/local-notifications/-/local-notifications-5.36.0.tgz#0df56f0632768a40886f4a266258a9e948f4b79a"
