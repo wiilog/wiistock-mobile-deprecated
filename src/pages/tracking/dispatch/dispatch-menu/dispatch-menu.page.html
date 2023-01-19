@@ -1,16 +1,5 @@
 <div scroll-y="true"
      class="page-content">
-    <ion-button fill="outline"
-                class="custom-fill-button"
-                expand="block"
-                (click)="filter()">
-        Filtrer
-    </ion-button>
-    <div class="filters" *ngIf="(this.filters.from || this.filters.to || this.filters.status) && this.labelFrom && this.labelTo">
-        <p class="filter" *ngIf="this.filters.from">{{this.labelFrom}} : {{this.filters.from.text}}</p>
-        <p class="filter" *ngIf="this.filters.to">{{this.labelTo}} : {{this.filters.to.text}}</p>
-        <p class="filter" *ngIf="this.filters.status">Statut : {{this.filters.status.text}}</p>
-    </div>
     <wii-card-list  *ngIf="!loading && dispatchesListConfig && dispatchesListConfig.length > 0"
                    [listIconName]="dispatchesIconName"
                    [color]="dispatchesListColor"
@@ -25,3 +14,15 @@
                  [resetEmitter]="resetEmitter$"
                  [scanMode]="barcodeScannerSearchMode">
 </wii-select-item>
+<ion-button *ngIf="hasRightDisplayGroupedSignatureButton"
+            class="submit-button larger"
+            color="primary"
+            size="large"
+            expand="full"
+            (click)="goToGroupedSignature()">
+    Signature groupée
+    <wii-icon name="check.svg"
+              class="button-icon"
+              color="white">
+    </wii-icon>
+</ion-button>

@@ -435,4 +435,12 @@ export const TablesDefinitions: Array<TableDefinition> = [
             expected_at: 'VARCHAR(255)',
         }
     },
+    {
+        name: 'dispatch_type',
+        keepOnConnection: true,
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            label: 'VARCHAR(255)',
+        }
+    },
 ];

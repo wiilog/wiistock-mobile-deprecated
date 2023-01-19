@@ -69,4 +69,7 @@ export enum NavPathEnum {
     TRANSPORT_ROUND_FINISH = 'transport-round-finish',
     MANUAL_DELIVERY = 'manual-delivery',
     MANUAL_DELIVERY_LOCATION = 'manual-delivery-location',
+    DISPATCH_GROUPED_SIGNATURE = 'dispatch-grouped-signature',
+    DISPATCH_GROUPED_SIGNATURE_VALIDATE = 'dispatch-grouped-signature-validate',
+    DISPATCH_GROUPED_SIGNATURE_FINISH = 'dispatch-grouped-signature-finish',
 }

@@ -363,6 +363,21 @@ const routes: Routes = [
         loadChildren: () => import('@pages/stock/livraison/manual-delivery-location/manual-delivery-location.module').then(m => m.ManualDeliveryLocationModule)
     },
     {
+        path: NavPathEnum.DISPATCH_GROUPED_SIGNATURE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-grouped-signature/dispatch-grouped-signature.module').then(m => m.DispatchGroupedSignaturePageModule)
+    },
+    {
+        path: NavPathEnum.DISPATCH_GROUPED_SIGNATURE_VALIDATE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-grouped-signature-validate/dispatch-grouped-signature-validate.module').then(m => m.DispatchGroupedSignatureValidatePageModule)
+    },
+    {
+        path: NavPathEnum.DISPATCH_GROUPED_SIGNATURE_FINISH,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-grouped-signature-finish/dispatch-grouped-signature-finish.module').then(m => m.DispatchGroupedSignatureFinishPageModule)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'

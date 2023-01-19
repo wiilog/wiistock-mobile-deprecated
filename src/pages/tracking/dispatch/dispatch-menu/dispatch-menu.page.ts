@@ -17,6 +17,8 @@ import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {Translations} from '@entities/translation';
 import {TranslationService} from '@app/common/services/translations.service';
 import * as moment from 'moment';
+import {StorageKeyEnum} from "@app/common/services/storage/storage-key.enum";
+import {StorageService} from "@app/common/services/storage/storage.service";
 
 @Component({
     selector: 'wii-dispatch-menu',
@@ -34,6 +36,10 @@ export class DispatchMenuPage extends PageComponent {
 
     public loading: boolean;
     public firstLaunch: boolean;
+    public labelTo?: string;
+    public labelFrom?: string;
+
+    public hasRightDisplayGroupedSignatureButton: boolean;
 
     public resetEmitter$: EventEmitter<void>;
 
@@ -42,33 +48,27 @@ export class DispatchMenuPage extends PageComponent {
     public dispatchesIconName?: string = 'stock-transfer.svg';
 
     public dispatchTranslations: Translations;
-    public labelFrom: string;
-    public labelTo: string;
-    public filters: {
-        status?: { id: number; text: string };
-        from?: { id: number; text: string };
-        to?: { id: number; text: string };
-    };
 
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
                        private mainHeaderService: MainHeaderService,
                        private translationService: TranslationService,
+                       private storageService: StorageService,
                        navService: NavService) {
         super(navService);
         this.resetEmitter$ = new EventEmitter<void>();
         this.loading = true;
         this.firstLaunch = true;
-        this.filters = {
-            status: null,
-            from: null,
-            to: null,
-        }
+        this.hasRightDisplayGroupedSignatureButton = false;
     }
 
 
     public ionViewWillEnter(): void {
+        this.storageService.getRight(StorageKeyEnum.RIGHT_GROUPED_SIGNATURE).subscribe((hasRightDisplayGroupedSignatureButton) => {
+            this.hasRightDisplayGroupedSignatureButton = hasRightDisplayGroupedSignatureButton;
+        });
+
         this.resetEmitter$.emit();
         this.updateDispatchList();
     }
@@ -87,20 +87,6 @@ export class DispatchMenuPage extends PageComponent {
 
         const withoutLoading = this.currentNavParams.get('withoutLoading');
         if (!this.firstLaunch || !withoutLoading) {
-            const filtersSQL = [];
-            this.dispatchesIconName = 'stock-transfer.svg';
-            if (this.filters.from) {
-                this.dispatchesIconName = null;
-                filtersSQL.push(`locationFromLabel = '${this.filters.from.text}'`)
-            }
-            if (this.filters.to) {
-                this.dispatchesIconName = null;
-                filtersSQL.push(`locationToLabel = '${this.filters.to.text}'`)
-            }
-            if (this.filters.status) {
-                this.dispatchesIconName = null;
-                filtersSQL.push(`statusId = '${this.filters.status.id}'`)
-            }
             this.loadingSubscription = this.loadingService.presentLoading()
                 .pipe(
                     tap(loader => loaderElement = loader),
@@ -108,7 +94,6 @@ export class DispatchMenuPage extends PageComponent {
                         this.sqliteService.findBy('dispatch',
                             [
                                 'treatedStatusId IS NULL OR partial = 1',
-                                ...filtersSQL
                             ]
                         ),
                         this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`)
@@ -157,6 +142,10 @@ export class DispatchMenuPage extends PageComponent {
         this.navService.push(NavPathEnum.DISPATCH_PACKS, {
             dispatchId: id
         });
+    }
+
+    public goToGroupedSignature(){
+        this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE);
     }
 
     private refreshDispatchesListConfig(dispatches: Array<Dispatch>, translations: Translations): void {
@@ -221,15 +210,5 @@ export class DispatchMenuPage extends PageComponent {
                 }
             };
         });
-    }
-
-    public filter() {
-        this.navService.push(NavPathEnum.DISPATCH_FILTER, {
-            ...this.filters,
-            afterValidate: (values) => {
-                this.filters = values;
-                this.updateDispatchList();
-            }
-        })
     }
 }

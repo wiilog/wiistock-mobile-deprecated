@@ -30,6 +30,7 @@ export class DispatchFilterPage extends PageComponent {
     public bodyConfig: Array<FormPanelParam>;
 
     public status: { id: number; text: string };
+    public type: { id: number; text: string };
     public from: { id: number; text: string };
     public to: { id: number; text: string };
 
@@ -43,6 +44,7 @@ export class DispatchFilterPage extends PageComponent {
         this.status = this.currentNavParams.get('status');
         this.to = this.currentNavParams.get('to');
         this.from = this.currentNavParams.get('from');
+        this.type = this.currentNavParams.get('type');
         this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`).subscribe((translations) => {
             this.dispatchTranslations = translations;
             this.bodyConfig = [
@@ -112,16 +114,37 @@ export class DispatchFilterPage extends PageComponent {
                         },
                     }
                 },
+                {
+                    item: FormPanelSelectComponent,
+                    config: {
+                        label: 'Type',
+                        name: 'type',
+                        value: this.type ? this.type.id : null,
+                        inputConfig: {
+                            searchType: SelectItemTypeEnum.DISPATCH_TYPE,
+                            onChange: (typeId) => {
+                                this.sqliteService
+                                    .findOneBy('dispatch_type', {id: typeId})
+                                    .subscribe((newType?: any) => {
+                                        this.type = {
+                                            id: newType.id,
+                                            text: newType.label,
+                                        }
+                                    })
+                            }
+                        },
+                    }
+                },
             ]
         })
     }
 
     public validate() {
-        console.log(this.from, this.to, this.status)
         this.navService.pop().subscribe(() => {
             this.afterValidate({
                 from: this.from,
                 to: this.to,
+                type: this.type,
                 status: this.status,
             });
         })

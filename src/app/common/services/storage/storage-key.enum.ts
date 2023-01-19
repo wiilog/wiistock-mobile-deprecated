@@ -8,6 +8,7 @@ export enum StorageKeyEnum {
     RIGHT_GROUP = 'group',
     RIGHT_UNGROUP = 'ungroup',
     RIGHT_EMPTY_ROUND = 'emptyRound',
+    RIGHT_GROUPED_SIGNATURE = 'groupedSignature',
     DEMO_MODE = 'demoMode',
 
     PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER = 'skipValidationsManualTransfer',
