@@ -21,6 +21,7 @@ import {SimpleFormComponent} from '@app/common/components/simple-form/simple-for
 import {IonicModule} from '@ionic/angular';
 import {HttpClientModule} from '@angular/common/http';
 import {Network} from '@ionic-native/network/ngx';
+import {InAppBrowser} from "@ionic-native/in-app-browser/ngx";
 import {BarcodeScanner} from '@ionic-native/barcode-scanner/ngx';
 import {Camera} from '@ionic-native/camera/ngx';
 import {SQLite} from '@ionic-native/sqlite/ngx';
@@ -124,6 +125,7 @@ import {SuggestionListComponent} from "@app/common/components/suggestion-list/su
     providers: [
         // ionic
         Network,
+        InAppBrowser,
         BarcodeScanner,
         SQLite,
         AppVersion,
