@@ -2,6 +2,7 @@ export interface Dispatch {
     id: number;
     requester: string;
     number: string;
+    trackingNumber: string;
     startDate: string;
     endDate: string;
     emergency: string;
@@ -15,4 +16,6 @@ export interface Dispatch {
     statusLabel: string;
     color: string;
     destination: string;
+    comment: string;
+    draft?: boolean;
 }

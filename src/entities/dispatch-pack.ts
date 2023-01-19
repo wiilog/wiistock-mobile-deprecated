@@ -1,7 +1,9 @@
+import {Reference} from "@entities/reference";
+
 export interface DispatchPack {
-    id: number;
+    id?: number;
     code: string;
-    natureId: number;
+    natureId?: number;
     quantity: number;
     dispatchId: number;
     lastLocation?: string;
@@ -10,4 +12,5 @@ export interface DispatchPack {
     comment?: string;
     photo1?: string;
     photo2?: string;
+    reference?: string;
 }

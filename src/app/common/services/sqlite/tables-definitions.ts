@@ -384,6 +384,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             id: 'INTEGER PRIMARY KEY',
             requester: 'VARCHAR(255)',
             number: 'VARCHAR(255)',
+            statusId: 'INTEGER',
             startDate: 'VARCHAR(255)',
             endDate: 'VARCHAR(255)',
             emergency: 'VARCHAR(255)',
@@ -395,7 +396,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             treatedStatusId: 'INTEGER',
             partial: 'INTEGER',
             color: 'VARCHAR(255)',
-            destination: 'VARCHAR(255)'
+            destination: 'VARCHAR(255)',
+            draft: 'INTEGER'
         }
     },
     {
@@ -412,6 +414,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             comment: 'VARCHAR(255)',
             photo1: 'TEXT',
             photo2: 'TEXT',
+            reference: 'TEXT',
         }
     },
     {
@@ -452,6 +455,43 @@ export const TablesDefinitions: Array<TableDefinition> = [
             priority: 'INTEGER',
             estimated_at: 'VARCHAR(255)',
             expected_at: 'VARCHAR(255)',
+        }
+    },
+    {
+        name: 'dispatch_type',
+        keepOnConnection: true,
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            label: 'VARCHAR(255)',
+        }
+    },
+    {
+        name: 'user',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            username: 'VARCHAR(255)',
+        }
+    },
+    {
+        name: 'reference',
+        attributes: {
+            reference: "VARCHAR(255)",
+            quantity: "INTEGER",
+            outFormatEquipment: "VARCHAR(255)",
+            manufacturerCode: "VARCHAR(255)",
+            sealingNumber: "VARCHAR(255)",
+            serialNumber: "VARCHAR(255)",
+            batchNumber: "VARCHAR(255)",
+            width: "REAL",
+            height: "REAL",
+            length: "REAL",
+            volume: "REAL",
+            weight: "REAL",
+            adr: "INTEGER",
+            associatedDocumentTypes: "TEXT",
+            comment: "TEXT",
+            photos: "TEXT",
+            logisticUnit: "VARCHAR(255)",
         }
     },
     {

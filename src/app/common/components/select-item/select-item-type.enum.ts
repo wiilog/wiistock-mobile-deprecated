@@ -11,6 +11,8 @@ export enum SelectItemTypeEnum {
     STATUS,
     DISPATCH_NUMBER,
     GROUP,
+    DISPATCH_TYPE,
+    USER,
     COLLECTABLE_ARTICLES,
     PROJECT
 }

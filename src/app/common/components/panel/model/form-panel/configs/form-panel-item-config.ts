@@ -1,5 +1,5 @@
 export interface FormPanelItemConfig<InputConfig> {
-    label: string;
+    label?: string;
     name: string|number;
     group?: string;
     ignoreEmpty?: boolean;

@@ -39,4 +39,7 @@ export type TableName = 'emplacement'
                       | 'picking_article_collecte'
                       | 'transport_round'
                       | 'transport_round_line'
+                      | 'dispatch_type'
+                      | 'user'
+                      | 'reference'
                       | 'project';

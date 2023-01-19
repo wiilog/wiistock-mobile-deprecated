@@ -41,6 +41,10 @@ export class FormPanelInputComponent implements FormPanelItemComponent<FormPanel
 
     public onValueChange(value: string) {
         this.valueChange.emit(value);
+
+        if(this.inputConfig.onChange) {
+            this.inputConfig.onChange(value);
+        }
     }
 
     public get error(): string {
@@ -49,5 +53,4 @@ export class FormPanelInputComponent implements FormPanelItemComponent<FormPanel
             ? this.errors[errorsKeys[0]]
             : undefined;
     }
-
 }

@@ -103,6 +103,20 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             databaseTable: 'demande_livraison_type',
             placeholder: 'Sélectionnez un type'
         },
+        [SelectItemTypeEnum.DISPATCH_TYPE]: {
+            label: 'label',
+            valueField: 'id',
+            templateIndex: 'default',
+            databaseTable: 'dispatch_type',
+            placeholder: 'Sélectionnez un type'
+        },
+        [SelectItemTypeEnum.USER]: {
+            label: 'username',
+            valueField: 'id',
+            templateIndex: 'default',
+            databaseTable: 'user',
+            placeholder: 'Sélectionnez un utilisateur'
+        },
         [SelectItemTypeEnum.DEMANDE_LIVRAISON_ARTICLES]: {
             label: 'bar_code',
             valueField: 'bar_code',
@@ -133,6 +147,13 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             templateIndex: 'collectable-articles',
             databaseTable: 'picking_article_collecte',
             placeholder: 'Sélectionnez un article',
+        },
+        [SelectItemTypeEnum.DISPATCH_TYPE]: {
+            label: 'label',
+            valueField: 'id',
+            templateIndex: 'default',
+            databaseTable: 'dispatch_type',
+            placeholder: 'Sélectionnez un type'
         },
         [SelectItemTypeEnum.PROJECT]: {
             label: 'code',

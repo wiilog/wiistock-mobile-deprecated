@@ -17,6 +17,8 @@ import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {Translations} from '@entities/translation';
 import {TranslationService} from '@app/common/services/translations.service';
 import * as moment from 'moment';
+import {StorageKeyEnum} from "@app/common/services/storage/storage-key.enum";
+import {StorageService} from "@app/common/services/storage/storage.service";
 
 @Component({
     selector: 'wii-dispatch-menu',
@@ -34,29 +36,39 @@ export class DispatchMenuPage extends PageComponent {
 
     public loading: boolean;
     public firstLaunch: boolean;
+    public labelTo?: string;
+    public labelFrom?: string;
+
+    public hasRightDisplayGroupedSignatureButton: boolean;
 
     public resetEmitter$: EventEmitter<void>;
 
     public dispatchesListConfig: Array<CardListConfig>;
     public readonly dispatchesListColor = CardListColorEnum.GREEN;
-    public readonly dispatchesIconName = 'stock-transfer.svg';
+    public dispatchesIconName?: string = 'stock-transfer.svg';
 
-    private dispatchTranslations: Translations;
+    public dispatchTranslations: Translations;
 
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
                        private loadingService: LoadingService,
                        private mainHeaderService: MainHeaderService,
                        private translationService: TranslationService,
+                       private storageService: StorageService,
                        navService: NavService) {
         super(navService);
         this.resetEmitter$ = new EventEmitter<void>();
         this.loading = true;
         this.firstLaunch = true;
+        this.hasRightDisplayGroupedSignatureButton = false;
     }
 
 
     public ionViewWillEnter(): void {
+        this.storageService.getRight(StorageKeyEnum.RIGHT_GROUPED_SIGNATURE).subscribe((hasRightDisplayGroupedSignatureButton) => {
+            this.hasRightDisplayGroupedSignatureButton = hasRightDisplayGroupedSignatureButton;
+        });
+
         this.resetEmitter$.emit();
         this.updateDispatchList();
     }
@@ -79,7 +91,11 @@ export class DispatchMenuPage extends PageComponent {
                 .pipe(
                     tap(loader => loaderElement = loader),
                     flatMap(() => zip(
-                        this.sqliteService.findBy('dispatch', ['treatedStatusId IS NULL OR partial = 1']),
+                        this.sqliteService.findBy('dispatch',
+                            [
+                                'treatedStatusId IS NULL OR partial = 1',
+                            ]
+                        ),
                         this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`)
                     ))
                 )
@@ -128,9 +144,14 @@ export class DispatchMenuPage extends PageComponent {
         });
     }
 
+    public goToGroupedSignature(){
+        this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE);
+    }
+
     private refreshDispatchesListConfig(dispatches: Array<Dispatch>, translations: Translations): void {
         this.dispatchTranslations = translations;
-
+        this.labelFrom = TranslationService.Translate(this.dispatchTranslations, 'Emplacement de prise');
+        this.labelTo = TranslationService.Translate(this.dispatchTranslations, 'Emplacement de dépose');
         this.dispatchesListConfig = dispatches
             .sort(({startDate: startDate1}, {startDate: startDate2}) => {
                 const momentDesiredDate1 = moment(startDate1, 'DD/MM/YYYY HH:mm:ss')
@@ -163,16 +184,16 @@ export class DispatchMenuPage extends PageComponent {
                         value: dispatch.startDate && dispatch.endDate ? `Du ${dispatch.startDate} au ${dispatch.endDate}` : ''
                     },
                     {
-                        label: TranslationService.Translate(this.dispatchTranslations, "Emplacement de prise"),
+                        label: this.labelFrom,
                         value: dispatch.locationFromLabel || ''
                     },
                     {
-                        label: TranslationService.Translate(this.dispatchTranslations, "Emplacement de dépose"),
+                        label: this.labelTo,
                         value: dispatch.locationToLabel || ''
                     },
                     (dispatch.emergency
                         ? {label: 'Urgence', value: dispatch.emergency || ''}
-                        : undefined)
+                        : {label: 'Urgence', value: 'Non'})
                 ].filter((item) => item && item.value),
                 ...(dispatch.emergency
                     ? {
