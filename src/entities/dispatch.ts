@@ -17,4 +17,5 @@ export interface Dispatch {
     color: string;
     destination: string;
     comment: string;
+    draft?: boolean;
 }

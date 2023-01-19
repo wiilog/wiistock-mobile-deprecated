@@ -70,4 +70,5 @@ export enum NavPathEnum {
     MANUAL_DELIVERY = 'manual-delivery',
     MANUAL_DELIVERY_LOCATION = 'manual-delivery-location',
     DISPATCH_NEW = 'dispatch-new',
+    DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION = 'dispatch-logistic-unit-reference-association',
 }

@@ -54,30 +54,13 @@ export class DispatchRequestMenuPage extends PageComponent implements CanLeave {
     }
 
     public ionViewWillEnter(): void {
-        this.fabListActivated = false
-
-        this.dispatches = [
-            {
-                number: 'A-20221236545',
-                trackingNumber: 'TR-456789321',
-                typeLabel: 'Standard',
-                locationFromLabel: 'Enlèvement 1',
-                locationToLabel: 'Livraison 1',
-                comment: 'Commentaire',
-                emergency: '',
-            } as any,
-            {
-                number: 'A-20221236123165',
-                trackingNumber: 'TR-4567800001',
-                typeLabel: 'Urgence',
-                locationFromLabel: 'Enlèvement 2',
-                locationToLabel: 'Livraison 2',
-                comment: 'Commentaire 2',
-                emergency: 'Oui',
-            } as any
-        ]
-        this.refreshPageList(this.dispatches);
-
+        this.loadingService.presentLoadingWhile({
+            event: () => this.sqliteService.findBy(`dispatch`, [`draft = 1`])
+        }).subscribe((dispatches) => {
+            this.dispatches = dispatches;
+            this.fabListActivated = false
+            this.refreshPageList(this.dispatches);
+        });
     }
 
     public wiiCanLeave(): boolean {
@@ -119,8 +102,6 @@ export class DispatchRequestMenuPage extends PageComponent implements CanLeave {
     private refreshPageList(dispatches: Array<Dispatch>) {
         this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`).subscribe((translations) => {
             this.dispatchTranslations = translations;
-
-
             this.dispatches = dispatches;
 
             this.dispatchListConfig = this.dispatches.map((dispatch: Dispatch): CardListConfig => {
@@ -128,6 +109,12 @@ export class DispatchRequestMenuPage extends PageComponent implements CanLeave {
                     title: {
                         label: 'Numéro',
                         value: dispatch.number
+                    },
+                    action: () => {
+                        this.navService.push(NavPathEnum.DISPATCH_PACKS, {
+                            dispatchId: dispatch.id,
+                            fromCreate: true,
+                        });
                     },
                     content: [
                         {label: 'Numéro de tracking', value: dispatch.trackingNumber || ''},
@@ -155,6 +142,7 @@ export class DispatchRequestMenuPage extends PageComponent implements CanLeave {
                         : {}),
                 };
             });
+
             this.refreshSubTitle();
             this.hasLoaded = true;
         })

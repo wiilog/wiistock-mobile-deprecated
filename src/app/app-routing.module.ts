@@ -368,6 +368,11 @@ const routes: Routes = [
         loadChildren: () => import('@pages/demande/dispatch/dispatch-new/dispatch-new.module').then(m => m.DispatchNewModule)
     },
     {
+        path: NavPathEnum.DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/dispatch/dispatch-logistic-unit-reference-association/dispatch-logistic-unit-reference-association.module').then(m => m.DispatchLogisticUnitReferenceAssociationModule)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'

@@ -5,4 +5,5 @@ export interface FormPanelInputConfig {
     required?: boolean;
     maxLength?: string;
     disabled?: boolean;
+    onChange?: (item: any) => void;
 }

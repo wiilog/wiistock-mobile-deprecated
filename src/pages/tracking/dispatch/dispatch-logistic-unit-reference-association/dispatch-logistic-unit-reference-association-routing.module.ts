@@ -1,12 +1,12 @@
 import {NgModule} from '@angular/core';
 import {Routes, RouterModule} from '@angular/router';
-import {DispatchNewPage} from './dispatch-new.page';
+import {DispatchLogisticUnitReferenceAssociationPage} from './dispatch-logistic-unit-reference-association.page';
 import {CanLeaveGuard} from '@app/guards/can-leave/can-leave.guard';
 
 const routes: Routes = [
     {
         path: '',
-        component: DispatchNewPage,
+        component: DispatchLogisticUnitReferenceAssociationPage,
         canDeactivate: [CanLeaveGuard]
     }
 ];
@@ -15,5 +15,5 @@ const routes: Routes = [
     imports: [RouterModule.forChild(routes)],
     exports: [RouterModule],
 })
-export class DispatchNewRoutingModule {
+export class DispatchLogisticUnitReferenceAssociationRoutingModule {
 }

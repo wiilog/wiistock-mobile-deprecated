@@ -372,10 +372,12 @@ export const TablesDefinitions: Array<TableDefinition> = [
             typeId: 'INTEGER',
             typeLabel: 'VARCHAR(255)',
             statusLabel: 'VARCHAR(255)',
+            statusId: 'INTEGER',
             treatedStatusId: 'INTEGER',
             partial: 'INTEGER',
             color: 'VARCHAR(255)',
-            destination: 'VARCHAR(255)'
+            destination: 'VARCHAR(255)',
+            draft: 'INTEGER'
         }
     },
     {
@@ -392,6 +394,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             comment: 'VARCHAR(255)',
             photo1: 'TEXT',
             photo2: 'TEXT',
+            reference: 'TEXT',
         }
     },
     {
@@ -447,6 +450,28 @@ export const TablesDefinitions: Array<TableDefinition> = [
         attributes: {
             id: 'INTEGER PRIMARY KEY',
             username: 'VARCHAR(255)',
+        }
+    },
+    {
+        name: 'reference',
+        attributes: {
+            reference: "VARCHAR(255)",
+            quantity: "INTEGER",
+            outFormatEquipment: "VARCHAR(255)",
+            manufacturerCode: "VARCHAR(255)",
+            sealingNumber: "VARCHAR(255)",
+            serialNumber: "VARCHAR(255)",
+            batchNumber: "VARCHAR(255)",
+            width: "REAL",
+            height: "REAL",
+            length: "REAL",
+            volume: "REAL",
+            weight: "REAL",
+            adr: "INTEGER",
+            associatedDocumentTypes: "TEXT",
+            comment: "TEXT",
+            photos: "TEXT",
+            logisticUnit: "VARCHAR(255)",
         }
     },
 ];

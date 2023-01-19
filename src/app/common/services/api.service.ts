@@ -64,6 +64,9 @@ export class ApiService {
     public static readonly PACKS_RETURN_LOCATIONS = {method: GET, service: '/packs-return-locations'};
     public static readonly GET_DISPATCH_EMERGENCIES = {method: GET, service: '/dispatch-emergencies'};
     public static readonly NEW_DISPATCH = {method: POST, service: '/new-dispatch'};
+    public static readonly GET_REFERENCE = {method: GET, service: '/get-reference'};
+    public static readonly GET_ASSOCIATED_DOCUMENT_TYPE_ELEMENTS = {method: GET, service: '/get-associated-document-type-elements'};
+    public static readonly DISPATCH_VALIDATE = {method: POST, service: '/dispatch-validate'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'

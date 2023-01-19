@@ -126,7 +126,7 @@ export class DispatchNewPage extends PageComponent {
                     label: 'N° de tracking',
                     name: 'carrierTrackingNumber',
                     inputConfig: {
-                        required: this.fieldParams.needsCarrierTrackingNumber,
+                        required: Boolean(this.fieldParams.needsCarrierTrackingNumber),
                         type: 'text',
                     },
                     errors: {
@@ -154,7 +154,7 @@ export class DispatchNewPage extends PageComponent {
                     label: 'Emplacement de prise',
                     name: 'pickLocation',
                     inputConfig: {
-                        required: this.fieldParams.needsPickLocation,
+                        required: Boolean(this.fieldParams.needsPickLocation),
                         searchType: SelectItemTypeEnum.LOCATION,
                     },
                     errors: {
@@ -168,7 +168,7 @@ export class DispatchNewPage extends PageComponent {
                     label: 'Emplacement de dépose',
                     name: 'dropLocation',
                     inputConfig: {
-                        required: this.fieldParams.needsDropLocation,
+                        required: Boolean(this.fieldParams.needsDropLocation),
                         searchType: SelectItemTypeEnum.LOCATION,
                     },
                     errors: {
@@ -182,7 +182,7 @@ export class DispatchNewPage extends PageComponent {
                     label: `Commentaire`,
                     name: 'comment',
                     inputConfig: {
-                        required: this.fieldParams.needsComment,
+                        required: Boolean(this.fieldParams.needsComment),
                         maxLength: '512',
                     },
                     errors: {
@@ -197,7 +197,7 @@ export class DispatchNewPage extends PageComponent {
                     name: 'emergency',
                     value: null,
                     inputConfig: {
-                        required: this.fieldParams.needsEmergency,
+                        required: Boolean(this.fieldParams.needsEmergency),
                         elements: this.emergencies
                     },
                     errors: {
@@ -211,7 +211,7 @@ export class DispatchNewPage extends PageComponent {
                     label: 'Destinataire',
                     name: 'receiver',
                     inputConfig: {
-                        required: this.fieldParams.needsReceiver,
+                        required: Boolean(this.fieldParams.needsReceiver),
                         searchType: SelectItemTypeEnum.USER,
                         label: `username`,
                     },
@@ -247,7 +247,8 @@ export class DispatchNewPage extends PageComponent {
             }).subscribe((result: number | { success: boolean; msg: string }) => {
                 if (typeof result === `number`) {
                     this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-                        dispatchId: result
+                        dispatchId: result,
+                        fromCreate: true,
                     });
                 } else {
                     this.toastService.presentToast(result.msg);

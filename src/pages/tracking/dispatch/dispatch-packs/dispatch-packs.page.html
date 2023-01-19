@@ -15,7 +15,7 @@
                     [body]="packsTreatedListConfig.body"
                     [boldValues]="listBoldValues">
     </wii-list-panel>
-    <wii-list-panel *ngIf="packsToTreatListConfig"
+    <wii-list-panel *ngIf="!fromCreate && packsToTreatListConfig"
                     [header]="packsToTreatListConfig.header"
                     [body]="packsToTreatListConfig.body"
                     [boldValues]="listBoldValues">
