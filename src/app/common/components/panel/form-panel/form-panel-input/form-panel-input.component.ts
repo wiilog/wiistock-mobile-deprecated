@@ -53,5 +53,4 @@ export class FormPanelInputComponent implements FormPanelItemComponent<FormPanel
             ? this.errors[errorsKeys[0]]
             : undefined;
     }
-
 }

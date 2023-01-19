@@ -55,7 +55,13 @@ $card-padding: 4px 12px !important;
 
         .content {
             flex: 1;
-
+            display: flex;
+            align-items: center;
+            .list-element-body-wrapper {
+                display: flex;
+                flex-direction: column;
+                flex: 1;
+            }
             .badges-container {
                 display: flex;
                 justify-content: space-between;
@@ -88,7 +94,7 @@ $card-padding: 4px 12px !important;
         }
 
         .actions {
-            display: inline-flex;
+            display: flex;
 
             .right-icon {
                 width: 25px !important;

@@ -40,6 +40,7 @@ export enum NavPathEnum {
     PREPARATION_ARTICLES = 'preparation-articles',
     PREPARATION_MENU = 'preparation-menu',
     DISPATCH_MENU = 'dispatch-menu',
+    DISPATCH_FILTER = 'dispatch-filter',
     STOCK_MOVEMENT_MENU = 'stock-movement-menu',
     TRACKING_MOVEMENT_MENU = 'tracking-movement-menu',
     LOGIN = 'login',
@@ -70,6 +71,9 @@ export enum NavPathEnum {
     TRANSPORT_ROUND_FINISH = 'transport-round-finish',
     MANUAL_DELIVERY = 'manual-delivery',
     MANUAL_DELIVERY_LOCATION = 'manual-delivery-location',
+    DISPATCH_GROUPED_SIGNATURE = 'dispatch-grouped-signature',
+    DISPATCH_GROUPED_SIGNATURE_VALIDATE = 'dispatch-grouped-signature-validate',
+    DISPATCH_GROUPED_SIGNATURE_FINISH = 'dispatch-grouped-signature-finish',
     DISPATCH_NEW = 'dispatch-new',
     DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION = 'dispatch-logistic-unit-reference-association',
 }

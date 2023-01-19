@@ -118,6 +118,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
         this.titlesConfig = [
             {pagePath: NavPathEnum.TRACKING_MENU, label: 'Traçabilité'},
             {pagePath: NavPathEnum.DISPATCH_MENU, label: 'Acheminements'},
+            {pagePath: NavPathEnum.DISPATCH_FILTER, label: 'Filtre'},
             {pagePath: NavPathEnum.STOCK_MENU, label: 'Stock'},
             {pagePath: NavPathEnum.TRANSPORT_ROUND_LIST, label: 'Track', noBreadcrumb: true},
             {
@@ -157,6 +158,8 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP, label: 'Terminer tournée'},
             {pagePath: NavPathEnum.TRANSPORT_ROUND_FINISH_PACK_DROP_VALIDATE, label: 'Terminer tournée'},
             {pagePath: NavPathEnum.TRANSPORT_ROUND_FINISH, label: 'Terminer tournée'},
+            {pagePath: NavPathEnum.DISPATCH_GROUPED_SIGNATURE, label: 'Signature groupée'},
+            {pagePath: NavPathEnum.DISPATCH_GROUPED_SIGNATURE_VALIDATE, label: 'Validation'},
             {
                 pagePath: NavPathEnum.TRANSPORT_COLLECT_NATURES,
                 label: 'Déposer colis',

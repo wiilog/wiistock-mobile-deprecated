@@ -148,6 +148,13 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             databaseTable: 'picking_article_collecte',
             placeholder: 'Sélectionnez un article',
         },
+        [SelectItemTypeEnum.DISPATCH_TYPE]: {
+            label: 'label',
+            valueField: 'id',
+            templateIndex: 'default',
+            databaseTable: 'dispatch_type',
+            placeholder: 'Sélectionnez un type'
+        },
     }
 
     public constructor(private sqliteService: SqliteService,
