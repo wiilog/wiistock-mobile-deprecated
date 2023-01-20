@@ -61,7 +61,7 @@ export class DemandeMenuPage extends PageComponent {
             },
             {
                 icon: 'transfer.svg',
-                iconColor: 'list-blue',
+                iconColor: 'success',
                 label: 'Acheminement',
                 action: () => {
                     self.navService.push(NavPathEnum.DISPATCH_REQUEST_MENU);

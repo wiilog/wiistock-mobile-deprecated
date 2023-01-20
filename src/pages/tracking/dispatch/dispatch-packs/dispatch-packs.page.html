@@ -1,6 +1,7 @@
 <div *ngIf="!loading && dispatchHeaderConfig"
      scroll-y="true"
-     class="page-content">
+     class="page-content"
+     [class.spacing]="fromCreate">
     <wii-panel-header *ngIf="dispatchHeaderConfig"
                       class="page-header"
                       [title]="dispatchHeaderConfig.title"

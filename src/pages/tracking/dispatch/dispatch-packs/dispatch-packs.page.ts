@@ -39,7 +39,7 @@ export class DispatchPacksPage extends PageComponent {
     public loading: boolean;
     public wayBillData = {};
     public hasWayBillData = false;
-    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.INVISIBLE;
+    public scannerMode: BarcodeScannerModeEnum;
 
     public dispatchHeaderConfig: {
         title: string;
@@ -75,6 +75,34 @@ export class DispatchPacksPage extends PageComponent {
     private loadingSubscription: Subscription;
     private loadingElement?: HTMLIonLoadingElement;
 
+    private fieldParams: {
+        displayCarrierTrackingNumber: boolean,
+        needsCarrierTrackingNumber: boolean,
+        displayPickLocation: boolean,
+        needsPickLocation: boolean,
+        displayDropLocation: boolean,
+        needsDropLocation: boolean,
+        displayComment: boolean,
+        needsComment: boolean,
+        displayEmergency: boolean,
+        needsEmergency: boolean,
+        displayReceiver: boolean,
+        needsReceiver: boolean,
+    } = {
+        displayCarrierTrackingNumber: false,
+        needsCarrierTrackingNumber: false,
+        displayPickLocation: false,
+        needsPickLocation: false,
+        displayDropLocation: false,
+        needsDropLocation: false,
+        displayComment: false,
+        needsComment: false,
+        displayEmergency: false,
+        needsEmergency: false,
+        displayReceiver: false,
+        needsReceiver: false,
+    };
+
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
                        private mainHeaderService: MainHeaderService,
@@ -84,6 +112,7 @@ export class DispatchPacksPage extends PageComponent {
                        private fileService: FileService,
                        private storage: StorageService,
                        public iab: InAppBrowser,
+                       private storageService: StorageService,
                        navService: NavService) {
         super(navService);
         this.loading = true;
@@ -97,7 +126,6 @@ export class DispatchPacksPage extends PageComponent {
             this.loading = true;
             this.unsubscribeLoading();
             const dispatchId = this.currentNavParams.get('dispatchId');
-            this.fromCreate = this.currentNavParams.get('fromCreate');
             this.loadingSubscription = this.loadingService.presentLoading()
                 .pipe(
                     tap((loader) => {
@@ -107,7 +135,26 @@ export class DispatchPacksPage extends PageComponent {
                             this.sqliteService.findOneBy('dispatch', {id: dispatchId}),
                             this.sqliteService.findBy('dispatch_pack', [`dispatchId = ${dispatchId}`]),
                             this.sqliteService.findAll('nature'),
-                            this.translationService.get(null, `Traçabilité`, `Général`)
+                            this.translationService.get(null, `Traçabilité`, `Général`),
+                            zip(
+                                this.storageService.getNumber('acheminements.carrierTrackingNumber.displayedCreate'),
+                                this.storageService.getNumber('acheminements.carrierTrackingNumber.requiredCreate'),
+
+                                this.storageService.getNumber('acheminements.pickLocation.displayedCreate'),
+                                this.storageService.getNumber('acheminements.pickLocation.requiredCreate'),
+
+                                this.storageService.getNumber('acheminements.dropLocation.displayedCreate'),
+                                this.storageService.getNumber('acheminements.dropLocation.requiredCreate'),
+
+                                this.storageService.getNumber('acheminements.comment.displayedCreate'),
+                                this.storageService.getNumber('acheminements.comment.requiredCreate'),
+
+                                this.storageService.getNumber('acheminements.emergency.displayedCreate'),
+                                this.storageService.getNumber('acheminements.emergency.requiredCreate'),
+
+                                this.storageService.getNumber('acheminements.receiver.displayedCreate'),
+                                this.storageService.getNumber('acheminements.receiver.requiredCreate'),
+                            ),
                         ).pipe(
                             flatMap((data) => this.sqliteService
                                 .findBy('status', [`category = 'acheminement'`, `state = 'partial'`, `typeId = ${data[0].typeId}`])
@@ -116,7 +163,10 @@ export class DispatchPacksPage extends PageComponent {
                     ),
                     filter(([dispatch]) => Boolean(dispatch))
                 )
-                .subscribe(([dispatch, packs, natures, natureTranslations, partialStatuses]: [Dispatch, Array<DispatchPack>, Array<Nature>, Translations, Array<any>]) => {
+                .subscribe(([dispatch, packs, natures, natureTranslations, fieldParams, partialStatuses]: [Dispatch, Array<DispatchPack>, Array<Nature>, Translations, Array<any>, Array<any>]) => {
+                    fieldParams.forEach((value, index) => {
+                        this.fieldParams[Object.keys(this.fieldParams)[index]] = value;
+                    });
                     this.typeHasNoPartialStatuses = partialStatuses.length === 0;
                     this.natureIdsToColors = natures.reduce((acc, {id, color}) => ({
                         ...acc,
@@ -145,6 +195,12 @@ export class DispatchPacksPage extends PageComponent {
                     this.footerScannerComponent.fireZebraScan();
                 });
         }
+    }
+
+    public ngOnInit() {
+        super.ngOnInit();
+        this.fromCreate = this.currentNavParams.get('fromCreate');
+        this.scannerMode = this.fromCreate ? BarcodeScannerModeEnum.ONLY_MANUAL : BarcodeScannerModeEnum.INVISIBLE;
     }
 
     public ngOnDestroy() {
@@ -180,10 +236,6 @@ export class DispatchPacksPage extends PageComponent {
         }
     }
 
-    /*private updateDispatchPacks(dispatchPack) {
-        this.dispatchPacks.push(dispatchPack);
-    }*/
-
     private unsubscribeLoading(): void {
         if (this.loadingSubscription) {
             this.loadingSubscription.unsubscribe();
@@ -201,9 +253,23 @@ export class DispatchPacksPage extends PageComponent {
             this.dispatchHeaderConfig = {
                 title: `Demande N°${this.dispatch.number}`,
                 subtitle: [
-                    TranslationService.Translate(dispatch, 'Emplacement de prise') + ' : ' + this.dispatch.locationFromLabel,
-                    this.dispatch.destination ? `Destination : ${this.dispatch.destination}` : ''
-                ],
+                    this.fromCreate && this.fieldParams.displayCarrierTrackingNumber
+                        ? `N° de tracking : ${this.dispatch.trackingNumber || ''}`
+                        : null,
+                    !this.fromCreate || (this.fromCreate && this.fieldParams.displayPickLocation)
+                        ? TranslationService.Translate(dispatch, 'Emplacement de prise') + ' : ' + this.dispatch.locationFromLabel || ''
+                        : null,
+                    this.fromCreate && this.fieldParams.displayDropLocation
+                            ? TranslationService.Translate(dispatch, 'Emplacement de dépose') + ' : ' + this.dispatch.locationToLabel || ''
+                            : null,
+                    this.fromCreate && this.fieldParams.displayComment
+                            ? `Commentaire : ${this.dispatch.comment || ''}`
+                            : null,
+                    this.fromCreate && this.fieldParams.displayEmergency
+                            ? `Urgence : ${this.dispatch.emergency || ''}`
+                            : null,
+                    this.dispatch.destination ? `Destination : ${this.dispatch.destination || ''}` : null
+                ].filter((item) => item),
                 info: `Type ${this.dispatch.typeLabel}`,
                 transparent: true,
                 leftIcon: {
