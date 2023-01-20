@@ -290,7 +290,7 @@ export class DispatchGroupedSignaturePage extends PageComponent {
             });
         }
         else {
-            this.toastService.presentToast("Veuillez saisir un statut, un type ainsi qu'un Emplacement de prise ou de dépose dans les filtres en haut de page.");
+            this.toastService.presentToast('Veuillez saisir un statut, un type ainsi qu\'un emplacement de prise ou de dépose dans les filtres.');
         }
     }
 
