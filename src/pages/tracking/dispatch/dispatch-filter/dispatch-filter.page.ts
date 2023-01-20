@@ -13,6 +13,7 @@ import {filter} from "rxjs/operators";
 import {Status} from "@entities/status";
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
 import {Emplacement} from "@entities/emplacement";
+import {ToastService} from "@app/common/services/toast.service";
 
 @Component({
     selector: 'wii-filter-validate',
@@ -34,7 +35,7 @@ export class DispatchFilterPage extends PageComponent {
     public from: { id: number; text: string };
     public to: { id: number; text: string };
 
-    public constructor(navService: NavService, public translationService: TranslationService, public sqliteService: SqliteService) {
+    public constructor(navService: NavService, public translationService: TranslationService, public sqliteService: SqliteService, public toastService: ToastService) {
         super(navService);
     }
 
@@ -140,13 +141,17 @@ export class DispatchFilterPage extends PageComponent {
     }
 
     public validate() {
-        this.navService.pop().subscribe(() => {
-            this.afterValidate({
-                from: this.from,
-                to: this.to,
-                type: this.type,
-                status: this.status,
-            });
-        })
+        if (this.status && this.type && (this.from || this.to)) {
+            this.navService.pop().subscribe(() => {
+                this.afterValidate({
+                    from: this.from,
+                    to: this.to,
+                    type: this.type,
+                    status: this.status,
+                });
+            })
+        } else {
+            this.toastService.presentToast('Veuillez saisir un statut, un type ainsi qu\'un emplacement de prise ou de dépose dans les filtres.');
+        }
     }
 }
