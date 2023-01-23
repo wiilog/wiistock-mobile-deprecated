@@ -470,7 +470,7 @@ export class DispatchPacksPage extends PageComponent {
                             })
                         )
                 }).subscribe(({success, msg}) => {
-                    if(success) {
+                    if (success && this.hasWayBillData) {
                         this.loadingService.presentLoadingWhile({
                             event: () => {
                                 return this.apiService.requestApi(ApiService.DISPATCH_WAYBILL, {
@@ -485,6 +485,8 @@ export class DispatchPacksPage extends PageComponent {
                                 });
                             })
                         });
+                    } else if (success && !this.hasWayBillData) {
+                        this.navService.runMultiplePop(2)
                     } else {
                         this.toastService.presentToast(msg);
                     }
@@ -529,14 +531,18 @@ export class DispatchPacksPage extends PageComponent {
     }
 
     public goToWayBill() {
-        this.navService.push(NavPathEnum.DISPATCH_WAYBILL, {
-            dispatchId: this.dispatch.id,
-            dispatchPacks: this.dispatchPacks,
-            data: this.wayBillData,
-            afterValidate: (data) => {
-                this.wayBillData = data;
-                this.hasWayBillData = true;
-            }
-        });
+        if(!this.hasWayBillData) {
+            this.navService.push(NavPathEnum.DISPATCH_WAYBILL, {
+                dispatchId: this.dispatch.id,
+                dispatchPacks: this.dispatchPacks,
+                data: this.wayBillData,
+                afterValidate: (data) => {
+                    this.wayBillData = data;
+                    this.hasWayBillData = true;
+                }
+            });
+        } else {
+            this.hasWayBillData = false;
+        }
     }
 }

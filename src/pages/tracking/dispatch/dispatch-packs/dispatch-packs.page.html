@@ -13,8 +13,7 @@
     </wii-panel-header>
     <ion-item *ngIf="fromCreate && ableToCreateWaybill">
         <ion-label>Lettre de voiture</ion-label>
-        <ion-toggle
-                    slot="end"
+        <ion-toggle slot="end"
                     [checked]="this.hasWayBillData"
                     (click)="goToWayBill()">
 
