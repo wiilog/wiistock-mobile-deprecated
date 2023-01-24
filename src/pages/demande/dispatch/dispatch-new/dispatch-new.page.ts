@@ -244,7 +244,7 @@ export class DispatchNewPage extends PageComponent {
                     mergeMap(({success, msg, dispatch}) => success ? this.sqliteService.insert(`dispatch`, dispatch) : of({success, msg}))
                 ),
                 message: `Création de l'acheminement en cours...`,
-            }).subscribe((result: number | { success: boolean; msg: string }) => {
+            }).subscribe((result: number | {success: boolean; msg: string}) => {
                 if (typeof result === `number`) {
                     this.navService.push(NavPathEnum.DISPATCH_PACKS, {
                         dispatchId: result,

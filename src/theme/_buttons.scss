@@ -62,8 +62,22 @@ ion-button {
         }
     }
 
-    &[disabled], &.disabled {
+    &[disabled]:not(.outline), &.disabled:not(.outline) {
         --ion-color-base: #CBCBCB !important;
         opacity: 1;
+    }
+
+    &.outline {
+        --border-width: 2px;
+        --border-style: solid;
+        --border-color: #030f4c;
+        --ion-color-base: #FFFFFF !important;
+        --ion-color-contrast: #030f4c !important;
+
+        &[disabled] {
+            --ion-color-base: #FFFFFF !important;
+            --ion-color-contrast: #030f4c !important;
+            opacity: 0.5;
+        }
     }
 }

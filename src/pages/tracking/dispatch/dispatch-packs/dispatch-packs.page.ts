@@ -200,7 +200,7 @@ export class DispatchPacksPage extends PageComponent {
     public ngOnInit() {
         super.ngOnInit();
         this.fromCreate = this.currentNavParams.get('fromCreate');
-        this.scannerMode = this.fromCreate ? BarcodeScannerModeEnum.ONLY_MANUAL : BarcodeScannerModeEnum.INVISIBLE;
+        this.scannerMode = this.fromCreate ? BarcodeScannerModeEnum.WITH_MANUAL : BarcodeScannerModeEnum.INVISIBLE;
     }
 
     public ngOnDestroy() {
@@ -336,7 +336,7 @@ export class DispatchPacksPage extends PageComponent {
         const plural = packsTreated.length > 1 ? 's' : '';
         this.packsTreatedListConfig = {
             header: {
-                title: 'Transféré',
+                title: this.fromCreate ? `Scannée` : 'Transféré',
                 info: `${packsTreated.length} unité${plural} logistique${plural} scannée${plural}`,
                 leftIcon: {
                     name: 'upload.svg',
@@ -346,7 +346,7 @@ export class DispatchPacksPage extends PageComponent {
             body: packsTreated.map((pack) => ({
                 ...(this.packToListItemConfig(pack, natureTranslationCapitalized)),
                 ...(
-                    !pack.already_treated
+                    !pack.already_treated && !this.fromCreate
                         ? {
                             pressAction: () => {
                                 this.navService.push(NavPathEnum.DISPATCH_PACK_CONFIRM, {
@@ -362,7 +362,22 @@ export class DispatchPacksPage extends PageComponent {
                                 action: () => this.revertPack(pack.code)
                             }
                         }
-                        : {}
+                        : (this.fromCreate
+                            ? {
+                                pressAction: () => {
+                                    this.loadingService.presentLoadingWhile({
+                                        event: () => this.sqliteService.findOneBy(`reference`, {reference: pack.reference})
+                                    }).subscribe((reference) => {
+                                        this.navService.push(NavPathEnum.DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION, {
+                                            logisticUnit: pack.code,
+                                            dispatch: this.dispatch.id,
+                                            reference,
+                                            edit: true
+                                        });
+                                    });
+                                }
+                            }
+                            : {})
                 )
             }))
         };
