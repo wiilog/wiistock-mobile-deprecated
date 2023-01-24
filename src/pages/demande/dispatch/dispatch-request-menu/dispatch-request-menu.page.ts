@@ -76,25 +76,6 @@ export class DispatchRequestMenuPage extends PageComponent implements CanLeave {
         this.fabListActivated = !this.fabListActivated;
     }
 
-    public onRefreshClick(): void {
-        this.fabListActivated = false;
-
-        if (this.networkService.hasNetwork()) {
-            let loader: HTMLIonLoadingElement;
-            this.apiSending = true;
-        } else {
-            this.alertService.show({
-                header: 'Synchronisation impossible',
-                cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
-                message: 'Aucune connexion à internet, synchronisation des demandes impossible.',
-                buttons: [{
-                    text: 'Confirmer',
-                    cssClass: 'alert-success'
-                }]
-            });
-        }
-    }
-
     public onAddClick(): void {
         this.navService.push(NavPathEnum.DISPATCH_NEW);
     }

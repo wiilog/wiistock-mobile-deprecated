@@ -8,15 +8,15 @@
                       [subtitle]="headerConfig.subtitle"
                       [leftIcon]="headerConfig.leftIcon">
     </wii-panel-header>
-    <ion-button class="submit-button larger"
+    <ion-button *ngIf="!edit" class="submit-button larger outline"
                 color="primary"
                 size="small"
-                expand="full"
+                expand="block"
                 (click)="getReference()" [disabled]="disabledAddReference">
         Valider la référence
         <wii-icon name="check.svg"
                   class="button-icon"
-                  color="white">
+                  color="primary">
         </wii-icon>
     </ion-button>
     <wii-form-panel #formPanelComponent
@@ -31,7 +31,7 @@
                 size="large"
                 expand="full"
                 (click)="validate()"
-                [disabled]="disableValidate">
+                [disabled]="!edit && disableValidate">
         Valider
         <wii-icon name="check.svg"
                   class="button-icon"

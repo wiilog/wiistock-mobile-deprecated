@@ -1,6 +1,7 @@
 <div *ngIf="!loading && dispatchHeaderConfig"
      scroll-y="true"
-     class="page-content">
+     class="page-content"
+     [class.spacing]="fromCreate">
     <wii-panel-header *ngIf="dispatchHeaderConfig"
                       class="page-header"
                       [title]="dispatchHeaderConfig.title"
@@ -12,8 +13,7 @@
     </wii-panel-header>
     <ion-item *ngIf="fromCreate && ableToCreateWaybill">
         <ion-label>Lettre de voiture</ion-label>
-        <ion-toggle
-                    slot="end"
+        <ion-toggle slot="end"
                     [checked]="this.hasWayBillData"
                     (click)="goToWayBill()">
 

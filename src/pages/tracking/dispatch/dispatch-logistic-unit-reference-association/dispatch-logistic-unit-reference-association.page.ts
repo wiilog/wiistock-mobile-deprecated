@@ -31,9 +31,7 @@ import {
 } from "@app/common/components/panel/form-panel/form-panel-buttons/form-panel-buttons.component";
 import {Reference} from "@entities/reference";
 import {Dispatch} from "@entities/dispatch";
-import {DispatchPack} from "@entities/dispatch-pack";
 import {zip} from "rxjs";
-import {FileService} from "@app/common/services/file.service";
 
 @Component({
     selector: 'wii-dispatch-logistic-unit-reference-association',
@@ -50,13 +48,13 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
 
     public logisticUnit: string;
     public dispatch: Dispatch;
-    public reference: Reference|{} = {};
+    public reference: Reference | any = {};
     public volume: number = undefined;
     public disableValidate: boolean = true;
     public disabledAddReference: boolean = true;
     public associatedDocumentTypeElements: string;
 
-    public updateDispatchPacks: (dispatchPack: DispatchPack) => void;
+    public edit: boolean = false;
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
@@ -73,9 +71,10 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
             event: () => this.apiService.requestApi(ApiService.GET_ASSOCIATED_DOCUMENT_TYPE_ELEMENTS)
         }).subscribe((values) => {
             this.associatedDocumentTypeElements = values;
+            this.reference = this.currentNavParams.get(`reference`) || {};
+            this.edit = this.currentNavParams.get(`edit`) || false;
             this.logisticUnit = this.currentNavParams.get(`logisticUnit`);
             this.dispatch = this.currentNavParams.get(`dispatch`);
-            this.updateDispatchPacks = this.currentNavParams.get(`updateDispatchPacks`);
             this.getFormConfig();
             this.createHeaderConfig();
         });
@@ -84,7 +83,6 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
     private getFormConfig(values: any = {}) {
         const {
             reference,
-            quantity,
             outFormatEquipment,
             manufacturerCode,
             sealingNumber,
@@ -97,6 +95,9 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
             weight,
             adr,
             associatedDocumentTypes,
+            comment,
+            photos,
+            exists,
         } = Object.keys(values).length > 0 ? values : this.reference;
 
         this.formConfig = [
@@ -110,6 +111,7 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                         required: true,
                         type: 'text',
                         onChange: (value) => this.disabledAddReference = value == ``,
+                        disabled: this.edit,
                     },
                     errors: {
                         required: 'Vous devez renseigner une réference.'
@@ -123,10 +125,11 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                     config: {
                         label: 'Quantité',
                         name: 'quantity',
-                        value: quantity ? Number(quantity) : null,
+                        value: this.reference && this.reference.quantity ? this.reference.quantity : null,
                         inputConfig: {
                             required: true,
                             type: 'number',
+                            min: 1
                         },
                         errors: {
                             required: 'Vous devez renseigner une quantité.'
@@ -198,7 +201,7 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                         }
                     }
                 },
-                {
+                ...(!exists ? [{
                     item: FormPanelInputComponent,
                     config: {
                         label: 'Longueur (cm)',
@@ -254,7 +257,7 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                             onChange: () => this.computeVolumeField(),
                         },
                     }
-                },
+                }] : []),
                 {
                     item: FormPanelInputComponent,
                     config: {
@@ -302,7 +305,10 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                         })) : null,
                         inputConfig: {
                             required: true,
-                            elements: this.associatedDocumentTypeElements.split(`,`).map((label) => ({id: label, label})),
+                            elements: this.associatedDocumentTypeElements.split(`,`).map((label) => ({
+                                id: label,
+                                label
+                            })),
                             isMultiple: true
                         },
                         errors: {
@@ -315,6 +321,7 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                     config: {
                         label: 'Commentaire',
                         name: 'comment',
+                        value: comment || null,
                         inputConfig: {},
                     }
                 },
@@ -323,6 +330,7 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                     config: {
                         label: 'Photo(s)',
                         name: 'photos',
+                        value: photos ? JSON.parse(photos) : null,
                         inputConfig: {
                             multiple: true
                         }
@@ -354,7 +362,7 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
 
                 return acc;
             }, {} as Reference);
-            if(!reference.volume) {
+            if (!this.reference.exists && !reference.volume) {
                 this.toastService.presentToast(`Le calcul du volume est nécessaire pour valider l'ajout de la référence.`)
             } else {
                 reference.logisticUnit = this.logisticUnit;
@@ -367,7 +375,12 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                             treated: 1,
                             reference: reference.reference
                         }),
-                        this.sqliteService.insert(`reference`, reference)
+                        this.edit
+                            ? this.sqliteService.update(`reference`, [{
+                                values: {reference},
+                                where: [`reference = '${reference.reference}'`]
+                            }
+                            ]) : this.sqliteService.insert(`reference`, reference)
                     )
                 }).subscribe(() => {
                     this.navService.pop();
@@ -392,8 +405,8 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
         const values = this.formPanelComponent.values;
         const {length, width, height} = values;
 
-        if(length && width && height) {
-            this.volume = (length * width * height) / 10**6;
+        if (length && width && height) {
+            this.volume = (length * width * height) / 10 ** 6;
             this.getFormConfig(values);
         } else {
             this.toastService.presentToast(`Veuillez renseigner des valeurs valides pour le calcul du volume.`);
