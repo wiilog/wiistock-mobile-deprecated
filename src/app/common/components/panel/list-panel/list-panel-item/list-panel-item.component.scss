@@ -10,6 +10,23 @@
     border-radius: $card-border-radius;
     box-shadow: $card-box-shadow;
 
+    .badges-container {
+        display: flex;
+        justify-content: space-between;
+        margin-top: $spacerMin;
+        margin-bottom: $spacerMin;
+
+        .wii-badge {
+            &:first-child {
+                margin-left: 0;
+            }
+
+            &:last-child {
+                margin-right: 0;
+            }
+        }
+    }
+
     .list-element-color {
         position: absolute;
         top: 0;

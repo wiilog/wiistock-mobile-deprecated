@@ -1,4 +1,5 @@
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
+import {BadgeConfig} from "@app/common/components/badge/badge-config";
 
 
 export interface ListPanelItemConfig {
@@ -16,6 +17,7 @@ export interface ListPanelItemConfig {
     rightIcon?: IconConfig;
     rightIconBase64?: string;
     sliding?: boolean;
+    badge?: BadgeConfig;
     slidingConfig?: {
         left: Array<{
             label: string,

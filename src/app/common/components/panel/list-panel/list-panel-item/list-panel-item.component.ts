@@ -1,5 +1,6 @@
 import {Component, ElementRef, HostBinding, Input} from '@angular/core';
 import {IconConfig} from '@app/common/components/panel/model/icon-config';
+import {BadgeConfig} from "@app/common/components/badge/badge-config";
 
 
 @Component({
@@ -31,6 +32,9 @@ export class ListPanelItemComponent {
 
     @Input()
     public rightIcon?: IconConfig;
+
+    @Input()
+    public badge?: BadgeConfig;
 
     @Input()
     public rightIconBase64?: string;

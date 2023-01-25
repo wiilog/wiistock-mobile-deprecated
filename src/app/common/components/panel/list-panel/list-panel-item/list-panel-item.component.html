@@ -54,7 +54,11 @@
 
         <ion-ripple-effect *ngIf="(!rightIcon || !rightIcon.action) && pressAction"></ion-ripple-effect>
     </div>
-
+    <p class="badges-container"
+       *ngIf="badge">
+        <wii-badge [config]="badge">
+        </wii-badge>
+    </p>
     <div class="list-element-disabled"
          *ngIf="disabled">
     </div>
