@@ -67,17 +67,17 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                     .requestApi(ApiService.DEFAULT_LOCATION_ARTICLE_CREATION)
             }
         }).subscribe(({location}) => {
-                this.defaultLocation = location;
-                this.headerConfig = {
-                    leftIcon: {
-                        name: 'transfer.svg',
-                        color: 'tertiary'
-                    },
-                    title: `Balayer étiquette RFID`,
-                    subtitle: `Emplacement : ${this.defaultLocation}`
-                }
-                this.loading = false;
-            })
+            this.defaultLocation = location;
+            this.headerConfig = {
+                leftIcon: {
+                    name: 'transfer.svg',
+                    color: 'tertiary'
+                },
+                title: `Balayer étiquette RFID`,
+                subtitle: `Emplacement : ${this.defaultLocation}`
+            }
+            this.loading = false;
+        })
     }
 
     public ionViewWillLeave(): void {
@@ -98,18 +98,18 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                     })
             }
         }).subscribe(({article}) => {
-                if (article) {
-                    this.toastService.presentToast('Article existant.');
-                } else {
-                    console.log('Create');
-                }
-                this.loading = false;
-            });
+            if (article) {
+                this.toastService.presentToast('Article existant.');
+            } else {
+                console.log('Create');
+            }
+            this.loading = false;
+        });
         console.log(value);
     }
 
     public rfid() {
-      console.log('RFID')
+        console.log('RFID')
     }
 
 }
