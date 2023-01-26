@@ -220,6 +220,11 @@ const routes: Routes = [
         loadChildren: () => import('@pages/stock/association/association.module').then(m => m.AssociationModule)
     },
     {
+        path: NavPathEnum.ARTICLE_CREATION,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/article-creation/article-creation-page.module').then(m => m.ArticleCreationPageModule)
+    },
+    {
         path: NavPathEnum.INVENTORY_LOCATIONS_ANOMALIES,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/inventory/inventory-locations/inventory-locations-anomalies/inventory-locations-anomalies.module').then(m => m.InventoryLocationsAnomaliesPageModule)

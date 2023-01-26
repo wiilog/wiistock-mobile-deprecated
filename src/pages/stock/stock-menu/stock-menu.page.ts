@@ -108,6 +108,13 @@ export class StockMenuPage extends PageComponent {
                 action: () => {
                     self.navService.push(NavPathEnum.ASSOCIATION);
                 }
+            },
+            {
+                icon: 'association.svg',
+                label: 'Créer article',
+                action: () => {
+                    self.navService.push(NavPathEnum.ARTICLE_CREATION);
+                }
             }
         ];
     }

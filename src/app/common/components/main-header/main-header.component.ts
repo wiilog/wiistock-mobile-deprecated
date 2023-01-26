@@ -122,6 +122,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.STOCK_MENU, label: 'Stock'},
             {pagePath: NavPathEnum.TRANSPORT_ROUND_LIST, label: 'Track', noBreadcrumb: true},
             {pagePath: NavPathEnum.ASSOCIATION, label: 'Association UL - Articles'},
+            {pagePath: NavPathEnum.ARTICLE_CREATION, label: 'Créer article'},
             {
                 pagePath: NavPathEnum.EMPLACEMENT_SCAN,
                 label: 'Association UL - Articles',
