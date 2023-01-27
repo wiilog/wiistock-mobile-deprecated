@@ -10,6 +10,8 @@ export interface Anomalie {
     barcode?: string;
     is_treatable?: number;
     mission_id: number;
+    type?: string;
+    done?: boolean;
     mission_start: string;
     mission_end: string;
     mission_name: string;

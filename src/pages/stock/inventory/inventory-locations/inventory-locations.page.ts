@@ -218,8 +218,8 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                     else { // if (this.currentPageMode === PageMode.MISSIONS) {
                         this.locationsListItemBody = [];
                         this.missionsListItemBody = inventoryArticles
-                            .filter(({mission_id}, index) => inventoryArticles.findIndex(({mission_id: mission_id2}) => (mission_id2 === mission_id)) === index)
-                            .map(({mission_id, mission_name, mission_start, mission_end}) => {
+                            .filter(({mission_id, done}, index) => inventoryArticles.findIndex(({mission_id: mission_id2}) => (mission_id2 === mission_id)) === index && !done)
+                            .map(({mission_id, mission_name, mission_start, mission_end, type}) => {
 
                                 const logisticUnits = inventoryArticles
                                     .filter((article) => article.logistic_unit_code)
@@ -248,7 +248,7 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                                     infos: {
                                         name_mission: {value: mission_name},
                                         date: {value: `Du ${moment(mission_start).format('DD/MM/YYYY')} au ${moment(mission_end).format('DD/MM/YYYY')}`},
-                                        toto: {
+                                        details: {
                                             value: `
                                                 ${nbLogisticUnits} unité(s) logistique(s),
                                                 ${nbRefInMission} référence${nbRefInMission > 1 ? 's' : ''},
@@ -262,6 +262,14 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                                     },
                                     pressAction: () => {
                                         this.selectMission(mission_id);
+                                    },
+                                    badge: {
+                                        label: type,
+                                        color: {
+                                            background: `#CBCBCB`,
+                                            font: `#666666`,
+                                        },
+                                        inline: true
                                     }
                                 };
                             });
