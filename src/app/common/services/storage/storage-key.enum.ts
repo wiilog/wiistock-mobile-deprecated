@@ -9,6 +9,7 @@ export enum StorageKeyEnum {
     RIGHT_UNGROUP = 'ungroup',
     RIGHT_EMPTY_ROUND = 'emptyRound',
     RIGHT_GROUPED_SIGNATURE = 'groupedSignature',
+    RIGHT_CREATE_ARTICLE_FROM_NOMADE = 'createArticleFromNomade',
     DEMO_MODE = 'demoMode',
 
     PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER = 'skipValidationsManualTransfer',

@@ -33,6 +33,7 @@ export class StockMenuPage extends PageComponent {
     private synchronisationSubscription: Subscription;
     private navigationSubscription: Subscription;
     private deposeAlreadyNavigate: boolean;
+    private hasRightDisplayCreateArticleButton?: boolean;
 
     public constructor(private platform: Platform,
                        private mainHeaderService: MainHeaderService,
@@ -109,14 +110,22 @@ export class StockMenuPage extends PageComponent {
                     self.navService.push(NavPathEnum.ASSOCIATION);
                 }
             },
-            {
-                icon: 'association.svg',
-                label: 'Créer article',
-                action: () => {
-                    self.navService.push(NavPathEnum.ARTICLE_CREATION);
-                }
-            }
         ];
+        this.storageService.getRight(StorageKeyEnum.RIGHT_CREATE_ARTICLE_FROM_NOMADE).subscribe((hasRightDisplayCreateArticleButton) => {
+            this.hasRightDisplayCreateArticleButton = hasRightDisplayCreateArticleButton;
+            if(this.hasRightDisplayCreateArticleButton){
+                this.menuConfig.push({
+                    icon: 'association.svg',
+                    label: 'Créer article',
+                    action: () => {
+                        self.navService.push(NavPathEnum.ARTICLE_CREATION);
+                    }
+                });
+            }
+        });
+
+
+
     }
 
     public ionViewWillEnter(): void {
