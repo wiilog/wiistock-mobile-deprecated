@@ -103,12 +103,33 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             databaseTable: 'demande_livraison_type',
             placeholder: 'Sélectionnez un type'
         },
-        [SelectItemTypeEnum.DISPATCH_TYPE]: {
+        [SelectItemTypeEnum.TYPE]: {
             label: 'label',
             valueField: 'id',
             templateIndex: 'default',
-            databaseTable: 'dispatch_type',
+            databaseTable: 'type',
             placeholder: 'Sélectionnez un type'
+        },
+        [SelectItemTypeEnum.SUPPLIER]: {
+            label: 'label',
+            valueField: 'id',
+            templateIndex: 'default',
+            databaseTable: 'supplier',
+            placeholder: 'Sélectionnez un fournisseur'
+        },
+        [SelectItemTypeEnum.REFERENCE_ARTICLE]: {
+            label: 'label',
+            valueField: 'id',
+            templateIndex: 'default',
+            databaseTable: 'reference_article',
+            placeholder: 'Sélectionnez une référence'
+        },
+        [SelectItemTypeEnum.SUPPLIER_REFERENCE]: {
+            label: 'label',
+            valueField: 'id',
+            templateIndex: 'default',
+            databaseTable: 'supplier_reference',
+            placeholder: 'Sélectionnez une référence fournisseur'
         },
         [SelectItemTypeEnum.USER]: {
             label: 'username',

@@ -42,7 +42,6 @@ export class FormPanelDirective implements OnInit {
         this.instance.group = config.group;
         this.instance.inline = config.inline;
         this.instance.value = config.value;
-
         if (instanceCreation) {
             this.instance.value = config.value;
         }

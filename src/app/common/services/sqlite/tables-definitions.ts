@@ -470,6 +470,37 @@ export const TablesDefinitions: Array<TableDefinition> = [
         }
     },
     {
+        name: 'type',
+        keepOnConnection: true,
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            label: 'VARCHAR(255)',
+            category: 'VARCHAR(255)'
+        }
+    },
+    {
+        name: 'supplier',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            label: 'VARCHAR(255)',
+            code: 'VARCHAR(255)'
+        }
+    },
+    {
+        name: 'reference_article',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            label: 'VARCHAR(255)',
+        }
+    },
+    {
+        name: 'supplier_reference',
+        attributes: {
+            label: 'VARCHAR(255)',
+            id: 'INTEGER PRIMARY KEY',
+        }
+    },
+    {
         name: 'user',
         attributes: {
             id: 'INTEGER PRIMARY KEY',

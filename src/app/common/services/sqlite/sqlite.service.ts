@@ -426,6 +426,54 @@ export class SqliteService {
         );
     }
 
+    public importTypes(data): Observable<void> {
+        const types = data['types'] || [];
+        return this.deleteBy('type').pipe(
+            flatMap(() => (
+                types.length > 0
+                    ? this.insert('type', types)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
+    public importSuppliers(data): Observable<void> {
+        const types = data['suppliers'] || [];
+        return this.deleteBy('supplier').pipe(
+            flatMap(() => (
+                types.length > 0
+                    ? this.insert('supplier', types)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
+    public importRefs(data): Observable<void> {
+        const types = data['reference_articles'] || [];
+        return this.deleteBy('reference_article').pipe(
+            flatMap(() => (
+                types.length > 0
+                    ? this.insert('reference_article', types)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
+    public importSupplierReferences(data): Observable<void> {
+        console.log(data);
+        return this.deleteBy('supplier_reference').pipe(
+            flatMap(() => (
+                data.length > 0
+                    ? this.insert('supplier_reference', data)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
     public importUsers(data): Observable<void> {
         const users = data['users'] || [];
         return this.deleteBy('user').pipe(
@@ -752,6 +800,9 @@ export class SqliteService {
             flatMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),
             flatMap(() => this.importTransportRoundData(data).pipe(tap(() => {console.log('--- > importTransportRoundData')}))),
             flatMap(() => this.importDispatchTypes(data).pipe(tap(() => {console.log('--- > importDispatchTypesData')}))),
+            flatMap(() => this.importTypes(data).pipe(tap(() => {console.log('--- > importTypes')}))),
+            flatMap(() => this.importSuppliers(data).pipe(tap(() => {console.log('--- > importSuppliers')}))),
+            flatMap(() => this.importRefs(data).pipe(tap(() => {console.log('--- > importRefs')}))),
             flatMap(() => this.importUsers(data).pipe(tap(() => {console.log('--- > importUsersData')}))),
             flatMap(() => this.importProjects(data).pipe(tap(() => {console.log('--- > importProjects')}))),
             flatMap(() => (

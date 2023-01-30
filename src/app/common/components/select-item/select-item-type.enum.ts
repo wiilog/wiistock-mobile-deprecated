@@ -12,7 +12,11 @@ export enum SelectItemTypeEnum {
     DISPATCH_NUMBER,
     GROUP,
     DISPATCH_TYPE,
+    TYPE,
     USER,
     COLLECTABLE_ARTICLES,
+    REFERENCE_ARTICLE,
+    SUPPLIER,
+    SUPPLIER_REFERENCE,
     PROJECT
 }
