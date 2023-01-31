@@ -15,26 +15,26 @@ import {TranslationService} from '@app/common/services/translations.service';
 import {AlertService} from '@app/common/services/alert.service';
 import {NetworkService} from '@app/common/services/network.service';
 import {Observable} from 'rxjs';
-import {BarcodeScannerModeEnum} from "@app/common/components/barcode-scanner/barcode-scanner-mode.enum";
-import {IconConfig} from "@app/common/components/panel/model/icon-config";
-import {FormPanelComponent} from "@app/common/components/panel/form-panel/form-panel.component";
-import {FormPanelParam} from "@app/common/directives/form-panel/form-panel-param";
+import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
+import {IconConfig} from '@app/common/components/panel/model/icon-config';
+import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
+import {FormPanelParam} from '@app/common/directives/form-panel/form-panel-param';
 import {
     FormPanelSelectComponent
-} from "@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component";
-import {SelectItemTypeEnum} from "@app/common/components/select-item/select-item-type.enum";
+} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
+import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item-type.enum';
 import {
     FormPanelInputComponent
-} from "@app/common/components/panel/form-panel/form-panel-input/form-panel-input.component";
+} from '@app/common/components/panel/form-panel/form-panel-input/form-panel-input.component';
 import {
     FormPanelCalendarComponent
-} from "@app/common/components/panel/form-panel/form-panel-calendar/form-panel-calendar.component";
+} from '@app/common/components/panel/form-panel/form-panel-calendar/form-panel-calendar.component';
 import {
     FormPanelCalendarMode
-} from "@app/common/components/panel/form-panel/form-panel-calendar/form-panel-calendar-mode";
+} from '@app/common/components/panel/form-panel/form-panel-calendar/form-panel-calendar-mode';
 import {
     FormPanelTextareaComponent
-} from "@app/common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component";
+} from '@app/common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component';
 
 
 @Component({
@@ -52,15 +52,29 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
 
     public bodyConfig: Array<FormPanelParam>;
 
-    public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_MANUAL;
-    public loading: boolean = false;
-    public rfidTag: string = '';
+    public scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.WITH_MANUAL;
+    public loading = false;
+    public rfidTag = '';
     public headerConfig?: {
         leftIcon: IconConfig;
         title: string;
         subtitle?: string;
     };
-    public creation: boolean = false;
+
+    public PREFIXES_TO_FIELDS = {
+        CPO: 'commandNumber',
+        PNR: 'reference',
+        SHQ: 'quantity',
+        PSN: 'deliveryLine',
+        DMF: 'manufacturingDate',
+        CNT: 'country',
+        VNB: 'batch',
+        EXP: 'expiryDate',
+        CUR: 'productionDate',
+        BIN: 'destination',
+    };
+
+    public creation = false;
 
     public reference: number;
     public supplier: number;
@@ -135,30 +149,49 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
         return true;
     }
 
-    public scan(value) {
-        this.loading = true;
-        this.loadingService.presentLoadingWhile({
-            event: () => {
-                return this.apiService
-                    .requestApi(ApiService.GET_ARTICLE_BY_RFID_TAG, {
-                        pathParams: {rfid: value},
-                    })
-            }
-        }).subscribe(({article}) => {
-            if (article) {
-                this.toastService.presentToast('Article existant.');
-                this.creation = false;
-                this.bodyConfig = [];
-            } else if (this.defaultValues.location) {
-                this.creation = true;
-                this.rfidTag = value;
-                this.initForm();
-            } else {
-                this.toastService.presentToast('Aucun emplacement par défaut paramétré.');
-            }
-            this.loading = false;
-        });
+    public scan(value: string) {
         console.log(value);
+        if (this.creation) {
+            const formattedValue = value.replace(/~~/g, '~');
+            const matrixParts = formattedValue.split('~');
+            const values = matrixParts.reduce((accumulator, part) => {
+                if (part) {
+                    const associatedKey = Object.keys(this.PREFIXES_TO_FIELDS).find((key) => part.startsWith(key));
+                    const associatedField = this.PREFIXES_TO_FIELDS[associatedKey];
+                    if (associatedKey) {
+                        accumulator[associatedField] = part.substring(associatedKey.length);
+                    }
+                    return accumulator;
+                }
+                return accumulator;
+            }, {});
+            this.validate(values);
+        } else {
+            this.loading = true;
+            this.loadingService.presentLoadingWhile({
+                event: () => {
+                    return this.apiService
+                        .requestApi(ApiService.GET_ARTICLE_BY_RFID_TAG, {
+                            pathParams: {rfid: value},
+                        })
+                }
+            }).subscribe(({article}) => {
+                if (article) {
+                    this.toastService.presentToast('Article existant.');
+                    this.creation = false;
+                    this.bodyConfig = [];
+                } else if (this.defaultValues.location) {
+                    this.creation = true;
+                    this.rfidTag = value;
+                    this.scannerModeManual = BarcodeScannerModeEnum.INVISIBLE;
+                    this.initForm();
+                } else {
+                    this.toastService.presentToast('Aucun emplacement par défaut paramétré.');
+                }
+                this.loading = false;
+            });
+            console.log(value);
+        }
     }
 
     public initForm() {
@@ -317,8 +350,8 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 item: FormPanelCalendarComponent,
                 config: {
                     label: 'Date de fabrication',
-                    value: values ? values.buildDate : null,
-                    name: 'buildDate',
+                    value: values ? values.manufacturingDate : null,
+                    name: 'manufacturingDate',
                     inputConfig: {
                         mode: FormPanelCalendarMode.DATE,
                     },
@@ -383,23 +416,36 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
         console.log('RFID')
     }
 
-    public validate() {
-        this.loadingService.presentLoadingWhile({
-            event: () => {
-                return this.apiService.requestApi(ApiService.CREATE_ARTICLE, {
-                    params: Object.assign({
-                        rfid: this.rfidTag,
-                        location: this.defaultValues.location
-                    }, this.formPanelComponent.values)
-                })
-            }
-        }).subscribe((response) => {
-            this.toastService.presentToast(response.message).subscribe(() => {
-                if (response.success) {
-                    //this.navService.pop();
+    public validate(matrixValues) {
+        const params = Object.assign({
+            rfidTag: this.rfidTag,
+            location: this.defaultValues.location,
+            ...(matrixValues ? {
+                fromMatrix: true
+            } : {})
+        }, Object.assign(this.formPanelComponent.values, matrixValues));
+
+        if (!params.fromMatrix
+            && (!params.type || !params.reference || !params.supplier
+            || !params.supplier_reference || !params.label || !params.quantity)) {
+            this.toastService
+                .presentToast('Veuillez scanner un code-barre ou saisir un type, une référence, ' +
+                    'un fournisseur, une référence fournisseur, un label et une quantité pour l\'article.')
+        } else {
+            this.loadingService.presentLoadingWhile({
+                event: () => {
+                    return this.apiService.requestApi(ApiService.CREATE_ARTICLE, {
+                        params
+                    })
                 }
+            }).subscribe((response) => {
+                this.toastService.presentToast(response.message).subscribe(() => {
+                    if (response.success) {
+                        this.navService.pop();
+                    }
+                })
             })
-        })
+        }
     }
 
     public scanMatrix() {

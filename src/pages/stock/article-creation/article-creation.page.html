@@ -17,7 +17,7 @@
     </div>
 
     <div class="page-footer persisted-page-footer">
-        <wii-barcode-scanner *ngIf="!creation" #footerScannerComponent
+        <wii-barcode-scanner #footerScannerComponent
                              [mode]="scannerModeManual"
                              (add)="scan($event[0])">
         </wii-barcode-scanner>
