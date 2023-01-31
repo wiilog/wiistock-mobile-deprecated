@@ -42,4 +42,6 @@ export type TableName = 'emplacement'
                       | 'dispatch_type'
                       | 'user'
                       | 'reference'
-                      | 'project';
+                      | 'project'
+                      | 'inventory_mission'
+                      | 'inventory_location_zone';

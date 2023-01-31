@@ -614,7 +614,7 @@ export class SqliteService {
     }
 
     public importArticlesInventaire(data): Observable<any> {
-        let articlesInventaire = data['inventoryMission'];
+        let articlesInventaire = data['articlesInventaire'];
         return this.deleteBy('article_inventaire')
             .pipe(
                 flatMap(() => (
@@ -647,6 +647,58 @@ export class SqliteService {
                             logistic_unit_code,
                             logistic_unit_id,
                             logistic_unit_nature,
+                        })))
+                        : of(undefined)
+                ))
+            );
+    }
+
+    public importInventoryMission(data): Observable<any> {
+        let inventoryMission = data['inventoryMission'];
+        return this.deleteBy('inventory_mission')
+            .pipe(
+                flatMap(() => (
+                    (inventoryMission && inventoryMission.length > 0)
+                        ? this.insert('inventory_mission', inventoryMission.map(({
+                                                                                        id,
+                                                                                        type,
+                                                                                        mission_start,
+                                                                                        mission_end,
+                                                                                        mission_name,
+                                                                                    }) => ({
+                            id,
+                            mission_start,
+                            mission_end,
+                            mission_name,
+                            type,
+                        })))
+                        : of(undefined)
+                ))
+            );
+    }
+
+    public importInventoryLocationZone(data): Observable<any> {
+        let inventoryLocationZone = data['inventoryLocationZone'];
+        return this.deleteBy('inventory_location_zone')
+            .pipe(
+                flatMap(() => (
+                    (inventoryLocationZone && inventoryLocationZone.length > 0)
+                        ? this.insert('inventory_location_zone', inventoryLocationZone.map(({
+                                                                                     id,
+                                                                                     location_id,
+                                                                                     location_label,
+                                                                                     mission_id,
+                                                                                     zone_id,
+                                                                                     zone_label,
+                                                                                     done,
+                                                                                 }) => ({
+                            id,
+                            location_id,
+                            location_label,
+                            mission_id,
+                            zone_id,
+                            zone_label,
+                            done,
                         })))
                         : of(undefined)
                 ))
@@ -739,6 +791,8 @@ export class SqliteService {
             flatMap(() => this.importPreparations(data).pipe(tap(() => {console.log('--- > importPreparations')}))),
             flatMap(() => this.importLivraisons(data).pipe(tap(() => {console.log('--- > importLivraisons')}))),
             flatMap(() => this.importArticlesInventaire(data).pipe(tap(() => {console.log('--- > importArticlesInventaire')}))),
+            flatMap(() => this.importInventoryMission(data).pipe(tap(() => {console.log('--- > importInventoryMission')}))),
+            flatMap(() => this.importInventoryLocationZone(data).pipe(tap(() => {console.log('--- > importInventoryLocationsZone')}))),
             flatMap(() => this.importHandlings(data).pipe(tap(() => {console.log('--- > importHandlings')}))),
             flatMap(() => this.importCollectes(data).pipe(tap(() => {console.log('--- > importCollectes')}))),
             flatMap(() => this.importMouvementTraca(data).pipe(tap(() => {console.log('--- > importMouvementTraca')}))),
