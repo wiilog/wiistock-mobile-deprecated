@@ -5,11 +5,12 @@
   "homepage": "https://ionicframework.com/",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "lint": "ng lint",
-    "prod": "ng build --configuration production",
+    "start": "yarn ng serve",
+    "lint": "yarn ng lint",
+    "prod": "yarn ng build --configuration production",
     "sync": "yarn cordova-res android --skip-config --copy && yarn capacitor sync",
-    "watch": "ng build && yarn sync && yarn ionic capacitor run android --livereload --external"
+    "build": "yarn ng build && yarn sync",
+    "watch": "yarn ng build && yarn sync && yarn ionic capacitor run android --livereload --external"
   },
   "private": true,
   "dependencies": {

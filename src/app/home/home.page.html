@@ -1,20 +1,44 @@
 <ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Blank
-    </ion-title>
-  </ion-toolbar>
+    <ion-toolbar>
+        <ion-title>
+            Blank
+        </ion-title>
+    </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
-    </ion-toolbar>
-  </ion-header>
+    <ion-header collapse="condense">
+        <ion-toolbar>
+            <ion-title size="large">Blank</ion-title>
+        </ion-toolbar>
+    </ion-header>
 
-  <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
-  </div>
+    <div id="container">
+        <strong>Ready to create an app?</strong>
+        <p>Start with Ionic <a target="_blank" rel="noopener noreferrer"
+                               href="https://ionicframework.com/docs/components">UI Components</a></p>
+
+        <ion-button (click)="onConnectClicked()">
+            Connecter le scanner
+        </ion-button>
+        <ion-button (click)="onConfigureClicked()">
+            Configurer le scanner
+        </ion-button>
+        <ion-button (click)="onReaderInfo()">
+            Info
+        </ion-button>
+        <ion-button (click)="onScanStartClicked()"
+                    *ngIf="!scanStarted"
+                    color="success">
+            Start
+        </ion-button>
+        <ion-button (click)="onScanStoppedClicked()"
+                    *ngIf="scanStarted"
+                    color="danger">
+            Stop
+        </ion-button>
+        <ion-button (click)="onDisconnectClicked()">
+            Déconnecter le scanner
+        </ion-button>
+    </div>
 </ion-content>
