@@ -54,7 +54,6 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
 
     public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_MANUAL;
     public loading: boolean = false;
-    public defaultLocation: string = '';
     public rfidTag: string = '';
     public headerConfig?: {
         leftIcon: IconConfig;
@@ -65,6 +64,16 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
 
     public reference: number;
     public supplier: number;
+
+    public defaultValues: {
+        location: string;
+        type: string;
+        reference: string;
+        label: string;
+        quantity: string;
+        supplier: string;
+        supplierReference: string;
+    };
 
     public constructor(private networkService: NetworkService,
                        private apiService: ApiService,
@@ -88,19 +97,26 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
         this.loading = true;
         this.loadingService.presentLoadingWhile({
             event: () => {
-                return this.apiService
-                    .requestApi(ApiService.DEFAULT_LOCATION_ARTICLE_CREATION)
+                return this.apiService.requestApi(ApiService.DEFAULT_ARTICLE_VALUES)
             }
-        }).subscribe(({location}) => {
-            if (location) {
-                this.defaultLocation = location;
+        }).subscribe(({defaultValues}) => {
+            console.log(defaultValues);
+            this.defaultValues = defaultValues;
+
+            if (this.defaultValues.supplier && this.defaultValues.reference) {
+                this.reference = Number(this.defaultValues.reference);
+                this.supplier = Number(this.defaultValues.supplier);
+                this.cleanAndImportSupplierReferences();
+            }
+
+            if (defaultValues.location) {
                 this.headerConfig = {
                     leftIcon: {
                         name: 'transfer.svg',
                         color: 'tertiary'
                     },
                     title: `Balayer étiquette RFID`,
-                    subtitle: `Emplacement : ${this.defaultLocation}`
+                    subtitle: `Emplacement : ${this.defaultValues.location}`
                 }
                 this.loading = false;
             } else {
@@ -110,7 +126,9 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
     }
 
     public ionViewWillLeave(): void {
-        this.footerScannerComponent.unsubscribeZebraScan();
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.unsubscribeZebraScan();
+        }
     }
 
     wiiCanLeave(): boolean | Observable<boolean> {
@@ -131,11 +149,10 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 this.toastService.presentToast('Article existant.');
                 this.creation = false;
                 this.bodyConfig = [];
-            } else if (this.defaultLocation) {
+            } else if (this.defaultValues.location) {
                 this.creation = true;
                 this.rfidTag = value;
                 this.initForm();
-                console.log('Create');
             } else {
                 this.toastService.presentToast('Aucun emplacement par défaut paramétré.');
             }
@@ -146,13 +163,14 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
 
     public initForm() {
         const values = this.formPanelComponent ? this.formPanelComponent.values : null;
+        console.log(this.defaultValues);
         this.bodyConfig = [
             {
                 item: FormPanelSelectComponent,
                 config: {
                     label: 'Type',
                     name: 'type',
-                    value: values ? values.type : null,
+                    value: values ? values.type : (this.defaultValues.type || null),
                     inputConfig: {
                         searchType: SelectItemTypeEnum.TYPE,
                         requestParams: [
@@ -166,7 +184,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 config: {
                     label: 'Référence',
                     name: 'reference',
-                    value: values ? values.reference : null,
+                    value: values ? values.reference : (this.defaultValues.reference || null),
                     inputConfig: {
                         searchType: SelectItemTypeEnum.REFERENCE_ARTICLE,
                         onChange: (reference) => {
@@ -183,7 +201,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 config: {
                     label: 'Fournisseur',
                     name: 'supplier',
-                    value: values ? values.supplier : null,
+                    value: values ? values.supplier : (this.defaultValues.supplier || null),
                     inputConfig: {
                         searchType: SelectItemTypeEnum.SUPPLIER,
                         onChange: (supplier) => {
@@ -200,7 +218,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 config: {
                     label: 'Référence fournisseur',
                     name: 'supplier_reference',
-                    value: values ? values.supplier_reference : null,
+                    value: values ? values.supplier_reference : (this.defaultValues.supplierReference || null),
                     inputConfig: {
                         searchType: SelectItemTypeEnum.SUPPLIER_REFERENCE,
                         disabled: !this.supplier || !this.reference
@@ -212,6 +230,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 config: {
                     label: 'Libellé',
                     name: 'label',
+                    value: values ? values.label : (this.defaultValues.label || null),
                     inputConfig: {
                         type: 'text'
                     },
@@ -222,6 +241,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 config: {
                     label: 'Quantité',
                     name: 'quantity',
+                    value: values ? values.quantity : (this.defaultValues.quantity || null),
                     inputConfig: {
                         type: 'number'
                     },
@@ -232,6 +252,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 config: {
                     label: 'Prix unitaire',
                     name: 'price',
+                    value: values ? values.quantity : (this.defaultValues.quantity || null),
                     inputConfig: {
                         type: 'number'
                     },
@@ -242,6 +263,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 config: {
                     label: 'Date de péremption',
                     name: 'expiryDate',
+                    value: values ? values.expiryDate : null,
                     inputConfig: {
                         mode: FormPanelCalendarMode.DATE
                     },
@@ -251,6 +273,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 item: FormPanelInputComponent,
                 config: {
                     label: 'Numéro de lot',
+                    value: values ? values.batch : null,
                     name: 'batch',
                     inputConfig: {
                         type: 'text',
@@ -261,6 +284,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 item: FormPanelInputComponent,
                 config: {
                     label: 'Zone de destination',
+                    value: values ? values.destination : null,
                     name: 'destination',
                     inputConfig: {
                         type: 'text',
@@ -271,6 +295,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 item: FormPanelInputComponent,
                 config: {
                     label: 'Numéro de commande',
+                    value: values ? values.commandNumber : null,
                     name: 'commandNumber',
                     inputConfig: {
                         type: 'text',
@@ -281,6 +306,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 item: FormPanelInputComponent,
                 config: {
                     label: 'Ligne bon de livraison',
+                    value: values ? values.deliveryLine : null,
                     name: 'deliveryLine',
                     inputConfig: {
                         type: 'text',
@@ -291,6 +317,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 item: FormPanelCalendarComponent,
                 config: {
                     label: 'Date de fabrication',
+                    value: values ? values.buildDate : null,
                     name: 'buildDate',
                     inputConfig: {
                         mode: FormPanelCalendarMode.DATE,
@@ -301,6 +328,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 item: FormPanelInputComponent,
                 config: {
                     label: 'Pays d\'origine',
+                    value: values ? values.country : null,
                     name: 'country',
                     inputConfig: {
                         type: 'text',
@@ -311,6 +339,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 item: FormPanelCalendarComponent,
                 config: {
                     label: 'Date de production',
+                    value: values ? values.productionDate : null,
                     name: 'productionDate',
                     inputConfig: {
                         mode: FormPanelCalendarMode.DATE,
@@ -321,6 +350,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 item: FormPanelTextareaComponent,
                 config: {
                     label: 'Commentaire',
+                    value: values ? values.comment : null,
                     name: 'comment',
                     inputConfig: {
                         type: 'text',
@@ -358,7 +388,8 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
             event: () => {
                 return this.apiService.requestApi(ApiService.CREATE_ARTICLE, {
                     params: Object.assign({
-                        rfid: this.rfidTag
+                        rfid: this.rfidTag,
+                        location: this.defaultValues.location
                     }, this.formPanelComponent.values)
                 })
             }
