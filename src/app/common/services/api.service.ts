@@ -76,6 +76,7 @@ export class ApiService {
     public static readonly DISPATCH_VALIDATE = {method: POST, service: '/dispatch-validate'};
     public static readonly DEFAULT_LOCATION_ARTICLE_CREATION = {method: GET, service: '/default-article-location'};
     public static readonly GET_ARTICLE_BY_RFID_TAG = {method: GET, service: '/article-by-rfid-tag/{rfid}'};
+    public static readonly CREATE_ARTICLE = {method: POST, service: '/create-article'};
     public static readonly GET_SUPPLIER_REF_BY_REF_AND_SUPPLIER = {method: GET, service: '/supplier_reference/{ref}/{supplier}'};
 
     private static readonly DEFAULT_HEADERS = {

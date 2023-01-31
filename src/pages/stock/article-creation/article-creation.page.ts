@@ -55,6 +55,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
     public readonly scannerModeManual: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_MANUAL;
     public loading: boolean = false;
     public defaultLocation: string = '';
+    public rfidTag: string = '';
     public headerConfig?: {
         leftIcon: IconConfig;
         title: string;
@@ -132,6 +133,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 this.bodyConfig = [];
             } else if (this.defaultLocation) {
                 this.creation = true;
+                this.rfidTag = value;
                 this.initForm();
                 console.log('Create');
             } else {
@@ -322,6 +324,7 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                     name: 'comment',
                     inputConfig: {
                         type: 'text',
+                        maxLength: '512',
                     },
                 }
             },
@@ -351,7 +354,21 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
     }
 
     public validate() {
-        console.log('validate');
+        this.loadingService.presentLoadingWhile({
+            event: () => {
+                return this.apiService.requestApi(ApiService.CREATE_ARTICLE, {
+                    params: Object.assign({
+                        rfid: this.rfidTag
+                    }, this.formPanelComponent.values)
+                })
+            }
+        }).subscribe((response) => {
+            this.toastService.presentToast(response.message).subscribe(() => {
+                if (response.success) {
+                    //this.navService.pop();
+                }
+            })
+        })
     }
 
     public scanMatrix() {

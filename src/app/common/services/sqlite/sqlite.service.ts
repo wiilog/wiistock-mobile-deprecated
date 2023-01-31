@@ -463,7 +463,6 @@ export class SqliteService {
     }
 
     public importSupplierReferences(data): Observable<void> {
-        console.log(data);
         return this.deleteBy('supplier_reference').pipe(
             flatMap(() => (
                 data.length > 0
