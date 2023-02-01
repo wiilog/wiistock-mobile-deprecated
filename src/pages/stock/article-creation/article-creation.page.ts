@@ -411,14 +411,14 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
         console.log('RFID')
     }
 
-    public validate(matrixValues) {
+    public validate(matrixValues?: any) {
         const params = Object.assign({
             rfidTag: this.rfidTag,
             location: this.defaultValues.location,
             ...(matrixValues ? {
                 fromMatrix: true
             } : {})
-        }, Object.assign(this.formPanelComponent.values, matrixValues));
+        }, this.formPanelComponent.values, matrixValues || {});
 
         if (!params.fromMatrix
             && (!params.type || !params.reference || !params.supplier
