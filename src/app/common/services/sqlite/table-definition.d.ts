@@ -46,4 +46,6 @@ export type TableName = 'emplacement'
                       | 'reference_article'
                       | 'user'
                       | 'reference'
-                      | 'project';
+                      | 'project'
+                      | 'inventory_mission'
+                      | 'inventory_location_zone';

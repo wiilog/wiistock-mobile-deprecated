@@ -418,6 +418,11 @@ const routes: Routes = [
         loadChildren: () => import('@pages/prise-depose/prise-ul-details/prise-ul-details.module').then(m => m.PriseUlDetailsPageModule)
     },
     {
+        path: NavPathEnum.INVENTORY_MISSION_ZONES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/inventory/inventory-mission-zones/inventory-mission-zones.module').then(m => m.InventoryMissionZonesPageModule)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'

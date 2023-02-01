@@ -536,4 +536,26 @@ export const TablesDefinitions: Array<TableDefinition> = [
             code: 'VARCHAR(255)',
         },
     },
+    {
+        name: 'inventory_mission',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            mission_start: 'VARCHAR(255)',
+            mission_end: 'VARCHAR(255)',
+            mission_name: 'VARCHAR(255)',
+            type: 'VARCHAR(255)',
+        }
+    },
+    {
+        name: 'inventory_location_zone',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            location_id: 'INTEGER',
+            location_label: 'VARCHAR(255)',
+            mission_id: 'INTEGER',
+            zone_id: 'INTEGER',
+            zone_label: 'VARCHAR(255)',
+            done: 'INTEGER',
+        }
+    }
 ];

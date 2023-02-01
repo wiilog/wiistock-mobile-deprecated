@@ -19,6 +19,7 @@ import {ArticleInventaire} from '@entities/article-inventaire';
 import {ListPanelItemConfig} from '@app/common/components/panel/model/list-panel/list-panel-item-config';
 import * as moment from 'moment';
 import {Anomalie} from '@entities/anomalie';
+import {InventoryMission} from "@entities/inventory_mission";
 
 enum PageMode {
     LOCATIONS = 1,
@@ -126,12 +127,18 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
         this.navigateToArticles(label, missionId);
     }
 
-    public selectMission(missionId: number): void {
+    public selectMission(missionId: number, type?: string): void {
         this.reloadPage();
-        this.navService.push(NavPathEnum.INVENTORY_LOCATIONS_MISSIONS, {
-            missionFilter: missionId,
-            currentPageMode: PageMode.LOCATIONS,
-        });
+        if(type === 'location'){
+            this.navService.push(NavPathEnum.INVENTORY_MISSION_ZONES, {
+                missionId
+            });
+        } else if(type === 'article'){
+            this.navService.push(NavPathEnum.INVENTORY_LOCATIONS_MISSIONS, {
+                missionFilter: missionId,
+                currentPageMode: PageMode.LOCATIONS,
+            });
+        }
     }
 
     public navigateToAnomalies(): void {
@@ -171,6 +178,7 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
 
         zip(
             this.sqliteService.findBy(this.anomalyMode ? 'anomalie_inventaire' : 'article_inventaire'),
+            this.sqliteService.findBy('inventory_mission'),
             this.sqliteService.findBy(
                 'anomalie_inventaire',
                 this.missionFilter ? [`mission_id = ${this.missionFilter}`] : []
@@ -180,7 +188,7 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                 : of(undefined)
         )
             .subscribe(
-                ([inventoryArticles, anomalies]: [Array<ArticleInventaire|Anomalie>, Array<Anomalie>, any]) => {
+                ([inventoryArticles, inventoryMissions, anomalies]: [Array<ArticleInventaire|Anomalie>, Array<InventoryMission>, Array<Anomalie>, any]) => {
                     this.hasAnomalies = anomalies.length > 0;
                     if (this.currentPageMode === PageMode.LOCATIONS) {
                         this.missionsListItemBody = [];
@@ -217,10 +225,8 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                     }
                     else { // if (this.currentPageMode === PageMode.MISSIONS) {
                         this.locationsListItemBody = [];
-                        this.missionsListItemBody = inventoryArticles
-                            .filter(({mission_id, done}, index) => inventoryArticles.findIndex(({mission_id: mission_id2}) => (mission_id2 === mission_id)) === index && !done)
-                            .map(({mission_id, mission_name, mission_start, mission_end, type}) => {
-
+                        this.missionsListItemBody = inventoryMissions
+                            .map(({id, mission_name, mission_start, mission_end, type}) => {
                                 const logisticUnits = inventoryArticles
                                     .filter((article) => article.logistic_unit_code)
                                     .map((article) => article.logistic_unit_code)
@@ -229,7 +235,7 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                                 const nbLogisticUnits = logisticUnits.length;
 
                                 const notUniqueReferences = inventoryArticles
-                                    .filter(({mission_id: missionIdArt, is_ref}) => missionIdArt === mission_id && is_ref === 0)
+                                    .filter(({mission_id: missionIdArt, is_ref}) => missionIdArt === id && is_ref === 0)
                                     .map(line => line.reference);
 
                                 const nbRefFromArtInMission = notUniqueReferences
@@ -237,31 +243,33 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
                                     .length;
 
                                 const nbRefInMission = nbRefFromArtInMission + inventoryArticles
-                                    .filter(({mission_id: missionIdArt, is_ref}) => missionIdArt === mission_id && is_ref === 1)
+                                    .filter(({mission_id: missionIdArt, is_ref}) => missionIdArt === id && is_ref === 1)
                                     .length;
 
                                 const nbArtInMission = inventoryArticles
-                                    .filter(({mission_id: missionIdArt, is_ref}) => missionIdArt === mission_id && is_ref === 0)
+                                    .filter(({mission_id: missionIdArt, is_ref}) => missionIdArt === id && is_ref === 0)
                                     .length;
 
                                 return {
                                     infos: {
                                         name_mission: {value: mission_name},
                                         date: {value: `Du ${moment(mission_start).format('DD/MM/YYYY')} au ${moment(mission_end).format('DD/MM/YYYY')}`},
-                                        details: {
-                                            value: `
+                                        ...(type === 'article' ? {
+                                            details: {
+                                                value: `
                                                 ${nbLogisticUnits} unité(s) logistique(s),
                                                 ${nbRefInMission} référence${nbRefInMission > 1 ? 's' : ''},
                                                 ${nbArtInMission} article${nbArtInMission > 1 ? 's' : ''},
                                             `
-                                        }
+                                            }
+                                        } : {})
                                     },
                                     rightIcon: {
                                         color: 'primary',
                                         name: 'arrow-right.svg',
                                     },
                                     pressAction: () => {
-                                        this.selectMission(mission_id);
+                                        this.selectMission(id, type);
                                     },
                                     badge: {
                                         label: type,

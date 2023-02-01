@@ -27,6 +27,7 @@ export enum NavPathEnum {
     INVENTORY_ARTICLES = 'inventory-articles',
     INVENTORY_LOCATIONS_ANOMALIES = 'inventory-locations-anomalies',
     INVENTORY_LOCATIONS_MISSIONS = 'inventory-locations-missions',
+    INVENTORY_MISSION_ZONES = 'inventory-mission-zones',
     INVENTORY_LOCATIONS = 'inventory-locations',
     ASSOCIATION = 'association',
     ARTICLE_CREATION = 'article-creation',
