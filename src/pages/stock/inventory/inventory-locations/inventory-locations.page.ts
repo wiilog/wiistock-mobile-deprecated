@@ -129,7 +129,7 @@ export class InventoryLocationsPage extends PageComponent implements CanLeave {
 
     public selectMission(missionId: number, type?: string): void {
         this.reloadPage();
-        if(type === 'référence sur emplacement'){
+        if(type === 'location'){
             this.navService.push(NavPathEnum.INVENTORY_MISSION_ZONES, {
                 missionId
             });
