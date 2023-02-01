@@ -114,7 +114,6 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 return this.apiService.requestApi(ApiService.DEFAULT_ARTICLE_VALUES)
             }
         }).subscribe(({defaultValues}) => {
-            console.log(defaultValues);
             this.defaultValues = defaultValues;
 
             if (this.defaultValues.supplier && this.defaultValues.reference) {
@@ -150,7 +149,6 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
     }
 
     public scan(value: string) {
-        console.log(value);
         if (this.creation) {
             const formattedValue = value.replace(/~~/g, '~');
             const matrixParts = formattedValue.split('~');
@@ -190,13 +188,11 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
                 }
                 this.loading = false;
             });
-            console.log(value);
         }
     }
 
     public initForm() {
         const values = this.formPanelComponent ? this.formPanelComponent.values : null;
-        console.log(this.defaultValues);
         this.bodyConfig = [
             {
                 item: FormPanelSelectComponent,
@@ -395,7 +391,6 @@ export class ArticleCreationPage extends PageComponent implements CanLeave {
     }
 
     public cleanAndImportSupplierReferences() {
-        console.log(this.supplier, this.reference);
         this.loadingService.presentLoadingWhile({
             event: () => {
                 return this.apiService.requestApi(ApiService.GET_SUPPLIER_REF_BY_REF_AND_SUPPLIER, {
