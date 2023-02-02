@@ -12,6 +12,7 @@ import {SelectItemComponent} from '@app/common/components/select-item/select-ite
 import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel/list-panel-item-config";
 import {IconColor} from "@app/common/components/icon/icon-color";
 import {InventoryLocationMission} from "@entities/inventory_location_mission";
+import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
 
 
 @Component({
@@ -78,6 +79,11 @@ export class InventoryMissionZonesPage extends PageComponent implements CanLeave
                     infos: {
                         label: {value: index},
                         details: {value: arrayResult[index]['counter'] + ' emplacements à inventorier'}
+                    },
+                    pressAction: () => {
+                        this.navService.push(NavPathEnum.INVENTORY_MISSION_ZONE_CONTROLE, {
+                            zoneLabel: index
+                        });
                     },
                     ...(arrayResult[index]['done'] ? {
                         rightIcon: {
