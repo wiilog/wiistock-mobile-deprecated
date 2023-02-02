@@ -14,6 +14,7 @@ import {StorageService} from '@app/common/services/storage/storage.service';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {map} from 'rxjs/operators';
 import {NetworkService} from '@app/common/services/network.service';
+import {LoadingService} from "@app/common/services/loading.service";
 
 @Component({
     selector: 'wii-stock-menu',
@@ -22,9 +23,9 @@ import {NetworkService} from '@app/common/services/network.service';
 })
 export class StockMenuPage extends PageComponent {
     public readonly ColumnNumber = ColumnNumber;
-    public statsSlidersData: Array<StatsSlidersData|[StatsSlidersData,StatsSlidersData,StatsSlidersData,StatsSlidersData]>;
+    public statsSlidersData: Array<StatsSlidersData | [StatsSlidersData, StatsSlidersData, StatsSlidersData, StatsSlidersData]>;
 
-    public readonly menuConfig: Array<MenuConfig>;
+    public menuConfig: Array<MenuConfig>;
 
     public messageLoading: string;
     public loading: boolean;
@@ -33,7 +34,6 @@ export class StockMenuPage extends PageComponent {
     private synchronisationSubscription: Subscription;
     private navigationSubscription: Subscription;
     private deposeAlreadyNavigate: boolean;
-    private hasRightDisplayCreateArticleButton?: boolean;
 
     public constructor(private platform: Platform,
                        private mainHeaderService: MainHeaderService,
@@ -41,91 +41,92 @@ export class StockMenuPage extends PageComponent {
                        private networkService: NetworkService,
                        private toastService: ToastService,
                        private storageService: StorageService,
+                       private loadingService: LoadingService,
                        private sqliteService: SqliteService,
                        navService: NavService) {
         super(navService);
         this.avoidSync = true;
         const self = this;
-        this.menuConfig = [
-            {
-                icon: 'preparation.svg',
-                label: 'Préparation',
-                action: () => {
-                    self.navService.push(NavPathEnum.PREPARATION_MENU);
-                }
-            },
-            {
-                icon: 'delivery.svg',
-                label: 'Livraison',
-                action: () => {
-                    self.navService.push(NavPathEnum.LIVRAISON_MENU);
-                }
-            },
-            {
-                icon: 'manual-delivery.svg',
-                label: 'Livraison manuelle',
-                action: () => {
-                    self.navService.push(NavPathEnum.MANUAL_DELIVERY);
-                }
-            },
-            {
-                icon: 'collect.svg',
-                label: 'Collecte',
-                action: () => {
-                    this.navService.push(NavPathEnum.COLLECTE_MENU, {
-                        avoidSync: () => {
-                            self.setAvoidSync(true);
-                        },
-                        goToDrop: () => {
-                            self.goToDrop();
-                        }
-                    });
-                }
-            },
-            {
-                icon: 'stock-transfer.svg',
-                label: 'Transfert',
-                action: () => {
-                    this.navService.push(NavPathEnum.TRANSFER_LIST);
-                }
-            },
-            {
-                icon: 'manual-transfer.svg',
-                label: 'Transfert manuel',
-                action: () => {
-                    this.navigateToPriseDeposePage()
-                }
-            },
-            {
-                icon: 'inventory.svg',
-                label: 'Inventaire',
-                action: () => {
-                    self.navService.push(NavPathEnum.INVENTORY_LOCATIONS);
-                }
-            },
-            {
-                icon: 'association.svg',
-                label: 'Association Articles - UL',
-                action: () => {
-                    self.navService.push(NavPathEnum.ASSOCIATION);
-                }
-            },
-        ];
-        this.storageService.getRight(StorageKeyEnum.RIGHT_CREATE_ARTICLE_FROM_NOMADE).subscribe((hasRightDisplayCreateArticleButton) => {
-            this.hasRightDisplayCreateArticleButton = hasRightDisplayCreateArticleButton;
-            if(this.hasRightDisplayCreateArticleButton){
-                this.menuConfig.push({
-                    icon: 'association.svg',
-                    label: 'Créer article',
-                    action: () => {
-                        self.navService.push(NavPathEnum.ARTICLE_CREATION);
-                    }
-                });
+        this.loadingService.presentLoadingWhile({
+            event: () => {
+                return this.storageService.getRight(StorageKeyEnum.RIGHT_CREATE_ARTICLE_FROM_NOMADE)
             }
+        }).subscribe((hasRightDisplayCreateArticleButton) => {
+            self.menuConfig = [
+                {
+                    icon: 'preparation.svg',
+                    label: 'Préparation',
+                    action: () => {
+                        self.navService.push(NavPathEnum.PREPARATION_MENU);
+                    }
+                },
+                {
+                    icon: 'delivery.svg',
+                    label: 'Livraison',
+                    action: () => {
+                        self.navService.push(NavPathEnum.LIVRAISON_MENU);
+                    }
+                },
+                {
+                    icon: 'manual-delivery.svg',
+                    label: 'Livraison manuelle',
+                    action: () => {
+                        self.navService.push(NavPathEnum.MANUAL_DELIVERY);
+                    }
+                },
+                {
+                    icon: 'collect.svg',
+                    label: 'Collecte',
+                    action: () => {
+                        this.navService.push(NavPathEnum.COLLECTE_MENU, {
+                            avoidSync: () => {
+                                self.setAvoidSync(true);
+                            },
+                            goToDrop: () => {
+                                self.goToDrop();
+                            }
+                        });
+                    }
+                },
+                {
+                    icon: 'stock-transfer.svg',
+                    label: 'Transfert',
+                    action: () => {
+                        this.navService.push(NavPathEnum.TRANSFER_LIST);
+                    }
+                },
+                {
+                    icon: 'manual-transfer.svg',
+                    label: 'Transfert manuel',
+                    action: () => {
+                        this.navigateToPriseDeposePage()
+                    }
+                },
+                {
+                    icon: 'inventory.svg',
+                    label: 'Inventaire',
+                    action: () => {
+                        self.navService.push(NavPathEnum.INVENTORY_LOCATIONS);
+                    }
+                },
+                {
+                    icon: 'association.svg',
+                    label: 'Association Articles - UL',
+                    action: () => {
+                        self.navService.push(NavPathEnum.ASSOCIATION);
+                    }
+                },
+                ...(hasRightDisplayCreateArticleButton
+                    ? [{
+                        icon: 'association.svg',
+                        label: 'Créer article',
+                        action: () => {
+                            self.navService.push(NavPathEnum.ARTICLE_CREATION);
+                        }
+                    }]
+                    : [])
+            ];
         });
-
-
-
     }
 
     public ionViewWillEnter(): void {
@@ -139,8 +140,7 @@ export class StockMenuPage extends PageComponent {
 
         if (!this.avoidSync) {
             this.synchronise();
-        }
-        else {
+        } else {
             this.setAvoidSync(false);
             this.refreshSlidersData();
         }
@@ -184,8 +184,7 @@ export class StockMenuPage extends PageComponent {
                     }
                     throw error;
                 });
-        }
-        else {
+        } else {
             this.loading = false;
             this.refreshSlidersData();
             this.toastService.presentToast('Veuillez vous connecter à internet afin de synchroniser vos données');
@@ -236,7 +235,7 @@ export class StockMenuPage extends PageComponent {
         }
     }
 
-    private createSlidersData(transfers, preparations, collects, deliveries): Array<StatsSlidersData|[StatsSlidersData,StatsSlidersData,StatsSlidersData,StatsSlidersData]> {
+    private createSlidersData(transfers, preparations, collects, deliveries): Array<StatsSlidersData | [StatsSlidersData, StatsSlidersData, StatsSlidersData, StatsSlidersData]> {
         const sToTreat = {
             transfers: transfers.toTreat > 1 ? 's' : '',
             preparations: preparations.toTreat > 1 ? 's' : '',
