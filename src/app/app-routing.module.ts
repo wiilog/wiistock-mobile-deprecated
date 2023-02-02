@@ -423,6 +423,11 @@ const routes: Routes = [
         loadChildren: () => import('@pages/stock/inventory/inventory-mission-zones/inventory-mission-zones.module').then(m => m.InventoryMissionZonesPageModule)
     },
     {
+        path: NavPathEnum.INVENTORY_MISSION_ZONE_CONTROLE,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/stock/inventory/inventory-mission-zone-controle/inventory-mission-zone-controle.module').then(m => m.InventoryMissionZoneControlePageModule)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'

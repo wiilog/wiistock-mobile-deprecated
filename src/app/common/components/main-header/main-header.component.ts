@@ -171,6 +171,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
             {pagePath: NavPathEnum.TRANSPORT_ROUND_FINISH, label: 'Terminer tournée'},
             {pagePath: NavPathEnum.DISPATCH_GROUPED_SIGNATURE, label: 'Signature groupée'},
             {pagePath: NavPathEnum.DISPATCH_GROUPED_SIGNATURE_VALIDATE, label: 'Validation'},
+            {pagePath: NavPathEnum.INVENTORY_MISSION_ZONE_CONTROLE, label: 'Contrôle'},
             {
                 pagePath: NavPathEnum.TRANSPORT_COLLECT_NATURES,
                 label: 'Déposer colis',

@@ -22,6 +22,7 @@ export class InventoryMissionZoneControlePage extends PageComponent implements C
 
     public zoneLabel: string;
     public headerConfig?: {
+        leftIcon: IconConfig;
         rightIcon: IconConfig;
         title: string;
         subtitle?: string;
@@ -38,6 +39,21 @@ export class InventoryMissionZoneControlePage extends PageComponent implements C
 
     public ionViewWillEnter(): void {
         this.zoneLabel = this.currentNavParams.get('zoneLabel');
+        this.headerConfig = {
+            leftIcon: {
+                name: 'inventory.svg',
+            },
+            rightIcon: {
+                name: 'transfer.svg',
+                color: 'tertiary',
+                action: () => {
+                    console.log('PLAY');
+                }
+            },
+            title: this.zoneLabel,
+            subtitle: `0 objet scanné`
+        };
+        console.log(this.headerConfig);
         this.initZoneControleView();
     }
 
@@ -50,16 +66,6 @@ export class InventoryMissionZoneControlePage extends PageComponent implements C
     }
 
     public initZoneControleView() {
-        this.headerConfig = {
-            rightIcon: {
-                name: 'transfer.svg',
-                color: 'tertiary',
-                action: () => {
-                    console.log('PLAY');
-                }
-            },
-            title: this.zoneLabel,
-            subtitle: `0 objet scanné`
-        }
+
     }
 }
