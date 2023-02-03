@@ -31,6 +31,7 @@ export class InventoryMissionZonesPage extends PageComponent implements CanLeave
     public selectedMissionId?: number;
     public rfidTags: Array<string> = [];
     public zones: Array<number>;
+    public treated: boolean = false;
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
@@ -64,11 +65,15 @@ export class InventoryMissionZonesPage extends PageComponent implements CanLeave
                 'mission_id = ' + this.selectedMissionId
             ]),
         ).subscribe(([inventoryMissionZones]: [Array<InventoryLocationMission>]) => {
-            let arrayResult = inventoryMissionZones.reduce((acc, inventoryMissionZone: InventoryLocationMission) => {
+            this.treated = true;
+            const arrayResult = inventoryMissionZones.reduce((acc, inventoryMissionZone: InventoryLocationMission) => {
+                if (!Boolean(inventoryMissionZone.done)) {
+                    this.treated = false;
+                }
                 if(acc[inventoryMissionZone.zone_label]){
-                    acc[inventoryMissionZone.zone_label]['counter']++;
+                    acc[inventoryMissionZone.zone_label].counter++;
                     if(!Boolean(inventoryMissionZone.done)){
-                        acc[inventoryMissionZone.zone_label]['done'] = Boolean(inventoryMissionZone.done);
+                        acc[inventoryMissionZone.zone_label].done = Boolean(inventoryMissionZone.done);
                     }
                 } else {
                     this.zones.push(inventoryMissionZone.zone_id);

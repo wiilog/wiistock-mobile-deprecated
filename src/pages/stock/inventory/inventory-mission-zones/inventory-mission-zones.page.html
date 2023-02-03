@@ -10,6 +10,7 @@
     <div class="page-footer persisted-page-footer">
         <ion-button class="submit-button larger"
                     color="primary"
+                    *ngIf="treated"
                     size="large"
                     expand="full"
                     (click)="validate()">
