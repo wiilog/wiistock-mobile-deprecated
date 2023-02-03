@@ -35,7 +35,7 @@ export class InventoryMissionZoneControlePage extends PageComponent implements C
     public zoneId: number;
     public missionId: number;
     public rfidTags?: Array<string>;
-
+    public inputRfidTags: Array<string>;
     public headerConfig?: {
         leftIcon: IconConfig;
         rightIcon: IconConfig;
@@ -74,6 +74,7 @@ export class InventoryMissionZoneControlePage extends PageComponent implements C
         this.rfidTags = [];
         this.afterValidate = this.currentNavParams.get('afterValidate');
         this.zoneLabel = this.currentNavParams.get('zoneLabel');
+        this.inputRfidTags = this.currentNavParams.get('rfidTags');
         this.zoneId = this.currentNavParams.get('zoneId');
         this.missionId = this.currentNavParams.get('missionId');
         this.headerConfig = {
@@ -189,7 +190,10 @@ export class InventoryMissionZoneControlePage extends PageComponent implements C
         }).subscribe((response) => {
             if(response.success){
                 this.navService.pop().subscribe(() => {
-                    this.afterValidate(this.zoneId);
+                    this.afterValidate({
+                        zoneId: this.zoneId,
+                        tags: this.inputRfidTags
+                    });
                 });
             }
         });
@@ -198,6 +202,7 @@ export class InventoryMissionZoneControlePage extends PageComponent implements C
     public addManualRFID(rfidTag?: string){
         if(!this.rfidTags.includes(rfidTag)){
             this.rfidTags.push(rfidTag);
+            this.inputRfidTags.push(rfidTag);
         }
         this.loadingService.presentLoadingWhile({
             event: () => {

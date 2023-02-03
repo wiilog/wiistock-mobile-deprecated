@@ -13,7 +13,7 @@ import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel
 import {IconColor} from "@app/common/components/icon/icon-color";
 import {InventoryLocationMission} from "@entities/inventory_location_mission";
 import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
-import {flatMap} from "rxjs/operators";
+import {ApiService} from "@app/common/services/api.service";
 
 
 @Component({
@@ -29,9 +29,12 @@ export class InventoryMissionZonesPage extends PageComponent implements CanLeave
     public requestParams;
     public listZonesConfig?: Array<ListPanelItemConfig>;
     public selectedMissionId?: number;
+    public rfidTags: Array<string> = [];
+    public zones: Array<number>;
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
+                       private apiService: ApiService,
                        private localDataManager: LocalDataManagerService,
                        private mainHeaderService: MainHeaderService,
                        private toastService: ToastService,
@@ -42,6 +45,7 @@ export class InventoryMissionZonesPage extends PageComponent implements CanLeave
     public ionViewWillEnter(): void {
         this.selectedMissionId = this.currentNavParams.get('missionId');
         this.listZonesConfig = [];
+        this.zones = [];
         this.initZoneView();
     }
 
@@ -67,6 +71,7 @@ export class InventoryMissionZonesPage extends PageComponent implements CanLeave
                         acc[inventoryMissionZone.zone_label]['done'] = Boolean(inventoryMissionZone.done);
                     }
                 } else {
+                    this.zones.push(inventoryMissionZone.zone_id);
                     acc[inventoryMissionZone.zone_label] = {
                         zoneId: inventoryMissionZone.zone_id,
                         counter: 1,
@@ -87,8 +92,11 @@ export class InventoryMissionZonesPage extends PageComponent implements CanLeave
                             zoneLabel: index,
                             zoneId: arrayResult[index].zoneId,
                             missionId: this.selectedMissionId,
+                            rfidTags: this.rfidTags,
                             afterValidate: (data) => {
-                                this.refreshListConfig(data);
+                                console.log(data);
+                                this.rfidTags = data.tags;
+                                this.refreshListConfig(data.zoneId);
                             }
 
                         });
@@ -118,6 +126,24 @@ export class InventoryMissionZonesPage extends PageComponent implements CanLeave
             }]
         ).subscribe(() => {
             this.initZoneView();
+        });
+    }
+
+    public validate() {
+        console.log(this.rfidTags, this.zones, this.selectedMissionId);
+        this.loadingService.presentLoadingWhile({
+            message: 'Correction des quantités, cela peut prendre un certain temps...',
+            event: () => {
+                return this.apiService.requestApi(ApiService.FINISH_MISSION, {
+                    params: {
+                        tags: this.rfidTags,
+                        zones: this.zones,
+                        mission: this.selectedMissionId,
+                    }
+                })
+            }
+        }).subscribe((response) => {
+            this.navService.setRoot(NavPathEnum.MAIN_MENU);
         });
     }
 }
