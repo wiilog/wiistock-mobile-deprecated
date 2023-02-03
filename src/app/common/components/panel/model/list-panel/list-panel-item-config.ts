@@ -31,4 +31,8 @@ export interface ListPanelItemConfig {
         }>,
     },
     selected?: boolean;
+    textRight?: {
+        label: string;
+        size?: string;
+    };
 }

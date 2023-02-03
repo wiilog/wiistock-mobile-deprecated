@@ -57,6 +57,12 @@ export class ListPanelItemComponent {
     };
 
     @Input()
+    public textRight?: {
+        label?: string;
+        size?: string;
+    };
+
+    @Input()
     public pressAction?: (infos: {[name: string]: {label: string; value: string;};}) => void;
 
     @HostBinding('class')

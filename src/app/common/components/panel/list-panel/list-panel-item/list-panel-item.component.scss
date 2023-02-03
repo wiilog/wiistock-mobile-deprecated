@@ -64,6 +64,17 @@
                 width: 25px;
             }
         }
+
+        .list-element-text {
+            padding-left: .5rem;
+            display: flex;
+            .element-value {
+                word-break: break-word;
+                &.element-value-bold {
+                    font-weight: bold;
+                }
+            }
+        }
     }
 
     .list-element-disabled {

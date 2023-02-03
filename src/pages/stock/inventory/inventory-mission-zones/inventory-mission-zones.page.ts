@@ -13,6 +13,7 @@ import {ListPanelItemConfig} from "@app/common/components/panel/model/list-panel
 import {IconColor} from "@app/common/components/icon/icon-color";
 import {InventoryLocationMission} from "@entities/inventory_location_mission";
 import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
+import {flatMap} from "rxjs/operators";
 
 
 @Component({
@@ -67,6 +68,7 @@ export class InventoryMissionZonesPage extends PageComponent implements CanLeave
                     }
                 } else {
                     acc[inventoryMissionZone.zone_label] = {
+                        zoneId: inventoryMissionZone.zone_id,
                         counter: 1,
                         done: inventoryMissionZone.done
                     };
@@ -78,14 +80,20 @@ export class InventoryMissionZonesPage extends PageComponent implements CanLeave
                 return {
                     infos: {
                         label: {value: index},
-                        details: {value: arrayResult[index]['counter'] + ' emplacements à inventorier'}
+                        details: {value: arrayResult[index].counter + ' emplacements à inventorier'}
                     },
                     pressAction: () => {
                         this.navService.push(NavPathEnum.INVENTORY_MISSION_ZONE_CONTROLE, {
-                            zoneLabel: index
+                            zoneLabel: index,
+                            zoneId: arrayResult[index].zoneId,
+                            missionId: this.selectedMissionId,
+                            afterValidate: (data) => {
+                                this.refreshListConfig(data);
+                            }
+
                         });
                     },
-                    ...(arrayResult[index]['done'] ? {
+                    ...(arrayResult[index].done ? {
                         rightIcon: {
                             color: 'list-green' as IconColor,
                             name: 'check.svg',
@@ -93,6 +101,23 @@ export class InventoryMissionZonesPage extends PageComponent implements CanLeave
                     } : {})
                 }
             });
+        });
+    }
+
+    public refreshListConfig(zoneId?: number){
+        this.sqliteService.update(
+            'inventory_location_zone',
+            [{
+                values: {
+                    done: 1
+                },
+                where: [
+                    'mission_id = ' + this.selectedMissionId,
+                    'zone_id = ' + zoneId
+                ],
+            }]
+        ).subscribe(() => {
+            this.initZoneView();
         });
     }
 }

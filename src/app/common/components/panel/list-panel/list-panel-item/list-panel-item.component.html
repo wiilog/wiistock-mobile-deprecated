@@ -36,6 +36,14 @@
                 </span>
             </div>
         </div>
+        <div class="list-element-text"
+             *ngIf="textRight">
+            <span class="element-value"
+                  [class.element-value-bold]="!boldValues || boldValues.indexOf('textRight') > -1"
+                  [style.font-size]="textRight.size">
+                    {{ textRight.label }}
+            </span>
+        </div>
         <div class="list-element-icon"
              *ngIf="loading || rightIcon || rightIconBase64">
             <wii-icon *ngIf="rightIcon && !loading"
