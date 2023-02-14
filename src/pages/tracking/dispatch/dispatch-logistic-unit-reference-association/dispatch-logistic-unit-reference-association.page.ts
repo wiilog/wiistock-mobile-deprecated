@@ -184,6 +184,15 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                     }
                 },
                 {
+                    item: FormPanelToggleComponent,
+                    config: {
+                        label: 'ADR',
+                        name: 'adr',
+                        value: adr ? Boolean(adr) : null,
+                        inputConfig: {},
+                    }
+                },
+                {
                     item: FormPanelInputComponent,
                     config: {
                         label: 'Code fabriquant',
@@ -280,15 +289,6 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                         inputConfig: {
                             type: 'number',
                         },
-                    }
-                },
-                {
-                    item: FormPanelToggleComponent,
-                    config: {
-                        label: 'ADR',
-                        name: 'adr',
-                        value: adr ? Boolean(adr) : null,
-                        inputConfig: {},
                     }
                 },
                 {
