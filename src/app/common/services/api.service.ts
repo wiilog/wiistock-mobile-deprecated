@@ -69,6 +69,7 @@ export class ApiService {
     public static readonly DISPATCH_WAYBILL = {method: POST, service: '/waybill/{dispatch}'};
     public static readonly GET_REFERENCE = {method: GET, service: '/get-reference'};
     public static readonly GET_ASSOCIATED_DOCUMENT_TYPE_ELEMENTS = {method: GET, service: '/get-associated-document-type-elements'};
+    public static readonly GET_ASSOCIATED_REF = {method: GET, service: '/get-associated-ref-intels/{pack}/{dispatch}'};
     public static readonly DISPATCH_VALIDATE = {method: POST, service: '/dispatch-validate'};
 
     private static readonly DEFAULT_HEADERS = {

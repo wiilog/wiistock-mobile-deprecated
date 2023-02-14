@@ -30,6 +30,7 @@
                 color="primary"
                 size="large"
                 expand="full"
+                *ngIf="!viewMode"
                 (click)="validate()"
                 [disabled]="!edit && disableValidate">
         Valider

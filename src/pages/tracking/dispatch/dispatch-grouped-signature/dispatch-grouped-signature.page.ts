@@ -253,10 +253,11 @@ export class DispatchGroupedSignaturePage extends PageComponent {
                         }
                     } : {}),
                     action: () => {
-                        // this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-                        //     dispatchId: dispatch.id
-                        // });
-                        //TODO rediriger au détails au clic
+                        this.navService.push(NavPathEnum.DISPATCH_PACKS, {
+                            dispatchId: dispatch.id,
+                            fromCreate: true,
+                            viewMode: true
+                        });
                     }
                 };
             });

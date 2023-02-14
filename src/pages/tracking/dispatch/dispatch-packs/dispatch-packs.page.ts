@@ -63,6 +63,7 @@ export class DispatchPacksPage extends PageComponent {
 
     private dispatch: Dispatch;
     public fromCreate: boolean = false;
+    public viewMode: boolean = false;
     public ableToCreateWaybill: boolean = false;
     private dispatchPacks: Array<DispatchPack>;
 
@@ -200,6 +201,7 @@ export class DispatchPacksPage extends PageComponent {
     public ngOnInit() {
         super.ngOnInit();
         this.fromCreate = this.currentNavParams.get('fromCreate');
+        this.viewMode = this.currentNavParams.get('viewMode') || false;
         this.scannerMode = this.fromCreate ? BarcodeScannerModeEnum.WITH_MANUAL : BarcodeScannerModeEnum.INVISIBLE;
     }
 
@@ -370,9 +372,10 @@ export class DispatchPacksPage extends PageComponent {
                                     }).subscribe((reference) => {
                                         this.navService.push(NavPathEnum.DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION, {
                                             logisticUnit: pack.code,
-                                            dispatch: this.dispatch.id,
+                                            dispatch: this.dispatch,
                                             reference,
-                                            edit: true
+                                            edit: true,
+                                            viewMode: this.viewMode
                                         });
                                     });
                                 }
