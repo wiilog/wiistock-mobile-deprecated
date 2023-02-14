@@ -152,12 +152,9 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                         name: 'serialNumber',
                         value: serialNumber || null,
                         inputConfig: {
-                            required: true,
+                            required: false,
                             type: 'text',
                         },
-                        errors: {
-                            required: 'Vous devez renseigner un numéro de série.'
-                        }
                     }
                 },
                 {
