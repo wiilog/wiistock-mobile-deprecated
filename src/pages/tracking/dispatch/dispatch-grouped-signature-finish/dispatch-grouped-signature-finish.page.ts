@@ -134,7 +134,7 @@ export class DispatchGroupedSignatureFinishPage extends PageComponent {
                     value: '',
                     inputConfig: {
                         required: true,
-                        type: 'text',
+                        type: 'password',
                         disabled: false
                     },
                 }
