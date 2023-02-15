@@ -135,32 +135,11 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
     public validate() {
         if (this.selectedStatus) {
             const dispatchIds = this.dispatchs.map((dispatch: Dispatch) => dispatch.id);
-            this.loadingSubscription = this.loadingService.presentLoading()
-                .pipe(
-                    tap((loader) => {
-                        this.loadingElement = loader;
-                    }),
-                    flatMap(() =>
-                        this.sqliteService.update(
-                            'dispatch',
-                            [{
-                                values: {
-                                    statusId: this.selectedStatus.id,
-                                    statusLabel: this.selectedStatus.label,
-                                    partial: this.selectedStatus.state === 'partial' ? 1 : 0
-                                },
-                                where: [`id IN (${dispatchIds.join(',')})`],
-                            }]
-                        ),
-                    ),
-                )
-                .subscribe(() => {
-                    this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE_FINISH, {
-                        dispatches: this.dispatchs,
-                        status: this.selectedStatus,
-                        location: this.location
-                    });
-                })
+            this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE_FINISH, {
+                dispatches: this.dispatchs,
+                status: this.selectedStatus,
+                location: this.location
+            })
         }
         else {
             this.toastService.presentToast('Vous devez sélectionner un statut.');

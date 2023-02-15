@@ -173,11 +173,11 @@ export class DispatchGroupedSignaturePage extends PageComponent {
 
     private refreshHeaders() {
         this.headerFilteredDispatchs = {
-            title: `Demande filtrés`,
+            title: `Demandes filtrées`,
             subtitle: `${this.dispatches.length} demandes`,
             leftIcon: {
                 color: CardListColorEnum.GREEN,
-                name: 'stock-transfer.svg'
+                name: 'download.svg'
             },
             ...(this.dispatches.length ? {
                 rightIcon: {
@@ -190,11 +190,11 @@ export class DispatchGroupedSignaturePage extends PageComponent {
             } : {})
         };
         this.headerDispatchsToSign = {
-            title: `Sélectionnés`,
-            subtitle: `${this.dispatchesToSign.length} demandes` ,
+            title: `Sélectionnées`,
+            subtitle: `${this.dispatchesToSign.length} demandes`,
             leftIcon: {
                 color: CardListColorEnum.GREEN,
-                name: 'download.svg'
+                name: 'upload.svg'
             },
         };
     }
@@ -239,19 +239,21 @@ export class DispatchGroupedSignaturePage extends PageComponent {
                             label: this.labelTo,
                             value: dispatch.locationToLabel || ''
                         },
+                        {
+                            label: 'Références',
+                            value: dispatch.packReferences || ''
+                        },
                         (dispatch.emergency
                             ? {label: 'Urgence', value: dispatch.emergency || ''}
                             : {label: 'Urgence', value: 'Non'})
                     ].filter((item) => item && item.value),
-                    ...(!isSelected ? {
-                        rightIcon: {
-                            color: 'grey' as IconColor,
-                            name: 'up.svg',
-                            action: () => {
-                                this.signingDispatch(dispatch);
-                            }
+                    rightIcon: {
+                        color: 'grey' as IconColor,
+                        name: isSelected ? 'down.svg' : 'up.svg',
+                        action: () => {
+                            this.signingDispatch(dispatch, isSelected);
                         }
-                    } : {}),
+                    },
                     action: () => {
                         this.navService.push(NavPathEnum.DISPATCH_PACKS, {
                             dispatchId: dispatch.id,
@@ -303,9 +305,14 @@ export class DispatchGroupedSignaturePage extends PageComponent {
         this.refreshSingleList('dispatchesToSignListConfig', this.dispatchesToSign, true);
     }
 
-    public signingDispatch(dispatch: Dispatch): void {
-        this.dispatches.splice(this.dispatches.findIndex((dispatchIndex) => dispatchIndex.id === dispatch.id), 1);
-        this.dispatchesToSign.push(dispatch);
+    public signingDispatch(dispatch: Dispatch, selected): void {
+        const arrayToSpliceFrom = selected ? this.dispatchesToSign : this.dispatches;
+        const arrayToPushIn = selected ? this.dispatches : this.dispatchesToSign;
+        arrayToSpliceFrom.splice(this.dispatches.findIndex((dispatchIndex) => dispatchIndex.id === dispatch.id), 1);
+        arrayToPushIn.push(dispatch);
+
+        this.dispatches = selected ? arrayToPushIn : arrayToSpliceFrom;
+        this.dispatchesToSign = selected ? arrayToSpliceFrom : arrayToPushIn;
         this.refreshHeaders();
         this.refreshSingleList('dispatchesListConfig', this.dispatches, false);
         this.refreshSingleList('dispatchesToSignListConfig', this.dispatchesToSign, true);

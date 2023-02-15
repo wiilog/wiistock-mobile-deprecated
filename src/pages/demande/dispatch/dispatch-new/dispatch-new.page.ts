@@ -26,6 +26,7 @@ import {ApiService} from "@app/common/services/api.service";
 import {of, zip} from "rxjs";
 import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
 import {flatMap, mergeMap, tap} from "rxjs/operators";
+import {Translations} from "@entities/translation";
 
 
 @Component({
@@ -41,6 +42,7 @@ export class DispatchNewPage extends PageComponent {
     public formConfig: Array<FormPanelParam>|any;
 
     private emergencies: Array<{id: number; label: string}> = [];
+    private dispatchTranslations: Translations;
 
     private fieldParams: {
         displayCarrierTrackingNumber: boolean,
@@ -89,6 +91,7 @@ export class DispatchNewPage extends PageComponent {
             event: () => {
                 return zip(
                     this.apiService.requestApi(ApiService.GET_DISPATCH_EMERGENCIES),
+                    this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`),
                     this.storageService.getNumber('acheminements.carrierTrackingNumber.displayedCreate'),
                     this.storageService.getNumber('acheminements.carrierTrackingNumber.requiredCreate'),
 
@@ -108,22 +111,23 @@ export class DispatchNewPage extends PageComponent {
                     this.storageService.getNumber('acheminements.receiver.requiredCreate'),
                 )
             }
-        }).subscribe(([emergencies, ...fieldsParam]) => {
+        }).subscribe(([emergencies, translations, ...fieldsParam]) => {
             fieldsParam.forEach((value, index) => {
                 this.fieldParams[Object.keys(this.fieldParams)[index]] = value;
             });
-
+            this.dispatchTranslations = translations;
             this.emergencies = emergencies;
             this.getFormConfig();
         });
     }
 
     private getFormConfig() {
+
         this.formConfig = [
             ...(this.fieldParams.displayCarrierTrackingNumber ? [{
                 item: FormPanelInputComponent,
                 config: {
-                    label: 'N° de tracking',
+                    label: TranslationService.Translate(this.dispatchTranslations, 'N° tracking transporteur'),
                     name: 'carrierTrackingNumber',
                     inputConfig: {
                         required: Boolean(this.fieldParams.needsCarrierTrackingNumber),
@@ -151,7 +155,7 @@ export class DispatchNewPage extends PageComponent {
             ...(this.fieldParams.displayPickLocation ? [{
                 item: FormPanelSelectComponent,
                 config: {
-                    label: 'Emplacement de prise',
+                    label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de prise'),
                     name: 'pickLocation',
                     inputConfig: {
                         required: Boolean(this.fieldParams.needsPickLocation),
@@ -165,7 +169,7 @@ export class DispatchNewPage extends PageComponent {
             ...(this.fieldParams.displayDropLocation ? [{
                 item: FormPanelSelectComponent,
                 config: {
-                    label: 'Emplacement de dépose',
+                    label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de dépose'),
                     name: 'dropLocation',
                     inputConfig: {
                         required: Boolean(this.fieldParams.needsDropLocation),
