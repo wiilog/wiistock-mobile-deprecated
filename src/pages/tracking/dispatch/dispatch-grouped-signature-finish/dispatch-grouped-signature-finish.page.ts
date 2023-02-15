@@ -204,6 +204,14 @@ export class DispatchGroupedSignatureFinishPage extends PageComponent {
                     }
                 });
             });
+        } else {
+            if (!signatoryTrigram && !signatoryPassword) {
+                this.toastService.presentToast('Veuillez saisir un trigramme signataire et un code signataire.');
+            } else if (!signatoryTrigram) {
+                this.toastService.presentToast('Veuillez saisir un trigramme signataire.');
+            }else if (!signatoryPassword) {
+                this.toastService.presentToast('Veuillez saisir un code signataire.');
+            }
         }
     }
 }
