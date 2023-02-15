@@ -209,8 +209,10 @@ export class DispatchGroupedSignatureFinishPage extends PageComponent {
                 this.toastService.presentToast('Veuillez saisir un trigramme signataire et un code signataire.');
             } else if (!signatoryTrigram) {
                 this.toastService.presentToast('Veuillez saisir un trigramme signataire.');
-            }else if (!signatoryPassword) {
+            } else if (!signatoryPassword) {
                 this.toastService.presentToast('Veuillez saisir un code signataire.');
+            } else if (Boolean(this.selectedStatus.commentNeeded) && !comment) {
+                this.toastService.presentToast('Veuillez saisir un commentaire.');
             }
         }
     }
