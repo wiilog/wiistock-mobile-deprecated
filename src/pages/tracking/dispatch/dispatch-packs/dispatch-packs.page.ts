@@ -488,25 +488,29 @@ export class DispatchPacksPage extends PageComponent {
                             })
                         )
                 }).subscribe(({success, msg}) => {
-                    if (success && this.hasWayBillData) {
+                    if (!success) {
+                        this.toastService.presentToast(msg);
+                    } else {
                         this.loadingService.presentLoadingWhile({
                             event: () => {
-                                return this.apiService.requestApi(ApiService.DISPATCH_WAYBILL, {
-                                    pathParams: {dispatch: this.dispatch.id},
-                                    params: this.wayBillData
-                                });
+                                return zip(
+                                    this.sqliteService.deleteBy(`reference`),
+                                    this.hasWayBillData
+                                        ? this.apiService.requestApi(ApiService.DISPATCH_WAYBILL, {
+                                            pathParams: {dispatch: this.dispatch.id},
+                                            params: this.wayBillData
+                                        })
+                                        : of(null),
+                                    this.storage.getString(StorageKeyEnum.URL_SERVER)
+                                )
                             }
-                        }).subscribe((response) => {
-                            this.storage.getString(StorageKeyEnum.URL_SERVER).subscribe((url) => {
-                                this.navService.runMultiplePop(2).then(() => {
-                                    this.iab.create(url + response.filePath, '_system');
-                                });
-                            })
-                        });
-                    } else if (success && !this.hasWayBillData) {
-                        this.navService.runMultiplePop(2)
-                    } else {
-                        this.toastService.presentToast(msg);
+                        }).subscribe(([ignoredQueryResponse, waybillResponse, url]) => {
+                            this.navService.runMultiplePop(2).then(() => {
+                                if (this.hasWayBillData) {
+                                    this.iab.create(url + waybillResponse.filePath, '_system');
+                                }
+                            });
+                        })
                     }
                 });
             }
