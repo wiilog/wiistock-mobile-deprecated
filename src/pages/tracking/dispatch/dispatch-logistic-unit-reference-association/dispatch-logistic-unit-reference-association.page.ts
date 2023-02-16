@@ -208,6 +208,17 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                         }
                     },
                     {
+                        item: FormPanelToggleComponent,
+                        config: {
+                            label: 'ADR',
+                            name: 'adr',
+                            value: adr ? Boolean(adr) : null,
+                            inputConfig: {
+                                disabled: this.viewMode
+                            },
+                        }
+                    },
+                    {
                         item: FormPanelInputComponent,
                         config: {
                             label: 'Code fabriquant',
@@ -308,17 +319,6 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                             value: weight ? Number(weight) : null,
                             inputConfig: {
                                 type: 'number',
-                                disabled: this.viewMode
-                            },
-                        }
-                    },
-                    {
-                        item: FormPanelToggleComponent,
-                        config: {
-                            label: 'ADR',
-                            name: 'adr',
-                            value: adr ? Boolean(adr) : null,
-                            inputConfig: {
                                 disabled: this.viewMode
                             },
                         }
