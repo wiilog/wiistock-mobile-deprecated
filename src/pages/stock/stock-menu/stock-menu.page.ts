@@ -62,7 +62,7 @@ export class StockMenuPage extends PageComponent {
             },
             {
                 icon: 'manual-delivery.svg',
-                label: 'Livraison manuelle',
+                label: 'Livraison <br>manuelle',
                 action: () => {
                     self.navService.push(NavPathEnum.MANUAL_DELIVERY);
                 }
@@ -90,7 +90,7 @@ export class StockMenuPage extends PageComponent {
             },
             {
                 icon: 'manual-transfer.svg',
-                label: 'Transfert manuel',
+                label: 'Transfert <br>manuel',
                 action: () => {
                     this.navigateToPriseDeposePage()
                 }
