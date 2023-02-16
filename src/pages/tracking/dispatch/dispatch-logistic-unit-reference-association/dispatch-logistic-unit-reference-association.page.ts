@@ -5,33 +5,33 @@ import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {MainHeaderService} from '@app/common/services/main-header.service';
 import {ToastService} from '@app/common/services/toast.service';
-import {TranslationService} from "@app/common/services/translations.service";
-import {FormPanelComponent} from "@app/common/components/panel/form-panel/form-panel.component";
-import {FormPanelParam} from "@app/common/directives/form-panel/form-panel-param";
+import {TranslationService} from '@app/common/services/translations.service';
+import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
+import {FormPanelParam} from '@app/common/directives/form-panel/form-panel-param';
 import {
     FormPanelSelectComponent
-} from "@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component";
+} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 import {
     FormPanelInputComponent
-} from "@app/common/components/panel/form-panel/form-panel-input/form-panel-input.component";
+} from '@app/common/components/panel/form-panel/form-panel-input/form-panel-input.component';
 import {
     FormPanelToggleComponent
-} from "@app/common/components/panel/form-panel/form-panel-toggle/form-panel-toggle.component";
+} from '@app/common/components/panel/form-panel/form-panel-toggle/form-panel-toggle.component';
 import {
     FormPanelTextareaComponent
-} from "@app/common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component";
+} from '@app/common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component';
 import {
     FormPanelCameraComponent
-} from "@app/common/components/panel/form-panel/form-panel-camera/form-panel-camera.component";
-import {CardListColorEnum} from "@app/common/components/card-list/card-list-color.enum";
-import {HeaderConfig} from "@app/common/components/panel/model/header-config";
-import {ApiService} from "@app/common/services/api.service";
+} from '@app/common/components/panel/form-panel/form-panel-camera/form-panel-camera.component';
+import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
+import {HeaderConfig} from '@app/common/components/panel/model/header-config';
+import {ApiService} from '@app/common/services/api.service';
 import {
     FormPanelButtonsComponent
-} from "@app/common/components/panel/form-panel/form-panel-buttons/form-panel-buttons.component";
-import {Reference} from "@entities/reference";
-import {Dispatch} from "@entities/dispatch";
-import {of, zip} from "rxjs";
+} from '@app/common/components/panel/form-panel/form-panel-buttons/form-panel-buttons.component';
+import {Reference} from '@entities/reference';
+import {Dispatch} from '@entities/dispatch';
+import {of, zip} from 'rxjs';
 
 @Component({
     selector: 'wii-dispatch-logistic-unit-reference-association',
@@ -43,6 +43,7 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
     @ViewChild('formPanelComponent', {static: false})
     public formPanelComponent: FormPanelComponent;
 
+    public formConfigReference: Array<FormPanelParam> | any;
     public formConfig: Array<FormPanelParam> | any;
     public headerConfig: HeaderConfig;
 
@@ -50,12 +51,12 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
     public dispatch: Dispatch;
     public reference: Reference | any = {};
     public volume: number = undefined;
-    public disableValidate: boolean = true;
-    public disabledAddReference: boolean = true;
+    public disableValidate = true;
+    public disabledAddReference = true;
     public associatedDocumentTypeElements: string;
 
-    public edit: boolean = false;
-    public viewMode: boolean = false;
+    public edit = false;
+    public viewMode = false;
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
@@ -78,8 +79,49 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
             this.logisticUnit = this.currentNavParams.get(`logisticUnit`);
             this.dispatch = this.currentNavParams.get(`dispatch`);
             this.getFormConfig();
+            this.getFormConfigReference();
             this.createHeaderConfig();
         });
+    }
+
+    private getFormConfigReference(values: any = {}) {
+        const loader = this.viewMode ? this.apiService.requestApi(ApiService.GET_ASSOCIATED_REF, {
+            pathParams: {
+                pack: this.logisticUnit,
+                dispatch: this.dispatch.id
+            }
+        }) : of([]);
+        this.loadingService.presentLoadingWhile({
+            event: () => {
+                return loader;
+            }
+        }).subscribe((response) => {
+            let data = Object.keys(values).length > 0 ? values : this.reference;
+            if (response.reference) {
+                data = response;
+            }
+
+            const {reference} = data;
+            this.formConfigReference = [
+                {
+                    item: FormPanelInputComponent,
+                    config: {
+                        label: 'Référence',
+                        name: 'reference',
+                        value: reference ? reference : null,
+                        inputConfig: {
+                            required: true,
+                            type: 'text',
+                            onChange: (value) => this.disabledAddReference = value == ``,
+                            disabled: this.viewMode || this.edit,
+                        },
+                        errors: {
+                            required: 'Vous devez renseigner une réference.'
+                        },
+                    }
+                }];
+        })
+        console.log(this.edit, this.viewMode);
     }
 
     private getFormConfig(values: any = {}) {
@@ -100,7 +142,6 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
             }
 
             const {
-                reference,
                 quantity,
                 outFormatEquipment,
                 manufacturerCode,
@@ -119,24 +160,7 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                 exists,
             } = data;
 
-            this.formConfig = [
-                {
-                    item: FormPanelInputComponent,
-                    config: {
-                        label: 'Référence',
-                        name: 'reference',
-                        value: reference ? reference : null,
-                        inputConfig: {
-                            required: true,
-                            type: 'text',
-                            onChange: (value) => this.disabledAddReference = value == ``,
-                            disabled: this.viewMode || this.edit,
-                        },
-                        errors: {
-                            required: 'Vous devez renseigner une réference.'
-                        },
-                    }
-                }];
+            this.formConfig = [];
             if (Object.keys(values).length > 0 || Object.keys(this.reference).length > 0 || this.viewMode) {
                 this.formConfig.push({
                         item: FormPanelInputComponent,
