@@ -192,8 +192,9 @@ export class DispatchPacksPage extends PageComponent {
 
                     this.unsubscribeLoading();
                     this.loading = false;
-
-                    this.footerScannerComponent.fireZebraScan();
+                    if (this.footerScannerComponent) {
+                        this.footerScannerComponent.fireZebraScan();
+                    }
                 });
         }
     }
@@ -207,7 +208,9 @@ export class DispatchPacksPage extends PageComponent {
 
     public ngOnDestroy() {
         this.unsubscribeLoading();
-        this.footerScannerComponent.unsubscribeZebraScan();
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.unsubscribeZebraScan();
+        }
     }
 
     public takePack(barCode: string): void {
