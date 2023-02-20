@@ -119,10 +119,14 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                 exists,
             } = data;
 
-            if (this.viewMode && length && width && height) {
-                const volumeCentimeters = length * width * height;
-                const volumeMeters = volumeCentimeters / Math.pow(10, 6);
-                this.volume = volumeMeters ? Number(volumeMeters.toFixed(6)) : undefined;
+            if (this.viewMode) {
+                if (length && width && height) {
+                    const volumeCentimeters = length * width * height;
+                    const volumeMeters = volumeCentimeters / Math.pow(10, 6);
+                    this.volume = volumeMeters ? Number(volumeMeters.toFixed(6)) : undefined;
+                } else if (volume) {
+                    this.volume = volume;
+                }
             }
 
             this.formConfig = [
