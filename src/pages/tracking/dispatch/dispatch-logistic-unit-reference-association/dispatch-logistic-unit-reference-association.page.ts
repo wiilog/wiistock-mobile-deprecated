@@ -441,7 +441,9 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
         const {length, width, height} = values;
 
         if (length && width && height) {
-            this.volume = (length * width * height) / 10 ** 6;
+            const volumeCentimeters = length * width * height;
+            const volumeMeters = volumeCentimeters / Math.pow(10, 6);
+            this.volume = volumeMeters ? Number(volumeMeters.toFixed(6)) : undefined;
             this.getFormConfig(values);
         } else {
             this.toastService.presentToast(`Veuillez renseigner des valeurs valides pour le calcul du volume.`);
