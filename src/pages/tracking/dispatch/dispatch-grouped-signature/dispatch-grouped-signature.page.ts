@@ -313,6 +313,7 @@ export class DispatchGroupedSignaturePage extends PageComponent {
             this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE_VALIDATE, {
                 dispatchesToSign: this.dispatchesToSign,
                 status: this.filters.status.id,
+                type: this.filters.type.id,
                 location: this.filters.from ? this.filters.from.id : this.filters.to.id
             });
         }
