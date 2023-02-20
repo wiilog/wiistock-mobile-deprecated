@@ -21,6 +21,7 @@ import {StorageKeyEnum} from "@app/common/services/storage/storage-key.enum";
 import {StorageService} from "@app/common/services/storage/storage.service";
 import {HeaderConfig} from "@app/common/components/panel/model/header-config";
 import {IconColor} from "@app/common/components/icon/icon-color";
+import {BarcodeScannerComponent} from "@app/common/components/barcode-scanner/barcode-scanner.component";
 
 @Component({
     selector: 'wii-dispatch-grouped-signature',
@@ -31,8 +32,13 @@ export class DispatchGroupedSignaturePage extends PageComponent {
     public readonly barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SCAN;
     public readonly selectItemType = SelectItemTypeEnum.DISPATCH_NUMBER;
 
+    @ViewChild('footerScannerComponent', {static: false})
+    public footerScannerComponent: BarcodeScannerComponent;
+
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
+
+    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.INVISIBLE;
 
     private loadingSubscription: Subscription;
 
@@ -80,6 +86,11 @@ export class DispatchGroupedSignaturePage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.resetEmitter$.emit();
+
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.fireZebraScan();
+        }
+
         this.updateDispatchList();
     }
 
@@ -87,6 +98,10 @@ export class DispatchGroupedSignaturePage extends PageComponent {
         this.unsubscribeLoading();
         if (this.selectItemComponent) {
             this.selectItemComponent.unsubscribeZebraScan();
+        }
+
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.unsubscribeZebraScan();
         }
     }
 
@@ -179,14 +194,23 @@ export class DispatchGroupedSignaturePage extends PageComponent {
                 color: CardListColorEnum.GREEN,
                 name: 'download.svg'
             },
+            rightIconLayout: 'horizontal',
             ...(this.dispatches.length ? {
-                rightIcon: {
-                    color: 'grey' as IconColor,
-                    name: 'up.svg',
-                    action: () => {
-                        this.signAll();
+                rightIcon: [
+                    {
+                        color: 'primary',
+                        name: 'scan-photo.svg',
+                        action: () => {
+                            this.footerScannerComponent.scan();
+                        }
+                    },
+                    {
+                        name: 'up.svg',
+                        action: () => {
+                            this.signAll();
+                        }
                     }
-                }
+                ]
             } : {})
         };
         this.headerDispatchsToSign = {
@@ -317,5 +341,18 @@ export class DispatchGroupedSignaturePage extends PageComponent {
         this.refreshSingleList('dispatchesListConfig', this.dispatches, false);
         this.refreshSingleList('dispatchesToSignListConfig', this.dispatchesToSign, true);
 
+    }
+
+    public testIfBarcodeEquals(text, fromText: boolean = true): void {
+        const dispatch = fromText
+            ? this.dispatches.find((dispatch) => (dispatch.number === text))
+            : text;
+
+        if (dispatch) {
+            this.signingDispatch(dispatch, false);
+        }
+        else {
+            this.toastService.presentToast('L\'acheminement scanné n\'est pas dans la liste.');
+        }
     }
 }

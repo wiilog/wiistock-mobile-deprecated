@@ -21,6 +21,12 @@
                    [header]="headerFilteredDispatchs">
     </wii-card-list>
 </div>
+
+<wii-barcode-scanner #footerScannerComponent
+                     [mode]="scannerMode"
+                     [hidden]="!dispatches || dispatches.length === 0"
+                     (add)="testIfBarcodeEquals($event[0])">
+</wii-barcode-scanner>
 <ion-button class="submit-button larger"
             color="primary"
             size="large"
