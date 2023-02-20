@@ -371,7 +371,6 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                     });
             }
         })
-        console.log(this.edit, this.viewMode);
     }
 
     private createHeaderConfig(): any {
