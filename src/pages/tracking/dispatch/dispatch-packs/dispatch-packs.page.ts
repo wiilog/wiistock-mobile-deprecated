@@ -469,8 +469,9 @@ export class DispatchPacksPage extends PageComponent {
                             ])),
                             mergeMap((references) => of(references.map((reference) => {
                                 const photos = JSON.parse(reference.photos);
+                                const volume = `${reference.volume}`;
                                 delete reference.photos;
-                                return {...reference, ...(
+                                return {...reference, ...{volume}, ...(
                                     photos && photos.length > 0
                                         ? photos.reduce((acc: { [name: string]: File}, photoBase64: string, index: number) => {
                                             const name = `photo_${index + 1}`;

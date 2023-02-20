@@ -121,14 +121,12 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
 
             if (this.viewMode) {
                 if (length && width && height) {
-                    const volumeCentimeters = length * width * height;
-                    const volumeMeters = volumeCentimeters / Math.pow(10, 6);
-                    this.volume = volumeMeters ? Number(volumeMeters.toFixed(6)) : undefined;
+                    this.preComputeVolume(length, width, height);
                 } else if (volume) {
                     this.volume = volume;
                 }
             }
-
+            console.log(this.volume);
             this.formConfig = [
                 {
                     item: FormPanelInputComponent,
@@ -412,6 +410,7 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                 this.toastService.presentToast(`Le calcul du volume est nécessaire pour valider l'ajout de la référence.`)
             } else {
                 reference.logisticUnit = this.logisticUnit;
+                console.log(reference.volume);
                 this.loadingService.presentLoadingWhile({
                     event: () => zip(
                         this.sqliteService.insert(`dispatch_pack`, {
@@ -452,12 +451,16 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
         const {length, width, height} = values;
 
         if (length && width && height) {
-            const volumeCentimeters = length * width * height;
-            const volumeMeters = volumeCentimeters / Math.pow(10, 6);
-            this.volume = volumeMeters ? Number(volumeMeters.toFixed(6)) : undefined;
+            this.preComputeVolume(length, width, height);
             this.getFormConfig(values);
         } else {
             this.toastService.presentToast(`Veuillez renseigner des valeurs valides pour le calcul du volume.`);
         }
+    }
+
+    private preComputeVolume(length: number, width: number, height: number) {
+        const volumeCentimeters = length * width * height;
+        const volumeMeters = volumeCentimeters / Math.pow(10, 6);
+        this.volume = volumeMeters ? Number(volumeMeters.toFixed(6)) : undefined;
     }
 }
