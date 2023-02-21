@@ -19,6 +19,11 @@
 </div>
 
 <div class="page-footer">
+    <wii-tab
+             *ngIf="!process"
+             [(activeKey)]="process"
+             [config]="tabConfig">
+    </wii-tab>
     <ion-button class="submit-button larger"
                 color="primary"
                 size="large"

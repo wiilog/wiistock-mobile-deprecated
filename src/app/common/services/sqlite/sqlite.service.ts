@@ -846,7 +846,6 @@ export class SqliteService {
         const limitClause = limit ? ` LIMIT ${limit}${offsetClause}` : undefined;
 
         const sqlQuery = `SELECT * FROM ${table}${sqlWhereClauses || ''}${sqlOrderByClauses || ''}${limitClause || ''}`;
-
         return this.executeQuery(sqlQuery).pipe(
             map((data) => SqliteService.MultiSelectQueryMapper<any>(data)),
             take(1)

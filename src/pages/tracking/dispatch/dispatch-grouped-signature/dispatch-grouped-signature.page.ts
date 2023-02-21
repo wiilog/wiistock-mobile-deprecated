@@ -22,6 +22,7 @@ import {StorageService} from "@app/common/services/storage/storage.service";
 import {HeaderConfig} from "@app/common/components/panel/model/header-config";
 import {IconColor} from "@app/common/components/icon/icon-color";
 import {BarcodeScannerComponent} from "@app/common/components/barcode-scanner/barcode-scanner.component";
+import {SigningMode} from "../../../../enums/signing-mode.enum";
 
 @Component({
     selector: 'wii-dispatch-grouped-signature',
@@ -105,7 +106,7 @@ export class DispatchGroupedSignaturePage extends PageComponent {
         }
     }
 
-    private updateDispatchList(): void {
+    private updateDispatchList(callback = null): void {
         this.loading = true;
         this.unsubscribeLoading();
         let loaderElement;
@@ -113,18 +114,20 @@ export class DispatchGroupedSignaturePage extends PageComponent {
         const withoutLoading = this.currentNavParams.get('withoutLoading');
         if (!this.firstLaunch || !withoutLoading) {
             const filtersSQL = [];
-            if (this.filters.from) {
+            if (this.filters.from && this.filters.to) {
+                filtersSQL.push(`(locationFromLabel = '${this.filters.from.text}' OR locationToLabel = '${this.filters.to.text}')`)
+            } else if (this.filters.from) {
                 filtersSQL.push(`locationFromLabel = '${this.filters.from.text}'`)
-            }
-            if (this.filters.to) {
+            } else if (this.filters.to) {
                 filtersSQL.push(`locationToLabel = '${this.filters.to.text}'`)
             }
             if (this.filters.status) {
-                filtersSQL.push(`statusId = '${this.filters.status.id}'`)
+                filtersSQL.push(`statusId = ${this.filters.status.id}`)
             }
             if (this.filters.type) {
-                filtersSQL.push(`typeId = '${this.filters.type.id}'`)
+                filtersSQL.push(`typeId = ${this.filters.type.id}`)
             }
+            console.log(filtersSQL);
             this.loadingSubscription = this.loadingService.presentLoading()
                 .pipe(
                     tap(loader => loaderElement = loader),
@@ -139,10 +142,17 @@ export class DispatchGroupedSignaturePage extends PageComponent {
                     ))
                 )
                 .subscribe(([dispatches, translations]: [Array<Dispatch>, Translations]) => {
-                    this.dispatchesToSignListConfig = [];
-                    this.dispatchesListConfig = [];
-                    this.dispatches = dispatches;
-                    this.dispatchesToSign = [];
+                    if (this.dispatchesToSign === undefined) {
+                        this.dispatchesToSignListConfig = [];
+                        this.dispatchesToSign = [];
+                    }
+                    if (this.dispatches === undefined) {
+                        this.dispatchesListConfig = [];
+                        this.dispatches = dispatches;
+                    } else {
+                        this.dispatches = dispatches
+                            .filter((dispatch) => !this.dispatchesToSign.some((dispatchToSign) => dispatchToSign.id === dispatch.id));
+                    }
                     this.refreshDispatchesListConfig(translations);
                     this.refreshSubTitle();
                     this.unsubscribeLoading();
@@ -150,6 +160,9 @@ export class DispatchGroupedSignaturePage extends PageComponent {
                     if (loaderElement) {
                         loaderElement.dismiss();
                         loaderElement = undefined;
+                    }
+                    if (callback) {
+                        callback();
                     }
                 });
         }
@@ -204,12 +217,12 @@ export class DispatchGroupedSignaturePage extends PageComponent {
                             this.footerScannerComponent.scan();
                         }
                     },
-                    {
+                    ...((this.filters.from && !this.filters.to) || (this.filters.to && !this.filters.from) ? [{
                         name: 'up.svg',
                         action: () => {
                             this.signAll();
                         }
-                    }
+                    }]: [])
                 ]
             } : {})
         };
@@ -244,6 +257,7 @@ export class DispatchGroupedSignaturePage extends PageComponent {
                 );
             })
             .map((dispatch: Dispatch) => {
+                console.log(dispatch);
                 return {
                     title: {label: 'Demandeur', value: dispatch.requester},
                     customColor: dispatch.color,
@@ -275,7 +289,11 @@ export class DispatchGroupedSignaturePage extends PageComponent {
                         color: 'grey' as IconColor,
                         name: isSelected ? 'down.svg' : 'up.svg',
                         action: () => {
-                            this.signingDispatch(dispatch, isSelected);
+                            if (isSelected) {
+                                this.signingDispatch(dispatch, true);
+                            } else {
+                                this.testIfBarcodeEquals(dispatch, false);
+                            }
                         }
                     },
                     action: () => {
@@ -298,14 +316,15 @@ export class DispatchGroupedSignaturePage extends PageComponent {
         this.refreshSingleList('dispatchesToSignListConfig', this.dispatchesToSign, true);
     }
 
-    public filter() {
-        this.navService.push(NavPathEnum.DISPATCH_FILTER, {
-            ...this.filters,
-            afterValidate: (values) => {
-                this.filters = values;
-                this.updateDispatchList();
-            }
-        })
+    public resetFilters() {
+        this.filters = {
+            status: null,
+            type: null,
+            from: null,
+            to: null,
+        }
+        this.dispatchesToSign = undefined;
+        this.updateDispatchList();
     }
 
     public validateGroupedSignature(){
@@ -314,7 +333,9 @@ export class DispatchGroupedSignaturePage extends PageComponent {
                 dispatchesToSign: this.dispatchesToSign,
                 status: this.filters.status.id,
                 type: this.filters.type.id,
-                location: this.filters.from ? this.filters.from.id : this.filters.to.id
+                to: this.filters.to,
+                from: this.filters.from,
+                process: this.filters.to && !this.filters.from ? SigningMode.DROP : (this.filters.from && !this.filters.to ? SigningMode.PICK : null)
             });
         }
         else {
@@ -344,13 +365,52 @@ export class DispatchGroupedSignaturePage extends PageComponent {
 
     }
 
+    public refreshFiltersFromDispatch(dispatch: Dispatch): boolean {
+        let changes = false;
+        if (this.filters.from && this.filters.to) {
+            if (this.filters.from.id === dispatch.locationFromId && this.filters.to.id !== dispatch.locationToId) {
+                this.filters.to = null;
+                changes = true;
+            } else if (this.filters.from.id !== dispatch.locationFromId && this.filters.to.id === dispatch.locationToId) {
+                this.filters.from = null;
+                changes = true;
+            }
+        } else if (!this.filters.from && !this.filters.to) {
+            changes = true;
+            this.filters = {
+                status: {
+                    id: dispatch.statusId,
+                    text: dispatch.statusLabel,
+                },
+                type: {
+                    id: dispatch.typeId,
+                    text: dispatch.typeLabel,
+                },
+                from: {
+                    id: dispatch.locationFromId,
+                    text: dispatch.locationFromLabel,
+                },
+                to: {
+                    id: dispatch.locationToId,
+                    text: dispatch.locationToLabel,
+                },
+            }
+        }
+        return changes;
+    }
+
     public testIfBarcodeEquals(text, fromText: boolean = true): void {
-        const dispatch = fromText
+        const dispatch: Dispatch = fromText
             ? this.dispatches.find((dispatch) => (dispatch.number === text))
             : text;
 
         if (dispatch) {
-            this.signingDispatch(dispatch, false);
+            const changes = this.refreshFiltersFromDispatch(dispatch);
+            if (changes) {
+                this.updateDispatchList(() => this.signingDispatch(dispatch, false));
+            } else {
+                this.signingDispatch(dispatch, false);
+            }
         }
         else {
             this.toastService.presentToast('L\'acheminement scanné n\'est pas dans la liste.');
