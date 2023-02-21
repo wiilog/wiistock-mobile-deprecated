@@ -63,6 +63,7 @@ export class DispatchPacksPage extends PageComponent {
 
     private dispatch: Dispatch;
     public fromCreate: boolean = false;
+    public viewMode: boolean = false;
     public ableToCreateWaybill: boolean = false;
     private dispatchPacks: Array<DispatchPack>;
 
@@ -191,8 +192,9 @@ export class DispatchPacksPage extends PageComponent {
 
                     this.unsubscribeLoading();
                     this.loading = false;
-
-                    this.footerScannerComponent.fireZebraScan();
+                    if (this.footerScannerComponent) {
+                        this.footerScannerComponent.fireZebraScan();
+                    }
                 });
         }
     }
@@ -200,12 +202,15 @@ export class DispatchPacksPage extends PageComponent {
     public ngOnInit() {
         super.ngOnInit();
         this.fromCreate = this.currentNavParams.get('fromCreate');
+        this.viewMode = this.currentNavParams.get('viewMode') || false;
         this.scannerMode = this.fromCreate ? BarcodeScannerModeEnum.WITH_MANUAL : BarcodeScannerModeEnum.INVISIBLE;
     }
 
     public ngOnDestroy() {
         this.unsubscribeLoading();
-        this.footerScannerComponent.unsubscribeZebraScan();
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.unsubscribeZebraScan();
+        }
     }
 
     public takePack(barCode: string): void {
@@ -370,9 +375,10 @@ export class DispatchPacksPage extends PageComponent {
                                     }).subscribe((reference) => {
                                         this.navService.push(NavPathEnum.DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION, {
                                             logisticUnit: pack.code,
-                                            dispatch: this.dispatch.id,
+                                            dispatch: this.dispatch,
                                             reference,
-                                            edit: true
+                                            edit: true,
+                                            viewMode: this.viewMode
                                         });
                                     });
                                 }
@@ -463,8 +469,9 @@ export class DispatchPacksPage extends PageComponent {
                             ])),
                             mergeMap((references) => of(references.map((reference) => {
                                 const photos = JSON.parse(reference.photos);
+                                const volume = `${reference.volume}`;
                                 delete reference.photos;
-                                return {...reference, ...(
+                                return {...reference, ...{volume}, ...(
                                     photos && photos.length > 0
                                         ? photos.reduce((acc: { [name: string]: File}, photoBase64: string, index: number) => {
                                             const name = `photo_${index + 1}`;
@@ -485,25 +492,29 @@ export class DispatchPacksPage extends PageComponent {
                             })
                         )
                 }).subscribe(({success, msg}) => {
-                    if (success && this.hasWayBillData) {
+                    if (!success) {
+                        this.toastService.presentToast(msg);
+                    } else {
                         this.loadingService.presentLoadingWhile({
                             event: () => {
-                                return this.apiService.requestApi(ApiService.DISPATCH_WAYBILL, {
-                                    pathParams: {dispatch: this.dispatch.id},
-                                    params: this.wayBillData
-                                });
+                                return zip(
+                                    this.sqliteService.deleteBy(`reference`),
+                                    this.hasWayBillData
+                                        ? this.apiService.requestApi(ApiService.DISPATCH_WAYBILL, {
+                                            pathParams: {dispatch: this.dispatch.id},
+                                            params: this.wayBillData
+                                        })
+                                        : of(null),
+                                    this.storage.getString(StorageKeyEnum.URL_SERVER)
+                                )
                             }
-                        }).subscribe((response) => {
-                            this.storage.getString(StorageKeyEnum.URL_SERVER).subscribe((url) => {
-                                this.navService.runMultiplePop(2).then(() => {
-                                    this.iab.create(url + response.filePath, '_system');
-                                });
-                            })
-                        });
-                    } else if (success && !this.hasWayBillData) {
-                        this.navService.runMultiplePop(2)
-                    } else {
-                        this.toastService.presentToast(msg);
+                        }).subscribe(([ignoredQueryResponse, waybillResponse, url]) => {
+                            this.navService.runMultiplePop(2).then(() => {
+                                if (this.hasWayBillData) {
+                                    this.iab.create(url + waybillResponse.filePath, '_system');
+                                }
+                            });
+                        })
                     }
                 });
             }

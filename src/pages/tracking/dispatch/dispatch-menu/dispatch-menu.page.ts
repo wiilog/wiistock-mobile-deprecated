@@ -67,10 +67,10 @@ export class DispatchMenuPage extends PageComponent {
     public ionViewWillEnter(): void {
         this.storageService.getRight(StorageKeyEnum.RIGHT_GROUPED_SIGNATURE).subscribe((hasRightDisplayGroupedSignatureButton) => {
             this.hasRightDisplayGroupedSignatureButton = hasRightDisplayGroupedSignatureButton;
-        });
 
-        this.resetEmitter$.emit();
-        this.updateDispatchList();
+            this.resetEmitter$.emit();
+            this.updateDispatchList();
+        });
     }
 
     public ionViewWillLeave(): void {

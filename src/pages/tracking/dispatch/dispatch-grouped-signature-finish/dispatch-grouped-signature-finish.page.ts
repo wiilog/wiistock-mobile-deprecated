@@ -4,7 +4,7 @@ import {NavService} from '@app/common/services/nav/nav.service';
 import {PageComponent} from '@pages/page.component';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {LoadingService} from '@app/common/services/loading.service';
-import {flatMap, tap} from 'rxjs/operators';
+import {flatMap, map, mergeMap, tap} from 'rxjs/operators';
 import {Dispatch} from '@entities/dispatch';
 import {CardListConfig} from '@app/common/components/card-list/card-list-config';
 import {CardListColorEnum} from '@app/common/components/card-list/card-list-color.enum';
@@ -134,7 +134,7 @@ export class DispatchGroupedSignatureFinishPage extends PageComponent {
                     value: '',
                     inputConfig: {
                         required: true,
-                        type: 'text',
+                        type: 'password',
                         disabled: false
                     },
                 }
@@ -174,16 +174,28 @@ export class DispatchGroupedSignatureFinishPage extends PageComponent {
         if(signatoryTrigram && signatoryPassword && (!Boolean(this.selectedStatus.commentNeeded) || comment)){
             this.loadingService.presentLoadingWhile({
                 event: () => {
-                    return this.apiService.requestApi(ApiService.FINISH_GROUPED_SIGNATURE, {
-                        params: {
-                            location: this.location,
-                            status: this.selectedStatus.id,
-                            signatoryTrigram,
-                            signatoryPassword,
-                            comment,
-                            dispatchesToSign: this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.id).join(','),
-                        }
-                    })
+                    return this.sqliteService.update(
+                        'dispatch',
+                        [{
+                            values: {
+                                statusId: this.selectedStatus.id,
+                                statusLabel: this.selectedStatus.label,
+                                partial: this.selectedStatus.state === 'partial' ? 1 : 0
+                            },
+                            where: [`id IN (${this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.id).join(',')})`],
+                        }]
+                    ).pipe(
+                        mergeMap(() => this.apiService.requestApi(ApiService.FINISH_GROUPED_SIGNATURE, {
+                            params: {
+                                location: this.location,
+                                status: this.selectedStatus.id,
+                                signatoryTrigram,
+                                signatoryPassword,
+                                comment,
+                                dispatchesToSign: this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.id).join(','),
+                            }
+                        }))
+                    )
                 }
             }).subscribe((response) => {
                 this.toastService.presentToast(response.msg).subscribe(() => {
@@ -192,6 +204,16 @@ export class DispatchGroupedSignatureFinishPage extends PageComponent {
                     }
                 });
             });
+        } else {
+            if (!signatoryTrigram && !signatoryPassword) {
+                this.toastService.presentToast('Veuillez saisir un trigramme signataire et un code signataire.');
+            } else if (!signatoryTrigram) {
+                this.toastService.presentToast('Veuillez saisir un trigramme signataire.');
+            } else if (!signatoryPassword) {
+                this.toastService.presentToast('Veuillez saisir un code signataire.');
+            } else if (Boolean(this.selectedStatus.commentNeeded) && !comment) {
+                this.toastService.presentToast('Veuillez saisir un commentaire.');
+            }
         }
     }
 }

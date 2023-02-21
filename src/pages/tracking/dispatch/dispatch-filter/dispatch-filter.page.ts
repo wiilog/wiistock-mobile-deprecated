@@ -46,6 +46,10 @@ export class DispatchFilterPage extends PageComponent {
         this.to = this.currentNavParams.get('to');
         this.from = this.currentNavParams.get('from');
         this.type = this.currentNavParams.get('type');
+        this.generateForm();
+    }
+
+    public generateForm() {
         this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`).subscribe((translations) => {
             this.dispatchTranslations = translations;
             this.bodyConfig = [
@@ -94,30 +98,6 @@ export class DispatchFilterPage extends PageComponent {
                 {
                     item: FormPanelSelectComponent,
                     config: {
-                        label: 'Statut',
-                        name: 'status',
-                        value: this.status ? this.status.id : null,
-                        inputConfig: {
-                            searchType: SelectItemTypeEnum.STATUS,
-                            requestParams: [
-                                `category = 'acheminement'`,
-                            ],
-                            onChange: (statusId) => {
-                                this.sqliteService
-                                    .findOneBy('status', {id: statusId})
-                                    .subscribe((newStatus?: Status) => {
-                                        this.status = {
-                                            id: statusId,
-                                            text: newStatus.label,
-                                        }
-                                    })
-                            }
-                        },
-                    }
-                },
-                {
-                    item: FormPanelSelectComponent,
-                    config: {
                         label: 'Type',
                         name: 'type',
                         value: this.type ? this.type.id : null,
@@ -130,6 +110,32 @@ export class DispatchFilterPage extends PageComponent {
                                         this.type = {
                                             id: newType.id,
                                             text: newType.label,
+                                        }
+                                        this.generateForm();
+                                    })
+                            }
+                        },
+                    }
+                },
+                {
+                    item: FormPanelSelectComponent,
+                    config: {
+                        label: 'Statut',
+                        name: 'status',
+                        value: this.status ? this.status.id : null,
+                        inputConfig: {
+                            searchType: SelectItemTypeEnum.STATUS,
+                            requestParams: [
+                                `category = 'acheminement'`,
+                                `typeId = ${this.type ? this.type.id : null}`,
+                            ],
+                            onChange: (statusId) => {
+                                this.sqliteService
+                                    .findOneBy('status', {id: statusId})
+                                    .subscribe((newStatus?: Status) => {
+                                        this.status = {
+                                            id: statusId,
+                                            text: newStatus.label,
                                         }
                                     })
                             }

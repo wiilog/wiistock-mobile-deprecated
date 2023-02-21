@@ -21,6 +21,7 @@ import {StorageKeyEnum} from "@app/common/services/storage/storage-key.enum";
 import {StorageService} from "@app/common/services/storage/storage.service";
 import {HeaderConfig} from "@app/common/components/panel/model/header-config";
 import {IconColor} from "@app/common/components/icon/icon-color";
+import {BarcodeScannerComponent} from "@app/common/components/barcode-scanner/barcode-scanner.component";
 
 @Component({
     selector: 'wii-dispatch-grouped-signature',
@@ -31,8 +32,13 @@ export class DispatchGroupedSignaturePage extends PageComponent {
     public readonly barcodeScannerSearchMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.ONLY_SCAN;
     public readonly selectItemType = SelectItemTypeEnum.DISPATCH_NUMBER;
 
+    @ViewChild('footerScannerComponent', {static: false})
+    public footerScannerComponent: BarcodeScannerComponent;
+
     @ViewChild('selectItemComponent', {static: false})
     public selectItemComponent: SelectItemComponent;
+
+    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.INVISIBLE;
 
     private loadingSubscription: Subscription;
 
@@ -80,6 +86,11 @@ export class DispatchGroupedSignaturePage extends PageComponent {
 
     public ionViewWillEnter(): void {
         this.resetEmitter$.emit();
+
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.fireZebraScan();
+        }
+
         this.updateDispatchList();
     }
 
@@ -87,6 +98,10 @@ export class DispatchGroupedSignaturePage extends PageComponent {
         this.unsubscribeLoading();
         if (this.selectItemComponent) {
             this.selectItemComponent.unsubscribeZebraScan();
+        }
+
+        if (this.footerScannerComponent) {
+            this.footerScannerComponent.unsubscribeZebraScan();
         }
     }
 
@@ -173,28 +188,37 @@ export class DispatchGroupedSignaturePage extends PageComponent {
 
     private refreshHeaders() {
         this.headerFilteredDispatchs = {
-            title: `Demande filtrés`,
+            title: `Demandes filtrées`,
             subtitle: `${this.dispatches.length} demandes`,
             leftIcon: {
                 color: CardListColorEnum.GREEN,
-                name: 'stock-transfer.svg'
+                name: 'download.svg'
             },
+            rightIconLayout: 'horizontal',
             ...(this.dispatches.length ? {
-                rightIcon: {
-                    color: 'grey' as IconColor,
-                    name: 'up.svg',
-                    action: () => {
-                        this.signAll();
+                rightIcon: [
+                    {
+                        color: 'primary',
+                        name: 'scan-photo.svg',
+                        action: () => {
+                            this.footerScannerComponent.scan();
+                        }
+                    },
+                    {
+                        name: 'up.svg',
+                        action: () => {
+                            this.signAll();
+                        }
                     }
-                }
+                ]
             } : {})
         };
         this.headerDispatchsToSign = {
-            title: `Sélectionnés`,
-            subtitle: `${this.dispatchesToSign.length} demandes` ,
+            title: `Sélectionnées`,
+            subtitle: `${this.dispatchesToSign.length} demandes`,
             leftIcon: {
                 color: CardListColorEnum.GREEN,
-                name: 'download.svg'
+                name: 'upload.svg'
             },
         };
     }
@@ -239,24 +263,27 @@ export class DispatchGroupedSignaturePage extends PageComponent {
                             label: this.labelTo,
                             value: dispatch.locationToLabel || ''
                         },
+                        {
+                            label: 'Références',
+                            value: dispatch.packReferences || ''
+                        },
                         (dispatch.emergency
                             ? {label: 'Urgence', value: dispatch.emergency || ''}
                             : {label: 'Urgence', value: 'Non'})
                     ].filter((item) => item && item.value),
-                    ...(!isSelected ? {
-                        rightIcon: {
-                            color: 'grey' as IconColor,
-                            name: 'up.svg',
-                            action: () => {
-                                this.signingDispatch(dispatch);
-                            }
+                    rightIcon: {
+                        color: 'grey' as IconColor,
+                        name: isSelected ? 'down.svg' : 'up.svg',
+                        action: () => {
+                            this.signingDispatch(dispatch, isSelected);
                         }
-                    } : {}),
+                    },
                     action: () => {
-                        // this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-                        //     dispatchId: dispatch.id
-                        // });
-                        //TODO rediriger au détails au clic
+                        this.navService.push(NavPathEnum.DISPATCH_PACKS, {
+                            dispatchId: dispatch.id,
+                            fromCreate: true,
+                            viewMode: true
+                        });
                     }
                 };
             });
@@ -286,6 +313,7 @@ export class DispatchGroupedSignaturePage extends PageComponent {
             this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE_VALIDATE, {
                 dispatchesToSign: this.dispatchesToSign,
                 status: this.filters.status.id,
+                type: this.filters.type.id,
                 location: this.filters.from ? this.filters.from.id : this.filters.to.id
             });
         }
@@ -302,12 +330,30 @@ export class DispatchGroupedSignaturePage extends PageComponent {
         this.refreshSingleList('dispatchesToSignListConfig', this.dispatchesToSign, true);
     }
 
-    public signingDispatch(dispatch: Dispatch): void {
-        this.dispatches.splice(this.dispatches.findIndex((dispatchIndex) => dispatchIndex.id === dispatch.id), 1);
-        this.dispatchesToSign.push(dispatch);
+    public signingDispatch(dispatch: Dispatch, selected): void {
+        const arrayToSpliceFrom = selected ? this.dispatchesToSign : this.dispatches;
+        const arrayToPushIn = selected ? this.dispatches : this.dispatchesToSign;
+        arrayToSpliceFrom.splice(this.dispatches.findIndex((dispatchIndex) => dispatchIndex.id === dispatch.id), 1);
+        arrayToPushIn.push(dispatch);
+
+        this.dispatches = selected ? arrayToPushIn : arrayToSpliceFrom;
+        this.dispatchesToSign = selected ? arrayToSpliceFrom : arrayToPushIn;
         this.refreshHeaders();
         this.refreshSingleList('dispatchesListConfig', this.dispatches, false);
         this.refreshSingleList('dispatchesToSignListConfig', this.dispatchesToSign, true);
 
+    }
+
+    public testIfBarcodeEquals(text, fromText: boolean = true): void {
+        const dispatch = fromText
+            ? this.dispatches.find((dispatch) => (dispatch.number === text))
+            : text;
+
+        if (dispatch) {
+            this.signingDispatch(dispatch, false);
+        }
+        else {
+            this.toastService.presentToast('L\'acheminement scanné n\'est pas dans la liste.');
+        }
     }
 }

@@ -13,7 +13,7 @@
                 size="small"
                 expand="block"
                 (click)="getReference()" [disabled]="disabledAddReference">
-        Valider la référence
+        Rechercher
         <wii-icon name="check.svg"
                   class="button-icon"
                   color="primary">
@@ -30,6 +30,7 @@
                 color="primary"
                 size="large"
                 expand="full"
+                *ngIf="!viewMode"
                 (click)="validate()"
                 [disabled]="!edit && disableValidate">
         Valider

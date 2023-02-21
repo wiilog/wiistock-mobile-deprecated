@@ -401,6 +401,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             partial: 'INTEGER',
             color: 'VARCHAR(255)',
             destination: 'VARCHAR(255)',
+            packReferences: 'VARCHAR(255)',
             draft: 'INTEGER'
         }
     },

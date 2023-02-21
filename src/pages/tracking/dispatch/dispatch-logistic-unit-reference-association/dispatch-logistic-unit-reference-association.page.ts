@@ -31,7 +31,7 @@ import {
 } from "@app/common/components/panel/form-panel/form-panel-buttons/form-panel-buttons.component";
 import {Reference} from "@entities/reference";
 import {Dispatch} from "@entities/dispatch";
-import {zip} from "rxjs";
+import {of, zip} from "rxjs";
 
 @Component({
     selector: 'wii-dispatch-logistic-unit-reference-association',
@@ -55,6 +55,7 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
     public associatedDocumentTypeElements: string;
 
     public edit: boolean = false;
+    public viewMode: boolean = false;
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
@@ -73,6 +74,7 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
             this.associatedDocumentTypeElements = values;
             this.reference = this.currentNavParams.get(`reference`) || {};
             this.edit = this.currentNavParams.get(`edit`) || false;
+            this.viewMode = this.currentNavParams.get(`edit`) || false;
             this.logisticUnit = this.currentNavParams.get(`logisticUnit`);
             this.dispatch = this.currentNavParams.get(`dispatch`);
             this.getFormConfig();
@@ -81,262 +83,304 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
     }
 
     private getFormConfig(values: any = {}) {
-        const {
-            reference,
-            outFormatEquipment,
-            manufacturerCode,
-            sealingNumber,
-            serialNumber,
-            batchNumber,
-            width,
-            height,
-            length,
-            volume,
-            weight,
-            adr,
-            associatedDocumentTypes,
-            comment,
-            photos,
-            exists,
-        } = Object.keys(values).length > 0 ? values : this.reference;
+        const loader = this.viewMode ? this.apiService.requestApi(ApiService.GET_ASSOCIATED_REF, {
+            pathParams: {
+                pack: this.logisticUnit,
+                dispatch: this.dispatch.id
+            }
+        }) : of([]);
+        this.loadingService.presentLoadingWhile({
+            event: () => {
+                return loader;
+            }
+        }).subscribe((response) => {
+            let data = Object.keys(values).length > 0 ? values : this.reference;
+            if (response.reference) {
+                data = response;
+            }
 
-        this.formConfig = [
-            {
-                item: FormPanelInputComponent,
-                config: {
-                    label: 'Référence',
-                    name: 'reference',
-                    value: reference ? reference : null,
-                    inputConfig: {
-                        required: true,
-                        type: 'text',
-                        onChange: (value) => this.disabledAddReference = value == ``,
-                        disabled: this.edit,
-                    },
-                    errors: {
-                        required: 'Vous devez renseigner une réference.'
-                    },
+            const {
+                reference,
+                quantity,
+                outFormatEquipment,
+                manufacturerCode,
+                sealingNumber,
+                serialNumber,
+                batchNumber,
+                width,
+                height,
+                length,
+                volume,
+                weight,
+                adr,
+                associatedDocumentTypes,
+                comment,
+                photos,
+                exists,
+            } = data;
+
+            if (this.viewMode) {
+                if (length && width && height) {
+                    this.preComputeVolume(length, width, height);
+                } else if (volume) {
+                    this.volume = volume;
                 }
-            }];
-
-        if (Object.keys(values).length > 0 || Object.keys(this.reference).length > 0) {
-            this.formConfig.push({
-                    item: FormPanelInputComponent,
-                    config: {
-                        label: 'Quantité',
-                        name: 'quantity',
-                        value: this.reference && this.reference.quantity ? this.reference.quantity : null,
-                        inputConfig: {
-                            required: true,
-                            type: 'number',
-                            min: 1
-                        },
-                        errors: {
-                            required: 'Vous devez renseigner une quantité.'
-                        }
-                    }
-                },
-                {
-                    item: FormPanelToggleComponent,
-                    config: {
-                        label: 'Matériel hors format',
-                        name: 'outFormatEquipment',
-                        value: outFormatEquipment ? Boolean(outFormatEquipment) : null,
-                        inputConfig: {},
-                    }
-                },
+            }
+            console.log(this.volume);
+            this.formConfig = [
                 {
                     item: FormPanelInputComponent,
                     config: {
-                        label: 'Numéro de série',
-                        name: 'serialNumber',
-                        value: serialNumber || null,
+                        label: 'Référence',
+                        name: 'reference',
+                        value: reference ? reference : null,
                         inputConfig: {
                             required: true,
                             type: 'text',
+                            onChange: (value) => this.disabledAddReference = value == ``,
+                            disabled: this.viewMode || this.edit,
                         },
                         errors: {
-                            required: 'Vous devez renseigner un numéro de série.'
+                            required: 'Vous devez renseigner une réference.'
+                        },
+                    }
+                }];
+            if (Object.keys(values).length > 0 || Object.keys(this.reference).length > 0 || this.viewMode) {
+                this.formConfig.push({
+                        item: FormPanelInputComponent,
+                        config: {
+                            label: 'Quantité',
+                            name: 'quantity',
+                            value: quantity || (this.reference && this.reference.quantity ? this.reference.quantity : null),
+                            inputConfig: {
+                                required: true,
+                                type: 'number',
+                                min: 1,
+                                disabled: this.viewMode
+                            },
+                            errors: {
+                                required: 'Vous devez renseigner une quantité.'
+                            }
                         }
-                    }
-                },
-                {
-                    item: FormPanelInputComponent,
-                    config: {
-                        label: 'Numéro de lot',
-                        name: 'batchNumber',
-                        value: batchNumber || null,
-                        inputConfig: {
-                            required: true,
-                            type: 'text',
-                        },
-                        errors: {
-                            required: 'Vous devez renseigner un numéro de lot.'
+                    },
+                    {
+                        item: FormPanelToggleComponent,
+                        config: {
+                            label: 'Matériel hors format',
+                            name: 'outFormatEquipment',
+                            value: outFormatEquipment ? Boolean(outFormatEquipment) : null,
+                            inputConfig: {
+                                disabled: this.viewMode
+                            },
                         }
-                    }
-                },
-                {
-                    item: FormPanelInputComponent,
-                    config: {
-                        label: 'Numéro de plombage/scellé',
-                        value: sealingNumber || null,
-                        name: 'sealingNumber',
-                        inputConfig: {
-                            type: 'text',
-                        },
-                    }
-                },
-                {
-                    item: FormPanelInputComponent,
-                    config: {
-                        label: 'Code fabriquant',
-                        name: 'manufacturerCode',
-                        value: manufacturerCode || null,
-                        inputConfig: {
-                            required: true,
-                            type: 'text',
-                        },
-                        errors: {
-                            required: 'Vous devez renseigner un code fabriquant.'
+                    },
+                    {
+                        item: FormPanelInputComponent,
+                        config: {
+                            label: 'Numéro de série',
+                            name: 'serialNumber',
+                            value: serialNumber || null,
+                            inputConfig: {
+                                required: false,
+                                type: 'text',
+                                disabled: this.viewMode
+                            },
                         }
-                    }
-                },
-                ...(!exists ? [{
-                    item: FormPanelInputComponent,
-                    config: {
-                        label: 'Longueur (cm)',
-                        name: 'length',
-                        value: length ? Number(length) : null,
-                        inputConfig: {
-                            required: true,
-                            type: 'number',
-                        },
-                        errors: {
-                            required: 'Vous devez renseigner une longueur.'
+                    },
+                    {
+                        item: FormPanelInputComponent,
+                        config: {
+                            label: 'Numéro de lot',
+                            name: 'batchNumber',
+                            value: batchNumber || null,
+                            inputConfig: {
+                                required: true,
+                                type: 'text',
+                                disabled: this.viewMode
+                            },
+                            errors: {
+                                required: 'Vous devez renseigner un numéro de lot.'
+                            }
                         }
-                    }
-                },
-                {
-                    item: FormPanelInputComponent,
-                    config: {
-                        label: 'Largeur (cm)',
-                        name: 'width',
-                        value: width ? Number(width) : null,
-                        inputConfig: {
-                            required: true,
-                            type: 'number',
-                        },
-                        errors: {
-                            required: 'Vous devez renseigner une largeur.'
+                    },
+                    {
+                        item: FormPanelInputComponent,
+                        config: {
+                            label: 'Numéro de plombage/scellé',
+                            value: sealingNumber || null,
+                            name: 'sealingNumber',
+                            inputConfig: {
+                                type: 'text',
+                                disabled: this.viewMode
+                            },
                         }
-                    }
-                },
-                {
-                    item: FormPanelInputComponent,
-                    config: {
-                        label: 'Hauteur (cm)',
-                        name: 'height',
-                        value: height ? Number(height) : null,
-                        inputConfig: {
-                            required: true,
-                            type: 'number',
-                        },
-                        errors: {
-                            required: 'Vous devez renseigner une hauteur.'
+                    },
+                    {
+                        item: FormPanelToggleComponent,
+                        config: {
+                            label: 'ADR',
+                            name: 'adr',
+                            value: adr ? Boolean(adr) : null,
+                            inputConfig: {
+                                disabled: this.viewMode
+                            },
                         }
-                    }
-                },
-                {
-                    item: FormPanelButtonsComponent,
-                    config: {
-                        inputConfig: {
-                            type: 'text',
-                            elements: [
-                                {id: `compute`, label: `Calculer volume`}
-                            ],
-                            onChange: () => this.computeVolumeField(),
-                        },
-                    }
-                }] : []),
-                {
-                    item: FormPanelInputComponent,
-                    config: {
-                        label: 'Volume (m3)',
-                        name: 'volume',
-                        value: this.volume || Number(volume),
-                        inputConfig: {
-                            type: 'number',
-                            required: true,
-                            disabled: true,
-                        },
-                        errors: {
-                            required: ``
+                    },
+                    {
+                        item: FormPanelInputComponent,
+                        config: {
+                            label: 'Code fabriquant',
+                            name: 'manufacturerCode',
+                            value: manufacturerCode || null,
+                            inputConfig: {
+                                required: true,
+                                type: 'text',
+                                disabled: this.viewMode
+                            },
+                            errors: {
+                                required: 'Vous devez renseigner un code fabriquant.'
+                            }
                         }
-                    }
-                },
-                {
-                    item: FormPanelInputComponent,
-                    config: {
-                        label: 'Poids (kg)',
-                        name: 'weight',
-                        value: weight ? Number(weight) : null,
-                        inputConfig: {
-                            type: 'number',
+                    },
+                    ...(!exists ? [{
+                        item: FormPanelInputComponent,
+                        config: {
+                            label: 'Longueur (cm)',
+                            name: 'length',
+                            value: length ? Number(length) : null,
+                            inputConfig: {
+                                required: true,
+                                type: 'number',
+                                disabled: this.viewMode
+                            },
+                            errors: {
+                                required: 'Vous devez renseigner une longueur.'
+                            }
+                        }
+                    },
+                        {
+                            item: FormPanelInputComponent,
+                            config: {
+                                label: 'Largeur (cm)',
+                                name: 'width',
+                                value: width ? Number(width) : null,
+                                inputConfig: {
+                                    required: true,
+                                    type: 'number',
+                                    disabled: this.viewMode
+                                },
+                                errors: {
+                                    required: 'Vous devez renseigner une largeur.'
+                                }
+                            }
                         },
-                    }
-                },
-                {
-                    item: FormPanelToggleComponent,
-                    config: {
-                        label: 'ADR',
-                        name: 'adr',
-                        value: adr ? Boolean(adr) : null,
-                        inputConfig: {},
-                    }
-                },
-                {
-                    item: FormPanelSelectComponent,
-                    config: {
-                        label: 'Types de documents associés',
-                        name: 'associatedDocumentTypes',
-                        value: associatedDocumentTypes ? associatedDocumentTypes.split(`,`).map((label) => ({
-                            id: label,
-                            label
-                        })) : null,
-                        inputConfig: {
-                            required: true,
-                            elements: this.associatedDocumentTypeElements.split(`,`).map((label) => ({
+                        {
+                            item: FormPanelInputComponent,
+                            config: {
+                                label: 'Hauteur (cm)',
+                                name: 'height',
+                                value: height ? Number(height) : null,
+                                inputConfig: {
+                                    required: true,
+                                    type: 'number',
+                                    disabled: this.viewMode
+                                },
+                                errors: {
+                                    required: 'Vous devez renseigner une hauteur.'
+                                }
+                            }
+                        },
+                        ...(!this.viewMode ? [{
+                            item: FormPanelButtonsComponent,
+                            config: {
+                                inputConfig: {
+                                    type: 'text',
+                                    disabled: this.viewMode,
+                                    elements: [
+                                        {id: `compute`, label: `Calculer volume`}
+                                    ],
+                                    onChange: () => this.computeVolumeField(),
+                                },
+                            }
+                        }]: [])] : []),
+                    {
+                        item: FormPanelInputComponent,
+                        config: {
+                            label: 'Volume (m3)',
+                            name: 'volume',
+                            value: this.volume || Number(volume),
+                            inputConfig: {
+                                type: 'number',
+                                required: true,
+                                disabled: true,
+                            },
+                            errors: {
+                                required: ``
+                            }
+                        }
+                    },
+                    {
+                        item: FormPanelInputComponent,
+                        config: {
+                            label: 'Poids (kg)',
+                            name: 'weight',
+                            value: weight ? Number(weight) : null,
+                            inputConfig: {
+                                type: 'number',
+                                disabled: this.viewMode
+                            },
+                        }
+                    },
+                    {
+                        item: FormPanelSelectComponent,
+                        config: {
+                            label: 'Types de documents associés',
+                            name: 'associatedDocumentTypes',
+                            value: associatedDocumentTypes ? associatedDocumentTypes.split(`,`).map((label) => ({
                                 id: label,
                                 label
-                            })),
-                            isMultiple: true
-                        },
-                        errors: {
-                            required: 'Vous devez renseigner au moins un type de document associé.'
+                            })) : null,
+                            inputConfig: {
+                                required: true,
+                                elements: this.associatedDocumentTypeElements.split(`,`).map((label) => ({
+                                    id: label,
+                                    label
+                                })),
+                                isMultiple: true,
+                                disabled: this.viewMode
+                            },
+                            errors: {
+                                required: 'Vous devez renseigner au moins un type de document associé.'
+                            }
                         }
-                    }
-                },
-                {
-                    item: FormPanelTextareaComponent,
-                    config: {
-                        label: 'Commentaire',
-                        name: 'comment',
-                        value: comment || null,
-                        inputConfig: {},
-                    }
-                },
-                {
-                    item: FormPanelCameraComponent,
-                    config: {
-                        label: 'Photo(s)',
-                        name: 'photos',
-                        value: photos ? JSON.parse(photos) : null,
-                        inputConfig: {
-                            multiple: true
+                    },
+                    {
+                        item: FormPanelTextareaComponent,
+                        config: {
+                            label: 'Commentaire',
+                            name: 'comment',
+                            value: comment || null,
+                            inputConfig: {
+                                disabled: this.viewMode
+                            },
                         }
-                    }
-                });
-        }
+                    },
+                    {
+                        item: FormPanelCameraComponent,
+                        config: {
+                            label: 'Photo(s)',
+                            name: 'photos',
+                            value: photos ? JSON.parse(photos) : null,
+                            inputConfig: {
+                                multiple: true,
+                                disabled: this.viewMode
+                            }
+                        }
+                    });
+            }
+
+
+        })
     }
 
     private createHeaderConfig(): any {
@@ -366,6 +410,7 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                 this.toastService.presentToast(`Le calcul du volume est nécessaire pour valider l'ajout de la référence.`)
             } else {
                 reference.logisticUnit = this.logisticUnit;
+                console.log(reference.volume);
                 this.loadingService.presentLoadingWhile({
                     event: () => zip(
                         this.sqliteService.insert(`dispatch_pack`, {
@@ -406,10 +451,16 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
         const {length, width, height} = values;
 
         if (length && width && height) {
-            this.volume = (length * width * height) / 10 ** 6;
+            this.preComputeVolume(length, width, height);
             this.getFormConfig(values);
         } else {
             this.toastService.presentToast(`Veuillez renseigner des valeurs valides pour le calcul du volume.`);
         }
+    }
+
+    private preComputeVolume(length: number, width: number, height: number) {
+        const volumeCentimeters = length * width * height;
+        const volumeMeters = volumeCentimeters / Math.pow(10, 6);
+        this.volume = volumeMeters ? Number(volumeMeters.toFixed(6)) : undefined;
     }
 }

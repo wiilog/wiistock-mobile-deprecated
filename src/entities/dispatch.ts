@@ -17,5 +17,6 @@ export interface Dispatch {
     color: string;
     destination: string;
     comment: string;
+    packReferences: string;
     draft?: boolean;
 }

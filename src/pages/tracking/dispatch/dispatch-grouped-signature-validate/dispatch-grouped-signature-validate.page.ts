@@ -41,6 +41,7 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
     };
 
     public selectedStatus: Status;
+    public type: number;
     private dispatchs?: Array<Dispatch>;
     public statuses: Array<Status> = [];
     public location?: number;
@@ -63,6 +64,7 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
         this.afterValidate = this.currentNavParams.get('afterValidate');
         this.dispatchs = this.currentNavParams.get('dispatchesToSign');
         this.location = this.currentNavParams.get('location');
+        this.type = this.currentNavParams.get('type');
 
         // this.sqliteService.findOneById('status', this.currentNavParams.get('status'))
         //     .subscribe((status?: Status) => {
@@ -72,6 +74,7 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
         this.statusRequestParams = [
             `state = 'treated' OR state = 'partial'`,
             `category = 'acheminement'`,
+            `typeId = ${this.type}`,
         ];
         this.loadingSubscription = this.loadingService.presentLoading()
             .pipe(
@@ -135,32 +138,11 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
     public validate() {
         if (this.selectedStatus) {
             const dispatchIds = this.dispatchs.map((dispatch: Dispatch) => dispatch.id);
-            this.loadingSubscription = this.loadingService.presentLoading()
-                .pipe(
-                    tap((loader) => {
-                        this.loadingElement = loader;
-                    }),
-                    flatMap(() =>
-                        this.sqliteService.update(
-                            'dispatch',
-                            [{
-                                values: {
-                                    statusId: this.selectedStatus.id,
-                                    statusLabel: this.selectedStatus.label,
-                                    partial: this.selectedStatus.state === 'partial' ? 1 : 0
-                                },
-                                where: [`id IN (${dispatchIds.join(',')})`],
-                            }]
-                        ),
-                    ),
-                )
-                .subscribe(() => {
-                    this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE_FINISH, {
-                        dispatches: this.dispatchs,
-                        status: this.selectedStatus,
-                        location: this.location
-                    });
-                })
+            this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE_FINISH, {
+                dispatches: this.dispatchs,
+                status: this.selectedStatus,
+                location: this.location
+            })
         }
         else {
             this.toastService.presentToast('Vous devez sélectionner un statut.');
