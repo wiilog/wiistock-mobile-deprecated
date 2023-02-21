@@ -47,6 +47,7 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
     private dispatchs?: Array<Dispatch>;
     public statuses: Array<Status> = [];
     public process?: SigningMode;
+    public needsChoice: boolean;
     public from?: {
         id: number,
         text: string
@@ -82,6 +83,7 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
         this.to = this.currentNavParams.get('to');
         this.type = this.currentNavParams.get('type');
         this.process = this.currentNavParams.get('process');
+        this.needsChoice = !this.process;
 
         // this.sqliteService.findOneById('status', this.currentNavParams.get('status'))
         //     .subscribe((status?: Status) => {
