@@ -414,7 +414,7 @@ export class DispatchGroupedSignaturePage extends PageComponent {
             }
         }
         else {
-            this.toastService.presentToast('Aucun acheminement da la liste ne contient l \'UL scanné.');
+            this.toastService.presentToast('Aucun acheminement de la liste ne contient l \'UL scannée.');
         }
     }
 }
