@@ -42,6 +42,7 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
 
     public selectedStatus: Status;
     public type: number;
+    public status: number;
     private dispatchs?: Array<Dispatch>;
     public statuses: Array<Status> = [];
     public from?: {
@@ -73,6 +74,7 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
         this.from = this.currentNavParams.get('from');
         this.to = this.currentNavParams.get('to');
         this.type = this.currentNavParams.get('type');
+        this.status = this.currentNavParams.get('status');
 
         // this.sqliteService.findOneById('status', this.currentNavParams.get('status'))
         //     .subscribe((status?: Status) => {
@@ -83,7 +85,7 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
             `state = 'treated' OR state = 'partial'`,
             `category = 'acheminement'`,
             `typeId = ${this.type}`,
-            `id != ${this.selectedStatus.id}`,
+            `id != ${this.status}`,
             'groupedSignatureType != \'\''
         ];
         this.loadingSubscription = this.loadingService.presentLoading()
