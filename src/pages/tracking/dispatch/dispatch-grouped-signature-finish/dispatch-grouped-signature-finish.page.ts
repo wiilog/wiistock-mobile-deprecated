@@ -32,7 +32,6 @@ import {
     FormPanelInputComponent
 } from "@app/common/components/panel/form-panel/form-panel-input/form-panel-input.component";
 import {ApiService} from "@app/common/services/api.service";
-import {SigningMode} from "../../../../enums/signing-mode.enum";
 
 @Component({
     selector: 'wii-dispatch-grouped-signature-finish',
@@ -55,12 +54,18 @@ export class DispatchGroupedSignatureFinishPage extends PageComponent {
     public labelFrom?: string;
     public labelTo?: string;
     public selectedStatus?: Status;
-    public location?: number;
+    public from?: {
+        id: number,
+        text: string
+    };
+    public to?: {
+        id: number,
+        text: string
+    };
     public dispatchesToSignListConfig: Array<CardListConfig>;
     public readonly dispatchesListColor = CardListColorEnum.GREEN;
     public dispatchesToSign: Array<Dispatch>;
     public bodyConfig: Array<FormPanelParam>;
-    public process?: SigningMode;
 
     public constructor(private sqliteService: SqliteService,
                        private toastService: ToastService,
@@ -84,9 +89,9 @@ export class DispatchGroupedSignatureFinishPage extends PageComponent {
             this.labelTo = TranslationService.Translate(translations, 'Emplacement de dépose');
         });
         this.selectedStatus = this.currentNavParams.get('status');
-        this.location = this.currentNavParams.get('location');
+        this.from = this.currentNavParams.get('from');
+        this.to = this.currentNavParams.get('to');
         this.dispatchesToSign = this.currentNavParams.get('dispatches');
-        this.process = this.currentNavParams.get('process');
         this.dispatchesToSignListConfig = this.dispatchesToSign
             .map((dispatch: Dispatch) => {
             return {
@@ -190,13 +195,13 @@ export class DispatchGroupedSignatureFinishPage extends PageComponent {
                     ).pipe(
                         mergeMap(() => this.apiService.requestApi(ApiService.FINISH_GROUPED_SIGNATURE, {
                             params: {
-                                location: this.location,
+                                from: this.from ? this.from.id : null,
+                                to: this.to ? this.to.id : null,
                                 status: this.selectedStatus.id,
                                 signatoryTrigram,
                                 signatoryPassword,
                                 comment,
                                 dispatchesToSign: this.dispatchesToSign.map((dispatch: Dispatch) => dispatch.id).join(','),
-                                process: this.process
                             }
                         }))
                     )

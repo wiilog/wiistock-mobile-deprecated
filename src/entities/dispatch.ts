@@ -21,5 +21,6 @@ export interface Dispatch {
     destination: string;
     comment: string;
     packReferences: string;
+    packs: string;
     draft?: boolean;
 }

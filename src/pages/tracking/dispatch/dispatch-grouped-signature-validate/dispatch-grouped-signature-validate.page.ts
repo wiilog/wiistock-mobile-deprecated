@@ -16,8 +16,6 @@ import {StorageService} from '@app/common/services/storage/storage.service';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {NetworkService} from '@app/common/services/network.service';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
-import {TabConfig} from "@app/common/components/tab/tab-config";
-import {SigningMode} from "../../../../enums/signing-mode.enum";
 
 @Component({
     selector: 'wii-dispatch-grouped-signature-validate',
@@ -46,8 +44,6 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
     public type: number;
     private dispatchs?: Array<Dispatch>;
     public statuses: Array<Status> = [];
-    public process?: SigningMode;
-    public needsChoice: boolean;
     public from?: {
         id: number,
         text: string
@@ -56,11 +52,6 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
         id: number,
         text: string
     };
-
-    public tabConfig: TabConfig[] = [
-        { label: 'Enlèvement', key: SigningMode.PICK },
-        { label: 'Livraison', key: SigningMode.DROP },
-    ];
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
@@ -82,8 +73,6 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
         this.from = this.currentNavParams.get('from');
         this.to = this.currentNavParams.get('to');
         this.type = this.currentNavParams.get('type');
-        this.process = this.currentNavParams.get('process');
-        this.needsChoice = !this.process;
 
         // this.sqliteService.findOneById('status', this.currentNavParams.get('status'))
         //     .subscribe((status?: Status) => {
@@ -94,6 +83,7 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
             `state = 'treated' OR state = 'partial'`,
             `category = 'acheminement'`,
             `typeId = ${this.type}`,
+            'groupedSignatureType != \'\''
         ];
         this.loadingSubscription = this.loadingService.presentLoading()
             .pipe(
@@ -155,18 +145,13 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
 
     public validate() {
         if (this.selectedStatus) {
-            if (this.process) {
-                this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE_FINISH, {
-                    dispatches: this.dispatchs,
-                    status: this.selectedStatus,
-                    location: this.process === SigningMode.DROP ? this.to.id : this.from.id,
-                    process: this.process
-                })
-            } else {
-                this.toastService.presentToast('Veuillez selectionner un type de signature en bas de page.');
-            }
-        }
-        else {
+            this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE_FINISH, {
+                dispatches: this.dispatchs,
+                status: this.selectedStatus,
+                to: this.to,
+                from: this.from,
+            })
+        } else {
             this.toastService.presentToast('Vous devez sélectionner un statut.');
         }
     }

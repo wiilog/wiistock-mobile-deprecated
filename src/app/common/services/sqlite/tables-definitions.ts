@@ -380,6 +380,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             color: 'VARCHAR(255)',
             destination: 'VARCHAR(255)',
             packReferences: 'VARCHAR(255)',
+            packs: 'VARCHAR(255)',
             draft: 'INTEGER'
         }
     },
@@ -409,7 +410,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             state: 'VARCHAR(255)',
             category: 'VARCHAR(255)',
             displayOrder: 'INTEGER',
-            commentNeeded: 'INTEGER'
+            commentNeeded: 'INTEGER',
+            groupedSignatureType: 'VARCHAR(255)',
         }
     },
     {

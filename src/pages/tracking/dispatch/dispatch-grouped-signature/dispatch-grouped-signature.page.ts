@@ -22,7 +22,6 @@ import {StorageService} from "@app/common/services/storage/storage.service";
 import {HeaderConfig} from "@app/common/components/panel/model/header-config";
 import {IconColor} from "@app/common/components/icon/icon-color";
 import {BarcodeScannerComponent} from "@app/common/components/barcode-scanner/barcode-scanner.component";
-import {SigningMode} from "../../../../enums/signing-mode.enum";
 
 @Component({
     selector: 'wii-dispatch-grouped-signature',
@@ -335,7 +334,6 @@ export class DispatchGroupedSignaturePage extends PageComponent {
                 type: this.filters.type.id,
                 to: this.filters.to,
                 from: this.filters.from,
-                process: this.filters.to && !this.filters.from ? SigningMode.DROP : (this.filters.from && !this.filters.to ? SigningMode.PICK : null)
             });
         }
         else {
@@ -401,7 +399,10 @@ export class DispatchGroupedSignaturePage extends PageComponent {
 
     public testIfBarcodeEquals(text, fromText: boolean = true): void {
         const dispatch: Dispatch = fromText
-            ? this.dispatches.find((dispatch) => (dispatch.number === text))
+            ? this.dispatches.find((dispatchToSelect) => {
+                const packs = (dispatchToSelect.packs || '').split(',');
+                return packs.some((pack: string) => pack === text)
+            })
             : text;
 
         if (dispatch) {
@@ -413,7 +414,7 @@ export class DispatchGroupedSignaturePage extends PageComponent {
             }
         }
         else {
-            this.toastService.presentToast('L\'acheminement scanné n\'est pas dans la liste.');
+            this.toastService.presentToast('Aucun acheminement da la liste ne contient l \'UL scanné.');
         }
     }
 }
