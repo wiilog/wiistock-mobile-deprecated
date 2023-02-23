@@ -83,6 +83,7 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
             `state = 'treated' OR state = 'partial'`,
             `category = 'acheminement'`,
             `typeId = ${this.type}`,
+            `id != ${this.selectedStatus.id}`,
             'groupedSignatureType != \'\''
         ];
         this.loadingSubscription = this.loadingService.presentLoading()
