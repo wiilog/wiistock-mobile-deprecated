@@ -254,18 +254,23 @@ export class DispatchPacksPage extends PageComponent {
     }
 
     private refreshHeaderPanelConfigFromDispatch(): void {
-        this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`).subscribe((dispatch) => {
+        zip(
+            this.translationService.getRaw(`Demande`, `Acheminements`, `Champs fixes`),
+            this.translationService.getRaw(`Demande`, `Acheminements`, `Général`)
+        ).subscribe(([fieldsTranslations, generalTranslations]) => {
+            const fullTranslations = fieldsTranslations.concat(generalTranslations);
+            const dispatchTranslations = TranslationService.CreateTranslationDictionaryFromArray(fullTranslations);
             this.dispatchHeaderConfig = {
                 title: `Demande N°${this.dispatch.number}`,
                 subtitle: [
                     this.fromCreate && this.fieldParams.displayCarrierTrackingNumber
-                        ? `N° de tracking : ${this.dispatch.trackingNumber || ''}`
+                        ? TranslationService.Translate(dispatchTranslations, 'N° tracking transporteur') + ` : ${this.dispatch.carrierTrackingNumber || ''}`
                         : null,
                     !this.fromCreate || (this.fromCreate && this.fieldParams.displayPickLocation)
-                        ? TranslationService.Translate(dispatch, 'Emplacement de prise') + ' : ' + this.dispatch.locationFromLabel || ''
+                        ? TranslationService.Translate(dispatchTranslations, 'Emplacement de prise') + ' : ' + this.dispatch.locationFromLabel || ''
                         : null,
                     this.fromCreate && this.fieldParams.displayDropLocation
-                            ? TranslationService.Translate(dispatch, 'Emplacement de dépose') + ' : ' + this.dispatch.locationToLabel || ''
+                            ? TranslationService.Translate(dispatchTranslations, 'Emplacement de dépose') + ' : ' + this.dispatch.locationToLabel || ''
                             : null,
                     this.fromCreate && this.fieldParams.displayComment
                             ? `Commentaire : ${this.dispatch.comment || ''}`

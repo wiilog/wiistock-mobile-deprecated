@@ -16,6 +16,7 @@ import {NetworkService} from '@app/common/services/network.service';
 import {Dispatch} from "@entities/dispatch";
 import {TranslationService} from "@app/common/services/translations.service";
 import {Translations} from "@entities/translation";
+import {zip} from "rxjs";
 
 
 @Component({
@@ -81,8 +82,13 @@ export class DispatchRequestMenuPage extends PageComponent implements CanLeave {
     }
 
     private refreshPageList(dispatches: Array<Dispatch>) {
-        this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`).subscribe((translations) => {
-            this.dispatchTranslations = translations;
+        zip(
+            this.translationService.getRaw(`Demande`, `Acheminements`, `Champs fixes`),
+            this.translationService.getRaw(`Demande`, `Acheminements`, `Général`)
+        ).subscribe(([fieldsTranslations, generalTranslations]) => {
+
+            const fullTranslations = fieldsTranslations.concat(generalTranslations);
+            this.dispatchTranslations = TranslationService.CreateTranslationDictionaryFromArray(fullTranslations);
             this.dispatches = dispatches;
 
             this.dispatchListConfig = this.dispatches.map((dispatch: Dispatch): CardListConfig => {
@@ -98,7 +104,7 @@ export class DispatchRequestMenuPage extends PageComponent implements CanLeave {
                         });
                     },
                     content: [
-                        {label: 'Numéro de tracking', value: dispatch.trackingNumber || ''},
+                        {label: TranslationService.Translate(this.dispatchTranslations, 'N° tracking transporteur'), value: dispatch.carrierTrackingNumber || ''},
                         {label: 'Type', value: dispatch.typeLabel || ''},
                         {
                             label: TranslationService.Translate(this.dispatchTranslations, 'Emplacement de prise'),

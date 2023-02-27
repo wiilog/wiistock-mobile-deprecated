@@ -366,6 +366,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             number: 'VARCHAR(255)',
             statusId: 'INTEGER',
             startDate: 'VARCHAR(255)',
+            carrierTrackingNumber: 'VARCHAR(255)',
             endDate: 'VARCHAR(255)',
             emergency: 'VARCHAR(255)',
             locationFromLabel: 'VARCHAR(255)',
@@ -382,6 +383,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             packReferences: 'VARCHAR(255)',
             packs: 'VARCHAR(255)',
             draft: 'INTEGER',
+            comment: 'VARCHAR(255)',
             groupedSignatureStatusColor: 'VARCHAR(255)',
         }
     },

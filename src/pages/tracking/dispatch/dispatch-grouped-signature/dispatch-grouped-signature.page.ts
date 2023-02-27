@@ -257,12 +257,12 @@ export class DispatchGroupedSignaturePage extends PageComponent {
             })
             .map((dispatch: Dispatch) => {
                 return {
-                    title: {label: 'Demandeur', value: dispatch.requester},
+                    title: {label: 'Statut', value: dispatch.statusLabel},
                     customColor: dispatch.groupedSignatureStatusColor || dispatch.color,
                     content: [
                         {label: 'Numéro', value: dispatch.number || ''},
                         {label: 'Type', value: dispatch.typeLabel || ''},
-                        {label: 'Statut', value: dispatch.statusLabel || ''},
+                        {label: 'Demandeur', value: dispatch.requester || ''},
                         {
                             label: `Date d'échéance`,
                             value: dispatch.startDate && dispatch.endDate ? `Du ${dispatch.startDate} au ${dispatch.endDate}` : ''

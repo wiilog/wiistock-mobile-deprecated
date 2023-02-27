@@ -2,7 +2,7 @@ export interface Dispatch {
     id: number;
     requester: string;
     number: string;
-    trackingNumber: string;
+    carrierTrackingNumber: string;
     startDate: string;
     endDate: string;
     emergency: string;

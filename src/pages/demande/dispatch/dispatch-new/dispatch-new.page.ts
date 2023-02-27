@@ -91,7 +91,8 @@ export class DispatchNewPage extends PageComponent {
             event: () => {
                 return zip(
                     this.apiService.requestApi(ApiService.GET_DISPATCH_EMERGENCIES),
-                    this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`),
+                    this.translationService.getRaw(`Demande`, `Acheminements`, `Champs fixes`),
+                    this.translationService.getRaw(`Demande`, `Acheminements`, `Général`),
                     this.storageService.getNumber('acheminements.carrierTrackingNumber.displayedCreate'),
                     this.storageService.getNumber('acheminements.carrierTrackingNumber.requiredCreate'),
 
@@ -111,11 +112,12 @@ export class DispatchNewPage extends PageComponent {
                     this.storageService.getNumber('acheminements.receiver.requiredCreate'),
                 )
             }
-        }).subscribe(([emergencies, translations, ...fieldsParam]) => {
+        }).subscribe(([emergencies, fieldsTranslations, generalTranslations,  ...fieldsParam]) => {
             fieldsParam.forEach((value, index) => {
                 this.fieldParams[Object.keys(this.fieldParams)[index]] = value;
             });
-            this.dispatchTranslations = translations;
+            const fullTranslations = fieldsTranslations.concat(generalTranslations);
+            this.dispatchTranslations = TranslationService.CreateTranslationDictionaryFromArray(fullTranslations);
             this.emergencies = emergencies;
             this.getFormConfig();
         });
