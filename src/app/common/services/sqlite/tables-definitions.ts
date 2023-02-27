@@ -381,7 +381,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             destination: 'VARCHAR(255)',
             packReferences: 'VARCHAR(255)',
             packs: 'VARCHAR(255)',
-            draft: 'INTEGER'
+            draft: 'INTEGER',
+            groupedSignatureStatusColor: 'VARCHAR(255)',
         }
     },
     {

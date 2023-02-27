@@ -256,10 +256,9 @@ export class DispatchGroupedSignaturePage extends PageComponent {
                 );
             })
             .map((dispatch: Dispatch) => {
-                console.log(dispatch);
                 return {
                     title: {label: 'Demandeur', value: dispatch.requester},
-                    customColor: dispatch.color,
+                    customColor: dispatch.groupedSignatureStatusColor || dispatch.color,
                     content: [
                         {label: 'Numéro', value: dispatch.number || ''},
                         {label: 'Type', value: dispatch.typeLabel || ''},

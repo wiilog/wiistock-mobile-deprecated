@@ -23,4 +23,5 @@ export interface Dispatch {
     packReferences: string;
     packs: string;
     draft?: boolean;
+    groupedSignatureStatusColor?: string;
 }
