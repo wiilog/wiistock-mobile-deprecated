@@ -143,8 +143,22 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                         errors: {
                             required: 'Vous devez renseigner une réference.'
                         },
+                    },
+                },
+                ...(!this.edit ? [{
+                    item: FormPanelButtonsComponent,
+                    config: {
+                        inputConfig: {
+                            type: 'text',
+                            disabled: this.disabledAddReference,
+                            elements: [
+                                {id: `searchRef`, label: `Rechercher`}
+                            ],
+                            onChange: () => this.getReference(),
+                        },
                     }
-                }];
+                }] : [])
+            ];
             if (Object.keys(values).length > 0 || Object.keys(this.reference).length > 0 || this.viewMode) {
                 this.formConfig.push({
                         item: FormPanelInputComponent,

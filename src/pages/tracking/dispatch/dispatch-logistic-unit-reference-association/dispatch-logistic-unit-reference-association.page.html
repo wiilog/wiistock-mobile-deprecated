@@ -8,17 +8,6 @@
                       [subtitle]="headerConfig.subtitle"
                       [leftIcon]="headerConfig.leftIcon">
     </wii-panel-header>
-    <ion-button *ngIf="!edit" class="submit-button larger outline"
-                color="primary"
-                size="small"
-                expand="block"
-                (click)="getReference()" [disabled]="disabledAddReference">
-        Rechercher
-        <wii-icon name="check.svg"
-                  class="button-icon"
-                  color="primary">
-        </wii-icon>
-    </ion-button>
     <wii-form-panel #formPanelComponent
                     *ngIf="formConfig"
                     [body]="formConfig"
