@@ -14,6 +14,7 @@ export enum StorageKeyEnum {
     PARAMETER_SKIP_VALIDATION_MANUAL_TRANSFER = 'skipValidationsManualTransfer',
     PARAMETER_SKIP_VALIDATION_DELIVERY = 'skipValidationsLivraisons',
     PARAMETER_SKIP_VALIDATION_MANUAL_DELIVERY = 'manualDeliveryDisableValidations',
+    FORCE_GROUPED_SIGNATURE = 'forceDispatchSignature',
     PARAMETER_SKIP_QUANTITIES_DELIVERY = 'skipQuantitiesLivraisons',
     PARAMETER_SKIP_VALIDATION_PREPARATIONS = 'skipValidationsPreparations',
     PARAMETER_SKIP_QUANTITIES_PREPARATIONS = 'skipQuantitiesPreparations',

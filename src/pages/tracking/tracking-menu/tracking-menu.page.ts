@@ -44,18 +44,23 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
         zip(
             this.storageService.getRight(StorageKeyEnum.RIGHT_GROUP),
             this.storageService.getRight(StorageKeyEnum.RIGHT_UNGROUP),
+            this.storageService.getRight(StorageKeyEnum.FORCE_GROUPED_SIGNATURE),
             this.storageService.getCounter(StorageKeyEnum.COUNTERS_DISPATCHES_TREATED),
             this.sqliteService.count('dispatch', ['treatedStatusId IS NULL OR partial = 1']),
 
             this.translationService.get(`Demande`, `Acheminements`, `Général`)
         ).subscribe(
-            ([group, ungroup, treatedDispatches, toTreatDispatches, translations]) => {
+            ([group, ungroup, forceSignature, treatedDispatches, toTreatDispatches, translations]) => {
                 this.menuConfig.push(
                     {
                         icon: 'stock-transfer.svg',
                         label: TranslationService.Translate(translations, 'Acheminements'),
                         action: () => {
-                            this.navService.push(NavPathEnum.DISPATCH_MENU);
+                            if (forceSignature) {
+                                this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE);
+                            } else {
+                                this.navService.push(NavPathEnum.DISPATCH_MENU);
+                            }
                         }
                     },
                     {

@@ -9,7 +9,7 @@ const file = require(path.join(__dirname, '..', 'src', 'dev-credentials.json'));
 if (!file.keep) {
     const availableIPv4Addresses = Object
         .keys(interfaces)
-        .filter((key) => key !== 'VirtualBox Host-Only Network')
+        .filter((key) => key === 'Wi-Fi')
         .map((key) => interfaces[key])
         .map((interfaceValues) => (interfaceValues && interfaceValues.find(({family}) => family === 'IPv4')))
         .filter((interfaceValue) => interfaceValue && !interfaceValue.internal)
