@@ -118,7 +118,7 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                 photos,
                 exists,
             } = data;
-
+            console.log(associatedDocumentTypes);
             if (this.viewMode) {
                 if (length && width && height) {
                     this.preComputeVolume(length, width, height);
@@ -350,10 +350,13 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                         config: {
                             label: 'Types de documents associés',
                             name: 'associatedDocumentTypes',
-                            value: associatedDocumentTypes ? associatedDocumentTypes.split(`,`).map((label) => ({
-                                id: label,
-                                label
-                            })) : null,
+                            value: associatedDocumentTypes
+                                ? (Array.isArray(associatedDocumentTypes) ? associatedDocumentTypes : associatedDocumentTypes.split(`,`))
+                                    .map((label) => ({
+                                        id: label,
+                                        label
+                                    }))
+                                : null,
                             inputConfig: {
                                 required: true,
                                 elements: this.associatedDocumentTypeElements.split(`,`).map((label) => ({
