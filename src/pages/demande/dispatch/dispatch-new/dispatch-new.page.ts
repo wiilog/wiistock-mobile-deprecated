@@ -247,17 +247,22 @@ export class DispatchNewPage extends PageComponent {
             this.loadingService.presentLoadingWhile({
                 event: () => of(undefined).pipe(
                     mergeMap(() => this.apiService.requestApi(ApiService.NEW_DISPATCH, {params: values})),
-                    mergeMap(({success, msg, dispatch}) => success ? this.sqliteService.insert(`dispatch`, dispatch) : of({success, msg}))
+                    mergeMap(({success, msg, dispatch}) => success ? this.sqliteService.insert(`dispatch`, dispatch) : of({success, msg})),
+                    mergeMap((result: number | {success: boolean; msg: string}) => {
+                        if (typeof result === `number`) {
+                            return this.navService.push(NavPathEnum.DISPATCH_PACKS, {
+                                dispatchId: result,
+                                fromCreate: true,
+                            });
+                        } else {
+                            return of(result.msg);
+                        }
+                    })
                 ),
                 message: `Création de l'acheminement en cours...`,
-            }).subscribe((result: number | {success: boolean; msg: string}) => {
-                if (typeof result === `number`) {
-                    this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-                        dispatchId: result,
-                        fromCreate: true,
-                    });
-                } else {
-                    this.toastService.presentToast(result.msg);
+            }).subscribe((result: boolean | string) => {
+                if (typeof result === 'string') {
+                    this.toastService.presentToast(result);
                 }
             });
         }
