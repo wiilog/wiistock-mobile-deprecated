@@ -381,6 +381,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             color: 'VARCHAR(255)',
             destination: 'VARCHAR(255)',
             packReferences: 'VARCHAR(255)',
+            quantities: 'TEXT',
             packs: 'VARCHAR(255)',
             draft: 'INTEGER',
             comment: 'VARCHAR(255)',
