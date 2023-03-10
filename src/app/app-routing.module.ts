@@ -5,6 +5,7 @@ import {UserConnectedGuard} from '@app/guards/user-connected.guard';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {TransportShowPageRoutingModule} from '@pages/track/transport-show/transport-show-routing.module';
 import {TransportDepositMenuPageModule} from '@pages/track/transport-deposit-menu/transport-deposit-menu.module';
+import {TruckArrivalCarrierPageModule} from '@pages/tracking/truck-arrival/truck-arrival-carrier/truck-arrival-carrier-page.module';
 
 const routes: Routes = [
     {
@@ -396,6 +397,11 @@ const routes: Routes = [
         path: NavPathEnum.DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/tracking/dispatch/dispatch-logistic-unit-reference-association/dispatch-logistic-unit-reference-association.module').then(m => m.DispatchLogisticUnitReferenceAssociationModule)
+    },
+    {
+        path: NavPathEnum.TRUCK_ARRIVAL_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/truck-arrival/truck-arrival-carrier/truck-arrival-carrier-page.module').then(m => m.TruckArrivalCarrierPageModule)
     },
     {
         path: '',

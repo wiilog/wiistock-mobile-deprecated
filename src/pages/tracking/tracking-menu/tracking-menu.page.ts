@@ -69,7 +69,15 @@ export class TrackingMenuPage extends PageComponent implements ViewWillEnter {
                         action: () => {
                             this.navService.push(NavPathEnum.TRACKING_MOVEMENT_MENU);
                         }
-                });
+                    },
+                    {
+                        icon: 'arrivage-camion.svg',
+                        label: 'Arrivage camion',
+                        action: () => {
+                            this.navService.push(NavPathEnum.TRUCK_ARRIVAL_MENU);
+                        }
+                    },
+                );
                 if(group) {
                     this.menuConfig.push({
                         icon: 'group.svg',

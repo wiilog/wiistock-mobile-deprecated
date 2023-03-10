@@ -260,7 +260,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
                     this.loadFirstItems();
                 })
             )
-            // fix reload call withoyt subscribing
+            // fix reload call without subscribing
             .subscribe(
                 (list) => { $res.next(list); },
                 (error) => { $res.error(error); },

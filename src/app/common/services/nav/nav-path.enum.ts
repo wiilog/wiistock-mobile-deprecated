@@ -76,4 +76,5 @@ export enum NavPathEnum {
     DISPATCH_GROUPED_SIGNATURE_FINISH = 'dispatch-grouped-signature-finish',
     DISPATCH_NEW = 'dispatch-new',
     DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION = 'dispatch-logistic-unit-reference-association',
+    TRUCK_ARRIVAL_MENU = 'truck-arrival-menu',
 }

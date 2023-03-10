@@ -14,4 +14,5 @@ export enum SelectItemTypeEnum {
     DISPATCH_TYPE,
     COLLECTABLE_ARTICLES,
     USER,
+    CARRIER,
 }
