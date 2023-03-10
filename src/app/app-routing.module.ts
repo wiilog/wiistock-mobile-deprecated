@@ -404,6 +404,11 @@ const routes: Routes = [
         loadChildren: () => import('@pages/tracking/truck-arrival/truck-arrival-carrier/truck-arrival-carrier-page.module').then(m => m.TruckArrivalCarrierPageModule)
     },
     {
+        path: NavPathEnum.TRUCK_ARRIVAL_DRIVER,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/truck-arrival/truck-arrival-driver/truck-arrival-driver-page.module').then(m => m.TruckArrivalDriverPageModule)
+    },
+    {
         path: '',
         redirectTo: 'login',
         pathMatch: 'full'

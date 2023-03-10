@@ -71,6 +71,7 @@ export class ApiService {
     public static readonly GET_ASSOCIATED_DOCUMENT_TYPE_ELEMENTS = {method: GET, service: '/get-associated-document-type-elements'};
     public static readonly GET_ASSOCIATED_REF = {method: GET, service: '/get-associated-ref-intels/{pack}/{dispatch}'};
     public static readonly DISPATCH_VALIDATE = {method: POST, service: '/dispatch-validate'};
+    public static readonly GET_TRUCK_ARRIVALS_DEFAULT_UNLOADING_LOCATION = {method: GET, service: '/get-truck-arrival-default-unloading-location'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'

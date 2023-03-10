@@ -77,4 +77,5 @@ export enum NavPathEnum {
     DISPATCH_NEW = 'dispatch-new',
     DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION = 'dispatch-logistic-unit-reference-association',
     TRUCK_ARRIVAL_MENU = 'truck-arrival-menu',
+    TRUCK_ARRIVAL_DRIVER = 'truck-arrival-driver',
 }

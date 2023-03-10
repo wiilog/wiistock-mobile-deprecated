@@ -15,4 +15,5 @@ export enum SelectItemTypeEnum {
     COLLECTABLE_ARTICLES,
     USER,
     CARRIER,
+    DRIVER,
 }

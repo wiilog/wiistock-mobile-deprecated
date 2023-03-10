@@ -626,6 +626,20 @@ export class SqliteService {
             );
     }
 
+    public importDrivers(data): Observable<any> {
+        let drivers = data['drivers'];
+        return this.deleteBy('driver')
+            .pipe(
+                flatMap(() => (
+                    (drivers && drivers.length > 0)
+                        ? this.insert('driver', drivers.map((driver) => ({
+                            ...driver,
+                        })))
+                        : of(undefined)
+                ))
+            );
+    }
+
     public importArticlesPrepaByRefArticle(data, partial: boolean = false): Observable<any> {
         const articlesPrepaByRefArticle: Array<ArticlePrepaByRefArticle> = data['articlesPrepaByRefArticle'];
         return of(undefined)
@@ -720,6 +734,7 @@ export class SqliteService {
             flatMap(() => this.importAllowedNaturesData(data).pipe(tap(() => {console.log('--- > importAllowedNaturesData')}))),
             flatMap(() => this.importFreeFieldsData(data).pipe(tap(() => {console.log('--- > importFreeFieldData')}))),
             flatMap(() => this.importTranslations(data).pipe(tap(() => {console.log('--- > importTranslations')}))),
+            flatMap(() => this.importDrivers(data).pipe(tap(() => {console.log('--- > importDrivers')}))),
             flatMap(() => this.importDispatchesData(data).pipe(tap(() => {console.log('--- > importDispatchesData')}))),
             flatMap(() => this.importStatusData(data).pipe(tap(() => {console.log('--- > importStatusData')}))),
             flatMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),

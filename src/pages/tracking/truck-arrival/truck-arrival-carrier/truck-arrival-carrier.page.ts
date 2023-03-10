@@ -10,6 +10,7 @@ import {FormPanelComponent} from "@app/common/components/panel/form-panel/form-p
 import {SqliteService} from "@app/common/services/sqlite/sqlite.service";
 import {ToastService} from "@app/common/services/toast.service";
 import {Transporteur} from '@entities/transporteur';
+import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
 
 @Component({
     templateUrl: './truck-arrival-carrier.page.html',
@@ -37,40 +38,43 @@ export class TruckArrivalCarrierPage extends PageComponent {
     }
 
     public generateForm() {
-        this.bodyConfig = [
-            {
-                item: FormPanelSelectComponent,
-                config: {
-                    label: 'Transporteur',
-                    name: 'carrier',
-                    value: this.carrier ? this.carrier.id : null,
-                    inputConfig: {
-                        searchType: SelectItemTypeEnum.CARRIER,
-                        onChange: (carrierId) => {
-                            this.sqliteService
-                                .findOneBy('status', {id: carrierId})
-                                .subscribe((newCarrier?: Transporteur) => {
-                                    this.carrier = {
-                                        id: carrierId,
-                                        text: newCarrier.label,
-                                    }
-                                })
-                        }
-                    },
-                }
-            },
-        ]
+        // this.bodyConfig = [
+        //     {
+        //         item: FormPanelSelectComponent,
+        //         config: {
+        //             label: 'Transporteur',
+        //             name: 'carrier',
+        //             value: this.carrier ? this.carrier.id : null,
+        //             inputConfig: {
+        //                 searchType: SelectItemTypeEnum.CARRIER,
+        //                 onChange: (carrierId) => {
+        //                     this.sqliteService
+        //                         .findOneBy('status', {id: carrierId})
+        //                         .subscribe((newCarrier?: Transporteur) => {
+        //                             this.carrier = {
+        //                                 id: carrierId,
+        //                                 text: newCarrier.label,
+        //                             }
+        //                         })
+        //                 }
+        //             },
+        //         }
+        //     },
+        // ]
     }
 
     public next() {
-        if (this.carrier) {
-            this.navService.pop().subscribe(() => {
-                this.afterNext({
-                    carrier: this.carrier,
-                });
-            })
-        } else {
-            this.toastService.presentToast('Veuillez sélectionner un transporteur.');
-        }
+        // if (this.carrier) {
+        //     this.navService.pop().subscribe(() => {
+        //         this.afterNext({
+        //             carrier: this.carrier,
+        //         });
+        //     })
+        // } else {
+        //     this.toastService.presentToast('Veuillez sélectionner un transporteur.');
+        // }
+        this.navService.push(NavPathEnum.TRUCK_ARRIVAL_DRIVER, {
+            transporteurIds: [1,2,3]
+        });
     }
 }

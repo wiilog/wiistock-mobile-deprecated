@@ -41,4 +41,5 @@ export type TableName = 'emplacement'
                       | 'transport_round_line'
                       | 'dispatch_type'
                       | 'user'
-                      | 'reference';
+                      | 'reference'
+                      | 'driver';

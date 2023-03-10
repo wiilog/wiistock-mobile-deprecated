@@ -482,4 +482,13 @@ export const TablesDefinitions: Array<TableDefinition> = [
             logisticUnit: "VARCHAR(255)",
         }
     },
+    {
+        name: 'driver',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            label: 'VARCHAR(255)',
+            prenom: 'VARCHAR(255)',
+            id_transporteur: 'INTEGER',
+        }
+    },
 ];

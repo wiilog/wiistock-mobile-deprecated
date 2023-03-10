@@ -148,12 +148,12 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             databaseTable: 'picking_article_collecte',
             placeholder: 'Sélectionnez un article',
         },
-        [SelectItemTypeEnum.DISPATCH_TYPE]: {
+        [SelectItemTypeEnum.DRIVER]: {
             label: 'label',
             valueField: 'id',
             templateIndex: 'default',
-            databaseTable: 'dispatch_type',
-            placeholder: 'Sélectionnez un type'
+            databaseTable: 'driver',
+            placeholder: 'Sélectionnez un chauffeur'
         },
     }
 
