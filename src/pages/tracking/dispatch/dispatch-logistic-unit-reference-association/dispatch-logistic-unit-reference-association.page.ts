@@ -434,7 +434,7 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                             treated: 1,
                             reference: reference.reference
                         }),
-                        this.sqliteService.deleteBy('reference', [`reference = '${reference.reference}'`, `logisticUnit = ${reference.logisticUnit}`]),
+                        this.sqliteService.deleteBy('reference', [`reference = '${reference.reference}'`, `logisticUnit = '${reference.logisticUnit}'`]),
                         this.sqliteService.insert(`reference`, reference)
                     )
                 }).subscribe(() => {
