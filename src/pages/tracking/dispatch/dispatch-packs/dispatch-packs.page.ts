@@ -378,6 +378,7 @@ export class DispatchPacksPage extends PageComponent {
                                     this.loadingService.presentLoadingWhile({
                                         event: () => this.sqliteService.findOneBy(`reference`, {reference: pack.reference})
                                     }).subscribe((reference) => {
+                                        console.log('ViewMode: ', this.viewMode);
                                         this.navService.push(NavPathEnum.DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION, {
                                             logisticUnit: pack.code,
                                             dispatch: this.dispatch,

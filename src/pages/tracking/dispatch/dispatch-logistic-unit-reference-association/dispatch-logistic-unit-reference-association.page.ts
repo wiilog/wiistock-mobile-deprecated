@@ -74,11 +74,14 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
             this.associatedDocumentTypeElements = values;
             this.reference = this.currentNavParams.get(`reference`) || {};
             this.edit = this.currentNavParams.get(`edit`) || false;
-            this.viewMode = this.currentNavParams.get(`edit`) || false;
+            this.viewMode = this.currentNavParams.get(`viewMode`) || false;
             this.logisticUnit = this.currentNavParams.get(`logisticUnit`);
             this.dispatch = this.currentNavParams.get(`dispatch`);
             this.getFormConfig();
             this.createHeaderConfig();
+            if (Object.keys(this.reference).length > 0) {
+                this.disableValidate = false;
+            }
         });
     }
 
@@ -118,7 +121,6 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                 photos,
                 exists,
             } = data;
-            console.log(associatedDocumentTypes);
             if (this.viewMode) {
                 if (length && width && height) {
                     this.preComputeVolume(length, width, height);
@@ -256,67 +258,55 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                             }
                         }
                     },
-                    ...(!exists ? [{
+                    {
                         item: FormPanelInputComponent,
                         config: {
                             label: 'Longueur (cm)',
                             name: 'length',
                             value: length ? Number(length) : null,
                             inputConfig: {
-                                required: true,
                                 type: 'number',
                                 disabled: this.viewMode
                             },
-                            errors: {
-                                required: 'Vous devez renseigner une longueur.'
-                            }
                         }
                     },
-                        {
-                            item: FormPanelInputComponent,
-                            config: {
-                                label: 'Largeur (cm)',
-                                name: 'width',
-                                value: width ? Number(width) : null,
-                                inputConfig: {
-                                    required: true,
-                                    type: 'number',
-                                    disabled: this.viewMode
-                                },
-                                errors: {
-                                    required: 'Vous devez renseigner une largeur.'
-                                }
-                            }
-                        },
-                        {
-                            item: FormPanelInputComponent,
-                            config: {
-                                label: 'Hauteur (cm)',
-                                name: 'height',
-                                value: height ? Number(height) : null,
-                                inputConfig: {
-                                    required: true,
-                                    type: 'number',
-                                    disabled: this.viewMode
-                                },
-                                errors: {
-                                    required: 'Vous devez renseigner une hauteur.'
-                                }
-                            }
-                        },
-                        ...(!this.viewMode ? [{
-                            item: FormPanelButtonsComponent,
-                            config: {
-                                inputConfig: {
-                                    type: 'text',
-                                    disabled: this.viewMode,
-                                    elements: [
-                                        {id: `compute`, label: `Calculer volume`}
-                                    ],
-                                    onChange: () => this.computeVolumeField(),
-                                },
-                            }
-                        }]: [])] : []),
+                    {
+                        item: FormPanelInputComponent,
+                        config: {
+                            label: 'Largeur (cm)',
+                            name: 'width',
+                            value: width ? Number(width) : null,
+                            inputConfig: {
+                                type: 'number',
+                                disabled: this.viewMode
+                            },
+                        }
+                    },
+                    {
+                        item: FormPanelInputComponent,
+                        config: {
+                            label: 'Hauteur (cm)',
+                            name: 'height',
+                            value: height ? Number(height) : null,
+                            inputConfig: {
+                                type: 'number',
+                                disabled: this.viewMode
+                            },
+                        }
+                    },
+                    ...(!this.viewMode ? [{
+                        item: FormPanelButtonsComponent,
+                        config: {
+                            inputConfig: {
+                                type: 'text',
+                                disabled: this.viewMode,
+                                elements: [
+                                    {id: `compute`, label: `Calculer volume`}
+                                ],
+                                onChange: () => this.computeVolumeField(),
+                            },
+                        }
+                    }] : []),
                     {
                         item: FormPanelInputComponent,
                         config: {
@@ -329,7 +319,7 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                                 disabled: true,
                             },
                             errors: {
-                                required: ``
+                                required: `Un volume est nécéssaire.`
                             }
                         }
                     },
@@ -341,8 +331,12 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                             value: weight ? Number(weight) : null,
                             inputConfig: {
                                 type: 'number',
+                                required: true,
                                 disabled: this.viewMode
                             },
+                            errors: {
+                                required: 'Vous devez renseigner un poids.'
+                            }
                         }
                     },
                     {
@@ -417,8 +411,11 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
             this.toastService.presentToast(this.formPanelComponent.firstError);
         } else {
             const reference = Object.keys(this.formPanelComponent.values).reduce((acc, key) => {
-                if (this.formPanelComponent.values[key] !== undefined) {
-                    acc[key] = this.formPanelComponent.values[key];
+                console.log(key);
+                if (this.formPanelComponent.values[key] !== undefined && key !== 'undefined') {
+                    acc[key] = key === 'associatedDocumentTypes'
+                        ? this.formPanelComponent.values[key].replace(/;/g, ',')
+                        : this.formPanelComponent.values[key];
                 }
 
                 return acc;
@@ -427,9 +424,9 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                 this.toastService.presentToast(`Le calcul du volume est nécessaire pour valider l'ajout de la référence.`)
             } else {
                 reference.logisticUnit = this.logisticUnit;
-                console.log(reference.volume);
                 this.loadingService.presentLoadingWhile({
                     event: () => zip(
+                        this.sqliteService.deleteBy(`dispatch_pack`, [`code = '${this.logisticUnit}'`, `dispatchId = ${this.dispatch.id}`]),
                         this.sqliteService.insert(`dispatch_pack`, {
                             code: this.logisticUnit,
                             quantity: reference.quantity,
@@ -437,12 +434,8 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                             treated: 1,
                             reference: reference.reference
                         }),
-                        this.edit
-                            ? this.sqliteService.update(`reference`, [{
-                                values: {reference},
-                                where: [`reference = '${reference.reference}'`]
-                            }
-                            ]) : this.sqliteService.insert(`reference`, reference)
+                        this.sqliteService.deleteBy('reference', [`reference = '${reference.reference}'`, `logisticUnit = ${reference.logisticUnit}`]),
+                        this.sqliteService.insert(`reference`, reference)
                     )
                 }).subscribe(() => {
                     this.navService.pop();
@@ -453,14 +446,18 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
 
     public getReference() {
         const {reference} = this.formPanelComponent.values;
-        this.loadingService.presentLoadingWhile({
-            event: () => this.apiService.requestApi(ApiService.GET_REFERENCE, {params: {reference}}),
-            message: `Récupération des informations de la référence en cours...`
-        }).subscribe(({reference}) => {
-            this.disableValidate = false;
-            this.reference = reference;
-            this.getFormConfig();
-        });
+        if (reference) {
+            this.loadingService.presentLoadingWhile({
+                event: () => this.apiService.requestApi(ApiService.GET_REFERENCE, {params: {reference}}),
+                message: `Récupération des informations de la référence en cours...`
+            }).subscribe(({reference}) => {
+                this.disableValidate = false;
+                this.reference = reference;
+                this.getFormConfig();
+            });
+        } else {
+            this.toastService.presentToast(`Veuillez renseigner une référence valide.`);
+        }
     }
 
     private computeVolumeField(): void {
@@ -479,5 +476,9 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
         const volumeCentimeters = length * width * height;
         const volumeMeters = volumeCentimeters / Math.pow(10, 6);
         this.volume = volumeMeters ? Number(volumeMeters.toFixed(6)) : undefined;
+    }
+
+    public formIsLoaded() {
+        document.getElementsByName('reference')[0].focus();
     }
 }

@@ -256,6 +256,7 @@ export class DispatchGroupedSignaturePage extends PageComponent {
                 );
             })
             .map((dispatch: Dispatch) => {
+                console.log(dispatch);
                 return {
                     title: {label: 'Statut', value: dispatch.statusLabel},
                     customColor: dispatch.groupedSignatureStatusColor || dispatch.color,
@@ -276,8 +277,8 @@ export class DispatchGroupedSignaturePage extends PageComponent {
                             value: dispatch.locationToLabel || ''
                         },
                         {
-                            label: 'Références',
-                            value: dispatch.packReferences || ''
+                            label: 'Références (quantité)',
+                            value: dispatch.quantities || ''
                         },
                         (dispatch.emergency
                             ? {label: 'Urgence', value: dispatch.emergency || ''}
