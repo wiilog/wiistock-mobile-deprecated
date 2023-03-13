@@ -340,11 +340,12 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                             value: weight ? Number(weight) : null,
                             inputConfig: {
                                 type: 'number',
+                                required: true,
                                 disabled: this.viewMode
                             },
-                        },
-                        errors: {
-                            required: 'Vous devez renseigner un poids.'
+                            errors: {
+                                required: 'Vous devez renseigner un poids.'
+                            }
                         }
                     },
                     {
@@ -486,5 +487,9 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
         const volumeCentimeters = length * width * height;
         const volumeMeters = volumeCentimeters / Math.pow(10, 6);
         this.volume = volumeMeters ? Number(volumeMeters.toFixed(6)) : undefined;
+    }
+
+    public formIsLoaded() {
+        document.getElementsByName('reference')[0].focus();
     }
 }

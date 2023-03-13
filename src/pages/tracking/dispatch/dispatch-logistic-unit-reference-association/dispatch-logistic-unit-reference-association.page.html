@@ -11,6 +11,7 @@
     <wii-form-panel #formPanelComponent
                     *ngIf="formConfig"
                     [body]="formConfig"
+                    (loaded)="formIsLoaded()"
                     [isForm]="true"></wii-form-panel>
 </div>
 
