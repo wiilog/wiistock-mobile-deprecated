@@ -94,7 +94,6 @@ export class DispatchGroupedSignatureFinishPage extends PageComponent {
             this.dispatchesToSign = this.currentNavParams.get('dispatches');
             this.dispatchesToSignListConfig = this.dispatchesToSign
                 .map((dispatch: Dispatch) => {
-                    console.log(dispatch);
                     return {
                         title: {label: 'Statut', value: dispatch.statusLabel},
                         customColor: dispatch.groupedSignatureStatusColor || dispatch.color,

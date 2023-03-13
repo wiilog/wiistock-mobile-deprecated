@@ -19,9 +19,8 @@
                 color="primary"
                 size="large"
                 expand="full"
-                *ngIf="!viewMode"
-                (click)="validate()"
-                [disabled]="!edit && disableValidate">
+                *ngIf="!viewMode && !disableValidate"
+                (click)="validate()">
         Valider
         <wii-icon name="check.svg"
                   class="button-icon"

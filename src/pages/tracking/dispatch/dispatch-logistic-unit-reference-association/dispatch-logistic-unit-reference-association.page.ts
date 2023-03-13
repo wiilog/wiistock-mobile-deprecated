@@ -118,7 +118,6 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                 photos,
                 exists,
             } = data;
-            console.log(associatedDocumentTypes);
             if (this.viewMode) {
                 if (length && width && height) {
                     this.preComputeVolume(length, width, height);
@@ -256,7 +255,7 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                             }
                         }
                     },
-                    ...(!exists ? [{
+                    {
                         item: FormPanelInputComponent,
                         config: {
                             label: 'Longueur (cm)',
@@ -272,51 +271,51 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                             }
                         }
                     },
-                        {
-                            item: FormPanelInputComponent,
-                            config: {
-                                label: 'Largeur (cm)',
-                                name: 'width',
-                                value: width ? Number(width) : null,
-                                inputConfig: {
-                                    required: true,
-                                    type: 'number',
-                                    disabled: this.viewMode
-                                },
-                                errors: {
-                                    required: 'Vous devez renseigner une largeur.'
-                                }
+                    {
+                        item: FormPanelInputComponent,
+                        config: {
+                            label: 'Largeur (cm)',
+                            name: 'width',
+                            value: width ? Number(width) : null,
+                            inputConfig: {
+                                required: true,
+                                type: 'number',
+                                disabled: this.viewMode
+                            },
+                            errors: {
+                                required: 'Vous devez renseigner une largeur.'
                             }
-                        },
-                        {
-                            item: FormPanelInputComponent,
-                            config: {
-                                label: 'Hauteur (cm)',
-                                name: 'height',
-                                value: height ? Number(height) : null,
-                                inputConfig: {
-                                    required: true,
-                                    type: 'number',
-                                    disabled: this.viewMode
-                                },
-                                errors: {
-                                    required: 'Vous devez renseigner une hauteur.'
-                                }
+                        }
+                    },
+                    {
+                        item: FormPanelInputComponent,
+                        config: {
+                            label: 'Hauteur (cm)',
+                            name: 'height',
+                            value: height ? Number(height) : null,
+                            inputConfig: {
+                                required: true,
+                                type: 'number',
+                                disabled: this.viewMode
+                            },
+                            errors: {
+                                required: 'Vous devez renseigner une hauteur.'
                             }
-                        },
-                        ...(!this.viewMode ? [{
-                            item: FormPanelButtonsComponent,
-                            config: {
-                                inputConfig: {
-                                    type: 'text',
-                                    disabled: this.viewMode,
-                                    elements: [
-                                        {id: `compute`, label: `Calculer volume`}
-                                    ],
-                                    onChange: () => this.computeVolumeField(),
-                                },
-                            }
-                        }]: [])] : []),
+                        }
+                    },
+                    ...(!this.viewMode ? [{
+                        item: FormPanelButtonsComponent,
+                        config: {
+                            inputConfig: {
+                                type: 'text',
+                                disabled: this.viewMode,
+                                elements: [
+                                    {id: `compute`, label: `Calculer volume`}
+                                ],
+                                onChange: () => this.computeVolumeField(),
+                            },
+                        }
+                    }] : []),
                     {
                         item: FormPanelInputComponent,
                         config: {
@@ -343,6 +342,9 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
                                 type: 'number',
                                 disabled: this.viewMode
                             },
+                        },
+                        errors: {
+                            required: 'Vous devez renseigner un poids.'
                         }
                     },
                     {
@@ -453,14 +455,19 @@ export class DispatchLogisticUnitReferenceAssociationPage extends PageComponent 
 
     public getReference() {
         const {reference} = this.formPanelComponent.values;
-        this.loadingService.presentLoadingWhile({
-            event: () => this.apiService.requestApi(ApiService.GET_REFERENCE, {params: {reference}}),
-            message: `Récupération des informations de la référence en cours...`
-        }).subscribe(({reference}) => {
-            this.disableValidate = false;
-            this.reference = reference;
-            this.getFormConfig();
-        });
+        if (reference) {
+            this.loadingService.presentLoadingWhile({
+                event: () => this.apiService.requestApi(ApiService.GET_REFERENCE, {params: {reference}}),
+                message: `Récupération des informations de la référence en cours...`
+            }).subscribe(({reference}) => {
+                this.disableValidate = false;
+                console.log(!this.viewMode, this.edit, !this.disableValidate);
+                this.reference = reference;
+                this.getFormConfig();
+            });
+        } else {
+            this.toastService.presentToast(`Veuillez renseigner une référence valide.`);
+        }
     }
 
     private computeVolumeField(): void {
