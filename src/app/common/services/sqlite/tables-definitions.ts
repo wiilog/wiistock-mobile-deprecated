@@ -483,4 +483,11 @@ export const TablesDefinitions: Array<TableDefinition> = [
             logisticUnit: "VARCHAR(255)",
         }
     },
+    {
+        name: 'transporteur',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            label: 'VARCHAR(255)',
+        }
+    },
 ];
