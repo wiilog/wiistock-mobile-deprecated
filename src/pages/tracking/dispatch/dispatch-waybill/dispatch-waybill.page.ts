@@ -16,6 +16,9 @@ import {
 } from "@app/common/components/panel/form-panel/form-panel-calendar/form-panel-calendar-mode";
 import {StorageService} from "@app/common/services/storage/storage.service";
 import {ToastService} from "@app/common/services/toast.service";
+import {
+    FormPanelTextareaComponent
+} from "@app/common/components/panel/form-panel/form-panel-textarea/form-panel-textarea.component";
 
 @Component({
     selector: 'wii-dispatch-packs',
@@ -48,7 +51,7 @@ export class DispatchWaybillPage extends PageComponent {
         this.data = this.currentNavParams.get('data');
         this.bodyConfig = [
             {
-                item: FormPanelInputComponent,
+                item: FormPanelTextareaComponent,
                 config: {
                     label: 'Transporteur',
                     name: 'carrier',
@@ -63,7 +66,7 @@ export class DispatchWaybillPage extends PageComponent {
                 }
             },
             {
-                item: FormPanelInputComponent,
+                item: FormPanelTextareaComponent,
                 config: {
                     label: 'Expéditeur',
                     value: this.data.consignor || null,
@@ -78,7 +81,7 @@ export class DispatchWaybillPage extends PageComponent {
                 }
             },
             {
-                item: FormPanelInputComponent,
+                item: FormPanelTextareaComponent,
                 config: {
                     label: 'Destinataire',
                     value: this.data.receiver || null,

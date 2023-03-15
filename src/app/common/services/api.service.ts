@@ -71,6 +71,7 @@ export class ApiService {
     public static readonly GET_ASSOCIATED_DOCUMENT_TYPE_ELEMENTS = {method: GET, service: '/get-associated-document-type-elements'};
     public static readonly GET_ASSOCIATED_REF = {method: GET, service: '/get-associated-ref-intels/{pack}/{dispatch}'};
     public static readonly DISPATCH_VALIDATE = {method: POST, service: '/dispatch-validate'};
+    public static readonly GET_WAYBILL_DATA = {method: GET, service: '/get-waybill-data/{dispatch}'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'

@@ -564,15 +564,29 @@ export class DispatchPacksPage extends PageComponent {
 
     public goToWayBill() {
         if(!this.hasWayBillData) {
-            this.navService.push(NavPathEnum.DISPATCH_WAYBILL, {
-                dispatchId: this.dispatch.id,
-                dispatchPacks: this.dispatchPacks,
-                data: this.wayBillData,
-                afterValidate: (data) => {
-                    this.wayBillData = data;
-                    this.hasWayBillData = true;
+            this.loadingService.presentLoadingWhile({
+                event: () => {
+                    return this.apiService.requestApi(ApiService.GET_WAYBILL_DATA, {
+                        pathParams: {
+                            dispatch: this.dispatch.id
+                        }
+                    })
                 }
-            });
+            }).subscribe((apiWayBill) => {
+                const fusedData = {
+                    ...apiWayBill.data,
+                    ...this.wayBillData
+                };
+                this.navService.push(NavPathEnum.DISPATCH_WAYBILL, {
+                    dispatchId: this.dispatch.id,
+                    dispatchPacks: this.dispatchPacks,
+                    data: fusedData,
+                    afterValidate: (data) => {
+                        this.wayBillData = data;
+                        this.hasWayBillData = true;
+                    }
+                });
+            })
         } else {
             this.hasWayBillData = false;
         }
