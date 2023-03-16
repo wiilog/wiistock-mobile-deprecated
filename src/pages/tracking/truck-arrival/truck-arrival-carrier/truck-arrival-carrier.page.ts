@@ -38,7 +38,7 @@ export class TruckArrivalCarrierPage extends PageComponent {
 
     public bodyConfig: Array<FormPanelParam>;
 
-    public carrier: {id: number ; label: string ; logo: string ; minTrackingNumberLength?: number ; maxTrackingNumberLength?: number};
+    public carrier: Carrier;
 
     public carriers: Array<Carrier>;
 
@@ -84,13 +84,7 @@ export class TruckArrivalCarrierPage extends PageComponent {
                             this.sqliteService
                                 .findOneBy(`carrier`, {id: carrierId})
                                 .subscribe((newCarrier?: Carrier) => {
-                                    this.carrier = {
-                                        id: carrierId,
-                                        label: newCarrier.label,
-                                        logo: newCarrier.logo,
-                                        minTrackingNumberLength: newCarrier.minTrackingNumberLength ?? null,
-                                        maxTrackingNumberLength: newCarrier.maxTrackingNumberLength ?? null,
-                                    }
+                                    this.carrier = newCarrier;
                                 })
                         }
                     },
