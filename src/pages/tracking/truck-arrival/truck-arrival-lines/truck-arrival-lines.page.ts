@@ -128,28 +128,32 @@ export class TruckArrivalLinesPage extends PageComponent {
 
     public testIfBarcodeEquals(truckArrivalLineNumber: string, fromClick = false): void {
         if(truckArrivalLineNumber.length < this.carrier.minTrackingNumberLength || truckArrivalLineNumber.length > this.carrier.maxTrackingNumberLength){
-            const message = this.carrier.minTrackingNumberLength && this.carrier.maxTrackingNumberLength
+            const message = Boolean(this.carrier.minTrackingNumberLength) && Boolean(this.carrier.maxTrackingNumberLength)
                 ? `Le numéro de tracking transporteur doit contenir entre ${this.carrier.minTrackingNumberLength} et ${this.carrier.maxTrackingNumberLength} caractères, voulez vous l'utiliser quand même ?`
-                : (this.carrier.minTrackingNumberLength
+                : (Boolean(this.carrier.minTrackingNumberLength) && truckArrivalLineNumber.length < this.carrier.minTrackingNumberLength
                     ? `Le numéro de tracking transporteur doit contenir au moins ${this.carrier.minTrackingNumberLength} caractères, voulez vous l'utiliser quand même ?`
-                    : (this.carrier.maxTrackingNumberLength
-                        ? `Le numéro de tracking transporteur doit contenir au moins ${this.carrier.maxTrackingNumberLength} caractères, voulez vous l'utiliser quand même ?`
+                    : (Boolean(this.carrier.maxTrackingNumberLength) && truckArrivalLineNumber.length > this.carrier.maxTrackingNumberLength
+                        ? `Le numéro de tracking transporteur doit contenir au maximum ${this.carrier.maxTrackingNumberLength} caractères, voulez vous l'utiliser quand même ?`
                         : ''));
-            this.alertService.show({
-                header: '',
-                message,
-                buttons: [{
-                    text: 'Confirmer',
-                    cssClass: 'alert-success',
-                    handler: () => {
-                        this.checkIfAlreadyExist(truckArrivalLineNumber)
-                    }
-                }, {
-                    text: 'Annuler',
-                    cssClass: 'alert-danger',
-                    role: 'cancel',
-                }]
-            });
+            if(message){
+                this.alertService.show({
+                    header: '',
+                    message,
+                    buttons: [{
+                        text: 'Confirmer',
+                        cssClass: 'alert-success',
+                        handler: () => {
+
+                        }
+                    }, {
+                        text: 'Annuler',
+                        cssClass: 'alert-danger',
+                        role: 'cancel',
+                    }]
+                });
+            } else {
+                this.checkIfAlreadyExist(truckArrivalLineNumber);
+            }
         } else {
             this.checkIfAlreadyExist(truckArrivalLineNumber);
         }
