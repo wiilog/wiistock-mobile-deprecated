@@ -71,9 +71,11 @@ export class ApiService {
     public static readonly GET_ASSOCIATED_DOCUMENT_TYPE_ELEMENTS = {method: GET, service: '/get-associated-document-type-elements'};
     public static readonly GET_ASSOCIATED_REF = {method: GET, service: '/get-associated-ref-intels/{pack}/{dispatch}'};
     public static readonly DISPATCH_VALIDATE = {method: POST, service: '/dispatch-validate'};
+    public static readonly FINISH_TRUCK_ARRIVAL = {method: POST, service: '/finish-truck-arrival'};
     public static readonly GET_WAYBILL_DATA = {method: GET, service: '/get-waybill-data/{dispatch}'};
     public static readonly GET_CARRIERS = {method: GET, service: '/get-carriers-data'};
     public static readonly GET_TRUCK_ARRIVALS_DEFAULT_UNLOADING_LOCATION = {method: GET, service: '/get-truck-arrival-default-unloading-location'};
+    public static readonly GET_TRUCK_ARRIVALS_LINES_NUMBER = {method: GET, service: '/get-truck-arrival-lines-number'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'
@@ -188,9 +190,10 @@ export class ApiService {
     }
 
     private static ObjectToHttpParams(method: string,
-                                      object: { [x: string]: any }): HttpParams|FormData {
+                                      object: { [_: string]: any }): HttpParams|FormData {
         const paramsObject = Object
             .keys(object)
+            .filter((key: string) => object[key] !== null && object[key] !== undefined)
             .reduce((acc, key) => ({
                 ...acc,
                 [key]: ((typeof object[key] !== 'string') && (typeof object[key] !== 'number') && !(object[key] instanceof Blob))

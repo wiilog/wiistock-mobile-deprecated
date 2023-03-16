@@ -188,6 +188,7 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
                     params.get('fromEmptyRound')
                 )
             },
+            {pagePath: NavPathEnum.TRUCK_ARRIVAL_MENU, label: 'Arrivage camion'},
         ];
     }
 

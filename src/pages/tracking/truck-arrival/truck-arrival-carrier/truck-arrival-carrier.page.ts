@@ -17,6 +17,7 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {BarcodeScannerComponent} from '@app/common/components/barcode-scanner/barcode-scanner.component';
 import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {MainHeaderService} from "@app/common/services/main-header.service";
 
 @Component({
     selector: 'wii-truck-arrival-carrier',
@@ -48,11 +49,14 @@ export class TruckArrivalCarrierPage extends PageComponent {
                        private networkService: NetworkService,
                        private loadingService: LoadingService,
                        private localDataService: LocalDataManagerService,
-                       private apiService: ApiService) {
+                       private apiService: ApiService,
+                       private mainHeaderService: MainHeaderService) {
         super(navService);
     }
 
     public ionViewWillEnter(): void {
+        this.mainHeaderService.emitSubTitle('Etape 1/4');
+
         this.afterNext = this.currentNavParams.get('afterNext');
         this.carrier = this.currentNavParams.get('carrier');
         this.generateForm();
@@ -93,18 +97,13 @@ export class TruckArrivalCarrierPage extends PageComponent {
     }
 
     public next() {
-        // if (this.carrier) {
-        //     this.navService.pop().subscribe(() => {
-        //         this.afterNext({
-        //             carrier: this.carrier,
-        //         });
-        //     })
-        // } else {
-        //     this.toastService.presentToast('Veuillez sélectionner un transporteur.');
-        // }
-        this.navService.push(NavPathEnum.TRUCK_ARRIVAL_DRIVER, {
-            transporteurIds: [1,2,3]
-        });
+        if (this.carrier) {
+            this.navService.push(NavPathEnum.TRUCK_ARRIVAL_DRIVER, {
+                carrier: this.carrier
+            });
+        } else {
+            this.toastService.presentToast('Veuillez sélectionner un transporteur.');
+        }
     }
 
     public onLogoClick(event: Event, id: number) {

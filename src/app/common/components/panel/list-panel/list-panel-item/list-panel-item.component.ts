@@ -14,6 +14,7 @@ export class ListPanelItemComponent {
         [name: string]: {
             label: string;
             value: string;
+            emergency?: boolean;
         };
     };
 
@@ -31,6 +32,16 @@ export class ListPanelItemComponent {
 
     @Input()
     public rightIcon?: IconConfig;
+
+    @Input()
+    public leftIcon?: IconConfig;
+
+    @Input()
+    public rightButton?: {
+        text: string;
+        color?: string;
+        action?: () => void;
+    }
 
     @Input()
     public rightIconBase64?: string;
@@ -53,7 +64,7 @@ export class ListPanelItemComponent {
     };
 
     @Input()
-    public pressAction?: (infos: {[name: string]: {label: string; value: string;};}) => void;
+    public pressAction?: (infos: {[name: string]: {label: string; value: string; emergncy?: boolean;};}) => void;
 
     @HostBinding('class')
     public _backgroundColor?: string;
