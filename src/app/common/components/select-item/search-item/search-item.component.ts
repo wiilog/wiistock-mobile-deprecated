@@ -155,6 +155,13 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             databaseTable: 'driver',
             placeholder: 'Sélectionnez un chauffeur'
         },
+        [SelectItemTypeEnum.CARRIER]: {
+            label: 'label',
+            valueField: 'id',
+            templateIndex: 'default',
+            databaseTable: 'carrier',
+            placeholder: 'Sélectionnez un transporteur'
+        },
     }
 
     public constructor(private sqliteService: SqliteService,
@@ -219,6 +226,9 @@ export class SearchItemComponent implements OnInit, OnDestroy {
                 || !item
                 || item.label !== this._item.label
             )) {
+            if (this.isMultiple) {
+                item = [item];
+            }
             this._item = item;
         }
     }

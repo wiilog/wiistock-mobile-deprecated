@@ -21,6 +21,7 @@ export interface Dispatch {
     destination: string;
     comment: string;
     packReferences: string;
+    quantities: string;
     packs: string;
     draft?: boolean;
     groupedSignatureStatusColor?: string;

@@ -1,7 +1,20 @@
 <div class="page-content">
-<!--    <wii-form-panel #formPanelComponent-->
-<!--                    [body]="bodyConfig">-->
-<!--    </wii-form-panel>-->
+    <wii-form-panel #formPanelComponent
+                    [body]="bodyConfig">
+    </wii-form-panel>
+    <div class="logo-cards-container">
+        <wii-logo-card *ngFor="let carrierI of carriers"
+                       [src]="carrierI.logo"
+                       [alt]="carrierI.label"
+                       [selected]="carrier && carrier.id === carrierI.id"
+                       (action)="onLogoClick($event, carrierI.id)">
+            {{ carrierI.logo }}
+        </wii-logo-card>
+    </div>
+    <wii-barcode-scanner #footerScannerComponent
+                         (add)="testIfBarcodeEquals($event[0])"
+                         [mode]="scannerMode">
+    </wii-barcode-scanner>
 </div>
 
 <div class="page-footer">
@@ -12,7 +25,7 @@
                 [hidden]="false"
                 (click)="next()">
         Suivant
-        <wii-icon name="check.svg"
+        <wii-icon name="chevron-droite-blanc.svg"
                   class="button-icon"
                   color="white">
         </wii-icon>

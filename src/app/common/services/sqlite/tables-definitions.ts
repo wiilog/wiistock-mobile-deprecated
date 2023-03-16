@@ -381,6 +381,7 @@ export const TablesDefinitions: Array<TableDefinition> = [
             color: 'VARCHAR(255)',
             destination: 'VARCHAR(255)',
             packReferences: 'VARCHAR(255)',
+            quantities: 'TEXT',
             packs: 'VARCHAR(255)',
             draft: 'INTEGER',
             comment: 'VARCHAR(255)',
@@ -489,6 +490,17 @@ export const TablesDefinitions: Array<TableDefinition> = [
             label: 'VARCHAR(255)',
             prenom: 'VARCHAR(255)',
             id_transporteur: 'INTEGER',
+        }
+    },
+    {
+        name: 'carrier',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            label: 'VARCHAR(255)',
+            logo: 'TEXT',
+            minTrackingNumberLength: 'INTEGER',
+            maxTrackingNumberLength: 'INTEGER',
+            recurrent: 'INTEGER',
         }
     },
 ];

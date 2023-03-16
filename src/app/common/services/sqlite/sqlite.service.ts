@@ -16,6 +16,7 @@ import {TablesDefinitions} from '@app/common/services/sqlite/tables-definitions'
 import {TableName} from '@app/common/services/sqlite/table-definition';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {DemandeLivraisonArticle} from '@entities/demande-livraison-article';
+import {Carrier} from '@entities/carrier';
 
 
 @Injectable({
@@ -719,6 +720,18 @@ export class SqliteService {
             );
     }
 
+    public importTransporteursData(data): Observable<any> {
+        const apiCarriers: Array<Carrier> = data[`carriers`];
+        return this.deleteBy('carrier').pipe(
+            flatMap(() => (
+                apiCarriers && apiCarriers.length > 0
+                    ? this.insert('carrier', apiCarriers)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
     public importData(data: any): Observable<any> {
         return of(undefined).pipe(
             flatMap(() => this.importLocations(data).pipe(tap(() => {console.log('--- > importLocations')}))),
@@ -740,6 +753,7 @@ export class SqliteService {
             flatMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),
             flatMap(() => this.importTransportRoundData(data).pipe(tap(() => {console.log('--- > importTransportRoundData')}))),
             flatMap(() => this.importDispatchTypes(data).pipe(tap(() => {console.log('--- > importDispatchTypesData')}))),
+            flatMap(() => this.importTransporteursData(data).pipe(tap(() => (console.log('--- > importTransporteursData'))))),
             flatMap(() => this.importUsers(data).pipe(tap(() => {console.log('--- > importUsersData')}))),
             flatMap(() => (
                 this.storageService.getRight(StorageKeyEnum.RIGHT_INVENTORY_MANAGER).pipe(

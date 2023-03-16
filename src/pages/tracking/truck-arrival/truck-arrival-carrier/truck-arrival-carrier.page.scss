@@ -4,4 +4,12 @@
 .page-content {
     margin-top: $spacer;
     margin-bottom: $spacer;
+
+    .logo-cards-container {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
+        padding-left: $spacer - 2;
+        padding-right: $spacer - 2;
+    }
 }

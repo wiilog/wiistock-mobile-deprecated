@@ -5,6 +5,7 @@ import {CommonModule as AngularCommonModule} from '@angular/common';
 import {CommonModule} from '@app/common/common.module';
 import {TruckArrivalCarrierPage} from '@pages/tracking/truck-arrival/truck-arrival-carrier/truck-arrival-carrier.page';
 import {TruckArrivalCarrierRoutingModule} from '@pages/tracking/truck-arrival/truck-arrival-carrier/truck-arrival-carrier-routing.module';
+import {LogoCardComponent} from '@app/common/components/logo-card/logo-card.component';
 
 @NgModule({
     imports: [
@@ -14,7 +15,7 @@ import {TruckArrivalCarrierRoutingModule} from '@pages/tracking/truck-arrival/tr
         TruckArrivalCarrierRoutingModule,
         CommonModule
     ],
-    declarations: [TruckArrivalCarrierPage]
+    declarations: [TruckArrivalCarrierPage, LogoCardComponent]
 })
 export class TruckArrivalCarrierPageModule {
 }
