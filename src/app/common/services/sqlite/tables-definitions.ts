@@ -484,10 +484,14 @@ export const TablesDefinitions: Array<TableDefinition> = [
         }
     },
     {
-        name: 'transporteur',
+        name: 'carrier',
         attributes: {
             id: 'INTEGER PRIMARY KEY',
             label: 'VARCHAR(255)',
+            logo: 'TEXT',
+            minTrackingNumberLength: 'INTEGER',
+            maxTrackingNumberLength: 'INTEGER',
+            recurrent: 'INTEGER',
         }
     },
 ];

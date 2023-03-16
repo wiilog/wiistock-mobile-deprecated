@@ -9,7 +9,7 @@ import {SelectItemTypeEnum} from '@app/common/components/select-item/select-item
 import {FormPanelComponent} from '@app/common/components/panel/form-panel/form-panel.component';
 import {SqliteService} from '@app/common/services/sqlite/sqlite.service';
 import {ToastService} from '@app/common/services/toast.service';
-import {Transporteur} from '@entities/transporteur';
+import {Carrier} from '@entities/carrier';
 import {ApiService} from '@app/common/services/api.service';
 import {NetworkService} from '@app/common/services/network.service';
 import {LoadingService} from '@app/common/services/loading.service';
@@ -40,9 +40,8 @@ export class TruckArrivalCarrierPage extends PageComponent {
 
     public carrier: {id: number ; label: string ; logo: string ; minTrackingNumberLength?: number ; maxTrackingNumberLength?: number};
 
-    public carriers: Array<Transporteur>;
+    public carriers: Array<Carrier>;
 
-    public loading: boolean;
 
     public constructor(navService: NavService,
                        private sqliteService: SqliteService,
@@ -62,27 +61,13 @@ export class TruckArrivalCarrierPage extends PageComponent {
     }
 
     public synchronise(): void {
-        if (this.networkService.hasNetwork()) {
-            this.loading = true;
-
-            this.loadingService.presentLoading('Récupération des transporteurs en cours').subscribe(loader => {
-                this.apiService.requestApi(ApiService.GET_CARRIERS).subscribe(response => {
-                    if (response.success) {
-                        loader.dismiss();
-
-                        this.carriers = response.carriers;
-                        if(Object.keys(this.carriers).length === 0) {
-                            this.carriers = null;
-                        }
-
-                        this.loading = false;
-                    }
-                });
-            });
-        } else {
-            this.loading = false;
-            this.toastService.presentToast('Veuillez vous connecter à internet afin de synchroniser vos données');
-        }
+        this.loadingService.presentLoadingWhile({
+            event: () => this.sqliteService.findBy('carrier', [
+                'recurrent = 1'
+            ])
+        }).subscribe((carriers) => {
+            this.carriers = carriers;
+        });
     }
 
     public generateForm() {
@@ -97,8 +82,8 @@ export class TruckArrivalCarrierPage extends PageComponent {
                         searchType: SelectItemTypeEnum.CARRIER,
                         onChange: (carrierId) => {
                             this.sqliteService
-                                .findOneBy(`transporteur`, {id: carrierId})
-                                .subscribe((newCarrier?: Transporteur) => {
+                                .findOneBy(`carrier`, {id: carrierId})
+                                .subscribe((newCarrier?: Carrier) => {
                                     this.carrier = {
                                         id: carrierId,
                                         label: newCarrier.label,
@@ -128,14 +113,6 @@ export class TruckArrivalCarrierPage extends PageComponent {
 
     public onLogoClick(event: Event, id: number) {
         this.carrier = this.carriers.find(carrier => carrier.id === id);
-        const selectSelector = document.querySelector('wii-form-field');
-        console.log(selectSelector);
-        const logoCardSelector = document.getElementById(String(id)).parentElement;
-        const selected = document.querySelector('.selected');
-        if (selected) {
-            selected.classList.remove('selected');
-        }
-        logoCardSelector.classList.add('selected');
     }
 
     public testIfBarcodeEquals(text) {

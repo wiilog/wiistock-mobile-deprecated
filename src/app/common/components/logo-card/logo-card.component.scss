@@ -5,9 +5,12 @@
     width: 50%;
 
     .logo-card-img {
-        width: 85%;
-        height: 80%;
+        width: auto;
+        max-width: 85%;
+        height: auto;
+        max-height: 80%;
         margin: auto;
+
     }
 
     .logo-card-img-container {
@@ -21,6 +24,7 @@
         border-radius: 5%;
         width: 100%;
         margin: ($spacer / 4) ($spacer / 4);
+        min-height: 70px;
     }
 
     .selected {

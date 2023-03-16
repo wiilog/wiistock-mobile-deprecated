@@ -16,7 +16,7 @@ import {TablesDefinitions} from '@app/common/services/sqlite/tables-definitions'
 import {TableName} from '@app/common/services/sqlite/table-definition';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {DemandeLivraisonArticle} from '@entities/demande-livraison-article';
-import {Transporteur} from '@entities/transporteur';
+import {Carrier} from '@entities/carrier';
 
 
 @Injectable({
@@ -707,11 +707,11 @@ export class SqliteService {
     }
 
     public importTransporteursData(data): Observable<any> {
-        const apiCarriers: Array<Transporteur> = data[`transporteurs`];
-        return this.deleteBy('transporteur').pipe(
+        const apiCarriers: Array<Carrier> = data[`carriers`];
+        return this.deleteBy('carrier').pipe(
             flatMap(() => (
                 apiCarriers && apiCarriers.length > 0
-                    ? this.insert('transporteur', apiCarriers)
+                    ? this.insert('carrier', apiCarriers)
                     : of(undefined)
             )),
             map(() => undefined)

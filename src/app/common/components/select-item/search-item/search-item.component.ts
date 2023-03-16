@@ -159,7 +159,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             label: 'label',
             valueField: 'id',
             templateIndex: 'default',
-            databaseTable: 'transporteur',
+            databaseTable: 'carrier',
             placeholder: 'Sélectionnez un transporteur'
         },
     }

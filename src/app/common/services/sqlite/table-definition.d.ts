@@ -42,4 +42,4 @@ export type TableName = 'emplacement'
                       | 'dispatch_type'
                       | 'user'
                       | 'reference'
-                      | 'transporteur';
+                      | 'carrier';

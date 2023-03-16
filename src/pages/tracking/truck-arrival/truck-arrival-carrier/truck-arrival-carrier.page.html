@@ -6,7 +6,6 @@
         <wii-logo-card *ngFor="let carrierI of carriers"
                        [src]="carrierI.logo"
                        [alt]="carrierI.label"
-                       [id]="carrierI.id"
                        [selected]="carrier && carrier.id === carrierI.id"
                        (action)="onLogoClick($event, carrierI.id)">
             {{ carrierI.logo }}
