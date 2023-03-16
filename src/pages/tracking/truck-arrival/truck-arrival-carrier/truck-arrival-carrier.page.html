@@ -12,6 +12,10 @@
             {{ carrierI.logo }}
         </wii-logo-card>
     </div>
+    <wii-barcode-scanner #footerScannerComponent
+                         (add)="testIfBarcodeEquals($event[0])"
+                         [mode]="scannerMode">
+    </wii-barcode-scanner>
 </div>
 
 <div class="page-footer">

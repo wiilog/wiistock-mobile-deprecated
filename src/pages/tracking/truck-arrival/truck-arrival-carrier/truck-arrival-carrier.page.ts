@@ -14,6 +14,10 @@ import {ApiService} from '@app/common/services/api.service';
 import {NetworkService} from '@app/common/services/network.service';
 import {LoadingService} from '@app/common/services/loading.service';
 import {LocalDataManagerService} from '@app/common/services/local-data-manager.service';
+import {BarcodeScannerComponent} from '@app/common/components/barcode-scanner/barcode-scanner.component';
+import {BarcodeScannerModeEnum} from '@app/common/components/barcode-scanner/barcode-scanner-mode.enum';
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
+import {ArticleCollecte} from '@entities/article-collecte';
 
 @Component({
     selector: 'wii-truck-arrival-carrier',
@@ -25,11 +29,16 @@ export class TruckArrivalCarrierPage extends PageComponent {
     @ViewChild('formPanelComponent', {static: false})
     public formPanelComponent: FormPanelComponent;
 
+    @ViewChild('footerScannerComponent', {static: false})
+    public footerScannerComponent: BarcodeScannerComponent;
+
+    public readonly scannerMode: BarcodeScannerModeEnum = BarcodeScannerModeEnum.INVISIBLE;
+
     private afterNext: (values) => void;
 
     public bodyConfig: Array<FormPanelParam>;
 
-    public carrier: {id: number, label: string, logo: string};
+    public carrier: {id: number ; label: string ; logo: string ; minTrackingNumberLength?: number ; maxTrackingNumberLength?: number};
 
     public carriers: Array<Transporteur>;
 
@@ -94,6 +103,8 @@ export class TruckArrivalCarrierPage extends PageComponent {
                                         id: carrierId,
                                         label: newCarrier.label,
                                         logo: newCarrier.logo,
+                                        minTrackingNumberLength: newCarrier.minTrackingNumberLength ?? null,
+                                        maxTrackingNumberLength: newCarrier.maxTrackingNumberLength ?? null,
                                     }
                                 })
                         }
@@ -125,5 +136,14 @@ export class TruckArrivalCarrierPage extends PageComponent {
             selected.classList.remove('selected');
         }
         logoCardSelector.classList.add('selected');
+    }
+
+    public testIfBarcodeEquals(text) {
+        const carrier = this.carriers.find(carrierI => (carrierI.label === text));
+        if (carrier) {
+            this.carrier = carrier;
+        } else {
+            this.toastService.presentToast('Le transporteur scanné n\'est pas dans la liste.');
+        }
     }
 }
