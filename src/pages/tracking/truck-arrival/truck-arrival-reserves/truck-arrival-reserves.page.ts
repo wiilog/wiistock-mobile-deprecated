@@ -157,7 +157,7 @@ export class TruckArrivalReservesPage extends PageComponent {
                         }
                     },
                     section: {
-                        title: 'Réserve qualité +/-',
+                        title: 'Réserve quantité +/-',
                         bold: true,
                     }
                 },
