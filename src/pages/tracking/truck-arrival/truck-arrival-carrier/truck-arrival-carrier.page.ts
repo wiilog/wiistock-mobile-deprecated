@@ -55,6 +55,7 @@ export class TruckArrivalCarrierPage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
+        this.footerScannerComponent.fireZebraScan();
         this.mainHeaderService.emitSubTitle('Etape 1/4');
 
         this.afterNext = this.currentNavParams.get('afterNext');
@@ -98,6 +99,7 @@ export class TruckArrivalCarrierPage extends PageComponent {
 
     public next() {
         if (this.carrier) {
+            this.footerScannerComponent.unsubscribeZebraScan();
             this.navService.push(NavPathEnum.TRUCK_ARRIVAL_DRIVER, {
                 carrier: this.carrier
             });
