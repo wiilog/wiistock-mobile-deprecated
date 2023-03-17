@@ -143,7 +143,7 @@ export class TruckArrivalLinesPage extends PageComponent {
                         text: 'Confirmer',
                         cssClass: 'alert-success',
                         handler: () => {
-
+                            this.checkIfAlreadyExist(truckArrivalLineNumber);
                         }
                     }, {
                         text: 'Annuler',
