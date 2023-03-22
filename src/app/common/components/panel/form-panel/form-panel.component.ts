@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, Input, QueryList, ViewChild, ViewChildren} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Input, Output, QueryList, ViewChild, ViewChildren} from '@angular/core';
 import {HeaderConfig} from '@app/common/components/panel/model/header-config';
 import {FormPanelSelectComponent} from '@app/common/components/panel/form-panel/form-panel-select/form-panel-select.component';
 import {FormPanelParam} from '@app/common/directives/form-panel/form-panel-param';
@@ -35,10 +35,18 @@ export class FormPanelComponent implements AfterViewInit {
     @ViewChild('formHeaderComponent', {static: false})
     public formHeaderComponent: PanelHeaderComponent;
 
+    @Output()
+    public loaded: EventEmitter<boolean>;
+
     private afterViewInit: boolean;
     private fireZebraRequested: boolean;
 
     private multipleFieldOccurrences: {[name: string]: number} = {};
+
+
+    constructor() {
+        this.loaded = new EventEmitter<boolean>();
+    }
 
     public get values(): {[name: string]: any} {
         const getNewValue = (value, oldValue, multiple) => {
@@ -78,6 +86,7 @@ export class FormPanelComponent implements AfterViewInit {
 
     public ngAfterViewInit(): void {
         setTimeout(() => {
+            this.loaded.emit(true);
             this.afterViewInit = true;
             if (this.fireZebraRequested) {
                 this.doFireZebraScan();

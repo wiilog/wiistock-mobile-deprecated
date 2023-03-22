@@ -15,7 +15,7 @@ import {LocalDataManagerService} from '@app/common/services/local-data-manager.s
 import {StorageService} from '@app/common/services/storage/storage.service';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {NetworkService} from '@app/common/services/network.service';
-import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
+import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 
 @Component({
     selector: 'wii-dispatch-grouped-signature-validate',
@@ -42,9 +42,17 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
 
     public selectedStatus: Status;
     public type: number;
+    public status: number;
     private dispatchs?: Array<Dispatch>;
     public statuses: Array<Status> = [];
-    public location?: number;
+    public from?: {
+        id: number,
+        text: string
+    };
+    public to?: {
+        id: number,
+        text: string
+    };
 
     public constructor(private sqliteService: SqliteService,
                        private loadingService: LoadingService,
@@ -63,8 +71,10 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
         this.unsubscribeLoading();
         this.afterValidate = this.currentNavParams.get('afterValidate');
         this.dispatchs = this.currentNavParams.get('dispatchesToSign');
-        this.location = this.currentNavParams.get('location');
+        this.from = this.currentNavParams.get('from');
+        this.to = this.currentNavParams.get('to');
         this.type = this.currentNavParams.get('type');
+        this.status = this.currentNavParams.get('status');
 
         // this.sqliteService.findOneById('status', this.currentNavParams.get('status'))
         //     .subscribe((status?: Status) => {
@@ -75,6 +85,8 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
             `state = 'treated' OR state = 'partial'`,
             `category = 'acheminement'`,
             `typeId = ${this.type}`,
+            `id != ${this.status}`,
+            'groupedSignatureType != \'\''
         ];
         this.loadingSubscription = this.loadingService.presentLoading()
             .pipe(
@@ -86,7 +98,6 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
                 )),
             )
             .subscribe(([statuses]: [Array<any>]) => {
-                // this.statuses = statuses.filter((status) => status.state === '1');
                 this.statuses = statuses;
                 this.refreshStatusHeaderConfig();
 
@@ -137,14 +148,13 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
 
     public validate() {
         if (this.selectedStatus) {
-            const dispatchIds = this.dispatchs.map((dispatch: Dispatch) => dispatch.id);
             this.navService.push(NavPathEnum.DISPATCH_GROUPED_SIGNATURE_FINISH, {
                 dispatches: this.dispatchs,
                 status: this.selectedStatus,
-                location: this.location
+                to: this.to,
+                from: this.from,
             })
-        }
-        else {
+        } else {
             this.toastService.presentToast('Vous devez sélectionner un statut.');
         }
     }

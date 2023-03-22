@@ -20,7 +20,7 @@ export class TranslationService {
         return translations[field] || field;
     }
 
-    private static CreateTranslationDictionaryFromArray(translations: Array<Translation>): {[label: string]: string} {
+    public static CreateTranslationDictionaryFromArray(translations: Array<Translation>): {[label: string]: string} {
         return translations.reduce((acc, {label, translation}) => ({
             ...acc,
             [label]: translation
@@ -36,5 +36,13 @@ export class TranslationService {
             .pipe(
                 map((translations: Array<Translation>) => TranslationService.CreateTranslationDictionaryFromArray(translations))
             );
+    }
+
+    public getRaw(...args): Observable<Array<Translation>> {
+        const [topMenu, menu, subMenu] = args;
+        return this.sqliteService
+            .findBy('translations', args.length > 0
+                ? [`topMenu LIKE '${topMenu || ``}' AND menu LIKE '${menu || ``}' AND subMenu LIKE '${subMenu || ``}'`]
+                : []);
     }
 }

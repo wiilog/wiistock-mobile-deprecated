@@ -91,7 +91,8 @@ export class DispatchNewPage extends PageComponent {
             event: () => {
                 return zip(
                     this.apiService.requestApi(ApiService.GET_DISPATCH_EMERGENCIES),
-                    this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`),
+                    this.translationService.getRaw(`Demande`, `Acheminements`, `Champs fixes`),
+                    this.translationService.getRaw(`Demande`, `Acheminements`, `Général`),
                     this.storageService.getNumber('acheminements.carrierTrackingNumber.displayedCreate'),
                     this.storageService.getNumber('acheminements.carrierTrackingNumber.requiredCreate'),
 
@@ -111,11 +112,12 @@ export class DispatchNewPage extends PageComponent {
                     this.storageService.getNumber('acheminements.receiver.requiredCreate'),
                 )
             }
-        }).subscribe(([emergencies, translations, ...fieldsParam]) => {
+        }).subscribe(([emergencies, fieldsTranslations, generalTranslations,  ...fieldsParam]) => {
             fieldsParam.forEach((value, index) => {
                 this.fieldParams[Object.keys(this.fieldParams)[index]] = value;
             });
-            this.dispatchTranslations = translations;
+            const fullTranslations = fieldsTranslations.concat(generalTranslations);
+            this.dispatchTranslations = TranslationService.CreateTranslationDictionaryFromArray(fullTranslations);
             this.emergencies = emergencies;
             this.getFormConfig();
         });
@@ -245,17 +247,22 @@ export class DispatchNewPage extends PageComponent {
             this.loadingService.presentLoadingWhile({
                 event: () => of(undefined).pipe(
                     mergeMap(() => this.apiService.requestApi(ApiService.NEW_DISPATCH, {params: values})),
-                    mergeMap(({success, msg, dispatch}) => success ? this.sqliteService.insert(`dispatch`, dispatch) : of({success, msg}))
+                    mergeMap(({success, msg, dispatch}) => success ? this.sqliteService.insert(`dispatch`, dispatch) : of({success, msg})),
+                    mergeMap((result: number | {success: boolean; msg: string}) => {
+                        if (typeof result === `number`) {
+                            return this.navService.push(NavPathEnum.DISPATCH_PACKS, {
+                                dispatchId: result,
+                                fromCreate: true,
+                            });
+                        } else {
+                            return of(result.msg);
+                        }
+                    })
                 ),
                 message: `Création de l'acheminement en cours...`,
-            }).subscribe((result: number | {success: boolean; msg: string}) => {
-                if (typeof result === `number`) {
-                    this.navService.push(NavPathEnum.DISPATCH_PACKS, {
-                        dispatchId: result,
-                        fromCreate: true,
-                    });
-                } else {
-                    this.toastService.presentToast(result.msg);
+            }).subscribe((result: boolean | string) => {
+                if (typeof result === 'string') {
+                    this.toastService.presentToast(result);
                 }
             });
         }

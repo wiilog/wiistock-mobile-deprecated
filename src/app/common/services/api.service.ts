@@ -82,6 +82,11 @@ export class ApiService {
     public static readonly ZONE_RFID_SUMMARY = {method: POST, service: '/zone-rfid-summary'};
     public static readonly INVENTORY_MISSION_VALIDATE_ZONE = {method: POST, service: '/inventory-mission-validate-zone'};
     public static readonly FINISH_MISSION = {method: POST, service: '/finish-mission'};
+    public static readonly FINISH_TRUCK_ARRIVAL = {method: POST, service: '/finish-truck-arrival'};
+    public static readonly GET_WAYBILL_DATA = {method: GET, service: '/get-waybill-data/{dispatch}'};
+    public static readonly GET_CARRIERS = {method: GET, service: '/get-carriers-data'};
+    public static readonly GET_TRUCK_ARRIVALS_DEFAULT_UNLOADING_LOCATION = {method: GET, service: '/get-truck-arrival-default-unloading-location'};
+    public static readonly GET_TRUCK_ARRIVALS_LINES_NUMBER = {method: GET, service: '/get-truck-arrival-lines-number'};
 
     private static readonly DEFAULT_HEADERS = {
         'X-Requested-With': 'XMLHttpRequest'
@@ -196,9 +201,10 @@ export class ApiService {
     }
 
     private static ObjectToHttpParams(method: string,
-                                      object: { [x: string]: any }): HttpParams|FormData {
+                                      object: { [_: string]: any }): HttpParams|FormData {
         const paramsObject = Object
             .keys(object)
+            .filter((key: string) => object[key] !== null && object[key] !== undefined)
             .reduce((acc, key) => ({
                 ...acc,
                 [key]: ((typeof object[key] !== 'string') && (typeof object[key] !== 'number') && !(object[key] instanceof Blob))

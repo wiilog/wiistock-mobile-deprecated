@@ -390,10 +390,13 @@ export const TablesDefinitions: Array<TableDefinition> = [
             number: 'VARCHAR(255)',
             statusId: 'INTEGER',
             startDate: 'VARCHAR(255)',
+            carrierTrackingNumber: 'VARCHAR(255)',
             endDate: 'VARCHAR(255)',
             emergency: 'VARCHAR(255)',
             locationFromLabel: 'VARCHAR(255)',
+            locationFromId: 'INTEGER',
             locationToLabel: 'VARCHAR(255)',
+            locationToId: 'INTEGER',
             typeId: 'INTEGER',
             typeLabel: 'VARCHAR(255)',
             statusLabel: 'VARCHAR(255)',
@@ -402,7 +405,11 @@ export const TablesDefinitions: Array<TableDefinition> = [
             color: 'VARCHAR(255)',
             destination: 'VARCHAR(255)',
             packReferences: 'VARCHAR(255)',
-            draft: 'INTEGER'
+            quantities: 'TEXT',
+            packs: 'VARCHAR(255)',
+            draft: 'INTEGER',
+            comment: 'VARCHAR(255)',
+            groupedSignatureStatusColor: 'VARCHAR(255)',
         }
     },
     {
@@ -431,7 +438,8 @@ export const TablesDefinitions: Array<TableDefinition> = [
             state: 'VARCHAR(255)',
             category: 'VARCHAR(255)',
             displayOrder: 'INTEGER',
-            commentNeeded: 'INTEGER'
+            commentNeeded: 'INTEGER',
+            groupedSignatureType: 'VARCHAR(255)',
         }
     },
     {
@@ -558,5 +566,25 @@ export const TablesDefinitions: Array<TableDefinition> = [
             zone_label: 'VARCHAR(255)',
             done: 'INTEGER',
         }
-    }
+    },
+    {
+        name: 'driver',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            label: 'VARCHAR(255)',
+            prenom: 'VARCHAR(255)',
+            id_transporteur: 'INTEGER',
+        }
+    },
+    {
+        name: 'carrier',
+        attributes: {
+            id: 'INTEGER PRIMARY KEY',
+            label: 'VARCHAR(255)',
+            logo: 'TEXT',
+            minTrackingNumberLength: 'INTEGER',
+            maxTrackingNumberLength: 'INTEGER',
+            recurrent: 'INTEGER',
+        }
+    },
 ];

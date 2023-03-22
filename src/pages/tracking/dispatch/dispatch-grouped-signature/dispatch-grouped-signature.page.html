@@ -3,8 +3,8 @@
     <ion-button fill="outline"
                 class="custom-fill-button"
                 expand="block"
-                (click)="filter()">
-        Filtrer
+                (click)="resetFilters()">
+        Réinitialiser les filtres
     </ion-button>
     <div class="filters" *ngIf="(filters.from || filters.to || filters.status || filters.type) && labelFrom && labelTo">
         <p class="filter" *ngIf="filters.from">{{labelFrom}} : {{filters.from.text}}</p>

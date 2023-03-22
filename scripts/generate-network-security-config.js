@@ -7,7 +7,7 @@ const ifaces = os.networkInterfaces();
 const isProdEnv = process.argv && (process.argv.length > 2 ? process.argv[2] === 'prod' : '') || false;
 const availableIPv4Addresses = Object
     .keys(ifaces)
-    .filter((ifaceKey) => ifaceKey !== 'VirtualBox Host-Only Network')
+    .filter((ifaceKey) => ifaceKey === 'Wi-Fi')
     .map((ifaceKey) => ifaces[ifaceKey])
     .map((ifaceDetails) => (ifaceDetails && ifaceDetails.find(({family}) => (family === 'IPv4'))))
     .filter((ifaceValue) => (ifaceValue && !ifaceValue.internal))

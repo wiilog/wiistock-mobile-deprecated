@@ -5,6 +5,8 @@ import {UserConnectedGuard} from '@app/guards/user-connected.guard';
 import {NavPathEnum} from '@app/common/services/nav/nav-path.enum';
 import {TransportShowPageRoutingModule} from '@pages/track/transport-show/transport-show-routing.module';
 import {TransportDepositMenuPageModule} from '@pages/track/transport-deposit-menu/transport-deposit-menu.module';
+import {TruckArrivalCarrierPageModule} from '@pages/tracking/truck-arrival/truck-arrival-carrier/truck-arrival-carrier-page.module';
+import {TruckArrivalLinesPage} from "@pages/tracking/truck-arrival/truck-arrival-lines/truck-arrival-lines.page";
 
 const routes: Routes = [
     {
@@ -426,6 +428,31 @@ const routes: Routes = [
         path: NavPathEnum.INVENTORY_MISSION_ZONE_CONTROLE,
         canActivate: [UserConnectedGuard],
         loadChildren: () => import('@pages/stock/inventory/inventory-mission-zone-controle/inventory-mission-zone-controle.module').then(m => m.InventoryMissionZoneControlePageModule)
+    },
+    {
+        path: NavPathEnum.TRUCK_ARRIVAL_MENU,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/truck-arrival/truck-arrival-carrier/truck-arrival-carrier-page.module').then(m => m.TruckArrivalCarrierPageModule)
+    },
+    {
+        path: NavPathEnum.TRUCK_ARRIVAL_DRIVER,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/truck-arrival/truck-arrival-driver/truck-arrival-driver-page.module').then(m => m.TruckArrivalDriverPageModule)
+    },
+    {
+        path: NavPathEnum.TRUCK_ARRIVAL_LINES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/truck-arrival/truck-arrival-lines/truck-arrival-lines-page.module').then(m => m.TruckArrivalLinesPageModule)
+    },
+    {
+        path: NavPathEnum.TRUCK_ARRIVAL_RESERVES,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/truck-arrival/truck-arrival-reserves/truck-arrival-reserves-page.module').then(m => m.TruckArrivalReservesPageModule)
+    },
+    {
+        path: NavPathEnum.TRUCK_ARRIVAL_RESERVE_DETAILS,
+        canActivate: [UserConnectedGuard],
+        loadChildren: () => import('@pages/tracking/truck-arrival/truck-arrival-reserve-details/truck-arrival-reserve-details-page.module').then(m => m.TruckArrivalReserveDetailsPageModule)
     },
     {
         path: '',

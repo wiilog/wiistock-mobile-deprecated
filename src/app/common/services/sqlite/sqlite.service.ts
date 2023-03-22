@@ -16,6 +16,7 @@ import {TablesDefinitions} from '@app/common/services/sqlite/tables-definitions'
 import {TableName} from '@app/common/services/sqlite/table-definition';
 import {StorageKeyEnum} from '@app/common/services/storage/storage-key.enum';
 import {DemandeLivraisonArticle} from '@entities/demande-livraison-article';
+import {Carrier} from '@entities/carrier';
 
 
 @Injectable({
@@ -752,6 +753,20 @@ export class SqliteService {
             );
     }
 
+    public importDrivers(data): Observable<any> {
+        let drivers = data['drivers'];
+        return this.deleteBy('driver')
+            .pipe(
+                flatMap(() => (
+                    (drivers && drivers.length > 0)
+                        ? this.insert('driver', drivers.map((driver) => ({
+                            ...driver,
+                        })))
+                        : of(undefined)
+                ))
+            );
+    }
+
     public importArticlesPrepaByRefArticle(data, partial: boolean = false): Observable<any> {
         const articlesPrepaByRefArticle: Array<ArticlePrepaByRefArticle> = data['articlesPrepaByRefArticle'];
         return of(undefined)
@@ -831,6 +846,18 @@ export class SqliteService {
             );
     }
 
+    public importTransporteursData(data): Observable<any> {
+        const apiCarriers: Array<Carrier> = data[`carriers`];
+        return this.deleteBy('carrier').pipe(
+            flatMap(() => (
+                apiCarriers && apiCarriers.length > 0
+                    ? this.insert('carrier', apiCarriers)
+                    : of(undefined)
+            )),
+            map(() => undefined)
+        );
+    }
+
     public importData(data: any): Observable<any> {
         return of(undefined).pipe(
             flatMap(() => this.importLocations(data).pipe(tap(() => {console.log('--- > importLocations')}))),
@@ -848,11 +875,13 @@ export class SqliteService {
             flatMap(() => this.importAllowedNaturesData(data).pipe(tap(() => {console.log('--- > importAllowedNaturesData')}))),
             flatMap(() => this.importFreeFieldsData(data).pipe(tap(() => {console.log('--- > importFreeFieldData')}))),
             flatMap(() => this.importTranslations(data).pipe(tap(() => {console.log('--- > importTranslations')}))),
+            flatMap(() => this.importDrivers(data).pipe(tap(() => {console.log('--- > importDrivers')}))),
             flatMap(() => this.importDispatchesData(data).pipe(tap(() => {console.log('--- > importDispatchesData')}))),
             flatMap(() => this.importStatusData(data).pipe(tap(() => {console.log('--- > importStatusData')}))),
             flatMap(() => this.importTransferOrderData(data).pipe(tap(() => {console.log('--- > importTransferOrderData')}))),
             flatMap(() => this.importTransportRoundData(data).pipe(tap(() => {console.log('--- > importTransportRoundData')}))),
             flatMap(() => this.importDispatchTypes(data).pipe(tap(() => {console.log('--- > importDispatchTypesData')}))),
+            flatMap(() => this.importTransporteursData(data).pipe(tap(() => (console.log('--- > importTransporteursData'))))),
             flatMap(() => this.importTypes(data).pipe(tap(() => {console.log('--- > importTypes')}))),
             flatMap(() => this.importSuppliers(data).pipe(tap(() => {console.log('--- > importSuppliers')}))),
             flatMap(() => this.importRefs(data).pipe(tap(() => {console.log('--- > importRefs')}))),
@@ -978,7 +1007,6 @@ export class SqliteService {
         const limitClause = limit ? ` LIMIT ${limit}${offsetClause}` : undefined;
 
         const sqlQuery = `SELECT * FROM ${table}${sqlWhereClauses || ''}${sqlOrderByClauses || ''}${limitClause || ''}`;
-
         return this.executeQuery(sqlQuery).pipe(
             map((data) => SqliteService.MultiSelectQueryMapper<any>(data)),
             take(1)

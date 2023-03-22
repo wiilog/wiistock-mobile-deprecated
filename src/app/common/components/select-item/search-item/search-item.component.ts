@@ -169,12 +169,19 @@ export class SearchItemComponent implements OnInit, OnDestroy {
             databaseTable: 'picking_article_collecte',
             placeholder: 'Sélectionnez un article',
         },
-        [SelectItemTypeEnum.DISPATCH_TYPE]: {
+        [SelectItemTypeEnum.DRIVER]: {
             label: 'label',
             valueField: 'id',
             templateIndex: 'default',
-            databaseTable: 'dispatch_type',
-            placeholder: 'Sélectionnez un type'
+            databaseTable: 'driver',
+            placeholder: 'Sélectionnez un chauffeur'
+        },
+        [SelectItemTypeEnum.CARRIER]: {
+            label: 'label',
+            valueField: 'id',
+            templateIndex: 'default',
+            databaseTable: 'carrier',
+            placeholder: 'Sélectionnez un transporteur'
         },
         [SelectItemTypeEnum.PROJECT]: {
             label: 'code',
@@ -247,6 +254,9 @@ export class SearchItemComponent implements OnInit, OnDestroy {
                 || !item
                 || item.label !== this._item.label
             )) {
+            if (this.isMultiple) {
+                item = [item];
+            }
             this._item = item;
         }
     }
@@ -293,7 +303,7 @@ export class SearchItemComponent implements OnInit, OnDestroy {
                     this.loadFirstItems();
                 })
             )
-            // fix reload call withoyt subscribing
+            // fix reload call without subscribing
             .subscribe(
                 (list) => { $res.next(list); },
                 (error) => { $res.error(error); },

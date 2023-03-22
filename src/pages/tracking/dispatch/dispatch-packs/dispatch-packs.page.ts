@@ -254,18 +254,23 @@ export class DispatchPacksPage extends PageComponent {
     }
 
     private refreshHeaderPanelConfigFromDispatch(): void {
-        this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`).subscribe((dispatch) => {
+        zip(
+            this.translationService.getRaw(`Demande`, `Acheminements`, `Champs fixes`),
+            this.translationService.getRaw(`Demande`, `Acheminements`, `Général`)
+        ).subscribe(([fieldsTranslations, generalTranslations]) => {
+            const fullTranslations = fieldsTranslations.concat(generalTranslations);
+            const dispatchTranslations = TranslationService.CreateTranslationDictionaryFromArray(fullTranslations);
             this.dispatchHeaderConfig = {
                 title: `Demande N°${this.dispatch.number}`,
                 subtitle: [
                     this.fromCreate && this.fieldParams.displayCarrierTrackingNumber
-                        ? `N° de tracking : ${this.dispatch.trackingNumber || ''}`
+                        ? TranslationService.Translate(dispatchTranslations, 'N° tracking transporteur') + ` : ${this.dispatch.carrierTrackingNumber || ''}`
                         : null,
                     !this.fromCreate || (this.fromCreate && this.fieldParams.displayPickLocation)
-                        ? TranslationService.Translate(dispatch, 'Emplacement de prise') + ' : ' + this.dispatch.locationFromLabel || ''
+                        ? TranslationService.Translate(dispatchTranslations, 'Emplacement de prise') + ' : ' + this.dispatch.locationFromLabel || ''
                         : null,
                     this.fromCreate && this.fieldParams.displayDropLocation
-                            ? TranslationService.Translate(dispatch, 'Emplacement de dépose') + ' : ' + this.dispatch.locationToLabel || ''
+                            ? TranslationService.Translate(dispatchTranslations, 'Emplacement de dépose') + ' : ' + this.dispatch.locationToLabel || ''
                             : null,
                     this.fromCreate && this.fieldParams.displayComment
                             ? `Commentaire : ${this.dispatch.comment || ''}`
@@ -373,6 +378,7 @@ export class DispatchPacksPage extends PageComponent {
                                     this.loadingService.presentLoadingWhile({
                                         event: () => this.sqliteService.findOneBy(`reference`, {reference: pack.reference})
                                     }).subscribe((reference) => {
+                                        console.log('ViewMode: ', this.viewMode);
                                         this.navService.push(NavPathEnum.DISPATCH_LOGISTIC_UNIT_REFERENCE_ASSOCIATION, {
                                             logisticUnit: pack.code,
                                             dispatch: this.dispatch,
@@ -558,15 +564,29 @@ export class DispatchPacksPage extends PageComponent {
 
     public goToWayBill() {
         if(!this.hasWayBillData) {
-            this.navService.push(NavPathEnum.DISPATCH_WAYBILL, {
-                dispatchId: this.dispatch.id,
-                dispatchPacks: this.dispatchPacks,
-                data: this.wayBillData,
-                afterValidate: (data) => {
-                    this.wayBillData = data;
-                    this.hasWayBillData = true;
+            this.loadingService.presentLoadingWhile({
+                event: () => {
+                    return this.apiService.requestApi(ApiService.GET_WAYBILL_DATA, {
+                        pathParams: {
+                            dispatch: this.dispatch.id
+                        }
+                    })
                 }
-            });
+            }).subscribe((apiWayBill) => {
+                const fusedData = {
+                    ...apiWayBill.data,
+                    ...this.wayBillData
+                };
+                this.navService.push(NavPathEnum.DISPATCH_WAYBILL, {
+                    dispatchId: this.dispatch.id,
+                    dispatchPacks: this.dispatchPacks,
+                    data: fusedData,
+                    afterValidate: (data) => {
+                        this.wayBillData = data;
+                        this.hasWayBillData = true;
+                    }
+                });
+            })
         } else {
             this.hasWayBillData = false;
         }

@@ -54,7 +54,14 @@ export class DispatchGroupedSignatureFinishPage extends PageComponent {
     public labelFrom?: string;
     public labelTo?: string;
     public selectedStatus?: Status;
-    public location?: number;
+    public from?: {
+        id: number,
+        text: string
+    };
+    public to?: {
+        id: number,
+        text: string
+    };
     public dispatchesToSignListConfig: Array<CardListConfig>;
     public readonly dispatchesListColor = CardListColorEnum.GREEN;
     public dispatchesToSign: Array<Dispatch>;
@@ -80,79 +87,77 @@ export class DispatchGroupedSignatureFinishPage extends PageComponent {
         this.translationService.get(`Demande`, `Acheminements`, `Champs fixes`).subscribe((translations: Translations) => {
             this.labelFrom = TranslationService.Translate(translations, 'Emplacement de prise');
             this.labelTo = TranslationService.Translate(translations, 'Emplacement de dépose');
-        });
-        this.selectedStatus = this.currentNavParams.get('status');
-        this.location = this.currentNavParams.get('location');
-        this.dispatchesToSign = this.currentNavParams.get('dispatches');
-        this.dispatchesToSignListConfig = this.dispatchesToSign
-            .map((dispatch: Dispatch) => {
-            return {
-                title: {label: 'Demandeur', value: dispatch.requester},
-                customColor: dispatch.color,
-                content: [
-                    {label: 'Numéro', value: dispatch.number || ''},
-                    {label: 'Type', value: dispatch.typeLabel || ''},
-                    {label: 'Statut', value: dispatch.statusLabel || ''},
-                    {
-                        label: `Date d'échéance`,
-                        value: dispatch.startDate && dispatch.endDate ? `Du ${dispatch.startDate} au ${dispatch.endDate}` : ''
-                    },
-                    {
-                        label: this.labelFrom,
-                        value: dispatch.locationFromLabel || ''
-                    },
-                    {
-                        label: this.labelTo,
-                        value: dispatch.locationToLabel || ''
-                    },
-                    (dispatch.emergency
-                        ? {label: 'Urgence', value: dispatch.emergency || ''}
-                        : {label: 'Urgence', value: 'Non'})
-                ].filter((item) => item && item.value),
-            };
-        });
 
-        this.bodyConfig = [
-            {
-                item: FormPanelInputComponent,
-                config: {
-                    label: 'Trigramme signataire',
-                    name: 'signatoryTrigram',
-                    value: '',
-                    inputConfig: {
-                        required: true,
-                        type: 'text',
-                        disabled: false
-                    },
-                }
-            },
-            {
-                item: FormPanelInputComponent,
-                config: {
-                    label: 'Code signataire',
-                    name: 'signatoryPassword',
-                    value: '',
-                    inputConfig: {
-                        required: true,
-                        type: 'password',
-                        disabled: false
-                    },
-                }
-            },
-            {
-                item: FormPanelInputComponent,
-                config: {
-                    label: 'Commentaire',
-                    name: 'comment',
-                    value: '',
-                    inputConfig: {
-                        required: Boolean(this.selectedStatus.commentNeeded),
-                        type: 'text',
-                        disabled: false
-                    },
-                }
-            },
-        ];
+            this.selectedStatus = this.currentNavParams.get('status');
+            this.from = this.currentNavParams.get('from');
+            this.to = this.currentNavParams.get('to');
+            this.dispatchesToSign = this.currentNavParams.get('dispatches');
+            this.dispatchesToSignListConfig = this.dispatchesToSign
+                .map((dispatch: Dispatch) => {
+                    return {
+                        title: {label: 'Statut', value: dispatch.statusLabel},
+                        customColor: dispatch.groupedSignatureStatusColor || dispatch.color,
+                        content: [
+                            {label: 'Numéro', value: dispatch.number || ''},
+                            {label: 'Type', value: dispatch.typeLabel || ''},
+                            {
+                                label: this.labelFrom,
+                                value: dispatch.locationFromLabel || ''
+                            },
+                            {
+                                label: this.labelTo,
+                                value: dispatch.locationToLabel || ''
+                            },
+                            {
+                                label: 'Références (quantité)',
+                                value: dispatch.quantities || ''
+                            },
+                        ].filter((item) => item && item.value),
+                    };
+                });
+
+            this.bodyConfig = [
+                {
+                    item: FormPanelInputComponent,
+                    config: {
+                        label: 'Trigramme signataire',
+                        name: 'signatoryTrigram',
+                        value: '',
+                        inputConfig: {
+                            required: true,
+                            type: 'text',
+                            disabled: false
+                        },
+                    }
+                },
+                {
+                    item: FormPanelInputComponent,
+                    config: {
+                        label: 'Code signataire',
+                        name: 'signatoryPassword',
+                        value: '',
+                        inputConfig: {
+                            required: true,
+                            type: 'password',
+                            disabled: false
+                        },
+                    }
+                },
+                {
+                    item: FormPanelInputComponent,
+                    config: {
+                        label: 'Commentaire',
+                        name: 'comment',
+                        value: '',
+                        inputConfig: {
+                            required: Boolean(this.selectedStatus.commentNeeded),
+                            type: 'text',
+                            disabled: false
+                        },
+                    }
+                },
+            ];
+        });
     }
 
     public ionViewWillLeave(): void {
@@ -187,7 +192,8 @@ export class DispatchGroupedSignatureFinishPage extends PageComponent {
                     ).pipe(
                         mergeMap(() => this.apiService.requestApi(ApiService.FINISH_GROUPED_SIGNATURE, {
                             params: {
-                                location: this.location,
+                                from: this.from ? this.from.id : null,
+                                to: this.to ? this.to.id : null,
                                 status: this.selectedStatus.id,
                                 signatoryTrigram,
                                 signatoryPassword,
