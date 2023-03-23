@@ -26,7 +26,7 @@
          [class.ion-activatable]="(!rightIcon || !rightIcon.action) && pressAction"
          [class.ripple-parent]="(!rightIcon || !rightIcon.action) && pressAction"
          (click)="onPress()">
-        <div class="list-element-icon-left">
+        <div class="list-element-icon-left" *ngIf="leftIcon">
             <wii-icon [name]="leftIcon.name"
                       [color]="leftIcon.color"
                       (action)="leftIcon.action()"
