@@ -116,6 +116,7 @@ export class TruckArrivalCarrierPage extends PageComponent {
         const carrier = this.carriers.find(carrierI => (carrierI.label === text));
         if (carrier) {
             this.carrier = carrier;
+            this.next();
         } else {
             this.toastService.presentToast('Le transporteur scanné n\'est pas dans la liste.');
         }
