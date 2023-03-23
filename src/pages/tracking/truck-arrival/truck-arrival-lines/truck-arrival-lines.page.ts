@@ -68,13 +68,14 @@ export class TruckArrivalLinesPage extends PageComponent {
     }
 
     public ionViewWillEnter(): void {
+        this.mainHeaderService.emitSubTitle('Etape 3/4');
         this.loadingService.presentLoadingWhile({
             event: () => this.apiService.requestApi(ApiService.GET_TRUCK_ARRIVALS_LINES_NUMBER, {})
         }).subscribe((truckArrivalLinesNumber) => {
             this.truckArrivalLinesNumber = truckArrivalLinesNumber;
             if(this.truckArrivalLines.length === 0) {
                 this.loading = false;
-                this.mainHeaderService.emitSubTitle('Etape 3/4');
+
                 this.carrier = this.currentNavParams.get('carrier') ?? null;
                 this.driver = this.currentNavParams.get('driver') ?? null;
                 this.truckArrivalUnloadingLocation = this.currentNavParams.get('truckArrivalUnloadingLocation') ?? [];
