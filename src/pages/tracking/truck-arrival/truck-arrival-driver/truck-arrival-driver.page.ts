@@ -134,7 +134,7 @@ export class TruckArrivalDriverPage extends PageComponent {
                                 required: Boolean(this.fieldParams.needsRegistrationNumber)
                             },
                             errors: {
-                                required: 'Votre commentaire est requis',
+                                required: 'Veuillez renseigner une immatriculation.',
                             }
                         }
                     }
