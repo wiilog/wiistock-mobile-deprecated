@@ -121,6 +121,9 @@ export class TruckArrivalReservesPage extends PageComponent {
                             type: 'text',
                             required: true,
                         },
+                        errors: {
+                            required: 'Le champ commentaire est obligatoire pour valider votre arrivage camion.'
+                        },
                     }
                 }]
                 : []),
@@ -140,13 +143,13 @@ export class TruckArrivalReservesPage extends PageComponent {
                                     afterValidate: (data) => {
                                         this.reserves.push({
                                             type: 'quantity',
-                                            quantity: data.quantity,
-                                            quantityType: data.quantityType,
+                                            quantity: data.quantity || 1,
+                                            quantityType: data.quantityType || 'minus',
                                             comment: data.comment || '',
                                         });
                                         this.refreshFormReserves(generalReserveChecked, value, {
-                                            quantity: data.quantity,
-                                            quantityType: data.quantityType,
+                                            quantity: data.quantity || 1,
+                                            quantityType: data.quantityType || 'minus',
                                             comment: data.comment || '',
                                         });
                                     }
@@ -189,34 +192,38 @@ export class TruckArrivalReservesPage extends PageComponent {
         ];
     }
     public validate() {
-        const {generalComment, signatures} = this.formPanelComponent.values;
-        if(generalComment){
-            this.reserves.push({
-                type: 'general',
-                comment: generalComment,
+        const firstError = this.formPanelComponent.firstError;
+        if(firstError){
+            this.toastService.presentToast(firstError);
+        } else {
+            const {generalComment, signatures} = this.formPanelComponent.values;
+            if (generalComment) {
+                this.reserves.push({
+                    type: 'general',
+                    comment: generalComment,
+                });
+            }
+
+
+            this.loadingService.presentLoadingWhile({
+                event: () => this.apiService.requestApi(ApiService.FINISH_TRUCK_ARRIVAL, {
+                    params: {
+                        carrierId: this.carrier.id,
+                        driverId: this.driver.id || null,
+                        registrationNumber: this.registrationNumber,
+                        truckArrivalUnloadingLocationId: this.truckArrivalUnloadingLocation.id,
+                        truckArrivalReserves: this.reserves,
+                        truckArrivalLines: this.truckArrivalLines,
+                        signatures,
+                    }
+                })
+            }).subscribe((response) => {
+                if (response.success) {
+                    this.navService.runMultiplePop(4);
+                } else {
+                    this.toastService.presentToast(response.msg);
+                }
             });
         }
-
-
-        this.loadingService.presentLoadingWhile({
-            event: () => this.apiService.requestApi(ApiService.FINISH_TRUCK_ARRIVAL, {
-                params: {
-                    carrierId: this.carrier.id,
-                    driverId: this.driver.id || null,
-                    registrationNumber: this.registrationNumber,
-                    truckArrivalUnloadingLocationId: this.truckArrivalUnloadingLocation.id,
-                    truckArrivalReserves: this.reserves,
-                    truckArrivalLines: this.truckArrivalLines,
-                    signatures,
-                }
-            })
-        }).subscribe((response) => {
-            if(response.success){
-                this.navService.runMultiplePop(4);
-            } else {
-                this.toastService.presentToast(response.msg);
-            }
-        });
-
     }
 }
