@@ -186,7 +186,8 @@ export class TruckArrivalReservesPage extends PageComponent {
                     name: 'signatures',
                     value: signatures,
                     inputConfig: {
-
+                        multiple: true,
+                        max: 2,
                     }
                 }
             }

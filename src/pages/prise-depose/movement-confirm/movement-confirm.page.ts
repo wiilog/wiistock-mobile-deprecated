@@ -186,7 +186,7 @@ export class MovementConfirmPage extends PageComponent {
                             },
                             errors: {
                                 required: 'Votre commentaire est requis',
-                                maxlength: 'Votre commentaire est trop long'
+                                maxlength: 'Votre commentaire est trop long',
                             }
                         }
                     },
