@@ -81,11 +81,9 @@ export class TruckArrivalDriverPage extends PageComponent {
                 )
             }
         }).subscribe(([defaultUnloadingLocationId, ...fieldParams]) => {
-            console.log(fieldParams);
             fieldParams.forEach((value, index) => {
                 this.fieldParams[Object.keys(this.fieldParams)[index]] = value;
             });
-            console.log(this.fieldParams);
             this.truckArrivalDefaultUnloadingLocationId = defaultUnloadingLocationId;
             this.generateForm();
         });

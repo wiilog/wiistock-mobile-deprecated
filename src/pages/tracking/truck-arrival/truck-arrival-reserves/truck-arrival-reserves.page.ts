@@ -89,8 +89,11 @@ export class TruckArrivalReservesPage extends PageComponent {
         }
     }
 
-    public refreshFormReserves(generalReserveChecked?: boolean, quantityReserveChecked?: boolean, options: { quantity?: number; quantityType?: string; comment?: string; } = {}){
-        const {generalComment, quantityComment} = this.formPanelComponent.values;
+    public refreshFormReserves(generalReserveChecked?: boolean, quantityReserveChecked?: boolean, options: { quantity?: number; quantityType?: string; comment?: string; } = {}, quantityParamsBefore?: string){
+        const {generalComment, quantityComment, signatures} = this.formPanelComponent.values;
+        const quantityParams = quantityParamsBefore || (options && options.quantity && options.quantityType
+            ? (': ' + options.quantity + ' UL en ' + (options.quantityType === 'minus' ? 'moins' : 'plus'))
+            : '');
         this.truckArrivalReservesListConfig = [
             {
                 item: FormPanelToggleComponent,
@@ -100,7 +103,7 @@ export class TruckArrivalReservesPage extends PageComponent {
                     value: generalReserveChecked,
                     inputConfig: {
                         onChange: (value) => {
-                            this.refreshFormReserves(value, quantityReserveChecked);
+                            this.refreshFormReserves(value, quantityReserveChecked, {}, quantityParams);
                         }
                     },
                     section: {
@@ -130,9 +133,7 @@ export class TruckArrivalReservesPage extends PageComponent {
             {
                 item: FormPanelToggleComponent,
                 config: {
-                    label: 'Réserve ' + (options && options.quantity && options.quantityType
-                        ? (': ' + options.quantity + ' UL en ' + (options.quantityType === 'minus' ? 'moins' : 'plus'))
-                        : ''),
+                    label: 'Réserve ' + quantityParams,
                     name: 'quantityReserve',
                     value: quantityReserveChecked,
                     inputConfig: {
@@ -183,7 +184,7 @@ export class TruckArrivalReservesPage extends PageComponent {
                 config: {
                     label: 'Signature(s)',
                     name: 'signatures',
-                    value: '',
+                    value: signatures,
                     inputConfig: {
 
                     }
