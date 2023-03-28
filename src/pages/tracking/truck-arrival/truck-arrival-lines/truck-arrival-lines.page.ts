@@ -164,9 +164,11 @@ export class TruckArrivalLinesPage extends PageComponent {
         const alreadyAddedToList = this.truckArrivalLines.findIndex((line) => line.number === truckArrivalLineNumber) !== -1;
         const alreadyExistInDatabase = this.truckArrivalLinesNumber.findIndex((line) => line.number === truckArrivalLineNumber) !== -1;
         if(!alreadyAddedToList && !alreadyExistInDatabase){
+            this.truckArrivalLines.reverse();
             this.truckArrivalLines.push({
                 number: truckArrivalLineNumber,
             });
+            this.truckArrivalLines.reverse();
         } else {
             this.alertService.show({
                 header: '',

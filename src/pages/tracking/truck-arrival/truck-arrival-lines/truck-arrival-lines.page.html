@@ -1,5 +1,8 @@
 <div class="page-content"
      scroll-y="true">
+    <div class="num-track-counter">
+        <span>Total numéro de tracking transporteur : {{ truckArrivalLinesListConfig ? truckArrivalLinesListConfig.length : 0 }}</span>
+    </div>
     <wii-list-panel [body]="truckArrivalLinesListConfig"></wii-list-panel>
 </div>
 
