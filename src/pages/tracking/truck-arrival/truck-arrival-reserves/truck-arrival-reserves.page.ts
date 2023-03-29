@@ -221,7 +221,26 @@ export class TruckArrivalReservesPage extends PageComponent {
                 })
             }).subscribe((response) => {
                 if (response.success) {
-                    this.navService.runMultiplePop(4);
+                    this.alertService.show({
+                        header: ``,
+                        cssClass: AlertService.CSS_CLASS_MANAGED_ALERT,
+                        message: '<img src="assets/icons/validation.svg" class="validation-modal-icon"><br><b>Arrivage camion créé avec succès</b>',
+                        buttons: [{
+                            text: 'OK',
+                            cssClass: 'alert-success',
+                            handler: () => {
+                                this.navService.runMultiplePop(4);
+                            }
+                        }]
+                    }).then((alert) => {
+                        setTimeout(() => {
+                            alert.dismiss().then((success) => {
+                                if(success){
+                                    this.navService.runMultiplePop(4);
+                                }
+                            });
+                        }, 3000);
+                    });
                 } else {
                     this.toastService.presentToast(response.msg);
                 }
