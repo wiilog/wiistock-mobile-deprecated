@@ -229,14 +229,14 @@ export class TruckArrivalReservesPage extends PageComponent {
                             text: 'OK',
                             cssClass: 'alert-success',
                             handler: () => {
-                                this.navService.runMultiplePop(4);
+                                this.navService.runMultiplePop(4).then(() => this.mainHeaderService.emitSubTitle(''));
                             }
                         }]
                     }).then((alert) => {
                         setTimeout(() => {
                             alert.dismiss().then((success) => {
                                 if(success){
-                                    this.navService.runMultiplePop(4);
+                                    this.navService.runMultiplePop(4).then(() => this.mainHeaderService.emitSubTitle(''));
                                 }
                             });
                         }, 3000);
