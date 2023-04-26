@@ -94,7 +94,7 @@ export class DispatchGroupedSignatureValidatePage extends PageComponent {
                     this.loadingElement = loader;
                 }),
                 flatMap(() => zip(
-                    this.sqliteService.findBy('status', this.statusRequestParams)
+                    this.sqliteService.findBy('status', this.statusRequestParams, {displayOrder: 'DESC'}),
                 )),
             )
             .subscribe(([statuses]: [Array<any>]) => {
