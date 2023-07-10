@@ -3,6 +3,7 @@ import {FormViewerAttachmentConfig} from '@app/common/components/panel/model/for
 import {NavService} from "@app/common/services/nav/nav.service";
 import {NavPathEnum} from "@app/common/services/nav/nav-path.enum";
 
+declare let cordova: any;
 
 @Component({
     selector: 'wii-form-viewer-attachments',
@@ -25,10 +26,24 @@ export class FormViewerAttachmentsComponent implements FormViewerAttachmentConfi
 
     public constructor(private navService: NavService) {}
 
-    public viewImage(url: string, label: string = null) {
+    public proceedAction(url: string, label: string) {
+        const extension = label.split('.').pop();
+
+        if(extension === `pdf`) {
+            this.viewPDF(url);
+        } else {
+            this.viewImage(url, label);
+        }
+    }
+
+    private viewImage(url: string, label?: string) {
         this.navService.push(NavPathEnum.IMAGE_VIEWER, {
             url,
             label,
         });
+    }
+
+    private viewPDF(url: string) {
+        cordova.InAppBrowser.open(url, '_system');
     }
 }
